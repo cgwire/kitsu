@@ -30,6 +30,7 @@
             @max-duration-update="onMaxDurationUpdate"
             @panzoom-changed="onPanzoomChanged"
             @panzoom-ready="onPanzoomReady"
+            @play-failed="onMoviePlayFailed"
             @play-next="onPlayNext"
             @video-loaded="onVideoLoaded"
             v-show="isMovie && !loading"
@@ -582,14 +583,22 @@ const stopPicturePlayback = () => {
   picturePlayFrame = null
 }
 
+// A movie that cannot be read keeps its slot on the strip.
+const isBrokenMovie = () => isMovie.value && rawPlayer.value?.isBroken
+
 const playPicture = () => {
   stopPicturePlayback()
-  const total = pictureFrameCount()
+  const total = isBrokenMovie() ? currentSlotFrames() : pictureFrameCount()
   let startFrame = currentFrameNumber.value
   if (startFrame >= total - 1) startFrame = 0
   const baseline = performance.now() - (startFrame / fps.value) * 1000
   const step = () => {
-    if (!isPlaying.value || !(isPicture.value || isSound.value)) return
+    if (
+      !isPlaying.value ||
+      !(isPicture.value || isSound.value || isBrokenMovie())
+    ) {
+      return
+    }
     const frame = Math.floor(
       ((performance.now() - baseline) / 1000) * fps.value
     )
@@ -668,8 +677,9 @@ const selectEntity = index => {
   }
   pause()
   rawPlayer.value?.loadEntity(index)
-  // Pausing the previous movie sent its frame to the bars.
-  if (isPicture.value) onFrameUpdate(0)
+  // Pausing the previous movie sent its frame to the bars, and a movie that
+  // cannot be read would hold its slot from there.
+  if (isPicture.value || isMovie.value) onFrameUpdate(0)
   if (wasPlaying) nextTick(play)
 }
 
@@ -898,6 +908,10 @@ const onPlayNext = () => {
 // A sound that cannot be read keeps its slot like a picture, then the
 // playlist moves on.
 const onSoundPlayFailed = () => {
+  if (isPlaying.value) playPicture()
+}
+
+const onMoviePlayFailed = () => {
   if (isPlaying.value) playPicture()
 }
 

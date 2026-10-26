@@ -1268,7 +1268,8 @@ const play = () => {
         seekTrimStart()
       }
       previewViewer.value.play()
-      if (comparisonViewer.value && isComparing.value) {
+      // A movie that cannot be read ends its play at once.
+      if (isPlaying.value && comparisonViewer.value && isComparing.value) {
         comparisonViewer.value.play()
       }
     }

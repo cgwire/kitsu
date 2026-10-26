@@ -23,7 +23,18 @@
       :muted="muted"
       @ended="onEnded"
     />
-    <canvas ref="displayCanvas" class="playlist-movie" />
+    <canvas
+      ref="displayCanvas"
+      class="playlist-movie"
+      :style="{ visibility: isBroken ? 'hidden' : null }"
+    />
+    <div class="processing" v-if="isProcessing">
+      <spinner :is-processing="true" />
+      <p>{{ $t('preview.processing') }}</p>
+    </div>
+    <p class="broken" v-else-if="isBroken">
+      {{ $t('preview.broken') }}
+    </p>
   </div>
 </template>
 
@@ -55,6 +66,7 @@ import { useStore } from 'vuex'
 
 import { panPanzoomBy, zoomPanzoomAt } from '@/lib/players/panzoom'
 import { swallowBrowserZoom } from '@/lib/players/wheel'
+import { latestPreviewFileStatus } from '@/lib/preview'
 import {
   DEFAULT_FPS,
   floorToFrame,
@@ -131,6 +143,7 @@ const emit = defineEmits([
   'metadata-loaded',
   'panzoom-changed',
   'panzoom-ready',
+  'play-failed',
   'play-next',
   'repeat',
   'time-update',
@@ -146,6 +159,7 @@ const displayCanvasRef = useTemplateRef('displayCanvas')
 
 const currentIndex = ref(0)
 const currentPlayer = shallowRef(null)
+const isBroken = ref(false)
 const isLoading = ref(true)
 const isPlaying = ref(false)
 const nextPlayer = shallowRef(undefined)
@@ -195,6 +209,16 @@ const fps = computed(() => {
 const frameDuration = computed(
   () => Math.round((1 / fps.value) * 10000) / 10000
 )
+// Zou answers 404 for the movie of a preview file it is still processing.
+const isProcessing = computed(() => {
+  const entity = props.entities[currentIndex.value]
+  return (
+    isBroken.value &&
+    Boolean(entity) &&
+    getMovieStatus(getMoviePreview(entity, props.currentPreviewIndex)) ===
+      'processing'
+  )
+})
 
 // Functions
 
@@ -350,7 +374,11 @@ const showLoading = () => {
   }
   showLoadingTimer = setTimeout(() => {
     showLoadingTimer = null
-    if (currentPlayer.value && currentPlayer.value.readyState < 3) {
+    if (
+      currentPlayer.value &&
+      currentPlayer.value.readyState < 3 &&
+      !isBroken.value
+    ) {
       isLoading.value = true
     }
   }, 150) // Hack to avoid blinking effect
@@ -362,15 +390,30 @@ const emitLoadedEvent = event => {
   emit('metadata-loaded', event)
 }
 
+const getMoviePreview = (entity, previewIndex = 0) => {
+  const subPreviews = entity.preview_file_previews || []
+  return previewIndex > 0 && previewIndex <= subPreviews.length
+    ? subPreviews[previewIndex - 1]
+    : {
+        id: entity.preview_file_id,
+        extension: entity.preview_file_extension,
+        status: entity.preview_file_status
+      }
+}
+
+// The shared playlist reads the statuses of its payload, the Playlists page
+// those the socket keeps in the store.
+const getMovieStatus = preview =>
+  latestPreviewFileStatus(
+    preview.status,
+    store.getters.previewFileStatusMap?.get(preview.id)
+  ) || 'ready'
+
 const getMoviePath = (entity, previewIndex = 0) => {
   // Check the extension on the element actually selected (main preview or
   // one of the additional previews): a revision whose main element is a
   // picture can still carry video elements, and vice versa.
-  const subPreviews = entity.preview_file_previews || []
-  const preview =
-    previewIndex > 0 && previewIndex <= subPreviews.length
-      ? subPreviews[previewIndex - 1]
-      : { id: entity.preview_file_id, extension: entity.preview_file_extension }
+  const preview = getMoviePreview(entity, previewIndex)
   if (preview.extension !== 'mp4') return ''
   const base = props.urlPrefix || '/api'
   // Originals for shared links or HD mode; the lighter low variant otherwise
@@ -404,6 +447,7 @@ const releasePlayers = () => {
 }
 
 const clear = () => {
+  isBroken.value = false
   if (currentPlayer.value) {
     currentPlayer.value.src = ''
     currentPlayer.value.removeAttribute('src')
@@ -536,6 +580,7 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
     } else if (nextPlayer.value) {
       nextPlayer.value.src = ''
     }
+    refreshBroken()
     resetHeight()
 
     setSpeed(rate)
@@ -580,10 +625,11 @@ const play = () => {
     if (!entity.preview_file_id) loadNextEntity()
     entity = props.entities[currentIndex.value]
     if (entity.preview_file_id) {
-      if (currentPlayer.value) {
+      if (currentPlayer.value && !isBroken.value) {
         currentPlayer.value.play()?.catch(() => {})
       }
       isPlaying.value = true
+      if (isBroken.value) emit('play-failed')
     }
   }
 }
@@ -607,6 +653,7 @@ const playNext = handleIn => {
 
     switchPlayers()
     updateMaxDuration()
+    if (isBroken.value) emit('play-failed')
   }
 }
 
@@ -705,6 +752,23 @@ const onEnded = () => {
   if (isPlaying.value) emit('play-next')
 }
 
+// A movie the browser cannot read (a missing file, a file that is no movie)
+// fails on its decoder, which keeps the error, and never ends. The empty
+// source of an entity without movie fails too, but is not broken.
+const refreshBroken = () => {
+  const player = currentPlayer.value
+  isBroken.value = Boolean(player?.error && player.getAttribute('src'))
+  if (isBroken.value) hideLoading()
+}
+
+// The other decoder only preloads: its error waits for the switch.
+const onError = event => {
+  hideLoading()
+  if (event.target !== currentPlayer.value) return
+  refreshBroken()
+  if (isBroken.value && isPlaying.value) emit('play-failed')
+}
+
 const switchPlayers = () => {
   pendingSeekTime = null
   const nextIndex = getNextIndex(currentIndex.value)
@@ -716,6 +780,7 @@ const switchPlayers = () => {
     nextPlayer.value.src = getMoviePath(nextEntity)
     preseekNextPlayer()
   }
+  refreshBroken()
   resetHeight()
   setSpeed(rate)
   resizeRenderer()
@@ -820,7 +885,7 @@ const LOADING_HANDLERS = [
   ['stalled', showLoading],
   ['waiting', showLoading],
   ['loadstart', showLoading],
-  ['error', hideLoading],
+  ['error', onError],
   ['seeked', onSeeked]
 ]
 
@@ -941,6 +1006,7 @@ defineExpose({
   // State
   currentIndex,
   currentPlayer,
+  isBroken,
   isPlaying,
   // Navigation
   loadEntity,
@@ -1008,6 +1074,29 @@ defineExpose({
       margin: 0 auto;
     }
   }
+}
+
+.broken {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 0.75em);
+  color: $white;
+  text-align: center;
+}
+
+.processing {
+  align-items: center;
+  color: $white;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .video-loader {

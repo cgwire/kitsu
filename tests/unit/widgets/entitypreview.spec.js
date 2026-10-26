@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils'
-import { nextTick, reactive } from 'vue'
+import { nextTick, reactive, ref } from 'vue'
 import { createStore } from 'vuex'
 
 import VideoViewer from '@/components/players/viewers/VideoViewer.vue'
@@ -100,6 +100,36 @@ describe('EntityPreview', () => {
     })
     expect(wrapper.findComponent(VideoViewer).exists()).toBe(false)
     expect(wrapper.find('.thumbnail-processing').exists()).toBe(true)
+  })
+
+  // The movie viewer says when it cannot read the movie: a play would start
+  // nothing.
+  test('offers no play on a movie that cannot be read', async () => {
+    const play = vi.fn()
+    const wrapper = shallowMount(EntityPreview, {
+      props: { entity: { ...entity, preview_file_extension: 'mp4' } },
+      global: {
+        plugins: [createStore({})],
+        stubs: {
+          VideoViewer: {
+            name: 'VideoViewer',
+            template: '<div class="video-stub" />',
+            setup: () => ({ isBroken: ref(false), pause: vi.fn(), play })
+          }
+        }
+      }
+    })
+    expect(wrapper.find('.button-play').exists()).toBe(true)
+    expect(wrapper.find('.video-stub').attributes('role')).toBe('button')
+
+    wrapper.findComponent({ name: 'VideoViewer' }).vm.isBroken = true
+    await nextTick()
+    await wrapper.find('.video-stub').trigger('click')
+
+    expect(wrapper.find('.button-play').exists()).toBe(false)
+    expect(play).not.toHaveBeenCalled()
+    expect(wrapper.find('.video-stub').attributes('role')).toBeUndefined()
+    expect(wrapper.find('.video-stub').attributes('tabindex')).toBeUndefined()
   })
 
   test('paints no cover while the preview is processing', () => {

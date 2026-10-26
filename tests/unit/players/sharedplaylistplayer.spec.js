@@ -46,6 +46,8 @@ const picture = {
 const mountPlayer = ({
   entities = [entity],
   getCurrentFrame = () => 0,
+  isMovieBroken = false,
+  movieFrameOnPause = null,
   goNextFrame = () => {},
   goPreviousFrame = () => {},
   loadEntity = () => {},
@@ -72,13 +74,20 @@ const mountPlayer = ({
         MultiVideoViewer: {
           name: 'MultiVideoViewer',
           template: '<div />',
+          data: () => ({ isBroken: isMovieBroken }),
           methods: {
             getCurrentFrame,
             getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
             goNextFrame,
             goPreviousFrame,
             loadEntity,
-            pause: () => {},
+            // Like the viewer, it sends the frame it pauses on.
+            pause() {
+              if (movieFrameOnPause !== null) {
+                this.$emit('frame-update', movieFrameOnPause)
+              }
+            },
+            play: () => {},
             resetHeight: () => {},
             resetPanZoom: () => {},
             resumePanZoom: () => {},
@@ -333,6 +342,70 @@ describe('players/SharedPlaylistPlayer', () => {
       const wrapper = mountPlayer({ entities: [sound('sound-1', 'mp3')] })
       await nextTick()
       expect(fileName(wrapper)).toBeFalsy()
+      wrapper.unmount()
+    })
+  })
+
+  // Like a picture, it keeps its slot on the strip, 4 s here, then the
+  // playlist moves on, or stops at its end.
+  describe('movie that cannot be read', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const playAndFail = async (entities, options = {}) => {
+      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+      const loadEntity = vi.fn()
+      const wrapper = mountPlayer({
+        entities,
+        isMovieBroken: true,
+        loadEntity,
+        ...options
+      })
+      wrapper.findComponent(SharedPlaylistButtonBar).vm.$emit('play')
+      await nextTick()
+      wrapper.findComponent({ name: 'MultiVideoViewer' }).vm.$emit('play-failed')
+      return { wrapper, loadEntity }
+    }
+
+    it('moves on from a movie that cannot be read', async () => {
+      const { wrapper, loadEntity } = await playAndFail([entity, picture])
+      await vi.advanceTimersByTimeAsync(3900)
+      expect(loadEntity).not.toHaveBeenCalledWith(1)
+      await vi.advanceTimersByTimeAsync(200)
+      expect(loadEntity).toHaveBeenCalledWith(1)
+      expect(
+        wrapper.findComponent(SharedPlaylistButtonBar).props('isPlaying')
+      ).toBe(true)
+      wrapper.unmount()
+    })
+
+    // Pausing the movie left sends its frame: the hold started from there.
+    it('holds the whole slot when reached from another movie', async () => {
+      const broken = { ...entity, id: 'entity-2', preview_file_duration: 0 }
+      const { wrapper } = await playAndFail([entity, broken], {
+        movieFrameOnPause: 25
+      })
+      wrapper.findComponent(SharedPlaylistHeader).vm.$emit('next-entity')
+      await nextTick()
+      wrapper.findComponent({ name: 'MultiVideoViewer' }).vm.$emit('play-failed')
+      await vi.advanceTimersByTimeAsync(1900)
+      expect(
+        wrapper.findComponent(SharedPlaylistButtonBar).props('isPlaying')
+      ).toBe(true)
+      await vi.advanceTimersByTimeAsync(200)
+      expect(
+        wrapper.findComponent(SharedPlaylistButtonBar).props('isPlaying')
+      ).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('stops on it at the end of the playlist', async () => {
+      const { wrapper } = await playAndFail([entity])
+      await vi.advanceTimersByTimeAsync(4100)
+      expect(
+        wrapper.findComponent(SharedPlaylistButtonBar).props('isPlaying')
+      ).toBe(false)
       wrapper.unmount()
     })
   })

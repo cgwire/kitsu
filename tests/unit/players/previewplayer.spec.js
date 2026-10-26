@@ -345,6 +345,52 @@ describe('PreviewPlayer.vue', () => {
       )
     })
 
+    // The main movie cannot be read: its play ends at once, and the
+    // compared movie stays still under a play button.
+    it('leaves the comparison still when the movie cannot be played', async () => {
+      const comparisonPlay = vi.fn()
+      wrapper = mountPlayer({
+        props: {
+          previews: [moviePreview],
+          entityPreviewFiles: {
+            [task.task_type_id]: [
+              { ...moviePreview, id: 'preview-3', revision: 2 },
+              moviePreview
+            ]
+          },
+          taskTypeMap: new Map([
+            [task.task_type_id, { id: task.task_type_id, name: 'Animation' }]
+          ])
+        },
+        stubs: {
+          PreviewViewer: {
+            name: 'PreviewViewer',
+            template: '<div />',
+            emits: ['play-ended'],
+            methods: {
+              ...viewer,
+              play() {
+                if (this.$attrs.name === 'main') this.$emit('play-ended')
+                else comparisonPlay()
+              }
+            }
+          }
+        }
+      })
+      await nextTick()
+      wrapper
+        .findComponent({ name: 'PlayerComparisonBar' })
+        .vm.$emit('compare-clicked')
+      await flushPromises()
+
+      wrapper.vm.play()
+
+      expect(comparisonPlay).not.toHaveBeenCalled()
+      expect(
+        wrapper.findComponent({ name: 'PlayerPlaybackBar' }).props('isPlaying')
+      ).toBe(false)
+    })
+
     // The playback wipes the canvas, and the movie stops on the frame it
     // shows: no frame change reloaded its drawing.
     it('shows the drawing of the frame a movie stops on', async () => {

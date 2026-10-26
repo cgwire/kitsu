@@ -47,6 +47,7 @@
       @panzoom-changed="onVideoPanzoomChanged"
       @panzoom-ready="$emit('panzoom-ready')"
       @play-ended="$emit('play-ended')"
+      @play-failed="$emit('play-ended')"
       @size-changed="onVideoSizeChanged"
       @video-end="$emit('video-end')"
       @video-loaded="$emit('video-loaded')"
@@ -310,8 +311,11 @@ const resetVideo = () => {
   if (videoViewer.value) videoViewer.value.mountVideo()
 }
 
+// A preview Zou could not process, or is still processing, has nothing
+// to play.
 const play = () => {
   isPlaying = true
+  if (isBroken.value || isProcessing.value) emit('play-ended')
   if (isMovie.value) videoViewer.value.play()
   if (isSound.value) soundViewer.value.play()
 }

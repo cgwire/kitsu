@@ -879,6 +879,93 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // Like an entity without preview, it keeps its slot on the strip, 3 s
+  // here, then the playlist moves on, repeat on or not.
+  describe('movie that cannot be read', () => {
+    const movie = {
+      ...entity,
+      preview_file_extension: 'mp4',
+      preview_file_duration: 3
+    }
+    const sound = {
+      id: 'shot-2',
+      preview_file_id: 'preview-2',
+      preview_file_extension: 'mp3'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountOnMovie = async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({
+        entities: [movie, sound],
+        stubs: {
+          SoundViewer: { ...withMethods(['pause', 'play']), name: 'SoundViewer' }
+        }
+      })
+      await flushPromises()
+    }
+
+    const playbackBar = () => wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+    const soundShown = () =>
+      wrapper.findComponent({ name: 'SoundViewer' }).exists()
+
+    const failMovie = async () => {
+      wrapper.findComponent({ ref: 'raw-player' }).vm.$emit('play-failed')
+      await flushPromises()
+    }
+
+    it('moves on from a movie that cannot be read', async () => {
+      await mountOnMovie()
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      await failMovie()
+      await vi.advanceTimersByTimeAsync(2900)
+      expect(soundShown()).toBe(false)
+      expect(playbackBar().props('isPlaying')).toBe(true)
+      await vi.advanceTimersByTimeAsync(200)
+      expect(soundShown()).toBe(true)
+      expect(playbackBar().props('isPlaying')).toBe(true)
+    })
+
+    it('moves on from it with repeat on', async () => {
+      await mountOnMovie()
+      playbackBar().vm.$emit('repeat-clicked')
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      await failMovie()
+      await vi.advanceTimersByTimeAsync(3100)
+      expect(soundShown()).toBe(true)
+    })
+
+    // The viewer sends the frame it pauses on before the playlist knows it
+    // is paused: a movie of no length must not end on it.
+    it('stays on a movie of no length paused during its slot', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({
+        entities: [{ ...movie, preview_file_duration: 0 }, sound],
+        stubs: {
+          SoundViewer: { ...withMethods(['pause', 'play']), name: 'SoundViewer' }
+        }
+      })
+      await flushPromises()
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      rawPlayer.pause = () => rawPlayer.$emit('frame-update', 0)
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      await failMovie()
+      await vi.advanceTimersByTimeAsync(1000)
+
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+
+      expect(soundShown()).toBe(false)
+      expect(playbackBar().props('isPlaying')).toBe(false)
+    })
+  })
+
   // The comparison viewer shows movies only: on a picture, a comparison
   // movie still playing went on decoding, hidden.
   it('stops the comparison movie on a move to a picture', async () => {

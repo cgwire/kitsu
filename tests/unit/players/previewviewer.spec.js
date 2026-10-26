@@ -180,4 +180,31 @@ describe('PreviewViewer', () => {
     wrapper.findComponent({ name: 'SoundViewer' }).vm.$emit('play-failed')
     expect(wrapper.emitted('play-ended')).toHaveLength(1)
   })
+
+  it('ends the play of a movie that cannot be read', () => {
+    const wrapper = shallowMount(PreviewViewer, {
+      props: {
+        isRepeating: true,
+        preview: { id: 'preview-1', extension: 'mp4', status: 'ready' }
+      }
+    })
+    wrapper.findComponent({ name: 'VideoViewer' }).vm.$emit('play-failed')
+    expect(wrapper.emitted('play-ended')).toHaveLength(1)
+  })
+
+  // Zou could not process the file, or is still at it: nothing plays it.
+  it.each([
+    ['mp4', 'broken'],
+    ['mp3', 'broken'],
+    ['mp4', 'processing']
+  ])(
+    'ends the play of a %s preview whose status is %s',
+    (extension, status) => {
+      const wrapper = shallowMount(PreviewViewer, {
+        props: { preview: { id: 'preview-1', extension, status } }
+      })
+      wrapper.vm.play()
+      expect(wrapper.emitted('play-ended')).toHaveLength(1)
+    }
+  )
 })

@@ -290,6 +290,7 @@
           @max-duration-update="onMaxDurationUpdate"
           @metadata-loaded="onMetadataLoaded"
           @panzoom-changed="onPanZoomChanged"
+          @play-failed="onMoviePlayFailed"
           @play-next="onPlayNext"
           @repeat="onVideoRepeated"
           @video-loaded="onVideoLoaded"
@@ -2995,8 +2996,13 @@ const onFrameUpdate = frame => {
     }
   }
   // A picture moves on with its own timer, not on the frame count of a
-  // movie.
-  if (props.playlist && isPlaying.value && isCurrentPreviewMovie.value) {
+  // movie, and so does a movie of no length, which cannot be read.
+  if (
+    props.playlist &&
+    isPlaying.value &&
+    isCurrentPreviewMovie.value &&
+    nbFrames.value > 0
+  ) {
     const hasHandles =
       ['shot', 'edit', 'episode'].includes(props.playlist.for_entity) &&
       currentPreviewIndex.value === 0 &&
@@ -3071,12 +3077,16 @@ const onMouseMove = () => {
   }
 }
 
+// A movie that cannot be read keeps its slot on the strip.
+const getHeldFrames = entityIndex =>
+  isCurrentPreviewMovie.value
+    ? entityList.value[entityIndex]?.playlist_nb_frames
+    : framesPerImage.value[entityIndex]
+
 // Play goes on from the frame shown, like a movie, unless it is the last.
 const playPicture = () => {
   if (playingPictureTimeout) clearTimeout(playingPictureTimeout)
-  if (
-    framesSeenOfPicture.value >= framesPerImage.value[playingEntityIndex.value]
-  ) {
+  if (framesSeenOfPicture.value >= getHeldFrames(playingEntityIndex.value)) {
     framesSeenOfPicture.value = 1
   }
   isPlaying.value = true
@@ -3106,6 +3116,12 @@ const onSoundEnded = () => {
 // preview, then the playlist moves on.
 const onSoundPlayFailed = () => {
   if (isPlaying.value) playPicture()
+}
+
+// The viewer tells it only for a movie it plays, before the playlist knows it
+// plays.
+const onMoviePlayFailed = () => {
+  if (isCurrentPreviewMovie.value) playPicture()
 }
 
 // The playlist bar gives a sound the fixed slot of an entity without
@@ -3876,7 +3892,7 @@ const onPlayerPlayingEntityChange = entityIndex => {
 }
 
 const continuePlayingPlaylist = (entityIndex, startMs) => {
-  const fpi = framesPerImage.value[entityIndex]
+  const fpi = getHeldFrames(entityIndex)
   const durationToWaitMs = (fpi * 1000) / fps.value
   const durationWaited = Date.now() - startMs
   if (!isPlaying.value) return
