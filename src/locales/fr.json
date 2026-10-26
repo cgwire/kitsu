@@ -366,7 +366,7 @@
       "login_failed": "La connexion a échoué, vérifiez vos identifiants.",
       "login_inactive": "La connexion a échoué, votre compte est inactif.",
       "login_page": "Annuler",
-      "redirecting": "Redirection dans {secondsLeft} secondes...",
+      "redirecting": "Redirection dans {count} seconde... | Redirection dans {count} secondes...",
       "reset_change_password": "Changer le mot de passe",
       "reset_change_password_form_failed": "Il y a un problème avec le mot de passe que vous avez fourni. Veuillez vérifier qu'il comporte au moins 8 caractères et que les deux mots de passe correspondent.",
       "reset_change_password_failed": "La modification du mot de passe a échoué. Veuillez recommencer la procédure.",

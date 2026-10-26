@@ -366,7 +366,7 @@
       "login_failed": "Inloggen mislukt, controleer je gegevens.",
       "login_inactive": "Inloggen mislukt, je account is inactief.",
       "login_page": "Annuleren",
-      "redirecting": "Doorsturen over {secondsLeft} seconden...",
+      "redirecting": "Doorsturen over {count} seconde... | Doorsturen over {count} seconden...",
       "reset_change_password": "Wachtwoord wijzigen",
       "reset_change_password_form_failed": "Er is een probleem met het ingevulde wachtwoord. Controleer of je wachtwoord minstens 8 tekens lang is en of beide wachtwoorden gelijk zijn.",
       "reset_change_password_failed": "Wachtwoord wijzigen mislukt. Start de procedure opnieuw.",

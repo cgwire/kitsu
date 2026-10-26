@@ -701,7 +701,7 @@
       "login_inactive": "Logowanie nie powiodło się, Twoje konto jest nieaktywne.",
       "login_server_failed": "Podczas logowania wystąpił błąd serwera.",
       "login_page": "Anuluj",
-      "redirecting": "Przekierowanie za {secondsLeft} s...",
+      "redirecting": "Przekierowanie za {count} s... | Przekierowanie za {count} s...",
       "reset_change_password": "Zmień hasło",
       "reset_change_password_failed": "Zmiana hasła nie powiodła się. Rozpocznij procedurę od nowa.",
       "reset_change_password_form_failed": "Wystąpił problem z podanym hasłem. Sprawdź, czy ma co najmniej 8 znaków i czy oba hasła są identyczne.",

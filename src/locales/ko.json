@@ -366,7 +366,7 @@
       "login_failed": "로그인에 실패했습니다. 인증 정보를 확인해 주시기 바랍니다.",
       "login_inactive": "로그인에 실패했습니다. 계정이 비활성 상태입니다.",
       "login_page": "취소",
-      "redirecting": "{secondsLeft}초 후 리다이렉트됩니다...",
+      "redirecting": "{count}초 후 리다이렉트됩니다... | {count}초 후 리다이렉트됩니다...",
       "reset_change_password": "비밀번호 변경",
       "reset_change_password_form_failed": "제공해주신 비밀번호에 문제가 있습니다. 최소 8자 이상인지, 두 비밀번호가 일치하는지 확인해 주시기 바랍니다.",
       "reset_change_password_failed": "비밀번호 변경 실패. 전체 절차를 다시 시작해 주시기 바랍니다.",

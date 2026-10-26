@@ -366,7 +366,7 @@
       "login_failed": "登录失败，请核实您的凭据。",
       "login_inactive": "登录失败，您的账号处于非活动状态。",
       "login_page": "取消",
-      "redirecting": "{secondsLeft} 秒后重定向...",
+      "redirecting": "{count} 秒后重定向... | {count} 秒后重定向...",
       "reset_change_password": "更改密码",
       "reset_change_password_form_failed": "您给出的密码有问题。请核实密码长度至少为 8 个字符，且两次输入的密码一致。",
       "reset_change_password_failed": "更改密码失败。请再次重启整个步骤。",

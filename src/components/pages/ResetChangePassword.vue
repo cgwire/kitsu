@@ -69,7 +69,7 @@
           {{ $t('login.reset_change_password_succeed') }}
         </p>
         <p class="has-text-centered mt2" v-if="isSuccess">
-          {{ $t('login.redirecting', { secondsLeft }) }}
+          {{ $t('login.redirecting', { count: secondsLeft }) }}
         </p>
         <p class="has-text-centered mt2">
           <router-link :to="{ name: 'login' }">
