@@ -5,6 +5,7 @@ import { createStore } from 'vuex'
 
 import PlaylistedEntity from '@/components/players/players/PlaylistedEntity.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail.vue'
 
 const taskTypes = [
   { id: 'tt-anim', name: 'Animation', priority: 1 },
@@ -57,6 +58,12 @@ describe('PlaylistedEntity.vue', () => {
         .findAllComponents(Combobox)
         .map(combo => combo.props('disabled'))
     ).toEqual([false, false])
+  })
+
+  // Like the revision files of the task panel, a sound shows its extension.
+  it('asks the thumbnail for the extension of a file', () => {
+    const thumbnail = mountEntity().findComponent(LightEntityThumbnail)
+    expect(thumbnail.props('withExtension')).toBe(true)
   })
 
   // The playlist would hold the same revision of the shot twice.

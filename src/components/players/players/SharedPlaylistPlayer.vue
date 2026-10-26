@@ -51,6 +51,7 @@
 
           <sound-viewer
             ref="soundPlayer"
+            :file-name="currentPreviewFileName"
             :preview-url="downloadUrl"
             @duration-changed="onSoundDurationChanged"
             @play-ended="onPlayNext"
@@ -377,6 +378,7 @@ const currentPreview = computed(() => {
   if (currentPreviewIndex.value === 0) {
     return {
       id: entity.preview_file_id,
+      original_name: entity.preview_file_original_name,
       extension: entity.preview_file_extension,
       task_id: entity.preview_file_task_id,
       revision: entity.preview_file_revision,
@@ -387,6 +389,14 @@ const currentPreview = computed(() => {
     }
   }
   return entity.preview_file_previews?.[currentPreviewIndex.value - 1]
+})
+
+// The link shares no revision list: the name comes with the shot fields.
+const currentPreviewFileName = computed(() => {
+  const preview = currentPreview.value
+  return preview?.original_name
+    ? `${preview.original_name}.${preview.extension}`
+    : ''
 })
 
 // Legacy annotations store unrounded times, so the same frame can exist as

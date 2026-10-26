@@ -281,6 +281,49 @@ describe('players/SharedPlaylistPlayer', () => {
     })
   })
 
+  // The stub declares no fileName prop: the name lands on its root element.
+  describe('sound file name', () => {
+    const fileName = wrapper =>
+      wrapper.findComponent({ name: 'SoundViewer' }).attributes('file-name')
+
+    it('names the sound on the waveform, like the task panel', async () => {
+      const wrapper = mountPlayer({
+        entities: [
+          { ...sound('sound-1', 'mp3'), preview_file_original_name: 'tone_a' }
+        ]
+      })
+      await nextTick()
+      expect(fileName(wrapper)).toBe('tone_a.mp3')
+      wrapper.unmount()
+    })
+
+    it('names the other files of the revision', async () => {
+      const wrapper = mountPlayer({
+        entities: [
+          {
+            ...sound('sound-1', 'mp3'),
+            preview_file_original_name: 'tone_a',
+            preview_file_previews: [
+              { id: 'preview-sound-1b', extension: 'wav', original_name: 'tone_b' }
+            ]
+          }
+        ]
+      })
+      await nextTick()
+      wrapper.findComponent(SharedPlaylistButtonBar).vm.$emit('next-preview')
+      await nextTick()
+      expect(fileName(wrapper)).toBe('tone_b.wav')
+      wrapper.unmount()
+    })
+
+    it('shows no name when Zou sends none', async () => {
+      const wrapper = mountPlayer({ entities: [sound('sound-1', 'mp3')] })
+      await nextTick()
+      expect(fileName(wrapper)).toBeFalsy()
+      wrapper.unmount()
+    })
+  })
+
   // Zou keeps no duration for a sound: the entity bar takes the decoded one,
   // and the playlist bar spreads the sound over the 2 s slot it gives it.
   describe('sound progress', () => {
