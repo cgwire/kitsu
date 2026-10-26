@@ -55,4 +55,26 @@ describe('PreviewViewer', () => {
       [name, 'zoomAt', 100, 50, 2]
     ])
   })
+
+  // A sound has no height of its own: in full screen the viewer takes the
+  // screen height, so the waveform can sit in its middle as in a playlist.
+  it.each([
+    ['mp3', true, 'calc(100vh - 32px)'],
+    ['wav', true, 'calc(100vh - 32px)'],
+    ['mp3', false, ''],
+    ['png', true, ''],
+    ['mp4', true, '']
+  ])(
+    'gives a %s viewer the screen height in full screen: %s',
+    (extension, isFullScreen, height) => {
+      const wrapper = shallowMount(PreviewViewer, {
+        props: {
+          isFullScreen,
+          marginBottom: 32,
+          preview: { id: 'preview-1', extension, status: 'ready' }
+        }
+      })
+      expect(wrapper.element.style.height).toBe(height)
+    }
+  )
 })

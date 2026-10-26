@@ -3,7 +3,8 @@
     ref="container"
     class="preview-viewer dark"
     :style="{
-      maxHeight: isFullScreen ? `calc(100vh - ${marginBottom}px)` : null
+      maxHeight: isFullScreen ? `calc(100vh - ${marginBottom}px)` : null,
+      height: isFullScreen && isSound ? `calc(100vh - ${marginBottom}px)` : null
     }"
   >
     <div
@@ -536,6 +537,12 @@ defineExpose({
 
 .status-message {
   color: $white;
+}
+
+// The waveform keeps its own height: in full screen, the free space goes
+// above and below it, as in a playlist.
+.sound-viewer {
+  margin: auto 0;
 }
 
 .preview-viewer {
