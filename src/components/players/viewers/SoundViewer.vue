@@ -47,11 +47,11 @@ const isLoading = ref(false)
 let wavesurfer = null
 
 const play = () => {
-  wavesurfer.play()?.catch(() => {})
+  wavesurfer?.play()?.catch(() => {})
 }
 
 const pause = () => {
-  wavesurfer.pause()
+  wavesurfer?.pause()
 }
 
 // destroy() aborts the in-flight fetch on teardown, rejecting load() with an
@@ -64,36 +64,40 @@ const onLoadError = err => {
   console.error('Error loading sound preview:', err)
 }
 
-onMounted(() => {
-  isLoading.value = true
-  wavesurfer = WaveSurfer.create({
-    container: waveform.value,
-    waveColor: '#00B242',
-    progressColor: '#008732',
-    height: props.defaultHeight
-  })
-  wavesurfer.on('ready', () => {
-    isLoading.value = false
-  })
-  wavesurfer.on('finish', () => {
-    emit('play-ended')
-  })
-  if (props.previewUrl) {
-    isLoading.value = true
-    wavesurfer.load(props.previewUrl).catch(onLoadError)
+// PreviewViewer keeps a hidden sound viewer under every preview, two per
+// player: the waveform is set up for the first sound only.
+const loadSound = () => {
+  if (!wavesurfer) {
+    wavesurfer = WaveSurfer.create({
+      container: waveform.value,
+      waveColor: '#00B242',
+      progressColor: '#008732',
+      height: props.defaultHeight
+    })
+    wavesurfer.on('ready', () => {
+      isLoading.value = false
+    })
+    wavesurfer.on('finish', () => {
+      emit('play-ended')
+    })
   }
+  isLoading.value = true
+  wavesurfer.load(props.previewUrl).catch(onLoadError)
+}
+
+onMounted(() => {
+  if (props.previewUrl) loadSound()
 })
 
 watch(
   () => props.previewUrl,
   () => {
-    if (props.previewUrl && props.previewUrl.length > 0) {
-      isLoading.value = true
-      wavesurfer.load(props.previewUrl).catch(onLoadError)
+    if (props.previewUrl) {
+      loadSound()
     } else {
       // The parent blanks the URL when another preview kind takes over:
       // stop playback instead of letting the loaded audio run on.
-      wavesurfer.pause()
+      wavesurfer?.pause()
     }
   }
 )
