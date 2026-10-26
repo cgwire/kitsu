@@ -610,6 +610,64 @@ describe('PlaylistPlayer.vue', () => {
       })
     })
 
+    // Like the shared playlist, by a frame of the playlist, up to its last
+    // frame.
+    describe('keys', () => {
+      const press = async code => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { code, key: code }))
+        await flushPromises()
+      }
+
+      it('steps a playing sound, not the hidden movie', async () => {
+        const { setCurrentTime } = await mountWithSound([sound, picture])
+        const pause = vi.spyOn(soundViewer().vm, 'pause')
+        const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+        const goNextFrame = vi.spyOn(rawPlayer, 'goNextFrame')
+        const goPreviousFrame = vi.spyOn(rawPlayer, 'goPreviousFrame')
+        const setCurrentFrame = vi.spyOn(rawPlayer, 'setCurrentFrame')
+        playbackBar().vm.$emit('play-pause-clicked')
+        soundViewer().vm.$emit('duration-changed', 3)
+        soundViewer().vm.$emit('time-update', 1.5)
+        await flushPromises()
+
+        await press('ArrowRight')
+        await press('ArrowLeft')
+        await press('Home')
+        await press('End')
+        const times = setCurrentTime.mock.calls.map(([time]) => time)
+        expect(times).toHaveLength(4)
+        expect(times[0]).toBeCloseTo(1.52)
+        expect(times[1]).toBeCloseTo(1.44)
+        expect(times[2]).toBe(0)
+        expect(times[3]).toBeCloseTo(2.96)
+        expect(goNextFrame).not.toHaveBeenCalled()
+        expect(goPreviousFrame).not.toHaveBeenCalled()
+        expect(setCurrentFrame).not.toHaveBeenCalled()
+        expect(pause).not.toHaveBeenCalled()
+        expect(playbackBar().props('isPlaying')).toBe(true)
+      })
+
+      it('keeps the sound between its first and last frames', async () => {
+        const { setCurrentTime } = await mountWithSound([sound, picture])
+        soundViewer().vm.$emit('duration-changed', 3)
+        soundViewer().vm.$emit('time-update', 2.96)
+        await flushPromises()
+        await press('ArrowRight')
+        soundViewer().vm.$emit('time-update', 0)
+        await press('ArrowLeft')
+        expect(setCurrentTime.mock.calls.map(([time]) => time)).toEqual([
+          2.96, 0
+        ])
+      })
+
+      it('leaves a sound being decoded where it is', async () => {
+        const { setCurrentTime } = await mountWithSound([sound, picture])
+        await press('ArrowRight')
+        await press('End')
+        expect(setCurrentTime).not.toHaveBeenCalled()
+      })
+    })
+
     describe('time', () => {
       const movie = {
         id: 'shot-4',
@@ -728,6 +786,82 @@ describe('PlaylistPlayer.vue', () => {
       expect(toggle().attributes('active')).toBe('true')
     }
   )
+
+  // A picture holds its slot of 50 frames on a timer, like the shared
+  // playlist.
+  describe('picture progress', () => {
+    const picture = {
+      id: 'shot-3',
+      preview_file_id: 'preview-3',
+      preview_file_extension: 'png'
+    }
+    const sound = {
+      id: 'shot-4',
+      preview_file_id: 'preview-4',
+      preview_file_extension: 'mp3'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountOnPicture = async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({
+        entities: [picture, sound],
+        stubs: {
+          SoundViewer: { ...withMethods(['pause', 'play']), name: 'SoundViewer' }
+        }
+      })
+      await flushPromises()
+      const entityBar = wrapper.findComponent({ ref: 'video-progress' })
+      const updateProgressBar = vi.spyOn(entityBar.vm, 'updateProgressBar')
+      return {
+        click: frame => entityBar.vm.$emit('progress-changed', frame),
+        play: () =>
+          wrapper
+            .findComponent({ name: 'PlayerPlaybackBar' })
+            .vm.$emit('play-pause-clicked'),
+        lastFrame: () => updateProgressBar.mock.lastCall[0]
+      }
+    }
+
+    const soundShown = () =>
+      wrapper.findComponent({ name: 'SoundViewer' }).exists()
+
+    it('plays a picture on from the frame clicked', async () => {
+      const { click, play, lastFrame } = await mountOnPicture()
+      play()
+      await vi.advanceTimersByTimeAsync(200)
+      expect(lastFrame()).toBeLessThanOrEqual(6)
+
+      click(30)
+      await vi.advanceTimersByTimeAsync(200)
+      expect(lastFrame()).toBeGreaterThanOrEqual(33)
+      await vi.advanceTimersByTimeAsync(500)
+      expect(soundShown()).toBe(false)
+      await vi.advanceTimersByTimeAsync(300)
+      expect(soundShown()).toBe(true)
+    })
+
+    it('resumes a picture from the frame clicked while paused', async () => {
+      const { click, play, lastFrame } = await mountOnPicture()
+      click(30)
+      play()
+      await vi.advanceTimersByTimeAsync(200)
+      expect(lastFrame()).toBeGreaterThanOrEqual(33)
+      expect(lastFrame()).toBeLessThanOrEqual(37)
+    })
+
+    it('restarts a picture paused on its last frame', async () => {
+      const { click, play, lastFrame } = await mountOnPicture()
+      click(49)
+      play()
+      await vi.advanceTimersByTimeAsync(200)
+      expect(lastFrame()).toBeLessThanOrEqual(6)
+      expect(soundShown()).toBe(false)
+    })
+  })
 
   // The comparison viewer shows movies only: on a picture, a comparison
   // movie still playing went on decoding, hidden.

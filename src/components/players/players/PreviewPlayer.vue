@@ -668,6 +668,8 @@ const movieDimensions = ref({ width: 1920, height: 1080 })
 const objectBackgroundUrl = ref(null)
 const pencilPalette = ref(['huge', 'big', 'medium', 'small', 'tiny'])
 const pictureBackgroundColor = ref('#000000')
+const soundDuration = ref(0)
+const soundTime = ref(0)
 const videoDuration = ref(0)
 const width = ref(0)
 
@@ -1203,15 +1205,17 @@ const changeMaxDuration = duration => {
 // Pausing a sound on a switch away sends its time once more, and a sound not
 // ready yet leaves the one before loaded under it.
 const onSoundTimeUpdate = time => {
-  if (isSound.value && isReady.value) {
-    currentTime.value = formatTime(time, fps.value)
-  }
+  if (!isSound.value || !isReady.value) return
+  currentTime.value = formatTime(time, fps.value)
+  soundTime.value = time
 }
 
+// A duration of 0 starts each load: the time restarts with the sound.
 const onSoundDurationChanged = duration => {
-  if (isSound.value && isReady.value) {
-    maxDuration.value = formatTime(duration, fps.value)
-  }
+  if (!isSound.value || !isReady.value) return
+  maxDuration.value = formatTime(duration, fps.value)
+  soundDuration.value = duration
+  if (!duration) soundTime.value = 0
 }
 
 const getCurrentTime = () => {
@@ -1291,9 +1295,25 @@ const pause = () => {
   }
 }
 
+// A sound has no frames of its own: the keys step it by a frame of the
+// production, up to the start of its last frame like a movie.
+const seekSoundFrame = frame => {
+  const lastFrame = Math.round(soundDuration.value * fps.value) - 1
+  if (lastFrame < 0) return
+  const target = Math.min(Math.max(frame, 0), lastFrame)
+  previewViewer.value?.setSoundTime(target / fps.value)
+}
+
+// The tolerance keeps a time read back from a frame seek on that frame.
+const currentSoundFrame = () => Math.floor(soundTime.value * fps.value + 0.001)
+
 // Past the ends of a movie, or on a picture, the viewer does not move and
 // no frame reloads the drawing: the canvas keeps it.
 const goPreviousFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(currentSoundFrame() - 1)
+    return
+  }
   if (currentFrame.value <= 0) return
   clearCanvas()
   previewViewer.value.goPreviousFrame()
@@ -1301,6 +1321,10 @@ const goPreviousFrame = () => {
 }
 
 const goNextFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(currentSoundFrame() + 1)
+    return
+  }
   if (currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   previewViewer.value.goNextFrame()
@@ -1308,6 +1332,10 @@ const goNextFrame = () => {
 }
 
 const goToFirstFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(0)
+    return
+  }
   if (!isMovie.value || currentFrame.value <= 0) return
   clearCanvas()
   setCurrentFrame(0)
@@ -1315,6 +1343,10 @@ const goToFirstFrame = () => {
 }
 
 const goToLastFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(Infinity)
+    return
+  }
   if (!isMovie.value || currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   setCurrentFrame(nbFrames.value - 1)
@@ -2358,10 +2390,12 @@ watch(currentPreview, (newPreview, oldPreview) => {
   currentFrame.value = 0
   currentTimeRaw.value = 0
   currentTime.value = formatTime(0, fps.value)
-  // A sound not ready yet loads nothing that would reset its duration, and a
-  // reload of the same preview keeps its sound loaded.
+  // A sound not ready yet loads nothing that would reset these, and a reload
+  // of the same preview keeps its sound loaded.
   if (isSound.value && newPreview?.id !== oldPreview?.id) {
     maxDuration.value = '00:00:00:00'
+    soundDuration.value = 0
+    soundTime.value = 0
   }
   if (isMovie.value) {
     configureVideo()

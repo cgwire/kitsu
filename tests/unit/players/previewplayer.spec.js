@@ -53,6 +53,7 @@ const viewer = {
   setCurrentFrame: vi.fn(),
   setCurrentTimeRaw: vi.fn(),
   setPanZoom: vi.fn(),
+  setSoundTime: vi.fn(),
   setVolume: vi.fn(),
   zoomAt: vi.fn()
 }
@@ -528,6 +529,63 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  // Like the playlists, by a frame of the production, up to its last frame.
+  describe('sound keys', () => {
+    const soundPreview = { ...preview, id: 'preview-sound', extension: 'mp3' }
+    const press = key =>
+      window.dispatchEvent(new KeyboardEvent('keydown', { key }))
+    const soundTimes = () => viewer.setSoundTime.mock.calls.map(([t]) => t)
+
+    const mountOnSound = async time => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      const [main] = wrapper.findAllComponents({ name: 'PreviewViewer' })
+      main.vm.$emit('sound-duration-changed', 3)
+      main.vm.$emit('sound-time-update', time)
+      await nextTick()
+      viewer.setCurrentFrame.mockClear()
+      return main
+    }
+
+    it('steps the sound, not the hidden movie', async () => {
+      await mountOnSound(1.5)
+
+      press('ArrowRight')
+      press('ArrowLeft')
+      press('Home')
+      press('End')
+
+      const times = soundTimes()
+      expect(times).toHaveLength(4)
+      expect(times[0]).toBeCloseTo(1.52)
+      expect(times[1]).toBeCloseTo(1.44)
+      expect(times[2]).toBe(0)
+      expect(times[3]).toBeCloseTo(2.96)
+      expect(viewer.goNextFrame).not.toHaveBeenCalled()
+      expect(viewer.goPreviousFrame).not.toHaveBeenCalled()
+      expect(viewer.setCurrentFrame).not.toHaveBeenCalled()
+      expect(viewer.pause).not.toHaveBeenCalled()
+    })
+
+    it('keeps the sound between its first and last frames', async () => {
+      const main = await mountOnSound(2.96)
+      press('ArrowRight')
+      main.vm.$emit('sound-time-update', 0)
+      await nextTick()
+      press('ArrowLeft')
+      expect(soundTimes()).toEqual([2.96, 0])
+    })
+
+    it('starts a new sound from its first frame', async () => {
+      const main = await mountOnSound(2)
+      main.vm.$emit('sound-duration-changed', 0)
+      main.vm.$emit('sound-duration-changed', 3)
+      await nextTick()
+      press('ArrowRight')
+      expect(soundTimes()[0]).toBeCloseTo(0.04)
+    })
+  })
+
   // Zou stores no duration for a sound: the bar takes the decoded one.
   describe('sound time', () => {
     const soundPreview = {
@@ -593,6 +651,10 @@ describe('PreviewPlayer.vue', () => {
       await nextTick()
       expect(bar().props('currentTime')).toBe('00:00:00:00')
       expect(bar().props('maxDuration')).toBe('00:00:00:00')
+
+      viewer.setSoundTime.mockClear()
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
+      expect(viewer.setSoundTime).not.toHaveBeenCalled()
     })
 
     // A store reload hands over new objects for the same previews: the sound
@@ -606,6 +668,10 @@ describe('PreviewPlayer.vue', () => {
 
       await wrapper.setProps({ previews: [{ ...soundPreview }] })
       expect(bar().props('maxDuration')).toBe('00:00:03:00')
+
+      viewer.setSoundTime.mockClear()
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
+      expect(viewer.setSoundTime).toHaveBeenCalledTimes(1)
     })
 
     // Pausing the sound on a switch away sends its time one last time.

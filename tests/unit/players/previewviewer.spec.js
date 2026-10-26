@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import PreviewViewer from '@/components/players/viewers/PreviewViewer.vue'
 
@@ -94,6 +94,25 @@ describe('PreviewViewer', () => {
       expect(wrapper.element.style.height).toBe(height)
     }
   )
+
+  // The preview player steps a sound with the frame keys.
+  it('seeks a sound', () => {
+    const setCurrentTime = vi.fn()
+    const wrapper = shallowMount(PreviewViewer, {
+      props: { preview: { id: 'preview-1', extension: 'mp3', status: 'ready' } },
+      global: {
+        stubs: {
+          SoundViewer: {
+            name: 'SoundViewer',
+            template: '<div />',
+            methods: { setCurrentTime }
+          }
+        }
+      }
+    })
+    wrapper.vm.setSoundTime(1.52)
+    expect(setCurrentTime).toHaveBeenCalledWith(1.52)
+  })
 
   // The preview player resets its play button.
   it('ends the play of a sound that cannot be read', () => {

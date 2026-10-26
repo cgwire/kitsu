@@ -457,6 +457,7 @@ const overlayDimensions = computed(() => {
 
 const nbFrames = computed(() => {
   if (isSound.value) return Math.round(soundDuration.value * fps.value)
+  if (isPicture.value) return pictureFrameCount()
   // The preview duration first, like the studio player: the decoder
   // duration floored to the frame plus the Chromium offset read one frame
   // more on the same clip.
@@ -466,7 +467,6 @@ const nbFrames = computed(() => {
     currentPreview.value?.duration ||
     (maxDuration.value > 0 ? maxDuration.value + change : 0)
   if (duration > 0) return Math.round(duration * fps.value)
-  if (isPicture.value) return Math.round(2 * fps.value)
   return 0
 })
 
@@ -561,9 +561,10 @@ const togglePlay = () => (isPlaying.value ? pause() : play())
 // Picture playback: the picture viewer (not MultiVideoViewer, which is
 // movie-only) shows the image, and a timer advances the playlist after the
 // image's frame budget elapses — mirroring the studio player's playPicture.
-// Matches playlistFrameData's defaultPictureFrames so a picture is shown for
-// the same span the playlist-progress bar allots to it.
-const pictureFrameCount = () => Math.round(2 * fps.value)
+// Matches playlistFrameData so a picture is shown for the same span the
+// playlist-progress bar allots to it.
+const pictureFrameCount = () =>
+  currentEntity.value?.preview_nb_frames || Math.round(2 * fps.value)
 
 const stopPicturePlayback = () => {
   if (picturePlayFrame !== null) cancelAnimationFrame(picturePlayFrame)
@@ -656,6 +657,8 @@ const selectEntity = index => {
   }
   pause()
   rawPlayer.value?.loadEntity(index)
+  // Pausing the previous movie sent its frame to the bars.
+  if (isPicture.value) onFrameUpdate(0)
   if (wasPlaying) nextTick(play)
 }
 
@@ -697,7 +700,23 @@ const onResetZoom = () => {
   resetPanzoomTransform()
 }
 
+// A sound has no frames of its own: the keys step it by a frame of the
+// playlist, up to the start of its last frame like a movie.
+const seekSoundFrame = frame => {
+  const lastFrame = nbFrames.value - 1
+  if (lastFrame < 0) return
+  const target = Math.min(Math.max(frame, 0), lastFrame)
+  soundPlayer.value?.setCurrentTime(target / fps.value)
+}
+
+// The tolerance keeps a time read back from a frame seek on that frame.
+const currentSoundFrame = () => Math.floor(soundTime.value * fps.value + 0.001)
+
 const goPreviousFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(currentSoundFrame() - 1)
+    return
+  }
   if (!rawPlayer.value) return
   const previousFrame = currentFrameNumber.value - 1
   if (previousFrame < 0) return
@@ -706,11 +725,24 @@ const goPreviousFrame = () => {
 }
 
 const goNextFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(currentSoundFrame() + 1)
+    return
+  }
   if (!rawPlayer.value) return
   const nextFrame = currentFrameNumber.value + 1
   if (nbFrames.value > 0 && nextFrame >= nbFrames.value) return
   rawPlayer.value.goNextFrame()
   onFrameUpdate(nextFrame)
+}
+
+const goToFrame = frame => {
+  if (isSound.value) {
+    seekSoundFrame(frame)
+    return
+  }
+  rawPlayer.value?.setCurrentFrame(frame)
+  onFrameUpdate(frame)
 }
 
 const loadFirstEntity = () => {
@@ -765,6 +797,11 @@ const onProgressChanged = frameNumber => {
   // The sound tells its new time back, and onSoundTimeUpdate moves the bars.
   if (isSound.value) {
     soundPlayer.value?.setCurrentTime(frameNumber / fps.value)
+    return
+  }
+  if (isPicture.value) {
+    onFrameUpdate(frameNumber)
+    if (isPlaying.value) playPicture()
     return
   }
   if (!isMovie.value) return
@@ -863,10 +900,12 @@ const onVideoLoaded = () => {
     width: dimensions.width || 0,
     height: dimensions.height || 0
   }
-  // Push the initial frame so the video-progress cursor sits on frame 1 and
-  // the annotation overlay renders the first frame's annotations right away
-  // (the viewer doesn't emit a frame-update until playback starts).
-  if (!isPlaying.value) onFrameUpdate(0)
+  // Push the frame the movie stands on so the video-progress cursor sits on
+  // it and the annotation overlay renders its annotations right away (the
+  // viewer doesn't emit a frame-update until playback starts). It is not
+  // always the first one: a click on the playlist bar seeks the movie, and
+  // the other decoder sends this event too when it preloads the next movie.
+  if (!isPlaying.value) onFrameUpdate(rawPlayer.value?.getCurrentFrame() || 0)
 }
 
 const onMaxDurationUpdate = duration => {
@@ -990,15 +1029,10 @@ const onKeyDown = event => {
       else goNextFrame()
       break
     case 'Home':
-      rawPlayer.value?.setCurrentFrame(0)
-      onFrameUpdate(0)
+      goToFrame(0)
       break
     case 'End':
-      if (nbFrames.value > 0) {
-        const lastFrame = nbFrames.value - 1
-        rawPlayer.value?.setCurrentFrame(lastFrame)
-        onFrameUpdate(lastFrame)
-      }
+      if (nbFrames.value > 0) goToFrame(nbFrames.value - 1)
       break
   }
 }

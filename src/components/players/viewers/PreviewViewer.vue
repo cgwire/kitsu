@@ -335,6 +335,10 @@ const goPreviousFrame = () => {
   return videoViewer.value.goPreviousFrame()
 }
 
+const setSoundTime = time => {
+  soundViewer.value?.setCurrentTime(time)
+}
+
 const goNextFrame = () => {
   return videoViewer.value.goNextFrame()
 }
@@ -511,6 +515,7 @@ defineExpose({
   resize,
   setCurrentFrame,
   setCurrentTimeRaw: setCurrentTimeRawValue,
+  setSoundTime,
   getCurrentTimeRaw,
   extractFrame,
   extractPicture,

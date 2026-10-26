@@ -2546,6 +2546,19 @@ const updateComparisonAnchor = () => {
   anchor.style.height = `${height}px`
 }
 
+// A sound has no frames of its own: the keys step it by a frame of the
+// playlist, up to the start of its last frame like a movie.
+const seekSoundFrame = frame => {
+  const lastFrame = Math.round(soundDuration.value * fps.value) - 1
+  if (lastFrame < 0) return
+  const target = Math.min(Math.max(frame, 0), lastFrame)
+  soundPlayer.value?.setCurrentTime(target / fps.value)
+}
+
+// The tolerance keeps a time read back from a frame seek on that frame.
+const currentSoundFrame = () =>
+  Math.floor(currentTimeRaw.value * fps.value + 0.001)
+
 const goPreviousFrame = () => {
   clearCanvas()
   if (isFullMode.value) {
@@ -2564,6 +2577,8 @@ const goPreviousFrame = () => {
     }
     previousFrameTime = previousFrame / fps.value
     setFullPlayerTime(previousFrameTime)
+  } else if (isCurrentPreviewSound.value) {
+    seekSoundFrame(currentSoundFrame() - 1)
   } else {
     if (!rawPlayer.value) return
     rawPlayer.value.goPreviousFrame()
@@ -2589,6 +2604,8 @@ const goNextFrame = () => {
     }
     nextFrameTime = nextFrame / fps.value
     setFullPlayerTime(nextFrameTime)
+  } else if (isCurrentPreviewSound.value) {
+    seekSoundFrame(currentSoundFrame() + 1)
   } else {
     if (!rawPlayer.value) return
     const nextFrameTime =
@@ -2614,7 +2631,12 @@ const goNextFrame = () => {
 // loading the drawing would pause it. A picture and the movie of the full
 // mode stay as they are.
 const goToFrame = frame => {
-  if (!isCurrentPreviewMovie.value || isFullMode.value) return
+  if (isFullMode.value) return
+  if (isCurrentPreviewSound.value) {
+    seekSoundFrame(frame)
+    return
+  }
+  if (!isCurrentPreviewMovie.value) return
   if (isPlaying.value) rawPlayer.value?.setCurrentFrame(frame)
   else onProgressChanged(frame)
 }
@@ -2686,6 +2708,8 @@ const onProgressChanged = (frame, updatePlaylistProgress = true) => {
   clearCanvas()
   if (isCurrentPreviewPicture.value) {
     framesSeenOfPicture.value = frame + 1
+    // The timer counts from the frame it starts on.
+    if (isPlaying.value) playPicture()
   } else {
     rawPlayer.value.setCurrentFrame(frame)
     syncComparisonPlayer()
@@ -2975,7 +2999,9 @@ const onFrameUpdate = frame => {
       }
     }
   }
-  if (props.playlist && isPlaying.value) {
+  // A picture moves on with its own timer, not on the frame count of a
+  // movie.
+  if (props.playlist && isPlaying.value && isCurrentPreviewMovie.value) {
     const hasHandles =
       ['shot', 'edit', 'episode'].includes(props.playlist.for_entity) &&
       currentPreviewIndex.value === 0 &&
@@ -3050,9 +3076,14 @@ const onMouseMove = () => {
   }
 }
 
+// Play goes on from the frame shown, like a movie, unless it is the last.
 const playPicture = () => {
   if (playingPictureTimeout) clearTimeout(playingPictureTimeout)
-  framesSeenOfPicture.value = 1
+  if (
+    framesSeenOfPicture.value >= framesPerImage.value[playingEntityIndex.value]
+  ) {
+    framesSeenOfPicture.value = 1
+  }
   isPlaying.value = true
   playingPictureTimeout = setTimeout(() => {
     continuePlayingPlaylist(
@@ -3855,8 +3886,9 @@ const continuePlayingPlaylist = (entityIndex, startMs) => {
   const durationWaited = Date.now() - startMs
   if (!isPlaying.value) return
   if (durationWaited < durationToWaitMs) {
+    // The tolerance keeps a picture played on from a frame on that frame.
     framesSeenOfPicture.value = Math.max(
-      Math.floor((durationWaited / 1000) * fps.value),
+      Math.floor((durationWaited / 1000) * fps.value + 0.001),
       1
     )
     playingPictureTimeout = setTimeout(() => {
@@ -4748,7 +4780,7 @@ const onKeyDown = event => {
   } else if (event.code === 'Home') {
     goToFrame(0)
   } else if (event.code === 'End') {
-    goToFrame(nbFrames.value - 1)
+    goToFrame(entityProgressNbFrames.value - 1)
   }
 }
 
