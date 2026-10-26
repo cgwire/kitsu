@@ -366,7 +366,7 @@
       "login_failed": "Login mislykkedes, kontrollér venligst dine loginoplysninger.",
       "login_inactive": "Login mislykkedes, din konto er inaktiv.",
       "login_page": "Annuller",
-      "redirecting": "Omdirigerer om {secondsLeft} sekunder...",
+      "redirecting": "Omdirigerer om {count} sekund... | Omdirigerer om {count} sekunder...",
       "reset_change_password": "Skift adgangskode",
       "reset_change_password_form_failed": "Der er et problem med den adgangskode, du har angivet. Kontrollér venligst, at den er mindst 8 tegn lang, og at begge adgangskoder stemmer overens.",
       "reset_change_password_failed": "Ændring af adgangskode mislykkedes. Genstart venligst proceduren.",

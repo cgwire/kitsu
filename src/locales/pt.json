@@ -366,7 +366,7 @@
       "login_failed": "Falha no login, verifique suas credenciais.",
       "login_inactive": "Falha no login, sua conta está inativa.",
       "login_page": "Cancelar",
-      "redirecting": "Redirecionando em {secondsLeft} segundos ...",
+      "redirecting": "Redirecionando em {count} segundo... | Redirecionando em {count} segundos...",
       "reset_change_password": "Alterar senha",
       "reset_change_password_form_failed": "Há um problema com a senha que você forneceu. Por favor, verifique se ela tem pelo menos 8 caracteres e se as duas senhas correspondem.",
       "reset_change_password_failed": "Falha ao alterar a senha. Reinicie todo o procedimento novamente.",

@@ -366,7 +366,7 @@
       "login_failed": "Error de inicio de sesión, por favor verifique sus credenciales.",
       "login_inactive": "El inicio de sesión ha fallado, su cuenta está inactiva.",
       "login_page": "Cancelar",
-      "redirecting": "Redirigiendo en {secondsLeft} segundos...",
+      "redirecting": "Redirigiendo en {count} segundo... | Redirigiendo en {count} segundos...",
       "reset_change_password": "Cambiar contraseña",
       "reset_change_password_form_failed": "Hay un problema con la contraseña que dio. Por favor, verifique que tenga al menos 8 caracteres y que ambas contraseñas coincidan.",
       "reset_change_password_failed": "Error al cambiar la contraseña. Por favor, reinicie todo el procedimiento de nuevo.",

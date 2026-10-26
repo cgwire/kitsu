@@ -366,7 +366,7 @@
       "login_failed": "خطا در ورود، لطفا مشخصات خود را بررسی کنید.",
       "login_inactive": "ورود ناموفق بود، حساب کاربری شما غیرفعال است.",
       "login_page": "لغو",
-      "redirecting": "هدایت در {secondsLeft} ثانیه...",
+      "redirecting": "هدایت در {count} ثانیه... | هدایت در {count} ثانیه...",
       "reset_change_password": "تغییر رمز عبور",
       "reset_change_password_form_failed": "رمز وارد شده معتبر نیست. رمز باید حداقل ۸ کاراکتر باشد و هر دو رمز با هم تطابق داشته باشند.",
       "reset_change_password_failed": "تغییر رمز انجام نشد. کل فرایند را مجدد انجام دهید.",

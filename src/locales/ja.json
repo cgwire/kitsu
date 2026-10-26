@@ -366,7 +366,7 @@
       "login_failed": "ログインに失敗しました。認証情報を確認してください。",
       "login_inactive": "ログインに失敗しました。アカウントが無効です。",
       "login_page": "キャンセル",
-      "redirecting": "{secondsLeft} 秒後にリダイレクトします…",
+      "redirecting": "{count} 秒後にリダイレクトします… | {count} 秒後にリダイレクトします…",
       "reset_change_password": "パスワードを変更",
       "reset_change_password_form_failed": "入力したパスワードに問題があります。8文字以上で、確認用と一致しているかご確認ください。",
       "reset_change_password_failed": "パスワードの変更に失敗しました。手順を最初からやり直してください。",

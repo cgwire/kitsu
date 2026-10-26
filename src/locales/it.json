@@ -366,7 +366,7 @@
       "login_failed": "Accesso non riuscito, verifica le tue credenziali.",
       "login_inactive": "Accesso non riuscito, il tuo account è inattivo.",
       "login_page": "Annulla",
-      "redirecting": "Reindirizzamento tra {secondsLeft} secondi...",
+      "redirecting": "Reindirizzamento tra {count} secondo... | Reindirizzamento tra {count} secondi...",
       "reset_change_password": "Cambia password",
       "reset_change_password_form_failed": "C'è un problema con la password che hai inserito. Verifica che contenga almeno 8 caratteri e che le due password coincidano.",
       "reset_change_password_failed": "Il cambio della password non è riuscito. Ricomincia la procedura.",

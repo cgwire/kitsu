@@ -366,7 +366,7 @@
       "login_failed": "Belépés sikertelen, kérlek ellenőrizd a felhasználóneved és jelszavad.",
       "login_inactive": "A bejelentkezés sikertelen, a fiókod inaktív.",
       "login_page": "Mégsem",
-      "redirecting": "Átirányítás {secondsLeft} mp múlva...",
+      "redirecting": "Átirányítás {count} mp múlva... | Átirányítás {count} mp múlva...",
       "reset_change_password": "Jelszó megváltoztatása",
       "reset_change_password_form_failed": "Probléma van a megadott jelszóval. Kérlek ellenőrizd, hogy legalább 8 karakter hosszú, és hogy a két mezőbe begépelt jelszó megegyezik.",
       "reset_change_password_failed": "Jelszóváltás sikertelen. Kérlek kezdd újra a folyamatot.",

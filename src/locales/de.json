@@ -366,7 +366,7 @@
       "login_failed": "Die Anmeldung ist fehlgeschlagen, bitte überprüfen Sie Ihre Zugangsdaten.",
       "login_inactive": "Die Anmeldung ist fehlgeschlagen, Ihr Konto ist inaktiv.",
       "login_page": "Abbrechen",
-      "redirecting": "Weiterleitung in {secondsLeft} Sekunden...",
+      "redirecting": "Weiterleitung in {count} Sekunde... | Weiterleitung in {count} Sekunden...",
       "reset_change_password": "Passwort ändern",
       "reset_change_password_form_failed": "Es gibt ein Problem mit dem von Ihnen angegebenen Passwort. Bitte überprüfen Sie, ob es mindestens 8 Zeichen lang ist und ob beide Passwörter übereinstimmen.",
       "reset_change_password_failed": "Die Änderung des Passworts ist fehlgeschlagen. Bitte starten Sie den gesamten Vorgang erneut.",

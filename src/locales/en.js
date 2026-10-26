@@ -734,7 +734,7 @@ export default {
     login_inactive: 'Login failed, your account is inactive.',
     login_server_failed: 'A server error occurred while logging in.',
     login_page: 'Cancel',
-    redirecting: 'Redirecting in {secondsLeft} seconds...',
+    redirecting: 'Redirecting in {count} second... | Redirecting in {count} seconds...',
     reset_change_password: 'Change password',
     reset_change_password_failed: 'Changing password failed. Please restart the procedure.',
     reset_change_password_form_failed: 'There is a problem with the password you provided. Please verify that it is at least 8 characters long and that both passwords match.',
