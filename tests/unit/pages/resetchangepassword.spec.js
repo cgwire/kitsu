@@ -1,10 +1,13 @@
+import { useHead } from '@unhead/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
+const route = vi.hoisted(() => ({ query: {} }))
+
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ query: { email: 'jane@example.com', token: 'token-1' } }),
+  useRoute: () => route,
   useRouter: () => ({ push: vi.fn() })
 }))
 
@@ -35,6 +38,24 @@ const fillPasswords = async wrapper => {
 }
 
 describe('pages/ResetChangePassword', () => {
+  beforeEach(() => {
+    route.query = { email: 'jane@example.com', token: 'token-1' }
+  })
+
+  it('titles the tab like its heading', () => {
+    const resetPage = mountPage(vi.fn())
+    expect(useHead.mock.lastCall[0].title.value).toBe(
+      resetPage.find('h1').text()
+    )
+
+    route.query.type = 'new'
+    const invitationPage = mountPage(vi.fn())
+    expect(invitationPage.find('h1').text()).toBe('login.set_password_title')
+    expect(useHead.mock.lastCall[0].title.value).toBe(
+      invitationPage.find('h1').text()
+    )
+  })
+
   it('sends the new password once while the request runs', async () => {
     const resetChangePassword = vi.fn(() => new Promise(() => {}))
     const wrapper = mountPage(resetChangePassword)

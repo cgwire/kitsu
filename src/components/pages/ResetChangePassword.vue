@@ -4,11 +4,7 @@
       <div class="box has-text-left">
         <div class="has-text-centered">
           <h1 class="title">
-            {{
-              isNew
-                ? $t('login.set_password_title')
-                : $t('login.reset_change_password_title')
-            }}
+            {{ title }}
           </h1>
         </div>
 
@@ -126,6 +122,11 @@ let redirectInterval = null
 // --------------------------------------------------------------------------
 
 const isNew = computed(() => route.query.type === 'new')
+const title = computed(() =>
+  isNew.value
+    ? t('login.set_password_title')
+    : t('login.reset_change_password_title')
+)
 
 // Functions
 // --------------------------------------------------------------------------
@@ -182,7 +183,7 @@ onBeforeUnmount(() => {
 // Head
 // --------------------------------------------------------------------------
 
-useHead({ title: computed(() => t('login.reset_change_password_title')) })
+useHead({ title })
 </script>
 
 <style lang="scss" scoped>
