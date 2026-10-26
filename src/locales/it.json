@@ -1131,6 +1131,7 @@
       "metadata": {
         "add_new_values": "Al momento non ci sono valori disponibili.",
         "available_values": "Valori disponibili",
+        "built_in_name": "Un campo integrato usa già questo nome.",
         "choices": "Elenco di valori",
         "delete_text": "Sei sicuro di voler eliminare questa colonna e i dati associati per tutti gli asset di questa produzione?",
         "delete_list_column_text": "Questa operazione rimuoverà la colonna “{name}” da tutte le produzioni, inclusi i valori salvati. Vuoi continuare?",

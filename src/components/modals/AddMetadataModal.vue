@@ -27,6 +27,8 @@
         <text-field
           ref="nameField"
           :label="$t('assets.fields.name')"
+          :error-text="$t('productions.metadata.built_in_name')"
+          :errored="isBuiltInName"
           v-model.trim="form.name"
           @enter="confirm"
         />
@@ -165,7 +167,11 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useModal } from '@/composables/modal'
-import { getDescriptorChecklistValues } from '@/lib/descriptors'
+import {
+  getDescriptorChecklistValues,
+  getDescriptorFieldName,
+  isBuiltInFieldName
+} from '@/lib/descriptors'
 import { remove } from '@/lib/models'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -276,6 +282,16 @@ const selectableDepartments = computed(() => {
   return departments
 })
 
+// A column created on the key of a built-in field, before Zou refused it,
+// keeps that key and stays editable.
+const isBuiltInName = computed(() => {
+  const fieldName = getDescriptorFieldName(form.value.name)
+  return (
+    fieldName !== props.descriptorToEdit?.field_name &&
+    isBuiltInFieldName(props.entityType, fieldName)
+  )
+})
+
 const isFormFilled = computed(() => {
   const dataTypeOk =
     SIMPLE_TYPES.includes(form.value.data_type) ||
@@ -291,7 +307,13 @@ const isFormFilled = computed(() => {
     props.entityType !== 'Task' ||
     !props.taskTypes.length ||
     Boolean(form.value.task_type_id)
-  return form.value.name.length && dataTypeOk && supervisorDeptOk && taskTypeOk
+  return (
+    form.value.name.length &&
+    !isBuiltInName.value &&
+    dataTypeOk &&
+    supervisorDeptOk &&
+    taskTypeOk
+  )
 })
 
 // Functions
@@ -409,10 +431,6 @@ onMounted(reset)
 
 .modal-content .box p.text {
   margin-bottom: 1em;
-}
-
-.error {
-  margin-top: 1em;
 }
 
 .description {

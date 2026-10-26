@@ -1604,6 +1604,7 @@ export default {
       add_new_values: 'There are currently no available values.',
       available_values: 'Available values',
       boolean: 'Checkbox',
+      built_in_name: 'A built-in field already uses this name.',
       checklist: 'Checklist',
       choices: 'List of values',
       date: 'Date',

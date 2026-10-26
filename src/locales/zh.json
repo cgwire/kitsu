@@ -1131,6 +1131,7 @@
       "metadata": {
         "add_new_values": "当前没有可用值。",
         "available_values": "可用值",
+        "built_in_name": "此名称已被内置字段使用。",
         "choices": "值列表",
         "delete_text": "您确定要删除此列以及此制作的所有资产方面的相关数据吗？",
         "delete_error": "删除此元数据列时出现错误。",

@@ -133,3 +133,35 @@ export const getExportDescriptors = (production, entityType) =>
   sortByName(
     (production.descriptors || []).filter(d => d.entity_type === entityType)
   )
+
+// Keys the built-in fields of an entity use in its data: frame range, trim
+// handles, frame rate, resolution, and retake cap. Zou refuses a column whose
+// field name is one of them, since both would share their values. Zou keeps
+// the same list in BUILT_IN_ENTITY_DATA_FIELDS.
+const BUILT_IN_DATA_FIELDS = [
+  'fps',
+  'frame_in',
+  'frame_out',
+  'handle_in',
+  'handle_out',
+  'max_retakes',
+  'resolution'
+]
+
+// The field name Zou makes from a column name (python-slugify with "_"):
+// accents dropped, any run of other characters turned into one "_". Zou
+// spells the letters of other scripts in Latin ones, which are kept as
+// they are here: a Russian word followed by "(Resolution)" stays off the
+// built-in keys on both sides.
+export const getDescriptorFieldName = name =>
+  name
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '_')
+    .replace(/^_|_$/g, '')
+
+// Project and task columns store their values out of the entity data.
+export const isBuiltInFieldName = (entityType, fieldName) =>
+  !['Project', 'Task'].includes(entityType) &&
+  BUILT_IN_DATA_FIELDS.includes(fieldName)

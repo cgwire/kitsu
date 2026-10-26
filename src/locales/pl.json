@@ -1550,6 +1550,7 @@
         "applies_to_all_projects": "Ta kolumna zostanie dodana do każdej produkcji na liście. Każda produkcja może mieć własną wartość w widoku listy.",
         "add_new_values": "Obecnie brak dostępnych wartości.",
         "available_values": "Dostępne wartości",
+        "built_in_name": "Ta nazwa jest już używana przez wbudowane pole.",
         "boolean": "Pole wyboru",
         "checklist": "Lista kontrolna",
         "choices": "Lista wartości",

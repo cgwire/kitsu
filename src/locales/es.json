@@ -1131,6 +1131,7 @@
       "metadata": {
         "add_new_values": "Actualmente no hay valores disponibles.",
         "available_values": "Valores disponibles",
+        "built_in_name": "Un campo integrado ya usa este nombre.",
         "choices": "Lista de valores",
         "delete_text": "¿Está seguro de que desea borrar esta columna y los datos relacionados para todos los recursos de esta producción?",
         "delete_error": "Se ha producido un error al eliminar esta columna de metadatos.",

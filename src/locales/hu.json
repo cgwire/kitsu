@@ -1131,6 +1131,7 @@
       "metadata": {
         "add_new_values": "Nincs hozzáférhető érték.",
         "available_values": "Rendelkezésre álló értékek",
+        "built_in_name": "Ezt a nevet már egy beépített mező használja.",
         "choices": "Értékek listája",
         "delete_text": "Biztosan törlöd az oszlopot és minden hozzá tartozó adatot a produkció összes asset-jéből?",
         "delete_error": "Hiba történt a meta-adat oszlop törlésekor.",

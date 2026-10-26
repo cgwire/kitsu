@@ -5,6 +5,7 @@ import { createStore } from 'vuex'
 vi.mock('@/composables/modal', () => ({ useModal: () => {} }))
 
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 
 const i18n = createI18n({
@@ -33,13 +34,18 @@ const store = createStore({
 // The modal focuses its name field on opening.
 const TextFieldStub = {
   name: 'TextField',
+  props: {
+    errored: { type: Boolean, default: false },
+    errorText: { type: String, default: '' }
+  },
   emits: ['enter', 'update:modelValue'],
   methods: { focus() {} },
   template: '<input />'
 }
 
-const openModal = async () => {
+const openModal = async (props = {}) => {
   const wrapper = shallowMount(AddMetadataModal, {
+    props,
     global: {
       plugins: [store, i18n],
       renderStubDefaultSlot: true,
@@ -87,5 +93,60 @@ describe('modals/AddMetadataModal', () => {
       name: 'Difficulty',
       data_type: 'string'
     })
+  })
+
+  // A Resolution shot column shared its values with the built-in field:
+  // the list showed both columns on the same value.
+  it('refuses the name of a built-in field', async () => {
+    const wrapper = await openModal({ entityType: 'Shot' })
+    const nameField = wrapper.findComponent({ name: 'TextField' })
+
+    await nameField.vm.$emit('update:modelValue', 'Résolution')
+    nameField.vm.$emit('enter')
+
+    expect(nameField.props('errored')).toBe(true)
+    expect(nameField.props('errorText')).toBe(
+      'productions.metadata.built_in_name'
+    )
+    expect(wrapper.findComponent(ModalFooter).props('isDisabled')).toBe(true)
+    expect(wrapper.emitted('confirm')).toBeUndefined()
+  })
+
+  it('keeps the name of a built-in field for a project column', async () => {
+    const wrapper = await openModal({ entityType: 'Project' })
+    const nameField = wrapper.findComponent({ name: 'TextField' })
+
+    await nameField.vm.$emit('update:modelValue', 'Resolution')
+    nameField.vm.$emit('enter')
+
+    expect(nameField.props('errored')).toBe(false)
+    expect(wrapper.emitted('confirm')[0][0].name).toBe('Resolution')
+  })
+
+  // A column created before Zou refused these names stays editable, under
+  // its name, but cannot move onto another built-in field.
+  it('lets a column on a built-in field keep its name', async () => {
+    const wrapper = await openModal({
+      entityType: 'Shot',
+      descriptorToEdit: {
+        id: 'descriptor-1',
+        name: 'Resolution',
+        field_name: 'resolution',
+        data_type: 'string',
+        for_client: false,
+        choices: [],
+        departments: []
+      }
+    })
+    const nameField = wrapper.findComponent({ name: 'TextField' })
+
+    nameField.vm.$emit('enter')
+    expect(nameField.props('errored')).toBe(false)
+    expect(wrapper.emitted('confirm')[0][0].name).toBe('Resolution')
+
+    await nameField.vm.$emit('update:modelValue', 'FPS')
+    nameField.vm.$emit('enter')
+    expect(nameField.props('errored')).toBe(true)
+    expect(wrapper.emitted('confirm')).toHaveLength(1)
   })
 })

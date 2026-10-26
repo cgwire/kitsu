@@ -1131,6 +1131,7 @@
       "metadata": {
         "add_new_values": "Der er i øjeblikket ingen tilgængelige værdier.",
         "available_values": "Tilgængelige værdier",
+        "built_in_name": "Et indbygget felt bruger allerede dette navn.",
         "choices": "Liste over værdier",
         "delete_text": "Er du sikker på, at du vil slette denne kolonne og relaterede data for alle assets i denne produktion?",
         "delete_error": "Der opstod en fejl under sletning af denne metadata-kolonne.",
