@@ -528,6 +528,102 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  // Zou stores no duration for a sound: the bar takes the decoded one.
+  describe('sound time', () => {
+    const soundPreview = {
+      ...preview,
+      id: 'preview-sound',
+      extension: 'mp3'
+    }
+    const viewers = () => wrapper.findAllComponents({ name: 'PreviewViewer' })
+    const bar = () => wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+
+    it('shows the time and the duration of the sound', async () => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      const [main, comparison] = viewers()
+      comparison.vm.$emit('sound-duration-changed', 9)
+      comparison.vm.$emit('sound-time-update', 7)
+      await nextTick()
+      expect(bar().props('currentTime')).toBe('00:00:00:00')
+      expect(bar().props('maxDuration')).toBe('00:00:00:00')
+
+      main.vm.$emit('sound-duration-changed', 3.2)
+      main.vm.$emit('sound-time-update', 1.48)
+      await nextTick()
+
+      expect(bar().props('currentTime')).toBe('00:00:01:12')
+      expect(bar().props('maxDuration')).toBe('00:00:03:05')
+      expect(bar().props('nbFrames')).toBe(0)
+    })
+
+    it('restarts the time and the duration on a switch to a sound', async () => {
+      wrapper = mountPlayer({ props: { previews: [moviePreview] } })
+      await nextTick()
+      const [main] = viewers()
+      main.vm.$emit('duration-changed', 10)
+      wrapper.vm.setCurrentFrame(50)
+      await nextTick()
+      expect(bar().props('currentTime')).toBe('00:00:02:00')
+
+      await wrapper.setProps({ previews: [soundPreview] })
+      main.vm.$emit('sound-duration-changed', 0)
+      await nextTick()
+
+      expect(bar().props('currentTime')).toBe('00:00:00:00')
+      expect(bar().props('maxDuration')).toBe('00:00:00:00')
+    })
+
+    // A sound Zou has not processed yet loads nothing: the sound left stays
+    // loaded under it, hidden.
+    it('leaves nothing of the sound left to a sound not ready yet', async () => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      const [main] = viewers()
+      main.vm.$emit('sound-duration-changed', 3)
+      main.vm.$emit('sound-time-update', 2)
+      await nextTick()
+
+      await wrapper.setProps({
+        previews: [
+          { ...soundPreview, id: 'preview-sound-2', status: 'processing' }
+        ]
+      })
+      main.vm.$emit('sound-time-update', 2.1)
+      await nextTick()
+      expect(bar().props('currentTime')).toBe('00:00:00:00')
+      expect(bar().props('maxDuration')).toBe('00:00:00:00')
+    })
+
+    // A store reload hands over new objects for the same previews: the sound
+    // on screen stays loaded, and sends no new duration.
+    it('keeps the sound on a reload of its preview', async () => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      const [main] = viewers()
+      main.vm.$emit('sound-duration-changed', 3)
+      await nextTick()
+
+      await wrapper.setProps({ previews: [{ ...soundPreview }] })
+      expect(bar().props('maxDuration')).toBe('00:00:03:00')
+    })
+
+    // Pausing the sound on a switch away sends its time one last time.
+    it('leaves the time of a movie to the movie', async () => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      await wrapper.setProps({ previews: [moviePreview] })
+      const [main] = viewers()
+      main.vm.$emit('duration-changed', 10)
+      main.vm.$emit('sound-time-update', 1.48)
+      main.vm.$emit('sound-duration-changed', 3.2)
+      await nextTick()
+
+      expect(bar().props('currentTime')).toBe('00:00:00:00')
+      expect(bar().props('maxDuration')).toBe('00:00:09:24')
+    })
+  })
+
   describe('render', () => {
     // The Task page mounts the player with its task still null when a
     // comment lands before the task is loaded, and TaskInfo drops its task

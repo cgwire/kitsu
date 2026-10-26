@@ -40,7 +40,7 @@
       />
     </div>
 
-    <div class="flexrow flexrow-item time-info" v-if="isMovie">
+    <div class="flexrow flexrow-item time-info" v-if="isMovie || isSound">
       <span
         class="flexrow-item time-indicator"
         :title="$t('playlists.actions.current_time')"
@@ -57,6 +57,7 @@
       <span
         class="flexrow-item frame-counter nowrap"
         :title="$t('playlists.actions.frame_number')"
+        v-if="isMovie"
       >
         ({{ currentFrameDisplay }} / {{ nbFramesDisplay }})
       </span>

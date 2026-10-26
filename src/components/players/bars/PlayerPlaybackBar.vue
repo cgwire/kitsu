@@ -22,10 +22,11 @@
     />
   </div>
 
-  <div class="left flexrow" v-if="isMovie && !compact">
+  <div class="left flexrow" v-if="(isMovie || isSound) && !compact">
     <template v-if="!phone">
       <span
         class="flexrow-item time-indicator current-time"
+        :class="{ 'narrow-hidden': isMovie }"
         :title="$t('playlists.actions.current_time')"
       >
         {{ currentTime }}
@@ -43,11 +44,12 @@
     <div
       class="flexrow-item time-indicator mr1 nowrap"
       :title="$t('playlists.actions.frame_number')"
+      v-if="isMovie"
     >
       {{ frameIndicator }}
     </div>
 
-    <template v-if="!phone">
+    <template v-if="isMovie && !phone">
       <div class="separator"></div>
 
       <button-simple
@@ -234,10 +236,10 @@ const frameIndicator = computed(() => {
   margin-right: 0;
 }
 
-// Hide the timecode when PreviewPlayer is narrow — the frame counter
-// next to it carries enough position info on its own.
+// Hide the timecode of a movie when PreviewPlayer is narrow: the frame
+// counter next to it carries enough position info on its own.
 @container preview-player (max-width: 600px) {
-  .current-time {
+  .narrow-hidden {
     display: none;
   }
 }

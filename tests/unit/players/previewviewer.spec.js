@@ -56,6 +56,23 @@ describe('PreviewViewer', () => {
     ])
   })
 
+  // The player shows the time of a sound under their own names: the movie
+  // events size the frames and the progress bar of a movie.
+  it('forwards the time and the duration of a sound apart', () => {
+    const wrapper = shallowMount(PreviewViewer, {
+      props: { preview: { id: 'preview-1', extension: 'mp3', status: 'ready' } }
+    })
+    const sound = wrapper.findComponent({ name: 'SoundViewer' })
+    sound.vm.$emit('duration-changed', 0)
+    sound.vm.$emit('duration-changed', 3.2)
+    sound.vm.$emit('time-update', 1.5)
+
+    expect(wrapper.emitted('sound-duration-changed')).toEqual([[0], [3.2]])
+    expect(wrapper.emitted('sound-time-update')).toEqual([[1.5]])
+    expect(wrapper.emitted('duration-changed')).toBeUndefined()
+    expect(wrapper.emitted('time-update')).toBeUndefined()
+  })
+
   // A sound has no height of its own: in full screen the viewer takes the
   // screen height, so the waveform can sit in its middle as in a playlist.
   it.each([

@@ -99,6 +99,8 @@
               @panzoom-changed="onPanzoomChanged"
               @picture-loaded="onPreviewLoaded"
               @play-ended="pause"
+              @sound-duration-changed="onSoundDurationChanged"
+              @sound-time-update="onSoundTimeUpdate"
               @video-end="onVideoEnd"
               @video-loaded="onPreviewLoaded"
             />
@@ -1186,6 +1188,20 @@ const changeMaxDuration = duration => {
   } else {
     maxDuration.value = '00:00:00:00'
     videoDuration.value = 0
+  }
+}
+
+// Pausing a sound on a switch away sends its time once more, and a sound not
+// ready yet leaves the one before loaded under it.
+const onSoundTimeUpdate = time => {
+  if (isSound.value && isReady.value) {
+    currentTime.value = formatTime(time, fps.value)
+  }
+}
+
+const onSoundDurationChanged = duration => {
+  if (isSound.value && isReady.value) {
+    maxDuration.value = formatTime(duration, fps.value)
   }
 }
 
@@ -2333,6 +2349,11 @@ watch(currentPreview, (newPreview, oldPreview) => {
   currentFrame.value = 0
   currentTimeRaw.value = 0
   currentTime.value = formatTime(0, fps.value)
+  // A sound not ready yet loads nothing that would reset its duration, and a
+  // reload of the same preview keeps its sound loaded.
+  if (isSound.value && newPreview?.id !== oldPreview?.id) {
+    maxDuration.value = '00:00:00:00'
+  }
   if (isMovie.value) {
     configureVideo()
     pause()

@@ -37,7 +37,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['play-ended'])
+const emit = defineEmits(['duration-changed', 'play-ended', 'time-update'])
 
 // A template ref, not a global '#waveform' id: PreviewPlayer mounts a
 // main and a comparison PreviewViewer, each with its own SoundViewer, so
@@ -62,6 +62,10 @@ const pause = () => {
   wavesurfer?.pause()
 }
 
+const setCurrentTime = time => {
+  wavesurfer?.setTime(time)
+}
+
 // destroy() aborts the in-flight fetch on teardown, rejecting load() with an
 // expected AbortError; ignore it and surface only real load failures.
 const onLoadError = err => {
@@ -82,8 +86,11 @@ const loadSound = () => {
       progressColor: '#008732',
       height: props.defaultHeight
     })
-    wavesurfer.on('ready', () => {
+    wavesurfer.on('ready', duration => {
       isLoading.value = false
+      emit('duration-changed', duration)
+      // A seek while the sound decoded was told as its start.
+      emit('time-update', wavesurfer.getCurrentTime())
       if (isPlayPending) {
         isPlayPending = false
         play()
@@ -98,8 +105,15 @@ const loadSound = () => {
     wavesurfer.on('finish', () => {
       emit('play-ended')
     })
+    // Sent while playing and on every seek, a click on the waveform included.
+    // A load pauses the sound before, whose time then comes in: a sound that
+    // loads stands at its start.
+    wavesurfer.on('timeupdate', time => {
+      emit('time-update', isLoading.value ? 0 : time)
+    })
   }
   isLoading.value = true
+  emit('duration-changed', 0)
   wavesurfer.load(props.previewUrl).catch(onLoadError)
 }
 
@@ -126,7 +140,7 @@ onBeforeUnmount(() => {
   wavesurfer = null
 })
 
-defineExpose({ play, pause })
+defineExpose({ play, pause, setCurrentTime })
 </script>
 
 <style lang="scss" scoped>

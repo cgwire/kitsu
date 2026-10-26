@@ -318,7 +318,9 @@
           :file-name="currentPreviewFileName"
           :preview-url="currentPreviewDlPath"
           :full-screen="fullScreen"
+          @duration-changed="onSoundDurationChanged"
           @play-ended="onSoundEnded"
+          @time-update="onSoundTimeUpdate"
           v-if="isCurrentPreviewSound && !isLoading"
         />
 
@@ -468,13 +470,7 @@
       :is-full-mode="isFullMode"
       :is-full-screen="fullScreen || isEntitiesHidden"
       :movie-dimensions="movieDimensions"
-      :nb-frames="
-        isCurrentPreviewMovie
-          ? nbFrames
-          : isCurrentPreviewPicture && currentEntity.preview_nb_frames
-            ? currentEntity.preview_nb_frames
-            : Math.round(2 * fps)
-      "
+      :nb-frames="entityProgressNbFrames"
       :handle-in="
         playlist.for_entity === 'shot' && currentPreviewIndex === 0
           ? handleIn
@@ -556,7 +552,7 @@
         :is-playing="isPlaying"
         :is-repeating="isRepeating"
         :is-sound="isCurrentPreviewSound"
-        :max-duration="maxDuration"
+        :max-duration="playbackMaxDuration"
         :nb-frames="nbFrames"
         :phone="isPhone"
         v-model:current-3-d-animation="objectModel.currentAnimation"
@@ -1170,6 +1166,8 @@ let autoHideTimer = null
 const playerTimeouts = new Set()
 let wavesurfer = null
 let waveformLoadTimeout = null
+// Frame clicked on the playlist bar for a sound not decoded yet.
+let pendingSoundFrame = null
 // Annotation painted by the show-annotations-while-playing path; reset
 // wherever the canvas is cleared outside that path.
 let lastShownWhilePlaying = null
@@ -1233,6 +1231,8 @@ const mediaHeight = ref(0)
 const playingEntityIndex = ref(0)
 const playlistDuration = ref(0)
 const playlistProgress = ref(0)
+// Zou keeps no duration for a sound: it comes from the decoded file.
+const soundDuration = ref(0)
 // Frame -> entity lookup for the strip. Non-reactive on purpose: one
 // entry per frame of the whole playlist made Vue proxy tens of
 // thousands of objects; consumers re-render on the shallowRef swap.
@@ -1513,6 +1513,25 @@ const nbFrames = computed(() => {
       : maxDurationRaw.value + change
   return Math.round(duration * fps.value)
 })
+
+const entityProgressNbFrames = computed(() => {
+  if (isCurrentPreviewMovie.value) return nbFrames.value
+  if (isCurrentPreviewSound.value && soundDuration.value) {
+    return Math.round(soundDuration.value * fps.value)
+  }
+  if (isCurrentPreviewPicture.value && currentEntity.value?.preview_nb_frames) {
+    return currentEntity.value.preview_nb_frames
+  }
+  return Math.round(2 * fps.value)
+})
+
+// The duration of a movie stays for the way back to it: the decoder that
+// holds the movie does not send it again.
+const playbackMaxDuration = computed(() =>
+  isCurrentPreviewSound.value
+    ? formatTime(soundDuration.value, fps.value)
+    : maxDuration.value
+)
 
 const frameNumber = computed(() => {
   if (isCurrentPreviewPicture.value) {
@@ -2392,6 +2411,11 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
   clearCanvas()
   framesSeenOfPicture.value = 1
   playingEntityIndex.value = entityIndex
+  // A frame clicked on the playlist bar waits for the sound's duration.
+  pendingSoundFrame =
+    entity && isSoundPreview(entity.preview_file_extension) && frame > 0
+      ? frame
+      : null
   if (entity && isMoviePreview(entity.preview_file_extension)) {
     // The handles otherwise stay those of the previous entity until its
     // metadata loads, and a playing switch seeked on them.
@@ -2653,6 +2677,11 @@ const onScrubEnd = () => {
 }
 
 const onProgressChanged = (frame, updatePlaylistProgress = true) => {
+  // The sound tells its new time back, and onSoundTimeUpdate moves the bars.
+  if (isCurrentPreviewSound.value) {
+    soundPlayer.value?.setCurrentTime(frame * frameDuration.value)
+    return
+  }
   clearCanvas()
   if (isCurrentPreviewPicture.value) {
     framesSeenOfPicture.value = frame + 1
@@ -3044,6 +3073,44 @@ const onSoundEnded = () => {
   if (!isPlaying.value) return
   if (isRepeating.value) playSound()
   else onPlayNextEntity()
+}
+
+// The playlist bar gives a sound the fixed slot of an entity without
+// duration: the sound is spread over it.
+const slotFrameToSoundTime = frame => {
+  const slotFrames = currentEntity.value?.playlist_nb_frames
+  return slotFrames ? (frame / slotFrames) * soundDuration.value : 0
+}
+
+const soundTimeToSlotTime = time => {
+  const slotFrames = currentEntity.value?.playlist_nb_frames || 0
+  return soundDuration.value
+    ? ((time / soundDuration.value) * slotFrames) / fps.value
+    : 0
+}
+
+// A duration of 0 starts each load: the time restarts with the sound.
+const onSoundDurationChanged = duration => {
+  soundDuration.value = duration
+  if (!duration) {
+    currentTimeRaw.value = 0
+    currentTime.value = formatTime(0, fps.value)
+  }
+  if (duration && pendingSoundFrame !== null) {
+    soundPlayer.value?.setCurrentTime(slotFrameToSoundTime(pendingSoundFrame))
+    pendingSoundFrame = null
+  }
+}
+
+const onSoundTimeUpdate = time => {
+  if (!isCurrentPreviewSound.value) return
+  currentTimeRaw.value = time
+  currentTime.value = formatTime(time, fps.value)
+  progress.value?.updateProgressBar(time * fps.value)
+  if (!isFullMode.value && currentEntity.value) {
+    playlistProgress.value =
+      currentEntity.value.start_duration + soundTimeToSlotTime(time)
+  }
 }
 
 const playModel = () => {
@@ -4190,10 +4257,12 @@ const configureFullPlayer = () => {
   fullPlaylistPlayer.value.addEventListener('ended', onFullPlayerEnded)
 }
 
+// A frame clicked on a sound not decoded yet is no frame of another file.
 const onPreviousPreviewClicked = () => {
   const index = currentPreviewIndex.value - 1
   currentPreviewIndex.value =
     index < 0 ? currentEntityPreviewLength.value - 1 : index
+  pendingSoundFrame = null
   updateRoomStatus()
 }
 
@@ -4201,6 +4270,7 @@ const onNextPreviewClicked = () => {
   const index = currentPreviewIndex.value + 1
   currentPreviewIndex.value =
     index > currentEntityPreviewLength.value - 1 ? 0 : index
+  pendingSoundFrame = null
   updateRoomStatus()
 }
 
@@ -4234,6 +4304,13 @@ const onProgressPlaylistChanged = frameNumberValue => {
   } else {
     if (isCurrentPreviewPicture.value) {
       framesSeenOfPicture.value = frame + 1
+    } else if (isCurrentPreviewSound.value) {
+      // A sound still being decoded takes the last frame clicked once decoded.
+      if (soundDuration.value) {
+        soundPlayer.value?.setCurrentTime(slotFrameToSoundTime(frame))
+      } else {
+        pendingSoundFrame = frame
+      }
     } else {
       setCurrentTimeRaw(frame / fps.value)
     }

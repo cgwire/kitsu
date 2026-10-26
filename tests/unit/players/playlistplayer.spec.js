@@ -425,24 +425,27 @@ describe('PlaylistPlayer.vue', () => {
 
     const mountWithSound = async entities => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
-      const playSound = vi.fn()
+      const soundViewer = { play: vi.fn(), setCurrentTime: vi.fn() }
       wrapper = mountPlayer({
         entities,
         stubs: {
           SoundViewer: {
-            ...withMethods(['pause'], { play: playSound }),
+            ...withMethods(['pause'], soundViewer),
             name: 'SoundViewer'
           }
         }
       })
       await flushPromises()
-      return playSound
+      return soundViewer
     }
 
     const playbackBar = () => wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+    const soundViewer = () => wrapper.findComponent({ name: 'SoundViewer' })
+    const entityBar = () => wrapper.findComponent({ ref: 'video-progress' })
+    const playlistBar = () => wrapper.findComponent({ name: 'PlaylistProgress' })
 
     const endSound = async () => {
-      wrapper.findComponent({ name: 'SoundViewer' }).vm.$emit('play-ended')
+      soundViewer().vm.$emit('play-ended')
       await flushPromises()
     }
 
@@ -451,35 +454,33 @@ describe('PlaylistPlayer.vue', () => {
       playbackBar().vm.$emit('play-pause-clicked')
       await flushPromises()
       await endSound()
-      expect(wrapper.findComponent({ name: 'SoundViewer' }).exists()).toBe(false)
+      expect(soundViewer().exists()).toBe(false)
       expect(playbackBar().props('isPlaying')).toBe(true)
     })
 
     it('replays a sound at its end with repeat on', async () => {
-      const playSound = await mountWithSound([sound, picture])
+      const { play } = await mountWithSound([sound, picture])
       playbackBar().vm.$emit('repeat-clicked')
       playbackBar().vm.$emit('play-pause-clicked')
       await flushPromises()
       await endSound()
-      expect(playSound).toHaveBeenCalledTimes(2)
+      expect(play).toHaveBeenCalledTimes(2)
       expect(playbackBar().props('isPlaying')).toBe(true)
     })
 
     // A build holds the movies only, and plays its own sound.
     it('starts no sound under the movie of a build', async () => {
-      const playSound = await mountWithSound([picture, sound])
+      const { play } = await mountWithSound([picture, sound])
       wrapper.vm.isFullMode = true
       await flushPromises()
       wrapper.vm.isPlaying = true
-      wrapper
-        .findComponent({ name: 'PlaylistProgress' })
-        .vm.$emit('progress-playlist-changed', 75)
+      playlistBar().vm.$emit('progress-playlist-changed', 75)
       await flushPromises()
-      expect(playSound).not.toHaveBeenCalled()
+      expect(play).not.toHaveBeenCalled()
     })
 
     it('starts the sound that playback reaches', async () => {
-      const playSound = await mountWithSound([sound, otherSound])
+      const { play } = await mountWithSound([sound, otherSound])
       playbackBar().vm.$emit('play-pause-clicked')
       await flushPromises()
       wrapper
@@ -489,7 +490,156 @@ describe('PlaylistPlayer.vue', () => {
         )
         .vm.$emit('click')
       await flushPromises()
-      expect(playSound).toHaveBeenCalledTimes(2)
+      expect(play).toHaveBeenCalledTimes(2)
+    })
+
+    // Zou keeps no duration for a sound: the entity bar takes the decoded
+    // one, and the playlist bar spreads the sound over the slot it has.
+    it('seeks the sound from the entity bar', async () => {
+      const { setCurrentTime } = await mountWithSound([sound, picture])
+      const setCurrentFrame = vi.spyOn(
+        wrapper.findComponent({ ref: 'raw-player' }).vm,
+        'setCurrentFrame'
+      )
+      soundViewer().vm.$emit('duration-changed', 3)
+      await flushPromises()
+      expect(entityBar().attributes('nb-frames')).toBe('75')
+
+      entityBar().vm.$emit('progress-changed', 37)
+      expect(setCurrentTime).toHaveBeenCalledTimes(1)
+      expect(setCurrentTime.mock.calls[0][0]).toBeCloseTo(1.48)
+      expect(setCurrentFrame).not.toHaveBeenCalled()
+    })
+
+    it('moves both bars with the sound', async () => {
+      await mountWithSound([sound, picture])
+      const updateProgressBar = vi.spyOn(entityBar().vm, 'updateProgressBar')
+      soundViewer().vm.$emit('duration-changed', 3)
+      soundViewer().vm.$emit('time-update', 1.5)
+      await flushPromises()
+      expect(updateProgressBar).toHaveBeenCalledWith(37.5)
+      // Half of the sound, half of its 2 s slot, which starts at frame 1.
+      expect(playlistBar().props('playlistProgress')).toBeCloseTo(1.04)
+    })
+
+    it('seeks the sound from its slot of the playlist bar', async () => {
+      const { setCurrentTime } = await mountWithSound([sound, picture])
+      soundViewer().vm.$emit('duration-changed', 3)
+      await flushPromises()
+      playlistBar().vm.$emit('progress-playlist-changed', 25)
+      await flushPromises()
+      expect(setCurrentTime).toHaveBeenCalledTimes(1)
+      expect(setCurrentTime.mock.calls[0][0]).toBeCloseTo(1.5)
+    })
+
+    it('seeks a sound reached from the playlist bar once decoded', async () => {
+      const { setCurrentTime } = await mountWithSound([picture, sound])
+      playlistBar().vm.$emit('progress-playlist-changed', 75)
+      await flushPromises()
+      expect(setCurrentTime).not.toHaveBeenCalled()
+
+      soundViewer().vm.$emit('duration-changed', 3)
+      expect(setCurrentTime).toHaveBeenCalledTimes(1)
+      expect(setCurrentTime.mock.calls[0][0]).toBeCloseTo(1.5)
+    })
+
+    it('seeks a sound being decoded to the last frame clicked', async () => {
+      const { setCurrentTime } = await mountWithSound([picture, sound])
+      playlistBar().vm.$emit('progress-playlist-changed', 75)
+      await flushPromises()
+      playlistBar().vm.$emit('progress-playlist-changed', 90)
+      await flushPromises()
+      expect(setCurrentTime).not.toHaveBeenCalled()
+
+      soundViewer().vm.$emit('duration-changed', 3)
+      expect(setCurrentTime).toHaveBeenCalledTimes(1)
+      expect(setCurrentTime.mock.calls[0][0]).toBeCloseTo(2.4)
+    })
+
+    describe('frame waiting for a sound', () => {
+      const twoFiles = {
+        ...sound,
+        preview_file_previews: [{ id: 'preview-1b', extension: 'wav' }]
+      }
+
+      // Next goes through the files of a revision first.
+      it('is dropped on a move to another file', async () => {
+        const { setCurrentTime } = await mountWithSound([picture, twoFiles])
+        playlistBar().vm.$emit('progress-playlist-changed', 75)
+        await flushPromises()
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(
+            button => button.attributes('title') === 'playlists.actions.next_shot'
+          )
+          .vm.$emit('click')
+        await flushPromises()
+        expect(wrapper.vm.currentPreviewIndex).toBe(1)
+
+        soundViewer().vm.$emit('duration-changed', 3)
+        expect(setCurrentTime).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('time', () => {
+      const movie = {
+        id: 'shot-4',
+        preview_file_id: 'preview-4',
+        preview_file_extension: 'mp4'
+      }
+      const rawPlayer = () => wrapper.findComponent({ ref: 'raw-player' })
+      const goTo = async direction => {
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(
+            button =>
+              button.attributes('title') === `playlists.actions.${direction}_shot`
+          )
+          .vm.$emit('click')
+        await flushPromises()
+      }
+      // A movie two seconds in, four seconds long.
+      const mountOnMovie = async () => {
+        await mountWithSound([movie, sound])
+        rawPlayer().vm.$emit('max-duration-update', 4)
+        rawPlayer().vm.$emit('frame-update', 50)
+        await flushPromises()
+        expect(playbackBar().props('currentTime')).toBe('00:00:02:00')
+        expect(playbackBar().props('maxDuration')).toBe('00:00:04:00')
+      }
+
+      it('shows the time and the decoded duration of a sound', async () => {
+        await mountWithSound([sound, picture])
+        soundViewer().vm.$emit('duration-changed', 3)
+        soundViewer().vm.$emit('time-update', 1.48)
+        await flushPromises()
+        expect(playbackBar().props('currentTime')).toBe('00:00:01:12')
+        expect(playbackBar().props('maxDuration')).toBe('00:00:03:00')
+      })
+
+      // The sound viewer sends a duration of 0 as it starts each load.
+      it('restarts the time on a move from a movie to a sound', async () => {
+        await mountOnMovie()
+        await goTo('next')
+        soundViewer().vm.$emit('duration-changed', 0)
+        await flushPromises()
+        expect(playbackBar().props('currentTime')).toBe('00:00:00:00')
+        expect(playbackBar().props('maxDuration')).toBe('00:00:00:00')
+
+        soundViewer().vm.$emit('duration-changed', 3)
+        await flushPromises()
+        expect(playbackBar().props('maxDuration')).toBe('00:00:03:00')
+      })
+
+      // The decoder that holds the movie already knows its duration: it
+      // sends it no more on the way back.
+      it('gives a movie its own duration back after a sound', async () => {
+        await mountOnMovie()
+        await goTo('next')
+        soundViewer().vm.$emit('duration-changed', 3)
+        await goTo('previous')
+        expect(playbackBar().props('maxDuration')).toBe('00:00:04:00')
+      })
     })
 
     // The waveform follows the width the comments panel leaves on its own.

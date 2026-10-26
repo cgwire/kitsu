@@ -52,7 +52,9 @@
           <sound-viewer
             ref="soundPlayer"
             :preview-url="downloadUrl"
+            @duration-changed="onSoundDurationChanged"
             @play-ended="onPlayNext"
+            @time-update="onSoundTimeUpdate"
             v-if="isSound && !loading"
           />
 
@@ -315,6 +317,9 @@ const playingEntityIndex = ref(0)
 const playlistedEntities = ref(null)
 const rawPlayer = ref(null)
 const soundPlayer = ref(null)
+// Zou keeps no duration for a sound: it comes from the decoded file.
+const soundDuration = ref(0)
+const soundTime = ref(0)
 const videoProgressRef = ref(null)
 const volume = ref(100)
 
@@ -324,6 +329,9 @@ let firstEntityLoaded = false
 
 // requestAnimationFrame id for the picture playback timer (null when idle).
 let picturePlayFrame = null
+
+// Frame of its slot clicked on the playlist bar for a sound not decoded yet.
+let pendingSoundFrame = null
 
 // Computed
 
@@ -447,6 +455,7 @@ const overlayDimensions = computed(() => {
 })
 
 const nbFrames = computed(() => {
+  if (isSound.value) return Math.round(soundDuration.value * fps.value)
   // The preview duration first, like the studio player: the decoder
   // duration floored to the frame plus the Chromium offset read one frame
   // more on the same clip.
@@ -467,15 +476,21 @@ const nbFramesDisplay = computed(() =>
   String(nbFrames.value || 0).padStart(3, '0')
 )
 const currentTimeFormatted = computed(() =>
-  formatTime(currentFrameNumber.value * frameDuration.value, fps.value)
+  formatTime(
+    isSound.value
+      ? soundTime.value
+      : currentFrameNumber.value * frameDuration.value,
+    fps.value
+  )
 )
 const maxDurationFormatted = computed(() =>
-  formatTime(maxDuration.value, fps.value)
+  formatTime(isSound.value ? soundDuration.value : maxDuration.value, fps.value)
 )
 
 const playlistFrameData = computed(() => {
   const position = {}
   const startDurationByIndex = []
+  const nbFramesByIndex = []
   const entitiesWithStart = []
   let duration = 0
   let currentFrame = 0
@@ -489,6 +504,7 @@ const playlistFrameData = computed(() => {
       defaultPictureFrames
     const startDuration = (currentFrame + 1) / fpsValue
     startDurationByIndex[index] = startDuration
+    nbFramesByIndex[index] = entityNbFrames
     entitiesWithStart.push({ ...entity, start_duration: startDuration })
     for (let i = 0; i < entityNbFrames; i++) {
       position[currentFrame + i] = {
@@ -508,6 +524,7 @@ const playlistFrameData = computed(() => {
     playlistShotPosition: position,
     playlistDuration: duration,
     startDurationByIndex,
+    nbFramesByIndex,
     entitiesWithStart
   }
 })
@@ -614,9 +631,20 @@ const selectEntity = index => {
   // currentPlaylistProgress. With the old index still in place the
   // cursor was being snapped to the start of the previously selected
   // shot.
+  const previousUrl = downloadUrl.value
   playingEntityIndex.value = index
   currentPreviewIndex.value = 0
   currentFrameNumber.value = 0
+  // The viewer keeps the previous sound until it reloads on the next tick.
+  // It does not reload the same file, which starts again instead, as a movie
+  // does.
+  pendingSoundFrame = null
+  if (downloadUrl.value !== previousUrl) {
+    soundDuration.value = 0
+    soundTime.value = 0
+  } else if (isSound.value) {
+    soundPlayer.value?.setCurrentTime(0)
+  }
   // Snap the global playlist marker to the new entity right away so the
   // cursor jumps on the first click without waiting for the new video
   // to load and emit its first frame-update.
@@ -634,11 +662,13 @@ const nextEntity = () => selectEntity(playingEntityIndex.value + 1)
 
 // Functions — sub-previews & zoom
 
+// A frame clicked on a sound not decoded yet is no frame of another file.
 const onPreviousPreviewClicked = () => {
   const length = currentEntityPreviewLength.value
   if (length <= 1) return
   const index = currentPreviewIndex.value - 1
   currentPreviewIndex.value = index < 0 ? length - 1 : index
+  pendingSoundFrame = null
 }
 
 const onNextPreviewClicked = () => {
@@ -646,6 +676,7 @@ const onNextPreviewClicked = () => {
   if (length <= 1) return
   const index = currentPreviewIndex.value + 1
   currentPreviewIndex.value = index > length - 1 ? 0 : index
+  pendingSoundFrame = null
 }
 
 // The movie viewer creates its panzoom instance paused (panzoomActive
@@ -729,6 +760,11 @@ const onFrameUpdate = rawFrameNumber => {
 }
 
 const onProgressChanged = frameNumber => {
+  // The sound tells its new time back, and onSoundTimeUpdate moves the bars.
+  if (isSound.value) {
+    soundPlayer.value?.setCurrentTime(frameNumber / fps.value)
+    return
+  }
   if (!isMovie.value) return
   rawPlayer.value?.setCurrentFrame(frameNumber)
   onFrameUpdate(frameNumber)
@@ -741,12 +777,58 @@ const onProgressPlaylistChanged = frameNumber => {
   // start carries the strip's +1 slot convention ((firstGlobalFrame + 1)
   // / fps): compensate like the studio player, or every strip click
   // seeks one frame early.
-  const localFrame = Math.round(frameNumber - start * fps.value) + 1
+  const localFrame = Math.max(
+    Math.round(frameNumber - start * fps.value) + 1,
+    0
+  )
   if (index !== playingEntityIndex.value) {
     selectEntity(index)
-    nextTick(() => rawPlayer.value?.setCurrentFrame(Math.max(localFrame, 0)))
+    if (isSound.value) seekSoundToSlotFrame(localFrame)
+    else nextTick(() => rawPlayer.value?.setCurrentFrame(localFrame))
+  } else if (isSound.value) {
+    seekSoundToSlotFrame(localFrame)
   } else {
-    rawPlayer.value?.setCurrentFrame(Math.max(localFrame, 0))
+    rawPlayer.value?.setCurrentFrame(localFrame)
+  }
+}
+
+// The playlist bar gives a sound the fixed slot of an entity without
+// duration: the sound is spread over it.
+const currentSlotFrames = () =>
+  playlistFrameData.value.nbFramesByIndex[playingEntityIndex.value] || 0
+
+const seekSoundToSlotFrame = frame => {
+  const slotFrames = currentSlotFrames()
+  if (soundDuration.value && slotFrames) {
+    soundPlayer.value?.setCurrentTime(
+      (frame / slotFrames) * soundDuration.value
+    )
+  } else {
+    pendingSoundFrame = frame
+  }
+}
+
+const onSoundDurationChanged = duration => {
+  soundDuration.value = duration
+  // 0 on each load, a sub-preview included.
+  if (!duration) soundTime.value = 0
+  if (duration && pendingSoundFrame !== null) {
+    const frame = pendingSoundFrame
+    pendingSoundFrame = null
+    seekSoundToSlotFrame(frame)
+  }
+}
+
+const onSoundTimeUpdate = time => {
+  if (!isSound.value) return
+  soundTime.value = time
+  videoProgressRef.value?.updateProgressBar(time * fps.value)
+  const startDuration =
+    playlistFrameData.value.startDurationByIndex[playingEntityIndex.value]
+  if (typeof startDuration === 'number' && soundDuration.value) {
+    currentPlaylistProgress.value =
+      startDuration +
+      ((time / soundDuration.value) * currentSlotFrames()) / fps.value
   }
 }
 

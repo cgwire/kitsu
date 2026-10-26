@@ -8,12 +8,14 @@ const waveSurfer = vi.hoisted(() => ({
     return {
       handlers,
       destroy: vi.fn(),
+      getCurrentTime: vi.fn(() => 0),
       load: vi.fn(() => Promise.resolve()),
       on: vi.fn((event, handler) => {
         handlers[event] = handler
       }),
       pause: vi.fn(),
-      play: vi.fn(() => Promise.resolve())
+      play: vi.fn(() => Promise.resolve()),
+      setTime: vi.fn()
     }
   })
 }))
@@ -145,6 +147,46 @@ describe('SoundViewer.vue', () => {
     mountViewer('/sound-1.wav')
     await wrapper.setProps({ previewUrl: '' })
     expect(lastWaveform().pause).toHaveBeenCalled()
+  })
+
+  it('seeks the sound', () => {
+    mountViewer('/sound-1.wav')
+    wrapper.vm.setCurrentTime(1.48)
+    expect(lastWaveform().setTime).toHaveBeenCalledWith(1.48)
+  })
+
+  // The progress bars of a playlist follow the sound over its decoded
+  // length: Zou keeps no duration for a sound.
+  it('tells its time and its decoded duration', () => {
+    mountViewer('/sound-1.wav')
+    lastWaveform().handlers.ready(3)
+    lastWaveform().handlers.timeupdate(1.2)
+    expect(wrapper.emitted('duration-changed')).toEqual([[0], [3]])
+    expect(wrapper.emitted('time-update')).toEqual([[0], [1.2]])
+  })
+
+  // A load pauses the sound before, whose time then comes in.
+  it('tells a sound that loads at its start', async () => {
+    mountViewer('/sound-1.wav')
+    const waveform = lastWaveform()
+    waveform.handlers.ready(3)
+    await wrapper.setProps({ previewUrl: '/sound-2.wav' })
+    waveform.handlers.timeupdate(2.4)
+    expect(wrapper.emitted('time-update').at(-1)).toEqual([0])
+    waveform.handlers.ready(5)
+    waveform.handlers.timeupdate(1.2)
+    expect(wrapper.emitted('time-update').at(-1)).toEqual([1.2])
+  })
+
+  // A seek while the sound decodes moves its media element: its time came in
+  // as the start of the sound.
+  it('tells once ready the time a seek gave a sound being decoded', () => {
+    mountViewer('/sound-1.wav')
+    const waveform = lastWaveform()
+    waveform.handlers.timeupdate(1.6)
+    waveform.getCurrentTime.mockReturnValue(1.6)
+    waveform.handlers.ready(5)
+    expect(wrapper.emitted('time-update')).toEqual([[0], [1.6]])
   })
 
   it('tells the end of the sound', () => {

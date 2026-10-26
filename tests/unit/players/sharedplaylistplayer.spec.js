@@ -3,6 +3,7 @@ import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
 import SharedPlaylistButtonBar from '@/components/players/bars/SharedPlaylistButtonBar.vue'
+import SharedPlaylistHeader from '@/components/players/headers/SharedPlaylistHeader.vue'
 import SharedPlaylistPlayer from '@/components/players/players/SharedPlaylistPlayer.vue'
 import SharedCommentsPanel from '@/components/players/sides/SharedCommentsPanel.vue'
 
@@ -35,10 +36,19 @@ const sound = (id, extension) => ({
   preview_file_extension: extension
 })
 
+const picture = {
+  id: 'picture-1',
+  name: 'picture-1',
+  preview_file_id: 'preview-picture-1',
+  preview_file_extension: 'png'
+}
+
 const mountPlayer = ({
   entities = [entity],
   setCurrentFrame = () => {},
-  playSound = () => {}
+  playSound = () => {},
+  setSoundTime = () => {},
+  updateProgressBar = () => {}
 } = {}) => {
   const store = createStore({
     getters: { user: () => ({ id: 'guest-1', is_guest: true }) }
@@ -73,11 +83,16 @@ const mountPlayer = ({
           name: 'SoundViewer',
           template: '<div />',
           props: { previewUrl: String },
-          methods: { pause: () => {}, play: playSound }
+          methods: {
+            pause: () => {},
+            play: playSound,
+            setCurrentTime: setSoundTime
+          }
         },
         VideoProgress: {
+          name: 'VideoProgress',
           template: '<div />',
-          methods: { updateProgressBar: () => {} }
+          methods: { updateProgressBar }
         }
       }
     }
@@ -160,6 +175,177 @@ describe('players/SharedPlaylistPlayer', () => {
         wrapper.findComponent({ name: 'SoundViewer' }).props('previewUrl')
       ).toContain('preview-sound-1')
       expect(playSound).toHaveBeenCalledTimes(2)
+      wrapper.unmount()
+    })
+  })
+
+  // Zou keeps no duration for a sound: the entity bar takes the decoded one,
+  // and the playlist bar spreads the sound over the 2 s slot it gives it.
+  describe('sound progress', () => {
+    const soundViewer = wrapper => wrapper.findComponent({ name: 'SoundViewer' })
+    const entityBar = wrapper => wrapper.findComponent({ name: 'VideoProgress' })
+    const playlistBar = wrapper =>
+      wrapper.findComponent({ name: 'PlaylistProgress' })
+
+    const decodeSound = async (wrapper, duration) => {
+      soundViewer(wrapper).vm.$emit('duration-changed', duration)
+      await nextTick()
+    }
+
+    it('seeks the sound from the entity bar', async () => {
+      const setCurrentFrame = vi.fn()
+      const setSoundTime = vi.fn()
+      const wrapper = mountPlayer({
+        entities: [sound('sound-1', 'mp3'), picture],
+        setCurrentFrame,
+        setSoundTime
+      })
+      await decodeSound(wrapper, 3)
+      expect(entityBar(wrapper).attributes('nb-frames')).toBe('75')
+
+      entityBar(wrapper).vm.$emit('progress-changed', 37)
+      expect(setSoundTime).toHaveBeenCalledTimes(1)
+      expect(setSoundTime.mock.calls[0][0]).toBeCloseTo(1.48)
+      expect(setCurrentFrame).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('moves both bars with the sound', async () => {
+      const updateProgressBar = vi.fn()
+      const wrapper = mountPlayer({
+        entities: [sound('sound-1', 'mp3'), picture],
+        updateProgressBar
+      })
+      await decodeSound(wrapper, 3)
+      soundViewer(wrapper).vm.$emit('time-update', 1.5)
+      await nextTick()
+      expect(updateProgressBar).toHaveBeenLastCalledWith(37.5)
+      // Half of the sound, half of its 2 s slot, which starts at frame 1.
+      expect(playlistBar(wrapper).props('playlistProgress')).toBeCloseTo(1.04)
+      wrapper.unmount()
+    })
+
+    it('seeks the sound from its slot of the playlist bar', async () => {
+      const setCurrentFrame = vi.fn()
+      const setSoundTime = vi.fn()
+      const wrapper = mountPlayer({
+        entities: [sound('sound-1', 'mp3'), picture],
+        setCurrentFrame,
+        setSoundTime
+      })
+      await decodeSound(wrapper, 3)
+      playlistBar(wrapper).vm.$emit('progress-playlist-changed', 25)
+      await nextTick()
+      expect(setSoundTime).toHaveBeenCalledTimes(1)
+      expect(setSoundTime.mock.calls[0][0]).toBeCloseTo(1.5)
+      expect(setCurrentFrame).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('seeks a sound reached from the playlist bar once decoded', async () => {
+      const setCurrentFrame = vi.fn()
+      const setSoundTime = vi.fn()
+      const wrapper = mountPlayer({
+        entities: [entity, sound('sound-1', 'mp3')],
+        setCurrentFrame,
+        setSoundTime
+      })
+      await nextTick()
+      // The movie takes 100 frames, the sound the next 50.
+      playlistBar(wrapper).vm.$emit('progress-playlist-changed', 125)
+      await nextTick()
+      await nextTick()
+      expect(setSoundTime).not.toHaveBeenCalled()
+
+      await decodeSound(wrapper, 3)
+      expect(setSoundTime).toHaveBeenCalledTimes(1)
+      expect(setSoundTime.mock.calls[0][0]).toBeCloseTo(1.5)
+      expect(setCurrentFrame).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    // A frame clicked on a sound not decoded yet is no frame of another file.
+    describe('frame waiting for a sound', () => {
+      const twoFiles = {
+        ...sound('sound-1', 'mp3'),
+        preview_file_previews: [{ id: 'preview-sound-1b', extension: 'wav' }]
+      }
+
+      it('is dropped on a move to another file', async () => {
+        const setSoundTime = vi.fn()
+        const wrapper = mountPlayer({
+          entities: [twoFiles, picture],
+          setSoundTime
+        })
+        await nextTick()
+        playlistBar(wrapper).vm.$emit('progress-playlist-changed', 25)
+        await nextTick()
+        wrapper.findComponent(SharedPlaylistButtonBar).vm.$emit('next-preview')
+        await nextTick()
+
+        await decodeSound(wrapper, 3)
+        expect(setSoundTime).not.toHaveBeenCalled()
+        wrapper.unmount()
+      })
+    })
+
+    it('restarts the sound on screen when its card is clicked', async () => {
+      const setSoundTime = vi.fn()
+      const wrapper = mountPlayer({
+        entities: [sound('sound-1', 'mp3'), picture],
+        setSoundTime
+      })
+      await decodeSound(wrapper, 3)
+      expect(entityBar(wrapper).attributes('nb-frames')).toBe('75')
+
+      // Same entity, same file: the viewer neither reloads nor sends its
+      // duration again.
+      wrapper
+        .findAllComponents({ name: 'PlaylistedEntity' })[0]
+        .vm.$emit('play-click', 0)
+      await nextTick()
+      expect(entityBar(wrapper).attributes('nb-frames')).toBe('75')
+      expect(setSoundTime).toHaveBeenLastCalledWith(0)
+      wrapper.unmount()
+    })
+
+    it('times a sound from 00:00 to its decoded duration', async () => {
+      const wrapper = mountPlayer({ entities: [entity, sound('sound-1', 'mp3')] })
+      const bar = () => wrapper.findComponent(SharedPlaylistButtonBar)
+      const movie = wrapper.findComponent({ name: 'MultiVideoViewer' })
+      movie.vm.$emit('max-duration-update', 4)
+      movie.vm.$emit('frame-update', 50)
+      await nextTick()
+      expect(bar().props('currentTimeFormatted')).toBe('00:00:02:00')
+      expect(bar().props('maxDurationFormatted')).toBe('00:00:04:00')
+
+      wrapper.findComponent(SharedPlaylistHeader).vm.$emit('next-entity')
+      await nextTick()
+      expect(bar().props('currentTimeFormatted')).toBe('00:00:00:00')
+      expect(bar().props('maxDurationFormatted')).toBe('00:00:00:00')
+
+      await decodeSound(wrapper, 3)
+      soundViewer(wrapper).vm.$emit('time-update', 1.2)
+      await nextTick()
+      expect(bar().props('currentTimeFormatted')).toBe('00:00:01:05')
+      expect(bar().props('maxDurationFormatted')).toBe('00:00:03:00')
+      wrapper.unmount()
+    })
+
+    it('still seeks a movie from both bars', async () => {
+      const setCurrentFrame = vi.fn()
+      const setSoundTime = vi.fn()
+      const wrapper = mountPlayer({
+        entities: [entity, sound('sound-1', 'mp3')],
+        setCurrentFrame,
+        setSoundTime
+      })
+      await nextTick()
+      entityBar(wrapper).vm.$emit('progress-changed', 40)
+      playlistBar(wrapper).vm.$emit('progress-playlist-changed', 60)
+      await nextTick()
+      expect(setCurrentFrame.mock.calls).toEqual([[40], [60]])
+      expect(setSoundTime).not.toHaveBeenCalled()
       wrapper.unmount()
     })
   })

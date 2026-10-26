@@ -45,6 +45,50 @@ describe('players/PlayerPlaybackBar', () => {
     })
   })
 
+  // A sound has a time but no frames, and none of the movie controls.
+  describe('sound', () => {
+    const mountSound = (props = {}) =>
+      mountBar({
+        currentTime: '00:00:01:12',
+        isMovie: false,
+        isSound: true,
+        maxDuration: '00:00:03:00',
+        ...props
+      })
+
+    it('shows the current time of a sound without a frame number', () => {
+      const wrapper = mountSound()
+      expect(wrapper.get('.current-time').text()).toBe('00:00:01:12')
+      expect(wrapper.text()).not.toContain('00:00:03:00')
+      expect(wrapper.text()).not.toContain('(005')
+      expect(wrapper.findComponent({ name: 'SpeedButton' }).exists()).toBe(false)
+      expect(wrapper.findComponent({ name: 'ButtonSound' }).exists()).toBe(false)
+    })
+
+    it('adds the duration of a sound in full screen', () => {
+      const wrapper = mountSound({ fullScreen: true })
+      expect(wrapper.text()).toContain('00:00:01:12 / 00:00:03:00')
+      expect(wrapper.text()).not.toContain('(005')
+    })
+
+    // A narrow preview player hides the time of a movie, which keeps its
+    // frame number: a sound would show no position at all.
+    it('keeps the time of a sound in a narrow player', () => {
+      expect(mountSound().get('.current-time').classes()).not.toContain(
+        'narrow-hidden'
+      )
+      expect(mountBar().get('.current-time').classes()).toContain(
+        'narrow-hidden'
+      )
+    })
+
+    it('shows no time in the compact bar of a full playlist', () => {
+      expect(mountSound({ compact: true }).find('.current-time').exists()).toBe(
+        false
+      )
+    })
+  })
+
   describe('phone mode', () => {
     it('keeps only play and the frame number on a phone', () => {
       const wrapper = mountBar({ phone: true })

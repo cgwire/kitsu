@@ -90,7 +90,9 @@
       class="sound-viewer"
       :file-name="fileTitle"
       :preview-url="isSound ? originalPath : ''"
+      @duration-changed="duration => $emit('sound-duration-changed', duration)"
       @play-ended="$emit('play-ended')"
+      @time-update="time => $emit('sound-time-update', time)"
       v-show="isSound"
     />
 
@@ -232,6 +234,8 @@ const emit = defineEmits([
   'picture-loaded',
   'play-ended',
   'size-changed',
+  'sound-duration-changed',
+  'sound-time-update',
   'time-update',
   'video-end',
   'video-loaded'
