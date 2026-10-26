@@ -94,4 +94,13 @@ describe('PreviewViewer', () => {
       expect(wrapper.element.style.height).toBe(height)
     }
   )
+
+  // The preview player resets its play button.
+  it('ends the play of a sound that cannot be read', () => {
+    const wrapper = shallowMount(PreviewViewer, {
+      props: { preview: { id: 'preview-1', extension: 'mp3', status: 'ready' } }
+    })
+    wrapper.findComponent({ name: 'SoundViewer' }).vm.$emit('play-failed')
+    expect(wrapper.emitted('play-ended')).toHaveLength(1)
+  })
 })

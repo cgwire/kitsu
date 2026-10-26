@@ -12,6 +12,9 @@
     <div class="file-name" v-show="!isLoading">
       {{ fileName }}
     </div>
+    <p class="broken" v-if="isBroken">
+      {{ $t('preview.broken') }}
+    </p>
     <div ref="waveform" class="waveform"></div>
   </div>
 </template>
@@ -37,28 +40,41 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['duration-changed', 'play-ended', 'time-update'])
+const emit = defineEmits([
+  'duration-changed',
+  'play-ended',
+  'play-failed',
+  'time-update'
+])
 
 // A template ref, not a global '#waveform' id: PreviewPlayer mounts a
 // main and a comparison PreviewViewer, each with its own SoundViewer, so
 // an id selector would bind every WaveSurfer instance to the first match.
 const waveform = ref(null)
 const isLoading = ref(false)
+const isBroken = ref(false)
 let wavesurfer = null
 let isPlayPending = false
+// The media element of a sound that fails while it plays may be paused
+// already when its error comes: the play asked for is kept here.
+let isPlayRequested = false
 
 // load() gives the media element its file only once fetched: a play()
 // before that would start nothing, so it waits for the ready event.
 const play = () => {
-  if (isLoading.value) {
+  if (isBroken.value) {
+    emit('play-failed')
+  } else if (isLoading.value) {
     isPlayPending = true
   } else {
+    isPlayRequested = true
     wavesurfer?.play()?.catch(() => {})
   }
 }
 
 const pause = () => {
   isPlayPending = false
+  isPlayRequested = false
   wavesurfer?.pause()
 }
 
@@ -97,12 +113,24 @@ const loadSound = () => {
       }
     })
     // A sound the browser cannot decode fails on the media element, and
-    // load() never settles.
-    wavesurfer.on('error', () => {
+    // load() never settles. Web Audio can fail to decode a sound the media
+    // element reads: it plays without its waveform.
+    wavesurfer.on('error', err => {
       isLoading.value = false
-      isPlayPending = false
+      if (err?.name === 'EncodingError') {
+        emit('duration-changed', wavesurfer.getDuration())
+        emit('time-update', wavesurfer.getCurrentTime())
+      } else {
+        isBroken.value = true
+      }
+      // A sound can also fail past its ready event, while it plays.
+      if (isPlayPending || (isPlayRequested && isBroken.value)) {
+        isPlayPending = false
+        play()
+      }
     })
     wavesurfer.on('finish', () => {
+      isPlayRequested = false
       emit('play-ended')
     })
     // Sent while playing and on every seek, a click on the waveform included.
@@ -113,6 +141,8 @@ const loadSound = () => {
     })
   }
   isLoading.value = true
+  isBroken.value = false
+  isPlayRequested = false
   emit('duration-changed', 0)
   wavesurfer.load(props.previewUrl).catch(onLoadError)
 }
@@ -154,6 +184,15 @@ defineExpose({ play, pause, setCurrentTime })
   left: 4px;
   bottom: 4px;
   color: $white;
+}
+
+.broken {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 0.75em);
+  color: $white;
+  text-align: center;
 }
 
 .loading {

@@ -54,6 +54,7 @@
             :preview-url="downloadUrl"
             @duration-changed="onSoundDurationChanged"
             @play-ended="onPlayNext"
+            @play-failed="onSoundPlayFailed"
             @time-update="onSoundTimeUpdate"
             v-if="isSound && !loading"
           />
@@ -576,7 +577,7 @@ const playPicture = () => {
   if (startFrame >= total - 1) startFrame = 0
   const baseline = performance.now() - (startFrame / fps.value) * 1000
   const step = () => {
-    if (!isPlaying.value || !isPicture.value) return
+    if (!isPlaying.value || !(isPicture.value || isSound.value)) return
     const frame = Math.floor(
       ((performance.now() - baseline) / 1000) * fps.value
     )
@@ -611,6 +612,7 @@ const advancePlaylist = () => {
   if (currentPreviewIndex.value < previewCount - 1) {
     currentPreviewIndex.value += 1
     currentFrameNumber.value = 0
+    pendingSoundFrame = null
     nextTick(playCurrentPreview)
     return
   }
@@ -847,6 +849,12 @@ const onPlayNext = () => {
   // Step through sub-previews first, then the next entity (handles images
   // too, which MultiVideoViewer's own playNext would skip).
   advancePlaylist()
+}
+
+// A sound that cannot be read keeps its slot like a picture, then the
+// playlist moves on.
+const onSoundPlayFailed = () => {
+  if (isPlaying.value) playPicture()
 }
 
 const onVideoLoaded = () => {

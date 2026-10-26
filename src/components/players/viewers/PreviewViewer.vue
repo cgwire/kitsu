@@ -92,6 +92,7 @@
       :preview-url="isSound ? originalPath : ''"
       @duration-changed="duration => $emit('sound-duration-changed', duration)"
       @play-ended="$emit('play-ended')"
+      @play-failed="$emit('play-ended')"
       @time-update="time => $emit('sound-time-update', time)"
       v-show="isSound"
     />

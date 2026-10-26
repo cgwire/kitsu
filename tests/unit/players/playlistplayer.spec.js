@@ -424,7 +424,7 @@ describe('PlaylistPlayer.vue', () => {
     })
 
     const mountWithSound = async entities => {
-      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
       const soundViewer = { play: vi.fn(), setCurrentTime: vi.fn() }
       wrapper = mountPlayer({
         entities,
@@ -465,6 +465,19 @@ describe('PlaylistPlayer.vue', () => {
       await flushPromises()
       await endSound()
       expect(play).toHaveBeenCalledTimes(2)
+      expect(playbackBar().props('isPlaying')).toBe(true)
+    })
+
+    // Like an entity without preview, it keeps its slot, 2 s here.
+    it('moves on from a sound that cannot be read', async () => {
+      await mountWithSound([sound, picture])
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      soundViewer().vm.$emit('play-failed')
+      await vi.advanceTimersByTimeAsync(1900)
+      expect(soundViewer().exists()).toBe(true)
+      await vi.advanceTimersByTimeAsync(200)
+      expect(soundViewer().exists()).toBe(false)
       expect(playbackBar().props('isPlaying')).toBe(true)
     })
 
@@ -574,6 +587,21 @@ describe('PlaylistPlayer.vue', () => {
           )
           .vm.$emit('click')
         await flushPromises()
+        expect(wrapper.vm.currentPreviewIndex).toBe(1)
+
+        soundViewer().vm.$emit('duration-changed', 3)
+        expect(setCurrentTime).not.toHaveBeenCalled()
+      })
+
+      // The hold of a sound that cannot be read moves on to the next file.
+      it('is dropped when playback moves on to another file', async () => {
+        const { setCurrentTime } = await mountWithSound([picture, twoFiles])
+        playlistBar().vm.$emit('progress-playlist-changed', 75)
+        await flushPromises()
+        playbackBar().vm.$emit('play-pause-clicked')
+        await flushPromises()
+        soundViewer().vm.$emit('play-failed')
+        await vi.advanceTimersByTimeAsync(2100)
         expect(wrapper.vm.currentPreviewIndex).toBe(1)
 
         soundViewer().vm.$emit('duration-changed', 3)

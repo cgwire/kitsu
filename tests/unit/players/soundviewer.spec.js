@@ -9,6 +9,7 @@ const waveSurfer = vi.hoisted(() => ({
       handlers,
       destroy: vi.fn(),
       getCurrentTime: vi.fn(() => 0),
+      getDuration: vi.fn(() => 0),
       load: vi.fn(() => Promise.resolve()),
       on: vi.fn((event, handler) => {
         handlers[event] = handler
@@ -124,6 +125,95 @@ describe('SoundViewer.vue', () => {
     await wrapper.setProps({ previewUrl: '/sound-2.wav' })
     lastWaveform().handlers.ready()
     expect(lastWaveform().play).not.toHaveBeenCalled()
+  })
+
+  // A sound can also fail past its ready event, while it plays: the players
+  // move on as for a sound that cannot be read. Its media element may be
+  // paused already when the error comes.
+  it('tells that the play failed on an error while it plays', async () => {
+    mountViewer('/sound-1.wav')
+    await flushPromises()
+    const waveform = lastWaveform()
+    waveform.handlers.ready()
+    wrapper.vm.play()
+    waveform.handlers.error(new Error('Media error 3'))
+    expect(wrapper.emitted('play-failed')).toHaveLength(1)
+  })
+
+  it('tells no failed play on an error once paused', async () => {
+    mountViewer('/sound-1.wav')
+    await flushPromises()
+    const waveform = lastWaveform()
+    waveform.handlers.ready()
+    wrapper.vm.play()
+    wrapper.vm.pause()
+    waveform.handlers.error(new Error('Media error 3'))
+    expect(wrapper.emitted('play-failed')).toBeUndefined()
+  })
+
+  it('tells no failed play on an error past the end', async () => {
+    mountViewer('/sound-1.wav')
+    await flushPromises()
+    const waveform = lastWaveform()
+    waveform.handlers.ready()
+    wrapper.vm.play()
+    waveform.handlers.finish()
+    waveform.handlers.error(new Error('Media error 3'))
+    expect(wrapper.emitted('play-failed')).toBeUndefined()
+  })
+
+  // Web Audio can fail to decode a sound the media element reads: the
+  // sound plays without its waveform.
+  it('plays a sound whose waveform cannot be decoded', async () => {
+    mountViewer('/no-waveform.mp3')
+    await flushPromises()
+    wrapper.vm.play()
+    const waveform = lastWaveform()
+    waveform.getDuration.mockReturnValue(3)
+    waveform.handlers.error(
+      new DOMException('Unable to decode audio data', 'EncodingError')
+    )
+    expect(waveform.play).toHaveBeenCalledTimes(1)
+    expect(wrapper.emitted('duration-changed')).toEqual([[0], [3]])
+  })
+
+  it('tells the time a seek gave a sound whose waveform cannot be decoded', () => {
+    mountViewer('/no-waveform.mp3')
+    const waveform = lastWaveform()
+    waveform.handlers.timeupdate(1.6)
+    waveform.getCurrentTime.mockReturnValue(1.6)
+    waveform.handlers.error(
+      new DOMException('Unable to decode audio data', 'EncodingError')
+    )
+    expect(wrapper.emitted('time-update')).toEqual([[0], [1.6]])
+  })
+
+  it('shows a sound that cannot be read as broken', async () => {
+    mountViewer('/broken.mp3')
+    await flushPromises()
+    lastWaveform().handlers.error(new Error('Media error 4'))
+    await flushPromises()
+    expect(wrapper.find('.broken').text()).toBe('preview.broken')
+
+    await wrapper.setProps({ previewUrl: '/sound-2.wav' })
+    expect(wrapper.find('.broken').exists()).toBe(false)
+  })
+
+  // The parent moves on: no end would ever come.
+  it('tells a play it cannot start', async () => {
+    mountViewer('/broken.mp3')
+    await flushPromises()
+    wrapper.vm.play()
+    lastWaveform().handlers.error(new Error('Media error 4'))
+    expect(wrapper.emitted('play-failed')).toHaveLength(1)
+    wrapper.vm.play()
+    expect(wrapper.emitted('play-failed')).toHaveLength(2)
+    expect(lastWaveform().play).not.toHaveBeenCalled()
+
+    await wrapper.setProps({ previewUrl: '/sound-2.wav' })
+    lastWaveform().handlers.ready()
+    wrapper.vm.play()
+    expect(lastWaveform().play).toHaveBeenCalledTimes(1)
   })
 
   it('plays a loaded sound at once', async () => {

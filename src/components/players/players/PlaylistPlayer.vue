@@ -320,6 +320,7 @@
           :full-screen="fullScreen"
           @duration-changed="onSoundDurationChanged"
           @play-ended="onSoundEnded"
+          @play-failed="onSoundPlayFailed"
           @time-update="onSoundTimeUpdate"
           v-if="isCurrentPreviewSound && !isLoading"
         />
@@ -3075,6 +3076,12 @@ const onSoundEnded = () => {
   else onPlayNextEntity()
 }
 
+// A sound that cannot be read keeps its slot like an entity without
+// preview, then the playlist moves on.
+const onSoundPlayFailed = () => {
+  if (isPlaying.value) playPicture()
+}
+
 // The playlist bar gives a sound the fixed slot of an entity without
 // duration: the sound is spread over it.
 const slotFrameToSoundTime = frame => {
@@ -3868,6 +3875,7 @@ const continuePlayingPlaylist = (entityIndex, startMs) => {
     })
   } else {
     currentPreviewIndex.value++
+    pendingSoundFrame = null
     nextTick(() => {
       // A still-image sub-preview can be followed by a video sub-preview.
       // Play the whole clip from its start instead of rescheduling the image

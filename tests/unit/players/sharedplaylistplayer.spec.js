@@ -137,6 +137,10 @@ describe('players/SharedPlaylistPlayer', () => {
   describe('sound', () => {
     const entities = [sound('sound-1', 'mp3'), sound('sound-2', 'wav')]
 
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
     const startPlaying = async wrapper => {
       wrapper.findComponent(SharedPlaylistButtonBar).vm.$emit('play')
       await nextTick()
@@ -160,6 +164,26 @@ describe('players/SharedPlaylistPlayer', () => {
       expect(
         wrapper.findComponent(SharedPlaylistButtonBar).props('isPlaying')
       ).toBe(true)
+      wrapper.unmount()
+    })
+
+    // Like a picture, it keeps its slot, 2 s.
+    it('moves on from a sound that cannot be read', async () => {
+      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+      const playSound = vi.fn()
+      const wrapper = mountPlayer({ entities, playSound })
+      await startPlaying(wrapper)
+      wrapper.findComponent({ name: 'SoundViewer' }).vm.$emit('play-failed')
+      await vi.advanceTimersByTimeAsync(1900)
+      expect(
+        wrapper.findComponent({ name: 'SoundViewer' }).props('previewUrl')
+      ).toContain('preview-sound-1')
+      await vi.advanceTimersByTimeAsync(200)
+      await nextTick()
+      expect(
+        wrapper.findComponent({ name: 'SoundViewer' }).props('previewUrl')
+      ).toContain('preview-sound-2')
+      expect(playSound).toHaveBeenCalledTimes(2)
       wrapper.unmount()
     })
 
@@ -271,6 +295,10 @@ describe('players/SharedPlaylistPlayer', () => {
         preview_file_previews: [{ id: 'preview-sound-1b', extension: 'wav' }]
       }
 
+      afterEach(() => {
+        vi.useRealTimers()
+      })
+
       it('is dropped on a move to another file', async () => {
         const setSoundTime = vi.fn()
         const wrapper = mountPlayer({
@@ -282,6 +310,30 @@ describe('players/SharedPlaylistPlayer', () => {
         await nextTick()
         wrapper.findComponent(SharedPlaylistButtonBar).vm.$emit('next-preview')
         await nextTick()
+
+        await decodeSound(wrapper, 3)
+        expect(setSoundTime).not.toHaveBeenCalled()
+        wrapper.unmount()
+      })
+
+      // The hold of a sound that cannot be read moves on to the next file.
+      it('is dropped when playback moves on to another file', async () => {
+        vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+        const setSoundTime = vi.fn()
+        const wrapper = mountPlayer({
+          entities: [twoFiles, picture],
+          setSoundTime
+        })
+        await nextTick()
+        playlistBar(wrapper).vm.$emit('progress-playlist-changed', 25)
+        await nextTick()
+        wrapper.findComponent(SharedPlaylistButtonBar).vm.$emit('play')
+        await nextTick()
+        soundViewer(wrapper).vm.$emit('play-failed')
+        await vi.advanceTimersByTimeAsync(2100)
+        expect(soundViewer(wrapper).props('previewUrl')).toContain(
+          'preview-sound-1b'
+        )
 
         await decodeSound(wrapper, 3)
         expect(setSoundTime).not.toHaveBeenCalled()
