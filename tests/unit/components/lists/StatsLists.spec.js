@@ -295,18 +295,29 @@ describe('lists/SequenceStatsList', () => {
 
 describe('lists/EpisodeStatsList', () => {
   const taskTypeMap = () =>
-    new Map([['task-type-1', { id: 'task-type-1', name: 'Story', color: '#ff0000' }]])
+    new Map([
+      [
+        'task-type-1',
+        { id: 'task-type-1', name: 'Animation', color: '#ff0000', for_entity: 'Shot' }
+      ]
+    ])
 
-  // Episode task types have their own route, outside any current episode.
-  test('links a column to the episodes task type page', () => {
+  // The columns count the shot tasks of the whole production, whatever the
+  // current episode. The episodes task type route only knows episode tasks.
+  test('links a column to the shot tasks of every episode', () => {
     const wrapper = mountList(
       EpisodeStatsList,
       { validationColumns: ['task-type-1'] },
       { isTVShow: () => true, currentEpisode: () => null, taskTypeMap }
     )
     expect(wrapper.findComponent(RouterLinkStub).props('to')).toEqual({
-      name: 'episodes-task-type',
-      params: { production_id: 'production-1', task_type_id: 'task-type-1' }
+      name: 'episode-task-type',
+      params: {
+        production_id: 'production-1',
+        task_type_id: 'task-type-1',
+        type: 'shots',
+        episode_id: 'all'
+      }
     })
   })
 

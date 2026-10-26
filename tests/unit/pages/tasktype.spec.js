@@ -55,7 +55,14 @@ const task = {
 const mountPage = async ({
   actions = {},
   getters = {},
+  path,
   query = '',
+  routes = [
+    {
+      path: '/productions/:production_id/assets/task-types/:task_type_id/:section',
+      component: { template: '<div />' }
+    }
+  ],
   section = 'estimation',
   socket = { on: vi.fn(), off: vi.fn() },
   stubs = {}
@@ -93,17 +100,10 @@ const mountPage = async ({
     },
     actions: storeActions
   })
-  const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [
-      {
-        path: '/productions/:production_id/assets/task-types/:task_type_id/:section',
-        component: { template: '<div />' }
-      }
-    ]
-  })
+  const router = createRouter({ history: createWebHashHistory(), routes })
   await router.push(
-    `/productions/production-1/assets/task-types/task-type-1/${section}${query}`
+    path ??
+      `/productions/production-1/assets/task-types/task-type-1/${section}${query}`
   )
   const wrapper = shallowMount(TaskType, {
     global: {
@@ -121,7 +121,7 @@ const mountPage = async ({
     }
   })
   await flushPromises()
-  return { storeActions, wrapper }
+  return { router, storeActions, wrapper }
 }
 
 describe('TaskType page', () => {
@@ -568,6 +568,134 @@ describe('TaskType page', () => {
         expect.anything(),
         expect.anything()
       )
+    })
+  })
+
+  // The task type routes of src/router/routes.js: the episodes one has no
+  // entity type for the tabs to inherit.
+  describe('tabs', () => {
+    const Page = { template: '<div />' }
+    const taskTypeRoute = (name, path) => ({
+      name,
+      path,
+      component: Page,
+      children: [
+        { name: `${name}-schedule`, path: 'schedule', component: Page },
+        { name: `${name}-estimation`, path: 'estimation', component: Page }
+      ]
+    })
+    const routes = [
+      taskTypeRoute(
+        'task-type',
+        '/productions/:production_id/:type/task-types/:task_type_id'
+      ),
+      taskTypeRoute(
+        'episode-task-type',
+        '/productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id'
+      ),
+      taskTypeRoute(
+        'episodes-task-type',
+        '/productions/:production_id/episodes/task-types/:task_type_id'
+      ),
+      // Held, so that the tabs keep the route of their first render.
+      {
+        name: 'not-found',
+        path: '/not-found',
+        component: Page,
+        beforeEnter: () => new Promise(() => {})
+      }
+    ]
+    const shotTaskType = {
+      id: 'task-type-1',
+      name: 'Animation',
+      for_entity: 'Shot'
+    }
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      vi.restoreAllMocks()
+    })
+
+    const mountTabs = async (
+      getters,
+      path = '/productions/production-1/episodes/task-types/task-type-1'
+    ) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const mounted = await mountPage({
+        getters: { currentTaskType: () => shotTaskType, ...getters },
+        path,
+        routes
+      })
+      wrapper = mounted.wrapper
+      return wrapper
+        .findAll('.tabs li')
+        .map(
+          tab =>
+            mounted.router.resolve(
+              tab.findComponent({ name: 'RouterLink' }).props('to')
+            ).fullPath
+        )
+    }
+
+    // Where the episode stats link their shot columns.
+    it('links the sections of a shot task type opened on all episodes', async () => {
+      const base =
+        '/productions/production-1/episodes/all/shots/task-types/task-type-1'
+      const paths = await mountTabs(
+        { currentEpisode: () => ({ id: 'all' }), isTVShow: () => true },
+        base
+      )
+      expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+    })
+
+    // The episode stats linked their shot columns to the episodes route.
+    it('links the sections of a shot task type opened on the episodes route', async () => {
+      const paths = await mountTabs({
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true
+      })
+      const base =
+        '/productions/production-1/episodes/episode-1/shots/task-types/task-type-1'
+      expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+    })
+
+    it('links them before the episodes are loaded', async () => {
+      const paths = await mountTabs({ isTVShow: () => true })
+      const base = '/productions/production-1/shots/task-types/task-type-1'
+      expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+    })
+
+    // A type there would be discarded with a warning.
+    it('links the sections of an episode task type to the episodes route', async () => {
+      const warn = vi.spyOn(console, 'warn')
+      const error = vi.spyOn(console, 'error')
+      const paths = await mountTabs({
+        currentEpisode: () => ({ id: 'episode-1' }),
+        currentTaskType: () => ({ ...shotTaskType, for_entity: 'Episode' }),
+        isTVShow: () => true
+      })
+      const base = '/productions/production-1/episodes/task-types/task-type-1'
+      expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+      expect(warn).not.toHaveBeenCalled()
+      expect(error).not.toHaveBeenCalled()
+    })
+
+    // The page renders once before leaving for the not found page.
+    describe('for a task type missing from the map', () => {
+      it('keeps the type of the route', async () => {
+        const base = '/productions/production-1/assets/task-types/task-type-1'
+        const paths = await mountTabs({ currentTaskType: () => ({}) }, base)
+        expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+      })
+
+      it('keeps the episodes route, which has no type', async () => {
+        const paths = await mountTabs({ currentTaskType: () => ({}) })
+        const base = '/productions/production-1/episodes/task-types/task-type-1'
+        expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+      })
     })
   })
 })
