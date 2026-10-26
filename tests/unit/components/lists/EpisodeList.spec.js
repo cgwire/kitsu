@@ -48,6 +48,54 @@ describe('lists/EpisodeList', () => {
       expect(await showsEmptyState({ isError: true })).toBe(false)
     })
   })
+
+  describe('episode count', () => {
+    const showsCount = async props => {
+      const wrapper = await mountEntityList(EpisodeList, {
+        getters: { currentProduction: production, displayedEpisodesLength: 1 },
+        props: { displayedEpisodes: [{ id: 'episode-1', name: 'E01' }], ...props }
+      })
+      const isShown = wrapper.find('.nb-episodes').exists()
+      wrapper.unmount()
+      return isShown
+    }
+
+    test('the count shows under the episodes', async () => {
+      expect(await showsCount()).toBe(true)
+    })
+
+    // The page keeps the rows of the production left when the list of the
+    // new one fails: their count must not show either.
+    test('the count stays hidden on error', async () => {
+      expect(await showsCount({ isError: true })).toBe(false)
+    })
+  })
+
+  describe('create tasks button', () => {
+    const showsCreateTasks = async props => {
+      const wrapper = await mountEntityList(EpisodeList, {
+        getters: {
+          currentProduction: production,
+          isCurrentUserProductionManager: true
+        },
+        props: { displayedEpisodes: [{ id: 'episode-1', name: 'E01' }], ...props }
+      })
+      const isShown = wrapper
+        .find('th.actions button-simple-stub[text="tasks.create_tasks"]')
+        .exists()
+      wrapper.unmount()
+      return isShown
+    }
+
+    test('the button shows above the episodes', async () => {
+      expect(await showsCreateTasks()).toBe(true)
+    })
+
+    // The rows held on error belong to the production left.
+    test('the button stays hidden on error', async () => {
+      expect(await showsCreateTasks({ isError: true })).toBe(false)
+    })
+  })
 })
 
 describe('lists/EpisodeList sticky columns', () => {
