@@ -431,11 +431,7 @@
             :interactive="isOverlayInteractive"
             :wheel-target="mainMediaElement"
             @resized="onMainCanvasResized"
-            v-show="
-              !isCurrentPreviewFile &&
-              isAnnotationsDisplayed &&
-              !isCurrentPreviewModel
-            "
+            v-show="isCurrentPreviewAnnotatable && isAnnotationsDisplayed"
           />
         </div>
       </div>
@@ -1322,6 +1318,10 @@ const {
   isSound: isCurrentPreviewSound,
   isTransparentPicture: isCurrentPreviewTransparentPicture
 } = useMediaKind(extension)
+// Annotations go on movies and pictures only, as in the task panel.
+const isCurrentPreviewAnnotatable = computed(
+  () => isCurrentPreviewMovie.value || isCurrentPreviewPicture.value
+)
 
 // Computed — entity & preview state
 
@@ -1979,14 +1979,20 @@ const { isAltHeld } = usePreviewShortcuts({
   onPlayPause: () => togglePlayPause(),
   onPrevAnnotation: () => onPreviousDrawingClicked(),
   onNextAnnotation: () => onNextDrawingClicked(),
-  onAnnotate: () => onAnnotateClicked(),
-  onErase: () => onEraseClicked(),
+  onAnnotate: () => {
+    if (isCurrentPreviewAnnotatable.value) onAnnotateClicked()
+  },
+  onErase: () => {
+    if (isCurrentPreviewAnnotatable.value) onEraseClicked()
+  },
   onUndo: () => undoLastAction(),
   onRedo: () => redoLastAction(),
   onPrevPreview: () => onPlayPreviousEntityClicked(),
   onNextPreview: () => onPlayNextEntityClicked(),
   onCopy: () => copyAnnotations(),
-  onPaste: () => pasteAnnotations(),
+  onPaste: () => {
+    if (isCurrentPreviewAnnotatable.value) pasteAnnotations()
+  },
   onToggleOverlay: () => toggleFullOverlayComparison()
 })
 
@@ -2470,8 +2476,11 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
     }
     const ann = getAnnotation(0)
     if (!isPlaying.value) loadAnnotation(ann)
-    if (wasDrawing) {
+    // Only a picture takes the pencil back: past a sound or a document, it
+    // stays off.
+    if (wasDrawing && isPicturePreview(entity?.preview_file_extension)) {
       setPlayerTimeout(() => {
+        if (!isCurrentPreviewAnnotatable.value) return
         isDrawing.value = true
         setAnnotationDrawingMode(true)
       }, 100)
@@ -4861,6 +4870,21 @@ watch(isAnnotationsDisplayed, () => {
   resetCanvasVisibility()
   if (!isRoomSilent) updateRoomStatus()
 })
+
+// A tool left on by a movie would draw over a sound or a document, where
+// nothing shows the drawing again. It waits for the render: the next entity
+// shows no file until the file index of the previous one goes back to 0.
+watch(
+  isCurrentPreviewAnnotatable,
+  () => {
+    if (isCurrentPreviewAnnotatable.value) return
+    if (isDrawing.value) onAnnotateClicked()
+    else if (isTyping.value) onTypeClicked()
+    else if (isEraserModeOn.value) onEraseClicked()
+    else if (isShapeMode.value) onShapeModeClicked()
+  },
+  { flush: 'post' }
+)
 
 watch(isDrawing, () => {
   setAnnotationDrawingMode(isDrawing.value)

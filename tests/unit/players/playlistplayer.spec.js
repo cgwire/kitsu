@@ -21,6 +21,7 @@ vi.mock('wavesurfer.js', () => ({ default: waveSurfer }))
 
 // Pre-load the real store to avoid a circular-import race from child components.
 import '@/lib/auth'
+import clipboard from '@/lib/clipboard'
 
 import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
 
@@ -757,6 +758,145 @@ describe('PlaylistPlayer.vue', () => {
         wrapper.findComponent({ name: 'PlayerAnnotationBar' }).props()
           .isCommentsHidden
       ).toBe(false)
+    })
+
+    // Annotations go on movies and pictures only, as in the task panel: a
+    // tool left on by a movie drew over the waveform, and nothing showed the
+    // drawing again.
+    describe('annotations', () => {
+      const movie = {
+        id: 'shot-0',
+        preview_file_id: 'preview-0',
+        preview_file_extension: 'mp4'
+      }
+
+      // As in the real one, the overlay sits in the element the player
+      // shows or hides.
+      const canvasStub = canvas => ({
+        name: 'AnnotationCanvas',
+        template: '<div><div ref="overlay"><canvas /></div></div>',
+        setup: () => ({ canvas: markRaw(canvas), overlay: ref(null) })
+      })
+
+      const annotationBar = () =>
+        wrapper.findComponent({ name: 'PlayerAnnotationBar' })
+      const mainCanvas = () =>
+        wrapper.findComponent({ ref: 'main-annotation-canvas' })
+      const press = init =>
+        window.dispatchEvent(new KeyboardEvent('keydown', init))
+
+      const clickButton = title =>
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(button => button.attributes('title') === title)
+          .vm.$emit('click')
+
+      const goToNextShot = async () => {
+        clickButton('playlists.actions.next_shot')
+        // The pencil of the previous entity comes back after 100 ms.
+        await vi.advanceTimersByTimeAsync(100)
+      }
+
+      afterEach(() => {
+        clipboard.copyAnnotations([])
+      })
+
+      it.each([
+        ['pencil', 'pencil-annotate-clicked', 'isDrawing'],
+        ['eraser', 'erase-clicked', 'isEraserModeOn'],
+        ['shape', 'shape-mode-clicked', 'isShapeMode'],
+        ['text', 'type-clicked', 'isTyping']
+      ])('turns the %s of a movie off on a sound', async (_, click, prop) => {
+        await mountWithSound([movie, sound], {
+          AnnotationCanvas: canvasStub(createFakeCanvas())
+        })
+        annotationBar().vm.$emit(click)
+        await flushPromises()
+        expect(annotationBar().props(prop)).toBe(true)
+
+        await goToNextShot()
+
+        expect(annotationBar().props(prop)).toBe(false)
+      })
+
+      // The next entity shows the file of the previous index until the index
+      // goes back to 0: a movie read as no file for a moment.
+      it('keeps the pencil from the last file of a revision to a movie', async () => {
+        const twoFiles = {
+          ...movie,
+          preview_file_previews: [
+            { id: 'preview-0b', extension: 'mp4', revision: 1, annotations: [] }
+          ]
+        }
+        const nextMovie = { ...movie, id: 'shot-9', preview_file_id: 'preview-9' }
+        await mountWithSound([twoFiles, nextMovie], {
+          AnnotationCanvas: canvasStub(createFakeCanvas())
+        })
+        // Alt+K moves to the next file, then to the next entity.
+        const pressNext = async () => {
+          press({ key: 'k', code: 'KeyK', altKey: true })
+          await vi.advanceTimersByTimeAsync(100)
+        }
+        await pressNext()
+        annotationBar().vm.$emit('pencil-annotate-clicked')
+        await flushPromises()
+        expect(annotationBar().props('isDrawing')).toBe(true)
+
+        await pressNext()
+
+        expect(wrapper.vm.playingEntityIndex).toBe(1)
+        expect(annotationBar().props('isDrawing')).toBe(true)
+      })
+
+      it('keeps the pencil off past a sound to a picture', async () => {
+        await mountWithSound([movie, sound, picture], {
+          AnnotationCanvas: canvasStub(createFakeCanvas())
+        })
+        annotationBar().vm.$emit('pencil-annotate-clicked')
+        await flushPromises()
+
+        // On to the picture before the 100 ms of the sound are over.
+        clickButton('playlists.actions.next_shot')
+        await flushPromises()
+        await goToNextShot()
+
+        expect(annotationBar().props('isDrawing')).toBe(false)
+      })
+
+      it('hides the annotations over a sound', async () => {
+        await mountWithSound([movie, sound], {
+          AnnotationCanvas: canvasStub(createFakeCanvas())
+        })
+        expect(mainCanvas().element.style.display).not.toBe('none')
+
+        await goToNextShot()
+
+        expect(mainCanvas().element.style.display).toBe('none')
+      })
+
+      it.each([
+        ['d', 'isDrawing'],
+        ['e', 'isEraserModeOn']
+      ])('turns no tool on with the %s key on a sound', async (key, prop) => {
+        await mountWithSound([sound], {
+          AnnotationCanvas: canvasStub(createFakeCanvas())
+        })
+        press({ key })
+        await flushPromises()
+        expect(annotationBar().props(prop)).toBe(false)
+      })
+
+      it('pastes no annotation on a sound', async () => {
+        const canvas = { ...createFakeCanvas(), setActiveObject: vi.fn() }
+        await mountWithSound([sound], { AnnotationCanvas: canvasStub(canvas) })
+        clipboard.copyAnnotations({
+          mainObject: { clone: async () => ({ left: 0, top: 0, set: vi.fn() }) },
+          subObjects: []
+        })
+        press({ key: 'v', ctrlKey: true })
+        await flushPromises()
+        expect(canvas.add).not.toHaveBeenCalled()
+      })
     })
 
     it('offers the comments toggle on a sound in full screen', async () => {

@@ -53,4 +53,18 @@ describe('players/SharedPlaylistButtonBar', () => {
       isShown
     )
   })
+
+  // A guest who can comment draws over movies and pictures only.
+  it.each([
+    ['a movie', true, { isMovie: true }],
+    ['a picture', true, { isPicture: true }],
+    ['a sound', false, { isSound: true }],
+    ['another file', false, {}]
+  ])('offers the pencil on %s: %s', (_, isShown, kind) => {
+    const wrapper = mountBar({ ...kind, canComment: true, guestId: 'guest-1' })
+    const titles = wrapper
+      .findAll('button')
+      .map(button => button.attributes('title'))
+    expect(titles.includes('playlists.actions.annotation_draw')).toBe(isShown)
+  })
 })

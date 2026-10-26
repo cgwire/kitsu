@@ -20,6 +20,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 
 // Pre-load the real store to avoid a circular-import race from child components.
 import '@/lib/auth'
+import clipboard from '@/lib/clipboard'
 
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 
@@ -629,6 +630,35 @@ describe('PreviewPlayer.vue', () => {
       await nextTick()
       press('ArrowRight')
       expect(soundTimes()[0]).toBeCloseTo(0.04)
+    })
+  })
+
+  // Annotations go on movies and pictures only: the canvas hides over a
+  // sound, but a paste still saved there what nothing showed again.
+  describe('sound annotations', () => {
+    afterEach(() => {
+      clipboard.copyAnnotations([])
+    })
+
+    it('pastes no annotation on a sound', async () => {
+      const canvas = { ...createFakeCanvas(), setActiveObject: vi.fn() }
+      wrapper = mountPlayer({
+        props: {
+          previews: [{ ...preview, id: 'preview-sound', extension: 'mp3' }],
+          readOnly: false
+        },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      clipboard.copyAnnotations({
+        mainObject: { clone: async () => ({ left: 0, top: 0, set: vi.fn() }) },
+        subObjects: []
+      })
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'v', ctrlKey: true })
+      )
+      await flushPromises()
+      expect(canvas.add).not.toHaveBeenCalled()
     })
   })
 

@@ -2046,7 +2046,11 @@ const { isAltHeld } = usePreviewShortcuts({
   onPrevPreview: () => onPreviousClicked(),
   onNextPreview: () => onNextClicked(),
   onCopy: () => copyAnnotations(),
-  onPaste: () => pasteAnnotations(),
+  // The canvas shows over movies and pictures only: a paste anywhere else
+  // would save annotations that nothing shows again.
+  onPaste: () => {
+    if (isMovie.value || isPicture.value) pasteAnnotations()
+  },
   onToggleOverlay: () => toggleFullOverlay()
 })
 

@@ -94,7 +94,7 @@
       icon="pencil"
       :title="$t('playlists.actions.annotation_draw')"
       @click="isAnnotating = !isAnnotating"
-      v-if="canComment && guestId"
+      v-if="canComment && guestId && (isMovie || isPicture)"
     />
     <button-simple
       class="playlist-button flexrow-item"
