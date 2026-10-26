@@ -346,7 +346,7 @@
               is-reversed
               is-preview
               thin
-              :model-value="currentPreview?.id"
+              :model-value="currentRevisionPreviewId"
               @update:model-value="changeCurrentPreviewFile"
             />
           </div>
@@ -1012,6 +1012,15 @@ const lastPreviewFileOptions = computed(() => {
       validation_status: preview.validation_status
     }))
 })
+
+// The options are the first files of the revisions: another file of a
+// revision stands for it by its revision number.
+const currentRevisionPreviewId = computed(
+  () =>
+    props.lastPreviewFiles.find(
+      preview => preview.revision === currentPreview.value?.revision
+    )?.id
+)
 
 const isComparisonEnabled = computed(() => fullScreen.value || props.extraWide)
 

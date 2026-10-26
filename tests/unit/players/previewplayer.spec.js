@@ -624,6 +624,108 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  describe('full screen', () => {
+    const soundPreview = { ...preview, id: 'preview-sound', extension: 'mp3' }
+
+    afterEach(() => {
+      delete document.fullscreen
+      vi.useRealTimers()
+    })
+
+    // jsdom has no full screen: the player follows the change event.
+    const enterFullScreen = async () => {
+      Object.defineProperty(document, 'fullscreen', {
+        configurable: true,
+        value: true
+      })
+      wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+      await nextTick()
+    }
+
+    const unannotated = ['mp3', 'glb', 'pdf', 'zip']
+
+    it.each(unannotated)('shows the comments of a %s file', async extension => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper = mountPlayer({
+        props: {
+          previews: [{ ...soundPreview, extension }],
+          readOnly: false
+        },
+        stubs: {
+          PlayerAnnotationBar: false,
+          TaskInfo: {
+            name: 'TaskInfo',
+            template: '<div />',
+            methods: { focusCommentTextarea: () => {} }
+          }
+        }
+      })
+      await enterFullScreen()
+      const toggle = wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('icon') === 'comment')
+      expect(toggle).toBeDefined()
+
+      toggle.vm.$emit('click')
+      await nextTick()
+
+      expect(wrapper.findComponent({ name: 'TaskInfo' }).isVisible()).toBe(
+        true
+      )
+    })
+
+    // The combo lists each revision by its first file.
+    describe('version combo', () => {
+      const firstFile = { ...moviePreview, id: 'preview-v2', revision: 2 }
+      const previousRevision = {
+        ...soundPreview,
+        id: 'preview-v1',
+        previews: [{ ...soundPreview, id: 'preview-v1' }]
+      }
+      const combo = () =>
+        wrapper
+          .findAllComponents({ name: 'ComboboxStyled' })
+          .find(item => item.classes('preview-combo'))
+
+      const showSecondFile = async extension => {
+        const secondFile = {
+          ...firstFile,
+          id: 'preview-v2-2',
+          extension,
+          position: 2
+        }
+        wrapper = mountPlayer({
+          props: {
+            previews: [firstFile, secondFile],
+            lastPreviewFiles: [
+              { ...firstFile, previews: [firstFile, secondFile] },
+              previousRevision
+            ]
+          }
+        })
+        await enterFullScreen()
+        wrapper.findComponent({ name: 'BrowsingBar' }).vm.$emit('next-clicked')
+        await nextTick()
+      }
+
+      it.each(['mp3', 'png', 'mp4'])(
+        'shows the revision of a second %s file',
+        async extension => {
+          await showSecondFile(extension)
+          expect(combo().props('modelValue')).toBe('preview-v2')
+        }
+      )
+
+      it('changes the version from a second file', async () => {
+        await showSecondFile('mp3')
+        combo().vm.$emit('update:modelValue', 'preview-v1')
+        expect(wrapper.emitted('change-current-preview')).toEqual([
+          [previousRevision]
+        ])
+      })
+    })
+  })
+
   describe('render', () => {
     // The Task page mounts the player with its task still null when a
     // comment lands before the task is loaded, and TaskInfo drops its task

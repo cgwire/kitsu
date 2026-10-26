@@ -263,6 +263,18 @@
       @click="isWireframe = !isWireframe"
     />
   </div>
+
+  <!-- no annotation outside a movie or a picture -->
+  <div class="flexrow" v-if="!isMovie && !isPicture && !phone">
+    <button-simple
+      class="button playlist-button flexrow-item"
+      icon="comment"
+      :active="!isCommentsHidden"
+      :title="$t('playlists.actions.comments')"
+      @click="$emit('comment-clicked')"
+      v-if="!readOnly && (fullScreen || showCommentsButton)"
+    />
+  </div>
 </template>
 
 <script setup>

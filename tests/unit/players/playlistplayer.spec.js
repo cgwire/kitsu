@@ -423,7 +423,7 @@ describe('PlaylistPlayer.vue', () => {
       vi.useRealTimers()
     })
 
-    const mountWithSound = async entities => {
+    const mountWithSound = async (entities, stubs = {}) => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
       const soundViewer = { play: vi.fn(), setCurrentTime: vi.fn() }
       wrapper = mountPlayer({
@@ -432,7 +432,8 @@ describe('PlaylistPlayer.vue', () => {
           SoundViewer: {
             ...withMethods(['pause'], soundViewer),
             name: 'SoundViewer'
-          }
+          },
+          ...stubs
         }
       })
       await flushPromises()
@@ -683,7 +684,50 @@ describe('PlaylistPlayer.vue', () => {
           .isCommentsHidden
       ).toBe(false)
     })
+
+    it('offers the comments toggle on a sound in full screen', async () => {
+      await mountWithSound([sound], { PlayerAnnotationBar: false })
+      // jsdom has no full screen
+      Object.defineProperty(document, 'fullscreen', {
+        configurable: true,
+        value: true
+      })
+      wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+      await flushPromises()
+      delete document.fullscreen
+      const toggle = () =>
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(button => button.attributes('icon') === 'comment')
+      expect(toggle()).toBeDefined()
+
+      toggle().vm.$emit('click')
+      await flushPromises()
+
+      expect(toggle().attributes('active')).toBe('true')
+    })
   })
+
+  it.each(['glb', 'pdf', 'blend'])(
+    'offers the comments toggle on a %s file',
+    async extension => {
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: extension }],
+        stubs: { PlayerAnnotationBar: false }
+      })
+      await flushPromises()
+      const toggle = () =>
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(button => button.attributes('icon') === 'comment')
+      expect(toggle()).toBeDefined()
+
+      toggle().vm.$emit('click')
+      await flushPromises()
+
+      expect(toggle().attributes('active')).toBe('true')
+    }
+  )
 
   // The comparison viewer shows movies only: on a picture, a comparison
   // movie still playing went on decoding, hidden.
