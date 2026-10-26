@@ -940,9 +940,13 @@ const zoomAt = (clientX, clientY, ratio) => {
   })
 }
 
+// Both decoders, not the current and the next one: the playlist gives the
+// volume before the first movie sets them.
 const setVolume = volume => {
-  if (currentPlayer.value) currentPlayer.value.volume = volume / 100
-  if (nextPlayer.value) nextPlayer.value.volume = volume / 100
+  const players = [player1Ref.value, player2Ref.value]
+  players.filter(Boolean).forEach(player => {
+    player.volume = volume / 100
+  })
 }
 
 const LOADING_HANDLERS = [

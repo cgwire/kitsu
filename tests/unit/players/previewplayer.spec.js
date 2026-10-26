@@ -633,6 +633,59 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  // The mute and the volume come back on the next visit, in the keys the
+  // Playlists page shares.
+  describe('mute', () => {
+    const playbackBar = () =>
+      wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+
+    afterEach(() => {
+      localStorage.removeItem('player:muted')
+      localStorage.removeItem('player:volume')
+    })
+
+    // ButtonSound gives back 50 on an unmute, the volume the player already
+    // has after a muted visit: no volume change follows.
+    it('plays at the volume of an unmute after a muted visit', async () => {
+      localStorage.setItem('player:muted', 'true')
+      localStorage.setItem('player:volume', '0')
+      wrapper = mountPlayer({ props: { previews: [moviePreview] } })
+      await nextTick()
+
+      playbackBar().vm.$emit('update:isMuted', false)
+      await nextTick()
+
+      expect(viewer.setVolume.mock.calls.at(-1)).toEqual([50])
+      expect(localStorage.getItem('player:muted')).toBe('false')
+      expect(localStorage.getItem('player:volume')).toBe('50')
+    })
+
+    // The playlist modal, opened over the task panel, stores a mute this
+    // player never saw.
+    it('stores the mute with the volume', async () => {
+      wrapper = mountPlayer({ props: { previews: [moviePreview] } })
+      await nextTick()
+      localStorage.setItem('player:muted', 'true')
+
+      playbackBar().vm.$emit('update:volume', 70)
+      await nextTick()
+
+      expect(localStorage.getItem('player:volume')).toBe('70')
+      expect(localStorage.getItem('player:muted')).toBe('false')
+    })
+
+    // Unmuted, a stored 0 can only be what such an unmute left before it
+    // stored its volume.
+    it('reads an unmuted volume of 0 as the default', async () => {
+      localStorage.setItem('player:muted', 'false')
+      localStorage.setItem('player:volume', '0')
+      wrapper = mountPlayer({ props: { previews: [moviePreview] } })
+      await nextTick()
+
+      expect(viewer.setVolume.mock.calls.at(-1)).toEqual([50])
+    })
+  })
+
   // Annotations go on movies and pictures only: the canvas hides over a
   // sound, but a paste still saved there what nothing showed again.
   describe('sound annotations', () => {

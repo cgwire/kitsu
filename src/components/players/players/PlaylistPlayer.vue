@@ -5232,6 +5232,16 @@ watch(isFullMode, () => {
 watch(volume, () => {
   rawPlayer.value?.setVolume(volume.value)
   preferences.setPreference('player:volume', volume.value)
+  // The task panel shares both keys: a mute another player stored must not
+  // outlive a volume set here.
+  preferences.setPreference('player:muted', isMuted.value)
+})
+
+watch(isMuted, () => {
+  preferences.setPreference('player:muted', isMuted.value)
+  // An unmute may give back the volume the player already has, which stores
+  // nothing: the 0 of the mute would come back on the next visit.
+  if (!isMuted.value) preferences.setPreference('player:volume', volume.value)
 })
 
 watch(isMediaFullScreen, () => resetHeight())
@@ -5322,7 +5332,15 @@ onMounted(() => {
 
   resetPencilConfiguration()
 
-  volume.value = preferences.getIntPreference('player:volume', volume.value)
+  // As in the task panel, a muted visit leaves aside the stored volume: it
+  // is the 0 the mute set. Unmuted, a stored 0 is what an unmute left before
+  // it stored its volume: the default stands in.
+  isMuted.value = preferences.getBoolPreference('player:muted')
+  if (!isMuted.value) {
+    volume.value =
+      preferences.getIntPreference('player:volume', volume.value) ||
+      volume.value
+  }
   nextTick(() => {
     rawPlayer.value?.setVolume(volume.value)
   })

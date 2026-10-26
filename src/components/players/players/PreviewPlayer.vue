@@ -2611,6 +2611,9 @@ watch(speed, () => {
 watch(volume, () => {
   previewViewer.value?.setVolume(volume.value)
   localPreferences.setPreference('player:volume', volume.value)
+  // The playlist player shares both keys, and may store its mute from a modal
+  // open over this one.
+  localPreferences.setPreference('player:muted', isMuted.value)
 })
 
 // The viewers reload their source on a quality switch: onPreviewLoaded then
@@ -2623,6 +2626,11 @@ watch(isHd, () => {
 // Persist through a watcher: ButtonSound drives isMuted via v-model.
 watch(isMuted, () => {
   localPreferences.setPreference('player:muted', isMuted.value)
+  // An unmute may give back the volume the player already has, which stores
+  // nothing: the 0 of the mute would come back on the next visit.
+  if (!isMuted.value) {
+    localPreferences.setPreference('player:volume', volume.value)
+  }
 })
 
 // Lifecycle
@@ -2645,15 +2653,16 @@ onMounted(() => {
     onObjectBackgroundSelected()
   }
 
-  if (isMuted.value) {
-    previewViewer.value?.setVolume(0)
-  } else {
-    volume.value = localPreferences.getIntPreference(
-      'player:volume',
+  // The mute goes through isMuted: a 0 set here outlived the unmute, which
+  // gives back the volume the player already has. A muted visit leaves aside
+  // the stored volume, the 0 the mute set; unmuted, a stored 0 is what such
+  // an unmute left before it stored its volume, and the default stands in.
+  if (!isMuted.value) {
+    volume.value =
+      localPreferences.getIntPreference('player:volume', volume.value) ||
       volume.value
-    )
-    previewViewer.value?.setVolume(volume.value)
   }
+  previewViewer.value?.setVolume(volume.value)
 
   reloadAnnotations()
   loadAnnotation()

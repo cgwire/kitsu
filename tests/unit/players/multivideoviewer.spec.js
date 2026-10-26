@@ -268,6 +268,18 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  // The playlist gives the stored volume as it mounts, before its first
+  // movie: both movies played at full volume until the slider moved.
+  it('plays the movies at the volume given before the first one', () => {
+    const wrapper = mountViewer()
+    wrapper.vm.setVolume(30)
+    wrapper.vm.loadEntity(0)
+
+    const volumes = wrapper.findAll('video').map(video => video.element.volume)
+    expect(volumes).toEqual([0.3, 0.3])
+    wrapper.unmount()
+  })
+
   describe('scrub seeks', () => {
     const mountSeekingViewer = async () => {
       const wrapper = mountViewer()

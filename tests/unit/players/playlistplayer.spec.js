@@ -227,6 +227,9 @@ describe('PlaylistPlayer.vue', () => {
     wrapper?.unmount()
     wrapper = null
     vi.restoreAllMocks()
+    // The player keeps its volume and its mute for the next visit.
+    localStorage.removeItem('player:muted')
+    localStorage.removeItem('player:volume')
   })
 
   // The comment box waits for the snapshots, and each of them waits 500 ms
@@ -1423,6 +1426,75 @@ describe('PlaylistPlayer.vue', () => {
 
     expect(onWindow).not.toHaveBeenCalled()
     expect(onDocument).not.toHaveBeenCalled()
+  })
+
+  // As the task panel does: a next visit comes back muted, and the volume
+  // kept is not the 0 the mute set.
+  describe('mute', () => {
+    const movie = { ...entity, preview_file_extension: 'mp4' }
+    const playbackBar = () =>
+      wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+
+    it('keeps the mute for the next visit', async () => {
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+
+      playbackBar().vm.$emit('update:isMuted', true)
+      await flushPromises()
+
+      expect(localStorage.getItem('player:muted')).toBe('true')
+    })
+
+    it('comes back muted from the previous visit', async () => {
+      localStorage.setItem('player:muted', 'true')
+      localStorage.setItem('player:volume', '0')
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+
+      expect(playbackBar().props('isMuted')).toBe(true)
+      expect(playbackBar().props('volume')).toBe(50)
+    })
+
+    // ButtonSound gives back 50 on an unmute, the volume the page already
+    // has after a muted visit: no volume change follows.
+    it('keeps the volume of an unmute for the next visit', async () => {
+      localStorage.setItem('player:muted', 'true')
+      localStorage.setItem('player:volume', '0')
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+
+      playbackBar().vm.$emit('update:isMuted', false)
+      await flushPromises()
+
+      expect(localStorage.getItem('player:muted')).toBe('false')
+      expect(localStorage.getItem('player:volume')).toBe('50')
+    })
+
+    // The task panel shares both keys: a mute stored by another player must
+    // not outlive a volume set here.
+    it('stores the mute with the volume', async () => {
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+      localStorage.setItem('player:muted', 'true')
+
+      playbackBar().vm.$emit('update:volume', 70)
+      await flushPromises()
+
+      expect(localStorage.getItem('player:volume')).toBe('70')
+      expect(localStorage.getItem('player:muted')).toBe('false')
+    })
+
+    // Unmuted, a stored 0 can only be what an unmute left before it stored
+    // its volume.
+    it('reads an unmuted volume of 0 as the default', async () => {
+      localStorage.setItem('player:muted', 'false')
+      localStorage.setItem('player:volume', '0')
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+
+      expect(playbackBar().props('isMuted')).toBe(false)
+      expect(playbackBar().props('volume')).toBe(50)
+    })
   })
 
   // A plain link navigates the tab: the browser fires beforeunload, which
