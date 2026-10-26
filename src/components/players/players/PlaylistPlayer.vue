@@ -317,7 +317,6 @@
           class="sound-player"
           :file-name="currentPreviewFileName"
           :preview-url="currentPreviewDlPath"
-          :full-screen="fullScreen"
           @duration-changed="onSoundDurationChanged"
           @play-ended="onSoundEnded"
           @play-failed="onSoundPlayFailed"
@@ -570,7 +569,6 @@
         v-model:volume="volume"
         @play-pause-clicked="onPlayPauseClicked"
         @repeat-clicked="onRepeatClicked"
-        @toggle-sound-clicked="onToggleSoundClicked"
       >
         <template #extra-controls>
           <div
@@ -2822,11 +2820,6 @@ const onRepeatClicked = () => {
   updateRoomStatus()
 }
 
-const onToggleSoundClicked = () => {
-  clearFocus()
-  isMuted.value = !isMuted.value
-}
-
 // phones review on the go: comments open, low definition whatever the
 // studio default, and no entity strip next to the media in landscape
 const applyPhoneDefaults = () => {
@@ -4365,8 +4358,6 @@ const configureWaveForm = () => {
       container: '#waveform',
       waveColor: '#00B242',
       progressColor: '#008732',
-      backend: 'MediaElement',
-      mediaType: 'video',
       height: 60,
       fillParent: true,
       minPxPerSec: 1
@@ -4931,8 +4922,8 @@ watch(playingEntityIndex, () => {
     })
   } else if (wavesurfer && isWaveformDisplayed.value) {
     wavesurfer.destroy()
-    // Null it like loadWaveForm does, or the next load double-destroys
-    // the dead instance inside its try and skips rebuilding the waveform.
+    // Null it like loadWaveForm does: the playback seek sync and a load
+    // still pending skip a missing waveform, not a destroyed one.
     wavesurfer = null
   }
   if (currentEntity.value) {

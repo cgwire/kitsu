@@ -188,7 +188,6 @@
       @previous-preview="onPreviousPreviewClicked"
       @reset-zoom="onResetZoom"
       @toggle-full-screen="toggleFullScreen"
-      @toggle-sound="onToggleSoundClicked"
     />
 
     <playlist-progress
@@ -769,10 +768,6 @@ const toggleFullScreen = async () => {
 
 const onFullScreenChange = () => {
   isFullScreen.value = isDocumentFullScreen()
-}
-
-const onToggleSoundClicked = () => {
-  isMuted.value = !isMuted.value
 }
 
 // Functions — player events

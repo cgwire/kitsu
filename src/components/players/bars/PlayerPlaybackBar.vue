@@ -86,7 +86,6 @@
 
       <button-sound
         class="flexrow-item"
-        @change-sound="$emit('toggle-sound-clicked')"
         v-model:muted="isMuted"
         v-model:volume="volume"
       />
@@ -188,7 +187,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['play-pause-clicked', 'repeat-clicked', 'toggle-sound-clicked'])
+defineEmits(['play-pause-clicked', 'repeat-clicked'])
 
 const current3DAnimation = defineModel('current3DAnimation', {
   type: String,

@@ -214,7 +214,6 @@
           v-model:volume="volume"
           @play-pause-clicked="onPlayPauseClicked"
           @repeat-clicked="onRepeatClicked"
-          @toggle-sound-clicked="onToggleSoundClicked"
         />
 
         <player-comparison-bar
@@ -1556,11 +1555,6 @@ const onRepeatClicked = () => {
   localPreferences.setPreference('player:repeating', isRepeating.value)
 }
 
-const onToggleSoundClicked = () => {
-  clearFocus()
-  isMuted.value = !isMuted.value
-}
-
 // Screen
 
 const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
@@ -2619,9 +2613,7 @@ watch(isHd, () => {
   if (isMovie.value) isQualitySwitchPending = true
 })
 
-// Persist through a watcher: ButtonSound drives isMuted via v-model and
-// never emits change-sound, so a click handler on the toggle chain never
-// runs and the preference was never written.
+// Persist through a watcher: ButtonSound drives isMuted via v-model.
 watch(isMuted, () => {
   localPreferences.setPreference('player:muted', isMuted.value)
 })

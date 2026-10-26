@@ -75,7 +75,6 @@
         class="flexrow-item playlist-button"
         v-model:muted="isMuted"
         v-model:volume="volume"
-        @change-sound="$emit('toggle-sound')"
       />
     </div>
 
@@ -148,8 +147,7 @@ defineEmits([
   'play',
   'previous-preview',
   'reset-zoom',
-  'toggle-full-screen',
-  'toggle-sound'
+  'toggle-full-screen'
 ])
 
 const isAnnotating = defineModel('isAnnotating', {
