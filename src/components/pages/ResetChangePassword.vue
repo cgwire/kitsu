@@ -131,8 +131,9 @@ const isNew = computed(() => route.query.type === 'new')
 // --------------------------------------------------------------------------
 
 const confirmResetChangePassword = async () => {
-  // Enter in a field submits too, whatever the button shows.
-  if (isLoading.value) return
+  // Enter in a field submits too, whatever the button shows, and Zou spends
+  // the token on the first success.
+  if (isLoading.value || isSuccess.value) return
   isError.value = false
   isFormError.value = false
   isTokenError.value = false
@@ -141,7 +142,6 @@ const confirmResetChangePassword = async () => {
     return
   }
   isLoading.value = true
-  isSuccess.value = false
   try {
     await store.dispatch('resetChangePassword', {
       email: route.query.email,

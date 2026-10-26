@@ -64,4 +64,25 @@ describe('pages/ResetChangePassword', () => {
 
     expect(resetChangePassword).toHaveBeenCalledTimes(2)
   })
+
+  it('sends nothing more once the password is set', async () => {
+    // Zou spends the token on the first success.
+    const resetChangePassword = vi
+      .fn()
+      .mockResolvedValueOnce()
+      .mockRejectedValue({ body: { message: 'Wrong or expired token.' } })
+    const wrapper = mountPage(resetChangePassword)
+    await fillPasswords(wrapper)
+    const password = wrapper.find('input[type="password"]')
+
+    await password.trigger('keyup.enter')
+    await flushPromises()
+    await password.trigger('keyup.enter')
+    await flushPromises()
+
+    expect(resetChangePassword).toHaveBeenCalledTimes(1)
+    expect(wrapper.find('.success').exists()).toBe(true)
+    expect(wrapper.find('.error').exists()).toBe(false)
+    wrapper.unmount()
+  })
 })
