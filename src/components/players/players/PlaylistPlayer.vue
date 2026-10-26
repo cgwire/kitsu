@@ -1168,6 +1168,7 @@ let playingPictureTimeout = null
 let autoHideTimer = null
 const playerTimeouts = new Set()
 let wavesurfer = null
+let waveformLoadTimeout = null
 // Annotation painted by the show-annotations-while-playing path; reset
 // wherever the canvas is cleared outside that path.
 let lastShownWhilePlaying = null
@@ -4265,9 +4266,16 @@ const loadWaveForm = () => {
   if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) {
     if (rawPlayer.value?.currentPlayer?.src) {
       try {
-        if (wavesurfer) wavesurfer.destroy()
+        if (wavesurfer) {
+          wavesurfer.destroy()
+          // configureWaveForm may set none up: no container, or a throw.
+          wavesurfer = null
+        }
         configureWaveForm()
-        setTimeout(() => {
+        // The load still pending from a switch less than 100 ms ago would
+        // fetch the movie a second time, into this new waveform.
+        clearTimeout(waveformLoadTimeout)
+        waveformLoadTimeout = setTimeout(() => {
           // Destroyed meanwhile: the player closed, or moved on to a
           // preview that is no movie.
           if (!wavesurfer) return
@@ -5194,6 +5202,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', onFocusToggle, true)
   leaveRoom()
   $socket.off('preview-file:annotation-update', onPreviewFileAnnotationUpdate)
+  clearTimeout(waveformLoadTimeout)
   if (wavesurfer) {
     wavesurfer.destroy()
     wavesurfer = null

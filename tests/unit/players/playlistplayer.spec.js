@@ -307,6 +307,7 @@ describe('PlaylistPlayer.vue', () => {
       preview_file_id: 'preview-2',
       preview_file_extension: 'png'
     }
+    const otherMovie = { ...movie, id: 'shot-3', preview_file_id: 'preview-3' }
 
     afterEach(() => {
       vi.useRealTimers()
@@ -330,6 +331,16 @@ describe('PlaylistPlayer.vue', () => {
       return waveSurfer.create.mock.results.at(-1).value
     }
 
+    const goToNextShot = async () => {
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      await flushPromises()
+    }
+
     it('loads the waveform of the movie on screen', async () => {
       const waveform = await showWaveform([movie])
       await vi.advanceTimersByTimeAsync(100)
@@ -346,15 +357,33 @@ describe('PlaylistPlayer.vue', () => {
 
     it('drops the waveform load of a movie left for a picture', async () => {
       const waveform = await showWaveform([movie, picture])
-      wrapper
-        .findAllComponents({ name: 'ButtonSimple' })
-        .find(
-          button => button.attributes('title') === 'playlists.actions.next_shot'
-        )
-        .vm.$emit('click')
-      await flushPromises()
+      await goToNextShot()
       await vi.advanceTimersByTimeAsync(100)
       expect(waveform.load).not.toHaveBeenCalled()
+    })
+
+    // Each switch sets a new waveform up: the load still pending from the
+    // previous one fetched the movie a second time, into the new waveform.
+    it('loads the movie once on two quick switches', async () => {
+      const created = waveSurfer.create.mock.results.length
+      await showWaveform([movie, otherMovie])
+      await goToNextShot()
+      await vi.advanceTimersByTimeAsync(100)
+      const loads = waveSurfer.create.mock.results
+        .slice(created)
+        .flatMap(({ value }) => value.load.mock.calls)
+      expect(loads).toEqual([['/movie.mp4']])
+    })
+
+    it('loads nothing into the waveform it destroyed', async () => {
+      const waveform = await showWaveform([movie, otherMovie])
+      await vi.advanceTimersByTimeAsync(100)
+      // No container left: no new waveform is set up.
+      document.getElementById.mockReturnValue(null)
+      await goToNextShot()
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.destroy).toHaveBeenCalled()
+      expect(waveform.load).toHaveBeenCalledTimes(1)
     })
 
     // wavesurfer.js 8 sends 'interaction' from a click handler that only
