@@ -1025,6 +1025,10 @@
       "view_as_playlist": "以播放清單檢視",
       "view_created": "查看播放清單"
     },
+    "plugins": {
+      "load_error": "無法載入外掛 {name}。",
+      "page_not_found": "此外掛 {name} 中沒有此頁面。"
+    },
     "productions": {
       "clients": {
         "access_description": "這些設定決定此製作的客戶能看到什麼，包括預覽帳號。",

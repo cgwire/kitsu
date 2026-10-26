@@ -1025,6 +1025,10 @@
       "view_as_playlist": "以播放列表查看",
       "view_created": "查看播放列表"
     },
+    "plugins": {
+      "load_error": "无法加载插件 {name}。",
+      "page_not_found": "插件 {name} 中不存在此页面。"
+    },
     "productions": {
       "clients": {
         "access_description": "这些设置决定该制作的客户能看到什么，包括预览账户。",

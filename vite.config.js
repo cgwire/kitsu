@@ -21,7 +21,11 @@ export default defineConfig({
   // v-t: compile its legacy API and its full install out of the bundle.
   define: {
     __VUE_I18N_LEGACY_API__: false,
-    __VUE_I18N_FULL_INSTALL__: false
+    __VUE_I18N_FULL_INSTALL__: false,
+    // Comma-separated `id=url` map for injected-plugin Vite servers in dev.
+    __KITSU_PLUGIN_DEV_URLS__: JSON.stringify(
+      process.env.KITSU_PLUGIN_DEV_URLS || ''
+    )
   },
   build: {
     sourcemap: true,

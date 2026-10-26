@@ -1443,6 +1443,11 @@ export default {
     }
   },
 
+  plugins: {
+    load_error: 'The {name} plugin could not be loaded.',
+    page_not_found: 'This page does not exist in the {name} plugin.'
+  },
+
   productions: {
     current: 'Selected production',
     delete_text: 'Are you sure you want to remove {name} from your database? Please confirm by typing the name of the production you want to delete in the text field.',

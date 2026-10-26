@@ -1025,6 +1025,10 @@
       "view_as_playlist": "재생 목록으로 보기",
       "view_created": "재생 목록 보기"
     },
+    "plugins": {
+      "load_error": "{name} 플러그인을 불러올 수 없습니다.",
+      "page_not_found": "이 페이지는 {name} 플러그인에 없습니다."
+    },
     "productions": {
       "clients": {
         "access_description": "이 설정은 미리보기 계정을 포함해 이 프로덕션의 클라이언트에게 무엇을 보여줄지 정합니다.",

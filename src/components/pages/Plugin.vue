@@ -1,5 +1,7 @@
 <template>
-  <div class="plugin-page page fixed-page">
+  <!-- injected: Zou detected frontend/dist/plugin.js (host-integration bundle) -->
+  <plugin-host v-if="plugin?.injected" class="plugin-page-host" />
+  <div v-else-if="plugin" class="plugin-page page fixed-page">
     <iframe
       class="plugin-iframe"
       :src="pluginUrl"
@@ -8,18 +10,31 @@
       referrerpolicy="same-origin"
     ></iframe>
   </div>
+  <p v-else class="has-text-centered mt2">
+    {{ t('main.loading') }}
+  </p>
 </template>
 
 <script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { useHead } from '@unhead/vue'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
-import { computed } from 'vue'
-import { useHead } from '@unhead/vue'
 
+import PluginHost from '@/components/pages/plugins/PluginHost.vue'
+
+// Composables
+// --------------------------------------------------------------------------
+const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
 
-const plugins = computed(() => store.getters.studioPlugins || [])
+// Computed
+// --------------------------------------------------------------------------
+const plugins = computed(() => store.getters.plugins || [])
 const productionId = computed(() => route.params.production_id || '')
 const episodeId = computed(() =>
   store.getters.isTVShow && productionId.value
@@ -52,12 +67,12 @@ const pluginUrl = computed(() => {
   return `${baseUrl}?${params.toString()}`
 })
 
-const plugin = computed(() => {
-  return plugins.value.find(
-    plugin => plugin.plugin_id === route.params.plugin_id
-  )
-})
+const plugin = computed(() =>
+  plugins.value.find(entry => entry.plugin_id === route.params.plugin_id)
+)
 
+// Head
+// --------------------------------------------------------------------------
 useHead({
   title: computed(() => {
     if (plugin.value) {
@@ -73,6 +88,10 @@ useHead({
   padding-left: 0;
   padding-right: 0;
   padding-bottom: 0;
+}
+
+.plugin-page-host {
+  padding: 5rem 1rem;
 }
 
 .plugin-iframe {

@@ -1396,6 +1396,10 @@
         "unmute": "Wyłącz wyciszenie"
       }
     },
+    "plugins": {
+      "load_error": "Nie udało się załadować wtyczki {name}.",
+      "page_not_found": "Ta strona nie istnieje we wtyczce {name}."
+    },
     "productions": {
       "clients": {
         "access_description": "Te ustawienia określają, co widzą klienci tej produkcji, w tym konto podglądu.",
