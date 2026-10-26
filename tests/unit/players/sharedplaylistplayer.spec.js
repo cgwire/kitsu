@@ -89,7 +89,7 @@ const mountPlayer = ({
         SoundViewer: {
           name: 'SoundViewer',
           template: '<div />',
-          props: { previewUrl: String },
+          props: { isMuted: Boolean, previewUrl: String, volume: Number },
           methods: {
             pause: () => {},
             play: playSound,
@@ -262,6 +262,19 @@ describe('players/SharedPlaylistPlayer', () => {
         wrapper.findComponent({ name: 'SoundViewer' }).props('previewUrl')
       ).toContain('preview-sound-2')
       expect(playSound).toHaveBeenCalledTimes(2)
+      wrapper.unmount()
+    })
+
+    it('plays a sound at the volume and the mute of the movies', async () => {
+      const wrapper = mountPlayer({ entities })
+      const bar = wrapper.findComponent(SharedPlaylistButtonBar)
+      const soundViewer = () => wrapper.findComponent({ name: 'SoundViewer' })
+      expect(soundViewer().props('volume')).toBe(100)
+      bar.vm.$emit('update:volume', 0)
+      bar.vm.$emit('update:isMuted', true)
+      await nextTick()
+      expect(soundViewer().props('volume')).toBe(0)
+      expect(soundViewer().props('isMuted')).toBe(true)
       wrapper.unmount()
     })
 

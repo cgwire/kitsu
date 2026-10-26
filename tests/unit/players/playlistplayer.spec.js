@@ -431,7 +431,8 @@ describe('PlaylistPlayer.vue', () => {
         stubs: {
           SoundViewer: {
             ...withMethods(['pause'], soundViewer),
-            name: 'SoundViewer'
+            name: 'SoundViewer',
+            props: { isMuted: Boolean, volume: Number }
           },
           ...stubs
         }
@@ -467,6 +468,21 @@ describe('PlaylistPlayer.vue', () => {
       await endSound()
       expect(play).toHaveBeenCalledTimes(2)
       expect(playbackBar().props('isPlaying')).toBe(true)
+    })
+
+    // The volume of the movies, the one kept between visits included.
+    it('plays a sound at the volume and the mute of the movies', async () => {
+      localStorage.setItem('player:volume', '30')
+      await mountWithSound([sound, picture])
+      expect(soundViewer().props('volume')).toBe(30)
+      expect(soundViewer().props('isMuted')).toBe(false)
+
+      playbackBar().vm.$emit('update:volume', 0)
+      playbackBar().vm.$emit('update:isMuted', true)
+      await flushPromises()
+      expect(soundViewer().props('volume')).toBe(0)
+      expect(soundViewer().props('isMuted')).toBe(true)
+      localStorage.removeItem('player:volume')
     })
 
     // Like an entity without preview, it keeps its slot, 2 s here.

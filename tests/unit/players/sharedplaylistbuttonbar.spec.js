@@ -38,4 +38,19 @@ describe('players/SharedPlaylistButtonBar', () => {
     )
     expect(wrapper.find('.frame-counter').exists()).toBe(false)
   })
+
+  it.each([
+    ['isMovie', true],
+    ['isSound', true],
+    ['isPicture', false]
+  ])('gives the repeat and the volume to %s: %s', (kind, isShown) => {
+    const wrapper = mountBar({ [kind]: true })
+    const titles = wrapper
+      .findAll('button')
+      .map(button => button.attributes('title'))
+    expect(titles.includes('playlists.actions.looping')).toBe(isShown)
+    expect(wrapper.findComponent({ name: 'button-sound' }).exists()).toBe(
+      isShown
+    )
+  })
 })

@@ -16,7 +16,9 @@ const waveSurfer = vi.hoisted(() => ({
       }),
       pause: vi.fn(),
       play: vi.fn(() => Promise.resolve()),
-      setTime: vi.fn()
+      setMuted: vi.fn(),
+      setTime: vi.fn(),
+      setVolume: vi.fn()
     }
   })
 }))
@@ -29,9 +31,9 @@ const isShown = element => element.style.display !== 'none'
 describe('SoundViewer.vue', () => {
   let wrapper = null
 
-  const mountViewer = previewUrl => {
+  const mountViewer = (previewUrl, props = {}) => {
     wrapper = mount(SoundViewer, {
-      props: { fileName: 'take.wav', previewUrl }
+      props: { fileName: 'take.wav', previewUrl, ...props }
     })
   }
 
@@ -277,6 +279,31 @@ describe('SoundViewer.vue', () => {
     waveform.getCurrentTime.mockReturnValue(1.6)
     waveform.handlers.ready(5)
     expect(wrapper.emitted('time-update')).toEqual([[0], [1.6]])
+  })
+
+  // The players give a sound the volume of their movies, out of 100.
+  it('plays the sound at the volume and mute it is given', async () => {
+    mountViewer('', { isMuted: true, volume: 30 })
+    await wrapper.setProps({ previewUrl: '/sound-1.wav' })
+    expect(lastWaveform().setVolume).toHaveBeenCalledWith(0.3)
+    expect(lastWaveform().setMuted).toHaveBeenCalledWith(true)
+  })
+
+  it('follows a change of volume or mute', async () => {
+    mountViewer('/sound-1.wav', { volume: 30 })
+    await wrapper.setProps({ volume: 70 })
+    expect(lastWaveform().setVolume).toHaveBeenLastCalledWith(0.7)
+    await wrapper.setProps({ isMuted: true })
+    expect(lastWaveform().setMuted).toHaveBeenLastCalledWith(true)
+  })
+
+  it('takes a volume before a sound', async () => {
+    mountViewer('')
+    await wrapper.setProps({ isMuted: true, volume: 20 })
+    expect(waveSurfer.create).not.toHaveBeenCalled()
+    await wrapper.setProps({ previewUrl: '/sound-1.wav' })
+    expect(lastWaveform().setVolume).toHaveBeenCalledWith(0.2)
+    expect(lastWaveform().setMuted).toHaveBeenCalledWith(true)
   })
 
   it('tells the end of the sound', () => {

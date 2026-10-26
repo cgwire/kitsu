@@ -61,7 +61,36 @@ describe('players/PlayerPlaybackBar', () => {
       expect(wrapper.get('.current-time').text()).toBe('00:00:01:12')
       expect(wrapper.text()).not.toContain('00:00:03:00')
       expect(wrapper.text()).not.toContain('(005')
+    })
+
+    // A review without picture needs no speed, quality or drawing.
+    it('gives a sound the repeat and the volume only', () => {
+      const wrapper = mountSound({
+        isShowAnnotationsWhilePlaying: true,
+        isWaveformDisplayed: false
+      })
+      const icons = wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .map(button => button.attributes('icon') || button.attributes('text'))
+      expect(icons).toEqual(['play', 'repeat'])
+      expect(wrapper.findComponent({ name: 'ButtonSound' }).exists()).toBe(true)
       expect(wrapper.findComponent({ name: 'SpeedButton' }).exists()).toBe(false)
+    })
+
+    it('hides the repeat of a sound in a light player, like a movie', () => {
+      const icons = wrapper =>
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .map(button => button.attributes('icon'))
+      expect(icons(mountSound({ light: true }))).not.toContain('repeat')
+      expect(icons(mountSound({ fullScreen: true, light: true }))).toContain(
+        'repeat'
+      )
+    })
+
+    it('keeps only play for a sound on a phone', () => {
+      const wrapper = mountSound({ phone: true })
+      expect(wrapper.findAllComponents({ name: 'ButtonSimple' })).toHaveLength(1)
       expect(wrapper.findComponent({ name: 'ButtonSound' }).exists()).toBe(false)
     })
 

@@ -49,7 +49,7 @@
       {{ frameIndicator }}
     </div>
 
-    <template v-if="isMovie && !phone">
+    <template v-if="(isMovie || isSound) && !phone">
       <div class="separator"></div>
 
       <button-simple
@@ -68,10 +68,10 @@
         "
         :text="isHd ? 'HD' : 'LD'"
         @click="isHd = !isHd"
-        v-if="!light || fullScreen"
+        v-if="isMovie && (!light || fullScreen)"
       />
 
-      <speed-button class="flexrow-item" v-model="speed" />
+      <speed-button class="flexrow-item" v-model="speed" v-if="isMovie" />
 
       <button-simple
         class="flexrow-item"
@@ -80,7 +80,9 @@
         icon="triangle"
         @click="isShowAnnotationsWhilePlaying = !isShowAnnotationsWhilePlaying"
         v-if="
-          isShowAnnotationsWhilePlaying !== undefined && (!light || fullScreen)
+          isMovie &&
+          isShowAnnotationsWhilePlaying !== undefined &&
+          (!light || fullScreen)
         "
       />
 
@@ -96,7 +98,9 @@
         :title="$t('playlists.actions.toggle_waveform')"
         icon="waveform"
         @click="isWaveformDisplayed = !isWaveformDisplayed"
-        v-if="isWaveformDisplayed !== undefined && (!light || fullScreen)"
+        v-if="
+          isMovie && isWaveformDisplayed !== undefined && (!light || fullScreen)
+        "
       />
     </template>
   </div>

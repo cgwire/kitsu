@@ -52,7 +52,9 @@
           <sound-viewer
             ref="soundPlayer"
             :file-name="currentPreviewFileName"
+            :is-muted="isMuted"
             :preview-url="downloadUrl"
+            :volume="volume"
             @duration-changed="onSoundDurationChanged"
             @play-ended="onPlayNext"
             @play-failed="onSoundPlayFailed"

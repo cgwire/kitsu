@@ -674,6 +674,31 @@ describe('PreviewPlayer.vue', () => {
       expect(viewer.setSoundTime).toHaveBeenCalledTimes(1)
     })
 
+    // As on a switch to another movie.
+    it.each([
+      ['a movie', moviePreview],
+      ['another sound', { ...soundPreview, id: 'preview-sound-0' }]
+    ])('ends the play on a switch from %s to a sound', async (_, previous) => {
+      wrapper = mountPlayer({ props: { previews: [previous] } })
+      await nextTick()
+      bar().vm.$emit('play-pause-clicked')
+      await nextTick()
+      expect(bar().props('isPlaying')).toBe(true)
+
+      await wrapper.setProps({ previews: [soundPreview] })
+      expect(bar().props('isPlaying')).toBe(false)
+    })
+
+    it('plays on through a reload of the preview of its sound', async () => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      bar().vm.$emit('play-pause-clicked')
+      await nextTick()
+
+      await wrapper.setProps({ previews: [{ ...soundPreview }] })
+      expect(bar().props('isPlaying')).toBe(true)
+    })
+
     // Pausing the sound on a switch away sends its time one last time.
     it('leaves the time of a movie to the movie', async () => {
       wrapper = mountPlayer({ props: { previews: [soundPreview] } })

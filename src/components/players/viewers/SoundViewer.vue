@@ -34,9 +34,18 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  isMuted: {
+    type: Boolean,
+    default: false
+  },
   previewUrl: {
     type: String,
     default: ''
+  },
+  // Out of 100, like the volume of the movies.
+  volume: {
+    type: Number,
+    default: 100
   }
 })
 
@@ -102,6 +111,9 @@ const loadSound = () => {
       progressColor: '#008732',
       height: props.defaultHeight
     })
+    // load() keeps the media element, and with it the volume and the mute.
+    wavesurfer.setVolume(props.volume / 100)
+    wavesurfer.setMuted(props.isMuted)
     wavesurfer.on('ready', duration => {
       isLoading.value = false
       emit('duration-changed', duration)
@@ -163,6 +175,16 @@ watch(
       pause()
     }
   }
+)
+
+watch(
+  () => props.volume,
+  () => wavesurfer?.setVolume(props.volume / 100)
+)
+
+watch(
+  () => props.isMuted,
+  () => wavesurfer?.setMuted(props.isMuted)
 )
 
 onBeforeUnmount(() => {

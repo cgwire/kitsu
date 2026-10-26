@@ -89,9 +89,11 @@
       ref="soundViewer"
       class="sound-viewer"
       :file-name="fileTitle"
+      :is-muted="isMuted"
       :preview-url="isSound ? originalPath : ''"
+      :volume="soundVolume"
       @duration-changed="duration => $emit('sound-duration-changed', duration)"
-      @play-ended="$emit('play-ended')"
+      @play-ended="onSoundEnded"
       @play-failed="$emit('play-ended')"
       @time-update="time => $emit('sound-time-update', time)"
       v-show="isSound"
@@ -247,6 +249,9 @@ const videoViewer = ref(null)
 const pictureViewer = ref(null)
 const soundViewer = ref(null)
 const objectViewer = ref(null)
+// A prop, not a call: the sound viewer sets up its waveform with the first
+// sound, after the player gave the volume.
+const soundVolume = ref(100)
 
 let isPlaying = false
 
@@ -337,6 +342,13 @@ const goPreviousFrame = () => {
 
 const setSoundTime = time => {
   soundViewer.value?.setCurrentTime(time)
+}
+
+// The media element starts a sound over when played from its end. A sound
+// that cannot be read ends the play whatever the repeat: it never starts.
+const onSoundEnded = () => {
+  if (props.isRepeating) soundViewer.value.play()
+  else emit('play-ended')
 }
 
 const goNextFrame = () => {
@@ -479,6 +491,7 @@ const setSpeed = rate => {
 
 const setVolume = volume => {
   if (videoViewer.value) videoViewer.value.setVolume(volume)
+  soundVolume.value = volume
 }
 
 watch(

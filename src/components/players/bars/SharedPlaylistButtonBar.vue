@@ -63,7 +63,7 @@
       </span>
     </div>
 
-    <div class="flexrow flexrow-item" v-if="isMovie">
+    <div class="flexrow flexrow-item" v-if="isMovie || isSound">
       <button-simple
         class="playlist-button flexrow-item"
         :active="isRepeating"

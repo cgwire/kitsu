@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 
 import PreviewViewer from '@/components/players/viewers/PreviewViewer.vue'
 
@@ -114,10 +115,67 @@ describe('PreviewViewer', () => {
     expect(setCurrentTime).toHaveBeenCalledWith(1.52)
   })
 
+  // The preview player drives the volume of the movie and the sound alike.
+  it('gives a sound the volume and the mute of the player', async () => {
+    const wrapper = shallowMount(PreviewViewer, {
+      props: {
+        isMuted: true,
+        preview: { id: 'preview-1', extension: 'mp3', status: 'ready' }
+      },
+      global: {
+        stubs: {
+          VideoViewer: {
+            name: 'VideoViewer',
+            template: '<div />',
+            methods: { setVolume: () => {} }
+          }
+        }
+      }
+    })
+    wrapper.vm.setVolume(40)
+    await nextTick()
+    const sound = wrapper.findComponent({ name: 'SoundViewer' })
+    expect(sound.props('volume')).toBe(40)
+    expect(sound.props('isMuted')).toBe(true)
+  })
+
+  // The preview player keeps playing: the sound starts over.
+  it.each([
+    [true, 2, undefined],
+    [false, 1, 1]
+  ])(
+    'replays a sound at its end with repeat %s',
+    (isRepeating, nbPlays, nbEnds) => {
+      const play = vi.fn()
+      const wrapper = shallowMount(PreviewViewer, {
+        props: {
+          isRepeating,
+          preview: { id: 'preview-1', extension: 'mp3', status: 'ready' }
+        },
+        global: {
+          stubs: {
+            SoundViewer: {
+              name: 'SoundViewer',
+              template: '<div />',
+              methods: { pause: () => {}, play }
+            }
+          }
+        }
+      })
+      wrapper.vm.play()
+      wrapper.findComponent({ name: 'SoundViewer' }).vm.$emit('play-ended')
+      expect(play).toHaveBeenCalledTimes(nbPlays)
+      expect(wrapper.emitted('play-ended')?.length).toBe(nbEnds)
+    }
+  )
+
   // The preview player resets its play button.
   it('ends the play of a sound that cannot be read', () => {
     const wrapper = shallowMount(PreviewViewer, {
-      props: { preview: { id: 'preview-1', extension: 'mp3', status: 'ready' } }
+      props: {
+        isRepeating: true,
+        preview: { id: 'preview-1', extension: 'mp3', status: 'ready' }
+      }
     })
     wrapper.findComponent({ name: 'SoundViewer' }).vm.$emit('play-failed')
     expect(wrapper.emitted('play-ended')).toHaveLength(1)

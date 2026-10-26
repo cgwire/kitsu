@@ -2387,6 +2387,8 @@ watch(currentPreview, (newPreview, oldPreview) => {
   // A sound not ready yet loads nothing that would reset these, and a reload
   // of the same preview keeps its sound loaded.
   if (isSound.value && newPreview?.id !== oldPreview?.id) {
+    // Another sound ends the play, as another movie does.
+    pause()
     maxDuration.value = '00:00:00:00'
     soundDuration.value = 0
     soundTime.value = 0
