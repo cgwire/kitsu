@@ -45,12 +45,20 @@ const emit = defineEmits(['play-ended'])
 const waveform = ref(null)
 const isLoading = ref(false)
 let wavesurfer = null
+let isPlayPending = false
 
+// load() gives the media element its file only once fetched: a play()
+// before that would start nothing, so it waits for the ready event.
 const play = () => {
-  wavesurfer?.play()?.catch(() => {})
+  if (isLoading.value) {
+    isPlayPending = true
+  } else {
+    wavesurfer?.play()?.catch(() => {})
+  }
 }
 
 const pause = () => {
+  isPlayPending = false
   wavesurfer?.pause()
 }
 
@@ -76,11 +84,16 @@ const loadSound = () => {
     })
     wavesurfer.on('ready', () => {
       isLoading.value = false
+      if (isPlayPending) {
+        isPlayPending = false
+        play()
+      }
     })
     // A sound the browser cannot decode fails on the media element, and
     // load() never settles.
     wavesurfer.on('error', () => {
       isLoading.value = false
+      isPlayPending = false
     })
     wavesurfer.on('finish', () => {
       emit('play-ended')
@@ -101,8 +114,9 @@ watch(
       loadSound()
     } else {
       // The parent blanks the URL when another preview kind takes over:
-      // stop playback instead of letting the loaded audio run on.
-      wavesurfer?.pause()
+      // stop playback instead of letting the loaded audio run on, and drop
+      // a play still waiting for the sound to load.
+      pause()
     }
   }
 )

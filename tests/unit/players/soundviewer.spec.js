@@ -84,6 +84,54 @@ describe('SoundViewer.vue', () => {
     expect(isShown(wrapper.find('.loading').element)).toBe(false)
   })
 
+  // The media element gets the file only once it is fetched: a play()
+  // before that started nothing, or the previous sound.
+  it('plays a sound asked for while it loads, once ready', async () => {
+    mountViewer('/sound-1.wav')
+    await flushPromises()
+    wrapper.vm.play()
+    expect(lastWaveform().play).not.toHaveBeenCalled()
+
+    lastWaveform().handlers.ready()
+    expect(lastWaveform().play).toHaveBeenCalledTimes(1)
+  })
+
+  it('drops a play asked for while it loads on pause', async () => {
+    mountViewer('/sound-1.wav')
+    await flushPromises()
+    wrapper.vm.play()
+    wrapper.vm.pause()
+    lastWaveform().handlers.ready()
+    expect(lastWaveform().play).not.toHaveBeenCalled()
+  })
+
+  it('drops a play asked for while it loads when another file takes over', async () => {
+    mountViewer('/sound-1.wav')
+    await flushPromises()
+    wrapper.vm.play()
+    await wrapper.setProps({ previewUrl: '' })
+    lastWaveform().handlers.ready()
+    expect(lastWaveform().play).not.toHaveBeenCalled()
+  })
+
+  it('drops a play asked for while it loads on a load error', async () => {
+    mountViewer('/broken.wav')
+    await flushPromises()
+    wrapper.vm.play()
+    lastWaveform().handlers.error(new Error('Media error 4'))
+    await wrapper.setProps({ previewUrl: '/sound-2.wav' })
+    lastWaveform().handlers.ready()
+    expect(lastWaveform().play).not.toHaveBeenCalled()
+  })
+
+  it('plays a loaded sound at once', async () => {
+    mountViewer('/sound-1.wav')
+    await flushPromises()
+    lastWaveform().handlers.ready()
+    wrapper.vm.play()
+    expect(lastWaveform().play).toHaveBeenCalledTimes(1)
+  })
+
   it('plays and pauses nothing before a sound', () => {
     mountViewer('')
     expect(() => {

@@ -52,7 +52,7 @@
           <sound-viewer
             ref="soundPlayer"
             :preview-url="downloadUrl"
-            @play-ended="pause"
+            @play-ended="onPlayNext"
             v-if="isSound && !loading"
           />
 
@@ -756,6 +756,10 @@ const onPlayNext = () => {
   // the toggle did nothing (the viewer's own trim loop is inactive here).
   if (isRepeating.value && isMovie.value) {
     rawPlayer.value?.playNext()
+    return
+  }
+  if (isRepeating.value && isSound.value) {
+    soundPlayer.value?.play()
     return
   }
   // Step through sub-previews first, then the next entity (handles images

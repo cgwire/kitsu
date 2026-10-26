@@ -158,7 +158,7 @@ const mountPlayer = ({
           getAnimations: () => []
         }),
         PictureViewer: withMethods(['setPanZoom']),
-        SoundViewer: withMethods(['pause', 'play', 'redraw']),
+        SoundViewer: withMethods(['pause', 'play']),
         TaskInfo: withMethods(['focusCommentTextarea']),
         VideoProgress: {
           ...withMethods(['updateProgressBar']),
@@ -403,6 +403,107 @@ describe('PlaylistPlayer.vue', () => {
 
       expect(() => onInteraction(1.5)).not.toThrow()
       expect(() => vi.advanceTimersByTime(1)).toThrow(failure)
+    })
+  })
+
+  describe('sound', () => {
+    const sound = { ...entity, preview_file_extension: 'mp3' }
+    const otherSound = {
+      id: 'shot-2',
+      preview_file_id: 'preview-2',
+      preview_file_extension: 'wav'
+    }
+    const picture = {
+      id: 'shot-3',
+      preview_file_id: 'preview-3',
+      preview_file_extension: 'png'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountWithSound = async entities => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const playSound = vi.fn()
+      wrapper = mountPlayer({
+        entities,
+        stubs: {
+          SoundViewer: {
+            ...withMethods(['pause'], { play: playSound }),
+            name: 'SoundViewer'
+          }
+        }
+      })
+      await flushPromises()
+      return playSound
+    }
+
+    const playbackBar = () => wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+
+    const endSound = async () => {
+      wrapper.findComponent({ name: 'SoundViewer' }).vm.$emit('play-ended')
+      await flushPromises()
+    }
+
+    it('moves on to the next entity at the end of a sound', async () => {
+      await mountWithSound([sound, picture])
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      await endSound()
+      expect(wrapper.findComponent({ name: 'SoundViewer' }).exists()).toBe(false)
+      expect(playbackBar().props('isPlaying')).toBe(true)
+    })
+
+    it('replays a sound at its end with repeat on', async () => {
+      const playSound = await mountWithSound([sound, picture])
+      playbackBar().vm.$emit('repeat-clicked')
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      await endSound()
+      expect(playSound).toHaveBeenCalledTimes(2)
+      expect(playbackBar().props('isPlaying')).toBe(true)
+    })
+
+    // A build holds the movies only, and plays its own sound.
+    it('starts no sound under the movie of a build', async () => {
+      const playSound = await mountWithSound([picture, sound])
+      wrapper.vm.isFullMode = true
+      await flushPromises()
+      wrapper.vm.isPlaying = true
+      wrapper
+        .findComponent({ name: 'PlaylistProgress' })
+        .vm.$emit('progress-playlist-changed', 75)
+      await flushPromises()
+      expect(playSound).not.toHaveBeenCalled()
+    })
+
+    it('starts the sound that playback reaches', async () => {
+      const playSound = await mountWithSound([sound, otherSound])
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      await flushPromises()
+      expect(playSound).toHaveBeenCalledTimes(2)
+    })
+
+    // The waveform follows the width the comments panel leaves on its own.
+    it('shows the comments of a sound', async () => {
+      wrapper = mountPlayer({ entities: [sound] })
+      await flushPromises()
+      wrapper
+        .findComponent({ name: 'PlayerAnnotationBar' })
+        .vm.$emit('comment-clicked')
+      await flushPromises()
+      expect(
+        wrapper.findComponent({ name: 'PlayerAnnotationBar' }).props()
+          .isCommentsHidden
+      ).toBe(false)
     })
   })
 

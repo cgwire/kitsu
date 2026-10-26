@@ -318,7 +318,7 @@
           :file-name="currentPreviewFileName"
           :preview-url="currentPreviewDlPath"
           :full-screen="fullScreen"
-          @play-ended="pause"
+          @play-ended="onSoundEnded"
           v-if="isCurrentPreviewSound && !isLoading"
         />
 
@@ -1017,7 +1017,8 @@ import {
   buildAnnotationSnapshotTitle,
   drawSnapshotTitle,
   isMoviePreview,
-  isPicturePreview
+  isPicturePreview,
+  isSoundPreview
 } from '@/lib/preview'
 import { formatDisplayDate, formatTimeOfDay } from '@/lib/time'
 import {
@@ -2449,15 +2450,20 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
         setAnnotationDrawingMode(true)
       }, 100)
     }
-    // Entities without any preview borrow the picture timer so continuous
-    // playback holds their slot and then moves on instead of stalling.
-    if (
-      isPlaying.value &&
-      entity &&
-      (isPicturePreview(entity.preview_file_extension) ||
-        !entity.preview_file_id)
-    ) {
-      playPicture()
+    if (isPlaying.value && entity) {
+      if (isSoundPreview(entity.preview_file_extension)) {
+        // The sound viewer gets its new file on the next render. A build holds
+        // the movies only, and plays its own sound.
+        if (!isFullMode.value) nextTick(playSound)
+      } else if (
+        // Entities without any preview borrow the picture timer so
+        // continuous playback holds their slot and then moves on instead
+        // of stalling.
+        isPicturePreview(entity.preview_file_extension) ||
+        !entity.preview_file_id
+      ) {
+        playPicture()
+      }
     }
   }
   scrollToEntity(playingEntityIndex.value)
@@ -3030,6 +3036,14 @@ const playSound = () => {
   if (playingPictureTimeout) clearTimeout(playingPictureTimeout)
   isPlaying.value = true
   if (isCurrentPreviewSound.value) soundPlayer.value?.play()
+}
+
+// A sound has no time update to chain the playlist on, like a movie does:
+// its end does it.
+const onSoundEnded = () => {
+  if (!isPlaying.value) return
+  if (isRepeating.value) playSound()
+  else onPlayNextEntity()
 }
 
 const playModel = () => {
@@ -5068,10 +5082,6 @@ watch(isFullMode, () => {
 watch(volume, () => {
   rawPlayer.value?.setVolume(volume.value)
   preferences.setPreference('player:volume', volume.value)
-})
-
-watch(isCommentsHidden, () => {
-  if (isCurrentPreviewSound.value) soundPlayer.value?.redraw()
 })
 
 watch(isMediaFullScreen, () => resetHeight())

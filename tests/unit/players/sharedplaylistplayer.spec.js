@@ -27,9 +27,18 @@ const shot = {
   preview_file_task_id: 'task-1'
 }
 
+const sound = (id, extension) => ({
+  id,
+  name: id,
+  parent_name: 'SQ01',
+  preview_file_id: `preview-${id}`,
+  preview_file_extension: extension
+})
+
 const mountPlayer = ({
   entities = [entity],
-  setCurrentFrame = () => {}
+  setCurrentFrame = () => {},
+  playSound = () => {}
 } = {}) => {
   const store = createStore({
     getters: { user: () => ({ id: 'guest-1', is_guest: true }) }
@@ -60,6 +69,12 @@ const mountPlayer = ({
             setVolume: () => {}
           }
         },
+        SoundViewer: {
+          name: 'SoundViewer',
+          template: '<div />',
+          props: { previewUrl: String },
+          methods: { pause: () => {}, play: playSound }
+        },
         VideoProgress: {
           template: '<div />',
           methods: { updateProgressBar: () => {} }
@@ -79,10 +94,13 @@ describe('players/SharedPlaylistPlayer', () => {
         disconnect() {}
       }
     )
+    // jsdom has no Element.scrollTo: the strip follows the playing entity.
+    Element.prototype.scrollTo = () => {}
   })
 
   afterAll(() => {
     vi.unstubAllGlobals()
+    delete Element.prototype.scrollTo
   })
 
   it('counts the frames from the preview duration, like the studio player', async () => {
@@ -99,6 +117,51 @@ describe('players/SharedPlaylistPlayer', () => {
     const bar = wrapper.findComponent({ name: 'SharedPlaylistButtonBar' })
     expect(bar.props('nbFramesDisplay')).toBe('100')
     wrapper.unmount()
+  })
+
+  describe('sound', () => {
+    const entities = [sound('sound-1', 'mp3'), sound('sound-2', 'wav')]
+
+    const startPlaying = async wrapper => {
+      wrapper.findComponent(SharedPlaylistButtonBar).vm.$emit('play')
+      await nextTick()
+    }
+
+    const endSound = async wrapper => {
+      wrapper.findComponent({ name: 'SoundViewer' }).vm.$emit('play-ended')
+      await nextTick()
+      await nextTick()
+    }
+
+    it('moves on to the next entity at the end of a sound', async () => {
+      const playSound = vi.fn()
+      const wrapper = mountPlayer({ entities, playSound })
+      await startPlaying(wrapper)
+      await endSound(wrapper)
+      expect(
+        wrapper.findComponent({ name: 'SoundViewer' }).props('previewUrl')
+      ).toContain('preview-sound-2')
+      expect(playSound).toHaveBeenCalledTimes(2)
+      expect(
+        wrapper.findComponent(SharedPlaylistButtonBar).props('isPlaying')
+      ).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('replays a sound at its end with repeat on', async () => {
+      const playSound = vi.fn()
+      const wrapper = mountPlayer({ entities, playSound })
+      wrapper
+        .findComponent(SharedPlaylistButtonBar)
+        .vm.$emit('update:isRepeating', true)
+      await startPlaying(wrapper)
+      await endSound(wrapper)
+      expect(
+        wrapper.findComponent({ name: 'SoundViewer' }).props('previewUrl')
+      ).toContain('preview-sound-1')
+      expect(playSound).toHaveBeenCalledTimes(2)
+      wrapper.unmount()
+    })
   })
 
   describe('timecode navigation', () => {
