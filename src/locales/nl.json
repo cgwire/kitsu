@@ -1131,6 +1131,7 @@
       "metadata": {
         "add_new_values": "Er zijn momenteel geen beschikbare waarden.",
         "available_values": "Beschikbare waarden",
+        "built_in_name": "Een ingebouwd veld gebruikt deze naam al.",
         "choices": "Lijst van waarden",
         "delete_text": "Weet je zeker dat je deze kolom en gerelateerde gegevens voor alle assets van deze productie wilt verwijderen?",
         "delete_error": "Er is een fout opgetreden bij het verwijderen van de metadatakolom.",

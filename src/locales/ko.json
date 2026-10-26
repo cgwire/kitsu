@@ -1131,6 +1131,7 @@
       "metadata": {
         "add_new_values": "현재 사용 가능한 값이 없습니다.",
         "available_values": "사용 가능한 값",
+        "built_in_name": "이 이름은 이미 기본 제공 필드에서 사용 중입니다.",
         "choices": "값 목록",
         "delete_text": "이 프로덕션의 모든 어셋에 대한 열과 관련 데이터를 삭제하시겠습니까?",
         "delete_error": "이 메타데이터 열을 삭제하는 동안 오류가 발생했습니다.",

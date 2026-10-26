@@ -1131,6 +1131,7 @@
       "metadata": {
         "add_new_values": "Es sind derzeit keine Werte verfügbar.",
         "available_values": "Verfügbare Werte",
+        "built_in_name": "Ein integriertes Feld verwendet diesen Namen bereits.",
         "choices": "Liste der Werte",
         "delete_text": "Sind Sie sicher, dass Sie diese Spalte und die zugehörigen Daten für alle Assets dieser Produktion löschen möchten?",
         "delete_error": "Beim Löschen dieser Metadatenspalte ist ein Fehler aufgetreten.",
