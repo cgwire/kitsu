@@ -356,6 +356,25 @@ describe('PlaylistPlayer.vue', () => {
       await vi.advanceTimersByTimeAsync(100)
       expect(waveform.load).not.toHaveBeenCalled()
     })
+
+    // wavesurfer.js 8 sends 'interaction' from a click handler that only
+    // logs what throws, which Sentry keeps as a mere breadcrumb.
+    it('throws the error of a waveform click outside wavesurfer', async () => {
+      const waveform = await showWaveform([movie])
+      const [, onInteraction] = waveform.on.mock.calls.find(
+        ([event]) => event === 'interaction'
+      )
+      const failure = new Error('No frame')
+      vi.spyOn(
+        wrapper.findComponent({ ref: 'raw-player' }).vm,
+        'setCurrentFrame'
+      ).mockImplementation(() => {
+        throw failure
+      })
+
+      expect(() => onInteraction(1.5)).not.toThrow()
+      expect(() => vi.advanceTimersByTime(1)).toThrow(failure)
+    })
   })
 
   // The comparison viewer shows movies only: on a picture, a comparison

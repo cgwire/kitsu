@@ -4244,8 +4244,18 @@ const configureWaveForm = () => {
     })
     // 'interaction' fires only on a user click or drag, never on the
     // seekTo() that keeps the waveform in sync with the video, so it needs
-    // no re-entrancy guard and works while playing.
-    wavesurfer.on('interaction', time => setCurrentTimeRaw(time))
+    // no re-entrancy guard and works while playing. wavesurfer.js 8 sends it
+    // from a click handler that only logs what throws: a failure is thrown
+    // again outside, where Sentry still catches it.
+    wavesurfer.on('interaction', time => {
+      try {
+        setCurrentTimeRaw(time)
+      } catch (err) {
+        setTimeout(() => {
+          throw err
+        })
+      }
+    })
   } catch (err) {
     console.error(err)
   }

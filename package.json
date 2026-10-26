@@ -71,7 +71,7 @@
     "vuedraggable": "4.1.0",
     "vuex": "4.1.0",
     "vuex-router-sync": "6.0.0-rc.1",
-    "wavesurfer.js": "7.12.12"
+    "wavesurfer.js": "8.0.3"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
