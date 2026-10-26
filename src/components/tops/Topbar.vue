@@ -836,7 +836,7 @@ const configureProduction = async routeProductionId => {
     // the coercion navigates a second time, over this very one.
     updateCombosFromRoute(currentEpisodeId.value)
   } catch (err) {
-    console.error(err)
+    errors.logRequestFailure(err)
   }
 }
 
@@ -848,7 +848,7 @@ const configureEpisode = async () => {
     try {
       await store.dispatch('loadEpisodes')
     } catch (err) {
-      console.error(err)
+      errors.logRequestFailure(err)
       return
     }
     if (route.params.production_id !== routeProductionId) return

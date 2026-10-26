@@ -206,8 +206,12 @@ export const reportApiError = async (err, { method, path, duration }) => {
   // Sentry records the breadcrumb of the request once the microtasks of its
   // response have run: capture in a later task to keep it.
   await new Promise(resolve => setTimeout(resolve))
-  // Leaving the page cuts the requests still running.
-  if (kind === 'no response' && isPageHidden) return
+  // Leaving the page cuts the requests still running. The route stays free
+  // for a failure once the page is back from the back-forward cache.
+  if (kind === 'no response' && isPageHidden) {
+    reportedRoutes.delete(key)
+    return
+  }
   const identity =
     err.status === 403 && isOwnData(path) ? await getSessionOwner() : null
   Sentry.captureMessage(`API ${kind} on ${method} ${route}`, {
