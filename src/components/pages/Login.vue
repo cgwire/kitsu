@@ -59,6 +59,7 @@
           <div class="field">
             <p class="control has-icon">
               <input
+                ref="passwordFieldRef"
                 class="input is-medium password"
                 type="password"
                 autocomplete="current-password"
@@ -149,6 +150,7 @@ const store = useStore()
 
 const email = ref('')
 const password = ref('')
+const passwordFieldRef = ref(null)
 const fadeAway = ref(false)
 const isInactiveUserError = ref(false)
 const isMissingOTP = ref(false)
@@ -246,6 +248,8 @@ const changedTwoFA = () => {
 onMounted(() => {
   email.value = store.state.login.email
   password.value = store.state.login.password
+  // Back with the email filled in, the user only has the password to type.
+  if (email.value) passwordFieldRef.value?.focus()
 })
 
 // Head
