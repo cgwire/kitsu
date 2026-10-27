@@ -22,6 +22,25 @@ const mountBar = (props = {}) =>
   })
 
 describe('players/PlayerPlaybackBar', () => {
+  // The bar sits at the bottom of a full screen: a list opening downward
+  // runs off the screen.
+  it('opens the list of the 3D animations upward, in their order', () => {
+    const animations = [
+      { label: 'Walk', value: 'walk' },
+      { label: 'Idle', value: 'idle' }
+    ]
+    const wrapper = mountBar({
+      available3DAnimations: animations,
+      is3DAnimation: true,
+      is3DModel: true,
+      isMovie: false
+    })
+    const combo = wrapper
+      .findAllComponents({ name: 'ComboboxStyled' })
+      .find(combo => combo.props('options')?.[0]?.value === 'walk')
+    expect(combo.props()).toMatchObject({ isReversed: true, keepOrder: true })
+  })
+
   describe('frame indicator', () => {
     it('keeps the 1-based numbering without a frame start', () => {
       const wrapper = mountBar()
