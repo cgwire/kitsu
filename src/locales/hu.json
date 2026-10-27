@@ -483,6 +483,7 @@
         "choose": "Kiválaszt",
         "error_empty": "A fájl üres.",
         "error_imported_rows": "A hiba előtt {count} sor lett importálva. | A hiba előtt {count} sor lett importálva.",
+        "import_success": "{count} sor lett importálva. | {count} sor lett importálva.",
         "error_line": "{line}. sor",
         "error_read": "Nem sikerült beolvasni a fájlt. Kérlek válaszd ki újra.",
         "error_timeout": "Az importálás a vártnál tovább tart, és a háttérben folytatódik.",

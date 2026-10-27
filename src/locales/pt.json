@@ -483,6 +483,7 @@
         "choose": "Escolher",
         "error_empty": "O arquivo está vazio.",
         "error_imported_rows": "{count} linha foi importada antes do erro. | {count} linhas foram importadas antes do erro.",
+        "import_success": "{count} linha foi importada. | {count} linhas foram importadas.",
         "error_line": "Linha {line}",
         "error_read": "Não foi possível ler o arquivo. Selecione-o novamente.",
         "error_timeout": "A importação está demorando mais do que o esperado e continua em segundo plano.",

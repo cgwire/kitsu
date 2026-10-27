@@ -483,6 +483,7 @@
         "choose": "Auswählen",
         "error_empty": "Die Datei ist leer.",
         "error_imported_rows": "{count} Zeile wurde vor dem Fehler importiert. | {count} Zeilen wurden vor dem Fehler importiert.",
+        "import_success": "{count} Zeile wurde importiert. | {count} Zeilen wurden importiert.",
         "error_line": "Zeile {line}",
         "error_read": "Die Datei konnte nicht gelesen werden. Bitte wählen Sie sie erneut aus.",
         "error_timeout": "Der Import dauert länger als erwartet und läuft im Hintergrund weiter.",

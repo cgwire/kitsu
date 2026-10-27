@@ -294,4 +294,35 @@ describe('ImportRenderModal', () => {
       expect(isConfirmDisabled(wrapper)).toBe(false)
     })
   })
+
+  describe('imported rows', () => {
+    const mountImported = props =>
+      mount(ImportRenderModal, {
+        props: {
+          active: true,
+          columns: ['Sequence', 'Name', 'Frames'],
+          dataMatchers: ['Sequence', 'Name'],
+          parsedCsv: parsedCsv().slice(0, 2),
+          ...props
+        },
+        global: { plugins: [store, i18n], mocks: { $t } }
+      })
+
+    test('show nothing by default', () => {
+      const wrapper = mountImported()
+
+      expect(wrapper.find('.import-success').exists()).toBe(false)
+      expect(isConfirmDisabled(wrapper)).toBe(false)
+    })
+
+    test('confirm the import with its row count', () => {
+      const wrapper = mountImported({ importedRows: 2 })
+
+      expect(wrapper.find('.import-success').text()).toBe(
+        'main.csv.import_success {"count":2}'
+      )
+      // Confirming again would import the same rows a second time.
+      expect(isConfirmDisabled(wrapper)).toBe(true)
+    })
+  })
 })

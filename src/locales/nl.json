@@ -483,6 +483,7 @@
         "choose": "Kies",
         "error_empty": "Het bestand is leeg.",
         "error_imported_rows": "{count} regel is geïmporteerd vóór de fout. | {count} regels zijn geïmporteerd vóór de fout.",
+        "import_success": "{count} regel is geïmporteerd. | {count} regels zijn geïmporteerd.",
         "error_line": "Regel {line}",
         "error_read": "Kon het bestand niet lezen. Selecteer het opnieuw.",
         "error_timeout": "De import duurt langer dan verwacht en loopt op de achtergrond verder.",

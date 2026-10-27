@@ -485,6 +485,7 @@
         "choose": "Choisir",
         "error_empty": "Le fichier est vide.",
         "error_imported_rows": "{count} ligne a été importée avant l'erreur. | {count} lignes ont été importées avant l'erreur.",
+        "import_success": "{count} ligne a été importée. | {count} lignes ont été importées.",
         "error_line": "Ligne {line}",
         "error_read": "Impossible de lire le fichier. Veuillez le sélectionner à nouveau.",
         "error_timeout": "L'import prend plus de temps que prévu et se poursuit en arrière-plan.",

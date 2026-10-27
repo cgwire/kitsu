@@ -483,6 +483,7 @@
         "choose": "Elija",
         "error_empty": "El archivo está vacío.",
         "error_imported_rows": "Se importó {count} línea antes del error. | Se importaron {count} líneas antes del error.",
+        "import_success": "Se importó {count} línea. | Se importaron {count} líneas.",
         "error_line": "Línea {line}",
         "error_read": "No se ha podido leer el archivo. Por favor, selecciónelo de nuevo.",
         "error_timeout": "La importación está tardando más de lo previsto y continúa en segundo plano.",

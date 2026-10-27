@@ -365,6 +365,7 @@
           :is-loading="loading.importing"
           :is-error="errors.importing"
           :import-error="errors.importingError"
+          :imported-rows="importedRows"
           :parsed-csv="parsedCSV"
           :form-data="importCsvFormData"
           :columns="[...dataMatchers, ...optionalColumns]"
@@ -575,6 +576,7 @@ const estimationFilter = ref('all')
 const importCsvFormData = ref({})
 const isScheduleVisible = ref(false)
 const parsedCSV = ref([])
+const importedRows = ref(null)
 const priorityFilter = ref('-1')
 const retakeCountFilter = ref('all')
 const tasks = ref([])
@@ -1908,6 +1910,7 @@ const showImportRenderModal = () => {
 
 const hideImportRenderModal = () => {
   modals.isImportRenderDisplayed = false
+  importedRows.value = null
 }
 
 const resetImport = () => {
@@ -1934,8 +1937,11 @@ const uploadImportFile = data => {
 
   store
     .dispatch('uploadTaskTypeEstimations', importCsvFormData.value)
-    .then(() => {
-      hideImportRenderModal()
+    .then(rows => {
+      // A picked file opens its preview even while an upload runs: the count
+      // only goes to the file it was uploaded from. The list needs no
+      // reload: Zou sends a task:update for each row.
+      if (parsedCSV.value === data) importedRows.value = rows.length
     })
     .catch(err => {
       errors.importingError = err
@@ -1968,6 +1974,7 @@ const renderImport = async (data, mode) => {
       mode === 'file' ? data.get('file') : data
     )
     parsedCSV.value = [renameExportLabels(headers), ...lines]
+    importedRows.value = null
     hideImportModal()
     showImportRenderModal()
   } catch (err) {

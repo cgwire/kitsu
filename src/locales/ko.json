@@ -483,6 +483,7 @@
         "choose": "선택",
         "error_empty": "파일이 비어 있습니다.",
         "error_imported_rows": "오류 발생 전에 {count}개의 행을 가져왔습니다. | 오류 발생 전에 {count}개의 행을 가져왔습니다.",
+        "import_success": "{count}개의 행을 가져왔습니다. | {count}개의 행을 가져왔습니다.",
         "error_line": "{line}행",
         "error_read": "파일을 읽을 수 없습니다. 다시 선택해 주세요.",
         "error_timeout": "가져오기가 예상보다 오래 걸리고 있으며 백그라운드에서 계속 진행됩니다.",

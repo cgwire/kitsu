@@ -483,6 +483,7 @@
         "choose": "Vælg",
         "error_empty": "Filen er tom.",
         "error_imported_rows": "{count} linje blev importeret før fejlen. | {count} linjer blev importeret før fejlen.",
+        "import_success": "{count} linje blev importeret. | {count} linjer blev importeret.",
         "error_line": "Linje {line}",
         "error_read": "Filen kunne ikke læses. Vælg den venligst igen.",
         "error_timeout": "Importen tager længere tid end forventet og fortsætter i baggrunden.",

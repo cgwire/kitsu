@@ -1012,6 +1012,7 @@ export default {
       choose: 'Choose',
       error_empty: 'The file is empty.',
       error_imported_rows: '{count} row was imported before the error. | {count} rows were imported before the error.',
+      import_success: '{count} row was imported. | {count} rows were imported.',
       error_line: 'Line {line}',
       error_read: 'Could not read the file. Please select it again.',
       error_timeout: 'The import is taking longer than expected and continues in the background.',

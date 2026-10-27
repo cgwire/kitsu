@@ -483,6 +483,7 @@
         "choose": "選択",
         "error_empty": "ファイルが空です。",
         "error_imported_rows": "エラーの前に {count} 行がインポートされました。 | エラーの前に {count} 行がインポートされました。",
+        "import_success": "{count} 行がインポートされました。 | {count} 行がインポートされました。",
         "error_line": "{line} 行目",
         "error_read": "ファイルを読み込めませんでした。もう一度選択してください。",
         "error_timeout": "インポートに予想より時間がかかっています。処理はバックグラウンドで続いています。",

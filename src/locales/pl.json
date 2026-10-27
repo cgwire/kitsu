@@ -976,6 +976,7 @@
         "choose": "Wybierz",
         "error_empty": "Plik jest pusty.",
         "error_imported_rows": "Przed błędem zaimportowano {count} wiersz. | Liczba wierszy zaimportowanych przed błędem: {count}.",
+        "import_success": "Zaimportowano {count} wiersz. | Liczba zaimportowanych wierszy: {count}.",
         "error_line": "Wiersz {line}",
         "error_read": "Nie udało się odczytać pliku. Wybierz go ponownie.",
         "error_timeout": "Import trwa dłużej, niż oczekiwano, i jest kontynuowany w tle.",

@@ -485,6 +485,7 @@
         "choose": "Scegli",
         "error_empty": "Il file è vuoto.",
         "error_imported_rows": "{count} riga è stata importata prima dell'errore. | {count} righe sono state importate prima dell'errore.",
+        "import_success": "{count} riga è stata importata. | {count} righe sono state importate.",
         "error_line": "Riga {line}",
         "error_read": "Impossibile leggere il file. Selezionalo di nuovo.",
         "error_timeout": "L'importazione sta richiedendo più tempo del previsto e prosegue in background.",

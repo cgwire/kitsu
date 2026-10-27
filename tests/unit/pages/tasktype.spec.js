@@ -647,6 +647,142 @@ describe('TaskType page', () => {
       expect(headers).not.toContain('Difficulty')
     })
 
+    describe('after an import', () => {
+      const importRows = async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const page = await mountPage({
+          actions: {
+            // Zou answers the rows it imported
+            uploadTaskTypeEstimations: () => Promise.resolve([{}, {}])
+          },
+          section: 'tasks'
+        })
+        wrapper = page.wrapper
+        const renderModal = () => wrapper.findComponent(ImportRenderModal)
+        await wrapper
+          .findComponent(ImportModal)
+          .vm.$emit('confirm', 'Parent;Entity\nProps;Tree\nProps;Rock', 'text')
+        await flushPromises()
+        await renderModal().vm.$emit(
+          'confirm',
+          renderModal().props('parsedCsv')
+        )
+        await flushPromises()
+        return renderModal
+      }
+
+      it('keeps the preview open with the imported row count', async () => {
+        const renderModal = await importRows()
+
+        expect(renderModal().props()).toMatchObject({
+          active: true,
+          importedRows: 2,
+          isError: false
+        })
+      })
+
+      it('drops the row count once the preview is closed', async () => {
+        const renderModal = await importRows()
+
+        await renderModal().vm.$emit('cancel')
+
+        expect(renderModal().props()).toMatchObject({
+          active: false,
+          importedRows: null
+        })
+      })
+
+      it('drops the row count for another file', async () => {
+        const renderModal = await importRows()
+        // the stub has no file to forget
+        wrapper.findComponent(ImportModal).vm.reset = vi.fn()
+
+        await renderModal().vm.$emit('reupload')
+
+        expect(renderModal().props('importedRows')).toBeNull()
+      })
+
+      it('drops the row count for a new preview', async () => {
+        const renderModal = await importRows()
+        await renderModal().vm.$emit('cancel')
+
+        await wrapper
+          .findComponent(ImportModal)
+          .vm.$emit('confirm', 'Parent;Entity\nProps;Tree', 'text')
+        await flushPromises()
+
+        expect(renderModal().props()).toMatchObject({
+          active: true,
+          importedRows: null
+        })
+      })
+
+      const startUpload = async () => {
+        let answerUpload = null
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const page = await mountPage({
+          actions: {
+            uploadTaskTypeEstimations: () =>
+              new Promise(resolve => {
+                answerUpload = resolve
+              })
+          },
+          section: 'tasks'
+        })
+        wrapper = page.wrapper
+        const renderModal = () => wrapper.findComponent(ImportRenderModal)
+        const importModal = () => wrapper.findComponent(ImportModal)
+        await importModal().vm.$emit(
+          'confirm',
+          'Parent;Entity\nProps;Tree\nProps;Rock',
+          'text'
+        )
+        await flushPromises()
+        await renderModal().vm.$emit('confirm', renderModal().props('parsedCsv'))
+        // the stub has no file to forget
+        importModal().vm.reset = vi.fn()
+        return {
+          answerUpload: rows => answerUpload(rows),
+          importModal,
+          renderModal
+        }
+      }
+
+      it('gives another file no count of an upload still running', async () => {
+        const { answerUpload, importModal, renderModal } = await startUpload()
+        await renderModal().vm.$emit('reupload')
+        // A picked file confirms at once, loading or not.
+        await importModal().vm.$emit('confirm', 'Parent;Entity\nProps;Tree', 'text')
+        await flushPromises()
+
+        answerUpload([{}, {}])
+        await flushPromises()
+
+        expect(renderModal().props()).toMatchObject({
+          active: true,
+          importedRows: null
+        })
+      })
+
+      it.each(['cancel', 'reupload'])(
+        'gives no count of an upload answered after a %s to the next file',
+        async event => {
+          const { answerUpload, importModal, renderModal } = await startUpload()
+          await renderModal().vm.$emit(event)
+          answerUpload([{}, {}])
+          await flushPromises()
+
+          await importModal().vm.$emit('confirm', 'Parent;Entity\nProps;Tree', 'text')
+          await flushPromises()
+
+          expect(renderModal().props()).toMatchObject({
+            active: true,
+            importedRows: null
+          })
+        }
+      )
+    })
+
     it('releases the modal on a bug, left to the error handler', async () => {
       vi.stubGlobal('FileReader', BrokenFileReader)
       const modal = await openImportModal()

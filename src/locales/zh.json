@@ -483,6 +483,7 @@
         "choose": "选择",
         "error_empty": "文件为空。",
         "error_imported_rows": "错误发生前已导入 {count} 行。 | 错误发生前已导入 {count} 行。",
+        "import_success": "已导入 {count} 行。 | 已导入 {count} 行。",
         "error_line": "第 {line} 行",
         "error_read": "无法读取文件。请重新选择。",
         "error_timeout": "导入耗时超出预期，正在后台继续进行。",

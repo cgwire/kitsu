@@ -166,6 +166,10 @@
       </p>
     </div>
 
+    <div class="import-success" v-if="importedRows !== null">
+      {{ $t('main.csv.import_success', { count: importedRows }) }}
+    </div>
+
     <div class="render-footer">
       <button-simple
         :text="$t('main.csv.preview_reupload')"
@@ -208,6 +212,9 @@ const props = defineProps({
   database: { type: Object, default: () => ({}) },
   disableUpdate: { type: Boolean, default: false },
   importError: { type: Error, default: null },
+  // The row count of a confirmed import, which then shows instead of a
+  // second import of the same rows.
+  importedRows: { type: Number, default: null },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   parsedCsv: { type: Array, default: () => [] },
@@ -369,6 +376,7 @@ const isTimeout = computed(() => Boolean(props.importError?.isTimeout))
 const isConfirmDisabled = computed(
   () =>
     incompleteLines.value.length > 0 ||
+    props.importedRows !== null ||
     (props.blockMissingColumns && columnsRequired.value.length > 0) ||
     // Importing again right away would race the import still running.
     (props.isError && isTimeout.value) ||
@@ -557,6 +565,16 @@ watch(
     font-size: 0.9em;
     margin-top: 0.5em;
   }
+}
+
+.import-success {
+  background: rgba($green, 0.08);
+  border: 1px solid $green;
+  border-radius: 10px;
+  color: var(--text);
+  font-weight: bold;
+  margin-top: 1em;
+  padding: 1em;
 }
 
 .line-badge {
