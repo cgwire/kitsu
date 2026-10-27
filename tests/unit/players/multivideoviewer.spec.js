@@ -268,6 +268,18 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  // The playlist gives the stored volume as it mounts, before its first
+  // movie: both movies played at full volume until the slider moved.
+  it('plays the movies at the volume given before the first one', () => {
+    const wrapper = mountViewer()
+    wrapper.vm.setVolume(30)
+    wrapper.vm.loadEntity(0)
+
+    const volumes = wrapper.findAll('video').map(video => video.element.volume)
+    expect(volumes).toEqual([0.3, 0.3])
+    wrapper.unmount()
+  })
+
   describe('scrub seeks', () => {
     const mountSeekingViewer = async () => {
       const wrapper = mountViewer()
@@ -467,6 +479,518 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
 
       expect(wrapper.vm.currentPlayer).toBe(player)
       wrapper.unmount()
+    })
+  })
+
+  // A missing file or a file that is no movie fails on its decoder, which
+  // keeps the error, and never ends.
+  describe('movie that cannot be read', () => {
+    const fail = player => {
+      Object.defineProperty(player, 'error', {
+        configurable: true,
+        value: { code: 4 }
+      })
+      player.dispatchEvent(new Event('error'))
+    }
+
+    const mountLoaded = async (props = {}) => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const wrapper = mountViewer(props)
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      const otherPlayer = wrapper
+        .findAll('video')
+        .map(({ element }) => element)
+        .find(element => element !== player)
+      return { wrapper, player, otherPlayer }
+    }
+
+    const isShownBroken = wrapper =>
+      wrapper.find('.broken').exists() &&
+      wrapper.find('canvas').element.style.visibility === 'hidden'
+
+    it('says the movie is broken, without its spinner', async () => {
+      const { wrapper, player } = await mountLoaded()
+
+      fail(player)
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.broken').text()).toBe('preview.broken')
+      expect(isShownBroken(wrapper)).toBe(true)
+      expect(wrapper.find('.video-loader').isVisible()).toBe(false)
+      expect(wrapper.emitted('play-failed')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    // The other decoder starts preloading the next movie: the spinner came
+    // over the label.
+    it('keeps the spinner off while the next movie loads', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const { wrapper, player, otherPlayer } = await mountLoaded()
+      fail(player)
+
+      otherPlayer.dispatchEvent(new Event('loadstart'))
+      vi.advanceTimersByTime(200)
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.video-loader').isVisible()).toBe(false)
+      vi.useRealTimers()
+      wrapper.unmount()
+    })
+
+    it('tells that a play on it failed', async () => {
+      const { wrapper, player } = await mountLoaded()
+      fail(player)
+
+      wrapper.vm.play()
+
+      expect(wrapper.emitted('play-failed')).toHaveLength(1)
+      expect(wrapper.vm.isPlaying).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('tells that the movie it plays failed', async () => {
+      const { wrapper, player } = await mountLoaded()
+      wrapper.vm.play()
+
+      fail(player)
+
+      expect(wrapper.emitted('play-failed')).toHaveLength(1)
+      wrapper.unmount()
+    })
+
+    it('leaves the movie on screen when the next one fails to preload', async () => {
+      const { wrapper, otherPlayer } = await mountLoaded()
+      wrapper.vm.play()
+
+      fail(otherPlayer)
+      await wrapper.vm.$nextTick()
+
+      expect(isShownBroken(wrapper)).toBe(false)
+      expect(wrapper.emitted('play-failed')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    it('tells that the preloaded movie playback reaches failed', async () => {
+      const { wrapper, otherPlayer } = await mountLoaded()
+      fail(otherPlayer)
+      wrapper.vm.play()
+
+      wrapper.vm.playNext()
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.vm.currentIndex).toBe(1)
+      expect(isShownBroken(wrapper)).toBe(true)
+      expect(wrapper.emitted('play-failed')).toHaveLength(1)
+      wrapper.unmount()
+    })
+
+    it('shows the preloaded movie a click reaches as broken', async () => {
+      const { wrapper, player, otherPlayer } = await mountLoaded()
+      fail(otherPlayer)
+
+      wrapper.vm.loadEntity(1)
+      await wrapper.vm.$nextTick()
+      expect(isShownBroken(wrapper)).toBe(true)
+
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.currentPlayer).toBe(player)
+      expect(isShownBroken(wrapper)).toBe(false)
+      wrapper.unmount()
+    })
+
+    // An entity without a movie empties the source of its decoder, which
+    // fails in a browser.
+    it('sees no broken movie on an entity without one', async () => {
+      const { wrapper } = await mountLoaded({
+        entities: [
+          { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'png', fps: 25 },
+          { id: 'e2', preview_file_id: 'p2', preview_file_extension: 'mp4', fps: 25 }
+        ]
+      })
+
+      fail(wrapper.vm.currentPlayer)
+      wrapper.vm.play()
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.broken').exists()).toBe(false)
+      expect(wrapper.emitted('play-failed')).toBeUndefined()
+      wrapper.unmount()
+    })
+  })
+
+  // Zou answers 404 for the movie of a preview file until a job has built
+  // its files.
+  describe('movie still processed', () => {
+    const fail = player => {
+      Object.defineProperty(player, 'error', {
+        configurable: true,
+        value: { code: 4 }
+      })
+      player.dispatchEvent(new Event('error'))
+    }
+
+    // The statuses the socket keeps, as the previews store module does.
+    const mountWithStatuses = async (statuses = {}, props = {}) => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const store = createStore({
+        state: { previewFileStatusMap: new Map(Object.entries(statuses)) },
+        getters: {
+          currentProduction: () => ({ fps: '25' }),
+          previewFileStatusMap: state => state.previewFileStatusMap
+        },
+        mutations: {
+          SET_PREVIEW_FILE_STATUS(state, { previewFileId, status }) {
+            state.previewFileStatusMap.set(previewFileId, status)
+          },
+          FORGET_PREVIEW_FILE_STATUSES(state, previewFileIds) {
+            previewFileIds.forEach(id => state.previewFileStatusMap.delete(id))
+          }
+        }
+      })
+      const wrapper = mount(MultiVideoViewer, {
+        props: {
+          entities: [
+            { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },
+            { id: 'e2', preview_file_id: 'p2', preview_file_extension: 'mp4', fps: 25 }
+          ],
+          name: 'main',
+          ...props
+        },
+        global: {
+          mocks: { $t: key => key },
+          plugins: [store]
+        }
+      })
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      const otherPlayer = wrapper
+        .findAll('video')
+        .map(({ element }) => element)
+        .find(element => element !== player)
+      return { wrapper, store, player, otherPlayer }
+    }
+
+    const isShownProcessing = wrapper =>
+      wrapper.find('.processing').exists() &&
+      !wrapper.find('.broken').exists() &&
+      wrapper.find('canvas').element.style.visibility === 'hidden'
+
+    it('says a movie of the registry is being processed', async () => {
+      const { wrapper, player } = await mountWithStatuses({ p1: 'processing' })
+
+      fail(player)
+      await wrapper.vm.$nextTick()
+
+      expect(isShownProcessing(wrapper)).toBe(true)
+      expect(wrapper.find('.processing').text()).toBe('preview.processing')
+      const spinner = wrapper
+        .findAllComponents({ name: 'Spinner' })
+        .find(component => component.props('isProcessing'))
+      expect(spinner?.isVisible()).toBe(true)
+      expect(wrapper.find('.video-loader').isVisible()).toBe(false)
+      wrapper.unmount()
+    })
+
+    // The shared playlist has no socket: its payload alone tells.
+    it('reads the status the entity carries', async () => {
+      const { wrapper, player } = await mountWithStatuses(
+        {},
+        {
+          entities: [
+            {
+              id: 'e1',
+              preview_file_id: 'p1',
+              preview_file_extension: 'mp4',
+              preview_file_status: 'processing',
+              fps: 25
+            }
+          ]
+        }
+      )
+
+      fail(player)
+      await wrapper.vm.$nextTick()
+
+      expect(isShownProcessing(wrapper)).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('reads the status of the other movie of a revision', async () => {
+      const { wrapper, player } = await mountWithStatuses(
+        {},
+        {
+          currentPreviewIndex: 1,
+          entities: [
+            {
+              id: 'e1',
+              preview_file_id: 'p1',
+              preview_file_extension: 'mp4',
+              preview_file_previews: [
+                { id: 'p1b', extension: 'mp4', status: 'processing' }
+              ],
+              fps: 25
+            }
+          ]
+        }
+      )
+      expect(player.getAttribute('src')).toContain('p1b')
+
+      fail(player)
+      await wrapper.vm.$nextTick()
+
+      expect(isShownProcessing(wrapper)).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('holds its slot like a movie that cannot be read', async () => {
+      const { wrapper, player } = await mountWithStatuses({ p1: 'processing' })
+      fail(player)
+
+      wrapper.vm.play()
+
+      expect(wrapper.emitted('play-failed')).toHaveLength(1)
+      expect(wrapper.vm.isBroken).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('says a movie whose processing failed is broken', async () => {
+      const { wrapper, player } = await mountWithStatuses({ p1: 'broken' })
+
+      fail(player)
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.broken').text()).toBe('preview.broken')
+      expect(wrapper.find('.processing').exists()).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('shows a processing movie that loads', async () => {
+      const { wrapper } = await mountWithStatuses({ p1: 'processing' })
+
+      expect(wrapper.find('.processing').exists()).toBe(false)
+      expect(wrapper.find('canvas').element.style.visibility).toBe('')
+      wrapper.unmount()
+    })
+
+    // The decoder keeps the 404 it got: load() asks for the movie again and,
+    // as in a browser, drops the error.
+    describe('once processed', () => {
+      beforeEach(() => {
+        HTMLMediaElement.prototype.load = vi.fn(function () {
+          delete this.error
+        })
+      })
+
+      const loadedPlayers = () => HTMLMediaElement.prototype.load.mock.contexts
+
+      const setReady = (store, previewFileId) =>
+        store.commit('SET_PREVIEW_FILE_STATUS', {
+          previewFileId,
+          status: 'ready'
+        })
+
+      it('loads the movie shown again', async () => {
+        const { wrapper, store, player } = await mountWithStatuses({
+          p1: 'processing'
+        })
+        fail(player)
+        await wrapper.vm.$nextTick()
+
+        setReady(store, 'p1')
+        await wrapper.vm.$nextTick()
+
+        expect(loadedPlayers()).toEqual([player])
+        expect(wrapper.find('.processing').exists()).toBe(false)
+        expect(wrapper.find('.broken').exists()).toBe(false)
+        expect(wrapper.find('canvas').element.style.visibility).toBe('')
+        wrapper.unmount()
+      })
+
+      it('loads the movie preloaded next again', async () => {
+        const { wrapper, store, otherPlayer } = await mountWithStatuses({
+          p2: 'processing'
+        })
+        fail(otherPlayer)
+
+        setReady(store, 'p2')
+        await wrapper.vm.$nextTick()
+
+        expect(loadedPlayers()).toEqual([otherPlayer])
+        wrapper.unmount()
+      })
+
+      // A movie that starts loading ends the slot the playlist holds for it.
+      it('loads the movie whose slot is held once paused', async () => {
+        const { wrapper, store, player } = await mountWithStatuses({
+          p1: 'processing'
+        })
+        fail(player)
+        wrapper.vm.play()
+
+        setReady(store, 'p1')
+        await wrapper.vm.$nextTick()
+        expect(loadedPlayers()).toEqual([])
+        expect(wrapper.find('.processing').exists()).toBe(true)
+
+        wrapper.vm.pause()
+        await wrapper.vm.$nextTick()
+        expect(loadedPlayers()).toEqual([player])
+        expect(wrapper.find('.processing').exists()).toBe(false)
+        wrapper.unmount()
+      })
+
+      // Loading the movie again, as a browser does on load(), forgets that
+      // it was processed.
+      it('shows as broken a movie whose file still fails once processed', async () => {
+        const { wrapper, store, player } = await mountWithStatuses({
+          p1: 'processing'
+        })
+        fail(player)
+        await wrapper.vm.$nextTick()
+
+        setReady(store, 'p1')
+        await wrapper.vm.$nextTick()
+        player.dispatchEvent(new Event('loadstart'))
+        fail(player)
+        await wrapper.vm.$nextTick()
+
+        expect(wrapper.find('.processing').exists()).toBe(false)
+        expect(wrapper.find('.broken').exists()).toBe(true)
+        wrapper.unmount()
+      })
+
+      // The store may never have heard that the movie was processing: the
+      // socket still says when it is ready.
+      it('loads again a failed movie the socket says is ready', async () => {
+        const { wrapper, store, player } = await mountWithStatuses()
+        fail(player)
+        await wrapper.vm.$nextTick()
+
+        setReady(store, 'p1')
+        await wrapper.vm.$nextTick()
+
+        expect(loadedPlayers()).toEqual([player])
+        wrapper.unmount()
+      })
+
+      // A deleted preview leaves the store: nothing says it is ready.
+      it('leaves a movie whose status is forgotten', async () => {
+        const { wrapper, store, player } = await mountWithStatuses({
+          p1: 'processing'
+        })
+        fail(player)
+        await wrapper.vm.$nextTick()
+
+        store.commit('FORGET_PREVIEW_FILE_STATUSES', ['p1'])
+        await wrapper.vm.$nextTick()
+
+        expect(loadedPlayers()).toEqual([])
+        expect(wrapper.find('.broken').exists()).toBe(true)
+        wrapper.unmount()
+      })
+
+      // A playlist of one movie preloads it on the other decoder too: the
+      // reload of the preloading decoder leaves the one shown to reload.
+      it('loads the movie shown on pause after the preloaded one', async () => {
+        const { wrapper, store, player, otherPlayer } = await mountWithStatuses(
+          { p1: 'processing' },
+          {
+            entities: [
+              { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 }
+            ]
+          }
+        )
+        fail(player)
+        fail(otherPlayer)
+        wrapper.vm.play()
+
+        setReady(store, 'p1')
+        await wrapper.vm.$nextTick()
+        otherPlayer.dispatchEvent(new Event('loadstart'))
+        wrapper.vm.pause()
+        await wrapper.vm.$nextTick()
+
+        expect(loadedPlayers()).toEqual([otherPlayer, player])
+        wrapper.unmount()
+      })
+
+      it('leaves a movie that loaded in the meantime', async () => {
+        const { wrapper, store, player } = await mountWithStatuses({
+          p1: 'processing'
+        })
+        Object.defineProperty(player, 'readyState', {
+          configurable: true,
+          value: HTMLMediaElement.HAVE_ENOUGH_DATA
+        })
+
+        setReady(store, 'p1')
+        await wrapper.vm.$nextTick()
+
+        expect(loadedPlayers()).toEqual([])
+        wrapper.unmount()
+      })
+
+      it('leaves a movie whose file fails once ready', async () => {
+        const { wrapper, store, player } = await mountWithStatuses({
+          p1: 'ready',
+          p2: 'processing'
+        })
+        fail(player)
+
+        setReady(store, 'p2')
+        await wrapper.vm.$nextTick()
+
+        expect(loadedPlayers()).not.toContain(player)
+        expect(wrapper.find('.broken').exists()).toBe(true)
+        wrapper.unmount()
+      })
+
+      // The shared playlist has no socket to hear of it.
+      it('asks again for a movie still processed it comes back to', async () => {
+        const { wrapper, player } = await mountWithStatuses(
+          {},
+          {
+            entities: [
+              {
+                id: 'e1',
+                preview_file_id: 'p1',
+                preview_file_extension: 'mp4',
+                preview_file_status: 'processing',
+                fps: 25
+              },
+              { id: 'e2', preview_file_id: 'p2', preview_file_extension: 'mp4', fps: 25 }
+            ]
+          }
+        )
+        fail(player)
+        wrapper.vm.loadEntity(1)
+
+        wrapper.vm.loadEntity(0)
+        await wrapper.vm.$nextTick()
+
+        expect(loadedPlayers()).toEqual([player])
+        expect(wrapper.vm.currentPlayer).toBe(player)
+        expect(wrapper.find('.processing').exists()).toBe(false)
+        expect(wrapper.find('canvas').element.style.visibility).toBe('')
+        wrapper.unmount()
+      })
+
+      it('leaves a broken movie it comes back to', async () => {
+        const { wrapper, player } = await mountWithStatuses({ p1: 'broken' })
+        fail(player)
+        wrapper.vm.loadEntity(1)
+
+        wrapper.vm.loadEntity(0)
+        await wrapper.vm.$nextTick()
+
+        expect(loadedPlayers()).toEqual([])
+        expect(wrapper.find('.broken').exists()).toBe(true)
+        wrapper.unmount()
+      })
     })
   })
 })

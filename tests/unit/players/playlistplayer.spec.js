@@ -21,6 +21,7 @@ vi.mock('wavesurfer.js', () => ({ default: waveSurfer }))
 
 // Pre-load the real store to avoid a circular-import race from child components.
 import '@/lib/auth'
+import clipboard from '@/lib/clipboard'
 
 import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
 
@@ -158,7 +159,7 @@ const mountPlayer = ({
           getAnimations: () => []
         }),
         PictureViewer: withMethods(['setPanZoom']),
-        SoundViewer: withMethods(['pause', 'play', 'redraw']),
+        SoundViewer: withMethods(['pause', 'play']),
         TaskInfo: withMethods(['focusCommentTextarea']),
         VideoProgress: {
           ...withMethods(['updateProgressBar']),
@@ -226,6 +227,9 @@ describe('PlaylistPlayer.vue', () => {
     wrapper?.unmount()
     wrapper = null
     vi.restoreAllMocks()
+    // The player keeps its volume and its mute for the next visit.
+    localStorage.removeItem('player:muted')
+    localStorage.removeItem('player:volume')
   })
 
   // The comment box waits for the snapshots, and each of them waits 500 ms
@@ -307,6 +311,7 @@ describe('PlaylistPlayer.vue', () => {
       preview_file_id: 'preview-2',
       preview_file_extension: 'png'
     }
+    const otherMovie = { ...movie, id: 'shot-3', preview_file_id: 'preview-3' }
 
     afterEach(() => {
       vi.useRealTimers()
@@ -330,6 +335,16 @@ describe('PlaylistPlayer.vue', () => {
       return waveSurfer.create.mock.results.at(-1).value
     }
 
+    const goToNextShot = async () => {
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      await flushPromises()
+    }
+
     it('loads the waveform of the movie on screen', async () => {
       const waveform = await showWaveform([movie])
       await vi.advanceTimersByTimeAsync(100)
@@ -346,6 +361,162 @@ describe('PlaylistPlayer.vue', () => {
 
     it('drops the waveform load of a movie left for a picture', async () => {
       const waveform = await showWaveform([movie, picture])
+      await goToNextShot()
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).not.toHaveBeenCalled()
+    })
+
+    // Each switch sets a new waveform up: the load still pending from the
+    // previous one fetched the movie a second time, into the new waveform.
+    it('loads the movie once on two quick switches', async () => {
+      const created = waveSurfer.create.mock.results.length
+      await showWaveform([movie, otherMovie])
+      await goToNextShot()
+      await vi.advanceTimersByTimeAsync(100)
+      const loads = waveSurfer.create.mock.results
+        .slice(created)
+        .flatMap(({ value }) => value.load.mock.calls)
+      expect(loads).toEqual([['/movie.mp4']])
+    })
+
+    it('loads nothing into the waveform it destroyed', async () => {
+      const waveform = await showWaveform([movie, otherMovie])
+      await vi.advanceTimersByTimeAsync(100)
+      // No container left: no new waveform is set up.
+      document.getElementById.mockReturnValue(null)
+      await goToNextShot()
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.destroy).toHaveBeenCalled()
+      expect(waveform.load).toHaveBeenCalledTimes(1)
+    })
+
+    // wavesurfer.js 8 sends 'interaction' from a click handler that only
+    // logs what throws, which Sentry keeps as a mere breadcrumb.
+    it('throws the error of a waveform click outside wavesurfer', async () => {
+      const waveform = await showWaveform([movie])
+      const [, onInteraction] = waveform.on.mock.calls.find(
+        ([event]) => event === 'interaction'
+      )
+      const failure = new Error('No frame')
+      vi.spyOn(
+        wrapper.findComponent({ ref: 'raw-player' }).vm,
+        'setCurrentFrame'
+      ).mockImplementation(() => {
+        throw failure
+      })
+
+      expect(() => onInteraction(1.5)).not.toThrow()
+      expect(() => vi.advanceTimersByTime(1)).toThrow(failure)
+    })
+  })
+
+  describe('sound', () => {
+    const sound = { ...entity, preview_file_extension: 'mp3' }
+    const otherSound = {
+      id: 'shot-2',
+      preview_file_id: 'preview-2',
+      preview_file_extension: 'wav'
+    }
+    const picture = {
+      id: 'shot-3',
+      preview_file_id: 'preview-3',
+      preview_file_extension: 'png'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountWithSound = async (entities, stubs = {}) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      const soundViewer = { play: vi.fn(), setCurrentTime: vi.fn() }
+      wrapper = mountPlayer({
+        entities,
+        stubs: {
+          SoundViewer: {
+            ...withMethods(['pause'], soundViewer),
+            name: 'SoundViewer',
+            props: { isMuted: Boolean, volume: Number }
+          },
+          ...stubs
+        }
+      })
+      await flushPromises()
+      return soundViewer
+    }
+
+    const playbackBar = () => wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+    const soundViewer = () => wrapper.findComponent({ name: 'SoundViewer' })
+    const entityBar = () => wrapper.findComponent({ ref: 'video-progress' })
+    const playlistBar = () => wrapper.findComponent({ name: 'PlaylistProgress' })
+
+    const endSound = async () => {
+      soundViewer().vm.$emit('play-ended')
+      await flushPromises()
+    }
+
+    it('moves on to the next entity at the end of a sound', async () => {
+      await mountWithSound([sound, picture])
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      await endSound()
+      expect(soundViewer().exists()).toBe(false)
+      expect(playbackBar().props('isPlaying')).toBe(true)
+    })
+
+    it('replays a sound at its end with repeat on', async () => {
+      const { play } = await mountWithSound([sound, picture])
+      playbackBar().vm.$emit('repeat-clicked')
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      await endSound()
+      expect(play).toHaveBeenCalledTimes(2)
+      expect(playbackBar().props('isPlaying')).toBe(true)
+    })
+
+    // The volume of the movies, the one kept between visits included.
+    it('plays a sound at the volume and the mute of the movies', async () => {
+      localStorage.setItem('player:volume', '30')
+      await mountWithSound([sound, picture])
+      expect(soundViewer().props('volume')).toBe(30)
+      expect(soundViewer().props('isMuted')).toBe(false)
+
+      playbackBar().vm.$emit('update:volume', 0)
+      playbackBar().vm.$emit('update:isMuted', true)
+      await flushPromises()
+      expect(soundViewer().props('volume')).toBe(0)
+      expect(soundViewer().props('isMuted')).toBe(true)
+      localStorage.removeItem('player:volume')
+    })
+
+    // Like an entity without preview, it keeps its slot, 2 s here.
+    it('moves on from a sound that cannot be read', async () => {
+      await mountWithSound([sound, picture])
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      soundViewer().vm.$emit('play-failed')
+      await vi.advanceTimersByTimeAsync(1900)
+      expect(soundViewer().exists()).toBe(true)
+      await vi.advanceTimersByTimeAsync(200)
+      expect(soundViewer().exists()).toBe(false)
+      expect(playbackBar().props('isPlaying')).toBe(true)
+    })
+
+    // A build holds the movies only, and plays its own sound.
+    it('starts no sound under the movie of a build', async () => {
+      const { play } = await mountWithSound([picture, sound])
+      wrapper.vm.isFullMode = true
+      await flushPromises()
+      wrapper.vm.isPlaying = true
+      playlistBar().vm.$emit('progress-playlist-changed', 75)
+      await flushPromises()
+      expect(play).not.toHaveBeenCalled()
+    })
+
+    it('starts the sound that playback reaches', async () => {
+      const { play } = await mountWithSound([sound, otherSound])
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
       wrapper
         .findAllComponents({ name: 'ButtonSimple' })
         .find(
@@ -353,8 +524,588 @@ describe('PlaylistPlayer.vue', () => {
         )
         .vm.$emit('click')
       await flushPromises()
-      await vi.advanceTimersByTimeAsync(100)
-      expect(waveform.load).not.toHaveBeenCalled()
+      expect(play).toHaveBeenCalledTimes(2)
+    })
+
+    // Zou keeps no duration for a sound: the entity bar takes the decoded
+    // one, and the playlist bar spreads the sound over the slot it has.
+    it('seeks the sound from the entity bar', async () => {
+      const { setCurrentTime } = await mountWithSound([sound, picture])
+      const setCurrentFrame = vi.spyOn(
+        wrapper.findComponent({ ref: 'raw-player' }).vm,
+        'setCurrentFrame'
+      )
+      soundViewer().vm.$emit('duration-changed', 3)
+      await flushPromises()
+      expect(entityBar().attributes('nb-frames')).toBe('75')
+
+      entityBar().vm.$emit('progress-changed', 37)
+      expect(setCurrentTime).toHaveBeenCalledTimes(1)
+      expect(setCurrentTime.mock.calls[0][0]).toBeCloseTo(1.48)
+      expect(setCurrentFrame).not.toHaveBeenCalled()
+    })
+
+    it('moves both bars with the sound', async () => {
+      await mountWithSound([sound, picture])
+      const updateProgressBar = vi.spyOn(entityBar().vm, 'updateProgressBar')
+      soundViewer().vm.$emit('duration-changed', 3)
+      soundViewer().vm.$emit('time-update', 1.5)
+      await flushPromises()
+      expect(updateProgressBar).toHaveBeenCalledWith(37.5)
+      // Half of the sound, half of its 2 s slot, which starts at frame 1.
+      expect(playlistBar().props('playlistProgress')).toBeCloseTo(1.04)
+    })
+
+    it('seeks the sound from its slot of the playlist bar', async () => {
+      const { setCurrentTime } = await mountWithSound([sound, picture])
+      soundViewer().vm.$emit('duration-changed', 3)
+      await flushPromises()
+      playlistBar().vm.$emit('progress-playlist-changed', 25)
+      await flushPromises()
+      expect(setCurrentTime).toHaveBeenCalledTimes(1)
+      expect(setCurrentTime.mock.calls[0][0]).toBeCloseTo(1.5)
+    })
+
+    it('seeks a sound reached from the playlist bar once decoded', async () => {
+      const { setCurrentTime } = await mountWithSound([picture, sound])
+      playlistBar().vm.$emit('progress-playlist-changed', 75)
+      await flushPromises()
+      expect(setCurrentTime).not.toHaveBeenCalled()
+
+      soundViewer().vm.$emit('duration-changed', 3)
+      expect(setCurrentTime).toHaveBeenCalledTimes(1)
+      expect(setCurrentTime.mock.calls[0][0]).toBeCloseTo(1.5)
+    })
+
+    it('seeks a sound being decoded to the last frame clicked', async () => {
+      const { setCurrentTime } = await mountWithSound([picture, sound])
+      playlistBar().vm.$emit('progress-playlist-changed', 75)
+      await flushPromises()
+      playlistBar().vm.$emit('progress-playlist-changed', 90)
+      await flushPromises()
+      expect(setCurrentTime).not.toHaveBeenCalled()
+
+      soundViewer().vm.$emit('duration-changed', 3)
+      expect(setCurrentTime).toHaveBeenCalledTimes(1)
+      expect(setCurrentTime.mock.calls[0][0]).toBeCloseTo(2.4)
+    })
+
+    describe('frame waiting for a sound', () => {
+      const twoFiles = {
+        ...sound,
+        preview_file_previews: [{ id: 'preview-1b', extension: 'wav' }]
+      }
+
+      // Next goes through the files of a revision first.
+      it('is dropped on a move to another file', async () => {
+        const { setCurrentTime } = await mountWithSound([picture, twoFiles])
+        playlistBar().vm.$emit('progress-playlist-changed', 75)
+        await flushPromises()
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(
+            button => button.attributes('title') === 'playlists.actions.next_shot'
+          )
+          .vm.$emit('click')
+        await flushPromises()
+        expect(wrapper.vm.currentPreviewIndex).toBe(1)
+
+        soundViewer().vm.$emit('duration-changed', 3)
+        expect(setCurrentTime).not.toHaveBeenCalled()
+      })
+
+      // The hold of a sound that cannot be read moves on to the next file.
+      it('is dropped when playback moves on to another file', async () => {
+        const { setCurrentTime } = await mountWithSound([picture, twoFiles])
+        playlistBar().vm.$emit('progress-playlist-changed', 75)
+        await flushPromises()
+        playbackBar().vm.$emit('play-pause-clicked')
+        await flushPromises()
+        soundViewer().vm.$emit('play-failed')
+        await vi.advanceTimersByTimeAsync(2100)
+        expect(wrapper.vm.currentPreviewIndex).toBe(1)
+
+        soundViewer().vm.$emit('duration-changed', 3)
+        expect(setCurrentTime).not.toHaveBeenCalled()
+      })
+    })
+
+    // Like the shared playlist, by a frame of the playlist, up to its last
+    // frame.
+    describe('keys', () => {
+      const press = async code => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { code, key: code }))
+        await flushPromises()
+      }
+
+      it('steps a playing sound, not the hidden movie', async () => {
+        const { setCurrentTime } = await mountWithSound([sound, picture])
+        const pause = vi.spyOn(soundViewer().vm, 'pause')
+        const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+        const goNextFrame = vi.spyOn(rawPlayer, 'goNextFrame')
+        const goPreviousFrame = vi.spyOn(rawPlayer, 'goPreviousFrame')
+        const setCurrentFrame = vi.spyOn(rawPlayer, 'setCurrentFrame')
+        playbackBar().vm.$emit('play-pause-clicked')
+        soundViewer().vm.$emit('duration-changed', 3)
+        soundViewer().vm.$emit('time-update', 1.5)
+        await flushPromises()
+
+        await press('ArrowRight')
+        await press('ArrowLeft')
+        await press('Home')
+        await press('End')
+        const times = setCurrentTime.mock.calls.map(([time]) => time)
+        expect(times).toHaveLength(4)
+        expect(times[0]).toBeCloseTo(1.52)
+        expect(times[1]).toBeCloseTo(1.44)
+        expect(times[2]).toBe(0)
+        expect(times[3]).toBeCloseTo(2.96)
+        expect(goNextFrame).not.toHaveBeenCalled()
+        expect(goPreviousFrame).not.toHaveBeenCalled()
+        expect(setCurrentFrame).not.toHaveBeenCalled()
+        expect(pause).not.toHaveBeenCalled()
+        expect(playbackBar().props('isPlaying')).toBe(true)
+      })
+
+      it('keeps the sound between its first and last frames', async () => {
+        const { setCurrentTime } = await mountWithSound([sound, picture])
+        soundViewer().vm.$emit('duration-changed', 3)
+        soundViewer().vm.$emit('time-update', 2.96)
+        await flushPromises()
+        await press('ArrowRight')
+        soundViewer().vm.$emit('time-update', 0)
+        await press('ArrowLeft')
+        expect(setCurrentTime.mock.calls.map(([time]) => time)).toEqual([
+          2.96, 0
+        ])
+      })
+
+      it('leaves a sound being decoded where it is', async () => {
+        const { setCurrentTime } = await mountWithSound([sound, picture])
+        await press('ArrowRight')
+        await press('End')
+        expect(setCurrentTime).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('time', () => {
+      const movie = {
+        id: 'shot-4',
+        preview_file_id: 'preview-4',
+        preview_file_extension: 'mp4'
+      }
+      const rawPlayer = () => wrapper.findComponent({ ref: 'raw-player' })
+      const goTo = async direction => {
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(
+            button =>
+              button.attributes('title') === `playlists.actions.${direction}_shot`
+          )
+          .vm.$emit('click')
+        await flushPromises()
+      }
+      // A movie two seconds in, four seconds long.
+      const mountOnMovie = async () => {
+        await mountWithSound([movie, sound])
+        rawPlayer().vm.$emit('max-duration-update', 4)
+        rawPlayer().vm.$emit('frame-update', 50)
+        await flushPromises()
+        expect(playbackBar().props('currentTime')).toBe('00:00:02:00')
+        expect(playbackBar().props('maxDuration')).toBe('00:00:04:00')
+      }
+
+      it('shows the time and the decoded duration of a sound', async () => {
+        await mountWithSound([sound, picture])
+        soundViewer().vm.$emit('duration-changed', 3)
+        soundViewer().vm.$emit('time-update', 1.48)
+        await flushPromises()
+        expect(playbackBar().props('currentTime')).toBe('00:00:01:12')
+        expect(playbackBar().props('maxDuration')).toBe('00:00:03:00')
+      })
+
+      // The sound viewer sends a duration of 0 as it starts each load.
+      it('restarts the time on a move from a movie to a sound', async () => {
+        await mountOnMovie()
+        await goTo('next')
+        soundViewer().vm.$emit('duration-changed', 0)
+        await flushPromises()
+        expect(playbackBar().props('currentTime')).toBe('00:00:00:00')
+        expect(playbackBar().props('maxDuration')).toBe('00:00:00:00')
+
+        soundViewer().vm.$emit('duration-changed', 3)
+        await flushPromises()
+        expect(playbackBar().props('maxDuration')).toBe('00:00:03:00')
+      })
+
+      // The decoder that holds the movie already knows its duration: it
+      // sends it no more on the way back.
+      it('gives a movie its own duration back after a sound', async () => {
+        await mountOnMovie()
+        await goTo('next')
+        soundViewer().vm.$emit('duration-changed', 3)
+        await goTo('previous')
+        expect(playbackBar().props('maxDuration')).toBe('00:00:04:00')
+      })
+    })
+
+    // The waveform follows the width the comments panel leaves on its own.
+    it('shows the comments of a sound', async () => {
+      wrapper = mountPlayer({ entities: [sound] })
+      await flushPromises()
+      wrapper
+        .findComponent({ name: 'PlayerAnnotationBar' })
+        .vm.$emit('comment-clicked')
+      await flushPromises()
+      expect(
+        wrapper.findComponent({ name: 'PlayerAnnotationBar' }).props()
+          .isCommentsHidden
+      ).toBe(false)
+    })
+
+    // Annotations go on movies and pictures only, as in the task panel: a
+    // tool left on by a movie drew over the waveform, and nothing showed the
+    // drawing again.
+    describe('annotations', () => {
+      const movie = {
+        id: 'shot-0',
+        preview_file_id: 'preview-0',
+        preview_file_extension: 'mp4'
+      }
+
+      // As in the real one, the overlay sits in the element the player
+      // shows or hides.
+      const canvasStub = canvas => ({
+        name: 'AnnotationCanvas',
+        template: '<div><div ref="overlay"><canvas /></div></div>',
+        setup: () => ({ canvas: markRaw(canvas), overlay: ref(null) })
+      })
+
+      const annotationBar = () =>
+        wrapper.findComponent({ name: 'PlayerAnnotationBar' })
+      const mainCanvas = () =>
+        wrapper.findComponent({ ref: 'main-annotation-canvas' })
+      const press = init =>
+        window.dispatchEvent(new KeyboardEvent('keydown', init))
+
+      const clickButton = title =>
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(button => button.attributes('title') === title)
+          .vm.$emit('click')
+
+      const goToNextShot = async () => {
+        clickButton('playlists.actions.next_shot')
+        // The pencil of the previous entity comes back after 100 ms.
+        await vi.advanceTimersByTimeAsync(100)
+      }
+
+      afterEach(() => {
+        clipboard.copyAnnotations([])
+      })
+
+      it.each([
+        ['pencil', 'pencil-annotate-clicked', 'isDrawing'],
+        ['eraser', 'erase-clicked', 'isEraserModeOn'],
+        ['shape', 'shape-mode-clicked', 'isShapeMode'],
+        ['text', 'type-clicked', 'isTyping']
+      ])('turns the %s of a movie off on a sound', async (_, click, prop) => {
+        await mountWithSound([movie, sound], {
+          AnnotationCanvas: canvasStub(createFakeCanvas())
+        })
+        annotationBar().vm.$emit(click)
+        await flushPromises()
+        expect(annotationBar().props(prop)).toBe(true)
+
+        await goToNextShot()
+
+        expect(annotationBar().props(prop)).toBe(false)
+      })
+
+      // The next entity shows the file of the previous index until the index
+      // goes back to 0: a movie read as no file for a moment.
+      it('keeps the pencil from the last file of a revision to a movie', async () => {
+        const twoFiles = {
+          ...movie,
+          preview_file_previews: [
+            { id: 'preview-0b', extension: 'mp4', revision: 1, annotations: [] }
+          ]
+        }
+        const nextMovie = { ...movie, id: 'shot-9', preview_file_id: 'preview-9' }
+        await mountWithSound([twoFiles, nextMovie], {
+          AnnotationCanvas: canvasStub(createFakeCanvas())
+        })
+        // Alt+K moves to the next file, then to the next entity.
+        const pressNext = async () => {
+          press({ key: 'k', code: 'KeyK', altKey: true })
+          await vi.advanceTimersByTimeAsync(100)
+        }
+        await pressNext()
+        annotationBar().vm.$emit('pencil-annotate-clicked')
+        await flushPromises()
+        expect(annotationBar().props('isDrawing')).toBe(true)
+
+        await pressNext()
+
+        expect(wrapper.vm.playingEntityIndex).toBe(1)
+        expect(annotationBar().props('isDrawing')).toBe(true)
+      })
+
+      it('keeps the pencil off past a sound to a picture', async () => {
+        await mountWithSound([movie, sound, picture], {
+          AnnotationCanvas: canvasStub(createFakeCanvas())
+        })
+        annotationBar().vm.$emit('pencil-annotate-clicked')
+        await flushPromises()
+
+        // On to the picture before the 100 ms of the sound are over.
+        clickButton('playlists.actions.next_shot')
+        await flushPromises()
+        await goToNextShot()
+
+        expect(annotationBar().props('isDrawing')).toBe(false)
+      })
+
+      it('hides the annotations over a sound', async () => {
+        await mountWithSound([movie, sound], {
+          AnnotationCanvas: canvasStub(createFakeCanvas())
+        })
+        expect(mainCanvas().element.style.display).not.toBe('none')
+
+        await goToNextShot()
+
+        expect(mainCanvas().element.style.display).toBe('none')
+      })
+
+      it.each([
+        ['d', 'isDrawing'],
+        ['e', 'isEraserModeOn']
+      ])('turns no tool on with the %s key on a sound', async (key, prop) => {
+        await mountWithSound([sound], {
+          AnnotationCanvas: canvasStub(createFakeCanvas())
+        })
+        press({ key })
+        await flushPromises()
+        expect(annotationBar().props(prop)).toBe(false)
+      })
+
+      it('pastes no annotation on a sound', async () => {
+        const canvas = { ...createFakeCanvas(), setActiveObject: vi.fn() }
+        await mountWithSound([sound], { AnnotationCanvas: canvasStub(canvas) })
+        clipboard.copyAnnotations({
+          mainObject: { clone: async () => ({ left: 0, top: 0, set: vi.fn() }) },
+          subObjects: []
+        })
+        press({ key: 'v', ctrlKey: true })
+        await flushPromises()
+        expect(canvas.add).not.toHaveBeenCalled()
+      })
+    })
+
+    it('offers the comments toggle on a sound in full screen', async () => {
+      await mountWithSound([sound], { PlayerAnnotationBar: false })
+      // jsdom has no full screen
+      Object.defineProperty(document, 'fullscreen', {
+        configurable: true,
+        value: true
+      })
+      wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+      await flushPromises()
+      delete document.fullscreen
+      const toggle = () =>
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(button => button.attributes('icon') === 'comment')
+      expect(toggle()).toBeDefined()
+
+      toggle().vm.$emit('click')
+      await flushPromises()
+
+      expect(toggle().attributes('active')).toBe('true')
+    })
+  })
+
+  it.each(['glb', 'pdf', 'blend'])(
+    'offers the comments toggle on a %s file',
+    async extension => {
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: extension }],
+        stubs: { PlayerAnnotationBar: false }
+      })
+      await flushPromises()
+      const toggle = () =>
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(button => button.attributes('icon') === 'comment')
+      expect(toggle()).toBeDefined()
+
+      toggle().vm.$emit('click')
+      await flushPromises()
+
+      expect(toggle().attributes('active')).toBe('true')
+    }
+  )
+
+  // A picture holds its slot of 50 frames on a timer, like the shared
+  // playlist.
+  describe('picture progress', () => {
+    const picture = {
+      id: 'shot-3',
+      preview_file_id: 'preview-3',
+      preview_file_extension: 'png'
+    }
+    const sound = {
+      id: 'shot-4',
+      preview_file_id: 'preview-4',
+      preview_file_extension: 'mp3'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountOnPicture = async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({
+        entities: [picture, sound],
+        stubs: {
+          SoundViewer: { ...withMethods(['pause', 'play']), name: 'SoundViewer' }
+        }
+      })
+      await flushPromises()
+      const entityBar = wrapper.findComponent({ ref: 'video-progress' })
+      const updateProgressBar = vi.spyOn(entityBar.vm, 'updateProgressBar')
+      return {
+        click: frame => entityBar.vm.$emit('progress-changed', frame),
+        play: () =>
+          wrapper
+            .findComponent({ name: 'PlayerPlaybackBar' })
+            .vm.$emit('play-pause-clicked'),
+        lastFrame: () => updateProgressBar.mock.lastCall[0]
+      }
+    }
+
+    const soundShown = () =>
+      wrapper.findComponent({ name: 'SoundViewer' }).exists()
+
+    it('plays a picture on from the frame clicked', async () => {
+      const { click, play, lastFrame } = await mountOnPicture()
+      play()
+      await vi.advanceTimersByTimeAsync(200)
+      expect(lastFrame()).toBeLessThanOrEqual(6)
+
+      click(30)
+      await vi.advanceTimersByTimeAsync(200)
+      expect(lastFrame()).toBeGreaterThanOrEqual(33)
+      await vi.advanceTimersByTimeAsync(500)
+      expect(soundShown()).toBe(false)
+      await vi.advanceTimersByTimeAsync(300)
+      expect(soundShown()).toBe(true)
+    })
+
+    it('resumes a picture from the frame clicked while paused', async () => {
+      const { click, play, lastFrame } = await mountOnPicture()
+      click(30)
+      play()
+      await vi.advanceTimersByTimeAsync(200)
+      expect(lastFrame()).toBeGreaterThanOrEqual(33)
+      expect(lastFrame()).toBeLessThanOrEqual(37)
+    })
+
+    it('restarts a picture paused on its last frame', async () => {
+      const { click, play, lastFrame } = await mountOnPicture()
+      click(49)
+      play()
+      await vi.advanceTimersByTimeAsync(200)
+      expect(lastFrame()).toBeLessThanOrEqual(6)
+      expect(soundShown()).toBe(false)
+    })
+  })
+
+  // Like an entity without preview, it keeps its slot on the strip, 3 s
+  // here, then the playlist moves on, repeat on or not.
+  describe('movie that cannot be read', () => {
+    const movie = {
+      ...entity,
+      preview_file_extension: 'mp4',
+      preview_file_duration: 3
+    }
+    const sound = {
+      id: 'shot-2',
+      preview_file_id: 'preview-2',
+      preview_file_extension: 'mp3'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountOnMovie = async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({
+        entities: [movie, sound],
+        stubs: {
+          SoundViewer: { ...withMethods(['pause', 'play']), name: 'SoundViewer' }
+        }
+      })
+      await flushPromises()
+    }
+
+    const playbackBar = () => wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+    const soundShown = () =>
+      wrapper.findComponent({ name: 'SoundViewer' }).exists()
+
+    const failMovie = async () => {
+      wrapper.findComponent({ ref: 'raw-player' }).vm.$emit('play-failed')
+      await flushPromises()
+    }
+
+    it('moves on from a movie that cannot be read', async () => {
+      await mountOnMovie()
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      await failMovie()
+      await vi.advanceTimersByTimeAsync(2900)
+      expect(soundShown()).toBe(false)
+      expect(playbackBar().props('isPlaying')).toBe(true)
+      await vi.advanceTimersByTimeAsync(200)
+      expect(soundShown()).toBe(true)
+      expect(playbackBar().props('isPlaying')).toBe(true)
+    })
+
+    it('moves on from it with repeat on', async () => {
+      await mountOnMovie()
+      playbackBar().vm.$emit('repeat-clicked')
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      await failMovie()
+      await vi.advanceTimersByTimeAsync(3100)
+      expect(soundShown()).toBe(true)
+    })
+
+    // The viewer sends the frame it pauses on before the playlist knows it
+    // is paused: a movie of no length must not end on it.
+    it('stays on a movie of no length paused during its slot', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({
+        entities: [{ ...movie, preview_file_duration: 0 }, sound],
+        stubs: {
+          SoundViewer: { ...withMethods(['pause', 'play']), name: 'SoundViewer' }
+        }
+      })
+      await flushPromises()
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      rawPlayer.pause = () => rawPlayer.$emit('frame-update', 0)
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+      await failMovie()
+      await vi.advanceTimersByTimeAsync(1000)
+
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+
+      expect(soundShown()).toBe(false)
+      expect(playbackBar().props('isPlaying')).toBe(false)
     })
   })
 
@@ -675,6 +1426,75 @@ describe('PlaylistPlayer.vue', () => {
 
     expect(onWindow).not.toHaveBeenCalled()
     expect(onDocument).not.toHaveBeenCalled()
+  })
+
+  // As the task panel does: a next visit comes back muted, and the volume
+  // kept is not the 0 the mute set.
+  describe('mute', () => {
+    const movie = { ...entity, preview_file_extension: 'mp4' }
+    const playbackBar = () =>
+      wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+
+    it('keeps the mute for the next visit', async () => {
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+
+      playbackBar().vm.$emit('update:isMuted', true)
+      await flushPromises()
+
+      expect(localStorage.getItem('player:muted')).toBe('true')
+    })
+
+    it('comes back muted from the previous visit', async () => {
+      localStorage.setItem('player:muted', 'true')
+      localStorage.setItem('player:volume', '0')
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+
+      expect(playbackBar().props('isMuted')).toBe(true)
+      expect(playbackBar().props('volume')).toBe(50)
+    })
+
+    // ButtonSound gives back 50 on an unmute, the volume the page already
+    // has after a muted visit: no volume change follows.
+    it('keeps the volume of an unmute for the next visit', async () => {
+      localStorage.setItem('player:muted', 'true')
+      localStorage.setItem('player:volume', '0')
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+
+      playbackBar().vm.$emit('update:isMuted', false)
+      await flushPromises()
+
+      expect(localStorage.getItem('player:muted')).toBe('false')
+      expect(localStorage.getItem('player:volume')).toBe('50')
+    })
+
+    // The task panel shares both keys: a mute stored by another player must
+    // not outlive a volume set here.
+    it('stores the mute with the volume', async () => {
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+      localStorage.setItem('player:muted', 'true')
+
+      playbackBar().vm.$emit('update:volume', 70)
+      await flushPromises()
+
+      expect(localStorage.getItem('player:volume')).toBe('70')
+      expect(localStorage.getItem('player:muted')).toBe('false')
+    })
+
+    // Unmuted, a stored 0 can only be what an unmute left before it stored
+    // its volume.
+    it('reads an unmuted volume of 0 as the default', async () => {
+      localStorage.setItem('player:muted', 'false')
+      localStorage.setItem('player:volume', '0')
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+
+      expect(playbackBar().props('isMuted')).toBe(false)
+      expect(playbackBar().props('volume')).toBe(50)
+    })
   })
 
   // A plain link navigates the tab: the browser fires beforeunload, which

@@ -23,7 +23,18 @@
       :muted="muted"
       @ended="onEnded"
     />
-    <canvas ref="displayCanvas" class="playlist-movie" />
+    <canvas
+      ref="displayCanvas"
+      class="playlist-movie"
+      :style="{ visibility: isBroken ? 'hidden' : null }"
+    />
+    <div class="processing" v-if="isProcessing">
+      <spinner :is-processing="true" />
+      <p>{{ $t('preview.processing') }}</p>
+    </div>
+    <p class="broken" v-else-if="isBroken">
+      {{ $t('preview.broken') }}
+    </p>
   </div>
 </template>
 
@@ -55,6 +66,7 @@ import { useStore } from 'vuex'
 
 import { panPanzoomBy, zoomPanzoomAt } from '@/lib/players/panzoom'
 import { swallowBrowserZoom } from '@/lib/players/wheel'
+import { latestPreviewFileStatus } from '@/lib/preview'
 import {
   DEFAULT_FPS,
   floorToFrame,
@@ -131,6 +143,7 @@ const emit = defineEmits([
   'metadata-loaded',
   'panzoom-changed',
   'panzoom-ready',
+  'play-failed',
   'play-next',
   'repeat',
   'time-update',
@@ -146,11 +159,15 @@ const displayCanvasRef = useTemplateRef('displayCanvas')
 
 const currentIndex = ref(0)
 const currentPlayer = shallowRef(null)
+const isBroken = ref(false)
 const isLoading = ref(true)
 const isPlaying = ref(false)
 const nextPlayer = shallowRef(undefined)
 
 // Non-reactive locals (instance-private state previously stashed on $options)
+// Movies whose status turned ready: a decoder that kept their 404 asks for
+// them again, and the entry goes once no decoder keeps that 404.
+const processedIds = new Set()
 let containerResizeObserver = null
 let currentTimeRaw = 0
 let isSeeking = false
@@ -194,6 +211,28 @@ const fps = computed(() => {
 })
 const frameDuration = computed(
   () => Math.round((1 / fps.value) * 10000) / 10000
+)
+// Zou answers 404 for the movie of a preview file it is still processing.
+// The watcher on the statuses fills processedIds before the render reads it.
+const isProcessing = computed(() => {
+  const entity = props.entities[currentIndex.value]
+  if (!isBroken.value || !entity) return false
+  const preview = getMoviePreview(entity, props.currentPreviewIndex)
+  return (
+    getMovieStatus(preview) === 'processing' || processedIds.has(preview.id)
+  )
+})
+const movieStatuses = computed(
+  () =>
+    new Map(
+      props.entities
+        .flatMap(entity => [
+          getMoviePreview(entity),
+          ...(entity.preview_file_previews || [])
+        ])
+        .filter(preview => preview.extension === 'mp4')
+        .map(preview => [preview.id, getKnownMovieStatus(preview)])
+    )
 )
 
 // Functions
@@ -350,7 +389,11 @@ const showLoading = () => {
   }
   showLoadingTimer = setTimeout(() => {
     showLoadingTimer = null
-    if (currentPlayer.value && currentPlayer.value.readyState < 3) {
+    if (
+      currentPlayer.value &&
+      currentPlayer.value.readyState < 3 &&
+      !isBroken.value
+    ) {
       isLoading.value = true
     }
   }, 150) // Hack to avoid blinking effect
@@ -362,15 +405,32 @@ const emitLoadedEvent = event => {
   emit('metadata-loaded', event)
 }
 
+const getMoviePreview = (entity, previewIndex = 0) => {
+  const subPreviews = entity.preview_file_previews || []
+  return previewIndex > 0 && previewIndex <= subPreviews.length
+    ? subPreviews[previewIndex - 1]
+    : {
+        id: entity.preview_file_id,
+        extension: entity.preview_file_extension,
+        status: entity.preview_file_status
+      }
+}
+
+// The shared playlist reads the statuses of its payload, the Playlists page
+// those the socket keeps in the store.
+const getKnownMovieStatus = preview =>
+  latestPreviewFileStatus(
+    preview.status,
+    store.getters.previewFileStatusMap?.get(preview.id)
+  )
+
+const getMovieStatus = preview => getKnownMovieStatus(preview) || 'ready'
+
 const getMoviePath = (entity, previewIndex = 0) => {
   // Check the extension on the element actually selected (main preview or
   // one of the additional previews): a revision whose main element is a
   // picture can still carry video elements, and vice versa.
-  const subPreviews = entity.preview_file_previews || []
-  const preview =
-    previewIndex > 0 && previewIndex <= subPreviews.length
-      ? subPreviews[previewIndex - 1]
-      : { id: entity.preview_file_id, extension: entity.preview_file_extension }
+  const preview = getMoviePreview(entity, previewIndex)
   if (preview.extension !== 'mp4') return ''
   const base = props.urlPrefix || '/api'
   // Originals for shared links or HD mode; the lighter low variant otherwise
@@ -404,6 +464,7 @@ const releasePlayers = () => {
 }
 
 const clear = () => {
+  isBroken.value = false
   if (currentPlayer.value) {
     currentPlayer.value.src = ''
     currentPlayer.value.removeAttribute('src')
@@ -488,6 +549,19 @@ const preseekNextPlayer = () => {
   player.currentTime = frameStartTime(props.nextHandleIn, nextFps)
 }
 
+// The shared playlist has no socket to hear that a movie is processed:
+// coming back to a movie still being processed asks for its file again.
+const setMovieSource = (player, moviePath, preview) => {
+  if (!player.src.endsWith(moviePath)) {
+    player.src = moviePath
+  } else if (
+    player.error &&
+    (getMovieStatus(preview) === 'processing' || processedIds.has(preview.id))
+  ) {
+    player.load()
+  }
+}
+
 const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
   if (index < props.entities.length) {
     const nextIndex = getNextIndex(index)
@@ -518,9 +592,11 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
     currentPlayer.value.addEventListener('loadedmetadata', updateMaxDuration)
 
     if (moviePath) {
-      if (!currentPlayer.value.src.endsWith(moviePath)) {
-        currentPlayer.value.src = moviePath
-      }
+      setMovieSource(
+        currentPlayer.value,
+        moviePath,
+        getMoviePreview(entity, props.currentPreviewIndex)
+      )
     } else {
       // Nothing to play: the playback stops with the movie left.
       isPlaying.value = false
@@ -529,13 +605,16 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
     // The next entity always starts on its main preview: preload index 0.
     const nextMoviePath = nextEntity ? getMoviePath(nextEntity) : ''
     if (nextMoviePath) {
-      if (!nextPlayer.value.src.endsWith(nextMoviePath)) {
-        nextPlayer.value.src = nextMoviePath
-      }
+      setMovieSource(
+        nextPlayer.value,
+        nextMoviePath,
+        getMoviePreview(nextEntity)
+      )
       preseekNextPlayer()
     } else if (nextPlayer.value) {
       nextPlayer.value.src = ''
     }
+    refreshBroken()
     resetHeight()
 
     setSpeed(rate)
@@ -562,6 +641,12 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
 
 const pause = () => {
   seekGuardTarget = null
+  if (
+    currentPlayer.value?.error &&
+    holdsMovieOf(currentPlayer.value, processedIds)
+  ) {
+    reloadPlayer(currentPlayer.value)
+  }
   if (currentPlayer.value) {
     currentPlayer.value.pause()
     seekNow(roundToFrame(getCurrentTime(), fps.value))
@@ -580,10 +665,11 @@ const play = () => {
     if (!entity.preview_file_id) loadNextEntity()
     entity = props.entities[currentIndex.value]
     if (entity.preview_file_id) {
-      if (currentPlayer.value) {
+      if (currentPlayer.value && !isBroken.value) {
         currentPlayer.value.play()?.catch(() => {})
       }
       isPlaying.value = true
+      if (isBroken.value) emit('play-failed')
     }
   }
 }
@@ -607,6 +693,7 @@ const playNext = handleIn => {
 
     switchPlayers()
     updateMaxDuration()
+    if (isBroken.value) emit('play-failed')
   }
 }
 
@@ -705,6 +792,48 @@ const onEnded = () => {
   if (isPlaying.value) emit('play-next')
 }
 
+// A movie the browser cannot read (a missing file, a file that is no movie)
+// fails on its decoder, which keeps the error, and never ends. The empty
+// source of an entity without movie fails too, but is not broken.
+const refreshBroken = () => {
+  const player = currentPlayer.value
+  isBroken.value = Boolean(player?.error && player.getAttribute('src'))
+  if (isBroken.value) hideLoading()
+}
+
+const holdsMovieOf = (player, previewFileIds) =>
+  [...previewFileIds].some(id =>
+    player.src.includes(`/preview-files/${id}.mp4`)
+  )
+
+const reloadPlayer = player => {
+  player.load()
+  if (player === currentPlayer.value) refreshBroken()
+  else preseekNextPlayer()
+}
+
+// Any new load of a movie asks for its file: if that fails too, the movie
+// is broken. A movie alone in a playlist sits on both decoders, and the
+// other one may still have to ask again.
+const onLoadStart = event => {
+  const otherPlayer = [player1Ref.value, player2Ref.value].find(
+    player => player && player !== event.target
+  )
+  Array.from(processedIds)
+    .filter(id => holdsMovieOf(event.target, [id]))
+    .filter(id => !(otherPlayer?.error && holdsMovieOf(otherPlayer, [id])))
+    .forEach(id => processedIds.delete(id))
+  showLoading()
+}
+
+// The other decoder only preloads: its error waits for the switch.
+const onError = event => {
+  hideLoading()
+  if (event.target !== currentPlayer.value) return
+  refreshBroken()
+  if (isBroken.value && isPlaying.value) emit('play-failed')
+}
+
 const switchPlayers = () => {
   pendingSeekTime = null
   const nextIndex = getNextIndex(currentIndex.value)
@@ -716,6 +845,7 @@ const switchPlayers = () => {
     nextPlayer.value.src = getMoviePath(nextEntity)
     preseekNextPlayer()
   }
+  refreshBroken()
   resetHeight()
   setSpeed(rate)
   resizeRenderer()
@@ -810,17 +940,21 @@ const zoomAt = (clientX, clientY, ratio) => {
   })
 }
 
+// Both decoders, not the current and the next one: the playlist gives the
+// volume before the first movie sets them.
 const setVolume = volume => {
-  if (currentPlayer.value) currentPlayer.value.volume = volume / 100
-  if (nextPlayer.value) nextPlayer.value.volume = volume / 100
+  const players = [player1Ref.value, player2Ref.value]
+  players.filter(Boolean).forEach(player => {
+    player.volume = volume / 100
+  })
 }
 
 const LOADING_HANDLERS = [
   ['canplay', hideLoading],
   ['stalled', showLoading],
   ['waiting', showLoading],
-  ['loadstart', showLoading],
-  ['error', hideLoading],
+  ['loadstart', onLoadStart],
+  ['error', onError],
   ['seeked', onSeeked]
 ]
 
@@ -837,6 +971,33 @@ const unbindLoadingHandlers = player => {
 }
 
 // Watchers
+
+// The store may never have known the movie as processing: a ready status
+// it learns still means the file is there. The movie of a slot the playlist
+// holds waits for a pause: loading it would stop the playback, and end the
+// slot.
+watch(movieStatuses, (statuses, previousStatuses) => {
+  const turnedReadyIds = [...statuses]
+    .filter(
+      ([id, status]) =>
+        status === 'ready' &&
+        previousStatuses.has(id) &&
+        previousStatuses.get(id) !== 'ready'
+    )
+    .map(([id]) => id)
+  turnedReadyIds.forEach(id => processedIds.add(id))
+  const players = isPlaying.value
+    ? [nextPlayer.value]
+    : [currentPlayer.value, nextPlayer.value]
+  players
+    .filter(
+      player =>
+        (player?.error ||
+          player?.readyState === HTMLMediaElement.HAVE_NOTHING) &&
+        holdsMovieOf(player, turnedReadyIds)
+    )
+    .forEach(reloadPlayer)
+})
 
 watch(
   () => props.currentPreviewIndex,
@@ -941,6 +1102,7 @@ defineExpose({
   // State
   currentIndex,
   currentPlayer,
+  isBroken,
   isPlaying,
   // Navigation
   loadEntity,
@@ -1008,6 +1170,29 @@ defineExpose({
       margin: 0 auto;
     }
   }
+}
+
+.broken {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 0.75em);
+  color: $white;
+  text-align: center;
+}
+
+.processing {
+  align-items: center;
+  color: $white;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .video-loader {

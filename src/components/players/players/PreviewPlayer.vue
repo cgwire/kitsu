@@ -99,6 +99,8 @@
               @panzoom-changed="onPanzoomChanged"
               @picture-loaded="onPreviewLoaded"
               @play-ended="pause"
+              @sound-duration-changed="onSoundDurationChanged"
+              @sound-time-update="onSoundTimeUpdate"
               @video-end="onVideoEnd"
               @video-loaded="onPreviewLoaded"
             />
@@ -212,7 +214,6 @@
           v-model:volume="volume"
           @play-pause-clicked="onPlayPauseClicked"
           @repeat-clicked="onRepeatClicked"
-          @toggle-sound-clicked="onToggleSoundClicked"
         />
 
         <player-comparison-bar
@@ -344,7 +345,7 @@
               is-reversed
               is-preview
               thin
-              :model-value="currentPreview?.id"
+              :model-value="currentRevisionPreviewId"
               @update:model-value="changeCurrentPreviewFile"
             />
           </div>
@@ -666,6 +667,8 @@ const movieDimensions = ref({ width: 1920, height: 1080 })
 const objectBackgroundUrl = ref(null)
 const pencilPalette = ref(['huge', 'big', 'medium', 'small', 'tiny'])
 const pictureBackgroundColor = ref('#000000')
+const soundDuration = ref(0)
+const soundTime = ref(0)
 const videoDuration = ref(0)
 const width = ref(0)
 
@@ -1011,6 +1014,15 @@ const lastPreviewFileOptions = computed(() => {
     }))
 })
 
+// The options are the first files of the revisions: another file of a
+// revision stands for it by its revision number.
+const currentRevisionPreviewId = computed(
+  () =>
+    props.lastPreviewFiles.find(
+      preview => preview.revision === currentPreview.value?.revision
+    )?.id
+)
+
 const isComparisonEnabled = computed(() => fullScreen.value || props.extraWide)
 
 const nbFrames = computed(() => {
@@ -1189,6 +1201,22 @@ const changeMaxDuration = duration => {
   }
 }
 
+// Pausing a sound on a switch away sends its time once more, and a sound not
+// ready yet leaves the one before loaded under it.
+const onSoundTimeUpdate = time => {
+  if (!isSound.value || !isReady.value) return
+  currentTime.value = formatTime(time, fps.value)
+  soundTime.value = time
+}
+
+// A duration of 0 starts each load: the time restarts with the sound.
+const onSoundDurationChanged = duration => {
+  if (!isSound.value || !isReady.value) return
+  maxDuration.value = formatTime(duration, fps.value)
+  soundDuration.value = duration
+  if (!duration) soundTime.value = 0
+}
+
 const getCurrentTime = () => {
   if (!isMovie.value) return 0
   // 4-decimal rounding only: toPrecision(4) keeps 4 significant digits and
@@ -1240,7 +1268,8 @@ const play = () => {
         seekTrimStart()
       }
       previewViewer.value.play()
-      if (comparisonViewer.value && isComparing.value) {
+      // A movie that cannot be read ends its play at once.
+      if (isPlaying.value && comparisonViewer.value && isComparing.value) {
         comparisonViewer.value.play()
       }
     }
@@ -1266,9 +1295,25 @@ const pause = () => {
   }
 }
 
+// A sound has no frames of its own: the keys step it by a frame of the
+// production, up to the start of its last frame like a movie.
+const seekSoundFrame = frame => {
+  const lastFrame = Math.round(soundDuration.value * fps.value) - 1
+  if (lastFrame < 0) return
+  const target = Math.min(Math.max(frame, 0), lastFrame)
+  previewViewer.value?.setSoundTime(target / fps.value)
+}
+
+// The tolerance keeps a time read back from a frame seek on that frame.
+const currentSoundFrame = () => Math.floor(soundTime.value * fps.value + 0.001)
+
 // Past the ends of a movie, or on a picture, the viewer does not move and
 // no frame reloads the drawing: the canvas keeps it.
 const goPreviousFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(currentSoundFrame() - 1)
+    return
+  }
   if (currentFrame.value <= 0) return
   clearCanvas()
   previewViewer.value.goPreviousFrame()
@@ -1276,6 +1321,10 @@ const goPreviousFrame = () => {
 }
 
 const goNextFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(currentSoundFrame() + 1)
+    return
+  }
   if (currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   previewViewer.value.goNextFrame()
@@ -1283,6 +1332,10 @@ const goNextFrame = () => {
 }
 
 const goToFirstFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(0)
+    return
+  }
   if (!isMovie.value || currentFrame.value <= 0) return
   clearCanvas()
   setCurrentFrame(0)
@@ -1290,6 +1343,10 @@ const goToFirstFrame = () => {
 }
 
 const goToLastFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(Infinity)
+    return
+  }
   if (!isMovie.value || currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   setCurrentFrame(nbFrames.value - 1)
@@ -1497,11 +1554,6 @@ const onRepeatClicked = () => {
   clearFocus()
   isRepeating.value = !isRepeating.value
   localPreferences.setPreference('player:repeating', isRepeating.value)
-}
-
-const onToggleSoundClicked = () => {
-  clearFocus()
-  isMuted.value = !isMuted.value
 }
 
 // Screen
@@ -1994,7 +2046,11 @@ const { isAltHeld } = usePreviewShortcuts({
   onPrevPreview: () => onPreviousClicked(),
   onNextPreview: () => onNextClicked(),
   onCopy: () => copyAnnotations(),
-  onPaste: () => pasteAnnotations(),
+  // The canvas shows over movies and pictures only: a paste anywhere else
+  // would save annotations that nothing shows again.
+  onPaste: () => {
+    if (isMovie.value || isPicture.value) pasteAnnotations()
+  },
   onToggleOverlay: () => toggleFullOverlay()
 })
 
@@ -2333,6 +2389,15 @@ watch(currentPreview, (newPreview, oldPreview) => {
   currentFrame.value = 0
   currentTimeRaw.value = 0
   currentTime.value = formatTime(0, fps.value)
+  // A sound not ready yet loads nothing that would reset these, and a reload
+  // of the same preview keeps its sound loaded.
+  if (isSound.value && newPreview?.id !== oldPreview?.id) {
+    // Another sound ends the play, as another movie does.
+    pause()
+    maxDuration.value = '00:00:00:00'
+    soundDuration.value = 0
+    soundTime.value = 0
+  }
   if (isMovie.value) {
     configureVideo()
     pause()
@@ -2546,6 +2611,9 @@ watch(speed, () => {
 watch(volume, () => {
   previewViewer.value?.setVolume(volume.value)
   localPreferences.setPreference('player:volume', volume.value)
+  // The playlist player shares both keys, and may store its mute from a modal
+  // open over this one.
+  localPreferences.setPreference('player:muted', isMuted.value)
 })
 
 // The viewers reload their source on a quality switch: onPreviewLoaded then
@@ -2555,11 +2623,14 @@ watch(isHd, () => {
   if (isMovie.value) isQualitySwitchPending = true
 })
 
-// Persist through a watcher: ButtonSound drives isMuted via v-model and
-// never emits change-sound, so a click handler on the toggle chain never
-// runs and the preference was never written.
+// Persist through a watcher: ButtonSound drives isMuted via v-model.
 watch(isMuted, () => {
   localPreferences.setPreference('player:muted', isMuted.value)
+  // An unmute may give back the volume the player already has, which stores
+  // nothing: the 0 of the mute would come back on the next visit.
+  if (!isMuted.value) {
+    localPreferences.setPreference('player:volume', volume.value)
+  }
 })
 
 // Lifecycle
@@ -2582,15 +2653,16 @@ onMounted(() => {
     onObjectBackgroundSelected()
   }
 
-  if (isMuted.value) {
-    previewViewer.value?.setVolume(0)
-  } else {
-    volume.value = localPreferences.getIntPreference(
-      'player:volume',
+  // The mute goes through isMuted: a 0 set here outlived the unmute, which
+  // gives back the volume the player already has. A muted visit leaves aside
+  // the stored volume, the 0 the mute set; unmuted, a stored 0 is what such
+  // an unmute left before it stored its volume, and the default stands in.
+  if (!isMuted.value) {
+    volume.value =
+      localPreferences.getIntPreference('player:volume', volume.value) ||
       volume.value
-    )
-    previewViewer.value?.setVolume(volume.value)
   }
+  previewViewer.value?.setVolume(volume.value)
 
   reloadAnnotations()
   loadAnnotation()

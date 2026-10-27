@@ -22,6 +22,7 @@
           :extension="entity.preview_file_extension"
           :preview-file-id="previewFileId"
           :url-prefix="urlPrefix"
+          with-extension
         />
       </div>
 
@@ -382,6 +383,10 @@ onMounted(() => {
 
   :deep(.thumbnail-picture) {
     background-color: #000;
+  }
+
+  :deep(.thumbnail-extension) {
+    color: $white-grey;
   }
 }
 

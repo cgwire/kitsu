@@ -5,17 +5,17 @@
       icon="left"
       :title="$t('playlists.actions.files_previous')"
       @click="$emit('previous-clicked')"
-      v-if="isBigDisplay || !isMovie"
+      v-if="isBigDisplay || !isTimed"
     />
 
     <span
       class="flexrow-item bar-element current-index"
       :title="$t('playlists.actions.files_position')"
       @click="$emit('current-index-clicked')"
-      v-if="isBigDisplay || !isMovie"
+      v-if="isBigDisplay || !isTimed"
     >
       {{ currentIndex }}
-      <template v-if="fullScreen || !isMovie">/ {{ previews.length }}</template>
+      <template v-if="fullScreen || !isTimed">/ {{ previews.length }}</template>
     </span>
 
     <button-simple
@@ -23,7 +23,7 @@
       icon="right"
       :title="$t('playlists.actions.files_next')"
       @click="$emit('next-clicked')"
-      v-if="isBigDisplay || !isMovie"
+      v-if="isBigDisplay || !isTimed"
     />
 
     <button-simple
@@ -48,6 +48,8 @@
 
 <script setup>
 import { computed } from 'vue'
+
+import { isSoundPreview } from '@/lib/preview'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
@@ -94,9 +96,11 @@ const isBigDisplay = computed(
   () => (!props.light || props.fullScreen) && props.previews.length > 1
 )
 
-const isMovie = computed(
-  () => props.previews[props.currentIndex - 1]?.extension === 'mp4'
-)
+// A movie or a sound gives the room of a light bar to its playback controls.
+const isTimed = computed(() => {
+  const extension = props.previews[props.currentIndex - 1]?.extension
+  return extension === 'mp4' || isSoundPreview(extension)
+})
 </script>
 
 <style lang="scss" scoped>
