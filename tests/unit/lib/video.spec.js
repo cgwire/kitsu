@@ -91,6 +91,35 @@ describe('video', () => {
     expect(formatToTimecode(-5, 25)).toBe('00:00:00:00')
   })
 
+  // The frame in and out of cgwire/kitsu#2303, in a 30 fps production.
+  it('formatToTimecode counts at the frame rate given', () => {
+    expect(formatToTimecode(1266, 30)).toBe('00:00:42:06')
+    expect(formatToTimecode(1440, 30)).toBe('00:00:48:00')
+    expect(formatToTimecode(1266, '30')).toBe('00:00:42:06')
+  })
+
+  // Non-drop-frame timecodes count 30 frames a second at 29.97 fps.
+  it.each([
+    [29.97, '00:00:42:06'],
+    ['29.97', '00:00:42:06'],
+    [23.976, '00:00:52:18']
+  ])('formatToTimecode counts %o fps on its nominal rate', (fps, timecode) => {
+    expect(formatToTimecode(1266, fps)).toBe(timecode)
+  })
+
+  it.each([undefined, null, '', 0, -30, NaN])(
+    'formatToTimecode counts at 25 fps for a frame rate of %o',
+    fps => {
+      expect(formatToTimecode(1266, fps)).toBe('00:00:50:16')
+    }
+  )
+
+  // A frame computed from a time can carry a float error.
+  it('formatToTimecode counts the nearest whole frame', () => {
+    expect(formatToTimecode(28.999999999999996, 25)).toBe('00:00:01:04')
+    expect(formatToTimecode(1266.4, 30)).toBe('00:00:42:06')
+  })
+
   it('formatTime with negative time', () => {
     expect(formatTime(-1, 25)).toBe('00:00:00:00')
   })

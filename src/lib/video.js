@@ -69,10 +69,21 @@ export const formatTime = (rawTime, fps) => {
   }
 }
 
+/*
+ * Timecodes count whole frames: a fractional rate counts on its nominal one,
+ * as non-drop-frame timecodes do (29.97 fps counts 30 frames a second).
+ */
+const getTimecodeRate = fps => {
+  const rate = Math.round(parseFloat(fps))
+  return rate > 0 && Number.isFinite(rate) ? rate : DEFAULT_FPS
+}
+
 /**
  * Get timecode from frame number.
  */
-export const formatToTimecode = (frame, fps = DEFAULT_FPS) => {
+export const formatToTimecode = (frame, fps) => {
+  fps = getTimecodeRate(fps)
+  frame = Math.round(frame)
   if (!frame || frame < 0) frame = 0
   const hours = Math.floor(frame / fps / 3600)
     .toString()
