@@ -4,6 +4,7 @@ import {
   renderComment,
   renderFileSize,
   renderMarkdown,
+  replaceTimeWithTimecode,
   safeUrl
 } from '@/lib/render'
 
@@ -159,4 +160,18 @@ describe('render', () => {
     result = renderFileSize(size)
     expect(result.trim()).toEqual('1.2G')
   })
+
+  // SMPTE: frame 31 is the first frame of the second second at 30 fps.
+  test.each([
+    [1, 30, 'v2 00:00:00:00 (1)'],
+    [31, 30, 'v2 00:00:01:00 (31)'],
+    [1201, 30, 'v2 00:00:40:00 (1201)'],
+    [1441, 24, 'v2 00:01:00:00 (1441)'],
+    [26, 25, 'v2 00:00:01:00 (26)']
+  ])(
+    'replaceTimeWithTimecode labels frame %i at %i fps',
+    (frame, fps, text) => {
+      expect(replaceTimeWithTimecode('@frame', 2, frame, fps)).toBe(text)
+    }
+  )
 })

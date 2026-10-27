@@ -1021,6 +1021,7 @@ import {
   floorToFrame,
   formatFrame,
   formatTime,
+  formatToTimecode,
   frameStartTime,
   getEntityFrameStart,
   roundToFrame
@@ -1184,7 +1185,7 @@ const framesSeenOfPicture = ref(1)
 
 const currentBackground = ref(null)
 const currentPreviewIndex = ref(0)
-const currentTime = ref('00:00.000')
+const currentTime = ref('00:00:00:00')
 const { currentTimeRaw, isHd, isMuted, isPlaying, isRepeating, speed, volume } =
   usePlayerTransport()
 // Set before the watchers: a quality change warms the movies again.
@@ -1214,7 +1215,7 @@ const isShowAnnotationsWhilePlaying = ref(false)
 const isTyping = ref(false)
 const isWaveformDisplayed = ref(false)
 const isWireframe = ref(false)
-const maxDuration = ref('00:00.000')
+const maxDuration = ref('00:00:00:00')
 const maxDurationRaw = ref(0)
 const movieDimensions = ref({ width: 0, height: 0 })
 const objectBackgroundUrl = ref(null)
@@ -3002,6 +3003,8 @@ const onFrameUpdate = frame => {
   const isChromium = !!window.chrome
   const change = isChromium ? 0.0001 : 0
   currentTimeRaw.value = frame * frameDuration.value + change
+  // From the time: the frame the viewer sends drifts on the rounded frame
+  // duration, its time matches the picture.
   currentTime.value = formatTime(currentTimeRaw.value, fps.value)
   updateProgressBar()
   if (isShowAnnotationsWhilePlaying.value) {
@@ -3080,11 +3083,11 @@ const onMaxDurationUpdate = duration => {
   if (Number.isFinite(duration) && duration > 0) {
     duration = floorToFrame(duration, fps.value)
     maxDurationRaw.value = duration
-    maxDuration.value = formatTime(duration, fps.value)
+    maxDuration.value = formatToTimecode(nbFrames.value, fps.value)
     resetHandles()
   } else {
     maxDurationRaw.value = 0
-    maxDuration.value = '00.00.000'
+    maxDuration.value = '00:00:00:00'
   }
 }
 
@@ -3533,7 +3536,7 @@ const clearPlayer = () => {
   rawPlayer.value?.clear()
   if (isComparing.value) rawPlayerComparison.value?.clear()
   maxDurationRaw.value = 0
-  maxDuration.value = '00:00.000'
+  maxDuration.value = '00:00:00:00'
 }
 
 const resetPictureCanvas = async () => {

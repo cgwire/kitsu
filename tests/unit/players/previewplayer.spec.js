@@ -831,6 +831,24 @@ describe('PreviewPlayer.vue', () => {
       expect(bar().props('isPlaying')).toBe(true)
     })
 
+    // SMPTE: 30 frames a second at 30 fps, the 1201st frame is at 40 s.
+    it('counts the time of a movie on its frames', async () => {
+      wrapper = mountPlayer({
+        props: { previews: [{ ...moviePreview, duration: 60 }] },
+        getterOverrides: {
+          productionMap: () => new Map([[task.project_id, { fps: 30 }]])
+        }
+      })
+      await nextTick()
+      const [main] = viewers()
+      main.vm.$emit('duration-changed', 60)
+      wrapper.vm.setCurrentFrame(1200)
+      await nextTick()
+
+      expect(bar().props('currentTime')).toBe('00:00:40:00')
+      expect(bar().props('maxDuration')).toBe('00:00:59:29')
+    })
+
     // Pausing the sound on a switch away sends its time one last time.
     it('leaves the time of a movie to the movie', async () => {
       wrapper = mountPlayer({ props: { previews: [soundPreview] } })

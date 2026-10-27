@@ -124,6 +124,17 @@ describe('video', () => {
     expect(formatTime(-1, 25)).toBe('00:00:00:00')
   })
 
+  // SMPTE: the frames field stays under the frame rate.
+  it('formatTime carries a frame rounded up to the next second', () => {
+    expect(formatTime(0.99, 25)).toBe('00:00:01:00')
+    expect(formatTime(599 / 29.97, 29.97)).toBe('00:00:19:29')
+  })
+
+  // A non-drop-frame timecode runs behind the clock at 29.97 fps.
+  it('formatTime counts 30 frames a second at 29.97 fps', () => {
+    expect(formatTime(3600, 29.97)).toBe('00:59:56:12')
+  })
+
   it('getEntityFrameStart', () => {
     expect(getEntityFrameStart({ data: { frame_in: 1001 } })).toBe(1001)
     expect(getEntityFrameStart({ data: { frame_in: '1001' } })).toBe(1001)

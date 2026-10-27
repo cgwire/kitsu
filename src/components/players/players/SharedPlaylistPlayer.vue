@@ -258,7 +258,12 @@ import {
 } from '@/composables/players/previewShortcuts'
 import { usePlayerTransport } from '@/composables/players/transport'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
-import { DEFAULT_FPS, floorToFrame, formatTime } from '@/lib/video'
+import {
+  DEFAULT_FPS,
+  floorToFrame,
+  formatTime,
+  formatToTimecode
+} from '@/lib/video'
 
 import SharedAnnotationOverlay from '@/components/players/annotations/SharedAnnotationOverlay.vue'
 import SharedPlaylistButtonBar from '@/components/players/bars/SharedPlaylistButtonBar.vue'
@@ -488,6 +493,8 @@ const currentFrameDisplay = computed(() =>
 const nbFramesDisplay = computed(() =>
   String(nbFrames.value || 0).padStart(3, '0')
 )
+// From the time: the frame the viewer sends drifts on the rounded frame
+// duration, its time matches the picture.
 const currentTimeFormatted = computed(() =>
   formatTime(
     isSound.value
@@ -497,7 +504,9 @@ const currentTimeFormatted = computed(() =>
   )
 )
 const maxDurationFormatted = computed(() =>
-  formatTime(isSound.value ? soundDuration.value : maxDuration.value, fps.value)
+  isSound.value
+    ? formatTime(soundDuration.value, fps.value)
+    : formatToTimecode(nbFrames.value, fps.value)
 )
 
 const playlistFrameData = computed(() => {

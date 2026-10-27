@@ -509,6 +509,7 @@ import {
   floorToFrame,
   formatFrame,
   formatTime,
+  formatToTimecode,
   frameStartTime,
   getEntityFrameStart,
   roundToFrame
@@ -1099,7 +1100,7 @@ const setVideoFrameContext = frame => {
     const time = frame * frameDuration.value
     currentFrame.value = frame
     currentTimeRaw.value = time
-    currentTime.value = formatTime(time, fps.value)
+    currentTime.value = formatToTimecode(frame, fps.value)
     // While playing, the bar is driven smoothly by onVideoTimeUpdate; here we
     // only move it for paused stepping/seeking (avoids a per-frame jerk).
     if (!isPlaying.value) progress.value.updateProgressBar(frame)
@@ -1204,10 +1205,8 @@ const changeMaxDuration = duration => {
     }
     duration = floorToFrame(duration, fps.value)
     videoDuration.value = duration
-    maxDuration.value = formatTime(
-      videoDuration.value - frameDuration.value,
-      fps.value
-    )
+    // The last frame the player shows: setVideoFrameContext stops there.
+    maxDuration.value = formatToTimecode(nbFrames.value - 1, fps.value)
   } else {
     maxDuration.value = '00:00:00:00'
     videoDuration.value = 0

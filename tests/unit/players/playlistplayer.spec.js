@@ -751,6 +751,27 @@ describe('PlaylistPlayer.vue', () => {
         await goTo('previous')
         expect(playbackBar().props('maxDuration')).toBe('00:00:04:00')
       })
+
+      // SMPTE: the frames field stays under 30 at 30 fps.
+      it('labels the time of a movie as a timecode', async () => {
+        await mountWithSound([
+          { ...movie, fps: '30', preview_file_duration: 60 },
+          sound
+        ])
+        rawPlayer().vm.$emit('max-duration-update', 60)
+        rawPlayer().vm.$emit('frame-update', 30)
+        await flushPromises()
+        expect(playbackBar().props('currentTime')).toBe('00:00:01:00')
+        expect(playbackBar().props('maxDuration')).toBe('00:01:00:00')
+      })
+
+      // A frame step sends its frame with a float error.
+      it('labels a stepped frame as its counter does', async () => {
+        await mountOnMovie()
+        rawPlayer().vm.$emit('frame-update', 28.999999999999996)
+        await flushPromises()
+        expect(playbackBar().props('currentTime')).toBe('00:00:01:04')
+      })
     })
 
     // The waveform follows the width the comments panel leaves on its own.
