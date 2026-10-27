@@ -640,6 +640,22 @@ const isShots = computed(() => props.entityType === 'Shot')
 
 const entityMap = computed(() => getEntityMap(props.entityType))
 
+// The first column of the export, the parent the estimations import matches
+// a line on: none for an episode, nor for a sequence or an edit outside a TV
+// show.
+const exportParentColumn = computed(() => {
+  if (isAssets.value) {
+    return { labelKey: 'tasks.fields.asset_type', field: 'asset_type_name' }
+  }
+  if (isEpisodes.value) return null
+  if (isSequences.value || isEdits.value) {
+    return isTVShow.value
+      ? { labelKey: 'shots.fields.episode', field: 'episode_name' }
+      : null
+  }
+  return { labelKey: 'tasks.fields.sequence', field: 'sequence_name' }
+})
+
 const displayedTasks = computed(() => props.tasks.slice(0, 60 * page.value))
 
 const cardGroups = computed(() =>
@@ -991,8 +1007,9 @@ const onMetadataChanged = ({ entry, descriptor, value }) => {
 }
 
 const getTableData = () => {
+  const parentColumn = exportParentColumn.value
   const headers = [
-    isAssets.value ? t('tasks.fields.asset_type') : t('tasks.fields.sequence'),
+    ...(parentColumn ? [t(parentColumn.labelKey)] : []),
     t('tasks.fields.entity_name'),
     t('tasks.fields.task_status'),
     t('tasks.fields.assignees'),
@@ -1023,7 +1040,7 @@ const getTableData = () => {
       .join(', ')
 
     const line = [
-      isAssets.value ? entity.asset_type_name : entity.sequence_name,
+      ...(parentColumn ? [entity[parentColumn.field]] : []),
       entity.name,
       task.task_status_short_name,
       assignees,
