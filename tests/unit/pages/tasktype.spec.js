@@ -981,16 +981,39 @@ describe('TaskType page', () => {
       expect(shown).toBe(true)
     })
 
-    it('is shown for an episode task type with all episodes in the store', async () => {
-      const shown = await hasImportButton(
-        {
-          currentEpisode: () => ({ id: 'all' }),
-          currentTaskType: () => ({ ...shotTaskType, for_entity: 'Episode' })
-        },
-        '/productions/production-1/episodes/task-types/task-type-1'
-      )
-      expect(shown).toBe(true)
-    })
+    // A link without episode, such as the task type of a task in My Tasks,
+    // keeps the Main pack of an earlier assets page, which lists nothing else.
+    it.each([
+      ['shots', 'Shot'],
+      ['edits', 'Edit'],
+      ['sequences', 'Sequence']
+    ])(
+      'is hidden on the %s route of a task type with Main pack in the store',
+      async (type, forEntity) => {
+        const shown = await hasImportButton(
+          {
+            currentEpisode: () => ({ id: 'main' }),
+            currentTaskType: () => ({ ...shotTaskType, for_entity: forEntity })
+          },
+          `/productions/production-1/${type}/task-types/task-type-1`
+        )
+        expect(shown).toBe(false)
+      }
+    )
+
+    it.each(['all', 'main'])(
+      'is shown for an episode task type with %s in the store',
+      async id => {
+        const shown = await hasImportButton(
+          {
+            currentEpisode: () => ({ id }),
+            currentTaskType: () => ({ ...shotTaskType, for_entity: 'Episode' })
+          },
+          '/productions/production-1/episodes/task-types/task-type-1'
+        )
+        expect(shown).toBe(true)
+      }
+    )
   })
 
   // The store keeps the episode the user came from.

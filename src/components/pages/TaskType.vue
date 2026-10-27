@@ -37,7 +37,7 @@
                 !isActiveTab('schedule') &&
                 !isActiveTab('estimation') &&
                 isSupervisorInDepartment &&
-                !isEstimationsImportAmbiguous
+                !isEstimationsImportHidden
               "
             >
               <button-simple
@@ -802,15 +802,18 @@ const isSupervisorInDepartment = computed(
     )
 )
 
-// Under All shots and All assets, the rows of two episodes can share their
-// sequence or asset type, and their name. Read the episode the import is
-// posted with, not the route: a route without episode keeps the 'all' of the
-// store.
-const isEstimationsImportAmbiguous = computed(
-  () =>
-    currentTaskTypeEpisode.value?.id === 'all' &&
-    ['Asset', 'Shot'].includes(currentTaskType.value?.for_entity)
-)
+// Read the episode the import is posted with, not the route: a route without
+// episode keeps the one of the store. Under All shots and All assets, the rows
+// of two episodes can share their sequence or asset type, and their name.
+// Main pack only holds assets: another task type kept there by a link without
+// episode lists nothing.
+const isEstimationsImportHidden = computed(() => {
+  const episodeId = currentTaskTypeEpisode.value?.id
+  const forEntity = currentTaskType.value?.for_entity
+  if (episodeId === 'all') return ['Asset', 'Shot'].includes(forEntity)
+  if (episodeId === 'main') return forEntity !== 'Asset'
+  return false
+})
 
 const taskMetadataDescriptors = computed(() =>
   store.getters.taskMetadataDescriptors.filter(
