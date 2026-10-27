@@ -42,6 +42,14 @@ const getters = {
     return cache.taskTypeMap.get(params.task_type_id) || {}
   },
 
+  // The episode the current task type page works in: none for an Episode
+  // task type, which lists every episode. Zou matches episode rows over the
+  // whole production too: posting the store episode would scope them to it.
+  currentTaskTypeEpisode: (state, getters, rootState, rootGetters) =>
+    getters.currentTaskType.for_entity === 'Episode'
+      ? null
+      : rootGetters.currentEpisode,
+
   assetTaskTypes: (state, getters, rootState, rootGetters) => {
     return state.taskTypes.filter(taskType => taskType.for_entity === 'Asset')
   },
@@ -130,10 +138,10 @@ const isScopeLoaded = (rootGetters, loadingKey) => {
 }
 
 const actions = {
-  uploadTaskTypeEstimations({ commit, state, rootGetters }, formData) {
+  uploadTaskTypeEstimations({ getters, rootGetters }, formData) {
     return taskTypesApi.postTaskTypeEstimations(
       rootGetters.currentProduction,
-      rootGetters.currentEpisode,
+      getters.currentTaskTypeEpisode,
       rootGetters.currentTaskType,
       formData
     )

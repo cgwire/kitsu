@@ -68,6 +68,30 @@ describe('Task types store', () => {
       expect(store.getters.currentTaskType(state, null, rootState))
         .toStrictEqual(taskTypes[1])
     }),
+    test.each(['Asset', 'Shot', 'Sequence', 'Edit'])(
+      'currentTaskTypeEpisode of the %s task types is the current episode',
+      forEntity => {
+        const episode = { id: 'ep-1' }
+        expect(
+          store.getters.currentTaskTypeEpisode(
+            state,
+            { currentTaskType: { for_entity: forEntity } },
+            null,
+            { currentEpisode: episode }
+          )
+        ).toBe(episode)
+      }
+    )
+    test('currentTaskTypeEpisode of the Episode task types is none', () => {
+      expect(
+        store.getters.currentTaskTypeEpisode(
+          state,
+          { currentTaskType: { for_entity: 'Episode' } },
+          null,
+          { currentEpisode: { id: 'all' } }
+        )
+      ).toBeNull()
+    })
     test('assetTaskTypes', () => {
       expect(store.getters.assetTaskTypes(state, null, null, rootGetters))
         .toHaveLength(2)
@@ -122,6 +146,30 @@ describe('Task types store', () => {
   describe('Actions', () => {
     afterEach(() => {
       vi.restoreAllMocks()
+    })
+
+    test('uploadTaskTypeEstimations posts with the estimations episode', async () => {
+      vi.spyOn(taskTypesApi, 'postTaskTypeEstimations').mockResolvedValue([])
+      const production = { id: 'p' }
+      const taskType = { id: 'task-type-5', for_entity: 'Episode' }
+      const formData = {}
+      await store.actions.uploadTaskTypeEstimations(
+        {
+          getters: { currentTaskTypeEpisode: null },
+          rootGetters: {
+            currentEpisode: { id: 'all' },
+            currentProduction: production,
+            currentTaskType: taskType
+          }
+        },
+        formData
+      )
+      expect(taskTypesApi.postTaskTypeEstimations).toHaveBeenCalledWith(
+        production,
+        null,
+        taskType,
+        formData
+      )
     })
 
     test('loadTaskType', async () => {

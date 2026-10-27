@@ -115,6 +115,17 @@ describe('store/api endpoints', () => {
             formData
           ),
         '/api/import/csv/projects/p1/episodes/e1/task-types/t1/estimations'
+      ],
+      [
+        'estimations CSV without episode',
+        () =>
+          taskTypesApi.postTaskTypeEstimations(
+            production,
+            null,
+            { id: 't1' },
+            formData
+          ),
+        '/api/import/csv/projects/p1/task-types/t1/estimations'
       ]
     ])('%s posts through ppostImport', (label, post, path) => {
       post()
