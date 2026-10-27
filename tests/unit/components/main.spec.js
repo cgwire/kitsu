@@ -16,12 +16,12 @@ vi.mock('@/components/tops/Topbar.vue', () => ({
 
 import Main from '@/components/Main.vue'
 
-const mountMain = user =>
+const mountMain = (user, socket = { connect: vi.fn() }) =>
   mount(Main, {
     global: {
       plugins: [createStore({ getters: { user: () => user } })],
       mocks: { $t: key => key },
-      config: { globalProperties: { $socket: { connect: vi.fn() } } },
+      config: { globalProperties: { $socket: socket } },
       stubs: { XyzTransition: { template: '<div><slot /></div>' }, 'router-view': true }
     }
   })
@@ -34,6 +34,12 @@ describe('Main', () => {
   afterEach(() => {
     vi.useRealTimers()
     vi.restoreAllMocks()
+  })
+
+  it('connects the socket once mounted', () => {
+    const socket = { connect: vi.fn() }
+    mountMain({ preview_project_id: null }, socket)
+    expect(socket.connect).toHaveBeenCalledOnce()
   })
 
   it('shows read-only banner for preview account', () => {
