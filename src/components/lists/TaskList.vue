@@ -451,6 +451,10 @@ import { useFormat } from '@/composables/format'
 import { useGrabList } from '@/composables/grabList'
 import { useTaskListSelection } from '@/composables/taskSelection'
 import {
+  getEstimationsCsvLabelKeys,
+  getEstimationsParentField
+} from '@/lib/csv'
+import {
   getMetadataFieldValue,
   isSupervisorInDepartments
 } from '@/lib/descriptors'
@@ -640,21 +644,12 @@ const isShots = computed(() => props.entityType === 'Shot')
 
 const entityMap = computed(() => getEntityMap(props.entityType))
 
-// The first column of the export, the parent the estimations import matches
-// a line on: none for an episode, nor for a sequence or an edit outside a TV
-// show.
-const exportParentColumn = computed(() => {
-  if (isAssets.value) {
-    return { labelKey: 'tasks.fields.asset_type', field: 'asset_type_name' }
-  }
-  if (isEpisodes.value) return null
-  if (isSequences.value || isEdits.value) {
-    return isTVShow.value
-      ? { labelKey: 'shots.fields.episode', field: 'episode_name' }
-      : null
-  }
-  return { labelKey: 'tasks.fields.sequence', field: 'sequence_name' }
-})
+const exportLabelKeys = computed(() =>
+  getEstimationsCsvLabelKeys(props.entityType, {
+    isPaperProduction: isPaperProduction.value,
+    isTVShow: isTVShow.value
+  })
+)
 
 const displayedTasks = computed(() => props.tasks.slice(0, 60 * page.value))
 
@@ -1007,19 +1002,19 @@ const onMetadataChanged = ({ entry, descriptor, value }) => {
 }
 
 const getTableData = () => {
-  const parentColumn = exportParentColumn.value
+  const labelKeys = exportLabelKeys.value
   const headers = [
-    ...(parentColumn ? [t(parentColumn.labelKey)] : []),
-    t('tasks.fields.entity_name'),
+    ...(labelKeys.Parent ? [t(labelKeys.Parent)] : []),
+    t(labelKeys.Entity),
     t('tasks.fields.task_status'),
     t('tasks.fields.assignees'),
-    t('tasks.fields.difficulty'),
-    t('tasks.fields.estimation'),
+    t(labelKeys.Difficulty),
+    t(labelKeys.Estimation),
     t('tasks.fields.duration'),
     t('tasks.fields.retake_count'),
     ...props.metadataDescriptors.map(descriptor => descriptor.name),
-    t('tasks.fields.start_date'),
-    t('tasks.fields.due_date'),
+    t(labelKeys['Start date']),
+    t(labelKeys['Due date']),
     t('tasks.fields.real_start_date'),
     t('tasks.fields.real_end_date'),
     t('tasks.fields.done_date'),
@@ -1028,7 +1023,7 @@ const getTableData = () => {
   if (isShots.value) {
     const value = !isPaperProduction.value
       ? t('tasks.fields.frames')
-      : t('tasks.fields.drawings')
+      : t(labelKeys.Drawings)
     headers.splice(4, 0, value)
   }
   const taskLines = [headers]
@@ -1040,7 +1035,9 @@ const getTableData = () => {
       .join(', ')
 
     const line = [
-      ...(parentColumn ? [entity[parentColumn.field]] : []),
+      ...(labelKeys.Parent
+        ? [entity[getEstimationsParentField(props.entityType)]]
+        : []),
       entity.name,
       task.task_status_short_name,
       assignees,

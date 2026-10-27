@@ -596,6 +596,57 @@ describe('TaskType page', () => {
       expect(modal().props()).toMatchObject({ active: true, isError: false })
     })
 
+    // The export writes the labels of the language of the user.
+    const exportedHeaders = [
+      'tasks.fields.asset_type',
+      'tasks.fields.entity_name',
+      'tasks.fields.task_status',
+      'tasks.fields.difficulty',
+      'tasks.fields.estimation',
+      'tasks.fields.start_date',
+      'tasks.fields.due_date'
+    ]
+
+    const previewHeaders = async ({ getters } = {}) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const page = await mountPage({ getters, section: 'tasks' })
+      wrapper = page.wrapper
+      await wrapper
+        .findComponent(ImportModal)
+        .vm.$emit('confirm', exportedHeaders.join(';'), 'text')
+      await flushPromises()
+      return wrapper.findComponent(ImportRenderModal).props('parsedCsv')[0]
+    }
+
+    it('gives the exported labels the column names of Zou', async () => {
+      expect(await previewHeaders()).toEqual([
+        'Parent',
+        'Entity',
+        'tasks.fields.task_status',
+        'Difficulty',
+        'Estimation',
+        'Start date',
+        'Due date'
+      ])
+    })
+
+    it('keeps the label of a column named after it', async () => {
+      const descriptor = {
+        id: 'descriptor-1',
+        task_type_id: 'task-type-1',
+        name: 'tasks.fields.difficulty',
+        field_name: 'difficulty',
+        departments: []
+      }
+
+      const headers = await previewHeaders({
+        getters: { taskMetadataDescriptors: () => [descriptor] }
+      })
+
+      expect(headers).toContain('tasks.fields.difficulty')
+      expect(headers).not.toContain('Difficulty')
+    })
+
     it('releases the modal on a bug, left to the error handler', async () => {
       vi.stubGlobal('FileReader', BrokenFileReader)
       const modal = await openImportModal()

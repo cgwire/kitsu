@@ -441,7 +441,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { getEntityMap } from '@/composables/entity'
-import csv from '@/lib/csv'
+import csv, { getEstimationsCsvLabelKeys } from '@/lib/csv'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
 import func from '@/lib/func'
 import {
@@ -1946,13 +1946,28 @@ const uploadImportFile = data => {
     })
 }
 
+// The labels of the export, in the language of the user, get their name
+// back. A descriptor named like a label keeps its column.
+const renameExportLabels = headers => {
+  const labelKeys = getEstimationsCsvLabelKeys(
+    currentTaskType.value?.for_entity,
+    { isPaperProduction: isPaperProduction.value, isTVShow: isTVShow.value }
+  )
+  return csv.renameHeaders(
+    headers,
+    new Map(Object.entries(labelKeys).map(([name, key]) => [t(key), name])),
+    taskMetadataDescriptors.value.map(descriptor => descriptor.name)
+  )
+}
+
 const renderImport = async (data, mode) => {
   loading.importing = true
   errors.importing = false
   try {
-    parsedCSV.value = await csv.processCSV(
+    const [headers, ...lines] = await csv.processCSV(
       mode === 'file' ? data.get('file') : data
     )
+    parsedCSV.value = [renameExportLabels(headers), ...lines]
     hideImportModal()
     showImportRenderModal()
   } catch (err) {
