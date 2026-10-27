@@ -239,7 +239,15 @@ const actions = {
           resolve()
         }
       } else if (rootGetters.currentTaskType.for_entity === 'Episode') {
-        if (rootGetters.episodeMap.size < 2 || force) {
+        const episodeMap = rootGetters.episodeMap
+        // The topbar fills the map with plain rows, and an episode created
+        // from the shot list joins them with its tasks: any row without its
+        // tasks would show empty task columns.
+        if (
+          force ||
+          episodeMap.size < 2 ||
+          [...episodeMap.values()].some(episode => !episode.validations)
+        ) {
           return dispatch('loadEpisodesWithTasks').then(resolve).catch(reject)
         } else {
           resolve()
