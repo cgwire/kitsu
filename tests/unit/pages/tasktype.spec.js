@@ -1009,11 +1009,15 @@ describe('TaskType page', () => {
       vi.restoreAllMocks()
     })
 
-    const readTitleAndExportName = async (forEntity, path) => {
+    const readTitleAndExportName = async (
+      forEntity,
+      path,
+      currentEpisode = episode
+    ) => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
       const mounted = await mountPage({
         getters: {
-          currentEpisode: () => episode,
+          currentEpisode: () => currentEpisode,
           currentTaskType: () => ({
             id: 'task-type-1',
             name: 'Animation',
@@ -1055,6 +1059,27 @@ describe('TaskType page', () => {
       expect(title).toBe('Production / E02 / Animation - Kitsu')
       expect(exportName).toMatch(/_e02_production_animation_tasks$/)
     })
+
+    // The pseudo-episodes have no name: they take the label of the topbar.
+    it.each([
+      ['all', 'shots', 'Shot', 'main.all_shots'],
+      ['all', 'assets', 'Asset', 'main.all_assets'],
+      ['all', 'edits', 'Edit', 'main.all_edits'],
+      ['all', 'sequences', 'Sequence', 'sequences.all_sequences'],
+      ['main', 'assets', 'Asset', 'main.main_pack']
+    ])(
+      'name the %s pseudo-episode of the %s',
+      async (id, type, forEntity, label) => {
+        const { title, exportName } = await readTitleAndExportName(
+          forEntity,
+          `/productions/production-1/episodes/${id}/${type}/task-types/task-type-1`,
+          { id }
+        )
+        expect(title).toBe(`Production / ${label} / Animation - Kitsu`)
+        expect(exportName).toContain(label.split('.').pop())
+        expect(exportName).not.toMatch(/undefined/)
+      }
+    )
   })
 
   // The episode stats linked their shot columns to the episodes route.

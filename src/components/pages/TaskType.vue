@@ -588,6 +588,12 @@ let taskIndex = null
 
 const genericColumns = ['Metadata column name (text value)']
 const pageEntityTypes = ['Asset', 'Shot', 'Sequence', 'Edit', 'Episode']
+const allEpisodesLabelKeys = {
+  Asset: 'main.all_assets',
+  Edit: 'main.all_edits',
+  Sequence: 'sequences.all_sequences',
+  Shot: 'main.all_shots'
+}
 const difficultyOptions = [
   { label: 'all_tasks', value: '-1' },
   { label: 'difficulty.very_easy', value: '1' },
@@ -855,16 +861,22 @@ const disabledDates = computed(() => ({
   days: [6, 0]
 }))
 
+// The pseudo-episodes have no name: they get the label of the entity type.
+const currentTaskTypeEpisodeLabel = computed(() => {
+  const episode = currentTaskTypeEpisode.value
+  if (episode?.id === 'all') {
+    return t(allEpisodesLabelKeys[entityType.value] ?? 'episodes.all_episodes')
+  }
+  if (episode?.id === 'main') return t('main.main_pack')
+  return episode?.name
+})
+
 const title = computed(() => {
   if (currentProduction.value) {
     if (isTVShow.value && currentTaskTypeEpisode.value) {
-      const episodeName =
-        currentTaskTypeEpisode.value.id === 'all'
-          ? t('main.all_assets')
-          : currentTaskTypeEpisode.value.name
       return (
         `${currentProduction.value.name} / ` +
-        `${episodeName} / ` +
+        `${currentTaskTypeEpisodeLabel.value} / ` +
         `${currentTaskType.value.name}`
       )
     }
@@ -1352,7 +1364,7 @@ const onExportClick = () => {
     'tasks'
   ]
   if (currentTaskTypeEpisode.value) {
-    nameData.splice(1, 0, currentTaskTypeEpisode.value.name)
+    nameData.splice(1, 0, currentTaskTypeEpisodeLabel.value)
   }
   const name = stringHelpers.slugify(nameData.join('_'))
   csv.buildCsvFile(name, taskLines)
