@@ -40,7 +40,6 @@
           <task-type-name
             class="flexrow-item"
             :task-type="taskTypeMap.get(currentAsset.ready_for)"
-            :current-production-id="currentProduction.id"
           />
         </div>
         <router-link

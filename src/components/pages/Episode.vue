@@ -237,7 +237,7 @@
                         <task-type-name
                           class="flexrow-item"
                           :task-type="taskTypeMap.get(asset.ready_for)"
-                          :current-production-id="currentProduction.id"
+                          :is-link="false"
                           :title="
                             'Ready for: ' +
                             (taskTypeMap.get(asset.ready_for)?.name || '')
