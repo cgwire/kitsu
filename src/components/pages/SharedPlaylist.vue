@@ -97,6 +97,19 @@ const loginAsGuest = guest => {
   })
 }
 
+// A link closed to comments asks for no name, but its comments still render
+// for the client role, as they do for a guest.
+const loginAsViewer = () => {
+  store.commit(USER_LOGIN, {
+    first_name: '',
+    last_name: '',
+    role: 'client',
+    is_guest: true,
+    has_avatar: false,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+  })
+}
+
 const restoreStoredGuest = async () => {
   const storedGuestId = localStorage.getItem(GUEST_STORAGE_PREFIX + token.value)
   if (!storedGuestId) return
@@ -125,9 +138,16 @@ const loadSharedPlaylist = async () => {
     const data = await store.dispatch('loadSharedPlaylist', token.value)
     playlist.value = data
     playlistEntities.value = data.shots || []
-    await store.dispatch('loadSharedPlaylistContext', token.value)
-    shareLink.value = { can_comment: true }
-    await restoreStoredGuest()
+    const context = await store.dispatch(
+      'loadSharedPlaylistContext',
+      token.value
+    )
+    shareLink.value = context.share_link
+    if (shareLink.value.can_comment) {
+      await restoreStoredGuest()
+    } else {
+      loginAsViewer()
+    }
   } catch {
     error.value = true
   }
