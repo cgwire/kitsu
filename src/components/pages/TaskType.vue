@@ -686,6 +686,9 @@ const taskListRef = useTemplateRef('task-list')
 
 // Computed
 const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentTaskTypeEpisode = computed(
+  () => store.getters.currentTaskTypeEpisode
+)
 const currentProduction = computed(() => store.getters.currentProduction)
 const currentTaskType = computed(() => store.getters.currentTaskType)
 const isCurrentUserProductionManager = computed(
@@ -790,7 +793,7 @@ const isSupervisorInDepartment = computed(
 // store.
 const isEstimationsImportAmbiguous = computed(
   () =>
-    store.getters.currentTaskTypeEpisode?.id === 'all' &&
+    currentTaskTypeEpisode.value?.id === 'all' &&
     ['Asset', 'Shot'].includes(currentTaskType.value?.for_entity)
 )
 
@@ -845,11 +848,11 @@ const disabledDates = computed(() => ({
 
 const title = computed(() => {
   if (currentProduction.value) {
-    if (isTVShow.value && currentEpisode.value) {
+    if (isTVShow.value && currentTaskTypeEpisode.value) {
       const episodeName =
-        currentEpisode.value.id === 'all'
+        currentTaskTypeEpisode.value.id === 'all'
           ? t('main.all_assets')
-          : currentEpisode.value.name
+          : currentTaskTypeEpisode.value.name
       return (
         `${currentProduction.value.name} / ` +
         `${episodeName} / ` +
@@ -1339,8 +1342,8 @@ const onExportClick = () => {
     currentTaskType.value.name,
     'tasks'
   ]
-  if (currentEpisode.value) {
-    nameData.splice(1, 0, currentEpisode.value.name)
+  if (currentTaskTypeEpisode.value) {
+    nameData.splice(1, 0, currentTaskTypeEpisode.value.name)
   }
   const name = stringHelpers.slugify(nameData.join('_'))
   csv.buildCsvFile(name, taskLines)

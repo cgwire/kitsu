@@ -1,3 +1,4 @@
+import { useHead } from '@unhead/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
@@ -12,6 +13,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
+import csv from '@/lib/csv'
 import assetStore from '@/store/modules/assets'
 import taskTypeStore from '@/store/modules/tasktypes'
 
@@ -984,6 +986,70 @@ describe('TaskType page', () => {
         '/productions/production-1/episodes/task-types/task-type-1'
       )
       expect(shown).toBe(true)
+    })
+  })
+
+  // The store keeps the episode the user came from.
+  describe('title and export name', () => {
+    const TaskListStub = {
+      name: 'TaskList',
+      template: '<div />',
+      methods: { getTableData: () => [['Entity']] }
+    }
+    const episode = { id: 'episode-2', name: 'E02' }
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      vi.restoreAllMocks()
+    })
+
+    const readTitleAndExportName = async (forEntity, path) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const mounted = await mountPage({
+        getters: {
+          currentEpisode: () => episode,
+          currentTaskType: () => ({
+            id: 'task-type-1',
+            name: 'Animation',
+            for_entity: forEntity
+          }),
+          isTVShow: () => true
+        },
+        path,
+        routes: taskTypeRoutes,
+        stubs: { TaskList: TaskListStub }
+      })
+      wrapper = mounted.wrapper
+      const buildCsvFile = vi.spyOn(csv, 'buildCsvFile').mockReturnValue('')
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'export')
+        .vm.$emit('click')
+      return {
+        title: vi.mocked(useHead).mock.calls.at(-1)[0].title.value,
+        exportName: buildCsvFile.mock.calls[0][0]
+      }
+    }
+
+    it('name no episode for an Episode task type', async () => {
+      const { title, exportName } = await readTitleAndExportName(
+        'Episode',
+        '/productions/production-1/episodes/task-types/task-type-1'
+      )
+      expect(title).toBe('Production / Animation - Kitsu')
+      expect(exportName).toMatch(/_production_animation_tasks$/)
+      expect(exportName).not.toMatch(/e02/i)
+    })
+
+    it('name the episode of a Shot task type', async () => {
+      const { title, exportName } = await readTitleAndExportName(
+        'Shot',
+        '/productions/production-1/episodes/episode-2/shots/task-types/task-type-1'
+      )
+      expect(title).toBe('Production / E02 / Animation - Kitsu')
+      expect(exportName).toMatch(/_e02_production_animation_tasks$/)
     })
   })
 
