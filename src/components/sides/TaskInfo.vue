@@ -289,16 +289,30 @@
           @confirm="confirmAddPreviewModal"
         />
 
-        <add-preview-modal
-          ref="add-extra-preview-modal"
-          :active="modals.addExtraPreview"
-          :is-loading="loading.addExtraPreview"
-          :is-error="errors.addExtraPreview"
-          message=""
-          :upload-progress="uploadProgress"
-          @cancel="onCloseExtraPreview"
-          @confirm="createExtraPreview"
-        />
+        <!-- The browser shows a player in full screen alone: the modals of
+             its "+" and trash buttons go into it. -->
+        <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
+          <add-preview-modal
+            ref="add-extra-preview-modal"
+            :active="modals.addExtraPreview"
+            :is-loading="loading.addExtraPreview"
+            :is-error="errors.addExtraPreview"
+            message=""
+            :upload-progress="uploadProgress"
+            @cancel="onCloseExtraPreview"
+            @confirm="createExtraPreview"
+          />
+
+          <delete-modal
+            :active="modals.deleteExtraPreview"
+            :is-loading="loading.deleteExtraPreview"
+            :is-error="errors.deleteExtraPreview"
+            :text="$t('tasks.delete_preview')"
+            :error-text="$t('tasks.delete_preview_error')"
+            @cancel="onCancelRemoveExtraPreview"
+            @confirm="confirmDeleteTaskPreview"
+          />
+        </teleport>
 
         <edit-comment-modal
           :active="modals.editComment"
@@ -331,16 +345,6 @@
           :is-error="errors.moveComment"
           @cancel="onCancelMoveComment"
           @confirm="confirmMoveComment"
-        />
-
-        <delete-modal
-          :active="modals.deleteExtraPreview"
-          :is-loading="loading.deleteExtraPreview"
-          :is-error="errors.deleteExtraPreview"
-          :text="$t('tasks.delete_preview')"
-          :error-text="$t('tasks.delete_preview_error')"
-          @cancel="onCancelRemoveExtraPreview"
-          @confirm="confirmDeleteTaskPreview"
         />
       </div>
       <div class="side task-info pa1" v-else-if="nbSelectedEntities > 0">
@@ -404,6 +408,7 @@ import { useStore } from 'vuex'
 
 import { addEvents, getClientX, removeEvents } from '@/composables/dom'
 import { getEntityMap } from '@/composables/entity'
+import { useFullScreenTarget } from '@/composables/fullScreen'
 import { useTime } from '@/composables/time'
 import { isCommentReplyable } from '@/lib/comments'
 import csv from '@/lib/csv'
@@ -566,6 +571,7 @@ const addCommentRef = useTemplateRef('add-comment')
 const addExtraPreviewModalRef = useTemplateRef('add-extra-preview-modal')
 const addPreviewModalRef = useTemplateRef('add-preview-modal')
 const previewPlayerRef = useTemplateRef('preview-player')
+const fullScreenPlayer = useFullScreenTarget(() => previewPlayerRef.value?.$el)
 const sideWrapperRef = useTemplateRef('side-wrapper')
 
 // Computed

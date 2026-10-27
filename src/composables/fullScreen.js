@@ -7,7 +7,14 @@
  * transition (button click, ESC key, browser UI), so onChange is the
  * single source of truth for side-effects.
  */
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  onScopeDispose,
+  ref,
+  shallowRef
+} from 'vue'
 
 const FULLSCREEN_EVENTS = [
   'fullscreenchange',
@@ -90,4 +97,28 @@ export const useFullScreen = ({ container, onChange }) => {
   })
 
   return { fullScreen, enter, exit, toggle }
+}
+
+/**
+ * The element while it, or an element it holds, is in full screen, null
+ * otherwise. The browser then shows nothing else: a modal opened for the
+ * element must be teleported into it.
+ *
+ * @param {Function} getElement - returns the element, read when needed
+ */
+export const useFullScreenTarget = getElement => {
+  const fullScreenElement = shallowRef(getFullScreenElement())
+  const update = () => {
+    fullScreenElement.value = getFullScreenElement()
+  }
+  FULLSCREEN_EVENTS.forEach(name => document.addEventListener(name, update))
+  onScopeDispose(() => {
+    FULLSCREEN_EVENTS.forEach(name =>
+      document.removeEventListener(name, update)
+    )
+  })
+  return computed(() => {
+    const element = getElement()
+    return element?.contains(fullScreenElement.value) ? element : null
+  })
 }

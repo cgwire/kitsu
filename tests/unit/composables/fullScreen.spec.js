@@ -1,8 +1,16 @@
+import { effectScope } from 'vue'
+
 import {
   exitDocumentFullScreen,
   getFullScreenElement,
-  requestFullScreen
+  requestFullScreen,
+  useFullScreenTarget
 } from '@/composables/fullScreen'
+
+import {
+  resetFullScreen,
+  setFullScreenElement
+} from '../fixtures/full-screen'
 
 // Safari below 16.4 only exposes the webkit-prefixed fullscreen API:
 // the helpers must fall back to it instead of silently doing nothing.
@@ -60,5 +68,34 @@ describe('composables/fullScreen helpers', () => {
 
   test('getFullScreenElement returns null when nothing is fullscreen', () => {
     expect(getFullScreenElement()).toBeNull()
+  })
+})
+
+describe('composables/fullScreen useFullScreenTarget', () => {
+  afterEach(() => {
+    resetFullScreen()
+  })
+
+  // A video the element holds may go full screen in its turn: the element
+  // stays the target.
+  test('gives the element while it or what it holds is in full screen', () => {
+    const element = document.createElement('div')
+    const video = element.appendChild(document.createElement('video'))
+    const scope = effectScope()
+    const target = scope.run(() => useFullScreenTarget(() => element))
+
+    expect(target.value).toBeNull()
+    setFullScreenElement(element)
+    expect(target.value).toBe(element)
+    setFullScreenElement(video)
+    expect(target.value).toBe(element)
+    setFullScreenElement(document.createElement('video'))
+    expect(target.value).toBeNull()
+    setFullScreenElement(null)
+    expect(target.value).toBeNull()
+
+    scope.stop()
+    setFullScreenElement(element)
+    expect(target.value).toBeNull()
   })
 })

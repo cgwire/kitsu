@@ -2972,8 +2972,14 @@ defineExpose({
   background: $dark-grey-2;
 }
 
+// The name gives way first on a narrow full screen: the buttons after it
+// stay on the screen.
 .entity-name {
   color: $light-grey;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .task-info-column {

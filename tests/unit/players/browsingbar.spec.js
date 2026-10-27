@@ -37,6 +37,23 @@ describe('players/BrowsingBar', () => {
     expect(wrapper.find('.current-index').exists()).toBe(isShown)
   })
 
+  // The host opens their modals in the player while it is in full screen.
+  it.each([
+    [false, false, ['plus', 'trash']],
+    [true, false, ['plus']],
+    [false, true, ['plus', 'trash']],
+    [true, true, ['plus', 'trash']]
+  ])(
+    'offers to add and delete a file, light %s, full screen %s',
+    (light, fullScreen, offered) => {
+      const wrapper = mountBar('png', { fullScreen, light })
+      const actions = icons(wrapper).filter(icon =>
+        ['plus', 'trash'].includes(icon)
+      )
+      expect(actions).toEqual(offered)
+    }
+  )
+
   it('browses the files of a sound out of a light bar', () => {
     const previews = [{ extension: 'mp3' }, { extension: 'wav' }]
     const wrapper = mountBar('mp3', { light: false, previews })
