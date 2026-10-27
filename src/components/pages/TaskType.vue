@@ -571,7 +571,7 @@ const descriptorIdToDelete = ref(null)
 const descriptorToEdit = ref({})
 const difficultyFilter = ref('-1')
 const dueDateFilter = ref('all')
-const entityType = ref('Asset')
+const routeEntityType = ref('Asset')
 const estimationFilter = ref('all')
 const importCsvFormData = ref({})
 const isScheduleVisible = ref(false)
@@ -587,6 +587,7 @@ const taskStatusIdsFilter = ref([])
 let taskIndex = null
 
 const genericColumns = ['Metadata column name (text value)']
+const pageEntityTypes = ['Asset', 'Shot', 'Sequence', 'Edit', 'Episode']
 const difficultyOptions = [
   { label: 'all_tasks', value: '-1' },
   { label: 'difficulty.very_easy', value: '1' },
@@ -713,6 +714,14 @@ const user = computed(() => store.getters.user)
 
 const taskStatusMap = computed(() => taskStatusStore.cache.taskStatusMap)
 const taskTypeMap = computed(() => taskTypeStore.cache.taskTypeMap)
+
+// Old links of the episode stats open shot task types on the episodes route,
+// which names no entity type.
+const entityType = computed(() =>
+  pageEntityTypes.includes(currentTaskType.value?.for_entity)
+    ? currentTaskType.value.for_entity
+    : routeEntityType.value
+)
 
 const entityMap = computed(() => getEntityMap(entityType.value))
 
@@ -2189,7 +2198,7 @@ onMounted(() => {
   const isShots = route.path.includes('shots')
   const isEdits = route.path.includes('edits')
   const isSequences = route.path.includes('sequences')
-  entityType.value = isAssets
+  routeEntityType.value = isAssets
     ? 'Asset'
     : isShots
       ? 'Shot'

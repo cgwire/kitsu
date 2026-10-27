@@ -15,6 +15,8 @@ vi.mock('vue-i18n', async importOriginal => ({
 import '@/lib/auth'
 import csv from '@/lib/csv'
 import assetStore from '@/store/modules/assets'
+import episodeStore from '@/store/modules/episodes'
+import shotStore from '@/store/modules/shots'
 import taskTypeStore from '@/store/modules/tasktypes'
 
 import TaskList from '@/components/lists/TaskList.vue'
@@ -138,9 +140,10 @@ const mountPage = async ({
 // The task type routes of src/router/routes.js: the episodes one has no
 // entity type for the tabs to inherit.
 const Page = { template: '<div />' }
-const taskTypeRoute = (name, path) => ({
+const taskTypeRoute = (name, path, meta = {}) => ({
   name,
   path,
+  meta,
   component: Page,
   children: [
     { name: `${name}-schedule`, path: 'schedule', component: Page },
@@ -158,7 +161,8 @@ const taskTypeRoutes = [
   ),
   taskTypeRoute(
     'episodes-task-type',
-    '/productions/:production_id/episodes/task-types/:task_type_id'
+    '/productions/:production_id/episodes/task-types/:task_type_id',
+    { section: 'episodes' }
   ),
   // Held, so that the tabs keep the route of their first render.
   {
@@ -1050,6 +1054,110 @@ describe('TaskType page', () => {
       )
       expect(title).toBe('Production / E02 / Animation - Kitsu')
       expect(exportName).toMatch(/_e02_production_animation_tasks$/)
+    })
+  })
+
+  // The episode stats linked their shot columns to the episodes route.
+  describe('entity type', () => {
+    const TaskListStub = {
+      name: 'TaskList',
+      props: {
+        entityType: { type: String, default: '' },
+        tasks: { type: Array, default: () => [] }
+      },
+      template: '<div />',
+      methods: { resetSelection: () => {} }
+    }
+    const entities = {
+      Asset: { store: assetStore.cache.assetMap, id: 'asset-1' },
+      Episode: { store: episodeStore.cache.episodeMap, id: 'episode-1' },
+      Shot: { store: shotStore.cache.shotMap, id: 'shot-1' }
+    }
+    // One task per entity type, all of the task type, so that the list
+    // tells which map the page read.
+    const typeTasks = Object.entries(entities).map(([type, { id }]) => ({
+      id: `task-${type}`,
+      assignees: [],
+      entity_id: id,
+      entity_name: id,
+      task_type_id: 'task-type-1'
+    }))
+    let wrapper = null
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    })
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      Object.values(entities).forEach(({ store, id }) => store.delete(id))
+    })
+
+    const mountList = async (forEntity, path) => {
+      const page = await mountPage({
+        actions: {
+          initTaskType: vi.fn(() => {
+            Object.entries(entities).forEach(([type, { store, id }]) => {
+              store.set(id, {
+                id,
+                episode_id: 'episode-1',
+                tasks: [`task-${type}`]
+              })
+            })
+          }),
+          loadEpisodeScheduleItems: vi.fn(() => [])
+        },
+        getters: {
+          assetValidationColumns: () => [],
+          currentEpisode: () => ({ id: 'episode-1', name: 'E01' }),
+          currentTaskType: () => ({
+            id: 'task-type-1',
+            name: 'Animation',
+            for_entity: forEntity
+          }),
+          episodeValidationColumns: () => [],
+          isTVShow: () => true,
+          shotValidationColumns: () => [],
+          taskMap: () => new Map(typeTasks.map(t => [t.id, t])),
+          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' })
+        },
+        path,
+        routes: taskTypeRoutes,
+        stubs: { TaskList: TaskListStub }
+      })
+      wrapper = page.wrapper
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+      const list = wrapper.findComponent(TaskListStub)
+      return {
+        entityType: list.props('entityType'),
+        taskIds: list.props('tasks').map(t => t.id)
+      }
+    }
+
+    it.each([
+      ['Shot', '/productions/production-1/episodes/task-types/task-type-1'],
+      [
+        'Shot',
+        '/productions/production-1/episodes/episode-1/shots/task-types/task-type-1'
+      ],
+      ['Asset', '/productions/production-1/assets/task-types/task-type-1'],
+      ['Episode', '/productions/production-1/episodes/task-types/task-type-1']
+    ])('lists the %s tasks of its task type on %s', async (type, path) => {
+      expect(await mountList(type, path)).toEqual({
+        entityType: type,
+        taskIds: [`task-${type}`]
+      })
+    })
+
+    it('keeps the type of the route for another task type', async () => {
+      expect(
+        await mountList(
+          'Concept',
+          '/productions/production-1/assets/task-types/task-type-1'
+        )
+      ).toEqual({ entityType: 'Asset', taskIds: ['task-Asset'] })
     })
   })
 
