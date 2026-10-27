@@ -124,6 +124,57 @@ describe('ImportRenderModal', () => {
     })
   })
 
+  describe('missing required columns', () => {
+    const withoutName = () => [
+      ['Sequence', 'Frames'],
+      ['0010', '198']
+    ]
+
+    test('let the import through by default', () => {
+      const wrapper = mountModal({ parsedCsv: withoutName() })
+
+      expect(wrapper.find('th.required-header').text()).toBe('Name')
+      expect(wrapper.text()).not.toContain('main.csv.missing_columns')
+      expect(isConfirmDisabled(wrapper)).toBe(false)
+    })
+
+    test('block the import when the page asks for it', () => {
+      const wrapper = mountModal({
+        blockMissingColumns: true,
+        parsedCsv: withoutName()
+      })
+
+      expect(isConfirmDisabled(wrapper)).toBe(true)
+    })
+
+    test('name the missing columns that block the import', () => {
+      const wrapper = mount(ImportRenderModal, {
+        props: {
+          active: true,
+          blockMissingColumns: true,
+          columns: ['Sequence', 'Name', 'Frames'],
+          dataMatchers: ['Sequence', 'Name'],
+          parsedCsv: [['Frames'], ['198']]
+        },
+        global: { plugins: [store, i18n], mocks: { $t } }
+      })
+
+      expect(wrapper.find('.import-error').text()).toBe(
+        'main.csv.missing_columns {"columns":"Sequence, Name","count":2}'
+      )
+    })
+
+    test('block nothing once every required column is there', () => {
+      const wrapper = mountModal({
+        blockMissingColumns: true,
+        parsedCsv: parsedCsv().slice(0, 2)
+      })
+
+      expect(wrapper.text()).not.toContain('main.csv.missing_columns')
+      expect(isConfirmDisabled(wrapper)).toBe(false)
+    })
+  })
+
   describe('existing entries', () => {
     test('match the right line after an empty one', () => {
       const wrapper = mountModal({
@@ -241,6 +292,37 @@ describe('ImportRenderModal', () => {
       expect(wrapper.text()).toContain('Name cannot be empty')
       expect(wrapper.text()).not.toContain('main.csv.error_timeout')
       expect(isConfirmDisabled(wrapper)).toBe(false)
+    })
+  })
+
+  describe('imported rows', () => {
+    const mountImported = props =>
+      mount(ImportRenderModal, {
+        props: {
+          active: true,
+          columns: ['Sequence', 'Name', 'Frames'],
+          dataMatchers: ['Sequence', 'Name'],
+          parsedCsv: parsedCsv().slice(0, 2),
+          ...props
+        },
+        global: { plugins: [store, i18n], mocks: { $t } }
+      })
+
+    test('show nothing by default', () => {
+      const wrapper = mountImported()
+
+      expect(wrapper.find('.import-success').exists()).toBe(false)
+      expect(isConfirmDisabled(wrapper)).toBe(false)
+    })
+
+    test('confirm the import with its row count', () => {
+      const wrapper = mountImported({ importedRows: 2 })
+
+      expect(wrapper.find('.import-success').text()).toBe(
+        'main.csv.import_success {"count":2}'
+      )
+      // Confirming again would import the same rows a second time.
+      expect(isConfirmDisabled(wrapper)).toBe(true)
     })
   })
 })

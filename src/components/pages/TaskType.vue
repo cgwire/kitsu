@@ -36,7 +36,8 @@
               v-if="
                 !isActiveTab('schedule') &&
                 !isActiveTab('estimation') &&
-                isSupervisorInDepartment
+                isSupervisorInDepartment &&
+                !isEstimationsImportHidden
               "
             >
               <button-simple
@@ -364,10 +365,13 @@
           :is-loading="loading.importing"
           :is-error="errors.importing"
           :import-error="errors.importingError"
+          :imported-rows="importedRows"
           :parsed-csv="parsedCSV"
           :form-data="importCsvFormData"
           :columns="[...dataMatchers, ...optionalColumns]"
           :data-matchers="dataMatchers"
+          :required-values="dataMatchers"
+          :block-missing-columns="true"
           :database="{}"
           :disable-update="true"
           @reupload="resetImport"
@@ -438,7 +442,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { getEntityMap } from '@/composables/entity'
-import csv from '@/lib/csv'
+import csv, { getEstimationsCsvLabelKeys } from '@/lib/csv'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
 import func from '@/lib/func'
 import {
@@ -567,11 +571,12 @@ const descriptorIdToDelete = ref(null)
 const descriptorToEdit = ref({})
 const difficultyFilter = ref('-1')
 const dueDateFilter = ref('all')
-const entityType = ref('Asset')
+const routeEntityType = ref('Asset')
 const estimationFilter = ref('all')
 const importCsvFormData = ref({})
 const isScheduleVisible = ref(false)
 const parsedCSV = ref([])
+const importedRows = ref(null)
 const priorityFilter = ref('-1')
 const retakeCountFilter = ref('all')
 const tasks = ref([])
@@ -581,8 +586,14 @@ const taskStatusIdsFilter = ref([])
 // Search index for the supervisor filters, non-reactive by design
 let taskIndex = null
 
-const dataMatchers = ['Parent', 'Entity']
 const genericColumns = ['Metadata column name (text value)']
+const pageEntityTypes = ['Asset', 'Shot', 'Sequence', 'Edit', 'Episode']
+const allEpisodesLabelKeys = {
+  Asset: 'main.all_assets',
+  Edit: 'main.all_edits',
+  Sequence: 'sequences.all_sequences',
+  Shot: 'main.all_shots'
+}
 const difficultyOptions = [
   { label: 'all_tasks', value: '-1' },
   { label: 'difficulty.very_easy', value: '1' },
@@ -682,6 +693,9 @@ const taskListRef = useTemplateRef('task-list')
 
 // Computed
 const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentTaskTypeEpisode = computed(
+  () => store.getters.currentTaskTypeEpisode
+)
 const currentProduction = computed(() => store.getters.currentProduction)
 const currentTaskType = computed(() => store.getters.currentTaskType)
 const isCurrentUserProductionManager = computed(
@@ -706,6 +720,14 @@ const user = computed(() => store.getters.user)
 
 const taskStatusMap = computed(() => taskStatusStore.cache.taskStatusMap)
 const taskTypeMap = computed(() => taskTypeStore.cache.taskTypeMap)
+
+// Old links of the episode stats open shot task types on the episodes route,
+// which names no entity type.
+const entityType = computed(() =>
+  pageEntityTypes.includes(currentTaskType.value?.for_entity)
+    ? currentTaskType.value.for_entity
+    : routeEntityType.value
+)
 
 const entityMap = computed(() => getEntityMap(entityType.value))
 
@@ -780,6 +802,19 @@ const isSupervisorInDepartment = computed(
     )
 )
 
+// Read the episode the import is posted with, not the route: a route without
+// episode keeps the one of the store. Under All shots and All assets, the rows
+// of two episodes can share their sequence or asset type, and their name.
+// Main pack only holds assets: another task type kept there by a link without
+// episode lists nothing.
+const isEstimationsImportHidden = computed(() => {
+  const episodeId = currentTaskTypeEpisode.value?.id
+  const forEntity = currentTaskType.value?.for_entity
+  if (episodeId === 'all') return ['Asset', 'Shot'].includes(forEntity)
+  if (episodeId === 'main') return forEntity !== 'Asset'
+  return false
+})
+
 const taskMetadataDescriptors = computed(() =>
   store.getters.taskMetadataDescriptors.filter(
     descriptor => descriptor.task_type_id === currentTaskType.value?.id
@@ -798,11 +833,22 @@ const sortOptions = computed(() => [
   ...staticSortOptions.slice(1)
 ])
 
-const optionalColumns = computed(() =>
-  isPaperProduction.value
-    ? ['Drawings', 'Estimation', 'Start date', 'Due date', 'Difficulty']
-    : ['Estimation', 'Start date', 'Due date', 'Difficulty']
+// Zou ignores the parent of an episode row, and takes an empty one of a
+// sequence or edit row as any episode.
+const dataMatchers = computed(() =>
+  ['Episode', 'Sequence', 'Edit'].includes(currentTaskType.value?.for_entity)
+    ? ['Entity']
+    : ['Parent', 'Entity']
 )
+
+const optionalColumns = computed(() => {
+  const columns = ['Estimation', 'Start date', 'Due date', 'Difficulty']
+  if (isPaperProduction.value) columns.unshift('Drawings')
+  if (['Sequence', 'Edit'].includes(currentTaskType.value?.for_entity)) {
+    columns.unshift('Parent')
+  }
+  return columns
+})
 
 const productionStartDate = computed(() =>
   parseDate(currentProduction.value.start_date)
@@ -818,16 +864,22 @@ const disabledDates = computed(() => ({
   days: [6, 0]
 }))
 
+// The pseudo-episodes have no name: they get the label of the entity type.
+const currentTaskTypeEpisodeLabel = computed(() => {
+  const episode = currentTaskTypeEpisode.value
+  if (episode?.id === 'all') {
+    return t(allEpisodesLabelKeys[entityType.value] ?? 'episodes.all_episodes')
+  }
+  if (episode?.id === 'main') return t('main.main_pack')
+  return episode?.name
+})
+
 const title = computed(() => {
   if (currentProduction.value) {
-    if (isTVShow.value && currentEpisode.value) {
-      const episodeName =
-        currentEpisode.value.id === 'all'
-          ? t('main.all_assets')
-          : currentEpisode.value.name
+    if (isTVShow.value && currentTaskTypeEpisode.value) {
       return (
         `${currentProduction.value.name} / ` +
-        `${episodeName} / ` +
+        `${currentTaskTypeEpisodeLabel.value} / ` +
         `${currentTaskType.value.name}`
       )
     }
@@ -1314,8 +1366,8 @@ const onExportClick = () => {
     currentTaskType.value.name,
     'tasks'
   ]
-  if (currentEpisode.value) {
-    nameData.splice(1, 0, currentEpisode.value.name)
+  if (currentTaskTypeEpisode.value) {
+    nameData.splice(1, 0, currentTaskTypeEpisodeLabel.value)
   }
   const name = stringHelpers.slugify(nameData.join('_'))
   csv.buildCsvFile(name, taskLines)
@@ -1885,6 +1937,7 @@ const showImportRenderModal = () => {
 
 const hideImportRenderModal = () => {
   modals.isImportRenderDisplayed = false
+  importedRows.value = null
 }
 
 const resetImport = () => {
@@ -1911,8 +1964,11 @@ const uploadImportFile = data => {
 
   store
     .dispatch('uploadTaskTypeEstimations', importCsvFormData.value)
-    .then(() => {
-      hideImportRenderModal()
+    .then(rows => {
+      // A picked file opens its preview even while an upload runs: the count
+      // only goes to the file it was uploaded from. The list needs no
+      // reload: Zou sends a task:update for each row.
+      if (parsedCSV.value === data) importedRows.value = rows.length
     })
     .catch(err => {
       errors.importingError = err
@@ -1923,13 +1979,29 @@ const uploadImportFile = data => {
     })
 }
 
+// The labels of the export, in the language of the user, get their name
+// back. A descriptor named like a label keeps its column.
+const renameExportLabels = headers => {
+  const labelKeys = getEstimationsCsvLabelKeys(
+    currentTaskType.value?.for_entity,
+    { isPaperProduction: isPaperProduction.value, isTVShow: isTVShow.value }
+  )
+  return csv.renameHeaders(
+    headers,
+    new Map(Object.entries(labelKeys).map(([name, key]) => [t(key), name])),
+    taskMetadataDescriptors.value.map(descriptor => descriptor.name)
+  )
+}
+
 const renderImport = async (data, mode) => {
   loading.importing = true
   errors.importing = false
   try {
-    parsedCSV.value = await csv.processCSV(
+    const [headers, ...lines] = await csv.processCSV(
       mode === 'file' ? data.get('file') : data
     )
+    parsedCSV.value = [renameExportLabels(headers), ...lines]
+    importedRows.value = null
     hideImportModal()
     showImportRenderModal()
   } catch (err) {
@@ -2141,7 +2213,7 @@ onMounted(() => {
   const isShots = route.path.includes('shots')
   const isEdits = route.path.includes('edits')
   const isSequences = route.path.includes('sequences')
-  entityType.value = isAssets
+  routeEntityType.value = isAssets
     ? 'Asset'
     : isShots
       ? 'Shot'

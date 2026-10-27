@@ -6,6 +6,11 @@ import { createStore } from 'vuex'
 import { trackTaskSelection } from '../../fixtures/task-selection'
 
 import TaskList from '@/components/lists/TaskList.vue'
+import assetStore from '@/store/modules/assets'
+import editStore from '@/store/modules/edits'
+import episodeStore from '@/store/modules/episodes'
+import sequenceStore from '@/store/modules/sequences'
+import shotStore from '@/store/modules/shots'
 
 vi.mock('@/store', () => ({ default: {} }))
 
@@ -411,5 +416,122 @@ describe('lists/TaskList', () => {
 
       wrapper.unmount()
     })
+  })
+
+  describe('export', () => {
+    const entityMaps = {
+      Asset: assetStore.cache.assetMap,
+      Edit: editStore.cache.editMap,
+      Episode: episodeStore.cache.episodeMap,
+      Sequence: sequenceStore.cache.sequenceMap,
+      Shot: shotStore.cache.shotMap
+    }
+
+    afterEach(() => {
+      Object.values(entityMaps).forEach(map => map.clear())
+    })
+
+    const exportFirstColumns = (
+      entityType,
+      entity,
+      { isTVShow = false } = {}
+    ) => {
+      entityMaps[entityType].set(entity.id, entity)
+      const wrapper = mountList(undefined, {
+        getters: { isTVShow: () => isTVShow },
+        props: {
+          entityType,
+          tasks: [{ ...task, entity: { id: entity.id } }]
+        }
+      })
+      const [headers, line] = wrapper.vm.getTableData()
+      wrapper.unmount()
+      return [headers.slice(0, 3), line.slice(0, 3)]
+    }
+
+    test('starts an asset line with its asset type', () => {
+      const asset = { id: 'asset-1', name: 'Tree', asset_type_name: 'Props' }
+
+      expect(exportFirstColumns('Asset', asset)).toEqual([
+        [
+          'tasks.fields.asset_type',
+          'tasks.fields.entity_name',
+          'tasks.fields.task_status'
+        ],
+        ['Props', 'Tree', undefined]
+      ])
+    })
+
+    test('starts a shot line with its sequence', () => {
+      const shot = { id: 'shot-1', name: 'SH010', sequence_name: 'SQ01' }
+
+      expect(exportFirstColumns('Shot', shot)).toEqual([
+        [
+          'tasks.fields.sequence',
+          'tasks.fields.entity_name',
+          'tasks.fields.task_status'
+        ],
+        ['SQ01', 'SH010', undefined]
+      ])
+    })
+
+    test('starts an episode line with its name', () => {
+      const episode = { id: 'episode-1', name: 'E01' }
+
+      expect(
+        exportFirstColumns('Episode', episode, { isTVShow: true })
+      ).toEqual([
+        [
+          'tasks.fields.entity_name',
+          'tasks.fields.task_status',
+          'tasks.fields.assignees'
+        ],
+        ['E01', undefined, '']
+      ])
+    })
+
+    const sequenceAndEdit = [
+      { entityType: 'Sequence', label: 'a sequence' },
+      { entityType: 'Edit', label: 'an edit' }
+    ]
+
+    test.each(sequenceAndEdit)(
+      'starts the line of $label task with its episode in a TV show',
+      ({ entityType }) => {
+        const entity = {
+          id: 'entity-1',
+          name: 'SQ01',
+          episode_id: 'episode-1',
+          episode_name: 'E01'
+        }
+
+        expect(
+          exportFirstColumns(entityType, entity, { isTVShow: true })
+        ).toEqual([
+          [
+            'shots.fields.episode',
+            'tasks.fields.entity_name',
+            'tasks.fields.task_status'
+          ],
+          ['E01', 'SQ01', undefined]
+        ])
+      }
+    )
+
+    test.each(sequenceAndEdit)(
+      'starts the line of $label task with its name outside a TV show',
+      ({ entityType }) => {
+        const entity = { id: 'entity-1', name: 'SQ01', episode_name: '' }
+
+        expect(exportFirstColumns(entityType, entity)).toEqual([
+          [
+            'tasks.fields.entity_name',
+            'tasks.fields.task_status',
+            'tasks.fields.assignees'
+          ],
+          ['SQ01', undefined, '']
+        ])
+      }
+    )
   })
 })
