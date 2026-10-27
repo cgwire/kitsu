@@ -369,6 +369,8 @@
           :form-data="importCsvFormData"
           :columns="[...dataMatchers, ...optionalColumns]"
           :data-matchers="dataMatchers"
+          :required-values="dataMatchers"
+          :block-missing-columns="true"
           :database="{}"
           :disable-update="true"
           @reupload="resetImport"
@@ -582,7 +584,6 @@ const taskStatusIdsFilter = ref([])
 // Search index for the supervisor filters, non-reactive by design
 let taskIndex = null
 
-const dataMatchers = ['Parent', 'Entity']
 const genericColumns = ['Metadata column name (text value)']
 const difficultyOptions = [
   { label: 'all_tasks', value: '-1' },
@@ -809,11 +810,22 @@ const sortOptions = computed(() => [
   ...staticSortOptions.slice(1)
 ])
 
-const optionalColumns = computed(() =>
-  isPaperProduction.value
-    ? ['Drawings', 'Estimation', 'Start date', 'Due date', 'Difficulty']
-    : ['Estimation', 'Start date', 'Due date', 'Difficulty']
+// Zou ignores the parent of an episode row, and takes an empty one of a
+// sequence or edit row as any episode.
+const dataMatchers = computed(() =>
+  ['Episode', 'Sequence', 'Edit'].includes(currentTaskType.value?.for_entity)
+    ? ['Entity']
+    : ['Parent', 'Entity']
 )
+
+const optionalColumns = computed(() => {
+  const columns = ['Estimation', 'Start date', 'Due date', 'Difficulty']
+  if (isPaperProduction.value) columns.unshift('Drawings')
+  if (['Sequence', 'Edit'].includes(currentTaskType.value?.for_entity)) {
+    columns.unshift('Parent')
+  }
+  return columns
+})
 
 const productionStartDate = computed(() =>
   parseDate(currentProduction.value.start_date)

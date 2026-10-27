@@ -18,6 +18,7 @@ import taskTypeStore from '@/store/modules/tasktypes'
 import TaskList from '@/components/lists/TaskList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import TaskType from '@/components/pages/TaskType.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -611,6 +612,84 @@ describe('TaskType page', () => {
         expect.anything()
       )
     })
+  })
+
+  // Zou finds the entity of a row by its parent and name, the parent being
+  // ignored for episodes and optional for sequences and edits.
+  describe('estimations import columns', () => {
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    const importColumns = async forEntity => {
+      // the data load the page starts 100 ms after mounting is not under test
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const mounted = await mountPage({
+        getters: {
+          currentTaskType: () => ({
+            id: 'task-type-1',
+            name: 'Layout',
+            for_entity: forEntity
+          })
+        },
+        section: 'tasks'
+      })
+      wrapper = mounted.wrapper
+      const renderModal = wrapper.findComponent(ImportRenderModal)
+      const importModal = wrapper.findComponent(ImportModal)
+      return {
+        blockMissingColumns: renderModal.props('blockMissingColumns'),
+        columns: renderModal.props('columns'),
+        dataMatchers: renderModal.props('dataMatchers'),
+        listedColumns: importModal.props('columns'),
+        listedOptionalColumns: importModal.props('optionalColumns'),
+        requiredValues: renderModal.props('requiredValues')
+      }
+    }
+
+    const optionalColumns = ['Estimation', 'Start date', 'Due date', 'Difficulty']
+
+    it.each(['Asset', 'Shot'])(
+      'require the parent and the entity of the %s task types',
+      async forEntity => {
+        expect(await importColumns(forEntity)).toEqual({
+          blockMissingColumns: true,
+          columns: ['Parent', 'Entity', ...optionalColumns],
+          dataMatchers: ['Parent', 'Entity'],
+          listedColumns: ['Parent', 'Entity'],
+          listedOptionalColumns: optionalColumns,
+          requiredValues: ['Parent', 'Entity']
+        })
+      }
+    )
+
+    it('require the entity alone of the Episode task types', async () => {
+      expect(await importColumns('Episode')).toEqual({
+        blockMissingColumns: true,
+        columns: ['Entity', ...optionalColumns],
+        dataMatchers: ['Entity'],
+        listedColumns: ['Entity'],
+        listedOptionalColumns: optionalColumns,
+        requiredValues: ['Entity']
+      })
+    })
+
+    it.each(['Sequence', 'Edit'])(
+      'take the parent of the %s task types as optional',
+      async forEntity => {
+        expect(await importColumns(forEntity)).toEqual({
+          blockMissingColumns: true,
+          columns: ['Entity', 'Parent', ...optionalColumns],
+          dataMatchers: ['Entity'],
+          listedColumns: ['Entity'],
+          listedOptionalColumns: ['Parent', ...optionalColumns],
+          requiredValues: ['Entity']
+        })
+      }
+    )
   })
 
   // The page posts with the store episode, which a route without episode
