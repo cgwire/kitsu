@@ -147,6 +147,7 @@
               <div class="preview">
                 <template v-if="taskPreviews && taskPreviews.length > 0">
                   <preview-player
+                    :can-comment="isCommentingAllowed"
                     :entity-preview-files="taskEntityPreviews"
                     :entity-type="entityType"
                     :extra-wide="isExtraWide"

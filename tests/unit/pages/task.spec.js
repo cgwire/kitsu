@@ -1445,6 +1445,18 @@ describe('Task.vue preview player permissions', () => {
     expect(isReadOnly(wrapper)).toBe(false)
   })
 
+  // Annotating and commenting are two rights: the player shows its comments
+  // in full screen to whoever can comment here.
+  it.each([
+    ['a plain artist', false, {}],
+    ['an assigned artist', true, { task: buildTask({ assignees: ['user-1'] }) }]
+  ])('lets %s comment in the player: %s', async (_, canComment, options) => {
+    const { wrapper } = await mountPage({ previews, ...options })
+    expect(wrapper.findComponent(PreviewPlayer).props('canComment')).toBe(
+      canComment
+    )
+  })
+
   it('is read only for a supervisor of another department', async () => {
     const { wrapper } = await mountPage({
       previews,

@@ -163,7 +163,7 @@
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
           v-show="!isCommentsHidden"
-          v-if="!readOnly && task?.id"
+          v-if="(!readOnly || canComment) && task?.id"
         />
       </div>
     </div>
@@ -246,6 +246,7 @@
         <div class="flexrow">
           <player-annotation-bar
             :background-options="backgroundOptions"
+            :can-comment="canComment"
             :full-screen="fullScreen"
             :is-3-d-model="is3DModel"
             :is-annotations-displayed="isAnnotationsDisplayed"
@@ -533,6 +534,11 @@ const { t } = useI18n()
 
 const props = defineProps({
   big: {
+    type: Boolean,
+    default: false
+  },
+  // Commenting is a right of its own: readOnly is the right to annotate.
+  canComment: {
     type: Boolean,
     default: false
   },

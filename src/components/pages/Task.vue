@@ -186,6 +186,7 @@
               <div v-if="isPreviews">
                 <preview-player
                   ref="preview-player"
+                  :can-comment="isCommentingAllowed"
                   :entity-preview-files="taskEntityPreviews"
                   :extra-wide="true"
                   :fps="currentFps"

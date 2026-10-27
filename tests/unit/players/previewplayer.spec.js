@@ -862,6 +862,30 @@ describe('PreviewPlayer.vue', () => {
       await nextTick()
     }
 
+    // Annotating and commenting are two rights: an assigned artist reads and
+    // writes the comments of a file it cannot draw on.
+    it.each([
+      [false, false],
+      [true, true]
+    ])(
+      'shows the comments to a read-only viewer who can comment: %s',
+      async (canComment, isShown) => {
+        wrapper = mountPlayer({
+          props: { canComment, readOnly: true },
+          stubs: { PlayerAnnotationBar: false }
+        })
+        await enterFullScreen()
+
+        const toggle = wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(button => button.attributes('icon') === 'comment')
+        expect(Boolean(toggle)).toBe(isShown)
+        expect(wrapper.findComponent({ name: 'TaskInfo' }).exists()).toBe(
+          isShown
+        )
+      }
+    )
+
     const unannotated = ['mp3', 'glb', 'pdf', 'zip']
 
     it.each(unannotated)('shows the comments of a %s file', async extension => {

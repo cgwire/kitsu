@@ -153,7 +153,7 @@ const mountPanel = async ({
         // reset() focuses the player and the timecode handler seeks it;
         // the default stub carries neither method.
         PreviewPlayer: {
-          props: ['fps', 'previews', 'readOnly'],
+          props: ['canComment', 'fps', 'previews', 'readOnly'],
           template: '<div />',
           methods: { focus: () => {}, setCurrentFrame: () => {} }
         },
@@ -906,6 +906,18 @@ describe('TaskInfo.vue', () => {
         }
       })
       expect(isReadOnly(wrapper)).toBe(false)
+    })
+
+    // Annotating and commenting are two rights: the player shows its
+    // comments in full screen to whoever can comment here.
+    it.each([
+      ['a plain artist', false, {}],
+      ['an assigned artist', true, { task: buildTask({ assignees: [USER_ID] }) }]
+    ])('lets %s comment in the player: %s', async (_, canComment, options) => {
+      const { wrapper } = await mountPanel({ previews, ...options })
+      expect(wrapper.findComponent(PreviewPlayer).props('canComment')).toBe(
+        canComment
+      )
     })
 
     it('is read only for the supervisor of another department', async () => {

@@ -224,7 +224,7 @@
       :active="!isCommentsHidden"
       :title="$t('playlists.actions.comments')"
       @click="$emit('comment-clicked')"
-      v-if="!readOnly && (fullScreen || showCommentsButton)"
+      v-if="(!readOnly || canComment) && (fullScreen || showCommentsButton)"
     />
   </div>
 
@@ -272,7 +272,7 @@
       :active="!isCommentsHidden"
       :title="$t('playlists.actions.comments')"
       @click="$emit('comment-clicked')"
-      v-if="!readOnly && (fullScreen || showCommentsButton)"
+      v-if="(!readOnly || canComment) && (fullScreen || showCommentsButton)"
     />
   </div>
 </template>
@@ -292,6 +292,11 @@ defineProps({
   backgroundOptions: {
     type: Array,
     default: () => []
+  },
+  // Commenting is a right of its own: readOnly is the right to annotate.
+  canComment: {
+    type: Boolean,
+    default: false
   },
   fullScreen: {
     type: Boolean,
