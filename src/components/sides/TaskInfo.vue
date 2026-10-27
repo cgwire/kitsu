@@ -754,7 +754,8 @@ const currentFps = computed(() => {
   const entityFps = parseFloat(getTaskEntity(props.task)?.data?.fps)
   if (entityFps) return entityFps
   return (
-    parseInt(productionMap.value.get(props.task.project_id)?.fps) || DEFAULT_FPS
+    parseFloat(productionMap.value.get(props.task.project_id)?.fps) ||
+    DEFAULT_FPS
   )
 })
 
