@@ -498,6 +498,7 @@
         "legend_disabled": "Zeile, die nicht aktualisiert oder erstellt wird",
         "legend_overwrite": "Zeile, die aktualisiert wird",
         "legend_incomplete": "Zeile, der ein Pflichtwert fehlt",
+        "missing_columns": "Eine Pflichtspalte fehlt ({columns}). Wählen Sie sie im Menü einer Spalte der Datei aus, oder fügen Sie sie der Datei hinzu und laden Sie die Datei erneut hoch. | Pflichtspalten fehlen ({columns}). Wählen Sie sie in den Menüs der Spalten der Datei aus, oder fügen Sie sie der Datei hinzu und laden Sie die Datei erneut hoch.",
         "missing_values": "Zeile {lines} hat keinen Wert in einer Pflichtspalte ({columns}). Füllen Sie sie aus oder entfernen Sie sie, und laden Sie die Datei dann erneut hoch. | Die Zeilen {lines} haben keinen Wert in einer Pflichtspalte ({columns}). Füllen Sie sie aus oder entfernen Sie sie, und laden Sie die Datei dann erneut hoch.",
         "paste": "Einfügen",
         "paste_code": "Bitte fügen Sie hier Ihre CSV-Daten ein:",

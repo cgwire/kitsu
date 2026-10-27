@@ -498,6 +498,7 @@
         "legend_disabled": "不會被更新或建立的行",
         "legend_overwrite": "將被更新的行",
         "legend_incomplete": "缺少必填值的行",
+        "missing_columns": "缺少必填欄（{columns}）。請在檔案某一欄的選單中選擇它，或將它加入檔案，然後重新上傳檔案。 | 缺少必填欄（{columns}）。請在檔案各欄的選單中選擇它們，或將它們加入檔案，然後重新上傳檔案。",
         "missing_values": "第 {lines} 行的必填欄（{columns}）沒有值。請補齊或刪除該行，然後重新上傳檔案。 | 第 {lines} 行的必填欄（{columns}）沒有值。請補齊或刪除這些行，然後重新上傳檔案。",
         "paste": "貼上",
         "paste_code": "請在此處貼上您的CSV資料：",

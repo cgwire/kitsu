@@ -119,6 +119,20 @@
       />
     </div>
 
+    <div
+      class="import-error"
+      v-if="blockMissingColumns && columnsRequired.length > 0"
+    >
+      <p class="import-error-title">
+        {{
+          $t('main.csv.missing_columns', {
+            columns: columnsRequired.join(', '),
+            count: columnsRequired.length
+          })
+        }}
+      </p>
+    </div>
+
     <div class="import-error" v-if="incompleteLines.length > 0">
       <p class="import-error-title">
         {{
@@ -187,6 +201,8 @@ const store = useStore()
 
 const props = defineProps({
   active: { type: Boolean, default: false },
+  // Most pages let Zou answer a file missing a data matcher column.
+  blockMissingColumns: { type: Boolean, default: false },
   columns: { type: Array, default: () => [] },
   dataMatchers: { type: Array, default: () => [] },
   database: { type: Object, default: () => ({}) },
@@ -353,6 +369,7 @@ const isTimeout = computed(() => Boolean(props.importError?.isTimeout))
 const isConfirmDisabled = computed(
   () =>
     incompleteLines.value.length > 0 ||
+    (props.blockMissingColumns && columnsRequired.value.length > 0) ||
     // Importing again right away would race the import still running.
     (props.isError && isTimeout.value) ||
     (updateData.value &&

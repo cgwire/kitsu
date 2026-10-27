@@ -498,6 +498,7 @@
         "legend_disabled": "Nem frissítendő és nem létrehozandó sor",
         "legend_overwrite": "Frissítendő sor",
         "legend_incomplete": "Sor, amelyből hiányzik egy kötelező érték",
+        "missing_columns": "Hiányzik egy kötelező oszlop ({columns}). Válaszd ki a fájl egyik oszlopának menüjében, vagy add hozzá a fájlhoz, és töltsd fel újra a fájlt. | Hiányoznak kötelező oszlopok ({columns}). Válaszd ki őket a fájl oszlopainak menüjében, vagy add hozzá őket a fájlhoz, és töltsd fel újra a fájlt.",
         "missing_values": "Ebben a sorban nincs érték egy kötelező oszlopban ({columns}): {lines}. Töltsd ki vagy töröld, majd töltsd fel újra a fájlt. | Ezekben a sorokban nincs érték egy kötelező oszlopban ({columns}): {lines}. Töltsd ki vagy töröld őket, majd töltsd fel újra a fájlt.",
         "paste": "Beillesztés",
         "paste_code": "Ide másold a CSV adatot",
