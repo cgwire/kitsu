@@ -36,7 +36,8 @@
               v-if="
                 !isActiveTab('schedule') &&
                 !isActiveTab('estimation') &&
-                isSupervisorInDepartment
+                isSupervisorInDepartment &&
+                !isEstimationsImportAmbiguous
               "
             >
               <button-simple
@@ -778,6 +779,16 @@ const isSupervisorInDepartment = computed(
       isCurrentUserProductionSupervisor.value,
       currentTaskType.value?.department_id
     )
+)
+
+// Under All shots and All assets, the rows of two episodes can share their
+// sequence or asset type, and their name. Read the episode the import is
+// posted with, not the route: a route without episode keeps the 'all' of the
+// store.
+const isEstimationsImportAmbiguous = computed(
+  () =>
+    store.getters.currentTaskTypeEpisode?.id === 'all' &&
+    ['Asset', 'Shot'].includes(currentTaskType.value?.for_entity)
 )
 
 const taskMetadataDescriptors = computed(() =>

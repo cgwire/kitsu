@@ -13,6 +13,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 import assetStore from '@/store/modules/assets'
+import taskTypeStore from '@/store/modules/tasktypes'
 
 import TaskList from '@/components/lists/TaskList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
@@ -95,6 +96,13 @@ const mountPage = async ({
       taskMap: () => new Map([[task.id, task]]),
       taskMetadataDescriptors: () => [],
       taskSearchQueries: () => [],
+      currentTaskTypeEpisode: (state, rootGetters) =>
+        taskTypeStore.getters.currentTaskTypeEpisode(
+          state,
+          rootGetters,
+          null,
+          rootGetters
+        ),
       user: () => ({ id: 'manager-1', departments: [] }),
       ...getters
     },
@@ -123,6 +131,40 @@ const mountPage = async ({
   await flushPromises()
   return { router, storeActions, wrapper }
 }
+
+// The task type routes of src/router/routes.js: the episodes one has no
+// entity type for the tabs to inherit.
+const Page = { template: '<div />' }
+const taskTypeRoute = (name, path) => ({
+  name,
+  path,
+  component: Page,
+  children: [
+    { name: `${name}-schedule`, path: 'schedule', component: Page },
+    { name: `${name}-estimation`, path: 'estimation', component: Page }
+  ]
+})
+const taskTypeRoutes = [
+  taskTypeRoute(
+    'task-type',
+    '/productions/:production_id/:type/task-types/:task_type_id'
+  ),
+  taskTypeRoute(
+    'episode-task-type',
+    '/productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id'
+  ),
+  taskTypeRoute(
+    'episodes-task-type',
+    '/productions/:production_id/episodes/task-types/:task_type_id'
+  ),
+  // Held, so that the tabs keep the route of their first render.
+  {
+    name: 'not-found',
+    path: '/not-found',
+    component: Page,
+    beforeEnter: () => new Promise(() => {})
+  }
+]
 
 describe('TaskType page', () => {
   afterEach(() => {
@@ -571,40 +613,116 @@ describe('TaskType page', () => {
     })
   })
 
-  // The task type routes of src/router/routes.js: the episodes one has no
-  // entity type for the tabs to inherit.
-  describe('tabs', () => {
-    const Page = { template: '<div />' }
-    const taskTypeRoute = (name, path) => ({
-      name,
-      path,
-      component: Page,
-      children: [
-        { name: `${name}-schedule`, path: 'schedule', component: Page },
-        { name: `${name}-estimation`, path: 'estimation', component: Page }
-      ]
+  // The page posts with the store episode, which a route without episode
+  // keeps.
+  describe('estimations import button', () => {
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
     })
-    const routes = [
-      taskTypeRoute(
-        'task-type',
-        '/productions/:production_id/:type/task-types/:task_type_id'
-      ),
-      taskTypeRoute(
-        'episode-task-type',
-        '/productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id'
-      ),
-      taskTypeRoute(
-        'episodes-task-type',
-        '/productions/:production_id/episodes/task-types/:task_type_id'
-      ),
-      // Held, so that the tabs keep the route of their first render.
-      {
-        name: 'not-found',
-        path: '/not-found',
-        component: Page,
-        beforeEnter: () => new Promise(() => {})
+
+    const shotTaskType = {
+      id: 'task-type-1',
+      name: 'Animation',
+      for_entity: 'Shot'
+    }
+
+    const hasImportButton = async (getters, path) => {
+      // the data load the page starts 100 ms after mounting is not under test
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const mounted = await mountPage({
+        getters: {
+          currentTaskType: () => shotTaskType,
+          isTVShow: () => true,
+          ...getters
+        },
+        path,
+        routes: taskTypeRoutes
+      })
+      wrapper = mounted.wrapper
+      return wrapper
+        .findAllComponents(ButtonSimple)
+        .some(button => button.props('icon') === 'import')
+    }
+
+    const hasPseudoEpisodeImportButton = (id, type, forEntity) =>
+      hasImportButton(
+        {
+          currentEpisode: () => ({ id }),
+          currentTaskType: () => ({ ...shotTaskType, for_entity: forEntity })
+        },
+        `/productions/production-1/episodes/${id}/${type}/task-types/task-type-1`
+      )
+
+    // The rows of two episodes can share their sequence or asset type, and
+    // their name.
+    it.each([
+      ['all', 'shots', 'Shot'],
+      ['all', 'assets', 'Asset']
+    ])(
+      'is hidden on the %s pseudo-episode of the %s',
+      async (id, type, forEntity) => {
+        expect(await hasPseudoEpisodeImportButton(id, type, forEntity)).toBe(
+          false
+        )
       }
-    ]
+    )
+
+    // A sequence or an edit row names its episode, and Main pack holds the
+    // assets without one.
+    it.each([
+      ['all', 'edits', 'Edit'],
+      ['all', 'sequences', 'Sequence'],
+      ['main', 'assets', 'Asset']
+    ])(
+      'is shown on the %s pseudo-episode of the %s',
+      async (id, type, forEntity) => {
+        expect(await hasPseudoEpisodeImportButton(id, type, forEntity)).toBe(
+          true
+        )
+      }
+    )
+
+    it('is hidden on the task type route of a TV show on all episodes', async () => {
+      const shown = await hasImportButton(
+        { currentEpisode: () => ({ id: 'all' }) },
+        '/productions/production-1/shots/task-types/task-type-1'
+      )
+      expect(shown).toBe(false)
+    })
+
+    it('is hidden on the episodes route of a shot task type on all episodes', async () => {
+      const shown = await hasImportButton(
+        { currentEpisode: () => ({ id: 'all' }) },
+        '/productions/production-1/episodes/task-types/task-type-1'
+      )
+      expect(shown).toBe(false)
+    })
+
+    it('is shown on an episode', async () => {
+      const shown = await hasImportButton(
+        { currentEpisode: () => ({ id: 'episode-1' }) },
+        '/productions/production-1/episodes/episode-1/shots/task-types/task-type-1'
+      )
+      expect(shown).toBe(true)
+    })
+
+    it('is shown for an episode task type with all episodes in the store', async () => {
+      const shown = await hasImportButton(
+        {
+          currentEpisode: () => ({ id: 'all' }),
+          currentTaskType: () => ({ ...shotTaskType, for_entity: 'Episode' })
+        },
+        '/productions/production-1/episodes/task-types/task-type-1'
+      )
+      expect(shown).toBe(true)
+    })
+  })
+
+  describe('tabs', () => {
+    const routes = taskTypeRoutes
     const shotTaskType = {
       id: 'task-type-1',
       name: 'Animation',
