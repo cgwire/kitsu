@@ -2500,4 +2500,56 @@ describe('PlaylistPlayer.vue', () => {
       ).toBe(false)
     })
   })
+
+  // The panel to add entities belongs to the page, outside the full screen:
+  // the button leaves the full screen to show it.
+  describe('add button in full screen', () => {
+    afterEach(() => {
+      delete document.fullscreen
+      delete document.exitFullscreen
+    })
+
+    it.each([
+      [false, true],
+      [true, false]
+    ])(
+      'leaves the full screen, panel already open %s, asks the panel %s',
+      async (isAddingEntity, isAsked) => {
+        document.exitFullscreen = vi.fn(() => Promise.resolve())
+        wrapper = mountPlayer({ props: { isAddingEntity } })
+        await flushPromises()
+        // jsdom has no full screen
+        Object.defineProperty(document, 'fullscreen', {
+          configurable: true,
+          value: true
+        })
+        wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+        await flushPromises()
+
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(button => button.attributes('icon') === 'plus')
+          .vm.$emit('click')
+
+        expect(document.exitFullscreen).toHaveBeenCalled()
+        expect(Boolean(wrapper.emitted('show-add-entities'))).toBe(isAsked)
+      }
+    )
+
+    // The full screen ends once the panel shows: the media gets sized while
+    // the panel hides it.
+    it('sizes the media again as the panel closes', async () => {
+      wrapper = mountPlayer({ props: { isAddingEntity: true } })
+      await flushPromises()
+      const resetHeight = vi.spyOn(
+        wrapper.findComponent({ ref: 'raw-player' }).vm,
+        'resetHeight'
+      )
+
+      await wrapper.setProps({ isAddingEntity: false })
+      await flushPromises()
+
+      expect(resetHeight).toHaveBeenCalled()
+    })
+  })
 })

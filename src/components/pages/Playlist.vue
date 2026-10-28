@@ -494,15 +494,19 @@
       </div>
     </div>
 
-    <edit-playlist-modal
-      :active="modals.isEditDisplayed"
-      :is-loading="loading.editPlaylist"
-      :is-error="errors.editPlaylist"
-      :playlist-to-edit="playlistToEdit"
-      :task-type-id="taskTypeId"
-      @cancel="hideEditModal"
-      @confirm="confirmEditPlaylist"
-    />
+    <!-- The browser shows a player in full screen alone: the form of its
+         Edit button goes into it. -->
+    <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
+      <edit-playlist-modal
+        :active="modals.isEditDisplayed"
+        :is-loading="loading.editPlaylist"
+        :is-error="errors.editPlaylist"
+        :playlist-to-edit="playlistToEdit"
+        :task-type-id="taskTypeId"
+        @cancel="hideEditModal"
+        @confirm="confirmEditPlaylist"
+      />
+    </teleport>
 
     <build-filter-modal
       :active="modals.isBuildFilterDisplayed"
@@ -531,6 +535,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useFullScreenTarget } from '@/composables/fullScreen'
 import { logRequestFailure } from '@/lib/errors'
 import { removeModelFromList, updateModelFromList } from '@/lib/models'
 import { getPlaylistPath as buildPlaylistPath } from '@/lib/path'
@@ -582,6 +587,7 @@ const newPlaylistForm = () => ({
 const entityListContentRef = useTemplateRef('entityListContent')
 const playlistListRef = useTemplateRef('playlistList')
 const playlistPlayerRef = useTemplateRef('playlist-player')
+const fullScreenPlayer = useFullScreenTarget(() => playlistPlayerRef.value?.$el)
 const searchFieldRef = useTemplateRef('search-field')
 
 const currentEntitiesList = ref([])

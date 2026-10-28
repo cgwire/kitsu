@@ -101,7 +101,7 @@
           class="playlist-button topbar-button flexrow-item full-button"
           icon="plus"
           :text="addEntitiesText"
-          @click="$emit('show-add-entities')"
+          @click="onAddEntitiesClicked"
           :active="isAddingEntity || isFullMode"
           v-if="!isLoading"
         />
@@ -1870,7 +1870,11 @@ watch(onionSkinFrames, value =>
 
 // FullScreen composable
 
-const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
+const {
+  fullScreen,
+  exit: exitFullScreen,
+  toggle: toggleFullScreen
+} = useFullScreen({
   container,
   onChange: () => {
     resetHeight()
@@ -2107,6 +2111,15 @@ const hideBars = () => {
 }
 
 // Modal handling
+
+// The panel to add entities belongs to the page, outside the full screen.
+const onAddEntitiesClicked = () => {
+  if (fullScreen.value) {
+    exitFullScreen()
+    if (props.isAddingEntity) return
+  }
+  emit('show-add-entities')
+}
 
 const showDeleteModal = () => {
   modals.value.delete = true
@@ -5182,7 +5195,10 @@ watch(
 watch(
   () => props.isAddingEntity,
   () => {
-    nextTick(() => updateProgressBar())
+    // The add button leaves the full screen once the panel shows: the media
+    // gets sized while the panel hides it.
+    if (props.isAddingEntity) nextTick(() => updateProgressBar())
+    else resetHeight()
   }
 )
 
