@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Bump the patch version, commit, tag and push the release.
+# Bump the version, commit, tag and push the release.
+# Usage: scripts/release.sh [patch|minor|major] (patch by default).
 # Portable across macOS (BSD tools) and Linux (GNU tools).
 set -euo pipefail
 
@@ -7,6 +8,16 @@ fail() {
     echo "Error: $*" >&2
     exit 1
 }
+
+# Checked before anything else, so a typo fails before pulling.
+usage="usage: $0 [patch|minor|major]"
+[ $# -le 1 ] || fail "${usage}"
+case "${1-patch}" in
+    major) bumped_field=1 ;;
+    minor) bumped_field=2 ;;
+    patch) bumped_field=3 ;;
+    *) fail "${usage}" ;;
+esac
 
 cd "$(git rev-parse --show-toplevel)" || fail "not inside a git repository."
 
@@ -25,13 +36,16 @@ current_branch=$(git rev-parse --abbrev-ref HEAD)
 git pull --rebase origin main || fail "git pull --rebase failed."
 
 last_release_number=$(npm pkg get version | tr -d '"')
-echo "${last_release_number}" | grep -Eq '^[0-9]+(\.[0-9]+)*$' ||
+echo "${last_release_number}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' ||
     fail "cannot parse a version from package.json" \
         "(got '${last_release_number}')."
 
+# Bump the chosen field and reset the next ones: 1.0.73 gives 1.0.74
+# (patch), 1.1.0 (minor) or 2.0.0 (major).
 release_number=$(
     echo "${last_release_number}" |
-        awk -F. -v OFS=. '{$NF += 1; print}'
+        awk -F. -v OFS=. -v field="${bumped_field}" \
+            '{$field += 1; for (i = field + 1; i <= NF; i++) $i = 0; print}'
 )
 tag="v${release_number}"
 
