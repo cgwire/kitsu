@@ -715,6 +715,11 @@ const modals = ref({
 const pendingParentChange = ref(null)
 const scheduleRef = useTemplateRef('schedule')
 
+// Bumped when the production or the episode changes and when the page is
+// left: an expansion still running then stops, rather than loading the
+// stores of the new scope for the rows of the one left.
+let scheduleGeneration = 0
+
 // Computed
 // --------------------------------------------------------------------------
 const currentEpisode = computed(() => store.getters.currentEpisode)
@@ -1032,7 +1037,10 @@ const loadData = async () => {
   }
 }
 
+const isStaleSchedule = generation => generation !== scheduleGeneration
+
 const reset = () => {
+  scheduleGeneration++
   // Debounce: cross-prod navigation triggers two close currentEpisode changes (transient 'main' then 'all').
   if (resetTimeout.value) clearTimeout(resetTimeout.value)
   resetTimeout.value = setTimeout(() => {
@@ -1167,6 +1175,19 @@ const assetInScope = asset => {
   return !isMainPack.value || !asset.source_id
 }
 
+// Loads the entities, scoped to the current episode for TV shows, that the
+// rows of a task type stand for.
+const loadTaskTypeEntities = forEntity => {
+  const loaders = {
+    Asset: loadScopedAssets,
+    Shot: () => store.dispatch('loadShots'),
+    Sequence: () => store.dispatch('loadSequences'),
+    Episode: () => store.dispatch('loadEpisodes'),
+    Edit: () => store.dispatch('loadEdits')
+  }
+  return loaders[forEntity]?.()
+}
+
 const expandTaskTypeElement = (
   taskTypeElement,
   refreshScheduleCallBack = null,
@@ -1228,6 +1249,7 @@ const expandTaskTypeDrillDown = async (
   taskTypeElement.expanded = expanded || !taskTypeElement.expanded
 
   if (taskTypeElement.expanded) {
+    const generation = scheduleGeneration
     // unversioned task list shared with the side panel to avoid a reload
     let rawTasks = null
     try {
@@ -1259,6 +1281,7 @@ const expandTaskTypeDrillDown = async (
         episodeId: currentEpisodeId.value
       }
       const entityRows = await loadEntityRows(parameters)
+      if (isStaleSchedule(generation)) return
 
       let children = convertScheduleItems(taskTypeElement, entityRows)
       const childrenById = new Map(
@@ -1267,22 +1290,14 @@ const expandTaskTypeDrillDown = async (
 
       // load entities (scoped to the current episode for TV shows) that
       // back the row grouping, the entity name and the episode filter
-      if (taskTypeElement.for_entity === 'Asset') {
-        await loadScopedAssets()
-      } else if (taskTypeElement.for_entity === 'Shot') {
-        await store.dispatch('loadShots')
-      } else if (taskTypeElement.for_entity === 'Sequence') {
-        await store.dispatch('loadSequences')
-      } else if (taskTypeElement.for_entity === 'Episode') {
-        await store.dispatch('loadEpisodes')
-      } else if (taskTypeElement.for_entity === 'Edit') {
-        await store.dispatch('loadEdits')
-      }
+      await loadTaskTypeEntities(taskTypeElement.for_entity)
+      if (isStaleSchedule(generation)) return
 
       let tasks = await store.dispatch(
         'loadTasks',
         buildTaskFilters(taskTypeElement)
       )
+      if (isStaleSchedule(generation)) return
       rawTasks = tasks
 
       // Update tasks for versioned schedules
@@ -1333,6 +1348,7 @@ const expandTaskTypeDrillDown = async (
           )
         daysOffRangeKey.value = daysOffKey
       }
+      if (isStaleSchedule(generation)) return
 
       // Read the entity maps fresh from the store cache. They are plain,
       // non-reactive Maps replaced on each episode-scoped load, so a cached
@@ -1804,6 +1820,7 @@ const selectTaskTypeElement = async (
     return
   }
 
+  const generation = scheduleGeneration
   selectedTaskType.value = taskType
 
   if (resetAssignments) {
@@ -1820,14 +1837,15 @@ const selectTaskTypeElement = async (
       'loadTasks',
       buildTaskFilters(selectedTaskType.value)
     ))
+  if (isStaleSchedule(generation)) return
+  if (!preloadedTasks) {
+    await loadTaskTypeEntities(taskType.for_entity)
+    if (isStaleSchedule(generation)) return
+  }
   const taskEntityIds = new Set(tasks.map(task => task.entity_id))
 
   // load entity types
   if (taskType.for_entity === 'Asset') {
-    if (!preloadedTasks) {
-      await loadScopedAssets()
-    }
-
     assignments.value.entityTypes = productionAssetTypes.value
       .filter(assetType => {
         // filtering following custom asset types workflow
@@ -1861,10 +1879,6 @@ const selectTaskTypeElement = async (
         }
       })
   } else if (taskType.for_entity === 'Shot') {
-    if (!preloadedTasks) {
-      await store.dispatch('loadShots')
-    }
-
     const shotsBySequence = shotStore.cache.shots
       .filter(shot => taskEntityIds.has(shot.id))
       .reduce((acc, shot) => {
@@ -1891,10 +1905,6 @@ const selectTaskTypeElement = async (
       }
     )
   } else if (taskType.for_entity === 'Sequence') {
-    if (!preloadedTasks) {
-      await store.dispatch('loadSequences')
-    }
-
     // sequences are the assignable entities, grouped by episode
     const sequencesByEpisode = [...sequenceStore.cache.sequenceMap.values()]
       .filter(
@@ -1929,10 +1939,6 @@ const selectTaskTypeElement = async (
       }
     )
   } else if (taskType.for_entity === 'Episode') {
-    if (!preloadedTasks) {
-      await store.dispatch('loadEpisodes')
-    }
-
     // episodes are the assignable entities, under a single production group
     const episodes = [...episodeStore.cache.episodeMap.values()]
       .filter(
@@ -1957,10 +1963,6 @@ const selectTaskTypeElement = async (
       }
     ]
   } else if (taskType.for_entity === 'Edit') {
-    if (!preloadedTasks) {
-      await store.dispatch('loadEdits')
-    }
-
     // edits are the assignable entities, grouped by episode
     const editsByEpisode = [...editStore.cache.editMap.values()]
       .filter(
@@ -2374,13 +2376,16 @@ const saveTask = async () => {
 const onScheduleExpandAll = async () => {
   if (loading.value.expandSchedule) return
 
+  const generation = scheduleGeneration
   loading.value.expandSchedule = true
   if (!expandAll.value) {
     await expandAllScheduleItems()
   } else {
     collapseAllScheduleItems()
   }
-  expandAll.value = !expandAll.value
+  // Stopped by a production or episode change: the rows shown now are
+  // collapsed.
+  if (!isStaleSchedule(generation)) expandAll.value = !expandAll.value
   loading.value.expandSchedule = false
 }
 
@@ -2573,11 +2578,13 @@ const applyToProduction = async () => {
 }
 
 const expandAllScheduleItems = async () => {
+  const generation = scheduleGeneration
   // scopedScheduleItems keeps the main pack to its in-scope Asset rows:
   // drilling an out-of-scope row would forward episode_id=main to an
   // endpoint that rejects it. Same array reference in every other mode.
   // run sequentially to avoid overloading the server
   for (const element of scopedScheduleItems.value) {
+    if (isStaleSchedule(generation)) return
     if (!element.expanded) {
       await expandTaskTypeElement(
         element,
@@ -2598,12 +2605,14 @@ const collapseAllScheduleItems = () => {
 }
 
 const exportSchedule = async (withAllRows = true) => {
+  const generation = scheduleGeneration
   loading.value.exportSchedule = true
 
   try {
     if (withAllRows) {
       await expandAllScheduleItems()
     }
+    if (isStaleSchedule(generation)) return
 
     const data = scheduleRef.value?.exportData()
 
@@ -2889,6 +2898,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  scheduleGeneration++
   if (resetTimeout.value) clearTimeout(resetTimeout.value)
 })
 
