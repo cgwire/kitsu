@@ -2,9 +2,16 @@ import {
   getCurrentInstance,
   nextTick,
   onBeforeUnmount,
+  shallowReactive,
+  shallowRef,
   unref,
   watch
 } from 'vue'
+
+import {
+  getFullScreenElement,
+  requestFullScreen
+} from '@/composables/fullScreen'
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -17,8 +24,11 @@ const FOCUSABLE_SELECTOR = [
   .map(selector => `${selector}:not([tabindex^="-"])`)
   .join(', ')
 
-// The open modals, the top one last: only that one answers the keyboard.
-const openModals = []
+// The open modals, the top one last: only that one answers the keyboard. A
+// player follows the ones of its comments panel.
+const openModals = shallowReactive([])
+
+const CHOOSER_DELAY = 500
 
 // v-show panels and closed nested modals keep their fields in the DOM, where
 // focus() does nothing.
@@ -68,9 +78,11 @@ const getWrapTarget = (container, isBackward) => {
 
 export const useModal = (active, emit, containerRef = null) => {
   const instance = getCurrentInstance()
-  const modal = {}
   // Where keyboard focus was before the modal opened, restored on close.
   let previouslyFocused = null
+  // The element in full screen when a file chooser opened from the modal.
+  let fullScreenElement = null
+  let restoreTimer = null
 
   // Without a ref, the component root: PreviewModal keeps its buttons out of
   // .modal-content.
@@ -78,6 +90,8 @@ export const useModal = (active, emit, containerRef = null) => {
     const container = unref(containerRef) ?? instance?.proxy?.$el
     return container instanceof Element ? container : null
   }
+
+  const modal = { container: shallowRef(null) }
 
   const isTop = () => openModals[openModals.length - 1] === modal
 
@@ -105,6 +119,67 @@ export const useModal = (active, emit, containerRef = null) => {
     }
   }
 
+  // Chrome leaves the full screen to show a file chooser, and a page may ask
+  // for it again on a user gesture only: the next click, Enter or Space in
+  // the modal, caught before the modal, which may close at once. Once the
+  // click is over, as it may open the chooser again: Chrome would then leave
+  // the full screen at once.
+  const restoreFullScreen = () => {
+    const element = fullScreenElement
+    clearTimeout(restoreTimer)
+    if (element) {
+      restoreTimer = setTimeout(() => {
+        if (fullScreenElement === element) fullScreenElement = null
+        if (element.isConnected && !getFullScreenElement()) {
+          requestFullScreen(element)
+        }
+      })
+    }
+  }
+
+  // The modal, its background included: the top bar of the page stays above
+  // some modals.
+  const holds = target =>
+    target instanceof Node && Boolean(instance?.proxy?.$el?.contains?.(target))
+
+  const onClick = event => {
+    if (!isTop() || !holds(event.target)) return
+    if (event.target.type === 'file') {
+      clearTimeout(restoreTimer)
+      fullScreenElement = getFullScreenElement() ?? fullScreenElement
+    } else {
+      restoreFullScreen()
+    }
+  }
+
+  // A button takes Space as the key goes up: the click it makes asks then,
+  // where the full screen coming back at once would move the focus off it.
+  const onActivationKey = event => {
+    if (
+      isTop() &&
+      holds(event.target) &&
+      (event.key === 'Enter' ||
+        (event.key === ' ' && event.target.tagName !== 'BUTTON')) &&
+      !event.target.closest?.('input, select, textarea')
+    ) {
+      restoreFullScreen()
+    }
+  }
+
+  // A chooser that kept the full screen, as Firefox's, leaves nothing to
+  // bring back. Chrome leaves it as its chooser shows, and the page hears of
+  // it a moment later: an instant cancel comes first.
+  const onFileChosen = event => {
+    const element = fullScreenElement
+    if (element && event.target.type === 'file') {
+      setTimeout(() => {
+        if (fullScreenElement === element && getFullScreenElement()) {
+          fullScreenElement = null
+        }
+      }, CHOOSER_DELAY)
+    }
+  }
+
   const onKeyDown = event => {
     if (!isTop()) return
     if (event.key === 'Escape') {
@@ -119,14 +194,28 @@ export const useModal = (active, emit, containerRef = null) => {
 
   const open = () => {
     previouslyFocused = document.activeElement
+    modal.container.value = getContainer()
     openModals.push(modal)
     window.addEventListener('keydown', onKeyDown, false)
-    // After the render that shows the dialog: focus() skips hidden elements.
-    nextTick(focusDialog)
+    window.addEventListener('keydown', onActivationKey, true)
+    window.addEventListener('click', onClick, true)
+    window.addEventListener('change', onFileChosen, true)
+    window.addEventListener('cancel', onFileChosen, true)
+    // After the render that shows the dialog: focus() skips hidden elements,
+    // and a modal mounted open only has its element then.
+    nextTick(() => {
+      modal.container.value = getContainer()
+      focusDialog()
+    })
   }
 
   const close = () => {
     window.removeEventListener('keydown', onKeyDown)
+    window.removeEventListener('keydown', onActivationKey, true)
+    window.removeEventListener('click', onClick, true)
+    window.removeEventListener('change', onFileChosen, true)
+    window.removeEventListener('cancel', onFileChosen, true)
+    fullScreenElement = null
     const index = openModals.indexOf(modal)
     if (index > -1) {
       openModals.splice(index, 1)
@@ -140,3 +229,7 @@ export const useModal = (active, emit, containerRef = null) => {
   // An open modal unmounted by a v-if gives the focus back too.
   onBeforeUnmount(close)
 }
+
+export const isModalOpenIn = element =>
+  Boolean(element) &&
+  openModals.some(modal => element.contains(modal.container.value))

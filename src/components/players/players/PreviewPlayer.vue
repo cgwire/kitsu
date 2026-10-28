@@ -1,5 +1,10 @@
 <template>
-  <div ref="container" class="preview-player dark" tabindex="-1">
+  <div
+    ref="container"
+    class="preview-player dark"
+    :class="{ 'keeps-comment-modal': !fullScreen && isCommentsShown }"
+    tabindex="-1"
+  >
     <div class="preview filler">
       <div class="flexrow filler">
         <div
@@ -151,6 +156,7 @@
         <task-info
           ref="task-info-player"
           class="flexrow-item task-info-column"
+          :class="{ 'is-collapsed': !fullScreen }"
           :current-frame="taskInfoFrame"
           :current-parent-preview="currentPreview"
           :entity-type="entityType"
@@ -162,7 +168,7 @@
           :task="task"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
-          v-show="!isCommentsHidden"
+          v-show="isCommentsShown"
           v-if="(!readOnly || canComment) && task?.id"
         />
       </div>
@@ -472,6 +478,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useFullScreen } from '@/composables/fullScreen'
+import { isModalOpenIn } from '@/composables/modal'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationCursor } from '@/composables/players/annotationCursor'
@@ -1570,7 +1577,12 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
     endAnnotationSaving()
     if (!nowFullScreen) {
       isComparing.value = false
-      isCommentsHidden.value = true
+      // Chrome leaves the full screen to show a file chooser: the modal
+      // that opened it stays on screen, to bring it back, and the comments
+      // keep their state for that return.
+      if (!isModalOpenIn(container.value)) {
+        isCommentsHidden.value = true
+      }
     }
     nextTick(() => {
       clearFocus()
@@ -1593,6 +1605,26 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
     }, RESIZE_DELAY)
   }
 })
+
+// Out of full screen, the comments panel only shows for its open modal.
+const isCommentModalOpen = computed(() =>
+  isModalOpenIn(commentContainer.value?.$el)
+)
+const isCommentsShown = computed(
+  () =>
+    !isCommentsHidden.value && (fullScreen.value || isCommentModalOpen.value)
+)
+
+// The comments kept for the return of the full screen belong to its task,
+// unless a modal of theirs is still open.
+watch(
+  () => props.task?.id,
+  () => {
+    if (!fullScreen.value && !isCommentModalOpen.value) {
+      isCommentsHidden.value = true
+    }
+  }
+)
 
 const onFullscreenClicked = () => {
   if (fullScreen.value) {
@@ -2895,6 +2927,12 @@ defineExpose({
   box-shadow: 0 0 4px #0007;
   min-height: 200px;
 
+  // WebKit lays a fixed element out in the size container holding it: the
+  // comments modal kept out of full screen would show in the player box.
+  &.keeps-comment-modal {
+    container-type: normal;
+  }
+
   .preview {
     position: relative;
     align-items: flex-start;
@@ -2993,6 +3031,14 @@ defineExpose({
   max-width: 450px;
   overflow-y: auto;
   height: 90vh;
+
+  // Out of full screen, it only keeps its open modal, which is fixed on the
+  // screen whatever the size of the panel.
+  &.is-collapsed {
+    max-height: 0;
+    max-width: 0;
+    min-width: 0;
+  }
 }
 
 .preview-container {

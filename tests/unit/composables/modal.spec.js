@@ -1,7 +1,12 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { nextTick, ref, watch } from 'vue'
 
-import { useModal } from '@/composables/modal'
+import { isModalOpenIn, useModal } from '@/composables/modal'
+
+import {
+  resetFullScreen,
+  setFullScreenElement
+} from '../fixtures/full-screen'
 
 const createModalWrapper = (active = false) => {
   const TestComponent = {
@@ -455,5 +460,415 @@ describe('composables/modal', () => {
       window.removeEventListener('error', onError)
       wrapper.unmount()
     })
+  })
+
+  it('finds an open modal in the element that holds it', async () => {
+    const panel = document.body.appendChild(document.createElement('div'))
+    const active = ref(true)
+    const wrapper = mount(
+      { setup: () => useModal(active, vi.fn()), template: '<div />' },
+      { attachTo: panel }
+    )
+    await nextTick()
+
+    expect(isModalOpenIn(panel)).toBe(true)
+    expect(isModalOpenIn(document.createElement('div'))).toBe(false)
+    expect(isModalOpenIn(null)).toBe(false)
+
+    active.value = false
+    await nextTick()
+
+    expect(isModalOpenIn(panel)).toBe(false)
+    wrapper.unmount()
+    panel.remove()
+  })
+
+  // Like the attachment modal of a reply, which a v-if mounts open.
+  it('lets a watcher follow the modals open in an element', async () => {
+    const panel = document.body.appendChild(document.createElement('div'))
+    const seen = []
+    const stop = watch(
+      () => isModalOpenIn(panel),
+      isOpen => seen.push(isOpen)
+    )
+    const shown = ref(false)
+    const Dialog = {
+      setup: () => useModal(ref(true), vi.fn()),
+      template: '<div />'
+    }
+    const wrapper = mount(
+      {
+        components: { Dialog },
+        setup: () => ({ shown }),
+        template: '<div><Dialog v-if="shown" /></div>'
+      },
+      { attachTo: panel }
+    )
+
+    shown.value = true
+    await flushPromises()
+    shown.value = false
+    await flushPromises()
+
+    expect(seen).toEqual([true, false])
+    stop()
+    wrapper.unmount()
+    panel.remove()
+  })
+
+  describe('full screen left for a file chooser', () => {
+    const PICKER = `
+      <div class="modal">
+        <div class="modal-content">
+          <div id="zone" @click="onZoneClick">
+            <label id="browse">Browse <input type="file" /></label>
+          </div>
+          <input id="name" />
+          <button id="confirm">Add</button>
+          <a id="attach" role="button" tabindex="0">Attach</a>
+          <button id="cancel" @click="active = false">Cancel</button>
+        </div>
+      </div>
+    `
+    let player = null
+
+    const openPicker = async () => {
+      const active = ref(false)
+      const Host = {
+        setup() {
+          useModal(active, vi.fn())
+          // Like FileUploadZone, the whole zone opens the chooser.
+          const onZoneClick = event => {
+            if (!event.target.closest('label')) {
+              event.currentTarget.querySelector('input').click()
+            }
+          }
+          return { active, onZoneClick }
+        },
+        template: PICKER
+      }
+      const wrapper = mount(Host, { attachTo: player })
+      active.value = true
+      await flushPromises()
+      vi.useFakeTimers()
+      return wrapper
+    }
+
+    // Chrome leaves the full screen to show the chooser.
+    const chooseFile = (wrapper, selector = '#browse') => {
+      wrapper.get(selector).element.click()
+      setFullScreenElement(null)
+    }
+
+    const press = (wrapper, selector, key) =>
+      wrapper
+        .get(selector)
+        .element.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
+
+    beforeEach(() => {
+      player = document.body.appendChild(document.createElement('div'))
+      player.requestFullscreen = vi.fn(() => Promise.resolve())
+      setFullScreenElement(player)
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+      resetFullScreen()
+      player.remove()
+    })
+
+    it('brings it back at the next click in the modal', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('brings it back from the click that closes the modal', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+
+      wrapper.get('#cancel').element.click()
+      await nextTick()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    // Chrome would leave the full screen again at once.
+    it('waits for the chooser that a click opens again', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+      chooseFile(wrapper, '#zone')
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).not.toHaveBeenCalled()
+
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    // A confirm that closes its modal at once: the key never reaches the
+    // window then.
+    it('brings it back on Enter on a control closing the modal', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+      const confirm = wrapper.get('#confirm').element
+      confirm.addEventListener('keydown', () => wrapper.unmount())
+
+      confirm.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+      )
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+    })
+
+    // A full screen left on purpose afterwards stays left.
+    it('brings it back once per file chooser', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+      setFullScreenElement(player)
+      setFullScreenElement(null)
+
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    // The top bar of the page stays above some modals.
+    it('leaves alone a click out of the modal', async () => {
+      const wrapper = await openPicker()
+      const outside = document.body.appendChild(
+        document.createElement('button')
+      )
+      chooseFile(wrapper)
+
+      outside.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).not.toHaveBeenCalled()
+
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      outside.remove()
+      wrapper.unmount()
+    })
+
+    // Firefox keeps the full screen while its chooser shows: a full screen
+    // left on purpose afterwards stays left.
+    it('forgets a chooser that kept the full screen', async () => {
+      const wrapper = await openPicker()
+      const input = wrapper.get('#browse input').element
+      wrapper.get('#browse').element.click()
+      input.dispatchEvent(new Event('change', { bubbles: true }))
+      vi.runAllTimers()
+      setFullScreenElement(null)
+
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    // Chrome leaves it a moment after the chooser shows: an automated or
+    // instant cancel comes first.
+    it('brings it back after a cancel that comes before the exit', async () => {
+      const wrapper = await openPicker()
+      const input = wrapper.get('#browse input').element
+      wrapper.get('#browse').element.click()
+      input.dispatchEvent(new Event('cancel', { bubbles: true }))
+      setFullScreenElement(null)
+      vi.runAllTimers()
+
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    // Like 'Add files as attachments', which confirms on the keydown.
+    it('brings it back on Space on a link button', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+
+      press(wrapper, '#attach', ' ')
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    // A button takes Space as the key goes up: the full screen coming
+    // back at the keydown would move the focus off it before.
+    it('leaves Space on a button to the click it makes', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+
+      press(wrapper, '#confirm', ' ')
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).not.toHaveBeenCalled()
+
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('leaves alone a key out of the modal', async () => {
+      const wrapper = await openPicker()
+      const outside = document.body.appendChild(
+        document.createElement('button')
+      )
+      chooseFile(wrapper)
+
+      outside.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+      )
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).not.toHaveBeenCalled()
+      outside.remove()
+      wrapper.unmount()
+    })
+
+    it('leaves the gestures to the modal on top', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+      const upper = mount(
+        { setup: () => useModal(ref(true), vi.fn()), template: '<div />' },
+        { attachTo: document.body }
+      )
+
+      wrapper.get('#confirm').element.click()
+      press(wrapper, '#confirm', 'Enter')
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).not.toHaveBeenCalled()
+      upper.unmount()
+      wrapper.unmount()
+    })
+
+    it('leaves alone an element gone from the page', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+      const parent = player.parentElement
+      player.remove()
+
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).not.toHaveBeenCalled()
+      parent.appendChild(player)
+      wrapper.unmount()
+    })
+
+    // Only the chooser tells: another field changing proves nothing.
+    it('keeps the record through a change of another field', async () => {
+      const wrapper = await openPicker()
+      wrapper.get('#browse').element.click()
+      wrapper
+        .get('#name')
+        .element.dispatchEvent(new Event('change', { bubbles: true }))
+      vi.runAllTimers()
+      setFullScreenElement(null)
+
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('waits a moment for the exit after a cancel', async () => {
+      const wrapper = await openPicker()
+      const input = wrapper.get('#browse input').element
+      wrapper.get('#browse').element.click()
+      input.dispatchEvent(new Event('cancel', { bubbles: true }))
+      vi.advanceTimersByTime(100)
+      setFullScreenElement(null)
+      vi.runAllTimers()
+
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    // Enter on a button comes with the click it makes.
+    it('asks for it once for a key and its click', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+
+      press(wrapper, '#confirm', 'Enter')
+      wrapper.get('#confirm').element.click()
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('brings it back on Enter, not on a key typed in a field', async () => {
+      const wrapper = await openPicker()
+      chooseFile(wrapper)
+
+      press(wrapper, '#name', 'Enter')
+      press(wrapper, '#name', ' ')
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).not.toHaveBeenCalled()
+
+      press(wrapper, '#confirm', 'Enter')
+      vi.runAllTimers()
+
+      expect(player.requestFullscreen).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it.each([
+      ['it was left another way', () => {}, () => setFullScreenElement(null)],
+      [
+        'the chooser kept it',
+        () => {},
+        wrapper => wrapper.get('#browse').element.click()
+      ],
+      [
+        'it was off when the modal opened',
+        () => setFullScreenElement(null),
+        wrapper => wrapper.get('#browse').element.click()
+      ]
+    ])(
+      'leaves the full screen alone when %s',
+      async (_, beforeOpen, act) => {
+        beforeOpen()
+        const wrapper = await openPicker()
+        act(wrapper)
+
+        wrapper.get('#confirm').element.click()
+        vi.runAllTimers()
+
+        expect(player.requestFullscreen).not.toHaveBeenCalled()
+        wrapper.unmount()
+      }
+    )
   })
 })

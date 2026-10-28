@@ -20,6 +20,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 
 // Pre-load the real store to avoid a circular-import race from child components.
 import '@/lib/auth'
+import { useModal } from '@/composables/modal'
 import clipboard from '@/lib/clipboard'
 
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
@@ -861,6 +862,135 @@ describe('PreviewPlayer.vue', () => {
       wrapper.element.dispatchEvent(new Event('fullscreenchange'))
       await nextTick()
     }
+
+    const leaveFullScreen = async () => {
+      delete document.fullscreen
+      wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+      await nextTick()
+    }
+
+    const commentToggle = () =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('icon') === 'comment')
+
+    // Chrome leaves the full screen to show a file chooser: a modal of the
+    // player stays on screen, to bring it back, and the comments keep their
+    // state for that return.
+    describe('comments as the full screen ends', () => {
+      const isPanelModalOpen = ref(false)
+      const isPlayerModalOpen = ref(false)
+
+      const openComments = async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            // In the player, out of the comments panel: where the task
+            // panel puts the modal of its "+" button.
+            BrowsingBar: {
+              name: 'BrowsingBar',
+              setup: () => useModal(isPlayerModalOpen, vi.fn()),
+              template: '<div />'
+            },
+            PlayerAnnotationBar: false,
+            TaskInfo: {
+              name: 'TaskInfo',
+              setup: () => useModal(isPanelModalOpen, vi.fn()),
+              template: '<div />',
+              methods: { focusCommentTextarea: () => {} }
+            }
+          }
+        })
+        await enterFullScreen()
+        commentToggle().vm.$emit('click')
+        await nextTick()
+        return wrapper.findComponent({ name: 'TaskInfo' })
+      }
+
+      // Detached v-show toggles fool isVisible: read the style instead.
+      const isShown = panel => panel.element.style.display !== 'none'
+
+      afterEach(() => {
+        isPanelModalOpen.value = false
+        isPlayerModalOpen.value = false
+      })
+
+      it('hides the comments panel', async () => {
+        const panel = await openComments()
+
+        await leaveFullScreen()
+
+        expect(isShown(panel)).toBe(false)
+      })
+
+      it('keeps the panel of an open modal, out of the layout', async () => {
+        isPanelModalOpen.value = true
+        const panel = await openComments()
+
+        expect(panel.classes()).not.toContain('is-collapsed')
+
+        await leaveFullScreen()
+
+        expect(isShown(panel)).toBe(true)
+        expect(panel.classes()).toContain('is-collapsed')
+        // WebKit lays a fixed element out in the size container holding it.
+        expect(wrapper.classes()).toContain('keeps-comment-modal')
+
+        isPanelModalOpen.value = false
+        await nextTick()
+
+        expect(isShown(panel)).toBe(false)
+        expect(wrapper.classes()).not.toContain('keeps-comment-modal')
+      })
+
+      it('keeps the comments for a modal of the player', async () => {
+        isPlayerModalOpen.value = true
+        const panel = await openComments()
+
+        await leaveFullScreen()
+        isPlayerModalOpen.value = false
+        await nextTick()
+
+        expect(isShown(panel)).toBe(false)
+
+        await enterFullScreen()
+
+        expect(isShown(panel)).toBe(true)
+      })
+
+      // Hiding it would hide the modal still open, and its keyboard trap.
+      it('keeps the panel of an open modal through a task change', async () => {
+        isPanelModalOpen.value = true
+        const panel = await openComments()
+        await leaveFullScreen()
+
+        await wrapper.setProps({ task: { ...task, id: 'task-2' } })
+
+        expect(isShown(panel)).toBe(true)
+      })
+
+      it('keeps the comments through a task change in full screen', async () => {
+        const panel = await openComments()
+
+        await wrapper.setProps({ task: { ...task, id: 'task-2' } })
+
+        expect(isShown(panel)).toBe(true)
+      })
+
+      it('forgets the comments of a task left out of full screen', async () => {
+        isPanelModalOpen.value = true
+        const panel = await openComments()
+        await leaveFullScreen()
+        isPanelModalOpen.value = false
+        await nextTick()
+
+        await wrapper.setProps({ task: { ...task, id: 'task-2' } })
+        await enterFullScreen()
+
+        expect(isShown(panel)).toBe(false)
+      })
+    })
 
     // Annotating and commenting are two rights: an assigned artist reads and
     // writes the comments of a file it cannot draw on.
