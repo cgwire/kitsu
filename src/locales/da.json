@@ -2013,7 +2013,7 @@
     },
     "status_automations": {
       "change_ready_for": "skifter \"klar til\" til",
-      "change_status": "skifter opgavestatus til",
+      "change_status": "skifter status for",
       "create_error": "Kunne ikke gemme. Prøv venligst igen.",
       "delete_text": "Er du sikker på, at du vil fjerne denne statusautomatisering fra din database?",
       "delete_error": "Der opstod en fejl under sletning af denne statusautomatisering. Den kan være knyttet til en produktion eller en produktionsskabelon. Hvis det er tilfældet, skal du først fjerne den fra alle produktioner og skabeloner.",
@@ -2026,6 +2026,7 @@
       "production_description": "En automatisering ændrer en opgaves status, eller den næste opgave, når en status sættes.",
       "run_for_selection": "Kør statusautomatisering for valgte opgaver:",
       "title": "Automatiseringer",
+      "to_status": "til",
       "wrong_automation": "I denne produktion bruger hver betingelse en opgavetype, der kommer efter den anvendte opgavetype. Deres statusændringer kører ikke denne automatisering, for at undgå uendelige cyklusser: den har ingen effekt.",
       "fields": {
         "entity_type": "Enhedstype",

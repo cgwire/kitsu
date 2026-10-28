@@ -2013,7 +2013,7 @@
     },
     "status_automations": {
       "change_ready_for": "ändert „bereit für“ in",
-      "change_status": "ändert den Aufgabenstatus in",
+      "change_status": "ändert den Status der Aufgabe",
       "create_error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "delete_text": "Sind Sie sicher, dass Sie diese Statusautomatisierung aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieser Statusautomatisierung ist ein Fehler aufgetreten. Sie ist möglicherweise mit einer Produktion oder einer Produktionsvorlage verknüpft. In diesem Fall müssen Sie sie zuerst aus jeder Produktion und jeder Vorlage entfernen.",
@@ -2026,6 +2026,7 @@
       "production_description": "Eine Automatisierung ändert den Status einer Aufgabe oder die nächste Aufgabe, wenn ein Status gesetzt wird.",
       "run_for_selection": "Führen Sie die Statusautomatisierung für ausgewählte Aufgaben aus:",
       "title": "Statusautomatisierungen",
+      "to_status": "auf",
       "wrong_automation": "In dieser Produktion verwendet jede Bedingung einen Aufgabentyp, der nach dem angewendeten Aufgabentyp kommt. Deren Statusänderungen lösen diese Automatisierung nicht aus, um Endlosschleifen zu vermeiden: Sie hat keine Wirkung.",
       "fields": {
         "entity_type": "Entitätstyp",

@@ -2013,7 +2013,7 @@
     },
     "status_automations": {
       "change_ready_for": "imposta \"pronto per\" a",
-      "change_status": "imposta lo stato del task a",
+      "change_status": "imposta lo stato del task",
       "create_error": "Impossibile salvare. Riprova.",
       "delete_text": "Sei sicuro di voler rimuovere questa automazione di stato dal database?",
       "delete_error": "Si è verificato un errore durante l'eliminazione di questa automazione di stato. Potrebbe essere collegata a una produzione o a un modello di produzione. In tal caso, devi prima rimuoverla da ogni produzione e da ogni modello.",
@@ -2026,6 +2026,7 @@
       "production_description": "Un'automazione cambia lo stato di un task, o il task successivo, quando viene impostato uno stato.",
       "run_for_selection": "Esegui l'automazione di stato per i task selezionati:",
       "title": "Automazioni",
+      "to_status": "su",
       "wrong_automation": "In questa produzione, ogni condizione usa un tipo di task che viene dopo il tipo di task applicato. I loro cambi di stato non avviano questa automazione, per evitare cicli infiniti: non ha alcun effetto.",
       "fields": {
         "entity_type": "Tipo di entità",

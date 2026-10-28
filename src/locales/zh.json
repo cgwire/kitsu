@@ -2013,7 +2013,7 @@
     },
     "status_automations": {
       "change_ready_for": "将“就绪环节”更改为",
-      "change_status": "将任务状态更改为",
+      "change_status": "更改任务状态：",
       "create_error": "无法保存。请重试。",
       "delete_text": "您确定要从数据库中删除此状态自动化吗？",
       "delete_error": "删除此状态自动化时出错。它可能与某个制作或制作模板相关联。如果是这样，您必须先将其从每个制作和模板中移除。",
@@ -2026,6 +2026,7 @@
       "production_description": "自动化会在设置某个状态时更改任务状态或下一个任务。",
       "run_for_selection": "为选定的任务运行状态自动化：",
       "title": "自动化",
+      "to_status": "改为",
       "wrong_automation": "在此制作中，每个条件使用的任务类型都位于应用任务类型之后。为避免无限循环，它们的状态变更不会运行此自动化：它不会有任何效果。",
       "fields": {
         "entity_type": "实体类型",

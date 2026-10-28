@@ -2013,7 +2013,7 @@
     },
     "status_automations": {
       "change_ready_for": "altera \"pronto para\" para",
-      "change_status": "altera o status da tarefa para",
+      "change_status": "altera o status da tarefa",
       "create_error": "Não foi possível salvar. Tente novamente.",
       "delete_text": "Tem certeza de que deseja remover essa automação de status do seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir essa automação de status. Ela pode estar vinculada a uma produção ou a um template de produção. Se for o caso, você deve removê-la de cada produção e de cada template primeiro.",
@@ -2026,6 +2026,7 @@
       "production_description": "Uma automação muda o status de uma tarefa, ou a tarefa seguinte, quando um status é definido.",
       "run_for_selection": "Executar automação de status para tarefas selecionadas:",
       "title": "Automações",
+      "to_status": "para",
       "wrong_automation": "Nesta produção, todas as condições usam um tipo de tarefa que vem depois do tipo de tarefa aplicada. As mudanças de status deles não executam esta automação, para evitar ciclos infinitos: ela não tem efeito.",
       "fields": {
         "entity_type": "Tipo de entidade",

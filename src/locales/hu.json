@@ -2349,7 +2349,7 @@
     "status_automations": {
       "add_status_automation_placeholder": "+ Állapot-automatizálás hozzáadása",
       "change_ready_for": "a \"készen áll erre\" értéket erre változtatja:",
-      "change_status": "a feladat állapotát erre változtatja:",
+      "change_status": "megváltoztatja a feladat állapotát:",
       "create_error": "Nem sikerült menteni. Kérlek próbáld újra.",
       "delete_error": "Hiba történt az állapot-automatizálás törlésekor. Lehet, hogy egy produkcióhoz vagy egy produkció-sablonhoz kapcsolódik. Ebben az esetben először el kell távolítanod minden produkcióból és sablonból.",
       "delete_text": "Biztosan eltávolítod ezt az állapot-automatizálást az adatbázisodból?",
@@ -2385,6 +2385,7 @@
       "production_description": "Egy automatizálás megváltoztatja egy feladat állapotát vagy a következő feladatot, amikor egy állapotot beállítanak.",
       "run_for_selection": "Állapot-automatizálás futtatása a kijelölt feladatokon:",
       "title": "Automatizálások",
+      "to_status": "→",
       "wrong_automation": "Ebben a produkcióban minden feltétel olyan feladat típust használ, amely az alkalmazott feladat típus után következik. Ezek állapotváltozásai a végtelen ciklusok elkerülése érdekében nem indítják el ezt az automatizálást: nincs hatása.",
       "connectors": {
         "and": "és",

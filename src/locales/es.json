@@ -2013,7 +2013,7 @@
     },
     "status_automations": {
       "change_ready_for": "cambia \"preparado para\" a",
-      "change_status": "cambia el estado de la tarea a",
+      "change_status": "cambia el estado de la tarea",
       "create_error": "No se ha podido guardar. Por favor, inténtelo de nuevo.",
       "delete_text": "¿Está seguro de que desea eliminar esta automatización de estado de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar esta automatización de estado. Es posible que esté vinculada a una producción o a una plantilla de producción. En ese caso, primero deberá eliminarla de cada producción y de cada plantilla.",
@@ -2026,6 +2026,7 @@
       "production_description": "Una automatización cambia el estado de una tarea, o la tarea siguiente, cuando se aplica un estado.",
       "run_for_selection": "Ejecutar la automatización de estado para las tareas seleccionadas:",
       "title": "Automatizaciones",
+      "to_status": "a",
       "wrong_automation": "En esta producción, todas las condiciones usan un tipo de tarea que va después del tipo de tarea aplicado. Sus cambios de estado no ejecutan esta automatización, para evitar ciclos infinitos: no tiene ningún efecto.",
       "fields": {
         "entity_type": "Tipo de entidad",

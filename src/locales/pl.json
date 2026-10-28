@@ -386,7 +386,7 @@
     "status_automations": {
       "add_status_automation_placeholder": "+ Dodaj automatyzację statusu",
       "change_ready_for": "zmienia „gotowe do” na",
-      "change_status": "zmienia status zadania na",
+      "change_status": "zmienia status zadania",
       "create_error": "Nie udało się zapisać. Spróbuj ponownie.",
       "delete_text": "Czy na pewno chcesz usunąć tę automatyzację statusu z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tej automatyzacji statusu. Może być powiązana z produkcją lub szablonem produkcji. W takim przypadku musisz najpierw usunąć ją z każdej produkcji i każdego szablonu.",
@@ -399,6 +399,7 @@
       "production_description": "Automatyzacja zmienia status zadania lub następne zadanie, gdy ustawiony zostanie status.",
       "run_for_selection": "Uruchom automatyzację statusu dla wybranych zadań:",
       "title": "Automatyzacje",
+      "to_status": "na",
       "wrong_automation": "W tej produkcji każdy warunek używa typu zadania występującego po docelowym typie zadania. Ich zmiany statusu nie uruchamiają tej automatyzacji, aby uniknąć nieskończonych cykli: nie ma ona żadnego efektu.",
       "fields": {
         "entity_type": "Typ obiektu",

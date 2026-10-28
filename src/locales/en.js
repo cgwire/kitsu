@@ -401,7 +401,7 @@ export default {
     add_condition: '+ Add condition',
     add_status_automation_placeholder: '+ Add Status Automation',
     change_ready_for: 'changes "ready for" to',
-    change_status: 'changes task status to',
+    change_status: 'changes the status of',
     create_error: 'Could not save. Please try again.',
     delete_text: 'Are you sure you want to remove this status automation from your database?',
     delete_error: 'An error occurred while deleting this status automation. It may be linked to a production or a production template. If so, you must remove it from every production and template first.',
@@ -419,6 +419,7 @@ export default {
     production_description: 'An automation changes a task status, or the next task, when a status is set.',
     run_for_selection: 'Run status automation for selected tasks:',
     title: 'Automations',
+    to_status: 'to',
     trigger_when: 'Trigger when',
     wrong_automation: 'In this production, every condition uses a task type that comes after the applied task type. Their status changes do not run this automation, to avoid infinite cycles: it has no effect.',
     connectors: {

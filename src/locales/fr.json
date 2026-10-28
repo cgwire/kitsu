@@ -2012,8 +2012,8 @@
       "multiple_delete_error": "Une erreur s'est produite lors de la suppression d'un montage. Il se peut que des données existantes y soient actuellement liées. Êtes-vous sûr qu'aucune tâche n'est liée aux montages sélectionnés ?"
     },
     "status_automations": {
-      "change_ready_for": "Change \"Prêt pour\" en",
-      "change_status": "Positionne le statut de tâche à",
+      "change_ready_for": "change \"prêt pour\" en",
+      "change_status": "positionne le statut de la tâche",
       "create_error": "Impossible d'enregistrer. Veuillez réessayer.",
       "delete_text": "Êtes-vous sûr de vouloir supprimer cette automatisation de votre base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de cette automatisation. Il est possible qu'elle soit liée à une production ou à un modèle de production. Si c'est le cas, vous devez d'abord la retirer de chaque production et de chaque modèle.",
@@ -2026,6 +2026,7 @@
       "production_description": "Une automatisation change le statut d'une tâche, ou la tâche suivante, quand un statut est appliqué.",
       "run_for_selection": "Lancer l'automatisation pour les tâches sélectionnées :",
       "title": "Automatisations",
+      "to_status": "sur",
       "wrong_automation": "Dans cette production, chaque condition porte sur un type de tâche qui vient après le type de tâche concerné. Leurs changements de statut ne déclenchent pas cette automatisation, pour éviter les cycles infinis : elle n'a aucun effet.",
       "fields": {
         "entity_type": "Type d'entité",

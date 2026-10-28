@@ -2013,7 +2013,7 @@
     },
     "status_automations": {
       "change_ready_for": "verandert 'klaar voor' in",
-      "change_status": "verandert taakstatus in",
+      "change_status": "verandert de status van de taak",
       "create_error": "Opslaan mislukt. Probeer het opnieuw.",
       "delete_text": "Weet je zeker dat je deze statusautomatisering uit je database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze statusautomatisering. Ze is misschien gekoppeld aan een productie of een productiesjabloon. In dat geval moet je ze eerst uit alle producties en sjablonen verwijderen.",
@@ -2026,6 +2026,7 @@
       "production_description": "Een automatisering wijzigt de status van een taak, of de volgende taak, wanneer een status wordt ingesteld.",
       "run_for_selection": "Statusautomatisering uitvoeren voor geselecteerde taken:",
       "title": "Automatiseringen",
+      "to_status": "naar",
       "wrong_automation": "In deze productie gebruikt elke voorwaarde een taaktype dat na het toegepaste taaktype komt. De statuswijzigingen ervan starten deze automatisering niet, om oneindige cycli te vermijden: ze heeft geen effect.",
       "fields": {
         "entity_type": "Entiteitstype",

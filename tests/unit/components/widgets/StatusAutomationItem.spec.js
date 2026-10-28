@@ -74,4 +74,11 @@ describe('StatusAutomationItem', () => {
     expect(wrapper.find('.status-automation').exists()).toBe(true)
     expect(wrapper.find('.guard').exists()).toBe(false)
   })
+
+  // main.to is the "To" date label of the news filters, which several
+  // languages translate as a date (ja 終了日, fr Jusqu'à).
+  it('introduces the applied status with a key of its own', () => {
+    const wrapper = mountItem({ statusAutomation })
+    expect(wrapper.find('.out-task-type + .flexrow-item').text()).toBe('to')
+  })
 })

@@ -2013,7 +2013,7 @@
     },
     "status_automations": {
       "change_ready_for": "將「可用於」改為",
-      "change_status": "將任務狀態變更為",
+      "change_status": "變更任務狀態：",
       "create_error": "無法儲存。請再試一次。",
       "delete_text": "您確定要從資料庫中移除此狀態自動化嗎？",
       "delete_error": "刪除此狀態自動化時發生錯誤。它可能與某個製作項目或製作項目範本連結。如果是的話，您必須先從每個製作項目和範本中移除它。",
@@ -2026,6 +2026,7 @@
       "production_description": "自動化會在設定某個狀態時變更任務狀態或下一個任務。",
       "run_for_selection": "為選取的任務執行狀態自動化：",
       "title": "自動化",
+      "to_status": "改為",
       "wrong_automation": "在此製作項目中，每個條件使用的任務類型都位於套用的任務類型之後。為避免無限循環，它們的狀態變更不會執行此自動化：它不會有任何效果。",
       "fields": {
         "entity_type": "實體類型",

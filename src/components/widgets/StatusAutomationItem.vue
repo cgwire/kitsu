@@ -24,7 +24,7 @@
       class="flexrow-item"
       v-if="statusAutomation.out_field_type === 'status'"
     >
-      {{ $t('main.to') }}
+      {{ $t('status_automations.to_status') }}
     </span>
     <span class="out-task-status flexrow-item">
       <task-status-cell
