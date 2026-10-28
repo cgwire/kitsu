@@ -2603,7 +2603,8 @@ describe('PlaylistPlayer.vue', () => {
     // A modal registered with useModal, which the player yields to. In an
     // app of its own: a second mount would swap the stubs of the player. Its
     // container tells what it holds: one holding the player stands for the
-    // temporary playlist modal. Its parent tells where it sits.
+    // temporary playlist modal. Its parent is the player in full screen, the
+    // page out of it.
     let closeModal = null
     const openModalHost = ({ container = null, parent = document.body } = {}) => {
       const element = parent.appendChild(document.createElement('div'))
@@ -2702,8 +2703,9 @@ describe('PlaylistPlayer.vue', () => {
       expect(isPanelShown()).toBe(false)
     })
 
-    // A modal of the page, out of full screen, keeps its own Shift+Tab too.
-    it('leaves Shift+Tab to a modal open out of it', async () => {
+    // A modal of the page keeps its own Shift+Tab too: its trap wraps the key
+    // to its last button.
+    it('leaves Shift+Tab to a modal of the page out of full screen', async () => {
       const pageBox = addPageBox()
       wrapper = mountPlayer()
       await flushPromises()
@@ -2713,6 +2715,9 @@ describe('PlaylistPlayer.vue', () => {
       await flushPromises()
 
       expect(document.activeElement).not.toBe(pageBox)
+      expect(document.activeElement).toBe(
+        document.querySelector('.modal button')
+      )
     })
 
     it('keeps Shift+Tab in a modal holding it, in full screen', async () => {

@@ -1078,7 +1078,7 @@ describe('PreviewPlayer.vue', () => {
 
       // Like the "+" modal back in the page once the full screen ended: the
       // player took the focus away as it ended.
-      it('leaves Shift+Tab to a modal open out of it', async () => {
+      it('leaves Shift+Tab to a modal of the page out of full screen', async () => {
         const pageBox = addPageBox()
         wrapper = mountPlayer()
         await flushPromises()
@@ -1087,6 +1087,9 @@ describe('PreviewPlayer.vue', () => {
         pressShiftTab()
 
         expect(document.activeElement).not.toBe(pageBox)
+        expect(document.activeElement).toBe(
+          document.querySelector('.modal button')
+        )
       })
 
       it('leaves the keys alone with its comments open and no box', async () => {
