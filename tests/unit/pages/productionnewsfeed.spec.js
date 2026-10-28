@@ -161,6 +161,20 @@ describe('pages/ProductionNewsFeed', () => {
     expect(path).not.toContain('page_size')
   })
 
+  // The end date takes in its whole day: Zou keeps the news created before
+  // the start of the next one, at midnight in Paris.
+  it('asks for the news up to the end of the end date', async () => {
+    const { router } = await mountPage(
+      `/productions/${production.id}/news-feed?before=2026-09-16`
+    )
+
+    const path = pget.mock.calls[0][0]
+    expect(new URL(path, 'http://kitsu').searchParams.get('before')).toBe(
+      '2026-09-16T22:00:00'
+    )
+    expect(router.currentRoute.value.query.before).toBe('2026-09-16')
+  })
+
   describe('socket reloads', () => {
     const feedPath = `/productions/${production.id}/news-feed`
     const rejections = []
@@ -345,10 +359,10 @@ describe('pages/ProductionNewsFeed', () => {
         { episode_id: 'episode-1', task_type_id: assetType.id }
       ],
       ['a start date', '?after=2026-09-17', {}],
-      ['an end date', '?before=2026-09-16', {}],
+      ['an end date', '?before=2026-09-15', {}],
       [
         'an end date, past midnight in Paris',
-        '?before=2026-09-17',
+        '?before=2026-09-16',
         pastParisMidnight
       ]
     ])(
@@ -368,6 +382,12 @@ describe('pages/ProductionNewsFeed', () => {
       ['an author', '?person_id=person-1', {}],
       ['an episode', '?episode_id=episode-1', {}],
       ['a period', '?after=2026-09-15&before=2026-09-17', {}],
+      ['an end date, on that day', '?before=2026-09-16', {}],
+      [
+        'an end date, late on that day in Paris',
+        '?before=2026-09-16',
+        { created_at: '2026-09-16T21:30:00' }
+      ],
       [
         'a start date, past midnight in Paris',
         '?after=2026-09-17',

@@ -207,7 +207,10 @@ const params = computed(() => ({
   person_id: person.value ? person.value.id : undefined,
   page: currentPage.value,
   episode_id: episodeId.value !== 'all' ? episodeId.value : undefined,
-  before: formatFullDateWithRevertedTimezone(before.value, timezone.value),
+  before: formatFullDateWithRevertedTimezone(
+    dayAfter(before.value),
+    timezone.value
+  ),
   after: formatFullDateWithRevertedTimezone(after.value, timezone.value)
 }))
 
@@ -227,6 +230,15 @@ const filterQuery = computed(() => ({
 // Query dates carry the day only. Rebuild them at local midnight: the round
 // trip goes back out through formatSimpleDate, which formats in local time.
 const parseQueryDate = value => (value ? new Date(`${value}T00:00:00`) : null)
+
+// The end date takes in its whole day: Zou keeps the news created before the
+// start of the next one.
+const dayAfter = date => {
+  if (!date) return null
+  const next = new Date(date)
+  next.setDate(next.getDate() + 1)
+  return next
+}
 
 const setScrollPosition = scrollPosition => {
   if (body.value) {
