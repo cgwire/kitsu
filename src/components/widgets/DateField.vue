@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ field: withMargin }">
+  <div :class="{ field: withMargin }" ref="rootRef">
     <label class="label" v-if="label">{{ label }}</label>
     <vue-date-picker
       auto-apply
@@ -8,6 +8,8 @@
       :dark="isDark || isDarkTheme"
       :disabled="disabled"
       :filters="{ weekDays: weekDaysDisabled ? [6, 0] : [] }"
+      :floating="fullScreenContainer ? { strategy: 'fixed' } : {}"
+      :key="fullScreenContainer ? 'full-screen' : 'page'"
       :formats="{ input: inputFormat }"
       :input-attrs="{ clearable: canDelete, hideInputIcon: true }"
       :locale="dateFnsLocale"
@@ -16,7 +18,7 @@
       :max-date="pickerMaxDate"
       :placeholder="placeholder"
       :range="range ? { partialRange: false } : false"
-      :teleport="true"
+      :teleport="!fullScreenContainer"
       :time-config="{ enableTimePicker: false }"
       v-model="localValue"
     >
@@ -49,9 +51,10 @@ import {
   zhCN,
   zhTW
 } from 'date-fns/locale'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
+import { useFullScreenContainer } from '@/composables/fullScreen'
 import { localDayToUtcDate, utcDayToLocalDate } from '@/lib/time'
 
 // date-fns locales matching src/locales/, keyed by two-letter code.
@@ -74,6 +77,13 @@ const DATE_FNS_LOCALES = {
 }
 
 const store = useStore()
+
+const rootRef = ref(null)
+// The calendar opens in <body>, behind an element in full screen: it opens
+// in place there, fixed on the screen. The picker reads its floating options
+// once, so a new one comes as the full screen starts or ends.
+const fullScreenContainer = useFullScreenContainer(() => rootRef.value)
+
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const user = computed(() => store.getters.user)
 

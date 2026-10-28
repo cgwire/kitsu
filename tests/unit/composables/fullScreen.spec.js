@@ -4,6 +4,7 @@ import {
   exitDocumentFullScreen,
   getFullScreenElement,
   requestFullScreen,
+  useFullScreenContainer,
   useFullScreenTarget
 } from '@/composables/fullScreen'
 
@@ -96,6 +97,69 @@ describe('composables/fullScreen useFullScreenTarget', () => {
 
     scope.stop()
     setFullScreenElement(element)
+    expect(target.value).toBeNull()
+  })
+})
+
+// A list can hold a date field per row, each following the full screen.
+describe('composables/fullScreen followers', () => {
+  const calls = spy =>
+    spy.mock.calls.filter(([name]) => name === 'fullscreenchange').length
+
+  afterEach(() => {
+    resetFullScreen()
+    vi.restoreAllMocks()
+  })
+
+  test('share one listener per event', () => {
+    const add = vi.spyOn(document, 'addEventListener')
+    const remove = vi.spyOn(document, 'removeEventListener')
+    const first = effectScope()
+    const second = effectScope()
+    first.run(() => useFullScreenTarget(() => null))
+    second.run(() => useFullScreenContainer(() => null))
+
+    expect(calls(add)).toBe(1)
+
+    first.stop()
+    expect(calls(remove)).toBe(0)
+    second.stop()
+    expect(calls(remove)).toBe(1)
+  })
+
+  test('find the element already in full screen as they start', () => {
+    const element = document.createElement('div')
+    setFullScreenElement(element)
+    const scope = effectScope()
+
+    const target = scope.run(() => useFullScreenTarget(() => element))
+
+    expect(target.value).toBe(element)
+    scope.stop()
+  })
+})
+
+describe('composables/fullScreen useFullScreenContainer', () => {
+  afterEach(() => {
+    resetFullScreen()
+  })
+
+  test('gives the element in full screen while it holds the element', () => {
+    const container = document.createElement('div')
+    const element = container.appendChild(document.createElement('div'))
+    const scope = effectScope()
+    const target = scope.run(() => useFullScreenContainer(() => element))
+
+    expect(target.value).toBeNull()
+    setFullScreenElement(container)
+    expect(target.value).toBe(container)
+    setFullScreenElement(element)
+    expect(target.value).toBe(element)
+    setFullScreenElement(document.createElement('div'))
+    expect(target.value).toBeNull()
+
+    scope.stop()
+    setFullScreenElement(container)
     expect(target.value).toBeNull()
   })
 })
