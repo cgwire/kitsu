@@ -11,6 +11,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 }))
 
 const pget = vi.fn()
+const registerPreviewFileStatuses = vi.fn()
 vi.mock('@/store/api/client', () => ({
   default: { pget: (...args) => pget(...args) }
 }))
@@ -82,7 +83,7 @@ const mountPage = async (
         })
       }
     },
-    actions: { loadTask },
+    actions: { loadTask, registerPreviewFileStatuses },
     getters: {
       currentProduction: () => production,
       dateFormat: () => 'YYYY-MM-DD',
@@ -729,6 +730,88 @@ describe('pages/ProductionNewsFeed', () => {
       await scrollDown(wrapper)
 
       expect(pget).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('previews mode', () => {
+    const feedPath = `/productions/${production.id}/news-feed`
+    const previewsPath = `${feedPath}?preview_mode=previews`
+    const previewFile = () => ({
+      id: 'preview-1',
+      extension: 'png',
+      revision: 1,
+      status: 'processing'
+    })
+    const fileEvent = {
+      comment_id: 'comment-2',
+      extension: 'png',
+      preview_file_id: 'preview-1',
+      revision: 1,
+      status: 'processing'
+    }
+    const withPreview = news => ({
+      ...news,
+      comment_id: 'comment-2',
+      preview_file_id: 'preview-1',
+      preview_files: [previewFile()]
+    })
+
+    // The event names the file, not the files of the revision the player
+    // plays.
+    it('loads a news again for its previews once its file is in', async () => {
+      const { socket, store } = await mountPage(previewsPath, {
+        firstPage: [{ ...newsList[0], comment_id: 'comment-2' }, newsList[1]]
+      })
+      pget.mockResolvedValueOnce(withPreview(newsList[0]))
+
+      emitSocketEvent(socket, 'preview-file:add-file', fileEvent)
+      await flushPromises()
+
+      expect(pget).toHaveBeenLastCalledWith(
+        `/api/data/projects/${production.id}/news/news-2`
+      )
+      expect(store.getters.newsList[0].preview_files).toEqual([previewFile()])
+    })
+
+    it('loads no news again for a file in comments mode', async () => {
+      const { socket } = await mountPage(feedPath, {
+        firstPage: [{ ...newsList[0], comment_id: 'comment-2' }, newsList[1]]
+      })
+
+      emitSocketEvent(socket, 'preview-file:add-file', fileEvent)
+      await flushPromises()
+
+      expect(pget).toHaveBeenCalledTimes(1)
+    })
+
+    it('loads no news again for a file without comment', async () => {
+      const { socket } = await mountPage(previewsPath)
+
+      emitSocketEvent(socket, 'preview-file:add-file', {
+        ...fileEvent,
+        comment_id: undefined
+      })
+      await flushPromises()
+
+      expect(pget).toHaveBeenCalledTimes(1)
+    })
+
+    // A picture is built in a job: the registry follows its status, after a
+    // socket drop too.
+    it('hands the previews of a news loaded again to the status registry', async () => {
+      const { socket } = await mountPage(previewsPath, {
+        firstPage: [{ ...newsList[0], comment_id: 'comment-2' }, newsList[1]]
+      })
+      registerPreviewFileStatuses.mockClear()
+      pget.mockResolvedValueOnce(withPreview(newsList[0]))
+
+      emitSocketEvent(socket, 'preview-file:add-file', fileEvent)
+      await flushPromises()
+
+      expect(registerPreviewFileStatuses).toHaveBeenCalledWith(
+        expect.anything(),
+        [previewFile()]
+      )
     })
   })
 

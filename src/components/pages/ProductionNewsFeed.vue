@@ -373,6 +373,14 @@ const onPreviewFileAddFile = eventData => {
     commentId: eventData.comment_id,
     extension: eventData.extension
   })
+  // The previews mode plays the files of the revision, which the event
+  // does not carry.
+  if (previewMode.value === 'previews' && eventData.comment_id) {
+    const relatedNews = newsList.value.find(
+      news => news.comment_id === eventData.comment_id
+    )
+    if (relatedNews) reloadNews(relatedNews)
+  }
 }
 
 const markRecent = newsId => {
@@ -439,30 +447,37 @@ const onNewsDelete = eventData => {
   store.commit('DELETE_NEWS', eventData.news_id)
 }
 
+const reloadNews = relatedNews => {
+  store
+    .dispatch('getSingleNews', {
+      productionId: relatedNews.project_id,
+      newsId: relatedNews.id
+    })
+    .then(news => {
+      if (!news) return
+      // A status edit can take the news out of the filters.
+      if (isNewsInFeed(news)) store.commit('UPDATE_NEWS', news)
+      else store.commit('REMOVE_NEWS', news.id)
+      // The registry follows the previews Zou builds in a job, after a
+      // socket drop too.
+      if (news.preview_files) {
+        store.dispatch('registerPreviewFileStatuses', news.preview_files)
+      }
+    })
+    .catch(err => {
+      // Deleting or moving a comment deletes its news, then updates its task.
+      if (err?.status === 404) store.commit('DELETE_NEWS', relatedNews.id)
+      else console.error(err)
+    })
+}
+
 const onTaskUpdate = eventData => {
   const relatedNews = newsList.value.find(
     news =>
       news.project_id === eventData.project_id &&
       news.task_id === eventData.task_id
   )
-  if (relatedNews) {
-    store
-      .dispatch('getSingleNews', {
-        productionId: relatedNews.project_id,
-        newsId: relatedNews.id
-      })
-      .then(news => {
-        if (!news) return
-        // A status edit can take the news out of the filters.
-        if (isNewsInFeed(news)) store.commit('UPDATE_NEWS', news)
-        else store.commit('REMOVE_NEWS', news.id)
-      })
-      .catch(err => {
-        // Deleting or moving a comment deletes its news, then updates its task.
-        if (err?.status === 404) store.commit('DELETE_NEWS', relatedNews.id)
-        else console.error(err)
-      })
-  }
+  if (relatedNews) reloadNews(relatedNews)
 }
 
 // Watchers
