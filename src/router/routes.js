@@ -97,6 +97,18 @@ const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 const isTargetClient = to =>
   userStore.getters.isCurrentUserClient(userStore.state, {}, { route: to })
 
+// The studio feed spans the productions, so it follows the global role. It
+// has its own guard: the one of the main route skips moves between its
+// children.
+const checkStudioFeedAccess = to => {
+  const isManager = userStore.getters.isCurrentUserManager(
+    userStore.state,
+    {},
+    { route: to }
+  )
+  if (!isManager) return { name: 'not-found' }
+}
+
 // Runs on every navigation, as the guard of the main route skips moves
 // between its children, such as a production switch.
 export const checkClientAccess = to => {
@@ -514,7 +526,8 @@ export const routes = [
         path: 'news-feed',
         component: ProductionNewsFeed,
         name: 'newsfeed',
-        meta: { title: 'news.title', requiresAdmin: true }
+        meta: { title: 'news.title' },
+        beforeEnter: checkStudioFeedAccess
       },
 
       {
