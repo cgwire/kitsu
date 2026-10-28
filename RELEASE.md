@@ -8,12 +8,12 @@ Every time a new version is ready, we follow this process:
 3. Tag the commit with the Kitsu version.
 4. Push changes to the `main` branch.
 
-You can run the following script to perform these commands at once:
+You can run `scripts/release.sh` to perform these commands at once.
+It bumps the patch version by default (1.0.73 → 1.0.74).
+Pass `minor` (→ 1.1.0) or `major` (→ 2.0.0) to bump another part:
 
 ```bash
-git pull --rebase origin main
-npm version patch
-git push origin main --tag
+scripts/release.sh minor
 ```
 
 # Deployment
