@@ -1700,14 +1700,9 @@ const onRemoteAcknowledge = (eventData, type) => {
   const comment = taskComments.value.find(c => c.id === eventData.comment_id)
   const person = personMap.value.get(eventData.person_id)
   if (!comment || !person) return
-  if (user.value?.id === person.id) {
-    if (
-      (type === 'ack' && !comment.acknowledgements.includes(person.id)) ||
-      (type === 'unack' && comment.acknowledgements.includes(person.id))
-    ) {
-      store.commit('ACK_COMMENT', { comment, user: person })
-    }
-  } else {
+  // The event may be applied already: by the user's own click, or by the
+  // panel the player holds for its full screen comments, which gets it too.
+  if ((type === 'ack') !== comment.acknowledgements.includes(person.id)) {
     store.commit('ACK_COMMENT', { comment, user: person })
   }
 }

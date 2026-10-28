@@ -1377,9 +1377,9 @@ const onRemoteAcknowledge = (eventData, type) => {
   const person = personMap.value.get(eventData.person_id)
   if (!comment || !person) return
   const hasAck = comment.acknowledgements.includes(person.id)
-  // For the current user's own events, skip commits that would double
-  // apply an acknowledgement already reflected locally.
-  if (user.value.id !== person.id || (type === 'ack') !== hasAck) {
+  // The event may be applied already: by the user's own click, or by the
+  // panel a player holds for its full screen comments, which gets it too.
+  if ((type === 'ack') !== hasAck) {
     store.commit('ACK_COMMENT', { comment, user: person })
   }
 }

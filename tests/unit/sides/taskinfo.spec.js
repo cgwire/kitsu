@@ -1551,6 +1551,46 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  // The panel PreviewPlayer holds for its full screen comments gets the
+  // events of the panel or page around it.
+  describe('comment:acknowledge', () => {
+    const TEAMMATE_ID = 'person-2'
+
+    it.each([
+      ['comment:acknowledge', [], [TEAMMATE_ID]],
+      ['comment:unacknowledge', [TEAMMATE_ID], []]
+    ])(
+      'applies a %s of a teammate once, however many panels get it',
+      async (event, acknowledgements, expected) => {
+        const comment = { id: 'comment-1', acknowledgements }
+        const { socket, store } = await mountPanel({
+          getterOverrides: {
+            getTaskComment: () => () => comment,
+            personMap: () => new Map([[TEAMMATE_ID, { id: TEAMMATE_ID }]])
+          }
+        })
+        // The toggle of the ACK_COMMENT mutation.
+        store.commit.mockImplementation((type, { user }) => {
+          if (type === 'ACK_COMMENT') {
+            comment.acknowledgements = comment.acknowledgements.includes(
+              user.id
+            )
+              ? comment.acknowledgements.filter(id => id !== user.id)
+              : [...comment.acknowledgements, user.id]
+          }
+        })
+        const [, handler] = socket.on.mock.calls.find(
+          ([name]) => name === event
+        )
+
+        handler({ comment_id: comment.id, person_id: TEAMMATE_ID })
+        handler({ comment_id: comment.id, person_id: TEAMMATE_ID })
+
+        expect(comment.acknowledgements).toEqual(expected)
+      }
+    )
+  })
+
   describe('preview-file:update', () => {
     const emitPreviewFileUpdate = async (socket, eventData) => {
       const [, onRemotePreviewUpdate] = socket.on.mock.calls.find(

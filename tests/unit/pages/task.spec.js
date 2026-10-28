@@ -683,6 +683,46 @@ describe('Task.vue comment events', () => {
       expect(rejections).toEqual([bug])
     })
   })
+
+  // The panel the player holds for its full screen comments gets the same
+  // events as the page.
+  describe('comment:acknowledge', () => {
+    const TEAMMATE_ID = 'person-2'
+
+    it.each([
+      ['comment:acknowledge', [], [TEAMMATE_ID]],
+      ['comment:unacknowledge', [TEAMMATE_ID], []]
+    ])(
+      'applies a %s of a teammate once, however many panels get it',
+      async (event, acknowledgements, expected) => {
+        const acknowledged = { ...comment, acknowledgements }
+        const { socket, store } = await mountPage({
+          comments: [acknowledged],
+          getterOverrides: {
+            personMap: () => new Map([[TEAMMATE_ID, { id: TEAMMATE_ID }]])
+          }
+        })
+        // The toggle of the ACK_COMMENT mutation.
+        store.commit.mockImplementation((type, payload) => {
+          if (type === 'ACK_COMMENT') {
+            const { user } = payload
+            acknowledged.acknowledgements =
+              acknowledged.acknowledgements.includes(user.id)
+                ? acknowledged.acknowledgements.filter(id => id !== user.id)
+                : [...acknowledged.acknowledgements, user.id]
+          }
+        })
+        const [, handler] = socket.on.mock.calls.find(
+          ([name]) => name === event
+        )
+
+        handler({ comment_id: acknowledged.id, person_id: TEAMMATE_ID })
+        handler({ comment_id: acknowledged.id, person_id: TEAMMATE_ID })
+
+        expect(acknowledged.acknowledgements).toEqual(expected)
+      }
+    )
+  })
 })
 
 describe('Task.vue comment actions', () => {
