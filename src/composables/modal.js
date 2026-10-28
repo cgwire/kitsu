@@ -233,3 +233,9 @@ export const useModal = (active, emit, containerRef = null) => {
 export const isModalOpenIn = element =>
   Boolean(element) &&
   openModals.some(modal => element.contains(modal.container.value))
+
+// The keys belong to the top modal, unless it holds the element.
+export const isBehindModal = element => {
+  const top = openModals[openModals.length - 1]
+  return Boolean(top) && !top.container.value?.contains(element)
+}

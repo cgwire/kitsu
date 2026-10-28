@@ -477,8 +477,8 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
-import { useFullScreen } from '@/composables/fullScreen'
-import { isModalOpenIn } from '@/composables/modal'
+import { getFullScreenElement, useFullScreen } from '@/composables/fullScreen'
+import { isBehindModal, isModalOpenIn } from '@/composables/modal'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationCursor } from '@/composables/players/annotationCursor'
@@ -2106,10 +2106,11 @@ const onCommentClicked = () => {
   isCommentsHidden.value = !isCommentsHidden.value
   if (!isCommentsHidden.value) {
     commentContainer.value.$el.style.height = `${height}px`
-    commentContainer.value.focusCommentTextarea()
   }
   endAnnotationSaving()
   nextTick(() => {
+    // Once shown: a hidden box takes no focus.
+    if (!isCommentsHidden.value) commentContainer.value?.focusCommentTextarea()
     previewViewer.value?.resize()
     comparisonViewer.value?.resize()
     loadAnnotation()
@@ -2337,6 +2338,9 @@ const onFocusToggle = event => {
     '.preview-player, .playlist-player'
   )
   if (closestPlayer && closestPlayer !== container.value) return
+  // An open modal keeps its own Shift+Tab, even the "+" one that the player
+  // holds in full screen.
+  if (isBehindModal(container.value)) return
   const active = document.activeElement
   if (active?.closest?.('.add-comment')) {
     event.preventDefault()
@@ -2348,10 +2352,20 @@ const onFocusToggle = event => {
   // one in a collapsed side panel, another in the visible one). Pick
   // the first visible & enabled textarea — focus on a hidden one is
   // a no-op and leaves the user stuck where they were.
+  // The browser shows the element in full screen alone: a box of the page
+  // behind it would take the keys out of sight.
+  const root = getFullScreenElement() ?? document
   const commentTextarea = Array.from(
-    document.querySelectorAll('.add-comment textarea')
+    root.querySelectorAll('.add-comment textarea')
   ).find(ta => ta.offsetParent !== null && !ta.disabled)
-  if (!commentTextarea) return
+  if (!commentTextarea) {
+    if (fullScreen.value && isCommentsHidden.value && commentContainer.value) {
+      event.preventDefault()
+      event.stopPropagation()
+      onCommentClicked()
+    }
+    return
+  }
   event.preventDefault()
   event.stopPropagation()
   // Focus synchronously and once more on the next tick to outlast

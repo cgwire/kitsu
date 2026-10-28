@@ -1,7 +1,7 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import process from 'node:process'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { defineAsyncComponent, markRaw, reactive, ref } from 'vue'
+import { createApp, defineAsyncComponent, h, markRaw, reactive, ref } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -21,9 +21,12 @@ vi.mock('wavesurfer.js', () => ({ default: waveSurfer }))
 
 // Pre-load the real store to avoid a circular-import race from child components.
 import '@/lib/auth'
+import { useModal } from '@/composables/modal'
 import clipboard from '@/lib/clipboard'
 
 import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
+
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 
 const playlist = {
   id: 'playlist-1',
@@ -68,6 +71,7 @@ const mountPlayer = ({
   playlistProp = playlist,
   entities = [entity],
   canEditShotTrim = () => true,
+  isArtist = false,
   isClient = false,
   organisation = {},
   props = {},
@@ -86,7 +90,7 @@ const mountPlayer = ({
       editMap: () => new Map(),
       episodeMap: () => new Map(),
       isCurrentUserAdmin: () => false,
-      isCurrentUserArtist: () => false,
+      isCurrentUserArtist: () => isArtist,
       isCurrentUserClient: () => isClient,
       isCurrentUserManager: () => true,
       isCurrentUserSupervisor: () => false,
@@ -2550,6 +2554,245 @@ describe('PlaylistPlayer.vue', () => {
       await flushPromises()
 
       expect(resetHeight).toHaveBeenCalled()
+    })
+  })
+
+  // Shift+Tab goes from the player to a comment box. The browser shows the
+  // player alone in full screen: a box of the page behind it, like the task
+  // panel under a temporary playlist, would take the keys out of sight.
+  describe('Shift+Tab', () => {
+    let pageForm = null
+
+    const goFullScreen = async () => {
+      // jsdom has no full screen
+      Object.defineProperty(document, 'fullscreen', {
+        configurable: true,
+        value: true
+      })
+      setFullScreenElement(wrapper.element)
+      wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+      await flushPromises()
+    }
+
+    const pressShiftTab = () => {
+      const event = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true
+      })
+      document.dispatchEvent(event)
+      return event
+    }
+
+    const isPanelShown = () =>
+      wrapper.find('.task-info-column').element.style.display !== 'none'
+
+    // A comment box of the page, shown: jsdom lays nothing out.
+    const addPageBox = ({ disabled = false } = {}) => {
+      if (!pageForm) {
+        pageForm = document.body.appendChild(document.createElement('div'))
+        pageForm.className = 'add-comment'
+      }
+      const box = pageForm.appendChild(document.createElement('textarea'))
+      box.disabled = disabled
+      Object.defineProperty(box, 'offsetParent', { value: document.body })
+      return box
+    }
+
+    // A modal registered with useModal, which the player yields to. In an
+    // app of its own: a second mount would swap the stubs of the player. Its
+    // container tells what it holds: one holding the player stands for the
+    // temporary playlist modal. Its parent tells where it sits.
+    let closeModal = null
+    const openModalHost = ({ container = null, parent = document.body } = {}) => {
+      const element = parent.appendChild(document.createElement('div'))
+      const app = createApp({
+        setup: () => {
+          useModal(ref(true), vi.fn(), container)
+          return () => h('div', { class: 'modal' }, [h('button', 'Cancel')])
+        }
+      })
+      app.mount(element)
+      closeModal = () => {
+        app.unmount()
+        element.remove()
+      }
+      return flushPromises()
+    }
+
+    afterEach(() => {
+      delete document.fullscreen
+      resetFullScreen()
+      pageForm?.remove()
+      pageForm = null
+      wrapper?.unmount()
+      wrapper = null
+      closeModal?.()
+      closeModal = null
+    })
+
+    // The closed panel still holds its box, hidden.
+    it('opens its comments in full screen, not a box of the page', async () => {
+      const pageBox = addPageBox()
+      wrapper = mountPlayer({
+        stubs: {
+          TaskInfo: {
+            ...withMethods(['focusCommentTextarea']),
+            template: '<div><div class="add-comment"><textarea /></div></div>'
+          }
+        }
+      })
+      await flushPromises()
+      const focusCommentTextarea = vi.spyOn(
+        wrapper.findComponent({ ref: 'task-info' }).vm,
+        'focusCommentTextarea'
+      )
+      await goFullScreen()
+
+      const event = pressShiftTab()
+      await flushPromises()
+
+      expect(event.defaultPrevented).toBe(true)
+      expect(document.activeElement).not.toBe(pageBox)
+      expect(isPanelShown()).toBe(true)
+      expect(focusCommentTextarea).toHaveBeenCalled()
+    })
+
+    it('focuses the box of its open comments in full screen', async () => {
+      const pageBox = addPageBox()
+      wrapper = mountPlayer({
+        stubs: {
+          TaskInfo: {
+            ...withMethods(['focusCommentTextarea']),
+            template: '<div><div class="add-comment"><textarea /></div></div>'
+          }
+        }
+      })
+      await flushPromises()
+      await goFullScreen()
+      pressShiftTab()
+      await flushPromises()
+      expect(isPanelShown()).toBe(true)
+      const panelBox = wrapper
+        .findComponent({ ref: 'task-info' })
+        .find('textarea').element
+      // Shown with its comments: jsdom lays nothing out.
+      Object.defineProperty(panelBox, 'offsetParent', { value: wrapper.element })
+      const focus = vi.spyOn(panelBox, 'focus')
+
+      const event = pressShiftTab()
+
+      expect(event.defaultPrevented).toBe(true)
+      expect(document.activeElement).not.toBe(pageBox)
+      expect(focus).toHaveBeenCalled()
+    })
+
+    // In full screen, a modal over the player sits in it, like the save form
+    // of a temporary playlist, and keeps its own Shift+Tab.
+    it('leaves Shift+Tab to a modal over it', async () => {
+      wrapper = mountPlayer()
+      await flushPromises()
+      await goFullScreen()
+      await openModalHost({ parent: wrapper.element })
+
+      pressShiftTab()
+      await flushPromises()
+
+      expect(isPanelShown()).toBe(false)
+    })
+
+    // A modal of the page, out of full screen, keeps its own Shift+Tab too.
+    it('leaves Shift+Tab to a modal open out of it', async () => {
+      const pageBox = addPageBox()
+      wrapper = mountPlayer()
+      await flushPromises()
+      await openModalHost()
+
+      pressShiftTab()
+      await flushPromises()
+
+      expect(document.activeElement).not.toBe(pageBox)
+    })
+
+    it('keeps Shift+Tab in a modal holding it, in full screen', async () => {
+      wrapper = mountPlayer()
+      await flushPromises()
+      await goFullScreen()
+      await openModalHost({ container: ref(wrapper.element.parentElement) })
+
+      const event = pressShiftTab()
+      await flushPromises()
+
+      expect(event.defaultPrevented).toBe(true)
+      expect(isPanelShown()).toBe(true)
+    })
+
+    // Like the comments button, which an artist does not get.
+    it('leaves the comments closed for an artist', async () => {
+      wrapper = mountPlayer({ isArtist: true })
+      await flushPromises()
+      await goFullScreen()
+
+      const event = pressShiftTab()
+      await flushPromises()
+
+      expect(event.defaultPrevented).toBe(false)
+      expect(isPanelShown()).toBe(false)
+    })
+
+    // Like the comments button, which the full mode of a build hides.
+    it('leaves the comments closed in full mode', async () => {
+      wrapper = mountPlayer()
+      await flushPromises()
+      wrapper.vm.isFullMode = true
+      await goFullScreen()
+
+      const event = pressShiftTab()
+      await flushPromises()
+
+      expect(event.defaultPrevented).toBe(false)
+      expect(isPanelShown()).toBe(false)
+    })
+
+    // A box posting its comment is disabled: Shift+Tab goes past it.
+    it('focuses the comment box of the page out of full screen', async () => {
+      addPageBox({ disabled: true })
+      const pageBox = addPageBox()
+      wrapper = mountPlayer()
+      await flushPromises()
+
+      const event = pressShiftTab()
+      await flushPromises()
+
+      expect(event.defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(pageBox)
+    })
+
+    it('leaves the comments closed out of full screen', async () => {
+      wrapper = mountPlayer()
+      await flushPromises()
+
+      const event = pressShiftTab()
+      await flushPromises()
+
+      expect(event.defaultPrevented).toBe(false)
+      expect(isPanelShown()).toBe(false)
+    })
+
+    // Like the panel of an entity without a task, the stub holds no box.
+    it('keeps the comments open when they hold no box', async () => {
+      wrapper = mountPlayer()
+      await flushPromises()
+      await goFullScreen()
+      pressShiftTab()
+      await flushPromises()
+
+      const event = pressShiftTab()
+      await flushPromises()
+
+      expect(event.defaultPrevented).toBe(false)
+      expect(isPanelShown()).toBe(true)
     })
   })
 })

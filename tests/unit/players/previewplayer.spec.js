@@ -10,7 +10,7 @@ import {
   it,
   vi
 } from 'vitest'
-import { markRaw, nextTick, ref } from 'vue'
+import { createApp, h, markRaw, nextTick, ref } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -24,6 +24,8 @@ import { useModal } from '@/composables/modal'
 import clipboard from '@/lib/clipboard'
 
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 
 const task = {
   id: 'task-1',
@@ -873,6 +875,269 @@ describe('PreviewPlayer.vue', () => {
       wrapper
         .findAllComponents({ name: 'ButtonSimple' })
         .find(button => button.attributes('icon') === 'comment')
+
+    // The box of the panel takes the focus once the panel shows.
+    it('focuses the comment box of the panel it opens', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      let displayOnFocus = null
+      wrapper = mountPlayer({
+        props: { readOnly: false },
+        stubs: {
+          PlayerAnnotationBar: false,
+          TaskInfo: {
+            name: 'TaskInfo',
+            template: '<div />',
+            methods: {
+              focusCommentTextarea() {
+                displayOnFocus = this.$el.style.display
+              }
+            }
+          }
+        }
+      })
+      await enterFullScreen()
+
+      commentToggle().vm.$emit('click')
+      await nextTick()
+
+      expect(displayOnFocus).toBe('')
+    })
+
+    // Shift+Tab goes from the player to a comment box. The browser shows the
+    // player alone in full screen: a box of the page behind it would take
+    // the keys out of sight.
+    describe('Shift+Tab', () => {
+      let pageForm = null
+
+      const pressShiftTab = () => {
+        const event = new KeyboardEvent('keydown', {
+          key: 'Tab',
+          shiftKey: true,
+          bubbles: true,
+          cancelable: true
+        })
+        document.dispatchEvent(event)
+        return event
+      }
+
+      const goFullScreen = async () => {
+        setFullScreenElement(wrapper.element)
+        await enterFullScreen()
+      }
+
+      // A comment box of the page, shown: jsdom lays nothing out.
+      const addPageBox = ({ disabled = false } = {}) => {
+        if (!pageForm) {
+          pageForm = document.body.appendChild(document.createElement('div'))
+          pageForm.className = 'add-comment'
+        }
+        const box = pageForm.appendChild(document.createElement('textarea'))
+        box.disabled = disabled
+        Object.defineProperty(box, 'offsetParent', { value: document.body })
+        return box
+      }
+
+      // A modal registered with useModal, which the player yields to. In an
+      // app of its own: a second mount would swap the stubs of the player.
+      let closeModal = null
+      const openModalHost = (parent = document.body) => {
+        const element = parent.appendChild(document.createElement('div'))
+        const app = createApp({
+          setup: () => {
+            useModal(ref(true), vi.fn())
+            return () => h('div', { class: 'modal' }, [h('button', 'Cancel')])
+          }
+        })
+        app.mount(element)
+        closeModal = () => {
+          app.unmount()
+          element.remove()
+        }
+        return nextTick()
+      }
+
+      afterEach(() => {
+        closeModal?.()
+        closeModal = null
+        pageForm?.remove()
+        pageForm = null
+        resetFullScreen()
+      })
+
+      // A box posting its comment is disabled: Shift+Tab goes past it.
+      it('focuses the comment box of the page out of full screen', async () => {
+        addPageBox({ disabled: true })
+        const pageBox = addPageBox()
+        wrapper = mountPlayer()
+        await flushPromises()
+
+        const event = pressShiftTab()
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(document.activeElement).toBe(pageBox)
+      })
+
+      // The comments keep their state: opened here, they would show at the
+      // next full screen.
+      it('leaves the comments closed out of full screen', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            TaskInfo: {
+              name: 'TaskInfo',
+              template: '<div />',
+              methods: { focusCommentTextarea: () => {} }
+            }
+          }
+        })
+        await flushPromises()
+
+        const event = pressShiftTab()
+        await goFullScreen()
+
+        expect(event.defaultPrevented).toBe(false)
+        expect(
+          wrapper.findComponent({ name: 'TaskInfo' }).element.style.display
+        ).toBe('none')
+      })
+
+      // The closed panel still holds its box, hidden.
+      it('opens the comments of the player in full screen', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const pageBox = addPageBox()
+        const focusCommentTextarea = vi.fn()
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            TaskInfo: {
+              name: 'TaskInfo',
+              template: '<div><div class="add-comment"><textarea /></div></div>',
+              methods: { focusCommentTextarea }
+            }
+          }
+        })
+        await goFullScreen()
+
+        const event = pressShiftTab()
+        await nextTick()
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(document.activeElement).not.toBe(pageBox)
+        expect(wrapper.findComponent({ name: 'TaskInfo' }).isVisible()).toBe(
+          true
+        )
+        expect(focusCommentTextarea).toHaveBeenCalled()
+      })
+
+      it('focuses the box of its open comments in full screen', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const pageBox = addPageBox()
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            TaskInfo: {
+              name: 'TaskInfo',
+              template: '<div><div class="add-comment"><textarea /></div></div>',
+              methods: { focusCommentTextarea: () => {} }
+            }
+          }
+        })
+        await goFullScreen()
+        pressShiftTab()
+        await nextTick()
+        expect(wrapper.findComponent({ name: 'TaskInfo' }).isVisible()).toBe(
+          true
+        )
+        const panelBox = wrapper
+          .findComponent({ name: 'TaskInfo' })
+          .find('textarea').element
+        // Shown with its comments: jsdom lays nothing out.
+        Object.defineProperty(panelBox, 'offsetParent', {
+          value: wrapper.element
+        })
+        const focus = vi.spyOn(panelBox, 'focus')
+
+        const event = pressShiftTab()
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(document.activeElement).not.toBe(pageBox)
+        expect(focus).toHaveBeenCalled()
+      })
+
+      it('leaves the page alone in full screen without comments', async () => {
+        const pageBox = addPageBox()
+        wrapper = mountPlayer()
+        await goFullScreen()
+
+        const event = pressShiftTab()
+
+        expect(event.defaultPrevented).toBe(false)
+        expect(document.activeElement).not.toBe(pageBox)
+      })
+
+      // Like the "+" modal back in the page once the full screen ended: the
+      // player took the focus away as it ended.
+      it('leaves Shift+Tab to a modal open out of it', async () => {
+        const pageBox = addPageBox()
+        wrapper = mountPlayer()
+        await flushPromises()
+        await openModalHost()
+
+        pressShiftTab()
+
+        expect(document.activeElement).not.toBe(pageBox)
+      })
+
+      it('leaves the keys alone with its comments open and no box', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            PlayerAnnotationBar: false,
+            TaskInfo: {
+              name: 'TaskInfo',
+              template: '<div />',
+              methods: { focusCommentTextarea: () => {} }
+            }
+          }
+        })
+        await goFullScreen()
+        commentToggle().vm.$emit('click')
+        await nextTick()
+
+        const event = pressShiftTab()
+
+        expect(event.defaultPrevented).toBe(false)
+      })
+
+      // A modal over the player, like the "+" one that it holds in full
+      // screen, keeps its own Shift+Tab.
+      it('leaves Shift+Tab to a modal over it in full screen', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const focusCommentTextarea = vi.fn()
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            TaskInfo: {
+              name: 'TaskInfo',
+              template: '<div />',
+              methods: { focusCommentTextarea }
+            }
+          }
+        })
+        await goFullScreen()
+        await openModalHost(wrapper.element)
+
+        pressShiftTab()
+        await nextTick()
+
+        expect(focusCommentTextarea).not.toHaveBeenCalled()
+        expect(
+          wrapper.findComponent({ name: 'TaskInfo' }).element.style.display
+        ).toBe('none')
+      })
+    })
 
     // Chrome leaves the full screen to show a file chooser: a modal of the
     // player stays on screen, to bring it back, and the comments keep their

@@ -990,7 +990,8 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import WaveSurfer from 'wavesurfer.js'
 
-import { useFullScreen } from '@/composables/fullScreen'
+import { getFullScreenElement, useFullScreen } from '@/composables/fullScreen'
+import { isBehindModal } from '@/composables/modal'
 import { usePhoneLayout } from '@/composables/phoneLayout'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationBroadcast } from '@/composables/players/annotationBroadcast'
@@ -3615,6 +3616,9 @@ const onFocusToggle = event => {
     '.preview-player, .playlist-player'
   )
   if (closestPlayer && closestPlayer !== container.value) return
+  // An open modal keeps its own Shift+Tab, unless it holds the player, like
+  // the temporary playlist one.
+  if (isBehindModal(container.value)) return
   const active = document.activeElement
   // Walk up from active to find an .add-comment ancestor — handles
   // multiple AddComment instances cleanly. If active is inside any
@@ -3629,10 +3633,26 @@ const onFocusToggle = event => {
   // one in a collapsed side panel, another in the visible one). Pick
   // the first visible & enabled textarea — focus on a hidden one is a
   // no-op and leaves the user stuck where they were.
+  // The browser shows the element in full screen alone: a box of the page
+  // behind it would take the keys out of sight.
+  const root = getFullScreenElement() ?? document
   const commentTextarea = Array.from(
-    document.querySelectorAll('.add-comment textarea')
+    root.querySelectorAll('.add-comment textarea')
   ).find(ta => ta.offsetParent !== null && !ta.disabled)
-  if (!commentTextarea) return
+  if (!commentTextarea) {
+    // As the comments button, which the annotation bar shows.
+    if (
+      fullScreen.value &&
+      isCommentsHidden.value &&
+      !readOnly.value &&
+      !isFullMode.value
+    ) {
+      event.preventDefault()
+      event.stopPropagation()
+      onCommentClicked()
+    }
+    return
+  }
   event.preventDefault()
   event.stopPropagation()
   // Focus synchronously and once more on the next tick to outlast

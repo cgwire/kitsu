@@ -1,7 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { nextTick, ref, watch } from 'vue'
 
-import { isModalOpenIn, useModal } from '@/composables/modal'
+import { isBehindModal, isModalOpenIn, useModal } from '@/composables/modal'
 
 import {
   resetFullScreen,
@@ -481,6 +481,53 @@ describe('composables/modal', () => {
     expect(isModalOpenIn(panel)).toBe(false)
     wrapper.unmount()
     panel.remove()
+  })
+
+  // A player leaves its keys to a modal open over it, unless the modal
+  // holds it, like the temporary playlist one.
+  it('tells whether the top modal leaves an element out', async () => {
+    const page = document.body.appendChild(document.createElement('div'))
+    const player = document.createElement('div')
+    expect(isBehindModal(player)).toBe(false)
+
+    const wrapper = mount(
+      { setup: () => useModal(ref(true), vi.fn()), template: '<div />' },
+      { attachTo: page }
+    )
+    await nextTick()
+
+    expect(isBehindModal(player)).toBe(true)
+
+    wrapper.element.appendChild(player)
+
+    expect(isBehindModal(player)).toBe(false)
+    wrapper.unmount()
+    page.remove()
+  })
+
+  // Like the save form of a temporary playlist, over the modal holding the
+  // player.
+  it('reads the top modal of a stack', async () => {
+    const page = document.body.appendChild(document.createElement('div'))
+    const player = document.createElement('div')
+    const holder = mount(
+      { setup: () => useModal(ref(true), vi.fn()), template: '<div />' },
+      { attachTo: page }
+    )
+    holder.element.appendChild(player)
+    const form = mount(
+      { setup: () => useModal(ref(true), vi.fn()), template: '<div />' },
+      { attachTo: page }
+    )
+    await nextTick()
+
+    expect(isBehindModal(player)).toBe(true)
+
+    form.unmount()
+
+    expect(isBehindModal(player)).toBe(false)
+    holder.unmount()
+    page.remove()
   })
 
   // Like the attachment modal of a reply, which a v-if mounts open.
