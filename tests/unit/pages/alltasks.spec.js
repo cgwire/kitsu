@@ -12,7 +12,9 @@ vi.mock('vue-i18n', async importOriginal => ({
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
+import AllTaskList from '@/components/lists/AllTaskList.vue'
 import AllTasks from '@/components/pages/AllTasks.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import StatusStats from '@/components/widgets/StatusStats.vue'
 
 const todoStatus = {
@@ -28,7 +30,20 @@ const wipStatus = {
   is_default: false
 }
 
-const mountPage = async () => {
+const openTasks = {
+  data: [],
+  is_more: false,
+  stats: {
+    status: [
+      { task_status_id: todoStatus.id, amount: 3 },
+      { task_status_id: wipStatus.id, amount: 1 }
+    ]
+  }
+}
+
+const mountPage = async ({
+  loadOpenTasks = vi.fn(() => openTasks)
+} = {}) => {
   const store = createStore({
     getters: {
       activePeopleWithoutBot: () => [],
@@ -46,16 +61,7 @@ const mountPage = async () => {
     },
     actions: {
       clearSelectedTasks: vi.fn(),
-      loadOpenTasks: vi.fn(() => ({
-        data: [],
-        is_more: false,
-        stats: {
-          status: [
-            { task_status_id: todoStatus.id, amount: 3 },
-            { task_status_id: wipStatus.id, amount: 1 }
-          ]
-        }
-      }))
+      loadOpenTasks
     }
   })
   const router = createRouter({
@@ -99,5 +105,28 @@ describe('AllTasks page', () => {
       { name: 'WIP', color: '#3273dc', value: 1 }
     ])
     wrapper.unmount()
+  })
+
+  // A production can refuse its open tasks to a person who is client or
+  // vendor on it, while the filter lists every open production.
+  it('clears the loading error once the tasks load again', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const loadOpenTasks = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Forbidden'))
+      .mockResolvedValue(openTasks)
+    const wrapper = await mountPage({ loadOpenTasks })
+    expect(wrapper.findComponent(AllTaskList).props('isError')).toBe(true)
+    expect(consoleError).toHaveBeenCalledOnce()
+
+    wrapper
+      .findComponent(ComboboxProduction)
+      .vm.$emit('update:modelValue', 'production-2')
+    await flushPromises()
+
+    expect(loadOpenTasks).toHaveBeenCalledTimes(2)
+    expect(wrapper.findComponent(AllTaskList).props('isError')).toBe(false)
+    wrapper.unmount()
+    consoleError.mockRestore()
   })
 })
