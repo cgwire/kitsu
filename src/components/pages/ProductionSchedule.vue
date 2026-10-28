@@ -1041,6 +1041,8 @@ const isStaleSchedule = generation => generation !== scheduleGeneration
 
 const reset = () => {
   scheduleGeneration++
+  // the rows of the new production or episode load collapsed
+  expandAll.value = false
   // Debounce: cross-prod navigation triggers two close currentEpisode changes (transient 'main' then 'all').
   if (resetTimeout.value) clearTimeout(resetTimeout.value)
   resetTimeout.value = setTimeout(() => {

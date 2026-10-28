@@ -803,6 +803,23 @@ describe('ProductionSchedule page', () => {
       ).toEqual(['production-1', 'production-2'])
     })
 
+    it('expands the new production after an expand all that finished', async () => {
+      const { store, storeActions, wrapper } = await mountPage()
+      findSchedule(wrapper).vm.$emit('expand-all')
+      await waitForLoad()
+      await switchProduction(store)
+      await waitForLoad()
+
+      findSchedule(wrapper).vm.$emit('expand-all')
+      await waitForLoad()
+
+      expect(
+        payloadsOf(storeActions.loadAssetTypeScheduleItems).map(
+          payload => payload.production.id
+        )
+      ).toEqual(['production-1', 'production-2'])
+    })
+
     it('stops an expand all when the page is left', async () => {
       const held = holdFirstCall(buildAssetTypeBars)
       const { storeActions, wrapper } = await mountPage({
