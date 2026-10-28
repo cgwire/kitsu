@@ -1,0 +1,2 @@
+import{It as e,Nt as t,j as n,nt as r,u as i}from"./vue-vendor-CT-2WHdw.js";i();var a={__name:`ErrorText`,props:{text:{default:``,type:String},hidden:{default:!1,type:Boolean},alignRight:{default:!1,type:Boolean}},setup(i){return(a,o)=>(r(),n(`p`,{class:t({error:!0,"has-text-right":i.alignRight,"is-hidden":i.hidden})},e(i.text),3))}};export{a as t};
+//# sourceMappingURL=ErrorText-DqMTgCBy.js.map

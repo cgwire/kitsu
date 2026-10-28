@@ -1,0 +1,2 @@
+import{u as e,wt as t,xt as n}from"./vue-vendor-CT-2WHdw.js";e();var r=`(max-width: 768px)`,i=`(max-height: 500px) and (orientation: landscape)`,a=()=>{let e=t(!1),a=t(!1),o=globalThis.matchMedia?.(r),s=globalThis.matchMedia?.(i),c=()=>{a.value=!!s?.matches,e.value=!!o?.matches||a.value};return c(),o?.addEventListener?.(`change`,c),s?.addEventListener?.(`change`,c),n(()=>{o?.removeEventListener?.(`change`,c),s?.removeEventListener?.(`change`,c)}),{isPhone:e,isPhoneLandscape:a}};export{a as t};
+//# sourceMappingURL=phoneLayout-DWhs65hA.js.map
