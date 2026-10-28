@@ -339,6 +339,14 @@
                 @remove-preview="onPreviewFormRemoved"
                 v-if="isCommentingAllowed"
               />
+              <task-working-files
+                :task="task"
+                :can-access="
+                  isAssigned || isCurrentUserManager || isCurrentUserAdmin
+                "
+                :can-upload="isAssigned"
+                v-if="!isCurrentUserClient && task"
+              />
               <div
                 class="comments"
                 v-if="taskComments && taskComments.length > 0"
@@ -530,6 +538,7 @@ import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
+import TaskWorkingFiles from '@/components/widgets/TaskWorkingFiles.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
@@ -631,6 +640,7 @@ const organisation = computed(() => store.getters.organisation)
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserProductionSupervisor
 )
