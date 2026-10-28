@@ -31,7 +31,7 @@
       icon="plus"
       :title="$t('playlists.actions.files_add')"
       @click="$emit('add-preview-clicked')"
-      v-if="(isAssigned || !readOnly) && !fullScreen && allowExtraPreview"
+      v-if="(isAssigned || !readOnly) && allowExtraPreview"
     />
 
     <button-simple
@@ -39,7 +39,7 @@
       icon="trash"
       :title="$t('playlists.actions.files_delete')"
       @click="$emit('remove-preview-clicked')"
-      v-if="!readOnly && !fullScreen && !light"
+      v-if="!readOnly && (!light || fullScreen)"
     />
 
     <div class="separator" v-if="isBigDisplay"></div>

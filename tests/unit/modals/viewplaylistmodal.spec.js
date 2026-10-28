@@ -25,9 +25,13 @@ vi.mock('vue-router', () => ({
 
 // PlaylistPlayer is a very heavy component and is only rendered, never used in
 // the save flow we exercise here, so stub it away.
-vi.mock('@/components/players/players/PlaylistPlayer.vue', () => ({
-  default: { name: 'PlaylistPlayer', props: ['canSave'], render: () => null }
-}))
+vi.mock('@/components/players/players/PlaylistPlayer.vue', async () => {
+  const { h } = await import('vue')
+  // Its root is the element the browser puts in full screen.
+  return {
+    default: { name: 'PlaylistPlayer', props: ['canSave'], render: () => h('div') }
+  }
+})
 
 const crisp = vi.hoisted(() => ({ setChatVisibility: vi.fn() }))
 vi.mock('@/lib/crisp', () => ({ default: crisp }))
@@ -36,6 +40,8 @@ import shotStore from '@/store/modules/shots'
 
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
+
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 
 describe('ViewPlaylistModal', () => {
   let store
@@ -106,6 +112,7 @@ describe('ViewPlaylistModal', () => {
 
   afterEach(() => {
     shotStore.cache.shotMap.delete('shot-1')
+    resetFullScreen()
     vi.restoreAllMocks()
   })
 
@@ -123,6 +130,22 @@ describe('ViewPlaylistModal', () => {
 
     expect(editPlaylistPayload).not.toBeNull()
     expect(editPlaylistPayload.data.task_type_id).toBe('task-type-1')
+  })
+
+  // The browser shows the player in full screen alone: its Save button opens
+  // the save form in it, back in the modal once the full screen ends.
+  it('opens the save form in the player in full screen', async () => {
+    const player = wrapper.findComponent({ name: 'PlaylistPlayer' })
+    setFullScreenElement(player.element)
+    player.vm.$emit('save-clicked')
+    await flushPromises()
+    const editModal = wrapper.findComponent(EditPlaylistModal)
+    expect(player.element.contains(editModal.element)).toBe(true)
+
+    setFullScreenElement(null)
+    await flushPromises()
+    expect(player.element.contains(editModal.element)).toBe(false)
+    expect(wrapper.element.contains(editModal.element)).toBe(true)
   })
 
   it('shows a success state instead of closing the modal right after creation', async () => {

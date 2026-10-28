@@ -16,6 +16,8 @@
       class="flexrow-item"
       :options="available3DAnimations"
       :is-dark="true"
+      is-reversed
+      keep-order
       :thin="true"
       v-model="current3DAnimation"
       v-if="is3DModel && is3DAnimation"

@@ -186,6 +186,7 @@
               <div v-if="isPreviews">
                 <preview-player
                   ref="preview-player"
+                  :can-comment="isCommentingAllowed"
                   :entity-preview-files="taskEntityPreviews"
                   :extra-wide="true"
                   :fps="currentFps"
@@ -415,22 +416,36 @@
         @confirm="confirmAddPreviewModal"
       />
 
-      <add-preview-modal
-        ref="add-extra-preview-modal"
-        :active="modals.addExtraPreview"
-        :is-loading="loading.addExtraPreview"
-        :is-error="errors.addExtraPreview"
-        :form-data="addExtraPreviewFormData"
-        message=""
-        :upload-progress="uploadProgress"
-        :title="
-          task
-            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
-            : ''
-        "
-        @cancel="hideExtraPreviewModal"
-        @confirm="createExtraPreview"
-      />
+      <!-- The browser shows a player in full screen alone: the modals of its
+           "+" and trash buttons go into it. -->
+      <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
+        <add-preview-modal
+          ref="add-extra-preview-modal"
+          :active="modals.addExtraPreview"
+          :is-loading="loading.addExtraPreview"
+          :is-error="errors.addExtraPreview"
+          :form-data="addExtraPreviewFormData"
+          message=""
+          :upload-progress="uploadProgress"
+          :title="
+            task
+              ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
+              : ''
+          "
+          @cancel="hideExtraPreviewModal"
+          @confirm="createExtraPreview"
+        />
+
+        <delete-modal
+          :active="modals.deleteExtraPreview"
+          :is-loading="loading.deleteExtraPreview"
+          :is-error="errors.deleteExtraPreview"
+          :text="$t('tasks.delete_preview')"
+          :error-text="$t('tasks.delete_preview_error')"
+          @cancel="hideRemoveExtraPreviewModal"
+          @confirm="confirmDeleteTaskPreview"
+        />
+      </teleport>
 
       <edit-comment-modal
         :active="modals.editComment"
@@ -454,16 +469,6 @@
         :error-text="$t('tasks.delete_comment_error')"
         @confirm="confirmDeleteTaskComment"
         @cancel="onCancelDeleteComment"
-      />
-
-      <delete-modal
-        :active="modals.deleteExtraPreview"
-        :is-loading="loading.deleteExtraPreview"
-        :is-error="errors.deleteExtraPreview"
-        :text="$t('tasks.delete_preview')"
-        :error-text="$t('tasks.delete_preview_error')"
-        @cancel="hideRemoveExtraPreviewModal"
-        @confirm="confirmDeleteTaskPreview"
       />
     </div>
   </div>
@@ -497,6 +502,7 @@ import {
 } from 'lucide-vue-next'
 
 import { isListOfPageLoaded } from '@/composables/entity'
+import { useFullScreenTarget } from '@/composables/fullScreen'
 import { isCommentReplyable } from '@/lib/comments'
 import drafts from '@/lib/drafts'
 import { logRequestFailure } from '@/lib/errors'
@@ -609,6 +615,7 @@ provide('draftComment', draftComment)
 
 const taskColumns = useTemplateRef('task-columns')
 const previewPlayerRef = useTemplateRef('preview-player')
+const fullScreenPlayer = useFullScreenTarget(() => previewPlayerRef.value?.$el)
 const addCommentRef = useTemplateRef('add-comment')
 const addPreviewModalRef = useTemplateRef('add-preview-modal')
 const addExtraPreviewModalRef = useTemplateRef('add-extra-preview-modal')
@@ -1694,14 +1701,9 @@ const onRemoteAcknowledge = (eventData, type) => {
   const comment = taskComments.value.find(c => c.id === eventData.comment_id)
   const person = personMap.value.get(eventData.person_id)
   if (!comment || !person) return
-  if (user.value?.id === person.id) {
-    if (
-      (type === 'ack' && !comment.acknowledgements.includes(person.id)) ||
-      (type === 'unack' && comment.acknowledgements.includes(person.id))
-    ) {
-      store.commit('ACK_COMMENT', { comment, user: person })
-    }
-  } else {
+  // The event may be applied already: by the user's own click, or by the
+  // panel the player holds for its full screen comments, which gets it too.
+  if ((type === 'ack') !== comment.acknowledgements.includes(person.id)) {
     store.commit('ACK_COMMENT', { comment, user: person })
   }
 }

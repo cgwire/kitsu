@@ -1,5 +1,10 @@
 <template>
-  <div ref="container" class="preview-player dark" tabindex="-1">
+  <div
+    ref="container"
+    class="preview-player dark"
+    :class="{ 'keeps-comment-modal': !fullScreen && isCommentsShown }"
+    tabindex="-1"
+  >
     <div class="preview filler">
       <div class="flexrow filler">
         <div
@@ -151,6 +156,7 @@
         <task-info
           ref="task-info-player"
           class="flexrow-item task-info-column"
+          :class="{ 'is-collapsed': !fullScreen }"
           :current-frame="taskInfoFrame"
           :current-parent-preview="currentPreview"
           :entity-type="entityType"
@@ -162,8 +168,8 @@
           :task="task"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
-          v-show="!isCommentsHidden"
-          v-if="!readOnly && task?.id"
+          v-show="isCommentsShown"
+          v-if="(!readOnly || canComment) && task?.id"
         />
       </div>
     </div>
@@ -246,6 +252,7 @@
         <div class="flexrow">
           <player-annotation-bar
             :background-options="backgroundOptions"
+            :can-comment="canComment"
             :full-screen="fullScreen"
             :is-3-d-model="is3DModel"
             :is-annotations-displayed="isAnnotationsDisplayed"
@@ -470,7 +477,8 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
-import { useFullScreen } from '@/composables/fullScreen'
+import { getFullScreenElement, useFullScreen } from '@/composables/fullScreen'
+import { isBehindModal, isModalOpenIn } from '@/composables/modal'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationCursor } from '@/composables/players/annotationCursor'
@@ -533,6 +541,11 @@ const { t } = useI18n()
 
 const props = defineProps({
   big: {
+    type: Boolean,
+    default: false
+  },
+  // Commenting is a right of its own: readOnly is the right to annotate.
+  canComment: {
     type: Boolean,
     default: false
   },
@@ -1564,7 +1577,12 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
     endAnnotationSaving()
     if (!nowFullScreen) {
       isComparing.value = false
-      isCommentsHidden.value = true
+      // Chrome leaves the full screen to show a file chooser: the modal
+      // that opened it stays on screen, to bring it back, and the comments
+      // keep their state for that return.
+      if (!isModalOpenIn(container.value)) {
+        isCommentsHidden.value = true
+      }
     }
     nextTick(() => {
       clearFocus()
@@ -1587,6 +1605,26 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
     }, RESIZE_DELAY)
   }
 })
+
+// Out of full screen, the comments panel only shows for its open modal.
+const isCommentModalOpen = computed(() =>
+  isModalOpenIn(commentContainer.value?.$el)
+)
+const isCommentsShown = computed(
+  () =>
+    !isCommentsHidden.value && (fullScreen.value || isCommentModalOpen.value)
+)
+
+// The comments kept for the return of the full screen belong to its task,
+// unless a modal of theirs is still open.
+watch(
+  () => props.task?.id,
+  () => {
+    if (!fullScreen.value && !isCommentModalOpen.value) {
+      isCommentsHidden.value = true
+    }
+  }
+)
 
 const onFullscreenClicked = () => {
   if (fullScreen.value) {
@@ -2068,10 +2106,11 @@ const onCommentClicked = () => {
   isCommentsHidden.value = !isCommentsHidden.value
   if (!isCommentsHidden.value) {
     commentContainer.value.$el.style.height = `${height}px`
-    commentContainer.value.focusCommentTextarea()
   }
   endAnnotationSaving()
   nextTick(() => {
+    // Once shown: a hidden box takes no focus.
+    if (!isCommentsHidden.value) commentContainer.value?.focusCommentTextarea()
     previewViewer.value?.resize()
     comparisonViewer.value?.resize()
     loadAnnotation()
@@ -2299,6 +2338,9 @@ const onFocusToggle = event => {
     '.preview-player, .playlist-player'
   )
   if (closestPlayer && closestPlayer !== container.value) return
+  // An open modal keeps its own Shift+Tab, even the "+" one that the player
+  // holds in full screen.
+  if (isBehindModal(container.value)) return
   const active = document.activeElement
   if (active?.closest?.('.add-comment')) {
     event.preventDefault()
@@ -2310,10 +2352,20 @@ const onFocusToggle = event => {
   // one in a collapsed side panel, another in the visible one). Pick
   // the first visible & enabled textarea — focus on a hidden one is
   // a no-op and leaves the user stuck where they were.
+  // The browser shows the element in full screen alone: a box of the page
+  // behind it would take the keys out of sight.
+  const root = getFullScreenElement() ?? document
   const commentTextarea = Array.from(
-    document.querySelectorAll('.add-comment textarea')
+    root.querySelectorAll('.add-comment textarea')
   ).find(ta => ta.offsetParent !== null && !ta.disabled)
-  if (!commentTextarea) return
+  if (!commentTextarea) {
+    if (fullScreen.value && isCommentsHidden.value && commentContainer.value) {
+      event.preventDefault()
+      event.stopPropagation()
+      onCommentClicked()
+    }
+    return
+  }
   event.preventDefault()
   event.stopPropagation()
   // Focus synchronously and once more on the next tick to outlast
@@ -2889,6 +2941,12 @@ defineExpose({
   box-shadow: 0 0 4px #0007;
   min-height: 200px;
 
+  // WebKit lays a fixed element out in the size container holding it: the
+  // comments modal kept out of full screen would show in the player box.
+  &.keeps-comment-modal {
+    container-type: normal;
+  }
+
   .preview {
     position: relative;
     align-items: flex-start;
@@ -2972,8 +3030,14 @@ defineExpose({
   background: $dark-grey-2;
 }
 
+// The name gives way first on a narrow full screen: the buttons after it
+// stay on the screen.
 .entity-name {
   color: $light-grey;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .task-info-column {
@@ -2981,6 +3045,14 @@ defineExpose({
   max-width: 450px;
   overflow-y: auto;
   height: 90vh;
+
+  // Out of full screen, it only keeps its open modal, which is fixed on the
+  // screen whatever the size of the panel.
+  &.is-collapsed {
+    max-height: 0;
+    max-width: 0;
+    min-width: 0;
+  }
 }
 
 .preview-container {

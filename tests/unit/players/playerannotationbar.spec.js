@@ -49,6 +49,21 @@ describe('players/PlayerAnnotationBar', () => {
     })
   })
 
+  // Annotating and commenting are two rights: an assigned artist comments
+  // a movie it cannot draw on.
+  it('offers the comments toggle alone on a read-only movie', () => {
+    const wrapper = mountBar({
+      canComment: true,
+      fullScreen: true,
+      readOnly: true
+    })
+    const icons = wrapper
+      .findAll('button-simple-stub')
+      .map(button => button.attributes('icon'))
+    expect(icons).toContain('comment')
+    expect(icons).not.toContain('pencil')
+  })
+
   // No annotation outside a movie or a picture: the comments toggle only.
   describe('other files', () => {
     const icons = wrapper =>
@@ -82,6 +97,13 @@ describe('players/PlayerAnnotationBar', () => {
       expect(icons(mountFile({ fullScreen: true, readOnly: true }))).toEqual(
         []
       )
+    })
+
+    // Annotating and commenting are two rights.
+    it('offers the comments toggle of a read-only file to who can comment', () => {
+      expect(
+        icons(mountFile({ canComment: true, fullScreen: true, readOnly: true }))
+      ).toEqual(['comment'])
     })
 
     it('keeps the comments toggle off a phone', () => {

@@ -29,7 +29,7 @@
     "@fullcalendar/multimonth": "6.1.22",
     "@fullcalendar/vue3": "6.1.22",
     "@google/model-viewer": "4.4.0",
-    "@sentry/vue": "10.76.2",
+    "@sentry/vue": "10.77.1",
     "@ungap/structured-clone": "1.4.0",
     "@unhead/vue": "3.4.3",
     "@vuepic/vue-datepicker": "14.0.0",

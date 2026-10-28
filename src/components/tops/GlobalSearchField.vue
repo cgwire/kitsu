@@ -152,6 +152,10 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
+import {
+  exitDocumentFullScreen,
+  useFullScreenElement
+} from '@/composables/fullScreen'
 import { isSearchShortcut } from '@/lib/keyboard'
 import { getEntityPath, getPersonPath } from '@/lib/path'
 import peopleStore from '@/store/modules/people'
@@ -165,6 +169,7 @@ import Spinner from '@/components/widgets/Spinner.vue'
 // --------------------------------------------------------------------------
 
 const store = useStore()
+const fullScreenElement = useFullScreenElement()
 
 // State
 // --------------------------------------------------------------------------
@@ -172,6 +177,7 @@ const store = useStore()
 const searchInput = useTemplateRef('searchInput')
 
 const assets = ref([])
+const isFocusPending = ref(false)
 const isLoading = ref(false)
 const isSearchActive = ref(false)
 const persons = ref([])
@@ -229,9 +235,26 @@ const onBlur = event => {
   }
 }
 
+// The browser shows the element in full screen alone, the search hidden
+// behind it: the full screen ends first. Ctrl+Alt in a field stays there:
+// Windows reports AltGr as Ctrl+Alt, and AltGr+F types a character on some
+// layouts.
+const focusSearch = event => {
+  if (!fullScreenElement.value) {
+    searchInput.value?.focus()
+  } else if (
+    !event.ctrlKey ||
+    event.metaKey ||
+    !['INPUT', 'TEXTAREA'].includes(event.target?.tagName)
+  ) {
+    isFocusPending.value = true
+    exitDocumentFullScreen()
+  }
+}
+
 const onKeyDown = event => {
   if (isSearchShortcut(event)) {
-    searchInput.value?.focus()
+    focusSearch(event)
   } else if (isSearchActive.value && event.key === 'ArrowDown') {
     selectNext()
   } else if (isSearchActive.value && event.key === 'ArrowUp') {
@@ -272,6 +295,16 @@ watch(searchQuery, async () => {
 watch(isSearchActive, () => {
   if (isSearchActive.value) {
     selectedIndex.value = 0
+  }
+})
+
+// A player blurs the page as its full screen ends: the focus comes after.
+// An exit back to another full screen, like a video over the player, drops
+// it.
+watch(fullScreenElement, element => {
+  if (isFocusPending.value) {
+    isFocusPending.value = false
+    if (!element) setTimeout(() => searchInput.value?.focus())
   }
 })
 

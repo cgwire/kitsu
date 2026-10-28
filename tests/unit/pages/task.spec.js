@@ -17,6 +17,8 @@ vi.mock('vue-i18n', async importOriginal => ({
 import '@/lib/auth'
 
 import Task from '@/components/pages/Task.vue'
+import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Comment from '@/components/widgets/Comment.vue'
@@ -27,6 +29,7 @@ import { DEFAULT_FPS } from '@/lib/video'
 import sequencesStore from '@/store/modules/sequences'
 import shotsStore from '@/store/modules/shots'
 
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
 
 // The ten events the page used to declare through the `socket` component
@@ -181,6 +184,9 @@ const mountPage = async ({
           template:
             '<a :data-task="to?.params?.task_id" :data-episode="to?.params?.episode_id"><slot /></a>'
         },
+        // The shallow stub drops the modals the player opens: they stay in
+        // the page, or go into the player in full screen.
+        teleport: false,
         // Provided by the animxyz plugin, which the specs do not install.
         XyzTransitionGroup: { template: '<div><slot /></div>' },
         ...stubs
@@ -676,6 +682,46 @@ describe('Task.vue comment events', () => {
 
       expect(rejections).toEqual([bug])
     })
+  })
+
+  // The panel the player holds for its full screen comments gets the same
+  // events as the page.
+  describe('comment:acknowledge', () => {
+    const TEAMMATE_ID = 'person-2'
+
+    it.each([
+      ['comment:acknowledge', [], [TEAMMATE_ID]],
+      ['comment:unacknowledge', [TEAMMATE_ID], []]
+    ])(
+      'applies a %s of a teammate once, however many panels get it',
+      async (event, acknowledgements, expected) => {
+        const acknowledged = { ...comment, acknowledgements }
+        const { socket, store } = await mountPage({
+          comments: [acknowledged],
+          getterOverrides: {
+            personMap: () => new Map([[TEAMMATE_ID, { id: TEAMMATE_ID }]])
+          }
+        })
+        // The toggle of the ACK_COMMENT mutation.
+        store.commit.mockImplementation((type, payload) => {
+          if (type === 'ACK_COMMENT') {
+            const { user } = payload
+            acknowledged.acknowledgements =
+              acknowledged.acknowledgements.includes(user.id)
+                ? acknowledged.acknowledgements.filter(id => id !== user.id)
+                : [...acknowledged.acknowledgements, user.id]
+          }
+        })
+        const [, handler] = socket.on.mock.calls.find(
+          ([name]) => name === event
+        )
+
+        handler({ comment_id: acknowledged.id, person_id: TEAMMATE_ID })
+        handler({ comment_id: acknowledged.id, person_id: TEAMMATE_ID })
+
+        expect(acknowledged.acknowledgements).toEqual(expected)
+      }
+    )
   })
 })
 
@@ -1399,6 +1445,18 @@ describe('Task.vue preview player permissions', () => {
     expect(isReadOnly(wrapper)).toBe(false)
   })
 
+  // Annotating and commenting are two rights: the player shows its comments
+  // in full screen to whoever can comment here.
+  it.each([
+    ['a plain artist', false, {}],
+    ['an assigned artist', true, { task: buildTask({ assignees: ['user-1'] }) }]
+  ])('lets %s comment in the player: %s', async (_, canComment, options) => {
+    const { wrapper } = await mountPage({ previews, ...options })
+    expect(wrapper.findComponent(PreviewPlayer).props('canComment')).toBe(
+      canComment
+    )
+  })
+
   it('is read only for a supervisor of another department', async () => {
     const { wrapper } = await mountPage({
       previews,
@@ -1768,4 +1826,74 @@ describe('Task.vue annotation snapshots', () => {
 
     expect(errorHandler).not.toHaveBeenCalled()
   })
+})
+
+describe('Task.vue full screen', () => {
+  const previews = [
+    { id: 'preview-1', revision: 1, extension: 'png', previews: ['p-1'] }
+  ]
+
+  const mountWithModals = () =>
+    mountPage({
+      previews,
+      stubs: {
+        AddPreviewModal: {
+          props: ['active'],
+          template: '<div />',
+          methods: { reset: () => {} }
+        }
+      }
+    })
+
+  const openModal = async (wrapper, event, Modal) => {
+    wrapper.findComponent(PreviewPlayer).vm.$emit(event, { id: 'preview-1' })
+    await flushPromises()
+    return wrapper
+      .findAllComponents(Modal)
+      .find(modal => modal.props('active'))
+  }
+
+  afterEach(() => {
+    resetFullScreen()
+  })
+
+  // The browser shows the player alone: the modals of its "+" and trash
+  // buttons go into it, and come back to the page once it ends.
+  it.each([
+    ['add-extra-preview', AddPreviewModal],
+    ['remove-extra-preview', DeleteModal]
+  ])('opens the %s modal in the player', async (event, Modal) => {
+    const { wrapper } = await mountWithModals()
+    const player = wrapper.findComponent(PreviewPlayer).element
+    setFullScreenElement(player)
+
+    const modal = await openModal(wrapper, event, Modal)
+    expect(player.contains(modal.element)).toBe(true)
+
+    setFullScreenElement(null)
+    await flushPromises()
+    expect(player.contains(modal.element)).toBe(false)
+    expect(wrapper.element.contains(modal.element)).toBe(true)
+  })
+
+  // The modal plays the video picked for upload, which can go full screen
+  // on its own.
+  it.each([
+    ['in the page', false],
+    ['in the player in full screen', true]
+  ])(
+    'keeps the modal %s when its video goes full screen',
+    async (_, isPlayerFullScreen) => {
+      const { wrapper } = await mountWithModals()
+      const player = wrapper.findComponent(PreviewPlayer).element
+      if (isPlayerFullScreen) setFullScreenElement(player)
+      const modal = await openModal(wrapper, 'add-extra-preview', AddPreviewModal)
+      const parent = modal.element.parentNode
+
+      const video = document.createElement('video')
+      setFullScreenElement(modal.element.appendChild(video))
+      await flushPromises()
+      expect(modal.element.parentNode).toBe(parent)
+    }
+  )
 })
