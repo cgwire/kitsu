@@ -658,6 +658,10 @@ describe('ProductionSchedule page', () => {
   })
 
   describe('drill-down', () => {
+    afterEach(() => {
+      assetStore.cache.assetMap.clear()
+    })
+
     it('loads the days off of the schedule range when a row expands', async () => {
       const { storeActions, wrapper } = await mountPage()
 
@@ -672,6 +676,50 @@ describe('ProductionSchedule page', () => {
       ])
     })
 
+    // The list the Assets page loads under All, which the main pack may take
+    // over, gives the episode of an asset as episode_id, not source_id, and
+    // also holds the assets other productions share with this one.
+    it.each([
+      ['an asset of another production', { source_id: null, shared: true }],
+      ['an episode asset of the list with tasks', { episode_id: 'episode-1' }]
+    ])('keeps %s out of the main pack rows', async (_, fields) => {
+      assetTypeStore.cache.assetTypeMap.set('asset-type-sets', {
+        id: 'asset-type-sets',
+        name: 'Sets',
+        task_types: []
+      })
+      const assets = [
+        { id: 'asset-1', asset_type_id: 'asset-type-props', source_id: null },
+        { id: 'asset-9', asset_type_id: 'asset-type-sets', ...fields }
+      ]
+      assets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
+      const { wrapper } = await mountPage({
+        actions: {
+          loadAssetTypeScheduleItems: vi.fn(() => [
+            ...buildAssetTypeBars(),
+            {
+              id: 'bar-sets',
+              task_type_id: 'tt-modeling',
+              object_id: 'asset-type-sets',
+              name: 'Sets',
+              start_date: '2026-02-01',
+              end_date: '2026-02-20'
+            }
+          ])
+        },
+        getters: {
+          currentEpisode: () => ({ id: 'main', name: 'Main Pack' }),
+          isTVShow: () => true
+        }
+      })
+
+      findSchedule(wrapper).vm.$emit('root-element-expanded', rowsOf(wrapper)[0])
+      await waitForLoad()
+
+      expect(rowsOf(wrapper)[0].children.map(row => row.name)).toEqual([
+        'Props'
+      ])
+    })
   })
 
   // An expansion outlives the production it started on: once the schedule

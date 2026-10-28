@@ -458,9 +458,14 @@ const actions = {
     const marker = isPartial ? '#partial' : all ? '#shared' : ''
     const scope = all ? 'all' : (episode?.id ?? '')
     const loadingKey = `${production.id}/${scope}${marker}`
+    // The full list of the same scope, loaded or on its way, holds every
+    // asset a partial load would fetch: a partial load takes it rather than
+    // replace the list a page displays with assets without their tasks.
+    const isFullListOfScope =
+      isPartial && state.assetsLoadingKey === `${production.id}/${scope}`
 
     if (state.isAssetsLoading) {
-      if (state.assetsLoadingKey === loadingKey) {
+      if (state.assetsLoadingKey === loadingKey || isFullListOfScope) {
         return cache.assetsLoadingPromise || cache.assets
       }
       // Another scope is in flight (the user switched episode mid-load): wait
@@ -472,6 +477,7 @@ const actions = {
         () => dispatch('loadAssets', { all, withShared, withTasks })
       )
     }
+    if (isFullListOfScope) return cache.assets
 
     if (all || episode?.id === 'all') {
       episode = null // Do not filter by episode

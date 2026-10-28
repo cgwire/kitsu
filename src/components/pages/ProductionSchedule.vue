@@ -1169,10 +1169,16 @@ const loadScopedAssets = () => {
 }
 
 // Whether an asset falls in the current scope: for the main pack, only the
-// assets attached to no episode (source_id null); otherwise the assetMap is
-// already scoped and every asset it holds belongs.
+// assets attached to no episode; otherwise the assetMap is already scoped
+// and every asset it holds belongs. The store may hand over the list of the
+// Assets page instead of a list without tasks: that list names the episode
+// episode_id rather than source_id, and holds the assets other productions
+// share with this one, which never belong.
 const assetInScope = asset => {
-  return !isMainPack.value || !asset.source_id
+  return (
+    !asset.shared &&
+    (!isMainPack.value || !(asset.episode_id || asset.source_id))
+  )
 }
 
 // Loads the entities, scoped to the current episode for TV shows, that the
