@@ -493,15 +493,10 @@ const currentFrameDisplay = computed(() =>
 const nbFramesDisplay = computed(() =>
   String(nbFrames.value || 0).padStart(3, '0')
 )
-// From the time: the frame the viewer sends drifts on the rounded frame
-// duration, its time matches the picture.
 const currentTimeFormatted = computed(() =>
-  formatTime(
-    isSound.value
-      ? soundTime.value
-      : currentFrameNumber.value * frameDuration.value,
-    fps.value
-  )
+  isSound.value
+    ? formatTime(soundTime.value, fps.value)
+    : formatToTimecode(currentFrameNumber.value, fps.value)
 )
 const maxDurationFormatted = computed(() =>
   isSound.value

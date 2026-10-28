@@ -27,7 +27,7 @@ const removeRvfcMock = () => {
   delete HTMLVideoElement.prototype.cancelVideoFrameCallback
 }
 
-const mountViewer = () => {
+const mountViewer = (props = {}) => {
   const store = createStore({
     getters: { currentProduction: () => ({ fps: '25' }) }
   })
@@ -35,7 +35,8 @@ const mountViewer = () => {
     props: {
       preview: { id: 'preview-1', extension: 'mp4' },
       fps: 25,
-      nbFrames: 100
+      nbFrames: 100,
+      ...props
     },
     global: {
       mocks: { $t: key => key },
@@ -142,6 +143,29 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     const tick2 = rvfcCallbacks[rvfcCallbacks.length - 1]
     tick2(performance.now(), { mediaTime: 0.4 })
     expect(wrapper.emitted('frame-update').length).toBe(frameCount)
+    wrapper.unmount()
+  })
+
+  // 10 minutes in at 30 fps: frame 18000, plus the 2 of the playback
+  // convention. The frame duration rounded to 0.0333 drifted it to 18020.
+  it('numbers a playing frame on the exact frame rate', async () => {
+    const wrapper = mountViewer({ fps: 30, nbFrames: 36000 })
+    await new Promise(resolve => setTimeout(resolve))
+    const video = wrapper.find('video').element
+    await video.dispatchEvent(new Event('loadedmetadata'))
+    Object.defineProperty(video, 'paused', {
+      value: false,
+      configurable: true
+    })
+
+    const tick = rvfcCallbacks[rvfcCallbacks.length - 1]
+    tick(performance.now(), { mediaTime: 18000 / 30 })
+
+    expect(wrapper.emitted('frame-update').at(-1)[0]).toBe(18002)
+    expect(wrapper.emitted('time-update').at(-1)[0]).toBeCloseTo(
+      18000.5 / 30,
+      6
+    )
     wrapper.unmount()
   })
 

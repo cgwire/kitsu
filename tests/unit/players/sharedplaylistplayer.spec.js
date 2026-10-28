@@ -607,6 +607,23 @@ describe('players/SharedPlaylistPlayer', () => {
       wrapper.unmount()
     })
 
+    // The label reads the frame the viewer numbers, as the counter does,
+    // 10 minutes into a 30 fps movie.
+    it('labels the frame the viewer sends', async () => {
+      const wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_duration: 1200 }]
+      })
+      await wrapper.setProps({ playlist: { name: 'Dailies', project_fps: 30 } })
+      const bar = () => wrapper.findComponent(SharedPlaylistButtonBar)
+      const movie = wrapper.findComponent({ name: 'MultiVideoViewer' })
+      movie.vm.$emit('max-duration-update', 1200)
+      movie.vm.$emit('frame-update', 18000)
+      await nextTick()
+      expect(bar().props('currentFrameDisplay')).toBe('18001')
+      expect(bar().props('currentTimeFormatted')).toBe('00:10:00:00')
+      wrapper.unmount()
+    })
+
     // A fake of the movie viewer: the frame it was sought to.
     const movieViewer = () => {
       let frame = 0

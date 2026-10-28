@@ -3003,9 +3003,7 @@ const onFrameUpdate = frame => {
   const isChromium = !!window.chrome
   const change = isChromium ? 0.0001 : 0
   currentTimeRaw.value = frame * frameDuration.value + change
-  // From the time: the frame the viewer sends drifts on the rounded frame
-  // duration, its time matches the picture.
-  currentTime.value = formatTime(currentTimeRaw.value, fps.value)
+  currentTime.value = formatToTimecode(frame, fps.value)
   updateProgressBar()
   if (isShowAnnotationsWhilePlaying.value) {
     const ann = getAnnotation(currentTimeRaw.value)

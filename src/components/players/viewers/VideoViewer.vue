@@ -331,7 +331,7 @@ const configureVideo = () => {
 // while every consumer is calibrated on the mid-frame currentTime that
 // frameToTime() seeks produce. Re-center so all emitted values stay
 // bit-identical to the old pipeline.
-const playerTimeFromMediaTime = mediaTime => mediaTime + frameDuration.value / 2
+const playerTimeFromMediaTime = mediaTime => mediaTime + 0.5 / fps.value
 
 const getFrameFromPlayer = () => {
   const raw =
@@ -341,7 +341,9 @@ const getFrameFromPlayer = () => {
         ? video.value.currentTime
         : 0
   if (raw === 0) return 0
-  let frame = Math.ceil(raw / frameDuration.value) + 1
+  // On the exact rate: a time divided by the frame duration, rounded to 4
+  // decimals (0.0333 at 30 fps), drifts a frame every 1000.
+  let frame = Math.ceil(raw * fps.value) + 1
   frame = Math.min(frame, props.nbFrames)
   return frame
 }

@@ -1126,17 +1126,17 @@ const setVideoFrameContext = frame => {
 }
 
 // Player time → progress bar during playback. `time` carries the
-// mediaTime + frameDuration/2 convention offset, so a raw division parks the
+// mediaTime + half a frame convention offset, so a raw conversion parks the
 // fill at half-frame positions; quantize with the same ceil(...)+1 convention
 // as getFrameFromPlayer so the bar fills whole frames and doesn't jump when
 // pausing.
 const onVideoTimeUpdate = time => {
   if (!isPlaying.value) return
   if (pendingTrimSeek) {
-    if (time >= (trimStartFrame.value + 2) * frameDuration.value) return
+    if (time >= (trimStartFrame.value + 2) / fps.value) return
     pendingTrimSeek = false
   }
-  progress.value?.updateProgressBar(Math.ceil(time / frameDuration.value) + 1)
+  progress.value?.updateProgressBar(Math.ceil(time * fps.value) + 1)
 }
 
 const onSubPreviewsWheel = event => {
