@@ -1,5 +1,5 @@
 <template>
-  <aside class="shared-comments-panel flexcolumn">
+  <aside class="shared-comments-panel flexcolumn" ref="panelRef">
     <form class="post-form" @submit.prevent="submitComment" v-if="canPost">
       <textarea
         ref="textareaRef"
@@ -144,7 +144,7 @@
       </template>
     </div>
 
-    <teleport to="body">
+    <teleport :to="fullScreenContainer || 'body'">
       <div class="shared-modals">
         <add-attachment-modal
           :active="modals.attachment"
@@ -189,6 +189,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { useFullScreenContainer } from '@/composables/fullScreen'
 import { replaceTimeWithTimecode } from '@/lib/render'
 import { DEFAULT_FPS } from '@/lib/video'
 import stringHelpers from '@/lib/string'
@@ -240,6 +241,10 @@ const pendingAttachments = ref([])
 const selectedStatusId = ref('')
 const taskStatuses = ref([])
 const textareaRef = ref(null)
+const panelRef = ref(null)
+// The panel holds no modal of its own: its blur traps them. They go to
+// <body>, or into the player in full screen, the only element shown then.
+const fullScreenContainer = useFullScreenContainer(() => panelRef.value)
 
 const loading = ref(true)
 const submitting = ref(false)
@@ -1220,9 +1225,14 @@ onMounted(() => {
 
 // Modals (teleported, hence a separate scope with its own theme vars)
 
+// In <body> they get the light theme, in full screen the dark one of the app
+// with its rules for box titles and checklists: they set their own look.
 .shared-modals {
   --accent: #7c5cff;
   --accent-soft: rgba(124, 92, 255, 0.16);
+  --background-hover: #4f525a;
+  --background-selectable: #7375bc;
+  --border: #dbdbdb;
   --border-soft: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.18);
   --surface: #14141a;
@@ -1403,6 +1413,25 @@ onMounted(() => {
   :deep(.modal-content h2),
   :deep(.modal-content h3) {
     color: var(--text);
+  }
+
+  :deep(.modal-content .title) {
+    background: transparent;
+  }
+
+  :deep(.modal-content .checklist-entry .checklist-text) {
+    background: var(--surface-inset);
+    color: var(--text);
+
+    &:hover {
+      background: var(--surface-inset);
+      border-color: $light-grey;
+    }
+
+    &:focus {
+      background: var(--surface-inset);
+      border-color: rgba(124, 92, 255, 0.5);
+    }
   }
 }
 
