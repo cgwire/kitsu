@@ -108,7 +108,7 @@ const updateFullScreenElement = () => {
   fullScreenElement.value = getFullScreenElement()
 }
 
-const useFullScreenElement = () => {
+export const useFullScreenElement = () => {
   if (followerCount === 0) {
     updateFullScreenElement()
     FULLSCREEN_EVENTS.forEach(name =>
