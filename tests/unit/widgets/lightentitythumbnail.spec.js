@@ -68,4 +68,32 @@ describe('LightEntityThumbnail', () => {
     expect(wrapper.find('img').exists()).toBe(false)
     expect(wrapper.find('.thumbnail-empty').exists()).toBe(true)
   })
+
+  describe('extension', () => {
+    test('writes the extension of a file without picture when asked', () => {
+      const wrapper = mountThumbnail({ extension: 'mp3', withExtension: true })
+      expect(wrapper.find('img').exists()).toBe(false)
+      expect(wrapper.find('.thumbnail-empty').text()).toBe('.mp3')
+    })
+
+    test('leaves the block empty unless asked', () => {
+      const wrapper = mountThumbnail({ extension: 'mp3' })
+      expect(wrapper.find('.thumbnail-empty').text()).toBe('')
+    })
+
+    test.each(['mp4', 'png'])('keeps the picture of a %s file', extension => {
+      const wrapper = mountThumbnail({ extension, withExtension: true })
+      expect(wrapper.find('img').exists()).toBe(true)
+      expect(wrapper.text()).toBe('')
+    })
+
+    test('writes nothing on a movie that has no picture yet', () => {
+      const wrapper = mountThumbnail({
+        extension: 'mp4',
+        previewFileStatus: 'processing',
+        withExtension: true
+      })
+      expect(wrapper.find('.thumbnail-empty').text()).toBe('')
+    })
+  })
 })

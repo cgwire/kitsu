@@ -177,17 +177,19 @@
         v-else-if="playlists.length === 0"
       >
         <div v-if="!loading.playlists && !loading.playlistsInit">
-          <p class="empty-explanation">
-            {{ $t('playlists.no_playlist') }}
-          </p>
-          <button
-            class="big button"
-            @click="showAddModal"
-            key="new-playlist-button"
-            v-if="isCurrentUserManager || isCurrentUserSupervisor"
-          >
-            {{ $t('playlists.new_playlist') }}
-          </button>
+          <template v-if="!errors.playlistLoading">
+            <p class="empty-explanation">
+              {{ $t('playlists.no_playlist') }}
+            </p>
+            <button
+              class="big button"
+              @click="showAddModal"
+              key="new-playlist-button"
+              v-if="isCurrentUserManager || isCurrentUserSupervisor"
+            >
+              {{ $t('playlists.new_playlist') }}
+            </button>
+          </template>
         </div>
         <spinner class="mt2" v-else />
       </div>
@@ -492,15 +494,19 @@
       </div>
     </div>
 
-    <edit-playlist-modal
-      :active="modals.isEditDisplayed"
-      :is-loading="loading.editPlaylist"
-      :is-error="errors.editPlaylist"
-      :playlist-to-edit="playlistToEdit"
-      :task-type-id="taskTypeId"
-      @cancel="hideEditModal"
-      @confirm="confirmEditPlaylist"
-    />
+    <!-- The browser shows a player in full screen alone: the form of its
+         Edit button goes into it. -->
+    <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
+      <edit-playlist-modal
+        :active="modals.isEditDisplayed"
+        :is-loading="loading.editPlaylist"
+        :is-error="errors.editPlaylist"
+        :playlist-to-edit="playlistToEdit"
+        :task-type-id="taskTypeId"
+        @cancel="hideEditModal"
+        @confirm="confirmEditPlaylist"
+      />
+    </teleport>
 
     <build-filter-modal
       :active="modals.isBuildFilterDisplayed"
@@ -529,6 +535,8 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useFullScreenTarget } from '@/composables/fullScreen'
+import { logRequestFailure } from '@/lib/errors'
 import { removeModelFromList, updateModelFromList } from '@/lib/models'
 import { getPlaylistPath as buildPlaylistPath } from '@/lib/path'
 import { DEFAULT_NB_FRAMES_PICTURE, isPlaylistInScope } from '@/lib/playlist'
@@ -579,6 +587,7 @@ const newPlaylistForm = () => ({
 const entityListContentRef = useTemplateRef('entityListContent')
 const playlistListRef = useTemplateRef('playlistList')
 const playlistPlayerRef = useTemplateRef('playlist-player')
+const fullScreenPlayer = useFullScreenTarget(() => playlistPlayerRef.value?.$el)
 const searchFieldRef = useTemplateRef('search-field')
 
 const currentEntitiesList = ref([])
@@ -926,14 +935,7 @@ const listQuery = () => ({
 
 const loadPlaylistsData = async (force = false) => {
   if (playlists.value.length === 0 || force) {
-    errors.playlistLoading = false
-    try {
-      await store.dispatch('loadPlaylists', listQuery())
-    } catch (err) {
-      console.error(err)
-      errors.playlistLoading = true
-      throw err
-    }
+    await store.dispatch('loadPlaylists', listQuery())
   }
 }
 
@@ -1499,7 +1501,8 @@ const reloadScope = () =>
 // Every reload goes through this gate. The watchers can ask again while
 // a run is in flight: remember it and, once the run settles, run a full
 // forced reload if the run did not serve the scope asked for since.
-// `work` publishes the scope it serves through servedScope, or throws.
+// `work` publishes the scope it serves through servedScope, or throws: no
+// caller waits on a run, so a failed request ends here.
 const runReload = async work => {
   if (loading.playlists) {
     isReloadPending = true
@@ -1511,10 +1514,16 @@ const runReload = async work => {
     return
   }
   loading.playlists = true
+  errors.playlistLoading = false
   let isServed = false
   try {
     await work()
     isServed = true
+  } catch (err) {
+    errors.playlistLoading = true
+    // The columns wait for the end of the first run.
+    loading.playlistsInit = false
+    logRequestFailure(err)
   } finally {
     loading.playlists = false
     const isStale =

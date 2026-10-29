@@ -287,6 +287,7 @@ const loadBurndown = async () => {
 
 const reload = async () => {
   isLoading.value = true
+  isLoadingError.value = false
   page = 1
   store.dispatch('clearSelectedTasks')
   tasks.value = []

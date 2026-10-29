@@ -1071,6 +1071,109 @@ describe('Assets store, partial loads', () => {
   })
 })
 
+describe('Assets store, partial load over the full list', () => {
+  // The full list of a scope, the one the Assets page displays, holds every
+  // asset a partial load of that scope would fetch, with their tasks: a
+  // partial load (the schedule) must not replace it with a poorer dataset.
+  const buildAsset = id => ({
+    id,
+    name: id,
+    asset_type_id: 't1',
+    asset_type_name: 'Char',
+    canceled: false,
+    tasks: [],
+    data: {}
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    assetsStore.cache.assetsLoadingPromise = null
+    assetsStore.cache.assets = []
+  })
+
+  test('takes the full list of its scope', async () => {
+    const getAssets = vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([])
+    const assets = [buildAsset('a1')]
+    assetsStore.cache.assets = assets
+    const state = {
+      isAssetsLoading: false,
+      isAssetsLoadingError: false,
+      assetsLoadingKey: 'p1/'
+    }
+    const commit = realCommit(state)
+
+    const result = await assetsStore.actions.loadAssets(
+      { commit, dispatch: vi.fn(), state, rootGetters: baseRootGetters() },
+      { withTasks: false, withShared: false }
+    )
+
+    expect(getAssets).not.toHaveBeenCalled()
+    expect(commit).not.toHaveBeenCalled()
+    expect(state.assetsLoadingKey).toBe('p1/')
+    expect(result).toBe(assets)
+  })
+
+  test('joins the full list of its scope on its way', async () => {
+    let release = () => {}
+    const getAssets = vi.spyOn(assetsApi, 'getAssets').mockImplementation(
+      () =>
+        new Promise(resolve => {
+          release = () => resolve([buildAsset('a1')])
+        })
+    )
+    vi.spyOn(assetsApi, 'getUsedSharedAssets').mockResolvedValue([])
+    const state = {
+      isAssetsLoading: false,
+      isAssetsLoadingError: false,
+      assetsLoadingKey: null,
+      assetSearchText: ''
+    }
+    const ctx = {
+      commit: realCommit(state),
+      dispatch: vi.fn(),
+      state,
+      rootGetters: baseRootGetters()
+    }
+
+    const full = assetsStore.actions.loadAssets(ctx)
+    const partial = assetsStore.actions.loadAssets(ctx, {
+      withTasks: false,
+      withShared: false
+    })
+    release()
+    const [, result] = await Promise.all([full, partial])
+
+    expect(getAssets).toHaveBeenCalledTimes(1)
+    expect(ctx.dispatch).not.toHaveBeenCalled()
+    expect(state.assetsLoadingKey).toBe('p1/')
+    expect(result.map(asset => asset.id)).toEqual(['a1'])
+  })
+
+  test('still loads the episode the full list does not cover', async () => {
+    const getAssets = vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([])
+    const state = {
+      isAssetsLoading: false,
+      isAssetsLoadingError: false,
+      assetsLoadingKey: 'p1/ep-a',
+      assetSearchText: ''
+    }
+    const rootGetters = {
+      ...baseRootGetters(),
+      isTVShow: true,
+      currentEpisode: { id: 'ep-b' },
+      episodes: [{ id: 'ep-a' }, { id: 'ep-b' }]
+    }
+
+    await assetsStore.actions.loadAssets(
+      { commit: realCommit(state), dispatch: vi.fn(), state, rootGetters },
+      { withTasks: false, withShared: false }
+    )
+
+    expect(getAssets).toHaveBeenCalledTimes(1)
+    expect(state.assetsLoadingKey).toBe('p1/ep-b#partial')
+  })
+})
+
 describe('Assets store, LOAD_ASSETS_ERROR', () => {
   // The store logs the failed load: keep that expected error out of the
   // test output.

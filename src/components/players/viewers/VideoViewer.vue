@@ -28,7 +28,14 @@
         type="video/mp4"
         playsinline
       ></video>
-      <canvas ref="displayCanvas" class="annotation-movie"></canvas>
+      <canvas
+        ref="displayCanvas"
+        class="annotation-movie"
+        :style="{ visibility: isBroken ? 'hidden' : null }"
+      ></canvas>
+      <p class="broken" v-if="isBroken">
+        {{ $t('preview.broken') }}
+      </p>
     </div>
   </div>
 </template>
@@ -118,6 +125,7 @@ const emit = defineEmits([
   'panzoom-changed',
   'panzoom-ready',
   'play-ended',
+  'play-failed',
   'size-changed',
   'time-update',
   'video-end',
@@ -129,6 +137,7 @@ const store = useStore()
 const container = ref(null)
 const currentTimeRaw = ref(0)
 const displayCanvas = ref(null)
+const isBroken = ref(false)
 const isLoading = ref(false)
 const movie = ref(null)
 const videoDuration = ref(0)
@@ -145,6 +154,9 @@ let panzoomActive = false
 let pendingSeekTime = null
 let lastEmittedFrame = null
 let isPlaying = false
+// Chrome pauses a decoder that fails before its error listener runs: the
+// play asked for is kept here.
+let isPlayRequested = false
 let previousDimensions = null
 
 let renderer = null
@@ -319,7 +331,7 @@ const configureVideo = () => {
 // while every consumer is calibrated on the mid-frame currentTime that
 // frameToTime() seeks produce. Re-center so all emitted values stay
 // bit-identical to the old pipeline.
-const playerTimeFromMediaTime = mediaTime => mediaTime + frameDuration.value / 2
+const playerTimeFromMediaTime = mediaTime => mediaTime + 0.5 / fps.value
 
 const getFrameFromPlayer = () => {
   const raw =
@@ -329,7 +341,9 @@ const getFrameFromPlayer = () => {
         ? video.value.currentTime
         : 0
   if (raw === 0) return 0
-  let frame = Math.ceil(raw / frameDuration.value) + 1
+  // On the exact rate: a time divided by the frame duration, rounded to 4
+  // decimals (0.0333 at 30 fps), drifts a frame every 1000.
+  let frame = Math.ceil(raw * fps.value) + 1
   frame = Math.min(frame, props.nbFrames)
   return frame
 }
@@ -434,6 +448,10 @@ const paintPosterFallback = () => {
 }
 
 const play = () => {
+  if (isBroken.value) {
+    emit('play-failed')
+    return
+  }
   if (
     !isPlaying &&
     videoDuration.value === video.value.currentTime &&
@@ -449,10 +467,12 @@ const play = () => {
   if (video.value.seeking) {
     seekGuardTarget = video.value.currentTime
   }
+  isPlayRequested = true
   video.value.play()?.catch(() => {})
 }
 
 const pause = () => {
+  isPlayRequested = false
   seekGuardTarget = null
   video.value.pause()
   seekNow(frameToTime(props.currentFrame))
@@ -481,6 +501,7 @@ const goNextFrame = () => {
 
 const onVideoEnd = () => {
   isPlaying = false
+  isPlayRequested = false
   // a queued 'ended' event can fire after unmount, once the ref is nulled
   if (!video.value) return
   if (props.isRepeating) {
@@ -595,6 +616,10 @@ const setVolume = volume => {
 
 // Watchers
 
+watch(moviePath, () => {
+  isBroken.value = false
+})
+
 watch(
   () => props.preview,
   () => {
@@ -703,12 +728,16 @@ onMounted(() => {
         isLoading.value = false
       })
 
+      // A movie the browser cannot read (a missing file, a file that is no
+      // movie) fails on its decoder and never plays.
       video.value.addEventListener('error', err => {
         console.error('An error occurred while loading a video', err)
         if (movie.value) {
           movie.value.style.height = props.defaultHeight + 'px'
         }
         isLoading.value = false
+        isBroken.value = true
+        if (isPlayRequested) emit('play-failed')
       })
 
       video.value.addEventListener('loadstart', () => {
@@ -750,6 +779,7 @@ onBeforeUnmount(() => {
 
 defineExpose({
   currentTimeRaw,
+  isBroken,
   video,
   formatFrame,
   getNaturalDimensions,
@@ -798,6 +828,15 @@ defineExpose({
 
 .spinner {
   margin: auto;
+}
+
+.broken {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 0.75em);
+  color: $white;
+  text-align: center;
 }
 
 .video-player {

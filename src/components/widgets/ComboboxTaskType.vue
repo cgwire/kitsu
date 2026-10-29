@@ -22,12 +22,16 @@
         </div>
         <chevron-down-icon class="ml05 down-icon flexrow-item" />
       </div>
-      <teleport to="body">
+      <teleport :to="fullScreenContainer || 'body'">
         <div
           class="select-input"
           ref="listRef"
           role="listbox"
-          :class="[{ 'open-top': openTop }, { dark: isDarkTheme }]"
+          :class="[
+            { 'open-top': openTop },
+            { dark: isDarkTheme },
+            { 'in-full-screen': fullScreenContainer }
+          ]"
           :style="tooltipStyle"
           v-if="showTaskTypeList"
         >
@@ -50,12 +54,13 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
 
 import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
+import { useFullScreenContainer } from '@/composables/fullScreen'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
@@ -141,6 +146,7 @@ const selectTaskType = taskType => {
 }
 
 const triggerRef = ref(null)
+const fullScreenContainer = useFullScreenContainer(() => triggerRef.value)
 
 const toggleTaskTypeList = event => {
   if (props.disabled) {
@@ -157,8 +163,15 @@ const toggleTaskTypeList = event => {
   // event, so fall back to the trigger element for positioning.
   const curDiv = event?.currentTarget ?? triggerRef.value
   const rect = curDiv.getBoundingClientRect()
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
+  // An element in full screen starts at the top left of the screen, whatever
+  // the scroll of the page.
+  const isInFullScreen = Boolean(fullScreenContainer.value)
+  const scrollTop = isInFullScreen
+    ? 0
+    : window.pageYOffset || document.documentElement.scrollTop
+  const scrollLeft = isInFullScreen
+    ? 0
+    : window.pageXOffset || document.documentElement.scrollLeft
   tooltipPosition.value = {
     top: rect.top + scrollTop + 35,
     left: rect.left + scrollLeft
@@ -174,6 +187,11 @@ const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
     if (!props.disabled) selectTaskType(props.taskTypeList[index])
   },
   listRef
+})
+
+// The list would stay where the full screen put it, away from its trigger.
+watch(fullScreenContainer, () => {
+  showTaskTypeList.value = false
 })
 </script>
 
@@ -255,6 +273,11 @@ const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
 
   &.open-top {
     bottom: 41px;
+  }
+
+  // Over the modals (Bulma: 1986) the element in full screen holds with it.
+  &.in-full-screen {
+    z-index: 2000;
   }
 }
 

@@ -11,6 +11,41 @@ import { convertHours } from '@/lib/timesheet'
 // deleted or changed since they were picked) and of the empty ones.
 const readFailures = new WeakSet()
 
+const ESTIMATIONS_PARENTS = {
+  Asset: { field: 'asset_type_name', labelKey: 'tasks.fields.asset_type' },
+  Edit: { field: 'episode_name', labelKey: 'shots.fields.episode' },
+  Sequence: { field: 'episode_name', labelKey: 'shots.fields.episode' },
+  Shot: { field: 'sequence_name', labelKey: 'tasks.fields.sequence' }
+}
+
+/*
+ * The columns of a task type export that the estimations import of Zou
+ * reads, by the name Zou reads, with the key of their label: the export
+ * writes these labels and the import gives them their name back. The parent
+ * of a sequence or an edit is its episode, so only a TV show has one, and an
+ * episode has none.
+ */
+export const getEstimationsCsvLabelKeys = (
+  entityType,
+  { isPaperProduction = false, isTVShow = false } = {}
+) => {
+  const hasParent =
+    ESTIMATIONS_PARENTS[entityType] &&
+    (isTVShow || !['Edit', 'Sequence'].includes(entityType))
+  return {
+    ...(hasParent && { Parent: ESTIMATIONS_PARENTS[entityType].labelKey }),
+    Entity: 'tasks.fields.entity_name',
+    ...(isPaperProduction && { Drawings: 'tasks.fields.drawings' }),
+    Difficulty: 'tasks.fields.difficulty',
+    Estimation: 'tasks.fields.estimation',
+    'Start date': 'tasks.fields.start_date',
+    'Due date': 'tasks.fields.due_date'
+  }
+}
+
+export const getEstimationsParentField = entityType =>
+  ESTIMATIONS_PARENTS[entityType]?.field
+
 const csv = {
   generateTimesheet({
     name,
@@ -278,6 +313,20 @@ const csv = {
         }
       })
     return [...names.values()]
+  },
+
+  /*
+   * Give each header that is a label its name (`names` maps labels to
+   * names), unless the file already has a header of that name or the label
+   * is also the name of a column of its own, listed in `kept`.
+   */
+  renameHeaders(headers, names, kept = []) {
+    return headers.map(header => {
+      const name = names.get(header)
+      return name && !headers.includes(name) && !kept.includes(header)
+        ? name
+        : header
+    })
   },
 
   turnEntriesToCsvString(entries, config = {}) {

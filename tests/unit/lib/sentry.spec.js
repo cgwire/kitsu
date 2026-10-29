@@ -719,6 +719,16 @@ describe('lib/sentry', () => {
       expect(h.captureMessage).toHaveBeenCalledTimes(1)
     })
 
+    test('reports a route cut by the page going away once the page is back', async () => {
+      sentry.init({}, {}, { dsn: 'https://key@sentry.example.com/1' })
+      const route = nextRoute()
+      pageListeners.pagehide()
+      await reportApiError(noAnswer, { method: 'GET', path: route })
+      pageListeners.pageshow()
+      await reportApiError(noAnswer, { method: 'GET', path: route })
+      expect(h.captureMessage).toHaveBeenCalledTimes(1)
+    })
+
     test('leaves out the refusals of the 2FA setup gate', async () => {
       await report(403, 'POST', nextRoute(), {
         error: true,
@@ -731,6 +741,17 @@ describe('lib/sentry', () => {
       const route = nextRoute()
       await report(403, 'DELETE', `${route}/${OTHER_ID}`)
       await report(403, 'DELETE', `${route}/${THIRD_ID}`)
+      expect(h.captureMessage).toHaveBeenCalledTimes(1)
+    })
+
+    // The route is marked before the wait: checked before it and marked
+    // after it, both failures would be reported.
+    test('reports the concurrent failures of a route once', async () => {
+      const route = nextRoute()
+      await Promise.all([
+        report(500, 'GET', `${route}/${OTHER_ID}`),
+        report(500, 'GET', `${route}/${THIRD_ID}`)
+      ])
       expect(h.captureMessage).toHaveBeenCalledTimes(1)
     })
 

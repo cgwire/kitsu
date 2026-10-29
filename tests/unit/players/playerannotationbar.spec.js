@@ -49,6 +49,86 @@ describe('players/PlayerAnnotationBar', () => {
     })
   })
 
+  // Annotating and commenting are two rights: an assigned artist comments
+  // a movie it cannot draw on.
+  it('offers the comments toggle alone on a read-only movie', () => {
+    const wrapper = mountBar({
+      canComment: true,
+      fullScreen: true,
+      readOnly: true
+    })
+    const icons = wrapper
+      .findAll('button-simple-stub')
+      .map(button => button.attributes('icon'))
+    expect(icons).toContain('comment')
+    expect(icons).not.toContain('pencil')
+  })
+
+  // No annotation outside a movie or a picture: the comments toggle only.
+  describe('other files', () => {
+    const icons = wrapper =>
+      wrapper
+        .findAll('button-simple-stub')
+        .map(button => button.attributes('icon'))
+    const mountFile = props =>
+      mountBar({
+        isMovie: false,
+        isAnnotationsDisplayed: true,
+        isEraserModeOn: false,
+        isLaserModeOn: false,
+        isOnionSkinOn: false,
+        isShapeMode: false,
+        ...props
+      })
+
+    it('offers the comments toggle alone in full screen', () => {
+      const wrapper = mountFile({ fullScreen: true })
+      expect(icons(wrapper)).toEqual(['comment'])
+      expect(wrapper.find('.annotation-tools').exists()).toBe(false)
+    })
+
+    it('offers the comments toggle to a consumer asking it', () => {
+      expect(icons(mountFile({ showCommentsButton: true }))).toEqual([
+        'comment'
+      ])
+    })
+
+    it('keeps the comments toggle from a read-only file', () => {
+      expect(icons(mountFile({ fullScreen: true, readOnly: true }))).toEqual(
+        []
+      )
+    })
+
+    // Annotating and commenting are two rights.
+    it('offers the comments toggle of a read-only file to who can comment', () => {
+      expect(
+        icons(mountFile({ canComment: true, fullScreen: true, readOnly: true }))
+      ).toEqual(['comment'])
+    })
+
+    it('keeps the comments toggle off a phone', () => {
+      expect(
+        icons(mountFile({ phone: true, showCommentsButton: true }))
+      ).toEqual([])
+    })
+
+    it('offers the comments toggle after the 3D controls', () => {
+      expect(icons(mountFile({ fullScreen: true, is3DModel: true }))).toEqual([
+        'image',
+        'box',
+        'comment'
+      ])
+    })
+
+    it('keeps the 3D controls alone on a phone', () => {
+      expect(
+        icons(
+          mountFile({ is3DModel: true, phone: true, showCommentsButton: true })
+        )
+      ).toEqual(['image', 'box'])
+    })
+  })
+
   // Opt-in control: a consumer that does not bind it gets no picker.
   it('shows the onion skin picker to the consumer binding it', () => {
     expect(

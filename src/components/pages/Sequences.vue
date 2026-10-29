@@ -49,7 +49,7 @@
               type="sequence"
               :production-id="currentProduction?.id"
               @remove-search="removeSearchQuery"
-              v-if="!isSequencesLoading && !initialLoading"
+              v-if="!isLoading && !initialLoading && !isLoadingError"
             />
           </div>
         </div>
@@ -64,9 +64,9 @@
           :contact-sheet-mode="contactSheetMode"
           :display-settings="displaySettings"
           :displayed-sequences="displayedSequences"
-          :is-loading="isSequencesLoading || initialLoading"
-          :is-error="isSequencesLoadingError"
-          :validation-columns="sequenceValidationColumns"
+          :is-loading="isLoading || initialLoading"
+          :is-error="isLoadingError"
+          :validation-columns="validationColumns"
           :department-filter="departmentFilter"
           @add-metadata="onAddMetadataClicked"
           @add-sequences="showNewModal"
@@ -79,7 +79,7 @@
           @edit-metadata="onEditMetadataClicked"
           @field-changed="onFieldChanged"
           @metadata-changed="onMetadataChanged"
-          @scroll="saveScrollPosition"
+          @scroll="onListScroll"
           @keep-task-panel-open="onKeepTaskPanelOpenChanged"
         />
       </div>
@@ -188,6 +188,7 @@
 import { useHead } from '@unhead/vue'
 import {
   computed,
+  nextTick,
   onBeforeUnmount,
   onMounted,
   ref,
@@ -198,6 +199,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useEntityPage } from '@/composables/entityPage'
+import { logRequestFailure } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
 import SequenceList from '@/components/lists/SequenceList.vue'
@@ -230,6 +232,10 @@ const listRef = useTemplateRef('sequence-list')
 const searchFieldRef = useTemplateRef('sequence-search-field')
 
 const initialLoading = ref(true)
+// No store action flags a load of this list or its failure.
+const isLoading = ref(false)
+const isLoadingError = ref(false)
+let lastLoadId = 0
 
 // Computed
 // --------------------------------------------------------------------------
@@ -243,10 +249,6 @@ const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
-const isSequencesLoading = computed(() => store.getters.isSequencesLoading)
-const isSequencesLoadingError = computed(
-  () => store.getters.isSequencesLoadingError
-)
 const isTVShow = computed(() => store.getters.isTVShow)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const sequenceMap = computed(() => store.getters.sequenceMap)
@@ -257,18 +259,36 @@ const sequenceSorting = computed(() => store.getters.sequenceSorting)
 const sequenceValidationColumns = computed(
   () => store.getters.sequenceValidationColumns
 )
+// After a failed load, the store still holds the columns of the production
+// left.
+const validationColumns = computed(() =>
+  isLoadingError.value ? [] : sequenceValidationColumns.value
+)
 const user = computed(() => store.getters.user)
 
 // Functions
 // --------------------------------------------------------------------------
 
+const loadList = () => {
+  const loadId = ++lastLoadId
+  isLoading.value = true
+  isLoadingError.value = false
+  return store
+    .dispatch('loadSequencesWithTasks')
+    .catch(err => {
+      // An older load may fail after a newer one, of this production or of
+      // another, succeeded.
+      if (loadId === lastLoadId) isLoadingError.value = true
+      logRequestFailure(err)
+    })
+    .finally(() => {
+      if (loadId === lastLoadId) isLoading.value = false
+    })
+}
+
 const reset = () => {
   initialLoading.value = false
-  store.dispatch('loadSequencesWithTasks', err => {
-    if (err) console.error(err)
-    applySearchFromUrl()
-    initialLoading.value = false
-  })
+  loadList()
 }
 
 const {
@@ -326,6 +346,11 @@ const {
 
 const showNewModal = () => onEditClicked()
 
+// Hiding the rows during a load scrolls the list back to the top.
+const onListScroll = position => {
+  if (!isLoading.value) saveScrollPosition(position)
+}
+
 const clearListAndReset = () => {
   clearSearchAndScroll()
   initialLoading.value = false
@@ -371,10 +396,14 @@ watch(currentProduction, clearListAndReset)
 watch(currentEpisode, clearListAndReset)
 watch(currentSection, reloadEpisodeSequencesIfNeeded)
 
-watch(isSequencesLoading, isLoading => {
-  if (isLoading) return
+watch(isLoading, () => {
+  if (isLoading.value) return
   initialLoading.value = false
-  setScrollPosition()
+  // The rows come back with the next render: the list can scroll then.
+  nextTick(() => {
+    applySearchFromUrl()
+    setScrollPosition()
+  })
 })
 
 // Lifecycle
@@ -408,15 +437,11 @@ onMounted(() => {
     sequenceMap.value.values().next().value?.project_id !==
       currentProduction.value.id
   ) {
-    store
-      .dispatch('loadSequencesWithTasks')
-      .then(() => {
-        initialLoading.value = false
-        finalize()
-      })
-      .catch(console.error)
+    loadList().then(() => {
+      initialLoading.value = false
+      finalize()
+    })
   } else {
-    if (!isSequencesLoading.value) initialLoading.value = false
     finalize()
     reloadEpisodeSequencesIfNeeded()
   }

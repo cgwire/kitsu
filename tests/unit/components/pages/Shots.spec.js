@@ -8,12 +8,16 @@ import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Shots from '@/components/pages/Shots.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import en from '@/locales/en'
+import enVideoGame from '@/locales/en_video-game'
+import fr from '@/locales/fr.json'
 import shotStore from '@/store/modules/shots'
 
 import {
   buildAddThumbnailsModalStub,
   mountEntityPage,
-  production
+  production,
+  reimportExport
 } from '../../fixtures/entity-page'
 
 // Two shots with their tasks in the cache: the page decides on mount
@@ -30,7 +34,12 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-const mountPage = async ({ getters = {}, actions = {}, stubs = {} } = {}) => {
+const mountPage = async ({
+  getters = {},
+  actions = {},
+  stubs = {},
+  ...options
+} = {}) => {
   const page = await mountEntityPage(Shots, {
     listName: 'ShotList',
     getters: {
@@ -39,7 +48,8 @@ const mountPage = async ({ getters = {}, actions = {}, stubs = {} } = {}) => {
       ...getters
     },
     actions,
-    stubs
+    stubs,
+    ...options
   })
   await flushPromises()
   return page
@@ -199,6 +209,123 @@ describe('Shots page, CSV import', () => {
       'FPS',
       'Resolution'
     ])
+  })
+
+  // The export writes the labels of the language of the user.
+  const { main, shots } = fr.default
+  const mountInFrench = getters =>
+    mountPage({
+      getters: { shotValidationColumns: [], ...getters },
+      actions: { getShotsCsvLines: () => [] },
+      locale: 'fr',
+      messages: fr.default
+    })
+
+  const descriptor = entityType => ({
+    id: 'descriptor-1',
+    entity_type: entityType,
+    name: shots.fields.resolution,
+    field_name: 'resolution',
+    departments: []
+  })
+
+  test('imports back a file exported in the language of the user', async () => {
+    const { wrapper } = await mountInFrench({
+      isFps: true,
+      isFrameIn: true,
+      isFrameOut: true,
+      isFrames: true,
+      isResolution: true
+    })
+
+    const { exported, imported } = await reimportExport(wrapper)
+
+    expect(exported).toEqual([
+      shots.fields.sequence,
+      shots.fields.name,
+      shots.fields.description,
+      main.frames,
+      main.frame_in,
+      main.frame_out,
+      main.fps,
+      shots.fields.resolution
+    ])
+    expect(imported).toEqual([
+      'Sequence',
+      'Name',
+      'Description',
+      'Frames',
+      'Frame In',
+      'Frame Out',
+      'FPS',
+      'Resolution'
+    ])
+  })
+
+  test('keeps the header of a descriptor named like a label', async () => {
+    const { wrapper } = await mountInFrench({
+      currentProduction: { ...production, descriptors: [descriptor('Shot')] }
+    })
+
+    const { imported } = await reimportExport(wrapper)
+
+    expect(imported).toEqual([
+      'Sequence',
+      'Name',
+      'Description',
+      shots.fields.resolution
+    ])
+  })
+
+  test('renames a label that only an asset descriptor uses', async () => {
+    const { wrapper } = await mountInFrench({
+      currentProduction: { ...production, descriptors: [descriptor('Asset')] },
+      isResolution: true
+    })
+
+    const { imported } = await reimportExport(wrapper)
+
+    expect(imported).toEqual(['Sequence', 'Name', 'Description', 'Resolution'])
+  })
+
+  test('keeps the header of a task type named like a label', async () => {
+    const taskType = { id: 'task-type-1', name: shots.fields.resolution }
+    const { wrapper } = await mountInFrench({
+      productionShotTaskTypes: [taskType],
+      shotValidationColumns: [taskType.id],
+      taskTypeMap: new Map([[taskType.id, taskType]])
+    })
+
+    const { imported } = await reimportExport(wrapper)
+
+    expect(imported).toEqual([
+      'Sequence',
+      'Name',
+      'Description',
+      taskType.name,
+      `${taskType.name} assignations`
+    ])
+  })
+
+  test('imports back a file exported in a video game production', async () => {
+    // An English user of a video game production gets the overlay over en.js.
+    const { wrapper } = await mountPage({
+      getters: { shotValidationColumns: [] },
+      actions: { getShotsCsvLines: () => [] },
+      locale: 'en_video-game',
+      messages: {
+        ...en,
+        shots: {
+          ...en.shots,
+          fields: { ...en.shots.fields, ...enVideoGame.shots.fields }
+        }
+      }
+    })
+
+    const { exported, imported } = await reimportExport(wrapper)
+
+    expect(exported).toEqual(['Level', 'Name', 'Description'])
+    expect(imported).toEqual(['Sequence', 'Name', 'Description'])
   })
 })
 

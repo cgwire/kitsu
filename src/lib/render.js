@@ -3,7 +3,7 @@ import { markedEmoji } from 'marked-emoji'
 import sanitizeHTML from 'sanitize-html'
 
 import emojis from '@/lib/emojis'
-import { formatTime } from '@/lib/video'
+import { formatToTimecode } from '@/lib/video'
 
 const markedEmojiOptions = {
   emojis,
@@ -165,9 +165,7 @@ export const replaceTimeWithTimecode = (
   fps
 ) => {
   if (comment) {
-    const frameDuration = Math.round((1 / fps) * 10000) / 10000
-    const currentTimeRaw = (frame - 1) * frameDuration
-    const formatedTime = formatTime(currentTimeRaw, fps)
+    const formatedTime = formatToTimecode(frame - 1, fps)
     return comment.replaceAll(
       '@frame',
       `v${currentPreviewRevision} ${formatedTime} (${frame})`

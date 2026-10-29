@@ -224,7 +224,7 @@
       :active="!isCommentsHidden"
       :title="$t('playlists.actions.comments')"
       @click="$emit('comment-clicked')"
-      v-if="!readOnly && (fullScreen || showCommentsButton)"
+      v-if="(!readOnly || canComment) && (fullScreen || showCommentsButton)"
     />
   </div>
 
@@ -263,6 +263,18 @@
       @click="isWireframe = !isWireframe"
     />
   </div>
+
+  <!-- no annotation outside a movie or a picture -->
+  <div class="flexrow" v-if="!isMovie && !isPicture && !phone">
+    <button-simple
+      class="button playlist-button flexrow-item"
+      icon="comment"
+      :active="!isCommentsHidden"
+      :title="$t('playlists.actions.comments')"
+      @click="$emit('comment-clicked')"
+      v-if="(!readOnly || canComment) && (fullScreen || showCommentsButton)"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -280,6 +292,11 @@ defineProps({
   backgroundOptions: {
     type: Array,
     default: () => []
+  },
+  // Commenting is a right of its own: readOnly is the right to annotate.
+  canComment: {
+    type: Boolean,
+    default: false
   },
   fullScreen: {
     type: Boolean,

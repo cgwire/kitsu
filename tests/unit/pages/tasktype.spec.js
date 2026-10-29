@@ -1,3 +1,4 @@
+import { useHead } from '@unhead/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
@@ -12,11 +13,16 @@ vi.mock('vue-i18n', async importOriginal => ({
 
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
+import csv from '@/lib/csv'
 import assetStore from '@/store/modules/assets'
+import episodeStore from '@/store/modules/episodes'
+import shotStore from '@/store/modules/shots'
+import taskTypeStore from '@/store/modules/tasktypes'
 
 import TaskList from '@/components/lists/TaskList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import TaskType from '@/components/pages/TaskType.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -55,7 +61,14 @@ const task = {
 const mountPage = async ({
   actions = {},
   getters = {},
+  path,
   query = '',
+  routes = [
+    {
+      path: '/productions/:production_id/assets/task-types/:task_type_id/:section',
+      component: { template: '<div />' }
+    }
+  ],
   section = 'estimation',
   socket = { on: vi.fn(), off: vi.fn() },
   stubs = {}
@@ -88,22 +101,22 @@ const mountPage = async ({
       taskMap: () => new Map([[task.id, task]]),
       taskMetadataDescriptors: () => [],
       taskSearchQueries: () => [],
+      currentTaskTypeEpisode: (state, rootGetters) =>
+        taskTypeStore.getters.currentTaskTypeEpisode(
+          state,
+          rootGetters,
+          null,
+          rootGetters
+        ),
       user: () => ({ id: 'manager-1', departments: [] }),
       ...getters
     },
     actions: storeActions
   })
-  const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [
-      {
-        path: '/productions/:production_id/assets/task-types/:task_type_id/:section',
-        component: { template: '<div />' }
-      }
-    ]
-  })
+  const router = createRouter({ history: createWebHashHistory(), routes })
   await router.push(
-    `/productions/production-1/assets/task-types/task-type-1/${section}${query}`
+    path ??
+      `/productions/production-1/assets/task-types/task-type-1/${section}${query}`
   )
   const wrapper = shallowMount(TaskType, {
     global: {
@@ -121,8 +134,44 @@ const mountPage = async ({
     }
   })
   await flushPromises()
-  return { storeActions, wrapper }
+  return { router, storeActions, wrapper }
 }
+
+// The task type routes of src/router/routes.js: the episodes one has no
+// entity type for the tabs to inherit.
+const Page = { template: '<div />' }
+const taskTypeRoute = (name, path, meta = {}) => ({
+  name,
+  path,
+  meta,
+  component: Page,
+  children: [
+    { name: `${name}-schedule`, path: 'schedule', component: Page },
+    { name: `${name}-estimation`, path: 'estimation', component: Page }
+  ]
+})
+const taskTypeRoutes = [
+  taskTypeRoute(
+    'task-type',
+    '/productions/:production_id/:type/task-types/:task_type_id'
+  ),
+  taskTypeRoute(
+    'episode-task-type',
+    '/productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id'
+  ),
+  taskTypeRoute(
+    'episodes-task-type',
+    '/productions/:production_id/episodes/task-types/:task_type_id',
+    { section: 'episodes' }
+  ),
+  // Held, so that the tabs keep the route of their first render.
+  {
+    name: 'not-found',
+    path: '/not-found',
+    component: Page,
+    beforeEnter: () => new Promise(() => {})
+  }
+]
 
 describe('TaskType page', () => {
   afterEach(() => {
@@ -553,6 +602,193 @@ describe('TaskType page', () => {
       expect(modal().props()).toMatchObject({ active: true, isError: false })
     })
 
+    // The export writes the labels of the language of the user.
+    const exportedHeaders = [
+      'tasks.fields.asset_type',
+      'tasks.fields.entity_name',
+      'tasks.fields.task_status',
+      'tasks.fields.difficulty',
+      'tasks.fields.estimation',
+      'tasks.fields.start_date',
+      'tasks.fields.due_date'
+    ]
+
+    const previewHeaders = async ({ getters } = {}) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const page = await mountPage({ getters, section: 'tasks' })
+      wrapper = page.wrapper
+      await wrapper
+        .findComponent(ImportModal)
+        .vm.$emit('confirm', exportedHeaders.join(';'), 'text')
+      await flushPromises()
+      return wrapper.findComponent(ImportRenderModal).props('parsedCsv')[0]
+    }
+
+    it('gives the exported labels the column names of Zou', async () => {
+      expect(await previewHeaders()).toEqual([
+        'Parent',
+        'Entity',
+        'tasks.fields.task_status',
+        'Difficulty',
+        'Estimation',
+        'Start date',
+        'Due date'
+      ])
+    })
+
+    it('keeps the label of a column named after it', async () => {
+      const descriptor = {
+        id: 'descriptor-1',
+        task_type_id: 'task-type-1',
+        name: 'tasks.fields.difficulty',
+        field_name: 'difficulty',
+        departments: []
+      }
+
+      const headers = await previewHeaders({
+        getters: { taskMetadataDescriptors: () => [descriptor] }
+      })
+
+      expect(headers).toContain('tasks.fields.difficulty')
+      expect(headers).not.toContain('Difficulty')
+    })
+
+    describe('after an import', () => {
+      const importRows = async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const page = await mountPage({
+          actions: {
+            // Zou answers the rows it imported
+            uploadTaskTypeEstimations: () => Promise.resolve([{}, {}])
+          },
+          section: 'tasks'
+        })
+        wrapper = page.wrapper
+        const renderModal = () => wrapper.findComponent(ImportRenderModal)
+        await wrapper
+          .findComponent(ImportModal)
+          .vm.$emit('confirm', 'Parent;Entity\nProps;Tree\nProps;Rock', 'text')
+        await flushPromises()
+        await renderModal().vm.$emit(
+          'confirm',
+          renderModal().props('parsedCsv')
+        )
+        await flushPromises()
+        return renderModal
+      }
+
+      it('keeps the preview open with the imported row count', async () => {
+        const renderModal = await importRows()
+
+        expect(renderModal().props()).toMatchObject({
+          active: true,
+          importedRows: 2,
+          isError: false
+        })
+      })
+
+      it('drops the row count once the preview is closed', async () => {
+        const renderModal = await importRows()
+
+        await renderModal().vm.$emit('cancel')
+
+        expect(renderModal().props()).toMatchObject({
+          active: false,
+          importedRows: null
+        })
+      })
+
+      it('drops the row count for another file', async () => {
+        const renderModal = await importRows()
+        // the stub has no file to forget
+        wrapper.findComponent(ImportModal).vm.reset = vi.fn()
+
+        await renderModal().vm.$emit('reupload')
+
+        expect(renderModal().props('importedRows')).toBeNull()
+      })
+
+      it('drops the row count for a new preview', async () => {
+        const renderModal = await importRows()
+        await renderModal().vm.$emit('cancel')
+
+        await wrapper
+          .findComponent(ImportModal)
+          .vm.$emit('confirm', 'Parent;Entity\nProps;Tree', 'text')
+        await flushPromises()
+
+        expect(renderModal().props()).toMatchObject({
+          active: true,
+          importedRows: null
+        })
+      })
+
+      const startUpload = async () => {
+        let answerUpload = null
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const page = await mountPage({
+          actions: {
+            uploadTaskTypeEstimations: () =>
+              new Promise(resolve => {
+                answerUpload = resolve
+              })
+          },
+          section: 'tasks'
+        })
+        wrapper = page.wrapper
+        const renderModal = () => wrapper.findComponent(ImportRenderModal)
+        const importModal = () => wrapper.findComponent(ImportModal)
+        await importModal().vm.$emit(
+          'confirm',
+          'Parent;Entity\nProps;Tree\nProps;Rock',
+          'text'
+        )
+        await flushPromises()
+        await renderModal().vm.$emit('confirm', renderModal().props('parsedCsv'))
+        // the stub has no file to forget
+        importModal().vm.reset = vi.fn()
+        return {
+          answerUpload: rows => answerUpload(rows),
+          importModal,
+          renderModal
+        }
+      }
+
+      it('gives another file no count of an upload still running', async () => {
+        const { answerUpload, importModal, renderModal } = await startUpload()
+        await renderModal().vm.$emit('reupload')
+        // A picked file confirms at once, loading or not.
+        await importModal().vm.$emit('confirm', 'Parent;Entity\nProps;Tree', 'text')
+        await flushPromises()
+
+        answerUpload([{}, {}])
+        await flushPromises()
+
+        expect(renderModal().props()).toMatchObject({
+          active: true,
+          importedRows: null
+        })
+      })
+
+      it.each(['cancel', 'reupload'])(
+        'gives no count of an upload answered after a %s to the next file',
+        async event => {
+          const { answerUpload, importModal, renderModal } = await startUpload()
+          await renderModal().vm.$emit(event)
+          answerUpload([{}, {}])
+          await flushPromises()
+
+          await importModal().vm.$emit('confirm', 'Parent;Entity\nProps;Tree', 'text')
+          await flushPromises()
+
+          expect(renderModal().props()).toMatchObject({
+            active: true,
+            importedRows: null
+          })
+        }
+      )
+    })
+
     it('releases the modal on a bug, left to the error handler', async () => {
       vi.stubGlobal('FileReader', BrokenFileReader)
       const modal = await openImportModal()
@@ -568,6 +804,504 @@ describe('TaskType page', () => {
         expect.anything(),
         expect.anything()
       )
+    })
+  })
+
+  // Zou finds the entity of a row by its parent and name, the parent being
+  // ignored for episodes and optional for sequences and edits.
+  describe('estimations import columns', () => {
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    const importColumns = async forEntity => {
+      // the data load the page starts 100 ms after mounting is not under test
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const mounted = await mountPage({
+        getters: {
+          currentTaskType: () => ({
+            id: 'task-type-1',
+            name: 'Layout',
+            for_entity: forEntity
+          })
+        },
+        section: 'tasks'
+      })
+      wrapper = mounted.wrapper
+      const renderModal = wrapper.findComponent(ImportRenderModal)
+      const importModal = wrapper.findComponent(ImportModal)
+      return {
+        blockMissingColumns: renderModal.props('blockMissingColumns'),
+        columns: renderModal.props('columns'),
+        dataMatchers: renderModal.props('dataMatchers'),
+        listedColumns: importModal.props('columns'),
+        listedOptionalColumns: importModal.props('optionalColumns'),
+        requiredValues: renderModal.props('requiredValues')
+      }
+    }
+
+    const optionalColumns = ['Estimation', 'Start date', 'Due date', 'Difficulty']
+
+    it.each(['Asset', 'Shot'])(
+      'require the parent and the entity of the %s task types',
+      async forEntity => {
+        expect(await importColumns(forEntity)).toEqual({
+          blockMissingColumns: true,
+          columns: ['Parent', 'Entity', ...optionalColumns],
+          dataMatchers: ['Parent', 'Entity'],
+          listedColumns: ['Parent', 'Entity'],
+          listedOptionalColumns: optionalColumns,
+          requiredValues: ['Parent', 'Entity']
+        })
+      }
+    )
+
+    it('require the entity alone of the Episode task types', async () => {
+      expect(await importColumns('Episode')).toEqual({
+        blockMissingColumns: true,
+        columns: ['Entity', ...optionalColumns],
+        dataMatchers: ['Entity'],
+        listedColumns: ['Entity'],
+        listedOptionalColumns: optionalColumns,
+        requiredValues: ['Entity']
+      })
+    })
+
+    it.each(['Sequence', 'Edit'])(
+      'take the parent of the %s task types as optional',
+      async forEntity => {
+        expect(await importColumns(forEntity)).toEqual({
+          blockMissingColumns: true,
+          columns: ['Entity', 'Parent', ...optionalColumns],
+          dataMatchers: ['Entity'],
+          listedColumns: ['Entity'],
+          listedOptionalColumns: ['Parent', ...optionalColumns],
+          requiredValues: ['Entity']
+        })
+      }
+    )
+  })
+
+  // The page posts with the store episode, which a route without episode
+  // keeps.
+  describe('estimations import button', () => {
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    const shotTaskType = {
+      id: 'task-type-1',
+      name: 'Animation',
+      for_entity: 'Shot'
+    }
+
+    const hasImportButton = async (getters, path) => {
+      // the data load the page starts 100 ms after mounting is not under test
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const mounted = await mountPage({
+        getters: {
+          currentTaskType: () => shotTaskType,
+          isTVShow: () => true,
+          ...getters
+        },
+        path,
+        routes: taskTypeRoutes
+      })
+      wrapper = mounted.wrapper
+      return wrapper
+        .findAllComponents(ButtonSimple)
+        .some(button => button.props('icon') === 'import')
+    }
+
+    const hasPseudoEpisodeImportButton = (id, type, forEntity) =>
+      hasImportButton(
+        {
+          currentEpisode: () => ({ id }),
+          currentTaskType: () => ({ ...shotTaskType, for_entity: forEntity })
+        },
+        `/productions/production-1/episodes/${id}/${type}/task-types/task-type-1`
+      )
+
+    // The rows of two episodes can share their sequence or asset type, and
+    // their name.
+    it.each([
+      ['all', 'shots', 'Shot'],
+      ['all', 'assets', 'Asset']
+    ])(
+      'is hidden on the %s pseudo-episode of the %s',
+      async (id, type, forEntity) => {
+        expect(await hasPseudoEpisodeImportButton(id, type, forEntity)).toBe(
+          false
+        )
+      }
+    )
+
+    // A sequence or an edit row names its episode, and Main pack holds the
+    // assets without one.
+    it.each([
+      ['all', 'edits', 'Edit'],
+      ['all', 'sequences', 'Sequence'],
+      ['main', 'assets', 'Asset']
+    ])(
+      'is shown on the %s pseudo-episode of the %s',
+      async (id, type, forEntity) => {
+        expect(await hasPseudoEpisodeImportButton(id, type, forEntity)).toBe(
+          true
+        )
+      }
+    )
+
+    it('is hidden on the task type route of a TV show on all episodes', async () => {
+      const shown = await hasImportButton(
+        { currentEpisode: () => ({ id: 'all' }) },
+        '/productions/production-1/shots/task-types/task-type-1'
+      )
+      expect(shown).toBe(false)
+    })
+
+    it('is hidden on the episodes route of a shot task type on all episodes', async () => {
+      const shown = await hasImportButton(
+        { currentEpisode: () => ({ id: 'all' }) },
+        '/productions/production-1/episodes/task-types/task-type-1'
+      )
+      expect(shown).toBe(false)
+    })
+
+    it('is shown on an episode', async () => {
+      const shown = await hasImportButton(
+        { currentEpisode: () => ({ id: 'episode-1' }) },
+        '/productions/production-1/episodes/episode-1/shots/task-types/task-type-1'
+      )
+      expect(shown).toBe(true)
+    })
+
+    // A link without episode, such as the task type of a task in My Tasks,
+    // keeps the Main pack of an earlier assets page, which lists nothing else.
+    it.each([
+      ['shots', 'Shot'],
+      ['edits', 'Edit'],
+      ['sequences', 'Sequence']
+    ])(
+      'is hidden on the %s route of a task type with Main pack in the store',
+      async (type, forEntity) => {
+        const shown = await hasImportButton(
+          {
+            currentEpisode: () => ({ id: 'main' }),
+            currentTaskType: () => ({ ...shotTaskType, for_entity: forEntity })
+          },
+          `/productions/production-1/${type}/task-types/task-type-1`
+        )
+        expect(shown).toBe(false)
+      }
+    )
+
+    it.each(['all', 'main'])(
+      'is shown for an episode task type with %s in the store',
+      async id => {
+        const shown = await hasImportButton(
+          {
+            currentEpisode: () => ({ id }),
+            currentTaskType: () => ({ ...shotTaskType, for_entity: 'Episode' })
+          },
+          '/productions/production-1/episodes/task-types/task-type-1'
+        )
+        expect(shown).toBe(true)
+      }
+    )
+  })
+
+  // The store keeps the episode the user came from.
+  describe('title and export name', () => {
+    const TaskListStub = {
+      name: 'TaskList',
+      template: '<div />',
+      methods: { getTableData: () => [['Entity']] }
+    }
+    const episode = { id: 'episode-2', name: 'E02' }
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      vi.restoreAllMocks()
+    })
+
+    const readTitleAndExportName = async (
+      forEntity,
+      path,
+      currentEpisode = episode
+    ) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const mounted = await mountPage({
+        getters: {
+          currentEpisode: () => currentEpisode,
+          currentTaskType: () => ({
+            id: 'task-type-1',
+            name: 'Animation',
+            for_entity: forEntity
+          }),
+          isTVShow: () => true
+        },
+        path,
+        routes: taskTypeRoutes,
+        stubs: { TaskList: TaskListStub }
+      })
+      wrapper = mounted.wrapper
+      const buildCsvFile = vi.spyOn(csv, 'buildCsvFile').mockReturnValue('')
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'export')
+        .vm.$emit('click')
+      return {
+        title: vi.mocked(useHead).mock.calls.at(-1)[0].title.value,
+        exportName: buildCsvFile.mock.calls[0][0]
+      }
+    }
+
+    it('name no episode for an Episode task type', async () => {
+      const { title, exportName } = await readTitleAndExportName(
+        'Episode',
+        '/productions/production-1/episodes/task-types/task-type-1'
+      )
+      expect(title).toBe('Production / Animation - Kitsu')
+      expect(exportName).toMatch(/_production_animation_tasks$/)
+      expect(exportName).not.toMatch(/e02/i)
+    })
+
+    it('name the episode of a Shot task type', async () => {
+      const { title, exportName } = await readTitleAndExportName(
+        'Shot',
+        '/productions/production-1/episodes/episode-2/shots/task-types/task-type-1'
+      )
+      expect(title).toBe('Production / E02 / Animation - Kitsu')
+      expect(exportName).toMatch(/_e02_production_animation_tasks$/)
+    })
+
+    // The pseudo-episodes have no name: they take the label of the topbar.
+    it.each([
+      ['all', 'shots', 'Shot', 'main.all_shots'],
+      ['all', 'assets', 'Asset', 'main.all_assets'],
+      ['all', 'edits', 'Edit', 'main.all_edits'],
+      ['all', 'sequences', 'Sequence', 'sequences.all_sequences'],
+      ['main', 'assets', 'Asset', 'main.main_pack']
+    ])(
+      'name the %s pseudo-episode of the %s',
+      async (id, type, forEntity, label) => {
+        const { title, exportName } = await readTitleAndExportName(
+          forEntity,
+          `/productions/production-1/episodes/${id}/${type}/task-types/task-type-1`,
+          { id }
+        )
+        expect(title).toBe(`Production / ${label} / Animation - Kitsu`)
+        expect(exportName).toContain(label.split('.').pop())
+        expect(exportName).not.toMatch(/undefined/)
+      }
+    )
+  })
+
+  // The episode stats linked their shot columns to the episodes route.
+  describe('entity type', () => {
+    const TaskListStub = {
+      name: 'TaskList',
+      props: {
+        entityType: { type: String, default: '' },
+        tasks: { type: Array, default: () => [] }
+      },
+      template: '<div />',
+      methods: { resetSelection: () => {} }
+    }
+    const entities = {
+      Asset: { store: assetStore.cache.assetMap, id: 'asset-1' },
+      Episode: { store: episodeStore.cache.episodeMap, id: 'episode-1' },
+      Shot: { store: shotStore.cache.shotMap, id: 'shot-1' }
+    }
+    // One task per entity type, all of the task type, so that the list
+    // tells which map the page read.
+    const typeTasks = Object.entries(entities).map(([type, { id }]) => ({
+      id: `task-${type}`,
+      assignees: [],
+      entity_id: id,
+      entity_name: id,
+      task_type_id: 'task-type-1'
+    }))
+    let wrapper = null
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    })
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      Object.values(entities).forEach(({ store, id }) => store.delete(id))
+    })
+
+    const mountList = async (forEntity, path) => {
+      const page = await mountPage({
+        actions: {
+          initTaskType: vi.fn(() => {
+            Object.entries(entities).forEach(([type, { store, id }]) => {
+              store.set(id, {
+                id,
+                episode_id: 'episode-1',
+                tasks: [`task-${type}`]
+              })
+            })
+          }),
+          loadEpisodeScheduleItems: vi.fn(() => [])
+        },
+        getters: {
+          assetValidationColumns: () => [],
+          currentEpisode: () => ({ id: 'episode-1', name: 'E01' }),
+          currentTaskType: () => ({
+            id: 'task-type-1',
+            name: 'Animation',
+            for_entity: forEntity
+          }),
+          episodeValidationColumns: () => [],
+          isTVShow: () => true,
+          shotValidationColumns: () => [],
+          taskMap: () => new Map(typeTasks.map(t => [t.id, t])),
+          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' })
+        },
+        path,
+        routes: taskTypeRoutes,
+        stubs: { TaskList: TaskListStub }
+      })
+      wrapper = page.wrapper
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+      const list = wrapper.findComponent(TaskListStub)
+      return {
+        entityType: list.props('entityType'),
+        taskIds: list.props('tasks').map(t => t.id)
+      }
+    }
+
+    it.each([
+      ['Shot', '/productions/production-1/episodes/task-types/task-type-1'],
+      [
+        'Shot',
+        '/productions/production-1/episodes/episode-1/shots/task-types/task-type-1'
+      ],
+      ['Asset', '/productions/production-1/assets/task-types/task-type-1'],
+      ['Episode', '/productions/production-1/episodes/task-types/task-type-1']
+    ])('lists the %s tasks of its task type on %s', async (type, path) => {
+      expect(await mountList(type, path)).toEqual({
+        entityType: type,
+        taskIds: [`task-${type}`]
+      })
+    })
+
+    it('keeps the type of the route for another task type', async () => {
+      expect(
+        await mountList(
+          'Concept',
+          '/productions/production-1/assets/task-types/task-type-1'
+        )
+      ).toEqual({ entityType: 'Asset', taskIds: ['task-Asset'] })
+    })
+  })
+
+  describe('tabs', () => {
+    const routes = taskTypeRoutes
+    const shotTaskType = {
+      id: 'task-type-1',
+      name: 'Animation',
+      for_entity: 'Shot'
+    }
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      vi.restoreAllMocks()
+    })
+
+    const mountTabs = async (
+      getters,
+      path = '/productions/production-1/episodes/task-types/task-type-1'
+    ) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const mounted = await mountPage({
+        getters: { currentTaskType: () => shotTaskType, ...getters },
+        path,
+        routes
+      })
+      wrapper = mounted.wrapper
+      return wrapper
+        .findAll('.tabs li')
+        .map(
+          tab =>
+            mounted.router.resolve(
+              tab.findComponent({ name: 'RouterLink' }).props('to')
+            ).fullPath
+        )
+    }
+
+    // Where the episode stats link their shot columns.
+    it('links the sections of a shot task type opened on all episodes', async () => {
+      const base =
+        '/productions/production-1/episodes/all/shots/task-types/task-type-1'
+      const paths = await mountTabs(
+        { currentEpisode: () => ({ id: 'all' }), isTVShow: () => true },
+        base
+      )
+      expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+    })
+
+    // The episode stats linked their shot columns to the episodes route.
+    it('links the sections of a shot task type opened on the episodes route', async () => {
+      const paths = await mountTabs({
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true
+      })
+      const base =
+        '/productions/production-1/episodes/episode-1/shots/task-types/task-type-1'
+      expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+    })
+
+    it('links them before the episodes are loaded', async () => {
+      const paths = await mountTabs({ isTVShow: () => true })
+      const base = '/productions/production-1/shots/task-types/task-type-1'
+      expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+    })
+
+    // A type there would be discarded with a warning.
+    it('links the sections of an episode task type to the episodes route', async () => {
+      const warn = vi.spyOn(console, 'warn')
+      const error = vi.spyOn(console, 'error')
+      const paths = await mountTabs({
+        currentEpisode: () => ({ id: 'episode-1' }),
+        currentTaskType: () => ({ ...shotTaskType, for_entity: 'Episode' }),
+        isTVShow: () => true
+      })
+      const base = '/productions/production-1/episodes/task-types/task-type-1'
+      expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+      expect(warn).not.toHaveBeenCalled()
+      expect(error).not.toHaveBeenCalled()
+    })
+
+    // The page renders once before leaving for the not found page.
+    describe('for a task type missing from the map', () => {
+      it('keeps the type of the route', async () => {
+        const base = '/productions/production-1/assets/task-types/task-type-1'
+        const paths = await mountTabs({ currentTaskType: () => ({}) }, base)
+        expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+      })
+
+      it('keeps the episodes route, which has no type', async () => {
+        const paths = await mountTabs({ currentTaskType: () => ({}) })
+        const base = '/productions/production-1/episodes/task-types/task-type-1'
+        expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+      })
     })
   })
 })

@@ -16,13 +16,17 @@
   />
   <span
     class="thumbnail-picture thumbnail-empty"
-    :class="{ 'thumbnail-processing': isProcessing }"
+    :class="{
+      'thumbnail-extension': extensionLabel,
+      'thumbnail-processing': isProcessing
+    }"
     :style="{
       width: emptyWidth ? emptyWidth : width,
       height: emptyHeight ? emptyHeight : height
     }"
     v-else
   >
+    {{ extensionLabel }}
   </span>
 </template>
 
@@ -71,6 +75,10 @@ const props = defineProps({
   urlPrefix: {
     default: '',
     type: String
+  },
+  withExtension: {
+    default: false,
+    type: Boolean
   }
 })
 
@@ -79,14 +87,24 @@ const { isBroken, isProcessing, reloadQuery } = usePreviewFileStatus(
   () => props.previewFileStatus
 )
 
+const hasThumbnailExtension = computed(
+  () => !props.extension || ['mp4', 'png'].includes(props.extension)
+)
+
 const isPreviewWithThumbnail = computed(() => {
   return (
     !isProcessing.value &&
     !isBroken.value &&
     props.previewFileId &&
-    (!props.extension || ['mp4', 'png'].includes(props.extension))
+    hasThumbnailExtension.value
   )
 })
+
+const extensionLabel = computed(() =>
+  props.withExtension && !hasThumbnailExtension.value
+    ? `.${props.extension}`
+    : ''
+)
 
 const thumbnailUrl = computed(() => {
   const base = props.urlPrefix || '/api'
@@ -107,6 +125,14 @@ span.thumbnail-empty {
   display: block;
   flex-shrink: 0;
   margin: 0;
+}
+
+span.thumbnail-extension {
+  align-items: center;
+  color: var(--text-alt);
+  display: flex;
+  font-weight: bold;
+  justify-content: center;
 }
 
 // The variants are still being built: a slow shimmer reads as "on its

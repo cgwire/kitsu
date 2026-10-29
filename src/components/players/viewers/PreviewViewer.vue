@@ -3,7 +3,8 @@
     ref="container"
     class="preview-viewer dark"
     :style="{
-      maxHeight: isFullScreen ? `calc(100vh - ${marginBottom}px)` : null
+      maxHeight: isFullScreen ? `calc(100vh - ${marginBottom}px)` : null,
+      height: isFullScreen && isSound ? `calc(100vh - ${marginBottom}px)` : null
     }"
   >
     <div
@@ -46,6 +47,7 @@
       @panzoom-changed="onVideoPanzoomChanged"
       @panzoom-ready="$emit('panzoom-ready')"
       @play-ended="$emit('play-ended')"
+      @play-failed="$emit('play-ended')"
       @size-changed="onVideoSizeChanged"
       @video-end="$emit('video-end')"
       @video-loaded="$emit('video-loaded')"
@@ -88,8 +90,13 @@
       ref="soundViewer"
       class="sound-viewer"
       :file-name="fileTitle"
+      :is-muted="isMuted"
       :preview-url="isSound ? originalPath : ''"
-      @play-ended="$emit('play-ended')"
+      :volume="soundVolume"
+      @duration-changed="duration => $emit('sound-duration-changed', duration)"
+      @play-ended="onSoundEnded"
+      @play-failed="$emit('play-ended')"
+      @time-update="time => $emit('sound-time-update', time)"
       v-show="isSound"
     />
 
@@ -231,6 +238,8 @@ const emit = defineEmits([
   'picture-loaded',
   'play-ended',
   'size-changed',
+  'sound-duration-changed',
+  'sound-time-update',
   'time-update',
   'video-end',
   'video-loaded'
@@ -241,6 +250,9 @@ const videoViewer = ref(null)
 const pictureViewer = ref(null)
 const soundViewer = ref(null)
 const objectViewer = ref(null)
+// A prop, not a call: the sound viewer sets up its waveform with the first
+// sound, after the player gave the volume.
+const soundVolume = ref(100)
 
 let isPlaying = false
 
@@ -299,8 +311,11 @@ const resetVideo = () => {
   if (videoViewer.value) videoViewer.value.mountVideo()
 }
 
+// A preview Zou could not process, or is still processing, has nothing
+// to play.
 const play = () => {
   isPlaying = true
+  if (isBroken.value || isProcessing.value) emit('play-ended')
   if (isMovie.value) videoViewer.value.play()
   if (isSound.value) soundViewer.value.play()
 }
@@ -327,6 +342,17 @@ const pauseModelAnimation = () => {
 
 const goPreviousFrame = () => {
   return videoViewer.value.goPreviousFrame()
+}
+
+const setSoundTime = time => {
+  soundViewer.value?.setCurrentTime(time)
+}
+
+// The media element starts a sound over when played from its end. A sound
+// that cannot be read ends the play whatever the repeat: it never starts.
+const onSoundEnded = () => {
+  if (props.isRepeating) soundViewer.value.play()
+  else emit('play-ended')
 }
 
 const goNextFrame = () => {
@@ -469,6 +495,7 @@ const setSpeed = rate => {
 
 const setVolume = volume => {
   if (videoViewer.value) videoViewer.value.setVolume(volume)
+  soundVolume.value = volume
 }
 
 watch(
@@ -505,6 +532,7 @@ defineExpose({
   resize,
   setCurrentFrame,
   setCurrentTimeRaw: setCurrentTimeRawValue,
+  setSoundTime,
   getCurrentTimeRaw,
   extractFrame,
   extractPicture,
@@ -536,6 +564,12 @@ defineExpose({
 
 .status-message {
   color: $white;
+}
+
+// The waveform keeps its own height: in full screen, the free space goes
+// above and below it, as in a playlist.
+.sound-viewer {
+  margin: auto 0;
 }
 
 .preview-viewer {

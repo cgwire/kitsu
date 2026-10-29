@@ -49,30 +49,20 @@ export const frameToSeconds = (nbFrames, production, shot) => {
 }
 
 /*
- * Display time in a timecode format.
+ * Timecodes count whole frames: a fractional rate counts on its nominal one,
+ * as non-drop-frame timecodes do (29.97 fps counts 30 frames a second).
  */
-export const formatTime = (rawTime, fps) => {
-  if (!Number.isFinite(rawTime) || rawTime < 0) rawTime = 0
-
-  const time = new Date(1000 * rawTime).toISOString()
-  const milliseconds = parseInt(time.substring(20, 23))
-  const frameDuration = roundPrecision(1 / fps)
-  const frame = `${Math.round(milliseconds / (1000 * frameDuration))}`.padStart(
-    2,
-    '0'
-  )
-  try {
-    return `${time.substring(11, 19)}:${frame}`
-  } catch (err) {
-    console.error(err)
-    return '00:00:00:00'
-  }
+const getTimecodeRate = fps => {
+  const rate = Math.round(parseFloat(fps))
+  return rate > 0 && Number.isFinite(rate) ? rate : DEFAULT_FPS
 }
 
 /**
  * Get timecode from frame number.
  */
-export const formatToTimecode = (frame, fps = DEFAULT_FPS) => {
+export const formatToTimecode = (frame, fps) => {
+  fps = getTimecodeRate(fps)
+  frame = Math.round(frame)
   if (!frame || frame < 0) frame = 0
   const hours = Math.floor(frame / fps / 3600)
     .toString()
@@ -87,6 +77,16 @@ export const formatToTimecode = (frame, fps = DEFAULT_FPS) => {
     .padStart(2, '0')
   const frames = (frame % fps).toString().padStart(2, '0')
   return `${hours}:${minutes}:${seconds}:${frames}`
+}
+
+/*
+ * Display time in a timecode format: the timecode of the nearest frame.
+ */
+export const formatTime = (rawTime, fps) => {
+  if (!Number.isFinite(rawTime) || rawTime < 0) rawTime = 0
+  let rate = parseFloat(fps)
+  if (!Number.isFinite(rate) || rate <= 0) rate = DEFAULT_FPS
+  return formatToTimecode(Math.round(rawTime * rate), rate)
 }
 
 /*

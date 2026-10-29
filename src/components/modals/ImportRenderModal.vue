@@ -119,6 +119,20 @@
       />
     </div>
 
+    <div
+      class="import-error"
+      v-if="blockMissingColumns && columnsRequired.length > 0"
+    >
+      <p class="import-error-title">
+        {{
+          $t('main.csv.missing_columns', {
+            columns: columnsRequired.join(', '),
+            count: columnsRequired.length
+          })
+        }}
+      </p>
+    </div>
+
     <div class="import-error" v-if="incompleteLines.length > 0">
       <p class="import-error-title">
         {{
@@ -150,6 +164,10 @@
           })
         }}
       </p>
+    </div>
+
+    <div class="import-success" v-if="importedRows !== null">
+      {{ $t('main.csv.import_success', { count: importedRows }) }}
     </div>
 
     <div class="render-footer">
@@ -187,11 +205,16 @@ const store = useStore()
 
 const props = defineProps({
   active: { type: Boolean, default: false },
+  // Most pages let Zou answer a file missing a data matcher column.
+  blockMissingColumns: { type: Boolean, default: false },
   columns: { type: Array, default: () => [] },
   dataMatchers: { type: Array, default: () => [] },
   database: { type: Object, default: () => ({}) },
   disableUpdate: { type: Boolean, default: false },
   importError: { type: Error, default: null },
+  // The row count of a confirmed import, which then shows instead of a
+  // second import of the same rows.
+  importedRows: { type: Number, default: null },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   parsedCsv: { type: Array, default: () => [] },
@@ -353,6 +376,8 @@ const isTimeout = computed(() => Boolean(props.importError?.isTimeout))
 const isConfirmDisabled = computed(
   () =>
     incompleteLines.value.length > 0 ||
+    props.importedRows !== null ||
+    (props.blockMissingColumns && columnsRequired.value.length > 0) ||
     // Importing again right away would race the import still running.
     (props.isError && isTimeout.value) ||
     (updateData.value &&
@@ -540,6 +565,16 @@ watch(
     font-size: 0.9em;
     margin-top: 0.5em;
   }
+}
+
+.import-success {
+  background: rgba($green, 0.08);
+  border: 1px solid $green;
+  border-radius: 10px;
+  color: var(--text);
+  font-weight: bold;
+  margin-top: 1em;
+  padding: 1em;
 }
 
 .line-badge {

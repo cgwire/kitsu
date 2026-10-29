@@ -27,7 +27,7 @@ const removeRvfcMock = () => {
   delete HTMLVideoElement.prototype.cancelVideoFrameCallback
 }
 
-const mountViewer = () => {
+const mountViewer = (props = {}) => {
   const store = createStore({
     getters: { currentProduction: () => ({ fps: '25' }) }
   })
@@ -35,7 +35,8 @@ const mountViewer = () => {
     props: {
       preview: { id: 'preview-1', extension: 'mp4' },
       fps: 25,
-      nbFrames: 100
+      nbFrames: 100,
+      ...props
     },
     global: {
       mocks: { $t: key => key },
@@ -142,6 +143,29 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     const tick2 = rvfcCallbacks[rvfcCallbacks.length - 1]
     tick2(performance.now(), { mediaTime: 0.4 })
     expect(wrapper.emitted('frame-update').length).toBe(frameCount)
+    wrapper.unmount()
+  })
+
+  // 10 minutes in at 30 fps: frame 18000, plus the 2 of the playback
+  // convention. The frame duration rounded to 0.0333 drifted it to 18020.
+  it('numbers a playing frame on the exact frame rate', async () => {
+    const wrapper = mountViewer({ fps: 30, nbFrames: 36000 })
+    await new Promise(resolve => setTimeout(resolve))
+    const video = wrapper.find('video').element
+    await video.dispatchEvent(new Event('loadedmetadata'))
+    Object.defineProperty(video, 'paused', {
+      value: false,
+      configurable: true
+    })
+
+    const tick = rvfcCallbacks[rvfcCallbacks.length - 1]
+    tick(performance.now(), { mediaTime: 18000 / 30 })
+
+    expect(wrapper.emitted('frame-update').at(-1)[0]).toBe(18002)
+    expect(wrapper.emitted('time-update').at(-1)[0]).toBeCloseTo(
+      18000.5 / 30,
+      6
+    )
     wrapper.unmount()
   })
 
@@ -255,6 +279,103 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     await new Promise(resolve => setTimeout(resolve))
     expect(wrapper.emitted('video-loaded')).toHaveLength(1)
     wrapper.unmount()
+  })
+
+  // A missing file or a file that is no movie: the decoder fails and keeps
+  // its error, and a play on it never starts.
+  describe('a movie that cannot be read', () => {
+    const failMovie = async wrapper => {
+      await new Promise(resolve => setTimeout(resolve))
+      const video = wrapper.find('video').element
+      await video.dispatchEvent(new Event('loadstart'))
+      await video.dispatchEvent(new Event('error'))
+    }
+
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    it('says the movie is broken, without its spinner', async () => {
+      const wrapper = mountViewer()
+      await failMovie(wrapper)
+
+      expect(wrapper.find('.broken').text()).toBe('preview.broken')
+      expect(wrapper.find('.loading-background').exists()).toBe(false)
+      expect(wrapper.find('canvas').element.style.visibility).toBe('hidden')
+      expect(wrapper.emitted('play-failed')).toBeUndefined()
+      expect(console.error).toHaveBeenCalledWith(
+        'An error occurred while loading a video',
+        expect.any(Event)
+      )
+      wrapper.unmount()
+    })
+
+    // The entity preview reads it through its template ref.
+    it('tells a parent holding its ref that the movie is broken', async () => {
+      const store = createStore({
+        getters: { currentProduction: () => ({ fps: '25' }) }
+      })
+      const parent = mount(
+        {
+          components: { VideoViewer },
+          template:
+            '<video-viewer ref="viewer" :preview="preview" :fps="25" :nb-frames="100" />',
+          data: () => ({ preview: { id: 'preview-1', extension: 'mp4' } })
+        },
+        { global: { mocks: { $t: key => key }, plugins: [store] } }
+      )
+      expect(parent.vm.$refs.viewer.isBroken).toBe(false)
+
+      await failMovie(parent)
+
+      expect(parent.vm.$refs.viewer.isBroken).toBe(true)
+      parent.unmount()
+    })
+
+    it('fails a play on it', async () => {
+      const wrapper = mountViewer()
+      await failMovie(wrapper)
+
+      wrapper.vm.play()
+
+      expect(wrapper.emitted('play-failed')).toHaveLength(1)
+      expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    // Chrome pauses the decoder before its own error listener runs.
+    it('fails the play under way', async () => {
+      const wrapper = mountViewer()
+      wrapper.vm.play()
+      await failMovie(wrapper)
+
+      expect(wrapper.emitted('play-failed')).toHaveLength(1)
+      wrapper.unmount()
+    })
+
+    it('fails no play after a pause', async () => {
+      const wrapper = mountViewer()
+      wrapper.vm.play()
+      wrapper.vm.pause()
+      await failMovie(wrapper)
+
+      expect(wrapper.emitted('play-failed')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    it('reads the movie of the next preview', async () => {
+      const wrapper = mountViewer()
+      await failMovie(wrapper)
+
+      await wrapper.setProps({ preview: { id: 'preview-2', extension: 'mp4' } })
+      wrapper.vm.play()
+
+      expect(wrapper.find('.broken').exists()).toBe(false)
+      expect(wrapper.find('canvas').element.style.visibility).toBe('')
+      expect(wrapper.emitted('play-failed')).toBeUndefined()
+      expect(HTMLMediaElement.prototype.play).toHaveBeenCalled()
+      wrapper.unmount()
+    })
   })
 
   describe('without rVFC (rAF fallback)', () => {

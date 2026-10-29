@@ -147,6 +147,7 @@
               <div class="preview">
                 <template v-if="taskPreviews && taskPreviews.length > 0">
                   <preview-player
+                    :can-comment="isCommentingAllowed"
                     :entity-preview-files="taskEntityPreviews"
                     :entity-type="entityType"
                     :extra-wide="isExtraWide"
@@ -289,16 +290,30 @@
           @confirm="confirmAddPreviewModal"
         />
 
-        <add-preview-modal
-          ref="add-extra-preview-modal"
-          :active="modals.addExtraPreview"
-          :is-loading="loading.addExtraPreview"
-          :is-error="errors.addExtraPreview"
-          message=""
-          :upload-progress="uploadProgress"
-          @cancel="onCloseExtraPreview"
-          @confirm="createExtraPreview"
-        />
+        <!-- The browser shows a player in full screen alone: the modals of
+             its "+" and trash buttons go into it. -->
+        <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
+          <add-preview-modal
+            ref="add-extra-preview-modal"
+            :active="modals.addExtraPreview"
+            :is-loading="loading.addExtraPreview"
+            :is-error="errors.addExtraPreview"
+            message=""
+            :upload-progress="uploadProgress"
+            @cancel="onCloseExtraPreview"
+            @confirm="createExtraPreview"
+          />
+
+          <delete-modal
+            :active="modals.deleteExtraPreview"
+            :is-loading="loading.deleteExtraPreview"
+            :is-error="errors.deleteExtraPreview"
+            :text="$t('tasks.delete_preview')"
+            :error-text="$t('tasks.delete_preview_error')"
+            @cancel="onCancelRemoveExtraPreview"
+            @confirm="confirmDeleteTaskPreview"
+          />
+        </teleport>
 
         <edit-comment-modal
           :active="modals.editComment"
@@ -331,16 +346,6 @@
           :is-error="errors.moveComment"
           @cancel="onCancelMoveComment"
           @confirm="confirmMoveComment"
-        />
-
-        <delete-modal
-          :active="modals.deleteExtraPreview"
-          :is-loading="loading.deleteExtraPreview"
-          :is-error="errors.deleteExtraPreview"
-          :text="$t('tasks.delete_preview')"
-          :error-text="$t('tasks.delete_preview_error')"
-          @cancel="onCancelRemoveExtraPreview"
-          @confirm="confirmDeleteTaskPreview"
         />
       </div>
       <div class="side task-info pa1" v-else-if="nbSelectedEntities > 0">
@@ -404,6 +409,7 @@ import { useStore } from 'vuex'
 
 import { addEvents, getClientX, removeEvents } from '@/composables/dom'
 import { getEntityMap } from '@/composables/entity'
+import { useFullScreenTarget } from '@/composables/fullScreen'
 import { useTime } from '@/composables/time'
 import { isCommentReplyable } from '@/lib/comments'
 import csv from '@/lib/csv'
@@ -566,6 +572,7 @@ const addCommentRef = useTemplateRef('add-comment')
 const addExtraPreviewModalRef = useTemplateRef('add-extra-preview-modal')
 const addPreviewModalRef = useTemplateRef('add-preview-modal')
 const previewPlayerRef = useTemplateRef('preview-player')
+const fullScreenPlayer = useFullScreenTarget(() => previewPlayerRef.value?.$el)
 const sideWrapperRef = useTemplateRef('side-wrapper')
 
 // Computed
@@ -747,7 +754,8 @@ const currentFps = computed(() => {
   const entityFps = parseFloat(getTaskEntity(props.task)?.data?.fps)
   if (entityFps) return entityFps
   return (
-    parseInt(productionMap.value.get(props.task.project_id)?.fps) || DEFAULT_FPS
+    parseFloat(productionMap.value.get(props.task.project_id)?.fps) ||
+    DEFAULT_FPS
   )
 })
 
@@ -1371,9 +1379,9 @@ const onRemoteAcknowledge = (eventData, type) => {
   const person = personMap.value.get(eventData.person_id)
   if (!comment || !person) return
   const hasAck = comment.acknowledgements.includes(person.id)
-  // For the current user's own events, skip commits that would double
-  // apply an acknowledgement already reflected locally.
-  if (user.value.id !== person.id || (type === 'ack') !== hasAck) {
+  // The event may be applied already: by the user's own click, or by the
+  // panel a player holds for its full screen comments, which gets it too.
+  if ((type === 'ack') !== hasAck) {
     store.commit('ACK_COMMENT', { comment, user: person })
   }
 }

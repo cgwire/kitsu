@@ -49,7 +49,7 @@
               type="episode"
               :production-id="currentProduction?.id"
               @remove-search="removeSearchQuery"
-              v-if="!isEpisodesLoading && !initialLoading"
+              v-if="!isLoading && !initialLoading && !isLoadingError"
             />
           </div>
         </div>
@@ -63,9 +63,9 @@
           ref="episode-list"
           :displayed-episodes="displayedEpisodes"
           :display-settings="displaySettings"
-          :is-loading="isEpisodesLoading || initialLoading"
-          :is-error="isEpisodesLoadingError"
-          :validation-columns="episodeValidationColumns"
+          :is-loading="isLoading || initialLoading"
+          :is-error="isLoadingError"
+          :validation-columns="validationColumns"
           :department-filter="departmentFilter"
           @add-episodes="showNewModal"
           @add-metadata="onAddMetadataClicked"
@@ -78,7 +78,7 @@
           @edit-metadata="onEditMetadataClicked"
           @field-changed="onFieldChanged"
           @metadata-changed="onMetadataChanged"
-          @scroll="saveScrollPosition"
+          @scroll="onListScroll"
           @keep-task-panel-open="onKeepTaskPanelOpenChanged"
         />
       </div>
@@ -198,6 +198,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useEntityPage } from '@/composables/entityPage'
+import { logRequestFailure } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
 import EpisodeList from '@/components/lists/EpisodeList.vue'
@@ -229,6 +230,10 @@ const listRef = useTemplateRef('episode-list')
 const searchFieldRef = useTemplateRef('episode-search-field')
 
 const initialLoading = ref(true)
+// No store action flags a load of this list or its failure.
+const isLoading = ref(false)
+const isLoadingError = ref(false)
+let lastLoadId = 0
 
 // Computed
 // --------------------------------------------------------------------------
@@ -242,13 +247,14 @@ const episodeSorting = computed(() => store.getters.episodeSorting)
 const episodeValidationColumns = computed(
   () => store.getters.episodeValidationColumns
 )
+// After a failed load, the store still holds the columns of the production
+// left.
+const validationColumns = computed(() =>
+  isLoadingError.value ? [] : episodeValidationColumns.value
+)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
-)
-const isEpisodesLoading = computed(() => store.getters.isEpisodesLoading)
-const isEpisodesLoadingError = computed(
-  () => store.getters.isEpisodesLoadingError
 )
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const user = computed(() => store.getters.user)
@@ -256,12 +262,26 @@ const user = computed(() => store.getters.user)
 // Functions
 // --------------------------------------------------------------------------
 
+const loadList = () => {
+  const loadId = ++lastLoadId
+  isLoading.value = true
+  isLoadingError.value = false
+  return store
+    .dispatch('loadEpisodesWithTasks')
+    .catch(err => {
+      // An older load may fail after a newer one, of this production or of
+      // another, succeeded.
+      if (loadId === lastLoadId) isLoadingError.value = true
+      logRequestFailure(err)
+    })
+    .finally(() => {
+      if (loadId === lastLoadId) isLoading.value = false
+    })
+}
+
 const reset = () => {
   initialLoading.value = false
-  store.dispatch('loadEpisodesWithTasks', err => {
-    if (err) console.error(err)
-    initialLoading.value = false
-  })
+  loadList()
 }
 
 const {
@@ -318,6 +338,11 @@ const {
 
 const showNewModal = () => onEditClicked()
 
+// Hiding the rows during a load scrolls the list back to the top.
+const onListScroll = position => {
+  if (!isLoading.value) saveScrollPosition(position)
+}
+
 const confirmEditEpisode = async form => {
   loading.edit = true
   errors.edit = false
@@ -358,11 +383,14 @@ watch(currentProduction, () => {
   reset()
 })
 
-watch(isEpisodesLoading, isLoading => {
-  if (isLoading) return
+watch(isLoading, () => {
+  if (isLoading.value) return
   initialLoading.value = false
-  nextTick(() => applySearchFromUrl())
-  setScrollPosition()
+  // The rows come back with the next render: the list can scroll then.
+  nextTick(() => {
+    applySearchFromUrl()
+    setScrollPosition()
+  })
 })
 
 // Lifecycle
@@ -397,14 +425,10 @@ onMounted(() => {
     episodeMap.value.values().next().value?.project_id !==
       currentProduction.value.id
   ) {
-    store
-      .dispatch('loadEpisodesWithTasks')
-      .then(() => {
-        setTimeout(finalize, 200)
-      })
-      .catch(console.error)
+    loadList().then(() => {
+      setTimeout(finalize, 200)
+    })
   } else {
-    if (!isEpisodesLoading.value) initialLoading.value = false
     finalize()
   }
 })

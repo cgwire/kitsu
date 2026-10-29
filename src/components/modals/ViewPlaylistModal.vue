@@ -38,18 +38,22 @@
         </div>
       </div>
 
-      <edit-playlist-modal
-        :active="modals.edit"
-        :is-loading="loading.edit"
-        :is-error="errors.edit"
-        :is-success="editSuccess"
-        :success-text="successText"
-        :playlist-to-edit="playlistToEdit"
-        :type-disabled="true"
-        @confirm="savePlaylist"
-        @view="onViewCreatedPlaylist"
-        @cancel="closeEditModal"
-      />
+      <!-- The browser shows a player in full screen alone: the save form
+           of its Save button goes into it. -->
+      <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
+        <edit-playlist-modal
+          :active="modals.edit"
+          :is-loading="loading.edit"
+          :is-error="errors.edit"
+          :is-success="editSuccess"
+          :success-text="successText"
+          :playlist-to-edit="playlistToEdit"
+          :type-disabled="true"
+          @confirm="savePlaylist"
+          @view="onViewCreatedPlaylist"
+          @cancel="closeEditModal"
+        />
+      </teleport>
     </div>
   </teleport>
 </template>
@@ -72,6 +76,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useFullScreenTarget } from '@/composables/fullScreen'
 import { useModal } from '@/composables/modal'
 import { usePhoneLayout } from '@/composables/phoneLayout'
 import crisp from '@/lib/crisp'
@@ -125,6 +130,7 @@ const modals = ref({ edit: false })
 const editSuccess = ref(false)
 const createdPlaylist = ref(null)
 const playlistPlayer = ref(null)
+const fullScreenPlayer = useFullScreenTarget(() => playlistPlayer.value?.$el)
 const playlistToEdit = ref({})
 let previewFileMap = new Map()
 let previewFileEntityMap = new Map()

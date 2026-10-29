@@ -97,6 +97,8 @@ const actions = {
 
   async resetChangePassword({ commit }, { email, token, password, password2 }) {
     await auth.resetChangePassword(email, token, password, password2)
+    // Filled in on the login page the reset page leads to.
+    commit(CHANGE_EMAIL, email)
     commit(LOGIN_SUCCESS)
   }
 }

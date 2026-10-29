@@ -14,6 +14,8 @@ import '@/lib/auth'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ActionPanel from '@/components/tops/ActionPanel.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
 import Comment from '@/components/widgets/Comment.vue'
@@ -23,6 +25,7 @@ import i18n, { loadLocaleMessages } from '@/lib/i18n'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotStore from '@/store/modules/shots'
 
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
 
 // The eleven events the panel declares through its socketEvents table.
@@ -150,11 +153,14 @@ const mountPanel = async ({
         // reset() focuses the player and the timecode handler seeks it;
         // the default stub carries neither method.
         PreviewPlayer: {
-          props: ['fps', 'previews', 'readOnly'],
+          props: ['canComment', 'fps', 'previews', 'readOnly'],
           template: '<div />',
           methods: { focus: () => {}, setCurrentFrame: () => {} }
         },
         RouterLink: RouterLinkStub,
+        // The shallow stub drops the modals the player opens: they stay in
+        // the panel, or go into the player in full screen.
+        teleport: false,
         // Provided by the animxyz plugin, which the specs do not install.
         XyzTransitionGroup: { template: '<div><slot /></div>' },
         ...stubs
@@ -843,6 +849,17 @@ describe('TaskInfo.vue', () => {
       expect(playerFps(wrapper)).toBe(30)
     })
 
+    it('keeps a fractional production fps', async () => {
+      const { wrapper } = await mountPanel({
+        previews,
+        getterOverrides: {
+          productionMap: () =>
+            new Map([['production-1', { fps: '23.976' }]])
+        }
+      })
+      expect(playerFps(wrapper)).toBe(23.976)
+    })
+
     it('lets the entity override the production fps', async () => {
       // The video was rendered at the entity rate; using the production one
       // would duplicate or drop frames in the player.
@@ -862,6 +879,16 @@ describe('TaskInfo.vue', () => {
         }
       })
       expect(playerFps(wrapper)).toBe(DEFAULT_FPS)
+    })
+
+    it('keeps the decimals of a production fps', async () => {
+      const { wrapper } = await mountPanel({
+        previews,
+        getterOverrides: {
+          productionMap: () => new Map([['production-1', { fps: '29.97' }]])
+        }
+      })
+      expect(playerFps(wrapper)).toBe(29.97)
     })
   })
 
@@ -900,6 +927,18 @@ describe('TaskInfo.vue', () => {
         }
       })
       expect(isReadOnly(wrapper)).toBe(false)
+    })
+
+    // Annotating and commenting are two rights: the player shows its
+    // comments in full screen to whoever can comment here.
+    it.each([
+      ['a plain artist', false, {}],
+      ['an assigned artist', true, { task: buildTask({ assignees: [USER_ID] }) }]
+    ])('lets %s comment in the player: %s', async (_, canComment, options) => {
+      const { wrapper } = await mountPanel({ previews, ...options })
+      expect(wrapper.findComponent(PreviewPlayer).props('canComment')).toBe(
+        canComment
+      )
     })
 
     it('is read only for the supervisor of another department', async () => {
@@ -1545,6 +1584,46 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  // The panel PreviewPlayer holds for its full screen comments gets the
+  // events of the panel or page around it.
+  describe('comment:acknowledge', () => {
+    const TEAMMATE_ID = 'person-2'
+
+    it.each([
+      ['comment:acknowledge', [], [TEAMMATE_ID]],
+      ['comment:unacknowledge', [TEAMMATE_ID], []]
+    ])(
+      'applies a %s of a teammate once, however many panels get it',
+      async (event, acknowledgements, expected) => {
+        const comment = { id: 'comment-1', acknowledgements }
+        const { socket, store } = await mountPanel({
+          getterOverrides: {
+            getTaskComment: () => () => comment,
+            personMap: () => new Map([[TEAMMATE_ID, { id: TEAMMATE_ID }]])
+          }
+        })
+        // The toggle of the ACK_COMMENT mutation.
+        store.commit.mockImplementation((type, { user }) => {
+          if (type === 'ACK_COMMENT') {
+            comment.acknowledgements = comment.acknowledgements.includes(
+              user.id
+            )
+              ? comment.acknowledgements.filter(id => id !== user.id)
+              : [...comment.acknowledgements, user.id]
+          }
+        })
+        const [, handler] = socket.on.mock.calls.find(
+          ([name]) => name === event
+        )
+
+        handler({ comment_id: comment.id, person_id: TEAMMATE_ID })
+        handler({ comment_id: comment.id, person_id: TEAMMATE_ID })
+
+        expect(comment.acknowledgements).toEqual(expected)
+      }
+    )
+  })
+
   describe('preview-file:update', () => {
     const emitPreviewFileUpdate = async (socket, eventData) => {
       const [, onRemotePreviewUpdate] = socket.on.mock.calls.find(
@@ -1629,6 +1708,76 @@ describe('TaskInfo.vue', () => {
         expect.anything()
       )
     })
+  })
+
+  describe('full screen', () => {
+    const previews = [
+      { id: 'preview-1', revision: 1, extension: 'png', previews: ['p-1'] }
+    ]
+
+    const mountWithModals = () =>
+      mountPanel({
+        previews,
+        stubs: {
+          AddPreviewModal: {
+            props: ['active'],
+            template: '<div />',
+            methods: { reset: () => {} }
+          }
+        }
+      })
+
+    const openModal = async (wrapper, event, Modal) => {
+      wrapper.findComponent(PreviewPlayer).vm.$emit(event, { id: 'preview-1' })
+      await flushPromises()
+      return wrapper
+        .findAllComponents(Modal)
+        .find(modal => modal.props('active'))
+    }
+
+    afterEach(() => {
+      resetFullScreen()
+    })
+
+    // The browser shows the player alone: the modals of its "+" and trash
+    // buttons go into it, and come back to the panel once it ends.
+    it.each([
+      ['add-extra-preview', AddPreviewModal],
+      ['remove-extra-preview', DeleteModal]
+    ])('opens the %s modal in the player', async (event, Modal) => {
+      const { wrapper } = await mountWithModals()
+      const player = wrapper.findComponent(PreviewPlayer).element
+      setFullScreenElement(player)
+
+      const modal = await openModal(wrapper, event, Modal)
+      expect(player.contains(modal.element)).toBe(true)
+
+      setFullScreenElement(null)
+      await flushPromises()
+      expect(player.contains(modal.element)).toBe(false)
+      expect(wrapper.element.contains(modal.element)).toBe(true)
+    })
+
+    // The modal plays the video picked for upload, which can go full screen
+    // on its own.
+    it.each([
+      ['in the panel', false],
+      ['in the player in full screen', true]
+    ])(
+      'keeps the modal %s when its video goes full screen',
+      async (_, isPlayerFullScreen) => {
+        const { wrapper } = await mountWithModals()
+        const player = wrapper.findComponent(PreviewPlayer).element
+        if (isPlayerFullScreen) setFullScreenElement(player)
+        const modal = await openModal(wrapper, 'add-extra-preview', AddPreviewModal)
+        const parent = modal.element.parentNode
+
+        const video = document.createElement('video')
+        setFullScreenElement(modal.element.appendChild(video))
+        await flushPromises()
+        expect(modal.element.parentNode).toBe(parent)
+      }
+    )
   })
 
   describe('player requests', () => {

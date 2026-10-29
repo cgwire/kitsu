@@ -1,5 +1,10 @@
 <template>
-  <div ref="container" class="preview-player dark" tabindex="-1">
+  <div
+    ref="container"
+    class="preview-player dark"
+    :class="{ 'keeps-comment-modal': !fullScreen && isCommentsShown }"
+    tabindex="-1"
+  >
     <div class="preview filler">
       <div class="flexrow filler">
         <div
@@ -99,6 +104,8 @@
               @panzoom-changed="onPanzoomChanged"
               @picture-loaded="onPreviewLoaded"
               @play-ended="pause"
+              @sound-duration-changed="onSoundDurationChanged"
+              @sound-time-update="onSoundTimeUpdate"
               @video-end="onVideoEnd"
               @video-loaded="onPreviewLoaded"
             />
@@ -149,6 +156,7 @@
         <task-info
           ref="task-info-player"
           class="flexrow-item task-info-column"
+          :class="{ 'is-collapsed': !fullScreen }"
           :current-frame="taskInfoFrame"
           :current-parent-preview="currentPreview"
           :entity-type="entityType"
@@ -160,8 +168,8 @@
           :task="task"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
-          v-show="!isCommentsHidden"
-          v-if="!readOnly && task?.id"
+          v-show="isCommentsShown"
+          v-if="(!readOnly || canComment) && task?.id"
         />
       </div>
     </div>
@@ -212,7 +220,6 @@
           v-model:volume="volume"
           @play-pause-clicked="onPlayPauseClicked"
           @repeat-clicked="onRepeatClicked"
-          @toggle-sound-clicked="onToggleSoundClicked"
         />
 
         <player-comparison-bar
@@ -245,6 +252,7 @@
         <div class="flexrow">
           <player-annotation-bar
             :background-options="backgroundOptions"
+            :can-comment="canComment"
             :full-screen="fullScreen"
             :is-3-d-model="is3DModel"
             :is-annotations-displayed="isAnnotationsDisplayed"
@@ -344,7 +352,7 @@
               is-reversed
               is-preview
               thin
-              :model-value="currentPreview?.id"
+              :model-value="currentRevisionPreviewId"
               @update:model-value="changeCurrentPreviewFile"
             />
           </div>
@@ -469,7 +477,8 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
-import { useFullScreen } from '@/composables/fullScreen'
+import { getFullScreenElement, useFullScreen } from '@/composables/fullScreen'
+import { isBehindModal, isModalOpenIn } from '@/composables/modal'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationCursor } from '@/composables/players/annotationCursor'
@@ -500,6 +509,7 @@ import {
   floorToFrame,
   formatFrame,
   formatTime,
+  formatToTimecode,
   frameStartTime,
   getEntityFrameStart,
   roundToFrame
@@ -532,6 +542,11 @@ const { t } = useI18n()
 
 const props = defineProps({
   big: {
+    type: Boolean,
+    default: false
+  },
+  // Commenting is a right of its own: readOnly is the right to annotate.
+  canComment: {
     type: Boolean,
     default: false
   },
@@ -666,6 +681,8 @@ const movieDimensions = ref({ width: 1920, height: 1080 })
 const objectBackgroundUrl = ref(null)
 const pencilPalette = ref(['huge', 'big', 'medium', 'small', 'tiny'])
 const pictureBackgroundColor = ref('#000000')
+const soundDuration = ref(0)
+const soundTime = ref(0)
 const videoDuration = ref(0)
 const width = ref(0)
 
@@ -1011,6 +1028,15 @@ const lastPreviewFileOptions = computed(() => {
     }))
 })
 
+// The options are the first files of the revisions: another file of a
+// revision stands for it by its revision number.
+const currentRevisionPreviewId = computed(
+  () =>
+    props.lastPreviewFiles.find(
+      preview => preview.revision === currentPreview.value?.revision
+    )?.id
+)
+
 const isComparisonEnabled = computed(() => fullScreen.value || props.extraWide)
 
 const nbFrames = computed(() => {
@@ -1074,7 +1100,7 @@ const setVideoFrameContext = frame => {
     const time = frame * frameDuration.value
     currentFrame.value = frame
     currentTimeRaw.value = time
-    currentTime.value = formatTime(time, fps.value)
+    currentTime.value = formatToTimecode(frame, fps.value)
     // While playing, the bar is driven smoothly by onVideoTimeUpdate; here we
     // only move it for paused stepping/seeking (avoids a per-frame jerk).
     if (!isPlaying.value) progress.value.updateProgressBar(frame)
@@ -1100,17 +1126,17 @@ const setVideoFrameContext = frame => {
 }
 
 // Player time → progress bar during playback. `time` carries the
-// mediaTime + frameDuration/2 convention offset, so a raw division parks the
+// mediaTime + half a frame convention offset, so a raw conversion parks the
 // fill at half-frame positions; quantize with the same ceil(...)+1 convention
 // as getFrameFromPlayer so the bar fills whole frames and doesn't jump when
 // pausing.
 const onVideoTimeUpdate = time => {
   if (!isPlaying.value) return
   if (pendingTrimSeek) {
-    if (time >= (trimStartFrame.value + 2) * frameDuration.value) return
+    if (time >= (trimStartFrame.value + 2) / fps.value) return
     pendingTrimSeek = false
   }
-  progress.value?.updateProgressBar(Math.ceil(time / frameDuration.value) + 1)
+  progress.value?.updateProgressBar(Math.ceil(time * fps.value) + 1)
 }
 
 const onSubPreviewsWheel = event => {
@@ -1179,14 +1205,28 @@ const changeMaxDuration = duration => {
     }
     duration = floorToFrame(duration, fps.value)
     videoDuration.value = duration
-    maxDuration.value = formatTime(
-      videoDuration.value - frameDuration.value,
-      fps.value
-    )
+    // The last frame the player shows: setVideoFrameContext stops there.
+    maxDuration.value = formatToTimecode(nbFrames.value - 1, fps.value)
   } else {
     maxDuration.value = '00:00:00:00'
     videoDuration.value = 0
   }
+}
+
+// Pausing a sound on a switch away sends its time once more, and a sound not
+// ready yet leaves the one before loaded under it.
+const onSoundTimeUpdate = time => {
+  if (!isSound.value || !isReady.value) return
+  currentTime.value = formatTime(time, fps.value)
+  soundTime.value = time
+}
+
+// A duration of 0 starts each load: the time restarts with the sound.
+const onSoundDurationChanged = duration => {
+  if (!isSound.value || !isReady.value) return
+  maxDuration.value = formatTime(duration, fps.value)
+  soundDuration.value = duration
+  if (!duration) soundTime.value = 0
 }
 
 const getCurrentTime = () => {
@@ -1240,7 +1280,8 @@ const play = () => {
         seekTrimStart()
       }
       previewViewer.value.play()
-      if (comparisonViewer.value && isComparing.value) {
+      // A movie that cannot be read ends its play at once.
+      if (isPlaying.value && comparisonViewer.value && isComparing.value) {
         comparisonViewer.value.play()
       }
     }
@@ -1266,9 +1307,25 @@ const pause = () => {
   }
 }
 
+// A sound has no frames of its own: the keys step it by a frame of the
+// production, up to the start of its last frame like a movie.
+const seekSoundFrame = frame => {
+  const lastFrame = Math.round(soundDuration.value * fps.value) - 1
+  if (lastFrame < 0) return
+  const target = Math.min(Math.max(frame, 0), lastFrame)
+  previewViewer.value?.setSoundTime(target / fps.value)
+}
+
+// The tolerance keeps a time read back from a frame seek on that frame.
+const currentSoundFrame = () => Math.floor(soundTime.value * fps.value + 0.001)
+
 // Past the ends of a movie, or on a picture, the viewer does not move and
 // no frame reloads the drawing: the canvas keeps it.
 const goPreviousFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(currentSoundFrame() - 1)
+    return
+  }
   if (currentFrame.value <= 0) return
   clearCanvas()
   previewViewer.value.goPreviousFrame()
@@ -1276,6 +1333,10 @@ const goPreviousFrame = () => {
 }
 
 const goNextFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(currentSoundFrame() + 1)
+    return
+  }
   if (currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   previewViewer.value.goNextFrame()
@@ -1283,6 +1344,10 @@ const goNextFrame = () => {
 }
 
 const goToFirstFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(0)
+    return
+  }
   if (!isMovie.value || currentFrame.value <= 0) return
   clearCanvas()
   setCurrentFrame(0)
@@ -1290,6 +1355,10 @@ const goToFirstFrame = () => {
 }
 
 const goToLastFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(Infinity)
+    return
+  }
   if (!isMovie.value || currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   setCurrentFrame(nbFrames.value - 1)
@@ -1499,11 +1568,6 @@ const onRepeatClicked = () => {
   localPreferences.setPreference('player:repeating', isRepeating.value)
 }
 
-const onToggleSoundClicked = () => {
-  clearFocus()
-  isMuted.value = !isMuted.value
-}
-
 // Screen
 
 const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
@@ -1512,7 +1576,12 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
     endAnnotationSaving()
     if (!nowFullScreen) {
       isComparing.value = false
-      isCommentsHidden.value = true
+      // Chrome leaves the full screen to show a file chooser: the modal
+      // that opened it stays on screen, to bring it back, and the comments
+      // keep their state for that return.
+      if (!isModalOpenIn(container.value)) {
+        isCommentsHidden.value = true
+      }
     }
     nextTick(() => {
       clearFocus()
@@ -1535,6 +1604,26 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
     }, RESIZE_DELAY)
   }
 })
+
+// Out of full screen, the comments panel only shows for its open modal.
+const isCommentModalOpen = computed(() =>
+  isModalOpenIn(commentContainer.value?.$el)
+)
+const isCommentsShown = computed(
+  () =>
+    !isCommentsHidden.value && (fullScreen.value || isCommentModalOpen.value)
+)
+
+// The comments kept for the return of the full screen belong to its task,
+// unless a modal of theirs is still open.
+watch(
+  () => props.task?.id,
+  () => {
+    if (!fullScreen.value && !isCommentModalOpen.value) {
+      isCommentsHidden.value = true
+    }
+  }
+)
 
 const onFullscreenClicked = () => {
   if (fullScreen.value) {
@@ -1994,7 +2083,11 @@ const { isAltHeld } = usePreviewShortcuts({
   onPrevPreview: () => onPreviousClicked(),
   onNextPreview: () => onNextClicked(),
   onCopy: () => copyAnnotations(),
-  onPaste: () => pasteAnnotations(),
+  // The canvas shows over movies and pictures only: a paste anywhere else
+  // would save annotations that nothing shows again.
+  onPaste: () => {
+    if (isMovie.value || isPicture.value) pasteAnnotations()
+  },
   onToggleOverlay: () => toggleFullOverlay()
 })
 
@@ -2012,10 +2105,11 @@ const onCommentClicked = () => {
   isCommentsHidden.value = !isCommentsHidden.value
   if (!isCommentsHidden.value) {
     commentContainer.value.$el.style.height = `${height}px`
-    commentContainer.value.focusCommentTextarea()
   }
   endAnnotationSaving()
   nextTick(() => {
+    // Once shown: a hidden box takes no focus.
+    if (!isCommentsHidden.value) commentContainer.value?.focusCommentTextarea()
     previewViewer.value?.resize()
     comparisonViewer.value?.resize()
     loadAnnotation()
@@ -2243,6 +2337,9 @@ const onFocusToggle = event => {
     '.preview-player, .playlist-player'
   )
   if (closestPlayer && closestPlayer !== container.value) return
+  // An open modal keeps its own Shift+Tab, even the "+" one that the player
+  // holds in full screen.
+  if (isBehindModal(container.value)) return
   const active = document.activeElement
   if (active?.closest?.('.add-comment')) {
     event.preventDefault()
@@ -2254,10 +2351,20 @@ const onFocusToggle = event => {
   // one in a collapsed side panel, another in the visible one). Pick
   // the first visible & enabled textarea — focus on a hidden one is
   // a no-op and leaves the user stuck where they were.
+  // The browser shows the element in full screen alone: a box of the page
+  // behind it would take the keys out of sight.
+  const root = getFullScreenElement() ?? document
   const commentTextarea = Array.from(
-    document.querySelectorAll('.add-comment textarea')
+    root.querySelectorAll('.add-comment textarea')
   ).find(ta => ta.offsetParent !== null && !ta.disabled)
-  if (!commentTextarea) return
+  if (!commentTextarea) {
+    if (fullScreen.value && isCommentsHidden.value && commentContainer.value) {
+      event.preventDefault()
+      event.stopPropagation()
+      onCommentClicked()
+    }
+    return
+  }
   event.preventDefault()
   event.stopPropagation()
   // Focus synchronously and once more on the next tick to outlast
@@ -2333,6 +2440,15 @@ watch(currentPreview, (newPreview, oldPreview) => {
   currentFrame.value = 0
   currentTimeRaw.value = 0
   currentTime.value = formatTime(0, fps.value)
+  // A sound not ready yet loads nothing that would reset these, and a reload
+  // of the same preview keeps its sound loaded.
+  if (isSound.value && newPreview?.id !== oldPreview?.id) {
+    // Another sound ends the play, as another movie does.
+    pause()
+    maxDuration.value = '00:00:00:00'
+    soundDuration.value = 0
+    soundTime.value = 0
+  }
   if (isMovie.value) {
     configureVideo()
     pause()
@@ -2546,6 +2662,9 @@ watch(speed, () => {
 watch(volume, () => {
   previewViewer.value?.setVolume(volume.value)
   localPreferences.setPreference('player:volume', volume.value)
+  // The playlist player shares both keys, and may store its mute from a modal
+  // open over this one.
+  localPreferences.setPreference('player:muted', isMuted.value)
 })
 
 // The viewers reload their source on a quality switch: onPreviewLoaded then
@@ -2555,11 +2674,14 @@ watch(isHd, () => {
   if (isMovie.value) isQualitySwitchPending = true
 })
 
-// Persist through a watcher: ButtonSound drives isMuted via v-model and
-// never emits change-sound, so a click handler on the toggle chain never
-// runs and the preference was never written.
+// Persist through a watcher: ButtonSound drives isMuted via v-model.
 watch(isMuted, () => {
   localPreferences.setPreference('player:muted', isMuted.value)
+  // An unmute may give back the volume the player already has, which stores
+  // nothing: the 0 of the mute would come back on the next visit.
+  if (!isMuted.value) {
+    localPreferences.setPreference('player:volume', volume.value)
+  }
 })
 
 // Lifecycle
@@ -2582,15 +2704,16 @@ onMounted(() => {
     onObjectBackgroundSelected()
   }
 
-  if (isMuted.value) {
-    previewViewer.value?.setVolume(0)
-  } else {
-    volume.value = localPreferences.getIntPreference(
-      'player:volume',
+  // The mute goes through isMuted: a 0 set here outlived the unmute, which
+  // gives back the volume the player already has. A muted visit leaves aside
+  // the stored volume, the 0 the mute set; unmuted, a stored 0 is what such
+  // an unmute left before it stored its volume, and the default stands in.
+  if (!isMuted.value) {
+    volume.value =
+      localPreferences.getIntPreference('player:volume', volume.value) ||
       volume.value
-    )
-    previewViewer.value?.setVolume(volume.value)
   }
+  previewViewer.value?.setVolume(volume.value)
 
   reloadAnnotations()
   loadAnnotation()
@@ -2817,6 +2940,12 @@ defineExpose({
   box-shadow: 0 0 4px #0007;
   min-height: 200px;
 
+  // WebKit lays a fixed element out in the size container holding it: the
+  // comments modal kept out of full screen would show in the player box.
+  &.keeps-comment-modal {
+    container-type: normal;
+  }
+
   .preview {
     position: relative;
     align-items: flex-start;
@@ -2900,8 +3029,14 @@ defineExpose({
   background: $dark-grey-2;
 }
 
+// The name gives way first on a narrow full screen: the buttons after it
+// stay on the screen.
 .entity-name {
   color: $light-grey;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .task-info-column {
@@ -2909,6 +3044,14 @@ defineExpose({
   max-width: 450px;
   overflow-y: auto;
   height: 90vh;
+
+  // Out of full screen, it only keeps its open modal, which is fixed on the
+  // screen whatever the size of the panel.
+  &.is-collapsed {
+    max-height: 0;
+    max-width: 0;
+    min-width: 0;
+  }
 }
 
 .preview-container {

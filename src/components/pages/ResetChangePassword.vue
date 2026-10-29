@@ -4,11 +4,7 @@
       <div class="box has-text-left">
         <div class="has-text-centered">
           <h1 class="title">
-            {{
-              isNew
-                ? $t('login.set_password_title')
-                : $t('login.reset_change_password_title')
-            }}
+            {{ title }}
           </h1>
         </div>
 
@@ -73,7 +69,7 @@
           {{ $t('login.reset_change_password_succeed') }}
         </p>
         <p class="has-text-centered mt2" v-if="isSuccess">
-          {{ $t('login.redirecting', { secondsLeft }) }}
+          {{ $t('login.redirecting', { count: secondsLeft }) }}
         </p>
         <p class="has-text-centered mt2">
           <router-link :to="{ name: 'login' }">
@@ -126,13 +122,19 @@ let redirectInterval = null
 // --------------------------------------------------------------------------
 
 const isNew = computed(() => route.query.type === 'new')
+const title = computed(() =>
+  isNew.value
+    ? t('login.set_password_title')
+    : t('login.reset_change_password_title')
+)
 
 // Functions
 // --------------------------------------------------------------------------
 
 const confirmResetChangePassword = async () => {
-  // Enter in a field submits too, whatever the button shows.
-  if (isLoading.value) return
+  // Enter in a field submits too, whatever the button shows, and Zou spends
+  // the token on the first success.
+  if (isLoading.value || isSuccess.value) return
   isError.value = false
   isFormError.value = false
   isTokenError.value = false
@@ -141,7 +143,6 @@ const confirmResetChangePassword = async () => {
     return
   }
   isLoading.value = true
-  isSuccess.value = false
   try {
     await store.dispatch('resetChangePassword', {
       email: route.query.email,
@@ -182,7 +183,7 @@ onBeforeUnmount(() => {
 // Head
 // --------------------------------------------------------------------------
 
-useHead({ title: computed(() => t('login.reset_change_password_title')) })
+useHead({ title })
 </script>
 
 <style lang="scss" scoped>

@@ -16,16 +16,19 @@
       class="flexrow-item"
       :options="available3DAnimations"
       :is-dark="true"
+      is-reversed
+      keep-order
       :thin="true"
       v-model="current3DAnimation"
       v-if="is3DModel && is3DAnimation"
     />
   </div>
 
-  <div class="left flexrow" v-if="isMovie && !compact">
+  <div class="left flexrow" v-if="(isMovie || isSound) && !compact">
     <template v-if="!phone">
       <span
         class="flexrow-item time-indicator current-time"
+        :class="{ 'narrow-hidden': isMovie }"
         :title="$t('playlists.actions.current_time')"
       >
         {{ currentTime }}
@@ -43,11 +46,12 @@
     <div
       class="flexrow-item time-indicator mr1 nowrap"
       :title="$t('playlists.actions.frame_number')"
+      v-if="isMovie"
     >
       {{ frameIndicator }}
     </div>
 
-    <template v-if="!phone">
+    <template v-if="(isMovie || isSound) && !phone">
       <div class="separator"></div>
 
       <button-simple
@@ -66,10 +70,10 @@
         "
         :text="isHd ? 'HD' : 'LD'"
         @click="isHd = !isHd"
-        v-if="!light || fullScreen"
+        v-if="isMovie && (!light || fullScreen)"
       />
 
-      <speed-button class="flexrow-item" v-model="speed" />
+      <speed-button class="flexrow-item" v-model="speed" v-if="isMovie" />
 
       <button-simple
         class="flexrow-item"
@@ -78,13 +82,14 @@
         icon="triangle"
         @click="isShowAnnotationsWhilePlaying = !isShowAnnotationsWhilePlaying"
         v-if="
-          isShowAnnotationsWhilePlaying !== undefined && (!light || fullScreen)
+          isMovie &&
+          isShowAnnotationsWhilePlaying !== undefined &&
+          (!light || fullScreen)
         "
       />
 
       <button-sound
         class="flexrow-item"
-        @change-sound="$emit('toggle-sound-clicked')"
         v-model:muted="isMuted"
         v-model:volume="volume"
       />
@@ -95,7 +100,9 @@
         :title="$t('playlists.actions.toggle_waveform')"
         icon="waveform"
         @click="isWaveformDisplayed = !isWaveformDisplayed"
-        v-if="isWaveformDisplayed !== undefined && (!light || fullScreen)"
+        v-if="
+          isMovie && isWaveformDisplayed !== undefined && (!light || fullScreen)
+        "
       />
     </template>
   </div>
@@ -186,7 +193,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['play-pause-clicked', 'repeat-clicked', 'toggle-sound-clicked'])
+defineEmits(['play-pause-clicked', 'repeat-clicked'])
 
 const current3DAnimation = defineModel('current3DAnimation', {
   type: String,
@@ -234,10 +241,10 @@ const frameIndicator = computed(() => {
   margin-right: 0;
 }
 
-// Hide the timecode when PreviewPlayer is narrow — the frame counter
-// next to it carries enough position info on its own.
+// Hide the timecode of a movie when PreviewPlayer is narrow: the frame
+// counter next to it carries enough position info on its own.
 @container preview-player (max-width: 600px) {
-  .current-time {
+  .narrow-hidden {
     display: none;
   }
 }

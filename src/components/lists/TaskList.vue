@@ -451,6 +451,10 @@ import { useFormat } from '@/composables/format'
 import { useGrabList } from '@/composables/grabList'
 import { useTaskListSelection } from '@/composables/taskSelection'
 import {
+  getEstimationsCsvLabelKeys,
+  getEstimationsParentField
+} from '@/lib/csv'
+import {
   getMetadataFieldValue,
   isSupervisorInDepartments
 } from '@/lib/descriptors'
@@ -639,6 +643,13 @@ const isSequences = computed(() => props.entityType === 'Sequence')
 const isShots = computed(() => props.entityType === 'Shot')
 
 const entityMap = computed(() => getEntityMap(props.entityType))
+
+const exportLabelKeys = computed(() =>
+  getEstimationsCsvLabelKeys(props.entityType, {
+    isPaperProduction: isPaperProduction.value,
+    isTVShow: isTVShow.value
+  })
+)
 
 const displayedTasks = computed(() => props.tasks.slice(0, 60 * page.value))
 
@@ -991,18 +1002,19 @@ const onMetadataChanged = ({ entry, descriptor, value }) => {
 }
 
 const getTableData = () => {
+  const labelKeys = exportLabelKeys.value
   const headers = [
-    isAssets.value ? t('tasks.fields.asset_type') : t('tasks.fields.sequence'),
-    t('tasks.fields.entity_name'),
+    ...(labelKeys.Parent ? [t(labelKeys.Parent)] : []),
+    t(labelKeys.Entity),
     t('tasks.fields.task_status'),
     t('tasks.fields.assignees'),
-    t('tasks.fields.difficulty'),
-    t('tasks.fields.estimation'),
+    t(labelKeys.Difficulty),
+    t(labelKeys.Estimation),
     t('tasks.fields.duration'),
     t('tasks.fields.retake_count'),
     ...props.metadataDescriptors.map(descriptor => descriptor.name),
-    t('tasks.fields.start_date'),
-    t('tasks.fields.due_date'),
+    t(labelKeys['Start date']),
+    t(labelKeys['Due date']),
     t('tasks.fields.real_start_date'),
     t('tasks.fields.real_end_date'),
     t('tasks.fields.done_date'),
@@ -1011,7 +1023,7 @@ const getTableData = () => {
   if (isShots.value) {
     const value = !isPaperProduction.value
       ? t('tasks.fields.frames')
-      : t('tasks.fields.drawings')
+      : t(labelKeys.Drawings)
     headers.splice(4, 0, value)
   }
   const taskLines = [headers]
@@ -1023,7 +1035,9 @@ const getTableData = () => {
       .join(', ')
 
     const line = [
-      isAssets.value ? entity.asset_type_name : entity.sequence_name,
+      ...(labelKeys.Parent
+        ? [entity[getEstimationsParentField(props.entityType)]]
+        : []),
       entity.name,
       task.task_status_short_name,
       assignees,

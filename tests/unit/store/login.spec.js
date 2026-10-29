@@ -4,7 +4,7 @@ import { vi } from 'vitest'
 
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@/lib/auth', () => ({
-  default: { logIn: vi.fn(), logout: vi.fn() }
+  default: { logIn: vi.fn(), logout: vi.fn(), resetChangePassword: vi.fn() }
 }))
 
 import auth from '@/lib/auth'
@@ -45,6 +45,25 @@ describe('Login store', () => {
       const committed = commit.mock.calls.map(c => c[0])
       expect(committed).toContain('LOGIN_FAILURE')
       expect(committed).not.toContain('LOGIN_SUCCESS')
+    })
+  })
+
+  describe('resetChangePassword action', () => {
+    test('fills in the login email once the password is set', async () => {
+      auth.resetChangePassword.mockResolvedValue({ success: true })
+      const commit = vi.fn()
+
+      await loginStore.actions.resetChangePassword(
+        { commit },
+        {
+          email: 'jane@studio.com',
+          token: 'token-1',
+          password: 'a strong password',
+          password2: 'a strong password'
+        }
+      )
+
+      expect(commit).toHaveBeenCalledWith('CHANGE_EMAIL', 'jane@studio.com')
     })
   })
 
