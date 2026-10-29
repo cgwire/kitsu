@@ -6,7 +6,8 @@
 
 export const DEFAULT_MODE = 'prev'
 export const DEFAULT_VERSION = 'ref'
-export const DEFAULT_ZOOM = 1
+// the week view, see zoomOptions in the page
+export const DEFAULT_ZOOM = 0
 
 // Query params
 // --------------------------------------------------------------------------
@@ -103,6 +104,34 @@ export const setTaskTypeVisibility = (
 export const refreshRawDates = item => {
   item.start_date = item.startDate.format('YYYY-MM-DD')
   item.end_date = item.endDate.format('YYYY-MM-DD')
+}
+
+// The rows of a task type bar, the tasks of a row (one array per
+// assignee), nothing under a task.
+export const subItemsOf = item =>
+  Array.isArray(item.children)
+    ? item.children
+    : item.children instanceof Map
+      ? Array.from(item.children.values()).flat()
+      : []
+
+// The sub-items a drag moved from where the widget stamped them. A task
+// with several assignees sits in several arrays: listed once.
+export const movedSubItems = item => {
+  const moved = new Set()
+  const walk = parent =>
+    subItemsOf(parent).forEach(child => {
+      if (
+        child._dragOrigStartDate &&
+        (!child.startDate.isSame(child._dragOrigStartDate) ||
+          !child.endDate.isSame(child._dragOrigEndDate))
+      ) {
+        moved.add(child)
+      }
+      walk(child)
+    })
+  walk(item)
+  return [...moved]
 }
 
 export const getMinDate = (parentElement, fallbackDate) => {

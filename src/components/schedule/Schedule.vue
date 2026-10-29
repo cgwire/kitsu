@@ -182,6 +182,40 @@
                     />
                     {{ rootElement.people[personId].full_name }}
                   </div>
+                  <div
+                    class="subchild-label empty"
+                    v-if="!childElement.children.size"
+                  >
+                    <template v-if="childElement.nbUndatedTasks">
+                      {{
+                        $t('schedule.nb_undated_tasks', {
+                          count: childElement.nbUndatedTasks
+                        })
+                      }}
+                      <button
+                        class="button is-small is-link plan-entity"
+                        type="button"
+                        @click="$emit('plan-entity', rootElement, childElement)"
+                        v-if="reassignable"
+                      >
+                        {{ $t(planEntityLabelKey(rootElement)) }}
+                      </button>
+                    </template>
+                    <template v-else-if="childElement.nbTasksOutOfRange">
+                      {{
+                        $t('schedule.nb_tasks_out_of_range', {
+                          count: childElement.nbTasksOutOfRange
+                        })
+                      }}
+                    </template>
+                    <template v-else>{{ $t('schedule.no_task') }}</template>
+                  </div>
+                </div>
+                <div
+                  class="child child-empty"
+                  v-if="!rootElement.children.length"
+                >
+                  {{ $t('schedule.no_task') }}
                 </div>
               </template>
               <template v-else-if="!multiline">
@@ -515,6 +549,10 @@
                 >
                   <!-- to invert odd/event line color -->
                 </div>
+                <div
+                  class="entity-line child-line empty"
+                  v-if="subchildren && !rootElement.children.length"
+                ></div>
                 <template
                   v-if="
                     dropTarget.rootElementId === rootElement.id &&
@@ -547,269 +585,38 @@
                     {{ $t(`schedule.drop_forbidden_${dropTarget.forbidden}`) }}
                   </span>
                 </div>
-                <div
-                  class="entity-line child-line"
-                  :class="{ multiline }"
+                <schedule-entity-row
                   :key="`entity-line-${childElement.id}`"
-                  :style="{
-                    ...(multiline && timelineMultilineStyle(childElement)),
-                    ...(subchildren && timelineSubchildrenStyle(childElement))
-                  }"
                   v-for="childElement in rootElement.children"
-                  v-show="!rootElement.loading"
-                >
-                  <template v-if="withStatuses">
-                    <span
-                      class="status-date status-date-wip"
-                      :class="{
-                        'status-date-gap':
-                          childElement.real_start_date.slice(0, 10) ===
-                            childElement.end_date?.slice(0, 10) ||
-                          childElement.real_start_date.slice(0, 10) ===
-                            childElement.done_date?.slice(0, 10)
-                      }"
-                      :style="dateStatusStyle(childElement.real_start_date)"
-                      :title="statuses.wip.name"
-                      v-if="childElement.real_start_date"
-                    >
-                    </span>
-                    <span
-                      class="status-date status-date-wfa"
-                      :class="{
-                        'status-date-gap':
-                          childElement.end_date.slice(0, 10) ===
-                            childElement.real_start_date?.slice(0, 10) ||
-                          childElement.end_date.slice(0, 10) ===
-                            childElement.done_date?.slice(0, 10)
-                      }"
-                      :style="dateStatusStyle(childElement.end_date)"
-                      :title="statuses.wfa.name"
-                      v-if="childElement.end_date"
-                    >
-                    </span>
-                    <span
-                      class="status-date status-date-done"
-                      :class="{
-                        'status-date-gap':
-                          childElement.done_date.slice(0, 10) ===
-                            childElement.real_start_date?.slice(0, 10) ||
-                          childElement.done_date.slice(0, 10) ===
-                            childElement.end_date?.slice(0, 10)
-                      }"
-                      :style="dateStatusStyle(childElement.done_date)"
-                      :title="statuses.done.name"
-                      v-if="childElement.done_date"
-                    >
-                    </span>
-                  </template>
-
-                  <template v-if="withTimesheets && rootElement.timesheet">
-                    <div
-                      class="timesheet"
-                      :style="
-                        timesheetStyle(
-                          timesheet,
-                          childElement,
-                          rootElement,
-                          withEstimations
-                        )
-                      "
-                      :title="`${formatDuration(timesheet.duration)} ${isDurationInHours ? $t('main.hours_spent', { count: formatDuration(timesheet.duration, false) }) : $t('main.days_spent', { count: formatDuration(timesheet.duration, false) })}`"
-                      :key="timesheet.id"
-                      v-for="timesheet in taskTimesheets(
+                  :root-element="rootElement"
+                  :child-element="childElement"
+                  :multiline="multiline"
+                  :subchildren="subchildren"
+                  :reassignable="reassignable"
+                  :with-estimations="withEstimations"
+                  :with-ghosts="withGhosts"
+                  :with-statuses="withStatuses"
+                  :with-timesheets="withTimesheets"
+                  v-bind="rowSelection(childElement)"
+                  @bar-down="moveTimebar"
+                  @left-handle-down="moveTimebarLeftSide"
+                  @right-handle-down="moveTimebarRightSide"
+                  @bar-click="onChildBarClick(rootElement, childElement)"
+                  @bar-enter="$emit('item-selected', rootElement, childElement)"
+                  @task-click="
+                    task => onTaskBarClick(rootElement, childElement, task)
+                  "
+                  @task-enter="
+                    task =>
+                      $emit(
+                        'task-selected',
                         rootElement,
-                        childElement.id
-                      )"
-                    ></div>
-                  </template>
-
-                  <div
-                    class="timebar timebar-ghost timebar-ghost-before"
-                    :title="`${childElement.previousElement.name} (${displayDate(childElement.previousElement.startDate)} - ${displayDate(childElement.previousElement.endDate)})`"
-                    :class="{
-                      'with-timesheets': withTimesheets
-                    }"
-                    :style="
-                      timebarChildStyle(
-                        childElement.previousElement,
-                        rootElement,
-                        multiline,
-                        50
-                      )
-                    "
-                    v-if="withGhosts && childElement.previousElement"
-                  ></div>
-
-                  <div
-                    class="timebar timebar-ghost timebar-ghost-after"
-                    :title="`${childElement.nextElement.name} (${displayDate(childElement.nextElement.startDate)} - ${displayDate(childElement.nextElement.endDate)})`"
-                    :class="{
-                      'with-timesheets': withTimesheets
-                    }"
-                    :style="
-                      timebarChildStyle(
-                        childElement.nextElement,
-                        rootElement,
-                        multiline,
-                        50
-                      )
-                    "
-                    v-if="withGhosts && childElement.nextElement"
-                  ></div>
-
-                  <div
-                    class="timebar"
-                    :class="{
-                      selected: isSelected(childElement),
-                      'timebar-subchildren': subchildren,
-                      'with-timesheets': withTimesheets,
-                      invalid: isOverlapping(childElement)
-                    }"
-                    :title="`${multiline && childElement.project_name ? `${childElement.project_name} - ` : ''}${childElement.name} (${displayDate(childElement.startDate)} - ${displayDate(childElement.endDate)})`"
-                    :style="
-                      timebarChildStyle(
                         childElement,
-                        rootElement,
-                        multiline,
-                        withTimesheets && 25,
-                        isDarkTheme ? 'black' : 'white'
+                        task,
+                        selection
                       )
-                    "
-                    v-show="subchildren || isVisible(childElement)"
-                    role="button"
-                    tabindex="0"
-                    @click="onChildBarClick(rootElement, childElement)"
-                    @keydown.enter.prevent="
-                      $emit('item-selected', rootElement, childElement)
-                    "
-                    v-if="withEstimations"
-                  >
-                    <div
-                      class="timebar-left-hand"
-                      @mousedown="moveTimebarLeftSide(childElement, $event)"
-                      @touchstart="moveTimebarLeftSide(childElement, $event)"
-                      v-if="
-                        !isChangeDates &&
-                        selection.length === 1 &&
-                        isSelected(childElement) &&
-                        childElement.editable &&
-                        !childElement.unresizable
-                      "
-                    ></div>
-                    <div
-                      class="timebar-center"
-                      :class="{
-                        ellipsis: multiline || subchildren,
-                        'has-text-centered': subchildren
-                      }"
-                      @mousedown="moveTimebar(childElement, $event)"
-                      @touchstart="moveTimebar(childElement, $event)"
-                    >
-                      <template v-if="multiline && childElement.project_name">
-                        <b>{{ childElement.project_name }}</b>
-                        <br />
-                      </template>
-                      <template v-if="multiline || subchildren">
-                        {{ childElement.name }}
-                      </template>
-                    </div>
-                    <div
-                      class="timebar-right-hand"
-                      @mousedown="moveTimebarRightSide(childElement, $event)"
-                      @touchstart="moveTimebarRightSide(childElement, $event)"
-                      v-if="
-                        !isChangeDates &&
-                        selection.length === 1 &&
-                        isSelected(childElement) &&
-                        childElement.editable &&
-                        !childElement.unresizable
-                      "
-                    ></div>
-                  </div>
-
-                  <div
-                    v-if="subchildren && childElement.children.size"
-                    class="subchildren"
-                  >
-                    <div
-                      :key="personId"
-                      v-for="[personId, subchild] in childElement.children"
-                      :style="{
-                        height: `${40 * getNbLines(subchild)}px`
-                      }"
-                      class="subchild"
-                      :class="{ 'drop-item-target': reassignable }"
-                      :data-entity-type-id="childElement.object_id"
-                      :data-person-id="personId"
-                    >
-                      <div
-                        class="day-off"
-                        :key="`dayoff-${dayOff.id}-${index}`"
-                        :style="dayOffStyle(dayOff)"
-                        :title="dayOff.description"
-                        v-for="(dayOff, index) in cachedDayOffRange(
-                          rootElement.people[personId].daysOff
-                        )"
-                      >
-                        <briefcase-icon class="day-off-icon" :size="14" />
-                      </div>
-                      <div
-                        class="timebar"
-                        :class="{ selected: isSelected(task) }"
-                        :key="index"
-                        :style="timebarSubchildStyle(task, rootElement)"
-                        :title="timebarSubchildTitle(task)"
-                        v-for="(task, index) in subchild"
-                      >
-                        <div
-                          class="timebar-left-hand"
-                          @mousedown="moveTimebarLeftSide(task, $event)"
-                          @touchstart="moveTimebarLeftSide(task, $event)"
-                          v-if="
-                            !isChangeDates &&
-                            selection.length === 1 &&
-                            isSelected(task) &&
-                            task.editable &&
-                            !task.unresizable
-                          "
-                        ></div>
-                        <div
-                          class="timebar-center ellipsis"
-                          role="button"
-                          tabindex="0"
-                          @mousedown="moveTimebar(task, $event)"
-                          @touchstart="moveTimebar(task, $event)"
-                          @click="
-                            onTaskBarClick(rootElement, childElement, task)
-                          "
-                          @keydown.enter.prevent="
-                            $emit(
-                              'task-selected',
-                              rootElement,
-                              childElement,
-                              task,
-                              selection
-                            )
-                          "
-                        >
-                          {{ task.entity.name }}
-                        </div>
-                        <div
-                          class="timebar-right-hand"
-                          @mousedown="moveTimebarRightSide(task, $event)"
-                          @touchstart="moveTimebarRightSide(task, $event)"
-                          v-if="
-                            !isChangeDates &&
-                            selection.length === 1 &&
-                            isSelected(task) &&
-                            task.editable &&
-                            !task.unresizable
-                          "
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  "
+                />
               </div>
             </div>
           </div>
@@ -835,18 +642,6 @@
  * Component to facilitate the build of schedule pages.
  */
 import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  reactive,
-  ref,
-  toRaw,
-  watch
-} from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useStore } from 'vuex'
-import {
   BanIcon,
   BriefcaseIcon,
   ChevronDownIcon,
@@ -857,8 +652,22 @@ import {
   PlusIcon
 } from 'lucide-vue-next'
 import moment from 'moment-timezone'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  provide,
+  reactive,
+  ref,
+  toRaw,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import colors from '@/lib/colors'
+import { subItemsOf } from '@/lib/productionSchedule'
 import {
   addBusinessDays,
   daysToMinutes,
@@ -871,8 +680,9 @@ import {
   parseDate
 } from '@/lib/time'
 
-import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EditMilestoneModal from '@/components/modals/EditMilestoneModal.vue'
+import ScheduleEntityRow from '@/components/schedule/ScheduleEntityRow.vue'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -880,7 +690,15 @@ import Spinner from '@/components/widgets/Spinner.vue'
 const store = useStore()
 const { t } = useI18n()
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
+  // page rule (item, person) => reason of the refusal or null, asked after
+  // the team check and shown through schedule.drop_forbidden_<reason>
+  assignRule: {
+    type: Function,
+    default: null
+  },
   clipChildren: {
     type: Boolean,
     default: false
@@ -888,12 +706,6 @@ const props = defineProps({
   daysOff: {
     type: Array,
     default: () => []
-  },
-  // page rule (item, person) => reason of the refusal or null, asked after
-  // the team check and shown through schedule.drop_forbidden_<reason>
-  assignRule: {
-    type: Function,
-    default: null
   },
   draggedItems: {
     type: Array,
@@ -903,15 +715,15 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  isLoading: {
-    type: Boolean,
-    default: true
-  },
   hideEntities: {
     type: Boolean,
     default: false
   },
   hideManDays: {
+    type: Boolean,
+    default: false
+  },
+  hideRoot: {
     type: Boolean,
     default: false
   },
@@ -923,9 +735,29 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  isEstimationLinked: {
+    type: Boolean,
+    default: false
+  },
+  isLoading: {
+    type: Boolean,
+    default: true
+  },
+  multiline: {
+    type: Boolean,
+    default: false
+  },
+  reassignable: {
+    type: Boolean,
+    default: false
+  },
   showExpandAll: {
     type: Boolean,
     default: false
+  },
+  startDate: {
+    type: Object,
+    required: true
   },
   subEndDate: {
     type: Object,
@@ -935,17 +767,13 @@ const props = defineProps({
     type: Object,
     default: null
   },
-  startDate: {
-    type: Object,
-    required: true
-  },
-  isEstimationLinked: {
+  subchildren: {
     type: Boolean,
     default: false
   },
-  withMilestones: {
-    type: Boolean,
-    default: true
+  type: {
+    type: String,
+    validator: value => ['prev', 'real'].includes(value)
   },
   withEstimations: {
     type: Boolean,
@@ -955,6 +783,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  withMilestones: {
+    type: Boolean,
+    default: true
+  },
   withStatuses: {
     type: Boolean,
     default: false
@@ -963,29 +795,9 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  hideRoot: {
-    type: Boolean,
-    default: false
-  },
   zoomLevel: {
     type: Number,
     default: 2
-  },
-  multiline: {
-    type: Boolean,
-    default: false
-  },
-  subchildren: {
-    type: Boolean,
-    default: false
-  },
-  reassignable: {
-    type: Boolean,
-    default: false
-  },
-  type: {
-    type: String,
-    validator: value => ['prev', 'real'].includes(value)
   }
 })
 
@@ -997,6 +809,7 @@ const emit = defineEmits([
   'item-drop',
   'item-selected',
   'item-unassign',
+  'plan-entity',
   'root-element-expanded',
   'root-element-selected',
   'scroll',
@@ -1004,7 +817,8 @@ const emit = defineEmits([
   'task-unselected'
 ])
 
-// Template refs
+// State
+// --------------------------------------------------------------------------
 const scheduleRef = ref(null)
 const entityListRef = ref(null)
 const timelineRef = ref(null)
@@ -1013,92 +827,8 @@ const timelineContentWrapperRef = ref(null)
 const timelineHeaderRef = ref(null)
 const timelinePositionRef = ref(null)
 
-// Store getters
-const currentProduction = computed(() => store.getters.currentProduction)
-const dateFormat = computed(() => store.getters.dateFormat)
-const departmentMap = computed(() => store.getters.departmentMap)
-
-const displayDate = date => formatDisplayDate(toRaw(date), dateFormat.value)
-const isCurrentUserProductionManager = computed(
-  () => store.getters.isCurrentUserProductionManager
-)
-const isDarkTheme = computed(() => store.getters.isDarkTheme)
-const milestones = computed(() => store.getters.milestones)
-const openProductions = computed(() => store.getters.openProductions)
-const organisation = computed(() => store.getters.organisation)
-const taskMap = computed(() => store.getters.taskMap)
-const taskStatuses = computed(() => store.getters.taskStatuses)
-
-// Format mixin replacements
-const isDurationInHours = computed(() => {
-  return organisation.value.format_duration_in_hours
-})
-
-const durationUnit = computed(() =>
-  isDurationInHours.value ? t('schedule.hours') : t('schedule.md')
-)
-
-const formatDuration = (minutes, toLocale = true) => {
-  if (!minutes) {
-    return 0
-  }
-
-  const duration = organisation.value.format_duration_in_hours
-    ? minutes / 60
-    : minutesToDays(organisation.value, minutes)
-
-  if (toLocale) {
-    return duration.toLocaleString('fullwide', {
-      maximumFractionDigits: 2
-    })
-  }
-  return Math.round(duration * 100) / 100
-}
-
-// Dom mixin replacements
-const addEvents = events => {
-  events.forEach(([type, listener]) => {
-    document.addEventListener(type, listener)
-  })
-}
-
-const removeEvents = events => {
-  events.forEach(([type, listener]) => {
-    document.removeEventListener(type, listener)
-  })
-}
-
-const getClientX = event => {
-  return (
-    event.touches?.[0]?.clientX ??
-    event.changedTouches?.[0]?.clientX ??
-    event.clientX
-  )
-}
-
-const getClientY = event => {
-  return (
-    event.touches?.[0]?.clientY ??
-    event.changedTouches?.[0]?.clientY ??
-    event.clientY
-  )
-}
-
-// Store actions
-const deleteMilestone = milestone => {
-  return store.dispatch('deleteMilestone', milestone)
-}
-
-const loadMilestones = production => {
-  return store.dispatch('loadMilestones', production)
-}
-
-const saveMilestone = milestone => {
-  return store.dispatch('saveMilestone', milestone)
-}
-
-// Data
 const currentElement = ref(null)
+
 // The text typed in an estimation field, shown as typed until the field is
 // left: rendered back from the estimation, "1." (no number yet) and "1.0"
 // (read as 1) lost their decimal point.
@@ -1126,9 +856,15 @@ let initialClientX = null
 let initialClientY = null
 let lastStartDate = null
 let lastEndDate = null
+
 // person row the drag started on: a multi-assignee task renders one bar per
 // assignee, so assignees[0] is not necessarily the person being reassigned
 let dragSourcePersonId = null
+
+// shift held on the mousedown: the rows of a root bar move with it instead
+// of being clipped to its new bounds
+let isShiftDrag = false
+
 // person row each dragged bar last hopped to during the drag: once the bar
 // left its source row, the source id is gone from assignees and only this
 // map knows which row the next hop must unassign
@@ -1166,7 +902,46 @@ let lastMoveEvent = null
 let domEvents = []
 let moveEvents = []
 
+// performance.now() of the last relayout of a drag
+let lastDragRelayoutAt = 0
+
+// the template iterates day-off ranges for each root and person row on every
+// render: expand each daysOff array once and reuse it
+// line of each item per row array: a task with several assignees sits in
+// one array per person row, and a line stored on the task itself would be
+// the one computed last
+const rowLines = new WeakMap()
+const dayOffRangeCache = new WeakMap()
+
+// A fresh [] per render would change the days-off prop of every person row
+// and update them all on each schedule render.
+const NO_DAY_OFF = []
+
+// same render-time concern for timesheets: group them by task once per array
+const timesheetsByTaskCache = new WeakMap()
+
 // Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
+const dateFormat = computed(() => store.getters.dateFormat)
+const departmentMap = computed(() => store.getters.departmentMap)
+const isCurrentUserProductionManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const milestones = computed(() => store.getters.milestones)
+const openProductions = computed(() => store.getters.openProductions)
+const organisation = computed(() => store.getters.organisation)
+const taskMap = computed(() => store.getters.taskMap)
+const taskStatuses = computed(() => store.getters.taskStatuses)
+
+const isDurationInHours = computed(() => {
+  return organisation.value.format_duration_in_hours
+})
+
+const durationUnit = computed(() =>
+  isDurationInHours.value ? t('schedule.hours') : t('schedule.md')
+)
 
 const statuses = computed(() => {
   return {
@@ -1176,15 +951,14 @@ const statuses = computed(() => {
   }
 })
 
-const currentMilestones = computed(() => {
-  const localMilestones = {}
-  Object.keys(milestones.value).forEach(key => {
-    if (displayedDaysIndex.value[key]) {
-      localMilestones[key] = milestones.value[key]
-    }
-  })
-  return localMilestones
-})
+// the milestones of the displayed days, by date
+const currentMilestones = computed(() =>
+  Object.fromEntries(
+    Object.entries(milestones.value).filter(
+      ([date]) => displayedDaysIndex.value[date] !== undefined
+    )
+  )
+)
 
 const cellWidth = computed(() => {
   const cellWidthByLevel = [20, 20, 40, 60, 120]
@@ -1257,25 +1031,15 @@ const displayedDays = computed(() => {
   return daysAvailable.value
 })
 
-const displayedDaysIndex = computed(() => {
-  let index = 0
-  const dayIndex = {}
-  displayedDays.value.forEach(d => {
-    dayIndex[d.text] = index
-    index++
-  })
-  return dayIndex
-})
+const displayedDaysIndex = computed(() =>
+  Object.fromEntries(displayedDays.value.map((day, index) => [day.text, index]))
+)
 
-const displayedWeeksIndex = computed(() => {
-  let index = 0
-  const weekIndex = {}
-  weeksAvailable.value.forEach(w => {
-    weekIndex[w.weekText] = index
-    index++
-  })
-  return weekIndex
-})
+const displayedWeeksIndex = computed(() =>
+  Object.fromEntries(
+    weeksAvailable.value.map((week, index) => [week.weekText, index])
+  )
+)
 
 const isRealSchedule = computed(() => {
   return props.type === 'real'
@@ -1287,8 +1051,6 @@ const totalManDays = computed(() => {
     0
   )
 })
-
-// Styles
 
 const timelineStyle = computed(() => {
   const firstDay = daysAvailable.value[0]
@@ -1342,16 +1104,79 @@ const unitOfTime = computed(() => {
   return props.zoomLevel > 0 ? 'days' : 'weeks'
 })
 
-// Methods
-//
+// the header cells of the current zoom: one per day, or one per week
+const columns = computed(() =>
+  isWeekMode.value ? weeksAvailable.value : displayedDays.value
+)
+
+// isSelected runs for every bar on every render: keep it O(1)
+const selectedIds = computed(() => new Set(selection.value.map(({ id }) => id)))
+
+// The header renders this title for every day of the range on each widget
+// render (a drag frame included): translate once and reuse the day text
+// daysAvailable already formatted.
+const addMilestoneLabel = computed(() => t('schedule.milestone.add_milestone'))
+
+// Functions
+// --------------------------------------------------------------------------
 // The items keep their moments in reactive state. The helpers below read
 // them with toRaw so the clone/diff/format chains stop paying a Proxy trap
 // per internal moment field, which leaves only the property read tracked:
 // always assign a new moment to an item date (clone first), never mutate
 // one in place with add/subtract/startOf, or the bars stop re-rendering.
 
+const displayDate = date => formatDisplayDate(toRaw(date), dateFormat.value)
+
+const formatDuration = (minutes, toLocale = true) => {
+  if (!minutes) {
+    return 0
+  }
+
+  const duration = organisation.value.format_duration_in_hours
+    ? minutes / 60
+    : minutesToDays(organisation.value, minutes)
+
+  if (toLocale) {
+    return duration.toLocaleString('fullwide', {
+      maximumFractionDigits: 2
+    })
+  }
+  return Math.round(duration * 100) / 100
+}
+
+const addEvents = events => {
+  events.forEach(([type, listener]) => {
+    document.addEventListener(type, listener)
+  })
+}
+
+const removeEvents = events => {
+  events.forEach(([type, listener]) => {
+    document.removeEventListener(type, listener)
+  })
+}
+
+const getClientX = event => {
+  return (
+    event.touches?.[0]?.clientX ??
+    event.changedTouches?.[0]?.clientX ??
+    event.clientX
+  )
+}
+
+const getClientY = event => {
+  return (
+    event.touches?.[0]?.clientY ??
+    event.changedTouches?.[0]?.clientY ??
+    event.clientY
+  )
+}
+
+const lineOf = (items, item) =>
+  rowLines.get(toRaw(items))?.get(item.id) ?? item.line ?? 0
+
 const getNbLines = (items = []) => {
-  const values = items.map(item => item.line || 0)
+  const values = items.map(item => lineOf(items, item))
   return values.length ? Math.max(...values) + 1 : 1
 }
 
@@ -1368,7 +1193,6 @@ const refreshAllItemPositions = () => {
 // stalls fast drags on large sections. During a drag a ~100ms cadence is
 // enough for live feedback; the drop (stopBrowsing) still runs the exact
 // relayout on every moved item.
-let lastDragRelayoutAt = 0
 const refreshItemPositionsDuringDrag = rootElements => {
   const now = performance.now()
   if (now - lastDragRelayoutAt < 100) return
@@ -1422,11 +1246,7 @@ const isVisible = timeElement => {
 const resetScheduleSize = () => {
   wrapperRect = null
   if (timelineContentRef.value) {
-    if (props.zoomLevel > 0) {
-      timelineContentRef.value.style.width = `${displayedDays.value.length * cellWidth.value}px`
-    } else {
-      timelineContentRef.value.style.width = `${weeksAvailable.value.length * cellWidth.value}px`
-    }
+    timelineContentRef.value.style.width = `${columns.value.length * cellWidth.value}px`
   }
 }
 
@@ -1574,6 +1394,9 @@ const getDisplayedWeeksIndex = date => {
     : weeksAvailable.value.length - 1
 }
 
+const getColumnIndex = date =>
+  isWeekMode.value ? getDisplayedWeeksIndex(date) : getDisplayedDaysIndex(date)
+
 const resetDroppableTargets = () => {
   scheduleRef.value?.querySelectorAll('.droppable').forEach(element => {
     element.classList.remove('droppable')
@@ -1598,8 +1421,12 @@ const changeDates = event => {
       resetDroppableTargets()
     }
     const currentRootElement = currentElement.value.parentElement
+    // only a task can be reassigned: an entity bar dragged over the task
+    // rows below it must keep moving instead of being dropped by the
+    // rights check
     if (
       props.subchildren &&
+      currentElement.value.assignees &&
       target &&
       target.dataset.personId &&
       target.dataset.entityTypeId &&
@@ -1737,6 +1564,7 @@ const changeDates = event => {
         // header entries with the item dates
         currentElement.value.startDate = newStartDate.clone()
         currentElement.value.endDate = newEndDate.clone()
+        propagateClipToChildren(currentElement.value)
       }
     }
   }
@@ -1746,23 +1574,12 @@ const changeStartDate = event => {
   const change = getClientX(event) - initialClientX + cellWidth.value / 2
   const dayChange = Math.floor(change / cellWidth.value)
 
-  const startDate = lastStartDate
-  const endDate = currentElement.value.endDate
-  let currentIndex, endDateIndex
-  if (isWeekMode.value) {
-    currentIndex = getDisplayedWeeksIndex(startDate)
-    endDateIndex = getDisplayedWeeksIndex(endDate)
-  } else {
-    currentIndex = getDisplayedDaysIndex(startDate)
-    endDateIndex = getDisplayedDaysIndex(endDate)
-  }
-  currentIndex += dayChange
+  const endDateIndex = getColumnIndex(currentElement.value.endDate)
+  let currentIndex = getColumnIndex(lastStartDate) + dayChange
   if (currentIndex > endDateIndex) currentIndex = endDateIndex
   if (currentIndex < 0) currentIndex = 0
 
-  const newStartDate = isWeekMode.value
-    ? weeksAvailable.value[currentIndex]
-    : displayedDays.value[currentIndex]
+  const newStartDate = columns.value[currentIndex]
 
   if (
     newStartDate &&
@@ -1773,7 +1590,7 @@ const changeStartDate = event => {
     updateItemEstimation(currentElement.value)
     propagateClipToChildren(currentElement.value)
     refreshItemPositionsDuringDrag([currentElement.value.parentElement])
-    resetSelection([currentElement.value])
+    selectAlone(currentElement.value)
   }
 }
 
@@ -1793,32 +1610,14 @@ const changeEndDate = event => {
     lastEndDate = props.startDate.clone().add(1, 'days')
   }
 
-  const startDate = currentElement.value.startDate
-  const endDate = lastEndDate
-  let startDateIndex, currentIndex
-  if (isWeekMode.value) {
-    startDateIndex = getDisplayedWeeksIndex(startDate)
-    currentIndex = getDisplayedWeeksIndex(endDate)
-  } else {
-    startDateIndex = getDisplayedDaysIndex(startDate)
-    currentIndex = getDisplayedDaysIndex(endDate)
-  }
-
-  currentIndex += dayChange - 1
+  const startDateIndex = getColumnIndex(currentElement.value.startDate)
+  let currentIndex = getColumnIndex(lastEndDate) + dayChange - 1
   if (currentIndex < startDateIndex) currentIndex = startDateIndex
-  if (isWeekMode.value) {
-    if (currentIndex > weeksAvailable.value.length - 1) {
-      currentIndex = weeksAvailable.value.length - 1
-    }
-  } else {
-    if (currentIndex > displayedDays.value.length - 1) {
-      currentIndex = displayedDays.value.length - 1
-    }
+  if (currentIndex > columns.value.length - 1) {
+    currentIndex = columns.value.length - 1
   }
 
-  const newEndDate = isWeekMode.value
-    ? weeksAvailable.value[currentIndex]
-    : displayedDays.value[currentIndex]
+  const newEndDate = columns.value[currentIndex]
   if (
     newEndDate &&
     !newEndDate.isSame(currentElement.value.endDate) &&
@@ -1828,7 +1627,7 @@ const changeEndDate = event => {
     updateItemEstimation(currentElement.value)
     propagateClipToChildren(currentElement.value)
     refreshItemPositionsDuringDrag([currentElement.value.parentElement])
-    resetSelection([currentElement.value])
+    selectAlone(currentElement.value)
   }
 }
 
@@ -1843,16 +1642,36 @@ const stampDragOrigin = timeElement => {
   timeElement._dragOrigStartDate = timeElement.startDate.clone()
   timeElement._dragOrigEndDate = timeElement.endDate.clone()
   timeElement._dragOrigEstimation = timeElement.estimation
-  if (!timeElement.parentElement && Array.isArray(timeElement.children)) {
-    timeElement.children.forEach(child => {
-      child._dragOrigStartDate = child.startDate.clone()
-      child._dragOrigEndDate = child.endDate.clone()
-    })
-  }
+  stampSubItems(timeElement)
+}
+
+const stampSubItems = item => {
+  subItemsOf(item).forEach(child => {
+    if (!child.startDate || !child.endDate) return
+    child._dragOrigStartDate = child.startDate.clone()
+    child._dragOrigEndDate = child.endDate.clone()
+    stampSubItems(child)
+  })
+}
+
+// Shift held: everything under the bar moves by the same whole days,
+// recomputed from the stamped origin so a back-drag never drifts (a
+// millisecond shift would also drift a day across a DST change).
+const shiftSubItems = (item, shift) => {
+  subItemsOf(item).forEach(child => {
+    if (!child._dragOrigStartDate) return
+    child.startDate = child._dragOrigStartDate.clone().add(shift, 'days')
+    child.endDate = child._dragOrigEndDate.clone().add(shift, 'days')
+    shiftSubItems(child, shift)
+  })
 }
 
 const propagateClipToChildren = item => {
   if (!props.clipChildren) return
+  if (isShiftDrag && isChangeDates.value) {
+    shiftSubItems(item, item.startDate.diff(item._dragOrigStartDate, 'days'))
+    return
+  }
   if (item.parentElement || !Array.isArray(item.children)) return
   const newStart = item.startDate
   const newEnd = item.endDate
@@ -1922,10 +1741,34 @@ const isOverlapping = item => {
   )
 }
 
-// isSelected runs for every bar on every render: keep it O(1)
-const selectedIds = computed(() => new Set(selection.value.map(({ id }) => id)))
-
 const isSelected = item => selectedIds.value.has(item.id)
+
+// A row gets the selection as the ids of its own items and shows the resize
+// handles only when it holds the single selected one: the other rows then
+// never update on a selection or a drag.
+const selectedKeyOf = tasks =>
+  tasks
+    .filter(isSelected)
+    .map(({ id }) => id)
+    .join(',')
+
+const rowHasHandles = tasks =>
+  !isChangeDates.value && selection.value.length === 1 && tasks.some(isSelected)
+
+// the entity and, per person, its tasks
+const rowItems = childElement =>
+  childElement.children instanceof Map
+    ? [childElement, ...Array.from(childElement.children.values()).flat()]
+    : [childElement]
+
+// one flattening per row and render for both props
+const rowSelection = childElement => {
+  const items = rowItems(childElement)
+  return {
+    selectedKey: selectedKeyOf(items),
+    withHandles: rowHasHandles(items)
+  }
+}
 
 const addToSelection = itemToAdd => {
   selection.value.push(itemToAdd)
@@ -1937,6 +1780,14 @@ const removeFromSelection = itemToRemove => {
 
 const resetSelection = value => {
   selection.value = value || []
+}
+
+// Called on every resize frame: replacing an identical selection would
+// recompute selectedIds and re-render every bar for nothing.
+const selectAlone = item => {
+  if (selection.value.length !== 1 || selection.value[0] !== item) {
+    resetSelection([item])
+  }
 }
 
 const moveTimebar = (timeElement, event) => {
@@ -1953,14 +1804,17 @@ const moveTimebar = (timeElement, event) => {
     lastStartDate = timeElement.startDate.clone()
     lastEndDate = timeElement.endDate.clone()
     initialClientX = getClientX(event)
+    isShiftDrag = event.shiftKey
     dragSourcePersonId =
       event.target.closest?.('[data-person-id]')?.dataset.personId ?? null
     dragPersonByItem.clear()
     document.body.style.cursor = props.reassignable ? 'all-scroll' : 'ew-resize'
 
     startMoveTracking()
-    stampDragOrigin(timeElement)
     updateSelection(timeElement, event)
+    // every selected bar moves: the stamps of a bar selected earlier date
+    // from its own click, and its rows may have been snapped since
+    new Set([timeElement, ...selection.value]).forEach(stampDragOrigin)
   }
 }
 
@@ -2160,14 +2014,8 @@ const stopBrowsing = event => {
   dragPersonByItem.clear()
   currentElement.value = null
 }
-
-// Helpers
-
-// the template iterates day-off ranges for each root and person row on every
-// render: expand each daysOff array once and reuse it
-const dayOffRangeCache = new WeakMap()
 const cachedDayOffRange = daysOff => {
-  if (!daysOff?.length) return []
+  if (!daysOff?.length) return NO_DAY_OFF
   let range = dayOffRangeCache.get(daysOff)
   if (!range) {
     range = getDayOffRange(daysOff)
@@ -2175,9 +2023,6 @@ const cachedDayOffRange = daysOff => {
   }
   return range
 }
-
-// same render-time concern for timesheets: group them by task once per array
-const timesheetsByTaskCache = new WeakMap()
 const taskTimesheets = (rootElement, taskId) => {
   if (!rootElement.timesheet) return []
   let byTask = timesheetsByTaskCache.get(rootElement.timesheet)
@@ -2215,8 +2060,6 @@ const isInRange = date => {
   )
 }
 
-// Styles
-
 const dayClass = (day, index = 0) => {
   return {
     'day-name': true,
@@ -2240,30 +2083,37 @@ const dateStatusStyle = date => {
   }
 }
 
+// The header columns are days, or weeks starting on a Monday: a week is
+// counted from the Monday of each date, not as seven days from the
+// schedule start, which can fall mid-week.
+const mondayOf = date => toRaw(date).clone().utc().startOf('isoWeek')
+
+const columnSpan = (startDate, endDate) =>
+  isWeekMode.value
+    ? mondayOf(endDate).diff(mondayOf(startDate), 'weeks')
+    : dateDiff(startDate, endDate, 'days')
+
+// columns between the first header column and the date
+const columnsFromStart = date =>
+  columnSpan(
+    isWeekMode.value
+      ? (weeksAvailable.value[0] ?? props.startDate)
+      : props.startDate,
+    date
+  )
+
 const getLeftPosition = date => {
-  const startDate = moment.utc(date)
-  const startDiff = dateDiff(props.startDate, startDate, unitOfTime.value)
-  return startDiff * cellWidth.value + 1
+  return columnsFromStart(moment.utc(date)) * cellWidth.value + 1
 }
 
-const entityLineStyle = (
-  timeElement,
-  root = false,
-  header = false,
-  expanded = false
-) => {
+const entityLineStyle = (timeElement, root = false, header = false) => {
   const style = {}
   let color = timeElement.color
   if (root) {
     // is a person
     color = isDarkTheme.value ? '#222' : '#EEF'
-  }
-  if (root) {
-    style['border-left'] = `1px solid ${color}`
     style['border-top'] = `1px solid ${color}`
-    if (!expanded) {
-      style['border-bottom'] = `1px solid ${color}`
-    }
+    style['border-bottom'] = `1px solid ${color}`
     if (header) {
       style.background = color
     }
@@ -2304,11 +2154,11 @@ const timelineMultilineStyle = timeElement => {
 
 const timelineSubchildrenStyle = timeElement => {
   const children = Array.from(timeElement.children.values())
-  const nbLines = children.reduce(
-    (acc, subChildren) => acc + getNbLines(subChildren),
-    0
-  )
-  const marginBottom = children.length * 10
+  // one line for the "no dated task" label of an empty row
+  const nbLines = children.length
+    ? children.reduce((acc, subChildren) => acc + getNbLines(subChildren), 0)
+    : 1
+  const marginBottom = Math.max(children.length, 1) * 10
   return {
     height: `${40 + 40 * nbLines + marginBottom + 2}px`,
     'padding-top': '13px'
@@ -2351,9 +2201,13 @@ const timesheetStyle = (
   }
 }
 
-const timebarSubchildStyle = (timeElement, rootElement) => {
+const timebarSubchildStyle = (
+  timeElement,
+  rootElement,
+  selected = isSelected(timeElement),
+  line = timeElement.line
+) => {
   const color = timeElement.color || rootElement.color
-  const selected = isSelected(timeElement)
   return {
     left: `${getTimebarLeft(timeElement)}px`,
     width: `${getTimebarWidth(timeElement)}px`,
@@ -2362,13 +2216,16 @@ const timebarSubchildStyle = (timeElement, rootElement) => {
         ? 'all-scroll'
         : 'ew-resize'
       : 'default',
-    top: `${5 + 38 * timeElement.line}px`,
+    top: `${5 + 38 * line}px`,
     background: `color-mix(in srgb, ${color} ${selected ? 80 : 40}%, transparent)`,
     'box-shadow': `inset 0 0 1px 2px ${selected ? 'var(--background-selected)' : color}`
   }
 }
 
-const timebarSubchildTitle = task => {
+// Reads the raw task: formatting a moment through the reactive proxy pays a
+// trap per internal property access, on every bar at every render.
+const timebarSubchildTitle = reactiveTask => {
+  const task = toRaw(reactiveTask)
   const name = task.entity.name
   const startDate = task.startDate.format('YYYY-MM-DD')
   const endDate = task.endDate.format('YYYY-MM-DD')
@@ -2403,8 +2260,7 @@ const onTaskBarClick = (rootElement, childElement, task) => {
 
 const getTimebarLeft = timeElement => {
   const startDate = timeElement.startDate || props.startDate
-  const startDiff = dateDiff(props.startDate, startDate, unitOfTime.value)
-  return startDiff * cellWidth.value + 3
+  return columnsFromStart(startDate) * cellWidth.value + 3
 }
 
 const getTimebarWidth = timeElement => {
@@ -2423,15 +2279,13 @@ const getTimebarWidth = timeElement => {
     endDate = addBusinessDays(startDate, days - 1)
   }
 
-  const lengthDiff = dateDiff(startDate, endDate, unitOfTime.value)
+  const lengthDiff = columnSpan(startDate, endDate)
   if (lengthDiff > 0) {
     return (lengthDiff + 1) * cellWidth.value - 6
   } else {
     return cellWidth.value - 4
   }
 }
-
-// Children
 
 const expandRootElement = rootElement => {
   if (rootElement.expanded) {
@@ -2451,6 +2305,12 @@ const expandRootElement = rootElement => {
     props.multiline || props.subchildren ? refreshItemPositions : undefined
   )
 }
+
+const planEntityLabelKey = rootElement =>
+  ({
+    Asset: 'schedule.plan_asset_type_tasks',
+    Shot: 'schedule.plan_sequence_tasks'
+  })[rootElement.for_entity] ?? 'schedule.plan_entity_tasks'
 
 const childNameStyle = (rootElement, index) => {
   const isOdd = index % 2 === 0
@@ -2480,8 +2340,6 @@ const childrenStyle = (
   return style
 }
 
-// Milestones
-
 const showEditMilestoneModal = (day, milestone) => {
   if (isCurrentUserProductionManager.value) {
     modals.edit = true
@@ -2504,41 +2362,31 @@ const hideEditMilestoneModal = () => {
   modals.edit = false
 }
 
-const confirmEditMilestone = milestone => {
+// the modal closes once the milestone is saved or deleted
+const runMilestoneAction = async (action, milestone) => {
   loading.edit = true
-  saveMilestone(milestone)
-    .then(() => {
-      modals.edit = false
-    })
-    .catch(err => {
-      console.error(err)
-      errors.edit = true
-    })
-    .finally(() => {
-      loading.edit = false
-    })
+  try {
+    await store.dispatch(action, milestone)
+    modals.edit = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  } finally {
+    loading.edit = false
+  }
 }
 
-const removeMilestone = milestone => {
-  loading.edit = true
-  deleteMilestone(milestone)
-    .then(() => {
-      modals.edit = false
-    })
-    .catch(err => {
-      console.error(err)
-      errors.edit = true
-    })
-    .finally(() => {
-      loading.edit = false
-    })
-}
+const confirmEditMilestone = milestone =>
+  runMilestoneAction('saveMilestone', milestone)
+
+const removeMilestone = milestone =>
+  runMilestoneAction('deleteMilestone', milestone)
 
 const milestoneLineStyle = milestone => {
   const startDate = parseDate(props.startDate.format('YYYY-MM-DD'))
   const milestoneDate = parseDate(milestone.date)
   if (startDate.isSameOrBefore(milestoneDate)) {
-    const lengthDiffVal = dateDiff(startDate, milestoneDate, unitOfTime.value)
+    const lengthDiffVal = columnsFromStart(milestoneDate)
     return {
       left: `${(lengthDiffVal + 0.5) * cellWidth.value}px`
     }
@@ -2548,10 +2396,7 @@ const milestoneLineStyle = milestone => {
     }
   }
 }
-
-const addMilestoneTitle = day => {
-  return `${t('schedule.milestone.add_milestone')} ${day.format('YYYY-MM-DD')}`
-}
+const addMilestoneTitle = day => `${addMilestoneLabel.value} ${day.text}`
 
 const getDropForbiddenReason = (item, person) => {
   // person may be any root element (e.g. a task type row on the production
@@ -2612,24 +2457,18 @@ const onRootDragLeave = (event, rootElement) => {
 }
 
 const onTaskDragEnter = (event, rootElement) => {
-  // HACK: the getData doesn't work on dragEnter, we use a "task-type-*" data key instead (key must be lowercase)
-  const draggedItemTaskType = event.dataTransfer.types.find(
-    dataKey => dataKey === `task-type-${rootElement.task_type_id}`
-  )
-  if (!draggedItemTaskType) {
-    const items = props.draggedItems || []
-    if (!items.length) {
-      return
-    }
-    // one forbidden task forbids the whole batch: no silent partial drop
-    const reason = items
-      .map(item => getDropForbiddenReason(item, rootElement))
-      .find(Boolean)
-    if (reason) {
-      dropTarget.rootElementId = rootElement.id
-      dropTarget.forbidden = reason
-      return
-    }
+  const items = props.draggedItems || []
+  if (!items.length) {
+    return
+  }
+  // one forbidden task forbids the whole batch: no silent partial drop
+  const reason = items
+    .map(item => getDropForbiddenReason(item, rootElement))
+    .find(Boolean)
+  if (reason) {
+    dropTarget.rootElementId = rootElement.id
+    dropTarget.forbidden = reason
+    return
   }
   event.currentTarget.classList.add('droppable')
 }
@@ -2640,8 +2479,7 @@ const onTaskDragEnter = (event, rootElement) => {
 // Multiple tasks chain sequentially from the aimed day: each next task
 // starts on the first business day after the previous one ends.
 const getDropRanges = (event, rootElement, items) => {
-  const columns = isWeekMode.value ? weeksAvailable.value : displayedDays.value
-  if (!columns.length) {
+  if (!columns.value.length) {
     return []
   }
   if (!wrapperRect) {
@@ -2651,7 +2489,8 @@ const getDropRanges = (event, rootElement, items) => {
   const index = Math.floor(
     (timelineContentWrapperRef.value.scrollLeft + cursorX) / cellWidth.value
   )
-  const dropDate = columns[Math.min(Math.max(index, 0), columns.length - 1)]
+  const dropDate =
+    columns.value[Math.min(Math.max(index, 0), columns.value.length - 1)]
   let cursorDate = addBusinessDays(dropDate, 0, rootElement.daysOff)
   return items.map(item => {
     const startDate = cursorDate
@@ -2722,16 +2561,12 @@ const onTaskDrop = (event, rootElement) => {
   event.currentTarget.classList.remove('droppable')
   clearDropTarget()
 
-  let items = props.draggedItems?.length ? [...props.draggedItems] : null
-  if (!items) {
-    const entityId = event.dataTransfer.getData('entityId')
-    const taskTypeId = event.dataTransfer.getData('taskTypeId')
-    if (!entityId || taskTypeId !== rootElement.task_type_id) {
-      return // invalid task type
-    }
-    items = [{ entity_id: entityId }]
-  } else if (items.some(item => !checkUserIsAllowed(item, rootElement))) {
-    return // invalid user rights
+  const items = [...(props.draggedItems || [])]
+  if (
+    !items.length ||
+    items.some(item => !checkUserIsAllowed(item, rootElement))
+  ) {
+    return
   }
 
   const ranges = getDropRanges(event, rootElement, items)
@@ -2758,8 +2593,52 @@ const exportData = () => {
   }
 }
 
-// Watchers
+/**
+ * Set the position of items in the schedule, avoiding collisions.
+ * Add a `line` attribute to each item.
+ *
+ * @param {Array<Object>} items - The list of items to position.
+ * @param {Moment.unitOfTime} unitOfTime - A unit of time (eg. 'days', 'weeks', 'months', ...).
+ */
+const setItemPositions = (items, unitOfTime = 'days') => {
+  if (!items?.length) {
+    return
+  }
+  // the week columns start on Monday whatever the locale
+  const period = unitOfTime === 'weeks' ? 'isoWeek' : unitOfTime
+  const minDate = moment
+    .min(items.map(item => toRaw(item.startDate)))
+    .clone()
+    .startOf(period)
 
+  // one entry per line: the [start, end] ranges already placed on it
+  const lines = []
+  const lineByItemId = new Map()
+  items.forEach(item => {
+    const start = toRaw(item.startDate)
+      .clone()
+      .startOf(period)
+      .diff(minDate, unitOfTime)
+    const end = toRaw(item.endDate)
+      .clone()
+      .endOf(period)
+      .diff(minDate, unitOfTime)
+    let line = 0
+    while (lines[line]?.some(([s, e]) => start <= e && end >= s)) {
+      line++
+    }
+    if (!lines[line]) {
+      lines[line] = []
+    }
+    lines[line].push([start, end])
+    item.line = line
+    lineByItemId.set(item.id, line)
+  })
+  rowLines.set(toRaw(items), lineByItemId)
+}
+
+// Watchers
+// --------------------------------------------------------------------------
 // the drag can end anywhere (drop elsewhere, Escape): dragleave alone
 // cannot be trusted to clear the drop preview or the spring-load timer
 watch(
@@ -2772,19 +2651,7 @@ watch(
   }
 )
 
-watch(
-  () => props.startDate,
-  () => {
-    resetScheduleSize()
-  }
-)
-
-watch(
-  () => props.endDate,
-  () => {
-    resetScheduleSize()
-  }
-)
+watch([() => props.startDate, () => props.endDate], resetScheduleSize)
 
 watch(
   () => props.zoomLevel,
@@ -2824,14 +2691,14 @@ watch(
   currentProduction,
   () => {
     if (props.withMilestones) {
-      loadMilestones(currentProduction.value)
+      store.dispatch('loadMilestones', currentProduction.value)
     }
   },
   { immediate: true }
 )
 
 // Lifecycle
-
+// --------------------------------------------------------------------------
 onMounted(() => {
   moveEvents = [
     ['mousemove', onMouseMove],
@@ -2859,6 +2726,30 @@ onBeforeUnmount(() => {
   document.body.style.cursor = 'default'
 })
 
+// The entity rows read the widget state (zoom, dates, selection) through
+// these helpers rather than through a dozen function props.
+provide('scheduleRowHelpers', {
+  cachedDayOffRange,
+  dateStatusStyle,
+  dayOffStyle,
+  displayDate,
+  formatDuration,
+  getNbLines,
+  isDarkTheme,
+  isDurationInHours,
+  isOverlapping,
+  isVisible,
+  lineOf,
+  statuses,
+  taskTimesheets,
+  timebarChildStyle,
+  timebarSubchildStyle,
+  timebarSubchildTitle,
+  timelineMultilineStyle,
+  timelineSubchildrenStyle,
+  timesheetStyle
+})
+
 defineExpose({
   exportData,
   refreshAllItemPositions,
@@ -2870,45 +2761,6 @@ defineExpose({
   scrollToToday,
   setScrollPosition
 })
-
-/**
- * Set the position of items in the schedule, avoiding collisions.
- * Add a `line` attribute to each item.
- *
- * @param {Array<Object>} items - The list of items to position.
- * @param {Moment.unitOfTime} unitOfTime - A unit of time (eg. 'days', 'weeks', 'months', ...).
- */
-const setItemPositions = (items, unitOfTime = 'days') => {
-  if (!items?.length) {
-    return
-  }
-  const minDate = moment
-    .min(items.map(item => toRaw(item.startDate)))
-    .clone()
-    .startOf(unitOfTime)
-
-  // one entry per line: the [start, end] ranges already placed on it
-  const lines = []
-  items.forEach(item => {
-    const start = toRaw(item.startDate)
-      .clone()
-      .startOf(unitOfTime)
-      .diff(minDate, unitOfTime)
-    const end = toRaw(item.endDate)
-      .clone()
-      .endOf(unitOfTime)
-      .diff(minDate, unitOfTime)
-    let line = 0
-    while (lines[line]?.some(([s, e]) => start <= e && end >= s)) {
-      line++
-    }
-    if (!lines[line]) {
-      lines[line] = []
-    }
-    lines[line].push([start, end])
-    item.line = line
-  })
-}
 </script>
 
 <style lang="scss" scoped>
@@ -2947,82 +2799,22 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     }
   }
 
-  .child-element-name {
-    color: $white;
-  }
-
   .timeline {
     .timeline-header {
       background: transparent;
-      color: $white;
 
-      .day {
-        .day-number {
-          color: $white;
-        }
-
-        .day-name {
-          margin: 0;
-          padding-bottom: 0;
-          &.new-month,
-          &.new-week {
-            border-left: 2px solid $white;
-          }
-        }
-
-        .month-name {
-          background: $dark-grey-2;
-          border-left: 2px solid $white;
-          color: $white;
+      .day .day-name {
+        margin: 0;
+        padding-bottom: 0;
+        &.new-month {
+          border-left: 2px solid var(--text-strong);
         }
       }
     }
 
-    .timeline-content-wrapper {
-      .timeline-content {
-        .entity-line.child-line {
-          .timebar {
-            color: $dark-grey;
-          }
-        }
-
-        .milestone-vertical-line {
-          border-left: 1px dashed $white;
-        }
-      }
-    }
-  }
-
-  .expand,
-  .man-day-input {
-    color: $white;
-  }
-
-  .total-man-days {
-    background: $dark-grey-2;
-    color: $white;
-  }
-
-  .entity-name {
-    .man-days-unit {
-      color: $white;
-    }
-  }
-
-  .child-name .entity-name span {
-    color: $white;
-  }
-
-  .milestone {
-    .milestone-tooltip {
-      background: $dark-grey-lighter;
-      border: 1px solid $dark-grey;
-      box-shadow: 0 2px 2px 0 $dark-grey-strong;
-    }
-    .milestone-tooltip:after,
-    .milestone-tooltip:before {
-      border-color: transparent;
-      border-top-color: $dark-grey-lighter;
+    // the task bars carry their own light color
+    .timeline-content .entity-line.child-line :deep(.timebar) {
+      color: $dark-grey;
     }
   }
 }
@@ -3057,7 +2849,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 }
 
-.status-date {
+.schedule-wrapper :deep(.status-date) {
   position: absolute;
   top: 2px;
   width: 4px;
@@ -3067,27 +2859,25 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   .dark & {
     box-shadow: $grey 0 0 1px 1px;
   }
+}
 
-  &-wip {
-    background-color: blue;
-    text-align: left;
-
-    &.status-date-gap {
-      transform: translateX(calc(-100% - 2px));
-    }
-  }
-  &-wfa {
-    background-color: purple;
-    text-align: center;
-  }
-  &-done {
-    background-color: green;
-    text-align: right;
-
-    &.status-date-gap {
-      transform: translateX(calc(100% + 2px));
-    }
-  }
+.schedule-wrapper :deep(.status-date-wip) {
+  background-color: blue;
+  text-align: left;
+}
+.schedule-wrapper :deep(.status-date-wip.status-date-gap) {
+  transform: translateX(calc(-100% - 2px));
+}
+.schedule-wrapper :deep(.status-date-wfa) {
+  background-color: purple;
+  text-align: center;
+}
+.schedule-wrapper :deep(.status-date-done) {
+  background-color: green;
+  text-align: right;
+}
+.schedule-wrapper :deep(.status-date-done.status-date-gap) {
+  transform: translateX(calc(100% + 2px));
 }
 
 .entity-name-list {
@@ -3113,7 +2903,6 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 
   .expand {
-    color: $white;
     cursor: pointer;
     margin-right: 0.5em;
   }
@@ -3151,6 +2940,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     overflow: hidden;
     z-index: 0;
     min-height: 85px;
+    color: var(--text-strong);
 
     &.without-milestones {
       min-height: 54px;
@@ -3186,7 +2976,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
         text-transform: uppercase;
 
         &.new-week {
-          border-left: 2px solid black;
+          border-left: 2px solid var(--text-strong);
 
           .zoom-level-1 & {
             border-left: none;
@@ -3195,7 +2985,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
       }
 
       .day-number {
-        color: black;
+        color: var(--text-strong);
         padding-top: 0.5em;
       }
 
@@ -3207,10 +2997,10 @@ const setItemPositions = (items, unitOfTime = 'days') => {
       }
 
       .month-name {
-        background: $white;
-        border-left: 2px solid black;
+        background: var(--background);
+        border-left: 2px solid var(--text-strong);
         bottom: 0;
-        color: black;
+        color: var(--text-strong);
         font-size: 0.9em;
         padding-bottom: 24px;
         padding-left: 0.5em;
@@ -3258,7 +3048,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
         top: 0;
         bottom: 0;
         width: 1px;
-        border-left: 1px dashed black;
+        border-left: 1px dashed var(--text-strong);
         margin-left: -0.5px;
         pointer-events: none;
         z-index: 100;
@@ -3272,7 +3062,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
           position: absolute;
           width: auto;
 
-          .timebar {
+          :deep(.timebar) {
             display: flex;
             align-items: center;
             height: calc(100% - 3px);
@@ -3283,7 +3073,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
           }
         }
 
-        .timebar {
+        :deep(.timebar) {
           position: absolute;
           top: 0;
           height: 14px;
@@ -3310,7 +3100,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
           }
         }
 
-        .subchildren .subchild .timebar {
+        :deep(.subchildren .subchild .timebar) {
           position: absolute;
           color: var(--text-strong);
           height: 34px;
@@ -3329,12 +3119,12 @@ const setItemPositions = (items, unitOfTime = 'days') => {
         &.child-line {
           padding: 0;
 
-          &.multiline .timebar {
+          &.multiline :deep(.timebar) {
             top: 0;
             font-size: 0.8em;
           }
 
-          .timebar {
+          :deep(.timebar) {
             position: relative;
             overflow: initial;
             background: rgba(0, 0, 50, 0.2);
@@ -3368,21 +3158,21 @@ const setItemPositions = (items, unitOfTime = 'days') => {
             }
           }
 
-          .timebar-left-hand,
-          .timebar-right-hand {
+          :deep(.timebar-left-hand),
+          :deep(.timebar-right-hand) {
             position: absolute;
             top: 0;
             bottom: 0;
             width: 20px;
           }
-          .timebar-left-hand {
+          :deep(.timebar-left-hand) {
             left: -12px;
           }
-          .timebar-right-hand {
+          :deep(.timebar-right-hand) {
             right: -12px;
           }
 
-          .timesheet {
+          :deep(.timesheet) {
             position: absolute;
             height: 6px;
             border-radius: 2px;
@@ -3479,12 +3269,13 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     width: 30px;
     text-align: right;
     background: transparent;
+    color: var(--text-strong);
     margin-right: 0.2em;
     font-size: 1.1em;
   }
 
   .man-days-unit {
-    color: $dark-grey;
+    color: var(--text-strong);
     font-size: 0.8em;
     margin-right: 0.3em;
     display: inline;
@@ -3597,7 +3388,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 }
 
 .child-name .entity-name span {
-  color: $dark-grey;
+  color: var(--text-strong);
   padding-left: 2.5em;
 
   .filler {
@@ -3610,7 +3401,8 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   align-items: flex-end;
   justify-content: space-between;
   position: absolute;
-  background: $white;
+  background: var(--background);
+  color: var(--text-strong);
   height: 85px;
   min-width: 300px;
   padding-bottom: 2px;
@@ -3662,18 +3454,17 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   .milestone-tooltip {
     visibility: hidden;
     display: inline-block;
-    border: 1px solid #eee;
+    border: 1px solid var(--border);
     border-radius: 5px;
-    box-shadow: 0 2px 2px 0 #eee;
+    box-shadow: 0 2px 2px 0 var(--box-shadow);
     font-size: 0.8em;
     font-weight: bold;
     padding: 2px 5px;
     position: relative;
-    border: 1px solid #eee;
     min-width: 100px;
     text-align: center;
     top: -5px;
-    background: $white;
+    background: var(--background-alt-2);
     z-index: 100;
     transform: translateX(-50%);
   }
@@ -3697,14 +3488,14 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 
   .milestone-tooltip:after {
-    border-color: rgba(255, 255, 255, 0);
-    border-top-color: $white;
+    border-color: transparent;
+    border-top-color: var(--background-alt-2);
     border-width: 5px;
     margin-left: -5px;
   }
   .milestone-tooltip:before {
-    border-color: rgba(238, 238, 238, 0);
-    border-top-color: #eeeeee;
+    border-color: transparent;
+    border-top-color: var(--border);
     border-width: 6px;
     margin-left: -6px;
   }
@@ -3713,17 +3504,12 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 .root-element-name {
   padding-left: 10px;
   white-space: nowrap;
-
-  color: #222;
-
-  .dark & {
-    color: $white;
-  }
+  color: var(--text-strong);
 }
 
 .child-element-name {
   padding-left: 10px;
-  color: $grey-strong;
+  color: var(--text);
 }
 
 .date-widget {
@@ -3775,17 +3561,16 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 }
 
-.day-off {
+.schedule-wrapper :deep(.day-off) {
   position: absolute;
   width: 19px;
   height: 100%;
   line-height: 40px;
   text-align: center;
-  color: $dark-grey-light;
+  color: var(--text-strong);
   background-color: #f0f0f0;
 
   .dark & {
-    color: $white;
     background-color: #43474d;
   }
 
@@ -3837,12 +3622,12 @@ input[type='number'] {
 .droppable {
   background-color: rgba(var(--background-selectable-rgb), 0.5) !important;
 
-  * {
+  :deep(*) {
     pointer-events: none;
   }
 }
 
-.subchildren {
+.schedule-wrapper :deep(.subchildren) {
   margin-top: 7px;
 }
 
@@ -3859,15 +3644,15 @@ input[type='number'] {
   color: var(--text);
 }
 
-.subchild {
+.schedule-wrapper :deep(.subchild) {
   position: relative;
 }
 
-.subchild + .subchild {
+.schedule-wrapper :deep(.subchild + .subchild) {
   margin-top: 10px;
 }
 
-.subchild,
+.schedule-wrapper :deep(.subchild),
 .subchild-label {
   box-shadow: 0 0 1px 0 $dark-grey-lighter;
 
@@ -3876,46 +3661,80 @@ input[type='number'] {
   }
 }
 
+// where the assignee rows would be: muted, no card (outranks the
+// nth-child stripes below)
+.child > .subchild-label.empty,
+.child-empty {
+  background: none;
+  box-shadow: none;
+  color: var(--text);
+  font-style: italic;
+  font-weight: 400;
+  height: 40px;
+}
+
+// the count above its button, in the 40px of an assignee row
+.child > .subchild-label.empty {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  line-height: 1.2;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.child-empty {
+  display: flex;
+  align-items: center;
+  padding-left: 15px;
+}
+
+.plan-entity {
+  font-style: normal;
+  height: auto;
+  opacity: 0.7;
+  padding: 0;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
 .subchild-label:nth-child(even),
-.subchild:nth-child(odd) {
+.schedule-wrapper :deep(.subchild:nth-child(odd)) {
   background-color: rgba(0, 0, 0, 0.15);
 }
 
 .subchild-label:nth-child(odd),
-.subchild:nth-child(even) {
+.schedule-wrapper :deep(.subchild:nth-child(even)) {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
-.subchild {
-  .day-off {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: -1px;
+.schedule-wrapper :deep(.subchild .day-off) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -1px;
 
-    .day-off-icon {
-      position: initial;
-    }
+  .day-off-icon {
+    position: initial;
   }
+}
 
-  &:nth-child(odd) {
-    .day-off {
-      background-color: #c4c4c4;
+.schedule-wrapper :deep(.subchild:nth-child(odd) .day-off) {
+  background-color: #c4c4c4;
 
-      .dark & {
-        background-color: #515357;
-      }
-    }
+  .dark & {
+    background-color: #515357;
   }
+}
 
-  &:nth-child(even) {
-    .day-off {
-      background-color: #e2e2e2;
+.schedule-wrapper :deep(.subchild:nth-child(even) .day-off) {
+  background-color: #e2e2e2;
 
-      .dark & {
-        background-color: #414349;
-      }
-    }
+  .dark & {
+    background-color: #414349;
   }
 }
 @media screen and (max-width: 768px) {

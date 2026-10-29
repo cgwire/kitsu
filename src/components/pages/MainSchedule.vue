@@ -73,10 +73,10 @@ import {
   parseSimpleDate
 } from '@/lib/time'
 
+import Schedule from '@/components/schedule/Schedule.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import DateField from '@/components/widgets/DateField.vue'
-import Schedule from '@/components/widgets/Schedule.vue'
 
 // Composables
 const { t } = useI18n()

@@ -484,7 +484,7 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 // eslint-disable-next-line no-unused-vars
-import Schedule from '@/components/widgets/Schedule.vue'
+import Schedule from '@/components/schedule/Schedule.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TaskListNumbers from '@/components/widgets/TaskListNumbers.vue'
