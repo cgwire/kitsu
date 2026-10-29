@@ -109,7 +109,7 @@
                 {{ $t('tasks.all_tasks') }}
               </router-link>
             </p>
-            <p @click="toggleSidebar()" v-if="isCurrentUserManager">
+            <p @click="toggleSidebar()" v-if="isStudioManager">
               <router-link :to="{ name: 'newsfeed' }">
                 <kitsu-icon class="nav-icon" name="newsFeed" />
                 {{ $t('news.title') }}
@@ -285,6 +285,11 @@ const isCurrentUserSupervisor = computed(
 )
 const isCurrentUserVendor = computed(() => store.getters.isCurrentUserVendor)
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
+// The studio feed follows the global role, as its route does, not the role
+// held on the production shown.
+const isStudioManager = computed(() =>
+  ['admin', 'manager'].includes(store.getters.user?.role)
+)
 const isSidebarHidden = computed(() => store.getters.isSidebarHidden)
 const mainConfig = computed(() => store.getters.mainConfig)
 const organisation = computed(() => store.getters.organisation)

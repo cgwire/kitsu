@@ -32,10 +32,7 @@
             </div>
 
             <template v-else>
-              <div
-                :key="dayList.length > 0 ? dayList[0].created_at : ''"
-                v-for="dayList in newsListByDay(timezone)"
-              >
+              <div :key="key" v-for="{ dayList, key } in newsDays">
                 <div
                   class="has-text-centered subtitle timeline-entry day-sticky"
                 >
@@ -47,14 +44,14 @@
                 <news-row
                   :key="`news-${news.id}`"
                   :ref="el => setNewsRef(news.id, el?.root)"
-                  :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(0, 10)}-${index}`"
+                  :canvas-id="`annotation-canvas-${news.id}`"
                   :is-new="recentNewsIds.has(news.id)"
                   :is-selected="news.id === currentNewsId"
                   :is-studio="isStudio"
                   :news="news"
                   :preview-mode="previewMode"
                   @select="onNewsSelected"
-                  v-for="(news, index) in dayList"
+                  v-for="news in dayList"
                 />
               </div>
             </template>
@@ -117,6 +114,7 @@ import { useTime } from '@/composables/time'
 import { isFreeEscape } from '@/lib/keyboard'
 import {
   formatFullDateWithRevertedTimezone,
+  formatFullDateWithTimezone,
   formatSimpleDate
 } from '@/lib/time'
 
@@ -158,6 +156,7 @@ const newsRefs = new Map()
 // The news selected last: its task may still be loading.
 let selectedNewsId = null
 let silent = false
+let isUnmounted = false
 
 const setNewsRef = (id, el) => {
   if (el) newsRefs.set(id, el)
@@ -170,7 +169,19 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const personMap = computed(() => store.getters.personMap)
 const newsList = computed(() => store.getters.newsList)
 const newsListByDay = computed(() => store.getters.newsListByDay)
-const newsTotal = computed(() => store.getters.newsTotal)
+
+// A day keeps its key when news come or go: a new key mounts all its rows
+// again, and their previews start over. The feed stays in date order, so a
+// day is never listed twice.
+const newsDays = computed(() =>
+  newsListByDay.value(timezone.value).map(dayList => ({
+    dayList,
+    key: formatFullDateWithTimezone(
+      dayList[0].created_at,
+      timezone.value
+    ).substring(0, 10)
+  }))
+)
 
 const isStudio = computed(() => !route.path.includes('productions'))
 
@@ -182,7 +193,7 @@ const isTimelineBlank = computed(
   () => loading.news || errors.news || newsList.value.length === 0
 )
 
-const hasMoreNews = computed(() => newsList.value.length < newsTotal.value)
+const hasMoreNews = computed(() => !store.getters.isNewsListComplete)
 
 const isDrawerOpen = computed(() => Boolean(currentNewsId.value))
 
@@ -196,7 +207,10 @@ const params = computed(() => ({
   person_id: person.value ? person.value.id : undefined,
   page: currentPage.value,
   episode_id: episodeId.value !== 'all' ? episodeId.value : undefined,
-  before: formatFullDateWithRevertedTimezone(before.value, timezone.value),
+  before: formatFullDateWithRevertedTimezone(
+    dayAfter(before.value),
+    timezone.value
+  ),
   after: formatFullDateWithRevertedTimezone(after.value, timezone.value)
 }))
 
@@ -216,6 +230,15 @@ const filterQuery = computed(() => ({
 // Query dates carry the day only. Rebuild them at local midnight: the round
 // trip goes back out through formatSimpleDate, which formats in local time.
 const parseQueryDate = value => (value ? new Date(`${value}T00:00:00`) : null)
+
+// The end date takes in its whole day: Zou keeps the news created before the
+// start of the next one.
+const dayAfter = date => {
+  if (!date) return null
+  const next = new Date(date)
+  next.setDate(next.getDate() + 1)
+  return next
+}
 
 const setScrollPosition = scrollPosition => {
   if (body.value) {
@@ -296,8 +319,10 @@ const init = () => {
       })
       .finally(() => {
         // A production or filter change during the load was dropped by the
-        // guard above: load again for it.
-        if (JSON.stringify(params.value) !== loadedParams) init()
+        // guard above: load again for it, unless the page was left meanwhile.
+        if (!isUnmounted && JSON.stringify(params.value) !== loadedParams) {
+          init()
+        }
       })
   }
 }
@@ -306,8 +331,14 @@ const loadFollowingNews = () => {
   if (loading.more || loading.news || !hasMoreNews.value) return
   loading.more = true
   currentPage.value += 1
+  let isPageEmpty = false
   store
     .dispatch('loadMoreNews', params.value)
+    .then(count => {
+      // A page of news already listed makes the feed no longer: no scroll
+      // would come to ask for the next one.
+      isPageEmpty = count === 0
+    })
     .catch(err => {
       console.error(err)
       // Give the failed page back so the next scroll retries it instead of
@@ -316,6 +347,7 @@ const loadFollowingNews = () => {
     })
     .finally(() => {
       loading.more = false
+      if (isPageEmpty) loadFollowingNews()
     })
 }
 
@@ -353,6 +385,14 @@ const onPreviewFileAddFile = eventData => {
     commentId: eventData.comment_id,
     extension: eventData.extension
   })
+  // The previews mode plays the files of the revision, which the event
+  // does not carry.
+  if (previewMode.value === 'previews' && eventData.comment_id) {
+    const relatedNews = newsList.value.find(
+      news => news.comment_id === eventData.comment_id
+    )
+    if (relatedNews) reloadNews(relatedNews)
+  }
 }
 
 const markRecent = newsId => {
@@ -366,23 +406,81 @@ const markRecent = newsId => {
   }, 3000)
 }
 
+const isProductionInFeed = productionId =>
+  isStudio.value
+    ? store.getters.openProductions.some(
+        production => production.id === productionId
+      )
+    : productionId === currentProduction.value?.id
+
+// Zou's filters, for a news that arrives on its own. Its episode filter
+// keeps the shots of that episode only.
+const isNewsInFeed = news => {
+  const { after, before, episode_id: episodeFilter } = params.value
+  const taskType = store.getters.taskTypeMap.get(news.task_type_id)
+  return (
+    (!taskTypeId.value || news.task_type_id === taskTypeId.value) &&
+    (!taskStatusId.value || news.task_status_id === taskStatusId.value) &&
+    (!person.value || news.author_id === person.value.id) &&
+    (!episodeFilter ||
+      (taskType?.for_entity === 'Shot' && news.episode_id === episodeFilter)) &&
+    (!after || news.created_at > after) &&
+    (!before || news.created_at < before)
+  )
+}
+
 const onNewsNew = eventData => {
   if (
-    (isStudio.value || eventData.project_id === currentProduction.value.id) &&
+    isProductionInFeed(eventData.project_id) &&
     (!taskTypeId.value || taskTypeId.value === eventData.task_type_id) &&
     (!taskStatusId.value || taskStatusId.value === eventData.task_status_id)
   ) {
     store
-      .dispatch('loadSingleNews', {
+      .dispatch('getSingleNews', {
         productionId: eventData.project_id,
         newsId: eventData.news_id
       })
-      .then(() => markRecent(eventData.news_id))
+      .then(news => {
+        if (news && isNewsInFeed(news)) {
+          store.commit('ADD_NEWS', news)
+          markRecent(news.id)
+        }
+      })
       .catch(err => {
         // Its comment was deleted or moved before the news could load.
         if (err?.status !== 404) console.error(err)
       })
   }
+}
+
+// The event may carry no project, and its news may still be on its way:
+// DELETE_NEWS keeps it out of the feed either way.
+const onNewsDelete = eventData => {
+  store.commit('DELETE_NEWS', eventData.news_id)
+}
+
+const reloadNews = relatedNews => {
+  store
+    .dispatch('getSingleNews', {
+      productionId: relatedNews.project_id,
+      newsId: relatedNews.id
+    })
+    .then(news => {
+      if (!news) return
+      // A status edit can take the news out of the filters.
+      if (isNewsInFeed(news)) store.commit('UPDATE_NEWS', news)
+      else store.commit('REMOVE_NEWS', news.id)
+      // The registry follows the previews Zou builds in a job, after a
+      // socket drop too.
+      if (news.preview_files) {
+        store.dispatch('registerPreviewFileStatuses', news.preview_files)
+      }
+    })
+    .catch(err => {
+      // Deleting or moving a comment deletes its news, then updates its task.
+      if (err?.status === 404) store.commit('DELETE_NEWS', relatedNews.id)
+      else console.error(err)
+    })
 }
 
 const onTaskUpdate = eventData => {
@@ -391,18 +489,7 @@ const onTaskUpdate = eventData => {
       news.project_id === eventData.project_id &&
       news.task_id === eventData.task_id
   )
-  if (relatedNews) {
-    store
-      .dispatch('loadSingleNews', {
-        productionId: relatedNews.project_id,
-        newsId: relatedNews.id
-      })
-      .catch(err => {
-        // Deleting or moving a comment deletes its news, then updates its task.
-        if (err?.status === 404) store.commit('REMOVE_NEWS', relatedNews.id)
-        else console.error(err)
-      })
-  }
+  if (relatedNews) reloadNews(relatedNews)
 }
 
 // Watchers
@@ -453,6 +540,7 @@ onMounted(() => {
   window.addEventListener('keydown', onKeyDown, false)
   socket.on('preview-file:add-file', onPreviewFileAddFile)
   socket.on('news:new', onNewsNew)
+  socket.on('news:delete', onNewsDelete)
   socket.on('task:update', onTaskUpdate)
 
   if (!loading.news) {
@@ -461,9 +549,11 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  isUnmounted = true
   window.removeEventListener('keydown', onKeyDown)
   socket.off('preview-file:add-file', onPreviewFileAddFile)
   socket.off('news:new', onNewsNew)
+  socket.off('news:delete', onNewsDelete)
   socket.off('task:update', onTaskUpdate)
 })
 
