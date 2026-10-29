@@ -257,6 +257,17 @@ describe('Task.vue', () => {
       expect(workingFiles.props('canUpload')).toBe(false)
     })
 
+    it('allows an unassigned Admin to read but not submit Working files', async () => {
+      const { wrapper } = await mountPage({
+        task: buildTask({ assignees: [] }),
+        getterOverrides: { isCurrentUserAdmin: () => true }
+      })
+
+      const workingFiles = wrapper.findComponent(TaskWorkingFiles)
+      expect(workingFiles.props('canAccess')).toBe(true)
+      expect(workingFiles.props('canUpload')).toBe(false)
+    })
+
     it('hides Working files from a Client', async () => {
       const { wrapper } = await mountPage({
         task: buildTask({ assignees: ['user-1'] }),
