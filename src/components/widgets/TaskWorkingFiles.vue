@@ -26,6 +26,7 @@
     </p>
     <button
       v-if="ambiguousCreate"
+      data-testid="ambiguous-create-acknowledge"
       class="button is-small"
       type="button"
       :disabled="isLoading || Boolean(loadError)"
@@ -111,7 +112,12 @@
             type="text"
             maxlength="250"
             v-model.trim="groupName"
-            :disabled="isCreating || isUploading || Boolean(pendingUpload)"
+            :disabled="
+              isCreating ||
+              isUploading ||
+              Boolean(pendingUpload) ||
+              Boolean(pendingCreateRequestId)
+            "
           />
         </div>
       </div>
@@ -124,7 +130,12 @@
           <select
             :id="`${titleId}-software`"
             v-model="softwareId"
-            :disabled="isCreating || isUploading || Boolean(pendingUpload)"
+            :disabled="
+              isCreating ||
+              isUploading ||
+              Boolean(pendingUpload) ||
+              Boolean(pendingCreateRequestId)
+            "
           >
             <option value="">
               {{ t('tasks.working_files.select_software') }}
@@ -150,7 +161,12 @@
             data-testid="working-file-input"
             class="input"
             type="file"
-            :disabled="isCreating || isUploading || Boolean(pendingUpload)"
+            :disabled="
+              isCreating ||
+              isUploading ||
+              Boolean(pendingUpload) ||
+              Boolean(pendingCreateRequestId)
+            "
             @change="selectFile"
           />
         </div>
@@ -236,6 +252,7 @@ const uploadError = ref('')
 const downloadError = ref('')
 const accessDenied = ref(false)
 const pendingUpload = ref(null)
+const pendingCreateRequestId = ref(null)
 const ambiguousCreate = ref(false)
 const objectUrls = new Set()
 
@@ -282,6 +299,17 @@ const canSubmit = computed(
 
 function statusOf(error) {
   return Number(error?.status || error?.response?.status || 0)
+}
+
+function createRequestId() {
+  const bytes = new Uint8Array(16)
+  globalThis.crypto.getRandomValues(bytes)
+  bytes[6] = (bytes[6] & 0x0f) | 0x40
+  bytes[8] = (bytes[8] & 0x3f) | 0x80
+  const hex = [...bytes].map(value => value.toString(16).padStart(2, '0'))
+  return `${hex.slice(0, 4).join('')}-${hex.slice(4, 6).join('')}-${hex
+    .slice(6, 8)
+    .join('')}-${hex.slice(8, 10).join('')}-${hex.slice(10).join('')}`
 }
 
 function errorCode(error) {
@@ -384,21 +412,26 @@ async function submit() {
   }
   uploadError.value = ''
   isCreating.value = true
+  const requestId = pendingCreateRequestId.value || createRequestId()
+  pendingCreateRequestId.value = requestId
 
   try {
     const workingFile = await filesApi.createTaskWorkingFile(props.task.id, {
       name: groupName.value,
       mode: 'working',
       revision: 0,
-      software_id: softwareId.value
+      software_id: softwareId.value,
+      request_id: requestId
     })
+    pendingCreateRequestId.value = null
     pendingUpload.value = { workingFile, file: selectedFile.value }
   } catch (error) {
     uploadError.value = errorCode(error)
     isCreating.value = false
     if ([0, 408, 500, 502, 503, 504].includes(statusOf(error))) {
-      // Zou has no idempotency key for this create route. Refresh before
-      // allowing the user to review whether the server created a revision.
+      // Refresh before allowing another create attempt. Zou versions that
+      // support request_id replay the original record; older versions may
+      // ignore it, so the refreshed list remains the user's review boundary.
       ambiguousCreate.value = true
       await load()
     }
@@ -490,6 +523,7 @@ watch(
     softwares.value = []
     selectedFile.value = null
     pendingUpload.value = null
+    pendingCreateRequestId.value = null
     softwareId.value = ''
     groupName.value = 'main'
     softwareError.value = ''

@@ -107,7 +107,10 @@ describe('TaskWorkingFiles', () => {
       name: 'main',
       mode: 'working',
       revision: 0,
-      software_id: 'nuke'
+      software_id: 'nuke',
+      request_id: expect.stringMatching(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+      )
     })
     expect(filesApi.uploadWorkingFile).toHaveBeenCalledWith(
       'working-3',
@@ -115,7 +118,7 @@ describe('TaskWorkingFiles', () => {
     )
   })
 
-  it('blocks another revision after an ambiguous create until the refreshed list is reviewed', async () => {
+  it('reuses the same create request after an ambiguous response', async () => {
     const uncertainRevision = {
       ...existingFile,
       id: 'working-2',
@@ -125,7 +128,16 @@ describe('TaskWorkingFiles', () => {
     filesApi.getTaskWorkingFiles
       .mockResolvedValueOnce([existingFile])
       .mockResolvedValueOnce([uncertainRevision, existingFile])
-    filesApi.createTaskWorkingFile.mockRejectedValue({ status: 502 })
+      .mockResolvedValueOnce([uncertainRevision, existingFile])
+      .mockResolvedValue([uncertainRevision, existingFile])
+    filesApi.createTaskWorkingFile
+      .mockRejectedValueOnce({ status: 502 })
+      .mockResolvedValueOnce({ id: 'working-2' })
+    const request = { on: vi.fn() }
+    filesApi.uploadWorkingFile.mockReturnValue({
+      request,
+      promise: Promise.resolve()
+    })
     await mountComponent()
 
     const input = wrapper.get('[data-testid="working-file-input"]')
@@ -144,11 +156,21 @@ describe('TaskWorkingFiles', () => {
     expect(wrapper.text()).toContain('main_v003.nk')
     expect(wrapper.get('[data-testid="working-file-submit"]').element.disabled).toBe(true)
 
+    await wrapper.get('[data-testid="ambiguous-create-acknowledge"]').trigger('click')
+    await flushPromises()
+    expect(filesApi.createTaskWorkingFile).toHaveBeenCalledTimes(1)
+
     await wrapper.get('form').trigger('submit')
     await flushPromises()
 
-    expect(filesApi.createTaskWorkingFile).toHaveBeenCalledTimes(1)
-    expect(filesApi.uploadWorkingFile).not.toHaveBeenCalled()
+    expect(filesApi.createTaskWorkingFile).toHaveBeenCalledTimes(2)
+    expect(filesApi.createTaskWorkingFile.mock.calls[0][1].request_id).toBe(
+      filesApi.createTaskWorkingFile.mock.calls[1][1].request_id
+    )
+    expect(filesApi.uploadWorkingFile).toHaveBeenCalledWith(
+      'working-2',
+      expect.any(FormData)
+    )
   })
 
   it('keeps the same revision id and file when upload fails', async () => {
