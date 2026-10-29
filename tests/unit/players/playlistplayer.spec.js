@@ -2014,32 +2014,46 @@ describe('PlaylistPlayer.vue', () => {
       }
     )
 
-    // A pause moves the movie to the next frame boundary: past the last
-    // frame, that is the very end of the movie, where no drawing is found.
-    it('shows the drawing of the last frame once paused on it', async () => {
+    const togglePlayback = () =>
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { code: 'Space', key: ' ' })
+      )
+
+    // The viewer pauses on the frame on screen and sends it: the movie
+    // time can still read the frame before.
+    it('shows the drawing of the frame the movie pauses on', async () => {
       const canvas = await mountShowing(movie)
       const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
-      let time = 0
-      rawPlayer.getCurrentTime = () => time
-      rawPlayer.getCurrentTimeRaw = () => time
-      rawPlayer.setCurrentTimeRaw = value => {
-        time = value
-      }
+      rawPlayer.getCurrentTime = () => 2.69
+      rawPlayer.getCurrentTimeRaw = () => 2.69
+      rawPlayer.pause = () => rawPlayer.$emit('frame-update', 68)
       rawPlayer.isPlaying = true
-      const togglePlayback = () =>
-        window.dispatchEvent(
-          new KeyboardEvent('keydown', { code: 'Space', key: ' ' })
-        )
       togglePlayback()
       await flushPromises()
-      // Inside the last frame, from 2.72 to 2.76 s.
-      time = 2.74
       canvas.add.mockClear()
 
       togglePlayback()
       await flushPromises()
 
       expect(drawnIds(canvas)).toEqual(['last'])
+    })
+
+    // A second seek, to the next frame boundary, landed after the one of
+    // the viewer: the picture moved off the frame on the counter.
+    it('leaves the pause of the movie to its viewer', async () => {
+      await mountShowing(movie)
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      rawPlayer.pause = vi.fn()
+      rawPlayer.setCurrentTimeRaw = vi.fn()
+      rawPlayer.isPlaying = true
+      togglePlayback()
+      await flushPromises()
+
+      togglePlayback()
+      await flushPromises()
+
+      expect(rawPlayer.pause).toHaveBeenCalled()
+      expect(rawPlayer.setCurrentTimeRaw).not.toHaveBeenCalled()
     })
 
     // As in the preview player: loading the drawing would pause the movie.

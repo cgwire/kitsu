@@ -125,7 +125,7 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     expect(firstCallCount).toBeGreaterThan(0)
 
     const { cb: tick1 } = rvfcCallbacks[firstCallCount - 1]
-    tick1()
+    tick1(performance.now(), { mediaTime: 0 })
     expect(fakeContext.drawImage).toHaveBeenCalled()
 
     fakeContext.drawImage.mockClear()
@@ -139,12 +139,12 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
 
     // Firing the stale old tick must NOT paint (stale-player guard)
     const staleCount = rvfcCallbacks.length
-    tick1()
+    tick1(performance.now(), { mediaTime: 0 })
     expect(fakeContext.drawImage).not.toHaveBeenCalled()
 
     // Firing the new tick DOES paint
     const { cb: tick2 } = rvfcCallbacks[staleCount - 1]
-    tick2()
+    tick2(performance.now(), { mediaTime: 0 })
     expect(fakeContext.drawImage).toHaveBeenCalled()
 
     wrapper.unmount()
@@ -260,7 +260,7 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     const countBefore = (wrapper.emitted('frame-update') || []).length
 
     const { cb: tick } = rvfcCallbacks[rvfcCallbacks.length - 1]
-    tick()
+    tick(performance.now(), { mediaTime: 0 })
 
     const countAfter = (wrapper.emitted('frame-update') || []).length
     expect(countAfter).toBe(countBefore)
@@ -447,6 +447,31 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
       const { cb: tick } = rvfcCallbacks.at(-1)
       tick(performance.now(), { mediaTime: 18000 / 30 })
       expect(lastFrame(wrapper)).toBe(18000)
+      wrapper.unmount()
+    })
+
+    // The movie time runs a frame behind the frame on screen while playing:
+    // a pause on it went back a frame.
+    it('pauses on the frame on screen', async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const { wrapper, player } = await mountAt30()
+      wrapper.vm.play()
+      const { cb: tick } = rvfcCallbacks.at(-1)
+      tick(performance.now(), { mediaTime: 18000 / 30 })
+      player.currentTime = 17999.4 / 30
+      wrapper.vm.pause()
+      expect(Math.floor(player.currentTime * 30)).toBe(18000)
+      expect(lastFrame(wrapper)).toBe(18000)
+      wrapper.unmount()
+    })
+
+    // The very end of the movie shows no frame and holds no drawing.
+    it('pauses within the last frame', async () => {
+      const { wrapper, player } = await mountAt30()
+      player.currentTime = 1200
+      wrapper.vm.pause()
+      expect(Math.floor(player.currentTime * 30)).toBe(35999)
+      expect(lastFrame(wrapper)).toBe(35999)
       wrapper.unmount()
     })
 

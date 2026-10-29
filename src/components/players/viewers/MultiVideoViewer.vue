@@ -182,6 +182,8 @@ let pendingSeekTime = null
 // again and skip entities.
 let trimEndFired = false
 let lastEmittedFrame = null
+// The frame painted last: the movie time runs a frame behind it.
+let presentedFrame = null
 let rate = 1
 let silent = false
 let showLoadingTimer = null
@@ -277,6 +279,7 @@ const resizeRenderer = () => {
 
 const startRenderLoop = () => {
   stopRenderLoop()
+  presentedFrame = null
   const player = currentPlayer.value
   if (!player) return
   renderLoopPlayer = player
@@ -321,6 +324,7 @@ const startRenderLoop = () => {
       }
       trimEndFired = false
       renderer?.drawFrame(player)
+      presentedFrame = Math.round(metadata.mediaTime * fps.value)
       if (isPlaying.value && props.name === 'main') {
         updateTime(player.currentTime)
       }
@@ -635,8 +639,17 @@ const pause = () => {
     reloadPlayer(currentPlayer.value)
   }
   if (currentPlayer.value) {
-    currentPlayer.value.pause()
-    const frame = Math.round(getCurrentTime() * fps.value)
+    const player = currentPlayer.value
+    const onScreen =
+      isPlaying.value && presentedFrame !== null
+        ? presentedFrame
+        : Math.round(getCurrentTime() * fps.value)
+    // The very end of the movie shows no frame and holds no drawing.
+    const lastFrame = Number.isFinite(player.duration)
+      ? floorToFrameNumber(player.duration) - 1
+      : onScreen
+    player.pause()
+    const frame = Math.max(0, Math.min(onScreen, lastFrame))
     seekNow(frameStartTime(frame, fps.value))
     currentTimeRaw = currentPlayer.value.currentTime
     emit('frame-update', Math.round(currentTimeRaw * fps.value))

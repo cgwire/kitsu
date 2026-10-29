@@ -1017,7 +1017,6 @@ import {
 } from '@/lib/preview'
 import { formatDisplayDate, formatTimeOfDay } from '@/lib/time'
 import {
-  ceilToFrame,
   floorToFrame,
   formatFrame,
   formatTime,
@@ -2402,21 +2401,13 @@ const pause = () => {
     isPlaying.value = false
     _stopPlaylistProgressUpdateLoop()
   } else if (isCurrentPreviewMovie.value) {
-    const comparisonPlayer = rawPlayerComparison.value
-    let currentTimeValue = 0
-    if (rawPlayer.value) {
-      // The next frame boundary, but within the last frame: the very end of
-      // the movie holds no drawing.
-      currentTimeValue = Math.min(
-        ceilToFrame(rawPlayer.value.getCurrentTimeRaw(), fps.value),
-        frameStartTime(nbFrames.value - 1, fps.value)
-      )
-    }
+    // The viewer pauses on the frame on screen. The comparison viewer is
+    // mounted even when not comparing: seeking the movie again for it
+    // moved the picture off that frame.
     rawPlayer.value?.pause()
-    if (comparisonPlayer) {
-      comparisonPlayer.pause()
-      rawPlayer.value.setCurrentTimeRaw(currentTimeValue)
-      comparisonPlayer.setCurrentTimeRaw(currentTimeValue)
+    if (isComparing.value) {
+      rawPlayerComparison.value?.pause()
+      syncComparisonPlayer()
     }
   } else if (isCurrentPreviewSound.value) {
     soundPlayer.value?.pause()
@@ -2826,7 +2817,8 @@ const togglePlayPause = () => {
     playClicked()
   } else {
     pauseClicked()
-    const ann = getAnnotation(rawPlayer.value?.getCurrentTime())
+    // The frame the viewer paused on, as drawings are saved.
+    const ann = getAnnotation(currentTimeRaw.value)
     if (ann) loadAnnotation(ann)
     updateRoomStatus()
   }
