@@ -590,19 +590,15 @@ onMounted(() => {
   domEvents.forEach(([type, listener]) =>
     document.addEventListener(type, listener)
   )
+  // Past the mount, the observer alone sets the width: a read while the bar
+  // is hidden sticks, as the size it reported last does not change.
+  onWindowResize()
   resizeObserver = new ResizeObserver(onWindowResize)
   resizeObserver.observe(progress.value)
-  const coords = progress.value.getBoundingClientRect()
-  width.value = coords.width
-  setTimeout(() => {
-    width.value = coords.width
-  })
   progress.value.setAttribute('max', videoDuration.value)
 })
 
 watch(videoDuration, () => {
-  const coords = progress.value.getBoundingClientRect()
-  width.value = coords.width
   progress.value.setAttribute('max', videoDuration.value)
   updateProgressBar(0)
 })
