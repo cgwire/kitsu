@@ -39,6 +39,9 @@
     <p v-if="accessDenied" class="help is-danger" role="alert">
       {{ t('tasks.working_files.errors.forbidden') }}
     </p>
+    <p v-if="downloadError" class="help is-danger" role="alert">
+      {{ t('tasks.working_files.errors.' + downloadError) }}
+    </p>
 
     <p
       v-if="!isLoading && !loadError && workingFiles.length === 0"
@@ -230,6 +233,7 @@ const downloadingId = ref(null)
 const loadError = ref('')
 const softwareError = ref('')
 const uploadError = ref('')
+const downloadError = ref('')
 const accessDenied = ref(false)
 const pendingUpload = ref(null)
 const ambiguousCreate = ref(false)
@@ -332,6 +336,7 @@ async function load() {
   isLoading.value = true
   loadError.value = ''
   softwareError.value = ''
+  downloadError.value = ''
   accessDenied.value = false
   const [filesResult, softwaresResult] = await Promise.allSettled([
     filesApi.getTaskWorkingFiles(taskId),
@@ -449,7 +454,7 @@ async function uploadPending() {
 async function download(workingFile) {
   if (downloadingId.value) return
   downloadingId.value = workingFile.id
-  uploadError.value = ''
+  downloadError.value = ''
   try {
     const blob = await filesApi.getWorkingFileBlob(workingFile.id)
     const url = URL.createObjectURL(blob)
@@ -469,7 +474,7 @@ async function download(workingFile) {
       objectUrls.delete(url)
     }, 1000)
   } catch (error) {
-    uploadError.value = errorCode(error)
+    downloadError.value = errorCode(error)
   } finally {
     downloadingId.value = null
   }
@@ -486,6 +491,7 @@ watch(
     groupName.value = 'main'
     softwareError.value = ''
     uploadError.value = ''
+    downloadError.value = ''
     if (props.canAccess) load()
   },
   { immediate: true }

@@ -161,6 +161,23 @@ describe('TaskWorkingFiles', () => {
     expect(wrapper.find('form').exists()).toBe(false)
   })
 
+  it('shows download failures to read-only users', async () => {
+    filesApi.getWorkingFileBlob.mockRejectedValue({ status: 503 })
+    wrapper = mount(TaskWorkingFiles, {
+      props: { task: { id: 'task-1' }, canAccess: true, canUpload: false },
+      global: { mocks: { $t: key => key } }
+    })
+    await flushPromises()
+
+    expect(wrapper.find('form').exists()).toBe(false)
+    await wrapper.find('.working-file-row button').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[role="alert"]').text()).toBe(
+      'tasks.working_files.errors.request_failed'
+    )
+  })
+
   it('does not fetch or render Working files for a user without task access', async () => {
     wrapper = mount(TaskWorkingFiles, {
       props: { task: { id: 'task-1' }, canAccess: false, canUpload: false },
