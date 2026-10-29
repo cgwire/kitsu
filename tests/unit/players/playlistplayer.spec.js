@@ -1986,6 +1986,34 @@ describe('PlaylistPlayer.vue', () => {
       expect(rawPlayer.setCurrentTimeRaw).not.toHaveBeenCalledWith(frame / 25)
     })
 
+    // A drawing is saved on frame * frameDuration, 0.0333 at 30 fps, which
+    // runs 0.001 s a frame behind the movie time: 50 s in, a step showed
+    // the drawing of 2 frames before.
+    it.each(['ArrowRight', 'ArrowLeft'])(
+      'shows the drawing of the frame reached on %s far into a movie',
+      async key => {
+        const canvas = await mountShowing({
+          ...movie,
+          fps: '30',
+          preview_file_duration: 60,
+          preview_file_annotations: [
+            drawingAt(1498 * 0.0333, 'before'),
+            drawingAt(1500 * 0.0333, 'reached')
+          ]
+        })
+        const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+        const step = () => rawPlayer.$emit('frame-update', 1500)
+        rawPlayer.goNextFrame = step
+        rawPlayer.goPreviousFrame = step
+        rawPlayer.getCurrentTime = () => 1500 / 30 + 0.001
+        canvas.add.mockClear()
+
+        await press(key)
+
+        expect(drawnIds(canvas)).toEqual(['reached'])
+      }
+    )
+
     // A pause moves the movie to the next frame boundary: past the last
     // frame, that is the very end of the movie, where no drawing is found.
     it('shows the drawing of the last frame once paused on it', async () => {

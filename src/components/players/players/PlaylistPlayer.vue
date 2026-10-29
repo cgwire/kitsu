@@ -2608,7 +2608,9 @@ const goPreviousFrame = () => {
     if (!rawPlayer.value) return
     rawPlayer.value.goPreviousFrame()
     if (isComparing.value) syncComparisonPlayer()
-    const time = rawPlayer.value.getCurrentTime()
+    // The time of the frame the step sent, as drawings are saved: the
+    // movie time runs ahead of frame * frameDuration along the movie.
+    const time = currentTimeRaw.value
     const ann = getAnnotation(time)
     if (ann) loadSingleAnnotation(ann)
     if (isComparing.value && !isComparisonOverlay.value) {
@@ -2642,7 +2644,9 @@ const goNextFrame = () => {
     clearCanvas()
     rawPlayer.value.goNextFrame()
     if (isComparing.value) syncComparisonPlayer()
-    const time = rawPlayer.value.getCurrentTime()
+    // The time of the frame the step sent, as drawings are saved: the
+    // movie time runs ahead of frame * frameDuration along the movie.
+    const time = currentTimeRaw.value
     const ann = getAnnotation(time)
     if (ann) loadSingleAnnotation(ann)
     if (isComparing.value && !isComparisonOverlay.value) {
