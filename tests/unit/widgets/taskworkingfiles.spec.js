@@ -153,6 +153,38 @@ describe('TaskWorkingFiles', () => {
     )
   })
 
+  it('does not show an upload failure on a different task after navigation', async () => {
+    filesApi.createTaskWorkingFile.mockResolvedValue({ id: 'working-3' })
+    const request = { on: vi.fn() }
+    let rejectUpload
+    filesApi.uploadWorkingFile.mockReturnValue({
+      request,
+      promise: new Promise((resolve, reject) => {
+        rejectUpload = reject
+      })
+    })
+    await mountComponent()
+
+    const input = wrapper.get('[data-testid="working-file-input"]')
+    const file = new File(['synthetic'], 'shot.nk')
+    Object.defineProperty(input.element, 'files', {
+      value: [file],
+      configurable: true
+    })
+    await input.trigger('change')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+
+    await wrapper.setProps({ task: { id: 'task-2' } })
+    await flushPromises()
+    rejectUpload({ status: 503 })
+    await flushPromises()
+
+    expect(filesApi.getTaskWorkingFiles).toHaveBeenLastCalledWith('task-2')
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+    expect(wrapper.find('form').exists()).toBe(true)
+  })
+
   it('hides submission and reports denied access when Zou rejects the task list', async () => {
     filesApi.getTaskWorkingFiles.mockRejectedValue({ status: 403 })
     await mountComponent()

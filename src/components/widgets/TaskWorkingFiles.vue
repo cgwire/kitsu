@@ -417,6 +417,7 @@ async function acknowledgeAmbiguousCreate() {
 
 async function uploadPending() {
   if (!pendingUpload.value || isUploading.value) return
+  const taskId = props.task.id
   isUploading.value = true
   uploadProgress.value = 0
   uploadError.value = ''
@@ -445,7 +446,9 @@ async function uploadPending() {
     if (input) input.value = ''
     await load()
   } catch (error) {
-    uploadError.value = errorCode(error)
+    if (props.task.id === taskId) {
+      uploadError.value = errorCode(error)
+    }
   } finally {
     isUploading.value = false
   }
