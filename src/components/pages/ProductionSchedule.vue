@@ -1165,6 +1165,8 @@ const reset = () => {
   scheduleGeneration++
   // the rows of the new production or episode load collapsed
   expandAll.value = false
+  // an export stopped by the switch: left open, it offers the new scope
+  modals.value.exportSchedule = false
   // Debounce: cross-prod navigation triggers two close currentEpisode changes (transient 'main' then 'all').
   if (resetTimeout.value) clearTimeout(resetTimeout.value)
   resetTimeout.value = setTimeout(() => {

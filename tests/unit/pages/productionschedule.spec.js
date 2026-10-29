@@ -878,10 +878,10 @@ describe('ProductionSchedule page', () => {
       const { scheduleWidget, store, wrapper } = await mountPage({
         actions: { loadAssetTypeScheduleItems: held.action }
       })
-      wrapper
-        .findAllComponents(ButtonSimple)
-        .find(button => button.props('title') === 'schedule.export')
-        .vm.$emit('click')
+      await waitForLoad()
+      findIconButton(wrapper, 'schedule.export').vm.$emit('click')
+      await flushPromises()
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
       await flushPromises()
 
       await switchProduction(store)
@@ -889,6 +889,8 @@ describe('ProductionSchedule page', () => {
       await waitForLoad()
 
       expect(scheduleWidget.methods.exportData).not.toHaveBeenCalled()
+      // the modal left open would offer to export the new production
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
     })
 
     it('stops loading the side panel entities once the production changed', async () => {
