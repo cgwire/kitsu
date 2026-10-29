@@ -2210,6 +2210,8 @@
         "unnamed": "Working file",
         "acknowledge_ambiguous": "Refresh list and confirm before creating another revision",
         "ambiguous_create": "The create request may have reached the server. Check the refreshed list before confirming another revision.",
+        "ambiguous_retry_unsupported": "This server does not confirm safe create retries. Do not submit again until an administrator verifies whether a new revision was created.",
+        "upload_unsupported": "Working-file submission is disabled because this Zou server does not advertise idempotent creates.",
         "errors": {
           "unauthorized": "Your session has expired. Sign in again.",
           "forbidden": "You do not have permission to access working files for this task.",
