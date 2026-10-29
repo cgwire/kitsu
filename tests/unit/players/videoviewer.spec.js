@@ -112,6 +112,21 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  // Chrome and Firefox do not always call a frame callback for a paused
+  // seek: the canvas kept a frame painted while playing.
+  it('paints the frame a paused seek lands on', async () => {
+    const wrapper = mountViewer()
+    await new Promise(resolve => setTimeout(resolve))
+    const video = wrapper.find('video').element
+    await video.dispatchEvent(new Event('loadedmetadata'))
+    fakeContext.drawImage.mockClear()
+
+    video.dispatchEvent(new Event('seeked'))
+
+    expect(fakeContext.drawImage).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
   it('starts the rVFC loop on loadedmetadata and paints + emits per tick while playing', async () => {
     const wrapper = mountViewer()
     // Wait for the setTimeout(0) in onMounted to complete
