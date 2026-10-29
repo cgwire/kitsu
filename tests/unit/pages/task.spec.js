@@ -234,6 +234,38 @@ describe('Task.vue', () => {
       expect(workingFiles.props('canUpload')).toBe(true)
     })
 
+    it('does not grant an unassigned artist access to Working files', async () => {
+      const { wrapper } = await mountPage({
+        task: buildTask({ assignees: [] }),
+        getterOverrides: { isCurrentUserArtist: () => true }
+      })
+
+      const workingFiles = wrapper.findComponent(TaskWorkingFiles)
+      expect(workingFiles.exists()).toBe(true)
+      expect(workingFiles.props('canAccess')).toBe(false)
+      expect(workingFiles.props('canUpload')).toBe(false)
+    })
+
+    it('allows an unassigned manager to read but not upload', async () => {
+      const { wrapper } = await mountPage({
+        task: buildTask({ assignees: [] }),
+        getterOverrides: { isCurrentUserProductionManager: () => true }
+      })
+
+      const workingFiles = wrapper.findComponent(TaskWorkingFiles)
+      expect(workingFiles.props('canAccess')).toBe(true)
+      expect(workingFiles.props('canUpload')).toBe(false)
+    })
+
+    it('hides Working files from a Client', async () => {
+      const { wrapper } = await mountPage({
+        task: buildTask({ assignees: ['user-1'] }),
+        getterOverrides: { isCurrentUserClient: () => true }
+      })
+
+      expect(wrapper.findComponent(TaskWorkingFiles).exists()).toBe(false)
+    })
+
     it('hides Working files from an assigned vendor', async () => {
       const { wrapper } = await mountPage({
         task: buildTask({ assignees: ['user-1'] }),
