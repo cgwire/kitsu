@@ -66,6 +66,62 @@ describe('players/VideoProgress', () => {
     })
   })
 
+  // A width read while the bar was hidden stuck at 0, as the size the
+  // observer reported last did not change: every click went to frame 0.
+  describe('width of the bar', () => {
+    let rect
+    let onResize
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(callback) {
+            onResize = callback
+          }
+          observe() {}
+          disconnect() {}
+        }
+      )
+      rect = { left: 0, top: 0, width: 0, height: 28 }
+      vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
+        () => rect
+      )
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const show = () => {
+      rect = { ...rect, width: 1000 }
+      onResize()
+    }
+
+    it('keeps the width the bar takes once shown after its mount', async () => {
+      const wrapper = mountProgress({ nbFrames: 100 })
+      show()
+      vi.runAllTimers()
+
+      await wrapper.find('progress').trigger('click', { clientX: 300 })
+
+      expect(wrapper.emitted('progress-changed')).toEqual([[30]])
+    })
+
+    it('keeps the width of the bar hidden while a movie loads', async () => {
+      const wrapper = mountProgress({ nbFrames: 100 })
+      show()
+      rect = { ...rect, width: 0 }
+      await wrapper.setProps({ nbFrames: 200 })
+      rect = { ...rect, width: 1000 }
+
+      await wrapper.find('progress').trigger('click', { clientX: 300 })
+
+      expect(wrapper.emitted('progress-changed')).toEqual([[60]])
+    })
+  })
+
   describe('scrubbing', () => {
     it('keeps the drag while the button leaves the window', async () => {
       // Chrome fires mouseleave on the document when a held pointer exits
