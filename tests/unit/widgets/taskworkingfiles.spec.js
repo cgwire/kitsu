@@ -177,6 +177,36 @@ describe('TaskWorkingFiles', () => {
     )
   })
 
+  it('releases a create request key after a definite failure', async () => {
+    filesApi.createTaskWorkingFile
+      .mockRejectedValueOnce({ status: 400 })
+      .mockResolvedValueOnce({ id: 'working-3' })
+    const request = { on: vi.fn() }
+    filesApi.uploadWorkingFile.mockReturnValue({
+      request,
+      promise: Promise.resolve()
+    })
+    await mountComponent()
+
+    const input = wrapper.get('[data-testid="working-file-input"]')
+    const file = new File(['synthetic'], 'shot.nk')
+    Object.defineProperty(input.element, 'files', {
+      value: [file],
+      configurable: true
+    })
+    await input.trigger('change')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+
+    expect(input.element.disabled).toBe(false)
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+
+    expect(filesApi.createTaskWorkingFile.mock.calls[0][1].request_id).not.toBe(
+      filesApi.createTaskWorkingFile.mock.calls[1][1].request_id
+    )
+  })
+
   it('disables submission when the server lacks idempotency support', async () => {
     filesApi.getApiInfo.mockResolvedValue({ api: 'Zou', version: '1.0.94' })
     await mountComponent()

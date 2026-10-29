@@ -454,6 +454,8 @@ async function submit() {
       // unless the server explicitly advertises idempotency support.
       ambiguousCreate.value = true
       await load()
+    } else {
+      pendingCreateRequestId.value = null
     }
     return
   }
