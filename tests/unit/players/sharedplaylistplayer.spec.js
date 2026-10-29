@@ -591,6 +591,39 @@ describe('players/SharedPlaylistPlayer', () => {
       wrapper.unmount()
     })
 
+    // SMPTE: the frames field stays under 30 at 30 fps.
+    it('labels the time of a movie as a timecode', async () => {
+      const wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_duration: 60 }]
+      })
+      await wrapper.setProps({ playlist: { name: 'Dailies', project_fps: 30 } })
+      const bar = () => wrapper.findComponent(SharedPlaylistButtonBar)
+      const movie = wrapper.findComponent({ name: 'MultiVideoViewer' })
+      movie.vm.$emit('max-duration-update', 60)
+      movie.vm.$emit('frame-update', 30)
+      await nextTick()
+      expect(bar().props('currentTimeFormatted')).toBe('00:00:01:00')
+      expect(bar().props('maxDurationFormatted')).toBe('00:01:00:00')
+      wrapper.unmount()
+    })
+
+    // The label reads the frame the viewer numbers, as the counter does,
+    // 10 minutes into a 30 fps movie.
+    it('labels the frame the viewer sends', async () => {
+      const wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_duration: 1200 }]
+      })
+      await wrapper.setProps({ playlist: { name: 'Dailies', project_fps: 30 } })
+      const bar = () => wrapper.findComponent(SharedPlaylistButtonBar)
+      const movie = wrapper.findComponent({ name: 'MultiVideoViewer' })
+      movie.vm.$emit('max-duration-update', 1200)
+      movie.vm.$emit('frame-update', 18000)
+      await nextTick()
+      expect(bar().props('currentFrameDisplay')).toBe('18001')
+      expect(bar().props('currentTimeFormatted')).toBe('00:10:00:00')
+      wrapper.unmount()
+    })
+
     // A fake of the movie viewer: the frame it was sought to.
     const movieViewer = () => {
       let frame = 0

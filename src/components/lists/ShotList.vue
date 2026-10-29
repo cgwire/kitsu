@@ -514,7 +514,8 @@
                 >
                   {{
                     formatToTimecode(
-                      getMetadataFieldValue({ field_name: 'frame_in' }, shot)
+                      getMetadataFieldValue({ field_name: 'frame_in' }, shot),
+                      currentProduction?.fps
                     )
                   }}
                 </span>
@@ -557,7 +558,8 @@
                 >
                   {{
                     formatToTimecode(
-                      getMetadataFieldValue({ field_name: 'frame_out' }, shot)
+                      getMetadataFieldValue({ field_name: 'frame_out' }, shot),
+                      currentProduction?.fps
                     )
                   }}
                 </span>

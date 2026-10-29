@@ -751,6 +751,42 @@ describe('PlaylistPlayer.vue', () => {
         await goTo('previous')
         expect(playbackBar().props('maxDuration')).toBe('00:00:04:00')
       })
+
+      // SMPTE: the frames field stays under 30 at 30 fps.
+      it('labels the time of a movie as a timecode', async () => {
+        await mountWithSound([
+          { ...movie, fps: '30', preview_file_duration: 60 },
+          sound
+        ])
+        rawPlayer().vm.$emit('max-duration-update', 60)
+        rawPlayer().vm.$emit('frame-update', 30)
+        await flushPromises()
+        expect(playbackBar().props('currentTime')).toBe('00:00:01:00')
+        expect(playbackBar().props('maxDuration')).toBe('00:01:00:00')
+      })
+
+      // A frame with a float error reads as its counter does.
+      it('labels a stepped frame as its counter does', async () => {
+        await mountOnMovie()
+        rawPlayer().vm.$emit('frame-update', 28.999999999999996)
+        await flushPromises()
+        expect(playbackBar().props('currentFrameLabel')).toBe('030')
+        expect(playbackBar().props('currentTime')).toBe('00:00:01:04')
+      })
+
+      // The label reads the frame the viewer numbers, as the counter does,
+      // 10 minutes into a 30 fps movie.
+      it('labels the frame the viewer sends', async () => {
+        await mountWithSound([
+          { ...movie, fps: '30', preview_file_duration: 1200 },
+          sound
+        ])
+        rawPlayer().vm.$emit('max-duration-update', 1200)
+        rawPlayer().vm.$emit('frame-update', 18000)
+        await flushPromises()
+        expect(playbackBar().props('currentFrameLabel')).toBe('18001')
+        expect(playbackBar().props('currentTime')).toBe('00:10:00:00')
+      })
     })
 
     // The waveform follows the width the comments panel leaves on its own.

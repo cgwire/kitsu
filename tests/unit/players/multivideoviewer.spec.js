@@ -366,6 +366,98 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  // A frame step sent 28.999999999999996 for the frame 29.
+  it('sends a whole frame number on a frame step', async () => {
+    const wrapper = mountViewer()
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    Object.defineProperty(wrapper.vm.currentPlayer, 'currentTime', {
+      value: 0,
+      writable: true,
+      configurable: true
+    })
+    wrapper.vm.setCurrentFrame(28)
+    wrapper.vm.goNextFrame()
+    expect(wrapper.emitted('frame-update').at(-1)).toEqual([29])
+    wrapper.unmount()
+  })
+
+  // At 30 fps the frame duration rounds to 0.0333: a time divided by it
+  // drifts a frame every 1000, 18 frames 10 minutes in.
+  describe('frame numbers at 30 fps', () => {
+    const mountAt30 = async () => {
+      const wrapper = mountViewer({
+        entities: [
+          { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 30 }
+        ]
+      })
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      Object.defineProperty(player, 'currentTime', {
+        value: 0,
+        writable: true,
+        configurable: true
+      })
+      Object.defineProperty(player, 'duration', {
+        value: 1200,
+        configurable: true
+      })
+      return { wrapper, player }
+    }
+    const lastFrame = wrapper => wrapper.emitted('frame-update').at(-1)[0]
+
+    it('numbers the frame it seeks to', async () => {
+      const { wrapper } = await mountAt30()
+      wrapper.vm.setCurrentFrame(18000)
+      expect(lastFrame(wrapper)).toBe(18000)
+      wrapper.unmount()
+    })
+
+    it('numbers the frames it steps to', async () => {
+      const { wrapper, player } = await mountAt30()
+      wrapper.vm.setCurrentFrame(18000)
+      wrapper.vm.goNextFrame()
+      expect(lastFrame(wrapper)).toBe(18001)
+      expect(Math.floor(player.currentTime * 30)).toBe(18001)
+      wrapper.vm.goPreviousFrame()
+      expect(lastFrame(wrapper)).toBe(18000)
+      expect(Math.floor(player.currentTime * 30)).toBe(18000)
+      wrapper.unmount()
+    })
+
+    // Chromium cuts a seek time down to whole microseconds and rounds the
+    // frame times to the nearest one: a seek right on 17792 / 30 lands a
+    // microsecond before that frame and shows the previous one.
+    it('numbers the frame it pauses on, and seeks past its start', async () => {
+      const { wrapper, player } = await mountAt30()
+      player.currentTime = 17792.4 / 30
+      wrapper.vm.pause()
+      expect(player.currentTime - 17792 / 30).toBeGreaterThan(1e-6)
+      expect(Math.floor(player.currentTime * 30)).toBe(17792)
+      expect(lastFrame(wrapper)).toBe(17792)
+      wrapper.unmount()
+    })
+
+    it('numbers a playing frame', async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const { wrapper, player } = await mountAt30()
+      wrapper.vm.play()
+      player.currentTime = 18000.25 / 30
+      const { cb: tick } = rvfcCallbacks.at(-1)
+      tick(performance.now(), { mediaTime: 18000 / 30 })
+      expect(lastFrame(wrapper)).toBe(18000)
+      wrapper.unmount()
+    })
+
+    it('numbers the frame it is on', async () => {
+      const { wrapper, player } = await mountAt30()
+      player.currentTime = 18000.4 / 30
+      expect(wrapper.vm.getCurrentFrame()).toBe(18000)
+      wrapper.unmount()
+    })
+  })
+
   it('loops on the handle-in frame with the seek nudge, not on its boundary', async () => {
     // 120 * 0.0333 (rounded frame duration) is 3.996 s, frame 119.88 at
     // 30 fps: the loop restarted one frame before the handle-in. An exact

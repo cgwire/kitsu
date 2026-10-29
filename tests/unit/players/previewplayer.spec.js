@@ -831,6 +831,51 @@ describe('PreviewPlayer.vue', () => {
       expect(bar().props('isPlaying')).toBe(true)
     })
 
+    // SMPTE: 30 frames a second at 30 fps, the 1201st frame is at 40 s.
+    it('counts the time of a movie on its frames', async () => {
+      wrapper = mountPlayer({
+        props: { previews: [{ ...moviePreview, duration: 60 }] },
+        getterOverrides: {
+          productionMap: () => new Map([[task.project_id, { fps: 30 }]])
+        }
+      })
+      await nextTick()
+      const [main] = viewers()
+      main.vm.$emit('duration-changed', 60)
+      wrapper.vm.setCurrentFrame(1200)
+      await nextTick()
+
+      expect(bar().props('currentTime')).toBe('00:00:40:00')
+      expect(bar().props('maxDuration')).toBe('00:00:59:29')
+    })
+
+    // While playing, the bar fills up to the frame the viewer numbers, plus
+    // the 2 of the playback convention: the frame duration rounded to
+    // 0.0333 drifted it 18 frames on, 10 minutes into a 30 fps movie.
+    it('fills the progress bar on the exact frame rate while playing', async () => {
+      const updateProgressBar = vi.fn()
+      wrapper = mountPlayer({
+        props: { previews: [{ ...moviePreview, duration: 1200 }] },
+        getterOverrides: {
+          productionMap: () => new Map([[task.project_id, { fps: 30 }]])
+        },
+        stubs: {
+          VideoProgress: {
+            name: 'VideoProgress',
+            template: '<div />',
+            methods: { updateProgressBar }
+          }
+        }
+      })
+      await nextTick()
+      bar().vm.$emit('play-pause-clicked')
+      await nextTick()
+      const [main] = viewers()
+      main.vm.$emit('time-update', 18000.5 / 30)
+
+      expect(updateProgressBar).toHaveBeenLastCalledWith(18002)
+    })
+
     // Pausing the sound on a switch away sends its time one last time.
     it('leaves the time of a movie to the movie', async () => {
       wrapper = mountPlayer({ props: { previews: [soundPreview] } })

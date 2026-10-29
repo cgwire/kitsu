@@ -509,6 +509,7 @@ import {
   floorToFrame,
   formatFrame,
   formatTime,
+  formatToTimecode,
   frameStartTime,
   getEntityFrameStart,
   roundToFrame
@@ -1099,7 +1100,7 @@ const setVideoFrameContext = frame => {
     const time = frame * frameDuration.value
     currentFrame.value = frame
     currentTimeRaw.value = time
-    currentTime.value = formatTime(time, fps.value)
+    currentTime.value = formatToTimecode(frame, fps.value)
     // While playing, the bar is driven smoothly by onVideoTimeUpdate; here we
     // only move it for paused stepping/seeking (avoids a per-frame jerk).
     if (!isPlaying.value) progress.value.updateProgressBar(frame)
@@ -1125,17 +1126,17 @@ const setVideoFrameContext = frame => {
 }
 
 // Player time → progress bar during playback. `time` carries the
-// mediaTime + frameDuration/2 convention offset, so a raw division parks the
+// mediaTime + half a frame convention offset, so a raw conversion parks the
 // fill at half-frame positions; quantize with the same ceil(...)+1 convention
 // as getFrameFromPlayer so the bar fills whole frames and doesn't jump when
 // pausing.
 const onVideoTimeUpdate = time => {
   if (!isPlaying.value) return
   if (pendingTrimSeek) {
-    if (time >= (trimStartFrame.value + 2) * frameDuration.value) return
+    if (time >= (trimStartFrame.value + 2) / fps.value) return
     pendingTrimSeek = false
   }
-  progress.value?.updateProgressBar(Math.ceil(time / frameDuration.value) + 1)
+  progress.value?.updateProgressBar(Math.ceil(time * fps.value) + 1)
 }
 
 const onSubPreviewsWheel = event => {
@@ -1204,10 +1205,8 @@ const changeMaxDuration = duration => {
     }
     duration = floorToFrame(duration, fps.value)
     videoDuration.value = duration
-    maxDuration.value = formatTime(
-      videoDuration.value - frameDuration.value,
-      fps.value
-    )
+    // The last frame the player shows: setVideoFrameContext stops there.
+    maxDuration.value = formatToTimecode(nbFrames.value - 1, fps.value)
   } else {
     maxDuration.value = '00:00:00:00'
     videoDuration.value = 0

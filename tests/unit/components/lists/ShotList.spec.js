@@ -171,3 +171,45 @@ describe('lists/ShotList number cells', () => {
     wrapper.unmount()
   })
 })
+
+describe('lists/ShotList in and out timecodes', () => {
+  const shot = (id, data) => ({ id, name: id, data, validations: new Map() })
+
+  const timecodes = wrapper =>
+    wrapper
+      .findAll('tbody tr.datatable-row')
+      .map(row => [
+        row.find('td.framein').text(),
+        row.find('td.frameout').text()
+      ])
+
+  // cgwire/kitsu#2303: counted at 25 fps, frame 1266 read 00:00:50:16. The
+  // in and out are positions in the edit, which runs at the production rate
+  // whatever the rate of the shot media (the EDL import counts them so).
+  test('counts at the frame rate of the production', async () => {
+    const wrapper = await mountEntityList(ShotList, {
+      getters: {
+        currentProduction: { ...production, fps: '30' },
+        displayedShotsCount: 2,
+        isFrameIn: true,
+        isFrameOut: true
+      },
+      props: {
+        displaySettings: { inOutTimecode: true, showInfos: true },
+        displayedShots: [
+          [
+            shot('shot-1', { frame_in: 1266, frame_out: 1440 }),
+            shot('shot-2', { frame_in: 1266, frame_out: 1440, fps: 24 })
+          ]
+        ]
+      }
+    })
+
+    expect(timecodes(wrapper)).toEqual([
+      ['00:00:42:06', '00:00:48:00'],
+      ['00:00:42:06', '00:00:48:00']
+    ])
+
+    wrapper.unmount()
+  })
+})

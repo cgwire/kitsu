@@ -1413,6 +1413,16 @@ describe('Task.vue fps', () => {
     })
     expect(playerFps(wrapper)).toBe(DEFAULT_FPS)
   })
+
+  it('keeps the decimals of a production fps', async () => {
+    const { wrapper } = await mountPage({
+      previews,
+      getterOverrides: {
+        productionMap: () => new Map([['production-1', { fps: '29.97' }]])
+      }
+    })
+    expect(playerFps(wrapper)).toBe(29.97)
+  })
 })
 
 describe('Task.vue preview player permissions', () => {

@@ -67,13 +67,7 @@ import { useStore } from 'vuex'
 import { panPanzoomBy, zoomPanzoomAt } from '@/lib/players/panzoom'
 import { swallowBrowserZoom } from '@/lib/players/wheel'
 import { latestPreviewFileStatus } from '@/lib/preview'
-import {
-  DEFAULT_FPS,
-  floorToFrame,
-  frameStartTime,
-  roundToFrame,
-  SEEK_NUDGE
-} from '@/lib/video'
+import { DEFAULT_FPS, frameStartTime, SEEK_NUDGE } from '@/lib/video'
 import {
   createFrameRenderer,
   supportsVideoFrameCallback
@@ -500,31 +494,24 @@ const getNextIndex = index => {
   return i
 }
 
-const goPreviousFrame = () => {
+// Frames count on the exact rate: a time divided by the frame duration,
+// rounded to 4 decimals (0.0333 at 30 fps), drifts a frame every 1000. A
+// time right on a frame start can read a hair under it once multiplied.
+const floorToFrameNumber = time => Math.floor(time * fps.value + 1e-6)
+
+const stepFrame = step => {
   if (currentPlayer.value) {
     const isChromium = !!window.chrome
-    const change = isChromium ? frameDuration.value : 0
-    const time = currentTimeRaw
-    let newTime = floorToFrame(time - frameDuration.value, fps.value)
-    newTime = newTime + change
-    newTime = _setCurrentTime(newTime)
-    const frameNumber = newTime / frameDuration.value
-    emit('frame-update', frameNumber)
+    const change = isChromium ? 1 : 0
+    const frame = floorToFrameNumber(currentTimeRaw) + step + change
+    const newTime = _setCurrentTime(frame / fps.value)
+    emit('frame-update', Math.round(newTime * fps.value))
   }
 }
 
-const goNextFrame = () => {
-  if (currentPlayer.value) {
-    const time = currentTimeRaw
-    let newTime = floorToFrame(time + frameDuration.value, fps.value)
-    const isChromium = !!window.chrome
-    const change = isChromium ? frameDuration.value : 0
-    newTime = newTime + change
-    newTime = _setCurrentTime(newTime)
-    const frameNumber = newTime / frameDuration.value
-    emit('frame-update', frameNumber)
-  }
-}
+const goPreviousFrame = () => stepFrame(-1)
+
+const goNextFrame = () => stepFrame(1)
 
 const loadNextEntity = () => {
   const newIndex = getNextIndex(currentIndex.value)
@@ -649,12 +636,10 @@ const pause = () => {
   }
   if (currentPlayer.value) {
     currentPlayer.value.pause()
-    seekNow(roundToFrame(getCurrentTime(), fps.value))
+    const frame = Math.round(getCurrentTime() * fps.value)
+    seekNow(frameStartTime(frame, fps.value))
     currentTimeRaw = currentPlayer.value.currentTime
-    const frameNumber = Math.round(
-      currentPlayer.value.currentTime / frameDuration.value
-    )
-    emit('frame-update', frameNumber)
+    emit('frame-update', Math.round(currentTimeRaw * fps.value))
   }
   isPlaying.value = false
 }
@@ -706,11 +691,7 @@ const seekNow = currentTime => {
   currentPlayer.value.currentTime = currentTime
 }
 
-const getCurrentFrame = () => {
-  let time = getCurrentTime()
-  time = floorToFrame(time, fps.value)
-  return time / frameDuration.value
-}
+const getCurrentFrame = () => floorToFrameNumber(getCurrentTime())
 
 const getCurrentTimeRaw = getCurrentTime
 
@@ -729,7 +710,7 @@ const setCurrentFrame = frameNumber => {
   // frameDuration is rounded to 4 decimals (0.0833 at 12fps), so the
   // target drifts ~1ms per frame and tips into the previous frame past
   // ~frame 30 (duplicate). The +0.001 nudge in runSetCurrentTime then
-  // lands it inside the correct frame. Readback math is left untouched.
+  // lands it inside the correct frame.
   _setCurrentTime(frameNumber / fps.value)
 }
 
@@ -739,7 +720,8 @@ const _setCurrentTime = newTime => {
   } else if (newTime < 0) {
     newTime = 0
   } else {
-    const duration = floorToFrame(currentPlayer.value.duration, fps.value)
+    const duration =
+      floorToFrameNumber(currentPlayer.value.duration) / fps.value
     if (newTime > duration) {
       newTime = duration
     }
@@ -771,13 +753,13 @@ const runSetCurrentTime = currentTime => {
 
 const onTimeUpdate = () => {
   const isChromium = !!window.chrome
-  const change = isChromium ? frameDuration.value : 0
+  const change = isChromium ? 1 / fps.value : 0
   if (currentPlayer.value) {
     currentTimeRaw = getCurrentTime() - change
   } else {
     currentTimeRaw = 0 + change
   }
-  emit('frame-update', Math.round(currentTimeRaw / frameDuration.value))
+  emit('frame-update', Math.round(currentTimeRaw * fps.value))
 }
 
 const onSeeked = event => {
@@ -857,7 +839,7 @@ const updateTime = time => {
   // Continuous time drives the smooth playlist playhead.
   emit('time-update', time)
   // The integer frame drives frame-based logic; only emit on change.
-  const frameNumber = Math.round(time / frameDuration.value)
+  const frameNumber = Math.round(time * fps.value)
   if (frameNumber !== lastEmittedFrame) {
     lastEmittedFrame = frameNumber
     emit('frame-update', frameNumber)
