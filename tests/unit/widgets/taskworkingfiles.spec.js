@@ -188,6 +188,14 @@ describe('TaskWorkingFiles', () => {
     expect(filesApi.createTaskWorkingFile).not.toHaveBeenCalled()
   })
 
+  it('fails closed when API capability discovery fails', async () => {
+    filesApi.getApiInfo.mockRejectedValue(new Error('offline'))
+    await mountComponent()
+
+    expect(wrapper.find('form').exists()).toBe(false)
+    expect(filesApi.createTaskWorkingFile).not.toHaveBeenCalled()
+  })
+
   it('keeps the same revision id and file when upload fails', async () => {
     filesApi.createTaskWorkingFile.mockResolvedValue({ id: 'working-3' })
     const request = { on: vi.fn() }
