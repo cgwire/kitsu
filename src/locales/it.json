@@ -1534,7 +1534,6 @@
         "error": "Si è verificato un errore durante l'aggiunta o la modifica della milestone. Riprova.",
         "delete_milestone": "Elimina milestone",
         "type": "Tipo",
-        "status": "Stato",
         "color": "Colore",
         "types": {
           "kickoff": "Avvio",
@@ -1542,11 +1541,6 @@
           "approval": "Approvazione",
           "delivery": "Consegna",
           "other": "Altro"
-        },
-        "statuses": {
-          "todo": "Da fare",
-          "wfa": "WFA",
-          "done": "Fatto"
         }
       },
       "mode": "Modalità di visualizzazione",

@@ -2040,7 +2040,6 @@ export default {
       name: 'Name',
       error: 'An error occurred while adding or editing the milestone. Please try again.',
       type: 'Type',
-      status: 'Status',
       color: 'Color',
       types: {
         kickoff: 'Kickoff',
@@ -2048,11 +2047,6 @@ export default {
         approval: 'Approval',
         delivery: 'Delivery',
         other: 'Other'
-      },
-      statuses: {
-        todo: 'To do',
-        wfa: 'WFA',
-        done: 'Done'
       }
     },
     mode: 'View Mode',

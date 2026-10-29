@@ -92,13 +92,13 @@ describe('Schedule store', () => {
       mutations.ADD_MILESTONE(state, {
         id: 'm1',
         date: '2026-10-22',
-        status: 'done'
+        name: 'Moved'
       })
 
       expect(state.milestones.m1).toEqual({
         id: 'm1',
         date: '2026-10-22',
-        status: 'done'
+        name: 'Moved'
       })
       mutations.REMOVE_MILESTONE(state, { id: 'm1' })
       expect(Object.keys(state.milestones)).toEqual(['m2'])

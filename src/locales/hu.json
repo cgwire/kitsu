@@ -1534,7 +1534,6 @@
         "error": "Hiba történt a mérföldkő szerkesztésekor. Kérlek próbáld újra.",
         "delete_milestone": "Mérföldkő törlése",
         "type": "Típus",
-        "status": "Állapot",
         "color": "Szín",
         "types": {
           "kickoff": "Indítás",
@@ -1542,11 +1541,6 @@
           "approval": "Jóváhagyás",
           "delivery": "Leadás",
           "other": "Egyéb"
-        },
-        "statuses": {
-          "todo": "Teendő",
-          "wfa": "WFA",
-          "done": "Kész"
         }
       },
       "mode": "Nézet módja",

@@ -1534,7 +1534,6 @@
         "error": "Ocorreu um erro ao adicionar ou editar o marco. Por favor, tente novamente.",
         "delete_milestone": "Excluir marco",
         "type": "Tipo",
-        "status": "Status",
         "color": "Cor",
         "types": {
           "kickoff": "Kickoff",
@@ -1542,11 +1541,6 @@
           "approval": "Aprovação",
           "delivery": "Entrega",
           "other": "Outro"
-        },
-        "statuses": {
-          "todo": "A fazer",
-          "wfa": "WFA",
-          "done": "Concluído"
         }
       },
       "mode": "Modo de exibição",

@@ -12,7 +12,6 @@ export default {
       name: milestone.name,
       task_type_id: milestone.task_type_id,
       milestone_type: milestone.milestone_type,
-      status: milestone.status,
       color: milestone.color,
       project_id: production.id
     }
@@ -25,7 +24,6 @@ export default {
       name: milestone.name,
       task_type_id: milestone.task_type_id,
       milestone_type: milestone.milestone_type,
-      status: milestone.status,
       color: milestone.color
     }
     const path = `/api/data/milestones/${milestone.id}`

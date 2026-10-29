@@ -7,8 +7,6 @@ export const MILESTONE_TYPES = [
   'other'
 ]
 
-export const MILESTONE_STATUSES = ['todo', 'wfa', 'done']
-
 export const MILESTONE_TYPE_COLORS = {
   kickoff: '#42A5F5',
   review: '#F9A825',
@@ -18,7 +16,6 @@ export const MILESTONE_TYPE_COLORS = {
 }
 
 export const DEFAULT_MILESTONE_TYPE = 'other'
-export const DEFAULT_MILESTONE_STATUS = 'todo'
 
 // A milestone without a picked color follows its type.
 export const getMilestoneColor = milestone =>

@@ -24,9 +24,6 @@
         <span class="milestone-popover-type">
           {{ $t(`schedule.milestone.types.${milestone.milestone_type}`) }}
         </span>
-        <span class="milestone-popover-status" :class="milestone.status">
-          {{ $t(`schedule.milestone.statuses.${milestone.status}`) }}
-        </span>
       </div>
     </div>
   </teleport>
@@ -145,23 +142,5 @@ onBeforeUnmount(() => {
 
 .milestone-popover-type {
   color: var(--text-alt);
-}
-
-.milestone-popover-status {
-  background: rgba(150, 150, 150, 0.2);
-  border-radius: 6px;
-  font-size: 0.9em;
-  padding: 0 5px;
-  text-transform: uppercase;
-
-  &.wfa {
-    background: $purple-strong;
-    color: $white;
-  }
-
-  &.done {
-    background: $green;
-    color: $white;
-  }
 }
 </style>

@@ -1534,7 +1534,6 @@
         "error": "Beim Hinzufügen oder Bearbeiten des Meilensteins ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
         "delete_milestone": "Meilenstein löschen",
         "type": "Typ",
-        "status": "Status",
         "color": "Farbe",
         "types": {
           "kickoff": "Kickoff",
@@ -1542,11 +1541,6 @@
           "approval": "Freigabe",
           "delivery": "Lieferung",
           "other": "Sonstiges"
-        },
-        "statuses": {
-          "todo": "Zu erledigen",
-          "wfa": "WFA",
-          "done": "Erledigt"
         }
       },
       "mode": "Ansichtsmodus",

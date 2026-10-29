@@ -1534,7 +1534,6 @@
         "error": "Une erreur est survenue en ajoutant ou en modifiant ce jalon. Veuillez réessayer.",
         "delete_milestone": "Supprimer le jalon",
         "type": "Type",
-        "status": "Statut",
         "color": "Couleur",
         "types": {
           "kickoff": "Lancement",
@@ -1542,11 +1541,6 @@
           "approval": "Validation",
           "delivery": "Livraison",
           "other": "Autre"
-        },
-        "statuses": {
-          "todo": "À faire",
-          "wfa": "WFA",
-          "done": "Terminé"
         }
       },
       "mode": "Mode d'affichage",

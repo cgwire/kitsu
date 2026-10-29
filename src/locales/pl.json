@@ -1957,7 +1957,6 @@
         "name": "Nazwa",
         "error": "Wystąpił błąd podczas dodawania lub edycji kamienia milowego. Spróbuj ponownie.",
         "type": "Typ",
-        "status": "Status",
         "color": "Kolor",
         "types": {
           "kickoff": "Rozpoczęcie",
@@ -1965,11 +1964,6 @@
           "approval": "Zatwierdzenie",
           "delivery": "Dostawa",
           "other": "Inne"
-        },
-        "statuses": {
-          "todo": "Do zrobienia",
-          "wfa": "WFA",
-          "done": "Gotowe"
         }
       },
       "mode": "Tryb widoku",

@@ -15,13 +15,6 @@
       :options="typeOptions"
       v-model="form.milestone_type"
     />
-    <combobox-simple
-      class="field"
-      :label="$t('schedule.milestone.status')"
-      locale-key-prefix="schedule.milestone.statuses."
-      :options="statusOptions"
-      v-model="form.status"
-    />
     <color-field
       class="mt2"
       :label="$t('schedule.milestone.color')"
@@ -53,9 +46,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import {
-  DEFAULT_MILESTONE_STATUS,
   DEFAULT_MILESTONE_TYPE,
-  MILESTONE_STATUSES,
   MILESTONE_TYPE_COLORS,
   MILESTONE_TYPES
 } from '@/lib/milestones'
@@ -89,9 +80,7 @@ const emit = defineEmits(['cancel', 'confirm', 'remove-milestone'])
 const form = ref({ name: '' })
 const nameField = ref(null)
 
-const toOptions = values => values.map(value => ({ label: value, value }))
-const typeOptions = toOptions(MILESTONE_TYPES)
-const statusOptions = toOptions(MILESTONE_STATUSES)
+const typeOptions = MILESTONE_TYPES.map(value => ({ label: value, value }))
 
 // Computed
 // --------------------------------------------------------------------------
@@ -128,7 +117,6 @@ const reset = () => {
     name: milestone.name || '',
     date: milestone.date,
     milestone_type: milestone.milestone_type || DEFAULT_MILESTONE_TYPE,
-    status: milestone.status || DEFAULT_MILESTONE_STATUS,
     color: milestone.color || null
   }
 }

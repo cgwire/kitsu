@@ -86,7 +86,6 @@ describe('Schedule widget - milestones', () => {
         date: '2026-08-01',
         name: 'Kickoff',
         milestone_type: 'kickoff',
-        status: 'todo',
         color: null
       }
     ]
@@ -104,8 +103,8 @@ describe('Schedule widget - milestones', () => {
 
   it('merges the milestones of a day into one flag', () => {
     milestonesByDate['2026-08-10'] = [
-      { id: 'm1', date: '2026-08-10', name: 'Delivery', status: 'done' },
-      { id: 'm2', date: '2026-08-10', name: 'Review', status: 'wfa' }
+      { id: 'm1', date: '2026-08-10', name: 'Delivery' },
+      { id: 'm2', date: '2026-08-10', name: 'Review' }
     ].map(milestone => ({ ...milestone, milestone_type: 'other', color: null }))
     const wrapper = mountSchedule({ withMilestones: true, zoomLevel: 3 })
 

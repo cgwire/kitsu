@@ -293,7 +293,6 @@
               class="milestone-flag"
               :class="{
                 compact: group.isCompact,
-                done: group.isDone,
                 pointer: isCurrentUserProductionManager
               }"
               :style="group.style"
@@ -321,18 +320,6 @@
                 ></span>
               </span>
               <span class="milestone-flag-label" v-if="!group.isCompact">
-                <check-icon
-                  class="milestone-status-icon"
-                  :size="10"
-                  :stroke-width="3"
-                  v-if="group.first.status === 'done'"
-                />
-                <hourglass-icon
-                  class="milestone-status-icon"
-                  :size="10"
-                  :stroke-width="3"
-                  v-else-if="group.first.status === 'wfa'"
-                />
                 <span class="milestone-flag-name">
                   {{ group.first.name }}
                 </span>
@@ -684,10 +671,8 @@
 import {
   BanIcon,
   BriefcaseIcon,
-  CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  HourglassIcon,
   LinkIcon,
   ListChevronsUpDownIcon,
   PlusIcon
@@ -1017,7 +1002,6 @@ const milestoneGroups = computed(() => {
       first: groupMilestones[0],
       colors,
       isCompact: maxWidth < MILESTONE_LABEL_MIN_WIDTH,
-      isDone: groupMilestones.every(milestone => milestone.status === 'done'),
       label: groupMilestones.map(milestone => milestone.name).join(', '),
       style: {
         left: `${center}px`,
@@ -2427,7 +2411,6 @@ const showEditMilestoneModal = (day, milestone) => {
         name: undefined,
         id: undefined,
         milestone_type: undefined,
-        status: undefined,
         color: undefined
       })
     }
@@ -3546,10 +3529,6 @@ defineExpose({
     outline: 2px solid var(--milestone-color);
   }
 
-  &.done .milestone-flag-name {
-    opacity: 0.6;
-  }
-
   &.compact {
     background: transparent;
     box-shadow: none;
@@ -3579,11 +3558,6 @@ defineExpose({
   gap: 3px;
   min-width: 0;
   padding: 0 5px 0 4px;
-}
-
-.milestone-status-icon {
-  color: var(--milestone-color);
-  flex-shrink: 0;
 }
 
 .milestone-flag-name {

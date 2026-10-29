@@ -1534,7 +1534,6 @@
         "error": "Er is een fout opgetreden bij het toevoegen of bewerken van de mijlpaal. Probeer het opnieuw.",
         "delete_milestone": "Mijlpaal verwijderen",
         "type": "Type",
-        "status": "Status",
         "color": "Kleur",
         "types": {
           "kickoff": "Kick-off",
@@ -1542,11 +1541,6 @@
           "approval": "Goedkeuring",
           "delivery": "Oplevering",
           "other": "Overig"
-        },
-        "statuses": {
-          "todo": "Te doen",
-          "wfa": "WFA",
-          "done": "Klaar"
         }
       },
       "mode": "Weergavemodus",
