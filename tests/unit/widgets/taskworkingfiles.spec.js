@@ -12,6 +12,7 @@ vi.mock('@/store/api/files', () => ({
   default: {
     getTaskWorkingFiles: vi.fn(),
     getWorkingSoftwares: vi.fn(),
+    getApiInfo: vi.fn(),
     createTaskWorkingFile: vi.fn(),
     uploadWorkingFile: vi.fn(),
     getWorkingFileBlob: vi.fn()
@@ -50,6 +51,9 @@ describe('TaskWorkingFiles', () => {
         archived: false
       }
     ])
+    filesApi.getApiInfo.mockResolvedValue({
+      capabilities: { working_file_create_idempotency: true }
+    })
   })
 
   it('lists the server revision and downloads through the authenticated API client', async () => {
@@ -171,6 +175,17 @@ describe('TaskWorkingFiles', () => {
       'working-2',
       expect.any(FormData)
     )
+  })
+
+  it('disables submission when the server lacks idempotency support', async () => {
+    filesApi.getApiInfo.mockResolvedValue({ api: 'Zou', version: '1.0.94' })
+    await mountComponent()
+
+    expect(wrapper.text()).toContain(
+      'tasks.working_files.upload_unsupported'
+    )
+    expect(wrapper.find('form').exists()).toBe(false)
+    expect(filesApi.createTaskWorkingFile).not.toHaveBeenCalled()
   })
 
   it('keeps the same revision id and file when upload fails', async () => {

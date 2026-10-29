@@ -1,6 +1,10 @@
 import client from '@/store/api/client'
 
 export default {
+  getApiInfo() {
+    return client.pget('/api/')
+  },
+
   getTaskWorkingFiles(taskId) {
     return client.pget(`/api/data/tasks/${taskId}/working-files`)
   },

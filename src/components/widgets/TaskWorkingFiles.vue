@@ -25,7 +25,7 @@
       {{ t(`tasks.working_files.errors.${loadError}`) }}
     </p>
     <button
-      v-if="ambiguousCreate"
+      v-if="ambiguousCreate && createRetrySupported"
       data-testid="ambiguous-create-acknowledge"
       class="button is-small"
       type="button"
@@ -39,6 +39,13 @@
     </p>
     <p v-if="accessDenied" class="help is-danger" role="alert">
       {{ t('tasks.working_files.errors.forbidden') }}
+    </p>
+    <p
+      v-if="canUpload && !createRetrySupported"
+      class="help is-warning"
+      role="status"
+    >
+      {{ t('tasks.working_files.upload_unsupported') }}
     </p>
     <p v-if="downloadError" class="help is-danger" role="alert">
       {{ t('tasks.working_files.errors.' + downloadError) }}
@@ -96,7 +103,7 @@
     </ul>
 
     <form
-      v-if="canUpload && !accessDenied"
+      v-if="canUpload && createRetrySupported && !accessDenied"
       class="working-file-upload"
       @submit.prevent="submit"
     >
@@ -184,6 +191,13 @@
       <p v-if="ambiguousCreate" class="help is-warning" role="status">
         {{ t('tasks.working_files.ambiguous_create') }}
       </p>
+      <p
+        v-if="ambiguousCreate && !createRetrySupported"
+        class="help is-danger"
+        role="alert"
+      >
+        {{ t('tasks.working_files.ambiguous_retry_unsupported') }}
+      </p>
       <p v-if="pendingUpload && !uploadError" class="help" role="status">
         {{
           t('tasks.working_files.retry_same_file', {
@@ -254,6 +268,7 @@ const accessDenied = ref(false)
 const pendingUpload = ref(null)
 const pendingCreateRequestId = ref(null)
 const ambiguousCreate = ref(false)
+const createRetrySupported = ref(false)
 const objectUrls = new Set()
 
 const titleId = computed(() => `task-working-files-${props.task.id}`)
@@ -366,11 +381,17 @@ async function load() {
   softwareError.value = ''
   downloadError.value = ''
   accessDenied.value = false
-  const [filesResult, softwaresResult] = await Promise.allSettled([
-    filesApi.getTaskWorkingFiles(taskId),
-    filesApi.getWorkingSoftwares()
-  ])
+  const [filesResult, softwaresResult, apiInfoResult] =
+    await Promise.allSettled([
+      filesApi.getTaskWorkingFiles(taskId),
+      filesApi.getWorkingSoftwares(),
+      filesApi.getApiInfo()
+    ])
   if (props.task.id !== taskId) return
+
+  createRetrySupported.value =
+    apiInfoResult.status === 'fulfilled' &&
+    apiInfoResult.value?.capabilities?.working_file_create_idempotency === true
 
   if (filesResult.status === 'fulfilled') {
     workingFiles.value = Array.isArray(filesResult.value)
@@ -429,9 +450,8 @@ async function submit() {
     uploadError.value = errorCode(error)
     isCreating.value = false
     if ([0, 408, 500, 502, 503, 504].includes(statusOf(error))) {
-      // Refresh before allowing another create attempt. Zou versions that
-      // support request_id replay the original record; older versions may
-      // ignore it, so the refreshed list remains the user's review boundary.
+      // Older Zou versions ignore request_id; never retry an ambiguous create
+      // unless the server explicitly advertises idempotency support.
       ambiguousCreate.value = true
       await load()
     }
@@ -443,7 +463,7 @@ async function submit() {
 }
 
 async function acknowledgeAmbiguousCreate() {
-  if (!ambiguousCreate.value) return
+  if (!ambiguousCreate.value || !createRetrySupported.value) return
   await load()
   if (!loadError.value) ambiguousCreate.value = false
 }
