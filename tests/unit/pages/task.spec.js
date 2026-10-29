@@ -24,6 +24,7 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
+import TaskWorkingFiles from '@/components/widgets/TaskWorkingFiles.vue'
 import drafts from '@/lib/drafts'
 import { DEFAULT_FPS } from '@/lib/video'
 import sequencesStore from '@/store/modules/sequences'
@@ -208,6 +209,32 @@ const mountPage = async ({
 }
 
 describe('Task.vue', () => {
+  describe('working-file access', () => {
+    it('allows an assigned supervisor to read but not upload', async () => {
+      const { wrapper } = await mountPage({
+        task: buildTask({ assignees: ['user-1'] }),
+        getterOverrides: {
+          isCurrentUserProductionSupervisor: () => true
+        }
+      })
+
+      const workingFiles = wrapper.findComponent(TaskWorkingFiles)
+      expect(workingFiles.props('canAccess')).toBe(true)
+      expect(workingFiles.props('canUpload')).toBe(false)
+    })
+
+    it('allows an assigned artist to read and upload', async () => {
+      const { wrapper } = await mountPage({
+        task: buildTask({ assignees: ['user-1'] }),
+        getterOverrides: { isCurrentUserArtist: () => true }
+      })
+
+      const workingFiles = wrapper.findComponent(TaskWorkingFiles)
+      expect(workingFiles.props('canAccess')).toBe(true)
+      expect(workingFiles.props('canUpload')).toBe(true)
+    })
+  })
+
   describe('socket subscriptions', () => {
     it('subscribes to every task event on mount', async () => {
       const { socket } = await mountPage()

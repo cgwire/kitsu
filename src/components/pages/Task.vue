@@ -345,7 +345,7 @@
                 :can-access="
                   isAssigned || isCurrentUserManager || isCurrentUserAdmin
                 "
-                :can-upload="isAssigned"
+                :can-upload="isAssigned && isCurrentUserArtist"
                 v-if="!isCurrentUserClient && task"
               />
               <div
