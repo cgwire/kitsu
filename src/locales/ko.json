@@ -1532,7 +1532,16 @@
         "edit_milestone": "마일스톤 편집",
         "name": "이름",
         "error": "마일스톤을 추가하거나 편집하는 동안 오류가 발생했습니다. 다시 시도해 주세요.",
-        "delete_milestone": "마일스톤 삭제"
+        "delete_milestone": "마일스톤 삭제",
+        "type": "유형",
+        "color": "색상",
+        "types": {
+          "kickoff": "킥오프",
+          "review": "리뷰",
+          "approval": "승인",
+          "delivery": "납품",
+          "other": "기타"
+        }
       },
       "mode": "보기 모드",
       "mode_prev": "예측",

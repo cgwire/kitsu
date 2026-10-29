@@ -1532,7 +1532,16 @@
         "edit_milestone": "Bewerk mijlpaal voor",
         "name": "Naam",
         "error": "Er is een fout opgetreden bij het toevoegen of bewerken van de mijlpaal. Probeer het opnieuw.",
-        "delete_milestone": "Mijlpaal verwijderen"
+        "delete_milestone": "Mijlpaal verwijderen",
+        "type": "Type",
+        "color": "Kleur",
+        "types": {
+          "kickoff": "Kick-off",
+          "review": "Review",
+          "approval": "Goedkeuring",
+          "delivery": "Oplevering",
+          "other": "Overig"
+        }
       },
       "mode": "Weergavemodus",
       "mode_prev": "Prognose",

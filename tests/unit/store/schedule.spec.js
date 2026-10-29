@@ -65,4 +65,43 @@ describe('Schedule store', () => {
       }
     ])
   })
+
+  describe('milestones', () => {
+    const { mutations, getters } = scheduleStore
+
+    // Two milestones on one day used to overwrite each other: the store was
+    // keyed by date.
+    test('keeps several milestones on the same day', () => {
+      const state = { milestones: {} }
+      mutations.ADD_MILESTONES(state, [
+        { id: 'm1', date: '2026-10-20', name: 'Review' },
+        { id: 'm2', date: '2026-10-20', name: 'Delivery' },
+        { id: 'm3', date: '2026-10-21', name: 'Kickoff' }
+      ])
+
+      expect(Object.keys(state.milestones)).toHaveLength(3)
+      const byDate = getters.milestonesByDate(state)
+      expect(byDate['2026-10-20'].map(m => m.id)).toEqual(['m2', 'm1'])
+      expect(byDate['2026-10-21'].map(m => m.id)).toEqual(['m3'])
+    })
+
+    test('adds, updates and removes milestones by id', () => {
+      const state = { milestones: {} }
+      mutations.ADD_MILESTONE(state, { id: 'm1', date: '2026-10-20' })
+      mutations.ADD_MILESTONE(state, { id: 'm2', date: '2026-10-20' })
+      mutations.ADD_MILESTONE(state, {
+        id: 'm1',
+        date: '2026-10-22',
+        name: 'Moved'
+      })
+
+      expect(state.milestones.m1).toEqual({
+        id: 'm1',
+        date: '2026-10-22',
+        name: 'Moved'
+      })
+      mutations.REMOVE_MILESTONE(state, { id: 'm1' })
+      expect(Object.keys(state.milestones)).toEqual(['m2'])
+    })
+  })
 })

@@ -1532,7 +1532,16 @@
         "edit_milestone": "Editar hito para",
         "name": "Nombre",
         "error": "Se ha producido un error al añadir o modificar el hito. Por favor, inténtelo de nuevo.",
-        "delete_milestone": "Eliminar hito"
+        "delete_milestone": "Eliminar hito",
+        "type": "Tipo",
+        "color": "Color",
+        "types": {
+          "kickoff": "Inicio",
+          "review": "Revisión",
+          "approval": "Aprobación",
+          "delivery": "Entrega",
+          "other": "Otro"
+        }
       },
       "mode": "Modo de vista",
       "mode_prev": "Previsión",

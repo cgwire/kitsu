@@ -1532,7 +1532,16 @@
         "edit_milestone": "Modifica milestone per",
         "name": "Nome",
         "error": "Si è verificato un errore durante l'aggiunta o la modifica della milestone. Riprova.",
-        "delete_milestone": "Elimina milestone"
+        "delete_milestone": "Elimina milestone",
+        "type": "Tipo",
+        "color": "Colore",
+        "types": {
+          "kickoff": "Avvio",
+          "review": "Revisione",
+          "approval": "Approvazione",
+          "delivery": "Consegna",
+          "other": "Altro"
+        }
       },
       "mode": "Modalità di visualizzazione",
       "mode_prev": "Previsioni",

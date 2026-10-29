@@ -288,6 +288,51 @@
           @touchstart="startBrowsingX"
           v-if="zoomLevel > 0"
         >
+          <div class="milestone-flags" v-if="withMilestones">
+            <div
+              class="milestone-flag"
+              :class="{
+                compact: group.isCompact,
+                pointer: isCurrentUserProductionManager
+              }"
+              :style="group.style"
+              :key="`milestone-flag-${group.date}`"
+              :aria-label="group.label"
+              role="button"
+              tabindex="0"
+              @mousedown.stop
+              @touchstart.stop
+              @click="onMilestoneGroupClick(group, $event)"
+              @keydown.enter.prevent="onMilestoneGroupClick(group, $event)"
+              @keydown.space.prevent="onMilestoneGroupClick(group, $event)"
+              @mouseenter="showMilestonePopover(group, $event)"
+              @mouseleave="hideMilestonePopover"
+              @focus="showMilestonePopover(group, $event)"
+              @blur="hideMilestonePopover"
+              v-for="group in milestoneGroups"
+            >
+              <span class="milestone-flag-stripes">
+                <span
+                  class="milestone-flag-stripe"
+                  :key="`milestone-stripe-${index}`"
+                  :style="{ background: color }"
+                  v-for="(color, index) in group.colors"
+                ></span>
+              </span>
+              <span class="milestone-flag-label" v-if="!group.isCompact">
+                <span class="milestone-flag-name">
+                  {{ group.first.name }}
+                </span>
+                <span
+                  class="milestone-flag-more"
+                  v-if="group.milestones.length > 1"
+                >
+                  +{{ group.milestones.length - 1 }}
+                </span>
+              </span>
+            </div>
+          </div>
+
           <div
             class="day"
             :class="{
@@ -297,25 +342,7 @@
             :key="`header-${day.text}-${index}`"
             v-for="(day, index) in daysAvailable"
           >
-            <div
-              class="milestone pointer"
-              role="button"
-              tabindex="0"
-              @click="showEditMilestoneModal(day, currentMilestones[day.text])"
-              @keydown.enter.prevent="
-                showEditMilestoneModal(day, currentMilestones[day.text])
-              "
-              @keydown.space.prevent="
-                showEditMilestoneModal(day, currentMilestones[day.text])
-              "
-              v-if="currentMilestones[day.text] && withMilestones"
-            >
-              <div class="milestone-tooltip">
-                {{ currentMilestones[day.text].name }}
-              </div>
-              <div class="bull">&bull;</div>
-            </div>
-            <div class="milestone" v-else-if="withMilestones">
+            <div class="milestone" v-if="withMilestones">
               <div class="bull">&nbsp;</div>
             </div>
 
@@ -350,20 +377,13 @@
                 :title="addMilestoneTitle(day)"
                 role="button"
                 tabindex="0"
-                @click="
-                  showEditMilestoneModal(day, currentMilestones[day.text])
-                "
-                @keydown.enter.prevent="
-                  showEditMilestoneModal(day, currentMilestones[day.text])
-                "
-                @keydown.space.prevent="
-                  showEditMilestoneModal(day, currentMilestones[day.text])
-                "
+                @click="showEditMilestoneModal(day)"
+                @keydown.enter.prevent="showEditMilestoneModal(day)"
+                @keydown.space.prevent="showEditMilestoneModal(day)"
                 v-if="withMilestones && isCurrentUserProductionManager"
               >
                 <span class="button">
-                  <edit-icon :size="10" v-if="currentMilestones[day.text]" />
-                  <plus-icon :size="12" :stroke-width="3" v-else />
+                  <plus-icon :size="12" :stroke-width="3" />
                 </span>
               </div>
             </div>
@@ -450,9 +470,9 @@
             <template v-if="withMilestones && !isWeekMode">
               <div
                 class="milestone-vertical-line"
-                :style="milestoneLineStyle(milestone)"
-                :key="`milestone-${milestone.date}`"
-                v-for="milestone in Object.values(currentMilestones)"
+                :style="group.lineStyle"
+                :key="`milestone-${group.date}`"
+                v-for="group in milestoneGroups"
               ></div>
             </template>
             <div
@@ -624,6 +644,13 @@
       </div>
     </div>
 
+    <milestone-popover
+      ref="milestonePopoverRef"
+      :can-edit="isCurrentUserProductionManager"
+      @edit="editMilestone"
+      v-if="withMilestones"
+    />
+
     <edit-milestone-modal
       active
       :is-loading="loading.edit"
@@ -646,7 +673,6 @@ import {
   BriefcaseIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  EditIcon,
   LinkIcon,
   ListChevronsUpDownIcon,
   PlusIcon
@@ -667,6 +693,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import colors from '@/lib/colors'
+import { getMilestoneColor } from '@/lib/milestones'
 import { subItemsOf } from '@/lib/productionSchedule'
 import {
   addBusinessDays,
@@ -683,6 +710,7 @@ import {
 import EditMilestoneModal from '@/components/modals/EditMilestoneModal.vue'
 import ScheduleEntityRow from '@/components/schedule/ScheduleEntityRow.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
+import MilestonePopover from '@/components/widgets/MilestonePopover.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -842,6 +870,7 @@ const isChangeEndDate = ref(false)
 const milestoneToEdit = reactive({
   date: moment()
 })
+const milestonePopoverRef = ref(null)
 const errors = reactive({
   edit: false
 })
@@ -929,7 +958,7 @@ const isCurrentUserProductionManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
-const milestones = computed(() => store.getters.milestones)
+const milestonesByDate = computed(() => store.getters.milestonesByDate)
 const openProductions = computed(() => store.getters.openProductions)
 const organisation = computed(() => store.getters.organisation)
 const taskMap = computed(() => store.getters.taskMap)
@@ -951,14 +980,41 @@ const statuses = computed(() => {
   }
 })
 
-// the milestones of the displayed days, by date
-const currentMilestones = computed(() =>
-  Object.fromEntries(
-    Object.entries(milestones.value).filter(
-      ([date]) => displayedDaysIndex.value[date] !== undefined
+// Same-day milestones merge into one header flag, which spreads to the right
+// up to the next flag.
+const milestoneGroups = computed(() => {
+  const dates = Object.keys(milestonesByDate.value)
+    .filter(date => displayedDaysIndex.value[date] !== undefined)
+    .sort()
+  return dates.map((date, i) => {
+    const groupMilestones = milestonesByDate.value[date]
+    const dayIndex = displayedDaysIndex.value[date]
+    const nextDayIndex = displayedDaysIndex.value[dates[i + 1]] ?? Infinity
+    const maxWidth = Math.min(
+      (nextDayIndex - dayIndex) * cellWidth.value - 4,
+      MILESTONE_LABEL_MAX_WIDTH
     )
-  )
-)
+    const center = (dayIndex + 0.5) * cellWidth.value
+    const colors = groupMilestones.map(getMilestoneColor)
+    return {
+      date,
+      milestones: groupMilestones,
+      first: groupMilestones[0],
+      colors,
+      isCompact: maxWidth < MILESTONE_LABEL_MIN_WIDTH,
+      label: groupMilestones.map(milestone => milestone.name).join(', '),
+      style: {
+        left: `${center}px`,
+        maxWidth: `${maxWidth}px`,
+        '--milestone-color': colors[0]
+      },
+      lineStyle: { left: `${center}px`, borderColor: colors[0] }
+    }
+  })
+})
+
+const MILESTONE_LABEL_MAX_WIDTH = 180
+const MILESTONE_LABEL_MIN_WIDTH = 30
 
 const cellWidth = computed(() => {
   const cellWidthByLevel = [20, 20, 40, 60, 120]
@@ -2342,6 +2398,7 @@ const childrenStyle = (
 
 const showEditMilestoneModal = (day, milestone) => {
   if (isCurrentUserProductionManager.value) {
+    milestonePopoverRef.value?.hide({ immediate: true })
     modals.edit = true
     if (milestone) {
       Object.assign(milestoneToEdit, {
@@ -2352,10 +2409,34 @@ const showEditMilestoneModal = (day, milestone) => {
       Object.assign(milestoneToEdit, {
         date: day,
         name: undefined,
-        id: undefined
+        id: undefined,
+        milestone_type: undefined,
+        color: undefined
       })
     }
   }
+}
+
+const editMilestone = milestone => {
+  showEditMilestoneModal(null, milestone)
+}
+
+// A single milestone opens straight in the editor; a merged flag lists them in
+// the popover, where each one is picked.
+const onMilestoneGroupClick = (group, event) => {
+  if (group.milestones.length === 1) {
+    editMilestone(group.milestones[0])
+  } else {
+    showMilestonePopover(group, event)
+  }
+}
+
+const showMilestonePopover = (group, event) => {
+  milestonePopoverRef.value?.show(group, event.currentTarget)
+}
+
+const hideMilestonePopover = () => {
+  milestonePopoverRef.value?.hide()
 }
 
 const hideEditMilestoneModal = () => {
@@ -2382,20 +2463,6 @@ const confirmEditMilestone = milestone =>
 const removeMilestone = milestone =>
   runMilestoneAction('deleteMilestone', milestone)
 
-const milestoneLineStyle = milestone => {
-  const startDate = parseDate(props.startDate.format('YYYY-MM-DD'))
-  const milestoneDate = parseDate(milestone.date)
-  if (startDate.isSameOrBefore(milestoneDate)) {
-    const lengthDiffVal = columnsFromStart(milestoneDate)
-    return {
-      left: `${(lengthDiffVal + 0.5) * cellWidth.value}px`
-    }
-  } else {
-    return {
-      display: 'none'
-    }
-  }
-}
 const addMilestoneTitle = day => `${addMilestoneLabel.value} ${day.text}`
 
 const getDropForbiddenReason = (item, person) => {
@@ -3048,8 +3115,8 @@ defineExpose({
         top: 0;
         bottom: 0;
         width: 1px;
-        border-left: 1px dashed var(--text-strong);
-        margin-left: -0.5px;
+        border-left: 2px dashed var(--text-strong);
+        margin-left: -1px;
         pointer-events: none;
         z-index: 100;
       }
@@ -3198,9 +3265,6 @@ defineExpose({
   .day {
     width: 20px;
   }
-  .milestone-tooltip {
-    left: 10px;
-  }
 }
 
 .zoom-level-1 {
@@ -3209,9 +3273,6 @@ defineExpose({
   }
   .day {
     width: 20px;
-  }
-  .milestone-tooltip {
-    left: 10px;
   }
 }
 
@@ -3222,9 +3283,6 @@ defineExpose({
   .day {
     width: 40px;
   }
-  .milestone-tooltip {
-    left: 20px;
-  }
 }
 
 .schedule.zoom-level-3 {
@@ -3234,9 +3292,6 @@ defineExpose({
   .day {
     width: 60px;
   }
-  .milestone-tooltip {
-    left: 30px;
-  }
 }
 
 .schedule.zoom-level-4 {
@@ -3245,9 +3300,6 @@ defineExpose({
   }
   .day {
     width: 120px;
-  }
-  .milestone-tooltip {
-    left: 60px;
   }
 }
 
@@ -3441,64 +3493,85 @@ defineExpose({
     transform: translateY(16.5px);
   }
 
-  .flexrow-item {
-    margin-left: 5px;
-    margin-right: 0;
-  }
-
   .bull {
     font-size: 20px;
     line-height: 10px;
   }
+}
 
-  .milestone-tooltip {
-    visibility: hidden;
-    display: inline-block;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    box-shadow: 0 2px 2px 0 var(--box-shadow);
-    font-size: 0.8em;
-    font-weight: bold;
-    padding: 2px 5px;
-    position: relative;
-    min-width: 100px;
-    text-align: center;
-    top: -5px;
-    background: var(--background-alt-2);
-    z-index: 100;
-    transform: translateX(-50%);
-  }
+.milestone-flags {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 0;
+  z-index: 2;
+}
 
-  &:hover {
-    .milestone-tooltip {
-      visibility: visible;
-    }
-  }
+.milestone-flag {
+  align-items: center;
+  background: var(--background-alt-2);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 1px 2px var(--box-shadow);
+  color: var(--text-strong);
+  display: flex;
+  font-size: 0.75em;
+  font-weight: bold;
+  height: 18px;
+  overflow: hidden;
+  position: absolute;
+  // Between the month names and the week numbers.
+  top: 25px;
+  // Centers the color stripe on the day.
+  margin-left: -2px;
+  white-space: nowrap;
 
-  .milestone-tooltip:after,
-  .milestone-tooltip:before {
-    top: 100%;
-    left: 50%;
-    border: solid transparent;
-    content: ' ';
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
+  &:focus-visible {
+    outline: 2px solid var(--milestone-color);
   }
 
-  .milestone-tooltip:after {
-    border-color: transparent;
-    border-top-color: var(--background-alt-2);
-    border-width: 5px;
-    margin-left: -5px;
+  &.compact {
+    background: transparent;
+    box-shadow: none;
   }
-  .milestone-tooltip:before {
-    border-color: transparent;
-    border-top-color: var(--border);
-    border-width: 6px;
-    margin-left: -6px;
+}
+
+// One stripe per milestone of the day: a merged flag shows every color.
+.milestone-flag-stripes {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 4px;
+
+  .milestone-flag-stripe {
+    flex: 1;
   }
+
+  .compact & {
+    border-radius: 2px;
+  }
+}
+
+.milestone-flag-label {
+  align-items: center;
+  display: flex;
+  gap: 3px;
+  min-width: 0;
+  padding: 0 5px 0 4px;
+}
+
+.milestone-flag-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.milestone-flag-more {
+  background: var(--milestone-color);
+  border-radius: 6px;
+  color: $white;
+  flex-shrink: 0;
+  font-size: 0.9em;
+  padding: 0 4px;
 }
 
 .root-element-name {

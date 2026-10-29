@@ -3,9 +3,9 @@ import moment from 'moment'
 import { vi } from 'vitest'
 import { isReactive, nextTick, reactive } from 'vue'
 
-const { milestones, organisation } = vi.hoisted(() => ({
-  // mutated by the milestone tests, by date
-  milestones: {},
+const { milestonesByDate, organisation } = vi.hoisted(() => ({
+  // mutated by the milestone tests: the milestones of each date
+  milestonesByDate: {},
   organisation: { hours_by_day: 8, format_duration_in_hours: false }
 }))
 
@@ -20,7 +20,7 @@ vi.mock('vuex', () => ({
       ]),
       isCurrentUserProductionManager: true,
       isDarkTheme: false,
-      milestones,
+      milestonesByDate,
       openProductions: [{ id: 'production-1', team: ['person-1'] }],
       organisation,
       taskMap: new Map(),
@@ -74,15 +74,21 @@ const mountSchedule = (props = {}, options = {}) =>
 
 describe('Schedule widget - milestones', () => {
   afterEach(() => {
-    Object.keys(milestones).forEach(date => delete milestones[date])
+    Object.keys(milestonesByDate).forEach(
+      date => delete milestonesByDate[date]
+    )
   })
 
   it('shows a milestone set on the first day of the range', () => {
-    milestones['2026-08-01'] = {
-      id: 'milestone-1',
-      date: '2026-08-01',
-      name: 'Kickoff'
-    }
+    milestonesByDate['2026-08-01'] = [
+      {
+        id: 'milestone-1',
+        date: '2026-08-01',
+        name: 'Kickoff',
+        milestone_type: 'kickoff',
+        color: null
+      }
+    ]
     // the header lists the days in UTC: a UTC start keeps that day first
     const wrapper = mountSchedule({
       startDate: moment.utc('2026-08-01'),
@@ -90,8 +96,24 @@ describe('Schedule widget - milestones', () => {
       withMilestones: true
     })
 
-    expect(wrapper.find('.milestone-tooltip').text()).toBe('Kickoff')
+    expect(wrapper.find('.milestone-flag-name').text()).toBe('Kickoff')
     expect(wrapper.find('.milestone-vertical-line').exists()).toBe(true)
+    wrapper.unmount()
+  })
+
+  it('merges the milestones of a day into one flag', () => {
+    milestonesByDate['2026-08-10'] = [
+      { id: 'm1', date: '2026-08-10', name: 'Delivery' },
+      { id: 'm2', date: '2026-08-10', name: 'Review' }
+    ].map(milestone => ({ ...milestone, milestone_type: 'other', color: null }))
+    const wrapper = mountSchedule({ withMilestones: true, zoomLevel: 3 })
+
+    const flags = wrapper.findAll('.milestone-flag')
+    expect(flags).toHaveLength(1)
+    expect(flags[0].attributes('aria-label')).toBe('Delivery, Review')
+    expect(flags[0].findAll('.milestone-flag-stripe')).toHaveLength(2)
+    expect(flags[0].find('.milestone-flag-more').text()).toBe('+1')
+    expect(wrapper.findAll('.milestone-vertical-line')).toHaveLength(1)
     wrapper.unmount()
   })
 })

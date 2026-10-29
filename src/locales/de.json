@@ -1532,7 +1532,16 @@
         "edit_milestone": "Meilenstein bearbeiten für",
         "name": "Name",
         "error": "Beim Hinzufügen oder Bearbeiten des Meilensteins ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
-        "delete_milestone": "Meilenstein löschen"
+        "delete_milestone": "Meilenstein löschen",
+        "type": "Typ",
+        "color": "Farbe",
+        "types": {
+          "kickoff": "Kickoff",
+          "review": "Review",
+          "approval": "Freigabe",
+          "delivery": "Lieferung",
+          "other": "Sonstiges"
+        }
       },
       "mode": "Ansichtsmodus",
       "mode_prev": "Prognose",

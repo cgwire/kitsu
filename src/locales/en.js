@@ -2038,7 +2038,16 @@ export default {
       delete_milestone: 'Delete milestone',
       edit_milestone: 'Edit milestone for',
       name: 'Name',
-      error: 'An error occurred while adding or editing the milestone. Please try again.'
+      error: 'An error occurred while adding or editing the milestone. Please try again.',
+      type: 'Type',
+      color: 'Color',
+      types: {
+        kickoff: 'Kickoff',
+        review: 'Review',
+        approval: 'Approval',
+        delivery: 'Delivery',
+        other: 'Other'
+      }
     },
     mode: 'View Mode',
     mode_prev: 'Forecast',

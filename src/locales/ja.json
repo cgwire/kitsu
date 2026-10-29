@@ -1532,7 +1532,16 @@
         "edit_milestone": "マイルストーンを編集",
         "name": "名前",
         "error": "マイルストーンの追加または編集中にエラーが発生しました。もう一度お試しください。",
-        "delete_milestone": "マイルストーンを削除"
+        "delete_milestone": "マイルストーンを削除",
+        "type": "種類",
+        "color": "色",
+        "types": {
+          "kickoff": "キックオフ",
+          "review": "レビュー",
+          "approval": "承認",
+          "delivery": "納品",
+          "other": "その他"
+        }
       },
       "mode": "表示モード",
       "mode_prev": "予測",

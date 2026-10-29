@@ -1532,7 +1532,16 @@
         "edit_milestone": "Modifier le jalon",
         "name": "Nom",
         "error": "Une erreur est survenue en ajoutant ou en modifiant ce jalon. Veuillez réessayer.",
-        "delete_milestone": "Supprimer le jalon"
+        "delete_milestone": "Supprimer le jalon",
+        "type": "Type",
+        "color": "Couleur",
+        "types": {
+          "kickoff": "Lancement",
+          "review": "Revue",
+          "approval": "Validation",
+          "delivery": "Livraison",
+          "other": "Autre"
+        }
       },
       "mode": "Mode d'affichage",
       "mode_prev": "Prévisions",

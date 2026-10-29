@@ -1955,7 +1955,16 @@
         "delete_milestone": "Usuń kamień milowy",
         "edit_milestone": "Edytuj kamień milowy na",
         "name": "Nazwa",
-        "error": "Wystąpił błąd podczas dodawania lub edycji kamienia milowego. Spróbuj ponownie."
+        "error": "Wystąpił błąd podczas dodawania lub edycji kamienia milowego. Spróbuj ponownie.",
+        "type": "Typ",
+        "color": "Kolor",
+        "types": {
+          "kickoff": "Rozpoczęcie",
+          "review": "Przegląd",
+          "approval": "Zatwierdzenie",
+          "delivery": "Dostawa",
+          "other": "Inne"
+        }
       },
       "mode": "Tryb widoku",
       "mode_prev": "Prognoza",

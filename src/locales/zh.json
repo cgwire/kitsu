@@ -1532,7 +1532,16 @@
         "edit_milestone": "编辑里程碑",
         "name": "名称",
         "error": "添加或编辑里程碑时发生错误。请再试一次。",
-        "delete_milestone": "删除里程碑"
+        "delete_milestone": "删除里程碑",
+        "type": "类型",
+        "color": "颜色",
+        "types": {
+          "kickoff": "启动",
+          "review": "审阅",
+          "approval": "审批",
+          "delivery": "交付",
+          "other": "其他"
+        }
       },
       "mode": "查看模式",
       "mode_prev": "预测",
