@@ -141,6 +141,23 @@ describe('New production page, creation', () => {
     expect(consoleError).toHaveBeenCalled()
   })
 
+  test.each([
+    ['23.976', false],
+    ['0.5', false],
+    ['60.5', true]
+  ])('flags a %s fps as errored: %s', async (fps, errored) => {
+    const wrapper = await mountPage()
+    const fpsField = wrapper
+      .findAllComponents({ name: 'TextField' })
+      .find(
+        field =>
+          field.attributes('placeholder') ===
+          'productions.creation.placeholder_fps'
+      )
+    await fpsField.vm.$emit('update:modelValue', fps)
+    expect(fpsField.attributes('errored')).toBe(String(errored))
+  })
+
   // Zou gives the production the type of its template.
   test.each([
     ['tvshow', 'episode-assets', { episode_id: 'all' }],

@@ -849,6 +849,17 @@ describe('TaskInfo.vue', () => {
       expect(playerFps(wrapper)).toBe(30)
     })
 
+    it('keeps a fractional production fps', async () => {
+      const { wrapper } = await mountPanel({
+        previews,
+        getterOverrides: {
+          productionMap: () =>
+            new Map([['production-1', { fps: '23.976' }]])
+        }
+      })
+      expect(playerFps(wrapper)).toBe(23.976)
+    })
+
     it('lets the entity override the production fps', async () => {
       // The video was rendered at the entity rate; using the production one
       // would duplicate or drop frames in the player.

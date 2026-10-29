@@ -715,7 +715,7 @@ const hasValidAssetTypes = computed(
 const hasValidShots = computed(() => nbShotsToImport.value > 0)
 
 const hasValidFPS = computed(() => {
-  const fps = parseInt(productionToCreate.settings.fps)
+  const fps = parseFloat(productionToCreate.settings.fps)
   return fps > 0 && fps <= 60
 })
 
