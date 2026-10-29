@@ -144,6 +144,7 @@ const mountPlayer = ({
               'setVolume'
             ],
             {
+              getCurrentFrame: () => 0,
               getCurrentTime: () => 0,
               getCurrentTimeRaw: () => 0,
               getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
@@ -1196,6 +1197,39 @@ describe('PlaylistPlayer.vue', () => {
     await wrapper.setProps({ entities: [comparedEntity('shot-3')] })
     await flushPromises()
     expect(comparisonViewer.props('entities')).toEqual([])
+  })
+
+  // Firefox paints no frame for a second seek right after a first one: the
+  // comparison movie, paused on its own frame then sent to the frame of the
+  // main one, stayed a frame or two ahead.
+  it('pauses the comparison movie on the frame of the main one', async () => {
+    wrapper = mountPlayer({
+      entities: [comparedEntity('shot-1')],
+      taskTypeMap: comparedTaskTypeMap
+    })
+    await flushPromises()
+    wrapper
+      .findComponent({ name: 'PlayerComparisonBar' })
+      .vm.$emit('compare-clicked')
+    await flushPromises()
+    const playPause = () =>
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { code: 'Space', key: ' ' })
+      )
+    const main = wrapper.findComponent({ ref: 'raw-player' }).vm
+    main.isPlaying = true
+    playPause()
+    await flushPromises()
+    const comparison = wrapper.findComponent({ ref: 'raw-player-comparison' }).vm
+    main.getCurrentFrame = () => 627
+    comparison.pause = vi.fn()
+    comparison.setCurrentTimeRaw = vi.fn()
+
+    playPause()
+    await flushPromises()
+
+    expect(comparison.pause).toHaveBeenCalledWith(627)
+    expect(comparison.setCurrentTimeRaw).not.toHaveBeenCalled()
   })
 
   describe('comparison movie of a picture', () => {

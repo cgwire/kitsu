@@ -115,6 +115,26 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  // Chrome and Firefox do not always call a frame callback for a paused
+  // seek: the canvas kept a frame painted while playing.
+  it('paints the frame a paused seek lands on', async () => {
+    const wrapper = mountViewer()
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    fakeContext.drawImage.mockClear()
+
+    wrapper.vm.currentPlayer.dispatchEvent(new Event('seeked'))
+
+    expect(fakeContext.drawImage).toHaveBeenCalledWith(
+      wrapper.vm.currentPlayer,
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    )
+    wrapper.unmount()
+  })
+
   it('paints from the active player and re-arms the loop on switch', async () => {
     const wrapper = mountViewer()
     wrapper.vm.loadEntity(0)
@@ -460,6 +480,19 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
       tick(performance.now(), { mediaTime: 18000 / 30 })
       player.currentTime = 17999.4 / 30
       wrapper.vm.pause()
+      expect(Math.floor(player.currentTime * 30)).toBe(18000)
+      expect(lastFrame(wrapper)).toBe(18000)
+      wrapper.unmount()
+    })
+
+    // A comparison movie pauses on the frame of the main one, in one seek.
+    it('pauses on the frame it is given', async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const { wrapper, player } = await mountAt30()
+      wrapper.vm.play()
+      const { cb: tick } = rvfcCallbacks.at(-1)
+      tick(performance.now(), { mediaTime: 18002 / 30 })
+      wrapper.vm.pause(18000)
       expect(Math.floor(player.currentTime * 30)).toBe(18000)
       expect(lastFrame(wrapper)).toBe(18000)
       wrapper.unmount()

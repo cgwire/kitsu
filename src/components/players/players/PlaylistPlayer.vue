@@ -2406,8 +2406,7 @@ const pause = () => {
     // moved the picture off that frame.
     rawPlayer.value?.pause()
     if (isComparing.value) {
-      rawPlayerComparison.value?.pause()
-      syncComparisonPlayer()
+      rawPlayerComparison.value?.pause(rawPlayer.value?.getCurrentFrame())
     }
   } else if (isCurrentPreviewSound.value) {
     soundPlayer.value?.pause()
