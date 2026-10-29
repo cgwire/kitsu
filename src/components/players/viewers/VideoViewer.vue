@@ -272,10 +272,16 @@ const setCurrentTime = currentTime => {
 }
 
 // Chrome and Firefox do not always call a frame callback for a paused seek:
-// the canvas kept a frame painted while playing.
+// the canvas kept a frame painted while playing. A held target equal to the
+// time reached seeks nothing: paint then too.
 const onSeeked = () => {
-  if (pendingSeekTime !== null) setCurrentTime(pendingSeekTime)
-  else if (video.value?.paused) renderer?.drawFrame()
+  const target = pendingSeekTime
+  pendingSeekTime = null
+  if (target !== null && video.value?.currentTime !== target) {
+    seekNow(target)
+  } else if (video.value?.paused) {
+    renderer?.drawFrame()
+  }
 }
 
 const resetSize = () => {

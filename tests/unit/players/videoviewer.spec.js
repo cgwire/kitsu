@@ -127,6 +127,26 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  // The comparison movie pauses, then gets synced to the same frame while
+  // its pause seek is still running.
+  it('paints the frame a seek held for the same target lands on', async () => {
+    const wrapper = mountViewer({ currentFrame: 10 })
+    await new Promise(resolve => setTimeout(resolve))
+    const video = wrapper.find('video').element
+    await video.dispatchEvent(new Event('loadedmetadata'))
+    wrapper.vm.pause()
+    Object.defineProperty(video, 'seeking', { value: true, configurable: true })
+    wrapper.vm.setCurrentFrame(10)
+    Object.defineProperty(video, 'seeking', { value: false, configurable: true })
+    fakeContext.drawImage.mockClear()
+
+    video.dispatchEvent(new Event('seeked'))
+
+    expect(video.currentTime).toBeCloseTo(10.5 / 25, 5)
+    expect(fakeContext.drawImage).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
   it('starts the rVFC loop on loadedmetadata and paints + emits per tick while playing', async () => {
     const wrapper = mountViewer()
     // Wait for the setTimeout(0) in onMounted to complete
