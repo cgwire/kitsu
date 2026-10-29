@@ -100,7 +100,7 @@
     <import-modal
       active
       :is-loading="isImportPeopleLoading"
-      :is-error="errors.importing || isImportPeopleLoadingError"
+      :is-error="errors.importing"
       :form-data="personCsvFormData"
       :columns="[...dataMatchers, ...csvColumns]"
       :optional-columns="optionalCsvColumns"
@@ -519,8 +519,8 @@ const renderImport = async (data, mode) => {
     hideImportModal()
     modals.isImportRenderDisplayed = true
   } catch (err) {
-    console.error(err)
     errors.importing = true
+    csv.logReadFailure(err)
   }
 }
 
@@ -616,7 +616,12 @@ const savePerson = async (loadingKey, action, form) => {
   } catch (err) {
     console.error(err)
     const message = err.body?.message ?? ''
-    if (message.includes('domain name')) {
+    // A dotless domain, refused where deliverability is checked, gets a
+    // message about the part after the @-sign.
+    if (
+      message.includes('domain name') ||
+      message.includes('after the @-sign')
+    ) {
       errors.invalidEmailDomain = true
     } else if (message.includes('limit reached')) {
       errors.userLimit = true

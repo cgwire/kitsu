@@ -1,6 +1,9 @@
 <template>
-  <div>
+  <div class="production-task-types">
     <div>
+      <p class="explanation mb1">
+        {{ $t('task_types.production_description') }}
+      </p>
       <route-section-tabs
         class="section-tabs"
         :active-tab="activeTab"
@@ -77,11 +80,18 @@
                   <th></th>
                 </tr>
               </thead>
+              <!-- A held button must not arm a drag: a reload that shifted
+                   the rows before the release made vuedraggable throw. -->
               <draggable
                 class="datatable-body"
-                item-key="taskType.id"
+                filter="button"
+                :item-key="item => item.taskType.id"
+                :prevent-on-filter="false"
                 tag="tbody"
+                @choose="onRowHeld"
                 @end="updatePriorities(taskListObject.list)"
+                @start="onRowDragged"
+                @unchoose="onRowReleased"
                 v-model="taskListObject.list"
               >
                 <template #item="{ element: taskTypeData }">
@@ -90,7 +100,6 @@
                     :task-type="taskTypeData.taskType"
                     :schedule-item="taskTypeData.scheduleItem"
                     @bitrates-changed="onBitratesChanged"
-                    @date-changed="onDateChanged"
                     @remove="removeTaskType"
                   />
                 </template>
@@ -121,22 +130,38 @@
         </div>
       </div>
     </div>
+
+    <remove-task-type-modal
+      active
+      :is-error="taskTypeRemoval.isError"
+      :is-loading="taskTypeRemoval.isLoading"
+      :nb-tasks="taskTypeRemoval.nbTasks"
+      :task-type="taskTypeRemoval.taskType"
+      @cancel="cancelTaskTypeRemoval"
+      @confirm="confirmTaskTypeRemoval"
+      v-if="taskTypeRemoval.taskType"
+    />
   </div>
 </template>
+
 <script setup>
-import draggable from 'vuedraggable'
 import moment from 'moment'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import draggable from 'vuedraggable'
 import { useStore } from 'vuex'
 
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
+import { logRequestFailure } from '@/lib/errors'
+import func from '@/lib/func'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
 
+import RemoveTaskTypeModal from '@/components/modals/RemoveTaskTypeModal.vue'
+import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
-import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
@@ -145,30 +170,35 @@ const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
 
+// State
+// --------------------------------------------------------------------------
 const activeTab = ref('assets')
 const assetTaskTypes = ref({ list: [] })
 const editTaskTypes = ref({ list: [] })
 const episodeTaskTypes = ref({ list: [] })
 const sequenceTaskTypes = ref({ list: [] })
 const shotTaskTypes = ref({ list: [] })
-const episode_span = ref(0)
 const taskTypeId = ref('')
 const loading = reactive({
   import: false,
-  episode_span: false,
-  scheduleTimeUpdate: false,
   scheduleTimeDelete: false
 })
+// A removed task type keeps its tasks, hidden from the lists and the
+// schedule: when some remain, the modal lets the user delete them first.
+const taskTypeRemoval = reactive({
+  isError: false,
+  isLoading: false,
+  nbTasks: 0,
+  scheduleItem: null,
+  taskType: null
+})
 const errors = reactive({
-  episode_span: false,
   scheduleTimeUpdate: false,
   delete: false
 })
 
-let lastCall = 0
-let isSaving = false
-let newSaveCall = false
-
+// Computed
+// --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
 const currentScheduleItems = computed(() => store.getters.currentScheduleItems)
 const getProductionTaskTypes = computed(
@@ -191,8 +221,16 @@ const productionEpisodeTaskTypes = computed(
 )
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const taskTypes = computed(() => store.getters.taskTypes)
-
+const isTVShow = computed(() => store.getters.isTVShow)
 const bitrateDefaults = computed(() => store.getters.movieBitrateDefaults)
+
+const groupByType = {
+  Asset: { ref: assetTaskTypes, getter: productionAssetTaskTypes },
+  Shot: { ref: shotTaskTypes, getter: productionShotTaskTypes },
+  Sequence: { ref: sequenceTaskTypes, getter: productionSequenceTaskTypes },
+  Episode: { ref: episodeTaskTypes, getter: productionEpisodeTaskTypes },
+  Edit: { ref: editTaskTypes, getter: productionEditTaskTypes }
+}
 
 // The low definition bitrate of a row stays within its high definition one.
 const bitrateHelp = computed(() => {
@@ -211,14 +249,6 @@ const bitrateHelp = computed(() => {
     ld: help(t('productions.video.task_type_ld_bitrate_max'))
   }
 })
-
-const groupByType = {
-  Asset: { ref: assetTaskTypes, getter: productionAssetTaskTypes },
-  Shot: { ref: shotTaskTypes, getter: productionShotTaskTypes },
-  Sequence: { ref: sequenceTaskTypes, getter: productionSequenceTaskTypes },
-  Episode: { ref: episodeTaskTypes, getter: productionEpisodeTaskTypes },
-  Edit: { ref: editTaskTypes, getter: productionEditTaskTypes }
-}
 
 const remainingTaskTypes = computed(() =>
   sortByName(
@@ -244,8 +274,6 @@ const isShotsOnly = computed(
   () => currentProduction.value.production_type === 'shots'
 )
 
-const isTVShow = computed(() => store.getters.isTVShow)
-
 const visibleEntities = computed(() =>
   [
     !isShotsOnly.value && 'assets',
@@ -269,6 +297,8 @@ const taskTypeTabs = computed(() =>
   }))
 )
 
+// Functions
+// --------------------------------------------------------------------------
 const isEmpty = list => !list || list.length === 0
 
 // The loaded items also hold the entity bars of each task type: keep the
@@ -282,27 +312,33 @@ const getScheduleItemForTaskType = taskType =>
     end_date: formatFullDate(moment())
   }
 
-const resetDisplayedTaskTypes = () => {
+const buildDisplayedTaskTypes = () => {
   Object.entries(groupByType).forEach(([type, { ref: stateRef, getter }]) => {
-    let list = sortTaskTypes([...getter.value], currentProduction.value)
-    list = list.map(taskType => ({
-      taskType,
-      scheduleItem: getScheduleItemForTaskType(taskType)
-    }))
     stateRef.value = {
       entity: `${type.toLowerCase()}s`,
-      title: t(`${type.toLowerCase()}s.title`),
-      list
+      list: sortTaskTypes([...getter.value], currentProduction.value).map(
+        taskType => ({
+          taskType,
+          scheduleItem: getScheduleItemForTaskType(taskType)
+        })
+      )
     }
   })
 }
+
+const {
+  rebuild: resetDisplayedTaskTypes,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(buildDisplayedTaskTypes)
 
 const updateTaskTypeIdFromRemaining = () => {
   taskTypeId.value = remainingTaskTypesForEntity.value[0]?.id || null
 }
 
 const addTaskType = async taskType => {
-  const id = taskType && taskType.id ? taskType.id : taskTypeId.value
+  const id = taskType?.id || taskTypeId.value
   const taskTypeToAdd = taskTypeMap.value.get(id)
   if (!taskTypeToAdd) return
   const entityType = taskTypeToAdd.for_entity
@@ -324,11 +360,12 @@ const addTaskType = async taskType => {
   resetDisplayedTaskTypes()
 }
 
-const removeTaskType = async ({ taskType, scheduleItem }) => {
+const applyTaskTypeRemoval = async ({ taskType, scheduleItem }) => {
   errors.delete = false
   try {
     await store.dispatch('removeTaskTypeFromProduction', taskType.id)
-    if (scheduleItem !== null) {
+    // A task type without a bar of its own gets a placeholder with no id.
+    if (scheduleItem?.id) {
       loading.scheduleTimeDelete = true
       await store.dispatch('deleteScheduleItem', scheduleItem)
       loading.scheduleTimeDelete = false
@@ -341,6 +378,59 @@ const removeTaskType = async ({ taskType, scheduleItem }) => {
   await nextTick()
   updateTaskTypeIdFromRemaining()
   resetDisplayedTaskTypes()
+}
+
+const removeTaskType = async ({ taskType, scheduleItem }) => {
+  errors.delete = false
+  let nbTasks
+  try {
+    nbTasks = await store.dispatch('countTasks', {
+      project_id: currentProduction.value.id,
+      task_type_id: taskType.id
+    })
+  } catch (err) {
+    console.error(err)
+    errors.delete = true
+    return
+  }
+  if (nbTasks > 0) {
+    Object.assign(taskTypeRemoval, {
+      isError: false,
+      nbTasks,
+      scheduleItem,
+      taskType
+    })
+  } else {
+    await applyTaskTypeRemoval({ taskType, scheduleItem })
+  }
+}
+
+const confirmTaskTypeRemoval = async isDeletingTasks => {
+  const { scheduleItem, taskType } = taskTypeRemoval
+  taskTypeRemoval.isError = false
+  taskTypeRemoval.isLoading = true
+  try {
+    if (isDeletingTasks) {
+      await store.dispatch('deleteAllTasks', {
+        projectId: currentProduction.value.id,
+        taskTypeId: taskType.id
+      })
+    }
+  } catch (err) {
+    console.error(err)
+    taskTypeRemoval.isError = true
+    return
+  } finally {
+    taskTypeRemoval.isLoading = false
+  }
+  taskTypeRemoval.taskType = null
+  await applyTaskTypeRemoval({ taskType, scheduleItem })
+}
+
+// A deletion of the tasks cannot be stopped once sent: the modal stays open
+// until it ends.
+const cancelTaskTypeRemoval = () => {
+  if (!taskTypeRemoval.isLoading) taskTypeRemoval.taskType = null
 }
 
 const onBitratesChanged = async ({ taskType, ...bitrates }) => {
@@ -356,45 +446,40 @@ const onBitratesChanged = async ({ taskType, ...bitrates }) => {
   }
 }
 
-const onDateChanged = async scheduleItem => {
-  errors.scheduleTimeUpdate = false
-  try {
-    await store.dispatch('saveScheduleItem', scheduleItem)
-  } catch (err) {
-    console.error(err)
-    errors.scheduleTimeUpdate = true
-  }
-}
+// The saves of a list never cross on the server, and each drop reloads the
+// context once every order of its list is saved. A list holds the task types
+// of an entity in a production.
+const priorityQueues = new Map()
 
-const savePriorities = async forms => {
-  const now = new Date().getTime()
-  if (now - lastCall > 1000 && !isSaving) {
-    lastCall = now
-    isSaving = true
-    await store.dispatch('reorderTaskTypeLinks', {
-      projectId: currentProduction.value.id,
-      taskTypeIds: forms.map(form => form.taskTypeId)
-    })
-    isSaving = false
-    if (newSaveCall) {
-      await savePriorities(forms)
-    }
-    setTimeout(() => {
-      store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap.value)
-    }, 100)
-  } else {
-    newSaveCall = true
+const savePriorities = order => {
+  const listKey = `${order.projectId}-${activeTab.value}`
+  if (!priorityQueues.has(listKey)) {
+    priorityQueues.set(
+      listKey,
+      func.queueLatest(value => store.dispatch('reorderTaskTypeLinks', value))
+    )
   }
+  return priorityQueues.get(listKey)(order)
 }
 
 const updatePriorities = async items => {
-  const forms = items.map((item, index) => ({
-    projectId: currentProduction.value.id,
-    taskTypeId: item.taskType.id,
-    priority: index + 1
-  }))
-  await savePriorities(forms)
-  await store.dispatch('loadContext')
+  try {
+    // An order can wait for a save past a switch to another production.
+    await savePriorities({
+      projectId: currentProduction.value.id,
+      taskTypeIds: items.map(item => item.taskType.id)
+    })
+    setTimeout(() => {
+      store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap.value)
+    }, 100)
+    await store.dispatch('loadContext')
+  } catch (err) {
+    // After a drop, the lists wait for a reload, which a failure needs too:
+    // Zou may hold an order saved after the failed one.
+    await store.dispatch('loadContext').catch(logRequestFailure)
+    resetDisplayedTaskTypes()
+    throw err
+  }
 }
 
 const importTaskTypesFromProduction = async productionId => {
@@ -435,26 +520,11 @@ const importTaskTypesFromProduction = async productionId => {
   loading.import = false
 }
 
-onMounted(() => {
-  updateTaskTypeIdFromRemaining()
-
-  activeTab.value = visibleEntities.value.includes(route.query.section)
-    ? route.query.section
-    : visibleEntities.value[0]
-
-  resetDisplayedTaskTypes()
-  if (currentProduction.value) {
-    episode_span.value = currentProduction.value.episode_span
-    store.dispatch('loadAllScheduleItems', currentProduction.value).then(() => {
-      resetDisplayedTaskTypes()
-    })
-  }
-})
-
+// Watchers
+// --------------------------------------------------------------------------
 watch(
   currentProduction,
   () => {
-    episode_span.value = currentProduction.value.episode_span
     store.dispatch('loadAllScheduleItems', currentProduction.value)
     resetDisplayedTaskTypes()
   },
@@ -471,15 +541,42 @@ watch(
     })
   }
 )
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  updateTaskTypeIdFromRemaining()
+
+  activeTab.value = visibleEntities.value.includes(route.query.section)
+    ? route.query.section
+    : visibleEntities.value[0]
+
+  resetDisplayedTaskTypes()
+  if (currentProduction.value) {
+    store.dispatch('loadAllScheduleItems', currentProduction.value).then(() => {
+      resetDisplayedTaskTypes()
+    })
+  }
+})
 </script>
 
 <style lang="scss" scoped>
 .column {
+  flex-basis: 400px;
+  flex-grow: 0;
   overflow-y: initial;
+
+  // The importer keeps its width: shrunk by the wide list, it got narrow
+  // as soon as the import from production field was hidden
+  &:last-child {
+    flex: 0 0 360px;
+    padding: 1em;
+  }
 }
 
 .datatable th {
   color: var(--text);
+  padding-bottom: 5px;
   padding-left: 10px;
   padding-top: 1em;
 }
@@ -512,54 +609,8 @@ table {
   margin-bottom: 1.5em;
 }
 
-th {
-  padding-left: 10px;
-  padding-bottom: 5px;
-}
-
-td p {
-  color: var(--text);
-}
-
-.column {
-  flex-basis: 400px;
-  flex-grow: 0;
-}
-
-td.name {
-  flex: 1;
-}
-
-.start-date {
-  width: 135px;
-}
-
-.end-date {
-  width: 135px;
-}
-
-.remove {
-  width: 100px;
-}
-
-.episode-span-column {
-  margin-left: 5rem;
-}
-
 .field {
   margin-bottom: 0;
-}
-
-.section-title {
-  color: $grey;
-  font-size: 1.2em;
-  margin-bottom: 1em;
-  margin-top: 2em;
-  text-transform: uppercase;
-}
-
-h2 {
-  border: 0;
 }
 
 .empty {
@@ -575,15 +626,7 @@ h2 {
   cursor: grabbing;
 }
 
-.column:last-child {
-  padding: 1em;
-}
-
 .pointer {
   cursor: pointer;
-}
-
-.grab {
-  cursor: grab;
 }
 </style>

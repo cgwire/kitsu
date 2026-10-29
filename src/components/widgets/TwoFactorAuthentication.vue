@@ -212,8 +212,11 @@ const updatePayload = () => {
   twoFactorPayload.value[chosenTwoFA.value] = OTPValue.value
 }
 
+// Enter in the code field lands here too: the release of the key that showed
+// the field, before any code, and a second Enter while the code is checked.
 const validate = () => {
-  emit('validate', twoFactorPayload.value)
+  const hasCode = Object.values(twoFactorPayload.value).some(Boolean)
+  if (hasCode && !props.isLoading) emit('validate', twoFactorPayload.value)
 }
 
 const removeErrors = () => {

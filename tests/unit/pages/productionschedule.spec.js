@@ -136,9 +136,9 @@ const propAssets = [
 const day = date => moment.utc(date)
 const format = date => date.format('YYYY-MM-DD')
 
-// The page loads after a debounce of its own.
+// The page loads after a debounce of its own, run on the fake clock.
 const waitForLoad = async () => {
-  await new Promise(resolve => setTimeout(resolve, 60))
+  await vi.advanceTimersByTimeAsync(60)
   await flushPromises()
 }
 
@@ -173,15 +173,18 @@ const mountPage = async ({
     ...actions
   }
   const store = createStore({
-    state: { scheduleVersions: versions },
+    state: { production, scheduleVersions: versions },
     mutations: {
+      SET_PRODUCTION(state, newProduction) {
+        state.production = newProduction
+      },
       SET_VERSIONS(state, scheduleVersions) {
         state.scheduleVersions = scheduleVersions
       }
     },
     getters: {
       currentEpisode: () => null,
-      currentProduction: () => production,
+      currentProduction: state => state.production,
       dateFormat: () => 'YYYY-MM-DD',
       isCurrentUserProductionManager: () => true,
       isCurrentUserProductionSupervisor: () => false,
@@ -229,7 +232,7 @@ const mountPage = async ({
   })
   mountedPage = wrapper
   await waitForLoad()
-  return { router, scheduleWidget, storeActions, wrapper }
+  return { router, scheduleWidget, store, storeActions, wrapper }
 }
 
 const findSchedule = wrapper => wrapper.findComponent({ name: 'Schedule' })
@@ -295,6 +298,7 @@ const selectTask = async (wrapper, entityTypeRow, task) => {
 
 describe('ProductionSchedule page', () => {
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     taskTypes.forEach(taskType => {
       taskTypeStore.cache.taskTypeMap.set(taskType.id, taskType)
     })
@@ -654,6 +658,10 @@ describe('ProductionSchedule page', () => {
   })
 
   describe('drill-down', () => {
+    afterEach(() => {
+      assetStore.cache.assetMap.clear()
+    })
+
     it('loads the days off of the schedule range when a row expands', async () => {
       const { storeActions, wrapper } = await mountPage()
 
@@ -666,6 +674,224 @@ describe('ProductionSchedule page', () => {
       expect(rowsOf(wrapper)[0].children.map(row => row.name)).toEqual([
         'Props'
       ])
+    })
+
+    // The list the Assets page loads under All, which the main pack may take
+    // over, gives the episode of an asset as episode_id, not source_id, and
+    // also holds the assets other productions share with this one.
+    it.each([
+      ['an asset of another production', { source_id: null, shared: true }],
+      ['an episode asset of the list with tasks', { episode_id: 'episode-1' }]
+    ])('keeps %s out of the main pack rows', async (_, fields) => {
+      assetTypeStore.cache.assetTypeMap.set('asset-type-sets', {
+        id: 'asset-type-sets',
+        name: 'Sets',
+        task_types: []
+      })
+      const assets = [
+        { id: 'asset-1', asset_type_id: 'asset-type-props', source_id: null },
+        { id: 'asset-9', asset_type_id: 'asset-type-sets', ...fields }
+      ]
+      assets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
+      const { wrapper } = await mountPage({
+        actions: {
+          loadAssetTypeScheduleItems: vi.fn(() => [
+            ...buildAssetTypeBars(),
+            {
+              id: 'bar-sets',
+              task_type_id: 'tt-modeling',
+              object_id: 'asset-type-sets',
+              name: 'Sets',
+              start_date: '2026-02-01',
+              end_date: '2026-02-20'
+            }
+          ])
+        },
+        getters: {
+          currentEpisode: () => ({ id: 'main', name: 'Main Pack' }),
+          isTVShow: () => true
+        }
+      })
+
+      findSchedule(wrapper).vm.$emit('root-element-expanded', rowsOf(wrapper)[0])
+      await waitForLoad()
+
+      expect(rowsOf(wrapper)[0].children.map(row => row.name)).toEqual([
+        'Props'
+      ])
+    })
+  })
+
+  // An expansion outlives the production it started on: once the schedule
+  // shows another one, it must load nothing more, or it fills the stores of
+  // the new production for the rows of the one left.
+  describe('production switch', () => {
+    const otherProduction = {
+      ...production,
+      id: 'production-2',
+      name: 'Sprite Fright'
+    }
+
+    const drillDownActions = [
+      'loadAssets',
+      'loadShots',
+      'loadTasks',
+      'loadProductionDaysOff'
+    ]
+
+    // The first call waits for the test to release it, the next ones answer
+    // at once.
+    const holdFirstCall = answer => {
+      let release = () => {}
+      const action = vi.fn(answer).mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            release = () => resolve(answer())
+          })
+      )
+      return { action, release: () => release() }
+    }
+
+    const switchProduction = async store => {
+      store.commit('SET_PRODUCTION', otherProduction)
+      await flushPromises()
+    }
+
+    it.each([
+      ['its asset type rows', 'loadAssetTypeScheduleItems', buildAssetTypeBars],
+      ['its assets', 'loadAssets', () => undefined],
+      ['its tasks', 'loadTasks', () => []],
+      ['the days off', 'loadProductionDaysOff', () => ({})]
+    ])('stops an expand all waiting for %s', async (_, name, answer) => {
+      const held = holdFirstCall(answer)
+      const { scheduleWidget, store, storeActions, wrapper } = await mountPage({
+        actions: { [name]: held.action }
+      })
+      findSchedule(wrapper).vm.$emit('expand-all')
+      await flushPromises()
+      drillDownActions.forEach(action => storeActions[action].mockClear())
+      scheduleWidget.methods.refreshItemPositions.mockClear()
+
+      await switchProduction(store)
+      held.release()
+      await waitForLoad()
+
+      drillDownActions.forEach(action => {
+        expect(storeActions[action]).not.toHaveBeenCalled()
+      })
+      expect(scheduleWidget.methods.refreshItemPositions).not.toHaveBeenCalled()
+    })
+
+    it('expands the new production after an expand all it interrupted', async () => {
+      const held = holdFirstCall(buildAssetTypeBars)
+      const { store, storeActions, wrapper } = await mountPage({
+        actions: { loadAssetTypeScheduleItems: held.action }
+      })
+      findSchedule(wrapper).vm.$emit('expand-all')
+      await flushPromises()
+      await switchProduction(store)
+      held.release()
+      await waitForLoad()
+
+      findSchedule(wrapper).vm.$emit('expand-all')
+      await waitForLoad()
+
+      expect(
+        payloadsOf(storeActions.loadAssetTypeScheduleItems).map(
+          payload => payload.production.id
+        )
+      ).toEqual(['production-1', 'production-2'])
+    })
+
+    it('expands the new production after an expand all that finished', async () => {
+      const { store, storeActions, wrapper } = await mountPage()
+      findSchedule(wrapper).vm.$emit('expand-all')
+      await waitForLoad()
+      await switchProduction(store)
+      await waitForLoad()
+
+      findSchedule(wrapper).vm.$emit('expand-all')
+      await waitForLoad()
+
+      expect(
+        payloadsOf(storeActions.loadAssetTypeScheduleItems).map(
+          payload => payload.production.id
+        )
+      ).toEqual(['production-1', 'production-2'])
+    })
+
+    it('stops an expand all when the page is left', async () => {
+      const held = holdFirstCall(buildAssetTypeBars)
+      const { storeActions, wrapper } = await mountPage({
+        actions: { loadAssetTypeScheduleItems: held.action }
+      })
+      findSchedule(wrapper).vm.$emit('expand-all')
+      await flushPromises()
+
+      wrapper.unmount()
+      mountedPage = null
+      held.release()
+      await flushPromises()
+
+      expect(storeActions.loadAssets).not.toHaveBeenCalled()
+      expect(storeActions.loadShots).not.toHaveBeenCalled()
+    })
+
+    it('exports nothing once the production changed', async () => {
+      const held = holdFirstCall(buildAssetTypeBars)
+      const { scheduleWidget, store, wrapper } = await mountPage({
+        actions: { loadAssetTypeScheduleItems: held.action }
+      })
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('title') === 'schedule.export')
+        .vm.$emit('click')
+      await flushPromises()
+
+      await switchProduction(store)
+      held.release()
+      await waitForLoad()
+
+      expect(scheduleWidget.methods.exportData).not.toHaveBeenCalled()
+    })
+
+    it('stops loading the side panel entities once the production changed', async () => {
+      const held = holdFirstCall(() => [])
+      const { store, storeActions, wrapper } = await mountPage({
+        actions: { loadTasks: held.action }
+      })
+      findSchedule(wrapper).vm.$emit('item-selected', rowsOf(wrapper)[0])
+      await flushPromises()
+
+      await switchProduction(store)
+      held.release()
+      await waitForLoad()
+
+      expect(storeActions.loadAssets).not.toHaveBeenCalled()
+    })
+
+    it('leaves the side panel of the new production empty', async () => {
+      const held = holdFirstCall(() => undefined)
+      const { store, wrapper } = await mountPage({
+        actions: { loadAssets: held.action },
+        getters: {
+          productionAssetTypes: () => [
+            { id: 'asset-type-props', name: 'Props', task_types: [] }
+          ]
+        }
+      })
+      findSchedule(wrapper).vm.$emit('item-selected', rowsOf(wrapper)[0])
+      await flushPromises()
+
+      // The new production loads, its side panel closed, before the assets
+      // of the one left arrive.
+      await switchProduction(store)
+      await waitForLoad()
+      held.release()
+      await flushPromises()
+      await toggleSidePanel(wrapper)
+
+      expect(wrapper.findAll('.side-column .assignment-item')).toHaveLength(0)
     })
   })
 
@@ -698,7 +924,7 @@ describe('ProductionSchedule page', () => {
         .map(field => field.props('modelValue'))
 
     beforeEach(() => {
-      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] })
       vi.setSystemTime(new Date(2026, 9, 6, 0, 30))
     })
 
@@ -1591,7 +1817,7 @@ describe('ProductionSchedule page', () => {
     // The panel opens on today at the current time: the day count left
     // that first day out once the end date was picked.
     it('counts the first day of a range that starts now', async () => {
-      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] })
       vi.setSystemTime(new Date('2026-04-06T10:30:00Z'))
       const { storeActions, wrapper } = await mountAssignments()
       await selectProps(wrapper)

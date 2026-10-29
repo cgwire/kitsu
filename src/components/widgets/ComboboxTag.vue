@@ -34,7 +34,7 @@
       </div>
     </div>
     <!-- Out of the list cells and modals, which clip their overflow. -->
-    <teleport to=".theme" v-if="showList">
+    <teleport to="#theme-popups" v-if="showList">
       <div class="c-mask is-active" @click="toggleList"></div>
       <div
         :id="listId"

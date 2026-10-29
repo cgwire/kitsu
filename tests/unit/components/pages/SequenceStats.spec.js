@@ -15,6 +15,8 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOptions.vue'
 import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 const status = (count, frames) => ({
   done: { name: 'done', color: '#22d160', count, frames, drawings: 0 }
@@ -50,6 +52,8 @@ const mountPage = async ({ dispatch, getters = {}, query = {} } = {}) => {
       currentEpisode: () => null,
       currentProduction: () => ({ id: 'production-1', name: 'Wing It' }),
       displayedSequences: () => [sq01, sq02],
+      clientAccess: () => ({ isTaskTypeVisible: () => true }),
+      isCurrentUserClient: () => false,
       isPaperProduction: () => false,
       isShotsLoading: () => false,
       isShotsLoadingError: () => false,
@@ -94,6 +98,24 @@ const findButton = icon =>
     .find(button => button.props('icon') === icon)
 
 describe('SequenceStats page', () => {
+  describe('client', () => {
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    test('offers the search to the studio', async () => {
+      await mountPage()
+      expect(wrapper.findComponent(SearchField).exists()).toBe(true)
+    })
+
+    test('keeps the search from a client', async () => {
+      await mountPage({ getters: { isCurrentUserClient: () => true } })
+      expect(wrapper.findComponent(SearchField).exists()).toBe(false)
+      expect(wrapper.findComponent(SearchQueryList).exists()).toBe(false)
+    })
+  })
+
   beforeEach(() => {
     localStorage.clear()
     vi.spyOn(console, 'error').mockImplementation(() => {})

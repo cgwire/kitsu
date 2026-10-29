@@ -15,6 +15,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOptions.vue'
 import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
 
 const status = count => ({
   done: { name: 'done', color: '#22d160', count, frames: 0, drawings: 0 }
@@ -67,6 +68,8 @@ const mountPage = async ({ getters = {}, query = {} } = {}) => {
       episodeSearchText: () => '',
       episodeStats: () => episodeStats,
       episodeValidationColumns: () => ['layout', 'anim'],
+      clientAccess: () => ({ isTaskTypeVisible: () => true }),
+      isCurrentUserClient: () => false,
       isPaperProduction: () => false,
       taskStatusMap: () => new Map(),
       taskTypeMap: () => new Map(taskTypes.map(t => [t.id, t])),
@@ -109,6 +112,84 @@ const showAllEpisodes = () =>
   combobox('statistics.episode_status').vm.$emit('update:model-value', 'all')
 
 describe('EpisodeStats page', () => {
+  describe('client access', () => {
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    test('drops the task type columns hidden from the client', async () => {
+      await mountPage({
+        getters: {
+          clientAccess: () => ({ isTaskTypeVisible: id => id !== 'anim' })
+        }
+      })
+      expect(listProps().validationColumns).toEqual(['layout'])
+    })
+
+    test('keeps the hidden task type out of the totals and the export', async () => {
+      const generateStatReports = vi
+        .spyOn(csv, 'generateStatReports')
+        .mockImplementation(() => {})
+      await mountPage({
+        getters: {
+          clientAccess: () => ({ isTaskTypeVisible: id => id !== 'anim' }),
+          isCurrentUserClient: () => true
+        }
+      })
+      expect(listProps().episodeStats.all.all.done.count).toBe(1)
+      await findButton('download').vm.$emit('click')
+      const [, stats] = generateStatReports.mock.calls[0]
+      expect(Object.keys(stats.all).sort()).toEqual(['all', 'layout'])
+    })
+
+    test('keeps every column for the studio', async () => {
+      await mountPage()
+      expect(listProps().validationColumns).toEqual(['layout', 'anim'])
+    })
+  })
+
+  describe('client', () => {
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    test('offers the search to the studio', async () => {
+      await mountPage()
+      expect(wrapper.findComponent(SearchField).exists()).toBe(true)
+    })
+
+    test('keeps the search from a client', async () => {
+      await mountPage({ getters: { isCurrentUserClient: () => true } })
+      expect(wrapper.findComponent(SearchField).exists()).toBe(false)
+    })
+
+    // Zou refuses the retake stats to clients since 1.0.97.
+    test('keeps the retakes mode from a client', async () => {
+      await mountPage({ getters: { isCurrentUserClient: () => true } })
+      const labels = wrapper
+        .findAllComponents(Combobox)
+        .map(box => box.props('label'))
+      expect(labels).not.toContain('statistics.data_mode')
+      expect(listProps().dataMode).toBe('status')
+      expect(listProps().episodeRetakeStats).toEqual({})
+    })
+
+    test('exports the status stats for a client', async () => {
+      const generateRetakeStatReports = vi
+        .spyOn(csv, 'generateRetakeStatReports')
+        .mockImplementation(() => {})
+      const generateStatReports = vi
+        .spyOn(csv, 'generateStatReports')
+        .mockImplementation(() => {})
+      await mountPage({ getters: { isCurrentUserClient: () => true } })
+      await findButton('download').vm.$emit('click')
+      expect(generateStatReports).toHaveBeenCalled()
+      expect(generateRetakeStatReports).not.toHaveBeenCalled()
+    })
+  })
+
   beforeEach(() => {
     localStorage.clear()
   })

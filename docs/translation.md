@@ -1,10 +1,10 @@
 # Add a translation
 
 Kitsu's interface is translated with
-[vue-i18n](https://vue-i18n.intlify.dev/) — check its major version in
-`package.json` (`vue-i18n`, currently 9), since the version-specific notes below
-(e.g. the `$tc()` deprecation) assume it. This guide covers how the locale files
-are organized, how to add or change a key, and how to add a whole language.
+[vue-i18n](https://vue-i18n.intlify.dev/). Check its major version in
+`package.json` (`vue-i18n`, currently 11), since the version-specific notes
+below (e.g. the removal of `$tc()`) assume it. This guide covers how the locale
+files are organized, how to add or change a key, and how to add a whole language.
 
 ## How locales are organized
 
@@ -23,15 +23,24 @@ are organized, how to add or change a key, and how to add a whole language.
 1. Add it to `en.js` first (single-quoted; escape apostrophes as `\'`).
 2. Add the same path to the other locale files (JSON, double-quoted). Missing
    ones fall back to English, but keeping locales in sync is preferred.
-3. If the English value mentions **shot**, **sequence** or **episode**, update
-   the overlays — `en_nft.js` (_shot → NFT_) and `en_video-game.js`
-   (_shot → map_, _sequence → level_, _episode → chapter_) — but only for keys
-   whose wording actually differs. When you **rename** a key in `en.js`, rename
-   it in the overlays too, or the stale override leaks the English word.
+3. If the English value mentions **shot**, **sequence**, or **episode**, update
+   the overlays (`en_nft.js`: _shot → NFT_; `en_video-game.js`: _shot → map_,
+   _sequence → level_, _episode → chapter_), but only for keys whose wording
+   actually differs. When you **rename** a key in `en.js`, rename it in the
+   overlays too, or the stale override leaks the English word. Then run
+   `node scripts/check-locale-overlays.js` until it prints nothing: it lists
+   every missing, dead, or outdated override with the value it expects.
+4. When a change alters what an `en.js` sentence says (not only a typo,
+   punctuation, or casing), translate it again in every locale in the same
+   commit: the tests only check that the keys exist, so a locale left alone
+   keeps the old meaning.
 
-Read keys with `$t('key')` / `t('key')`. Pluralize with the pipe format
-(`'shot | shots'`) and a count (`$t('shots.number', count)`); never `$tc()`
-(deprecated).
+Read keys with `$t('key')` / `t('key')`. Pluralize with the pipe format and a
+named count, `$t('main.files_selected', { count })` on
+`'{count} file selected | {count} files selected'`, never a bare number nor
+`$tc()` (removed in vue-i18n 11). Keep the number inside the message, never next
+to `$t()` in the template, so that each language can place it and make its words
+agree with it.
 
 ## Add a language
 
@@ -68,6 +77,10 @@ Preserve the machine-readable parts of each value:
   the word inside the braces.
 - **Pipe pluralization** — keep the same number of `|` segments (most keys have
   two; `people.seats_remaining` has three).
+- **Russian and Polish plurals**: every locale gets the singular and the plural
+  segment only, so where the noun changes after 2, 5, or 21, end the plural
+  segment on the number, as a label or in parentheses
+  (`Выбрано файлов: {count}`).
 - **HTML** (e.g. the `<abbr>` in the 2FA description) — keep the tags, translate
   the visible text.
 - **Hard-delete words** — `_hard_lock_text` is the exact word a user types to
@@ -80,5 +93,8 @@ Preserve the machine-readable parts of each value:
 
 - `npm run test:unit` and `npm run build` import every locale, so malformed JSON
   or a broken `en.js` fails fast.
-- Diff your key structure against `en.js`.
+- `tests/unit/locales/parity.spec.js` fails on a key missing from a locale, a
+  key `en.js` no longer has, or a different number of `|` segments.
+- `node scripts/check-locale-overlays.js` checks the English overlays against
+  `en.js`, and prints nothing when they follow it.
 - `npm run dev` hot-swaps locale edits so you can review wording in context.

@@ -1,9 +1,15 @@
 <template>
-  <div ref="container" class="preview-player dark" tabindex="-1">
+  <div
+    ref="container"
+    class="preview-player dark"
+    :class="{ 'keeps-comment-modal': !fullScreen && isCommentsShown }"
+    tabindex="-1"
+  >
     <div class="preview filler">
       <div class="flexrow filler">
         <div
           class="preview-container filler"
+          :class="{ 'touch-navigation': isTouchNavigationEnabled }"
           :style="{ cursor: annotationCursor || null }"
           ref="preview-container"
         >
@@ -98,6 +104,8 @@
               @panzoom-changed="onPanzoomChanged"
               @picture-loaded="onPreviewLoaded"
               @play-ended="pause"
+              @sound-duration-changed="onSoundDurationChanged"
+              @sound-time-update="onSoundTimeUpdate"
               @video-end="onVideoEnd"
               @video-loaded="onPreviewLoaded"
             />
@@ -148,6 +156,7 @@
         <task-info
           ref="task-info-player"
           class="flexrow-item task-info-column"
+          :class="{ 'is-collapsed': !fullScreen }"
           :current-frame="taskInfoFrame"
           :current-parent-preview="currentPreview"
           :entity-type="entityType"
@@ -159,8 +168,8 @@
           :task="task"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
-          v-show="!isCommentsHidden"
-          v-if="!readOnly && task?.id"
+          v-show="isCommentsShown"
+          v-if="(!readOnly || canComment) && task?.id"
         />
       </div>
     </div>
@@ -211,7 +220,6 @@
           v-model:volume="volume"
           @play-pause-clicked="onPlayPauseClicked"
           @repeat-clicked="onRepeatClicked"
-          @toggle-sound-clicked="onToggleSoundClicked"
         />
 
         <player-comparison-bar
@@ -244,6 +252,7 @@
         <div class="flexrow">
           <player-annotation-bar
             :background-options="backgroundOptions"
+            :can-comment="canComment"
             :full-screen="fullScreen"
             :is-3-d-model="is3DModel"
             :is-annotations-displayed="isAnnotationsDisplayed"
@@ -343,7 +352,7 @@
               is-reversed
               is-preview
               thin
-              :model-value="currentPreview?.id"
+              :model-value="currentRevisionPreviewId"
               @update:model-value="changeCurrentPreviewFile"
             />
           </div>
@@ -468,13 +477,15 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
-import { useFullScreen } from '@/composables/fullScreen'
+import { getFullScreenElement, useFullScreen } from '@/composables/fullScreen'
+import { isBehindModal, isModalOpenIn } from '@/composables/modal'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationCursor } from '@/composables/players/annotationCursor'
 import { useComparison } from '@/composables/players/comparison'
 import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
+import { useTouchNavigation } from '@/composables/players/touchNavigation'
 import { usePlayerTransport } from '@/composables/players/transport'
 import { useTrimmedShot } from '@/composables/players/trimmedShot'
 import func from '@/lib/func'
@@ -530,6 +541,11 @@ const { t } = useI18n()
 
 const props = defineProps({
   big: {
+    type: Boolean,
+    default: false
+  },
+  // Commenting is a right of its own: readOnly is the right to annotate.
+  canComment: {
     type: Boolean,
     default: false
   },
@@ -664,6 +680,8 @@ const movieDimensions = ref({ width: 1920, height: 1080 })
 const objectBackgroundUrl = ref(null)
 const pencilPalette = ref(['huge', 'big', 'medium', 'small', 'tiny'])
 const pictureBackgroundColor = ref('#000000')
+const soundDuration = ref(0)
+const soundTime = ref(0)
 const videoDuration = ref(0)
 const width = ref(0)
 
@@ -721,6 +739,7 @@ const annotation = useAnnotation({
 })
 
 const {
+  fabricCanvas,
   notSaved,
   pencilColor,
   pencilWidth,
@@ -764,6 +783,30 @@ const {
   restoreFailedAnnotations,
   toggleShapeMode
 } = annotation
+
+// Two fingers pan and zoom the media, over the annotations too. One finger
+// uses the annotation tool turned on, or pans when none is.
+const isTouchNavigationEnabled = computed(
+  () => isMovie.value || isPicture.value
+)
+const isAnnotationToolOn = computed(
+  () =>
+    isDrawing.value ||
+    isShapeMode.value ||
+    isEraserModeOn.value ||
+    isTyping.value
+)
+
+useTouchNavigation({
+  container: previewContainer,
+  surfaces: () => [canvasWrapper.value, mainMediaElement.value?.parentElement],
+  overlay: canvasWrapper,
+  isAnnotating: isAnnotationToolOn,
+  isEnabled: isTouchNavigationEnabled,
+  panBy: (dx, dy) => previewViewer.value?.panBy(dx, dy),
+  zoomAt: (clientX, clientY, ratio) =>
+    previewViewer.value?.zoomAt(clientX, clientY, ratio)
+})
 
 // Onion skin: ghost the annotations of nearby frames. Persisted like the
 // other player preferences.
@@ -835,7 +878,6 @@ const {
   isComparisonOverlay,
   overlayOpacity,
   toggleComparison,
-  setDefaultComparisonTaskType,
   setDefaultComparisonPreview,
   goToPreviousComparison,
   goToNextComparison,
@@ -985,6 +1027,15 @@ const lastPreviewFileOptions = computed(() => {
     }))
 })
 
+// The options are the first files of the revisions: another file of a
+// revision stands for it by its revision number.
+const currentRevisionPreviewId = computed(
+  () =>
+    props.lastPreviewFiles.find(
+      preview => preview.revision === currentPreview.value?.revision
+    )?.id
+)
+
 const isComparisonEnabled = computed(() => fullScreen.value || props.extraWide)
 
 const nbFrames = computed(() => {
@@ -1096,7 +1147,8 @@ const onSubPreviewsWheel = event => {
 }
 
 const setCurrentFrame = frame => {
-  if (!Number.isFinite(frame)) return
+  // Null once closed: a timecode click moves the frame 20 ms later.
+  if (!Number.isFinite(frame) || !previewViewer.value) return
   if (currentFrame.value !== frame) {
     setVideoFrameContext(frame)
     previewViewer.value.setCurrentFrame(frame)
@@ -1162,6 +1214,22 @@ const changeMaxDuration = duration => {
   }
 }
 
+// Pausing a sound on a switch away sends its time once more, and a sound not
+// ready yet leaves the one before loaded under it.
+const onSoundTimeUpdate = time => {
+  if (!isSound.value || !isReady.value) return
+  currentTime.value = formatTime(time, fps.value)
+  soundTime.value = time
+}
+
+// A duration of 0 starts each load: the time restarts with the sound.
+const onSoundDurationChanged = duration => {
+  if (!isSound.value || !isReady.value) return
+  maxDuration.value = formatTime(duration, fps.value)
+  soundDuration.value = duration
+  if (!duration) soundTime.value = 0
+}
+
 const getCurrentTime = () => {
   if (!isMovie.value) return 0
   // 4-decimal rounding only: toPrecision(4) keeps 4 significant digits and
@@ -1213,7 +1281,8 @@ const play = () => {
         seekTrimStart()
       }
       previewViewer.value.play()
-      if (comparisonViewer.value && isComparing.value) {
+      // A movie that cannot be read ends its play at once.
+      if (isPlaying.value && comparisonViewer.value && isComparing.value) {
         comparisonViewer.value.play()
       }
     }
@@ -1229,6 +1298,9 @@ const pause = () => {
     } else {
       if (previewViewer.value) previewViewer.value.pause()
       if (comparisonViewer.value) comparisonViewer.value.pause()
+      // The playback wiped the canvas, and the movie stops on the frame it
+      // shows: no frame change reloads its drawing.
+      loadAnnotation()
       nextTick(() => {
         syncComparisonViewer()
       })
@@ -1236,27 +1308,59 @@ const pause = () => {
   }
 }
 
+// A sound has no frames of its own: the keys step it by a frame of the
+// production, up to the start of its last frame like a movie.
+const seekSoundFrame = frame => {
+  const lastFrame = Math.round(soundDuration.value * fps.value) - 1
+  if (lastFrame < 0) return
+  const target = Math.min(Math.max(frame, 0), lastFrame)
+  previewViewer.value?.setSoundTime(target / fps.value)
+}
+
+// The tolerance keeps a time read back from a frame seek on that frame.
+const currentSoundFrame = () => Math.floor(soundTime.value * fps.value + 0.001)
+
+// Past the ends of a movie, or on a picture, the viewer does not move and
+// no frame reloads the drawing: the canvas keeps it.
 const goPreviousFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(currentSoundFrame() - 1)
+    return
+  }
+  if (currentFrame.value <= 0) return
   clearCanvas()
   previewViewer.value.goPreviousFrame()
   syncComparisonViewer()
 }
 
 const goNextFrame = () => {
+  if (isSound.value) {
+    seekSoundFrame(currentSoundFrame() + 1)
+    return
+  }
+  if (currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   previewViewer.value.goNextFrame()
   syncComparisonViewer()
 }
 
 const goToFirstFrame = () => {
-  if (!isMovie.value) return
+  if (isSound.value) {
+    seekSoundFrame(0)
+    return
+  }
+  if (!isMovie.value || currentFrame.value <= 0) return
   clearCanvas()
   setCurrentFrame(0)
   syncComparisonViewer()
 }
 
 const goToLastFrame = () => {
-  if (!isMovie.value) return
+  if (isSound.value) {
+    seekSoundFrame(Infinity)
+    return
+  }
+  if (!isMovie.value || currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   setCurrentFrame(nbFrames.value - 1)
   syncComparisonViewer()
@@ -1278,6 +1382,9 @@ const jumpToAnnotationFrame = annotation => {
     // string), which landed 1-2 frames past the drawing and lost the
     // next step.
     const frame = Math.round(annotation.time / frameDuration.value)
+    // On the frame on screen (always frame 0 on a picture), setCurrentFrame
+    // reloads nothing after a wipe: its drawing is shown already.
+    if (frame === currentFrame.value) return
     clearCanvas()
     setCurrentFrame(frame)
     syncComparisonViewer()
@@ -1305,6 +1412,11 @@ const realignComparisonCanvas = () => {
   comparisonAnnotationCanvas.value?.updateBounds()
   loadComparisonAnnotationAtCurrentFrame()
 }
+
+const realignComparisonCanvasLater = func.debounce(
+  realignComparisonCanvas,
+  RESIZE_DELAY
+)
 
 // Push the main viewer's current transform onto the comparison
 // viewer once its panzoom instance is (re)bound. The comparison
@@ -1344,7 +1456,7 @@ const onComparisonVideoLoaded = () => {
   // Draw once after RESIZE_DELAY rather than on nextTick: painting before
   // the transition settles places the annotation at a mid-transition
   // position, so it visibly jumps when corrected.
-  setTimeout(realignComparisonCanvas, RESIZE_DELAY)
+  realignComparisonCanvasLater()
 }
 
 const onComparisonCanvasResized = () => {
@@ -1457,11 +1569,6 @@ const onRepeatClicked = () => {
   localPreferences.setPreference('player:repeating', isRepeating.value)
 }
 
-const onToggleSoundClicked = () => {
-  clearFocus()
-  isMuted.value = !isMuted.value
-}
-
 // Screen
 
 const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
@@ -1470,7 +1577,12 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
     endAnnotationSaving()
     if (!nowFullScreen) {
       isComparing.value = false
-      isCommentsHidden.value = true
+      // Chrome leaves the full screen to show a file chooser: the modal
+      // that opened it stays on screen, to bring it back, and the comments
+      // keep their state for that return.
+      if (!isModalOpenIn(container.value)) {
+        isCommentsHidden.value = true
+      }
     }
     nextTick(() => {
       clearFocus()
@@ -1493,6 +1605,26 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
     }, RESIZE_DELAY)
   }
 })
+
+// Out of full screen, the comments panel only shows for its open modal.
+const isCommentModalOpen = computed(() =>
+  isModalOpenIn(commentContainer.value?.$el)
+)
+const isCommentsShown = computed(
+  () =>
+    !isCommentsHidden.value && (fullScreen.value || isCommentModalOpen.value)
+)
+
+// The comments kept for the return of the full screen belong to its task,
+// unless a modal of theirs is still open.
+watch(
+  () => props.task?.id,
+  () => {
+    if (!fullScreen.value && !isCommentModalOpen.value) {
+      isCommentsHidden.value = true
+    }
+  }
+)
 
 const onFullscreenClicked = () => {
   if (fullScreen.value) {
@@ -1694,9 +1826,6 @@ const loadAnnotation = annotation => {
     }
     annotation = getAnnotation(currentTimeVal)
     if (!annotation) {
-      if (!isMovie.value) {
-        console.warn('Annotations are malformed or empty.')
-      }
       if (isComparing.value && !isComparisonOverlay.value) {
         loadComparisonAnnotation(currentTimeVal)
       }
@@ -1772,13 +1901,19 @@ const getFileFromCanvas = (canvas, filename) => {
   })
 }
 
+// Resolves false once the player is closed: no viewer is left to read the
+// frame from, and the snapshots are of no use anymore.
 const extractVideoFrame = (canvas, frame) => {
   return new Promise(resolve => {
+    if (!previewViewer.value) {
+      resolve(false)
+      return
+    }
     setCurrentFrame(frame)
     nextTick(() => {
       setTimeout(() => {
-        previewViewer.value.extractFrame(canvas, frame)
-        resolve()
+        previewViewer.value?.extractFrame(canvas, frame)
+        resolve(Boolean(previewViewer.value))
       }, RESIZE_DELAY)
     })
   })
@@ -1820,13 +1955,14 @@ const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
     const frame = Math.round(
       roundToFrame(annotation.time, fps.value) / frameDuration.value
     )
-    await extractVideoFrame(canvas, frame)
+    if (!(await extractVideoFrame(canvas, frame))) return []
     await copyAnnotationCanvas(canvas, annotation)
     if (withLabel) drawSnapshotTitle(canvas, snapshotTitle({ revision, frame }))
     files.push(
       await getFileFromCanvas(canvas, snapshotFilename({ revision, frame }))
     )
   }
+  if (!previewViewer.value) return []
   // currentFrame is 0-based here (unlike PlaylistPlayer's 1-based label
   // this restore was copied from): no -1, or the playhead steps back.
   previewViewer.value.setCurrentFrame(cur)
@@ -1863,6 +1999,8 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
     // capture an empty live canvas, producing a PNG without any
     // annotation.
     await new Promise(resolve => setTimeout(resolve, 500))
+    // Closed meanwhile, like in extractVideoFrame
+    if (!previewViewer.value) return []
     const canvas = document.getElementById('annotation-snapshot')
     previewViewer.value.extractPicture(canvas)
     await compositeLiveAnnotationsOntoCanvas(canvas)
@@ -1946,7 +2084,11 @@ const { isAltHeld } = usePreviewShortcuts({
   onPrevPreview: () => onPreviousClicked(),
   onNextPreview: () => onNextClicked(),
   onCopy: () => copyAnnotations(),
-  onPaste: () => pasteAnnotations(),
+  // The canvas shows over movies and pictures only: a paste anywhere else
+  // would save annotations that nothing shows again.
+  onPaste: () => {
+    if (isMovie.value || isPicture.value) pasteAnnotations()
+  },
   onToggleOverlay: () => toggleFullOverlay()
 })
 
@@ -1964,10 +2106,11 @@ const onCommentClicked = () => {
   isCommentsHidden.value = !isCommentsHidden.value
   if (!isCommentsHidden.value) {
     commentContainer.value.$el.style.height = `${height}px`
-    commentContainer.value.focusCommentTextarea()
   }
   endAnnotationSaving()
   nextTick(() => {
+    // Once shown: a hidden box takes no focus.
+    if (!isCommentsHidden.value) commentContainer.value?.focusCommentTextarea()
     previewViewer.value?.resize()
     comparisonViewer.value?.resize()
     loadAnnotation()
@@ -1996,6 +2139,18 @@ const resetPlayerPositions = () => {
   comparisonViewer.value?.resetZoom()
   resetPanzoomTransform()
 }
+
+// Debounced: a live window resize (or the fullscreen transition) fires
+// this continuously, and each tick cleared and rebuilt the annotation
+// objects (async PSStroke deserialization).
+const onContainerResized = func.debounce(() => {
+  resetPlayerPositions()
+  // On a phone the keyboard resizes the player as a note is typed: the
+  // reload would end the typing. AnnotationCanvas resizes the canvas once
+  // the note is done.
+  if (fabricCanvas.value?.getActiveObject()?.isEditing) return
+  if (isPicture.value || isMovie.value) loadAnnotation()
+}, 200)
 
 const onPreviewLoaded = () => {
   if (isMovie.value) {
@@ -2183,6 +2338,9 @@ const onFocusToggle = event => {
     '.preview-player, .playlist-player'
   )
   if (closestPlayer && closestPlayer !== container.value) return
+  // An open modal keeps its own Shift+Tab, even the "+" one that the player
+  // holds in full screen.
+  if (isBehindModal(container.value)) return
   const active = document.activeElement
   if (active?.closest?.('.add-comment')) {
     event.preventDefault()
@@ -2194,10 +2352,20 @@ const onFocusToggle = event => {
   // one in a collapsed side panel, another in the visible one). Pick
   // the first visible & enabled textarea — focus on a hidden one is
   // a no-op and leaves the user stuck where they were.
+  // The browser shows the element in full screen alone: a box of the page
+  // behind it would take the keys out of sight.
+  const root = getFullScreenElement() ?? document
   const commentTextarea = Array.from(
-    document.querySelectorAll('.add-comment textarea')
+    root.querySelectorAll('.add-comment textarea')
   ).find(ta => ta.offsetParent !== null && !ta.disabled)
-  if (!commentTextarea) return
+  if (!commentTextarea) {
+    if (fullScreen.value && isCommentsHidden.value && commentContainer.value) {
+      event.preventDefault()
+      event.stopPropagation()
+      onCommentClicked()
+    }
+    return
+  }
   event.preventDefault()
   event.stopPropagation()
   // Focus synchronously and once more on the next tick to outlast
@@ -2273,6 +2441,15 @@ watch(currentPreview, (newPreview, oldPreview) => {
   currentFrame.value = 0
   currentTimeRaw.value = 0
   currentTime.value = formatTime(0, fps.value)
+  // A sound not ready yet loads nothing that would reset these, and a reload
+  // of the same preview keeps its sound loaded.
+  if (isSound.value && newPreview?.id !== oldPreview?.id) {
+    // Another sound ends the play, as another movie does.
+    pause()
+    maxDuration.value = '00:00:00:00'
+    soundDuration.value = 0
+    soundTime.value = 0
+  }
   if (isMovie.value) {
     configureVideo()
     pause()
@@ -2301,10 +2478,11 @@ watch(currentPreview, (newPreview, oldPreview) => {
       clearCanvas()
     }
   })
-  // Re-pick the default comparison target only on a real revision change;
-  // doing it on every sub-preview step would reset the user's selection.
+  // A real revision change drops the comparison target, as closing does:
+  // kept, it loads its movie in the hidden viewer. Opening the comparison
+  // picks a new one. Sub-preview steps keep the user's selection.
   if (revisionChanged) {
-    setDefaultComparisonTaskType()
+    taskTypeId.value = ''
   }
   isOrdering.value =
     props.previews.length > 1 &&
@@ -2485,6 +2663,9 @@ watch(speed, () => {
 watch(volume, () => {
   previewViewer.value?.setVolume(volume.value)
   localPreferences.setPreference('player:volume', volume.value)
+  // The playlist player shares both keys, and may store its mute from a modal
+  // open over this one.
+  localPreferences.setPreference('player:muted', isMuted.value)
 })
 
 // The viewers reload their source on a quality switch: onPreviewLoaded then
@@ -2494,11 +2675,14 @@ watch(isHd, () => {
   if (isMovie.value) isQualitySwitchPending = true
 })
 
-// Persist through a watcher: ButtonSound drives isMuted via v-model and
-// never emits change-sound, so a click handler on the toggle chain never
-// runs and the preference was never written.
+// Persist through a watcher: ButtonSound drives isMuted via v-model.
 watch(isMuted, () => {
   localPreferences.setPreference('player:muted', isMuted.value)
+  // An unmute may give back the volume the player already has, which stores
+  // nothing: the 0 of the mute would come back on the next visit.
+  if (!isMuted.value) {
+    localPreferences.setPreference('player:volume', volume.value)
+  }
 })
 
 // Lifecycle
@@ -2521,15 +2705,16 @@ onMounted(() => {
     onObjectBackgroundSelected()
   }
 
-  if (isMuted.value) {
-    previewViewer.value?.setVolume(0)
-  } else {
-    volume.value = localPreferences.getIntPreference(
-      'player:volume',
+  // The mute goes through isMuted: a 0 set here outlived the unmute, which
+  // gives back the volume the player already has. A muted visit leaves aside
+  // the stored volume, the 0 the mute set; unmuted, a stored 0 is what such
+  // an unmute left before it stored its volume, and the default stands in.
+  if (!isMuted.value) {
+    volume.value =
+      localPreferences.getIntPreference('player:volume', volume.value) ||
       volume.value
-    )
-    previewViewer.value?.setVolume(volume.value)
   }
+  previewViewer.value?.setVolume(volume.value)
 
   reloadAnnotations()
   loadAnnotation()
@@ -2540,13 +2725,6 @@ onMounted(() => {
   // viewer's transform through the panzoom-changed sync.
   previewViewer.value?.resumeZoom()
 
-  // Debounced: a live window resize (or the fullscreen transition) fires
-  // this continuously, and each tick cleared and rebuilt the annotation
-  // objects (async PSStroke deserialization).
-  const onContainerResized = func.debounce(() => {
-    resetPlayerPositions()
-    if (isPicture.value || isMovie.value) loadAnnotation()
-  }, 200)
   containerResizeObserver = new ResizeObserver(onContainerResized)
   containerResizeObserver.observe(container.value)
 
@@ -2574,6 +2752,8 @@ onBeforeUnmount(() => {
   document.removeEventListener('mouseup', onScrubEnd)
   containerResizeObserver?.disconnect()
   containerResizeObserver = null
+  onContainerResized.cancel()
+  realignComparisonCanvasLater.cancel()
 })
 
 // Player API (passed to TaskInfo via :player prop)
@@ -2761,6 +2941,12 @@ defineExpose({
   box-shadow: 0 0 4px #0007;
   min-height: 200px;
 
+  // WebKit lays a fixed element out in the size container holding it: the
+  // comments modal kept out of full screen would show in the player box.
+  &.keeps-comment-modal {
+    container-type: normal;
+  }
+
   .preview {
     position: relative;
     align-items: flex-start;
@@ -2844,8 +3030,14 @@ defineExpose({
   background: $dark-grey-2;
 }
 
+// The name gives way first on a narrow full screen: the buttons after it
+// stay on the screen.
 .entity-name {
   color: $light-grey;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .task-info-column {
@@ -2853,6 +3045,14 @@ defineExpose({
   max-width: 450px;
   overflow-y: auto;
   height: 90vh;
+
+  // Out of full screen, it only keeps its open modal, which is fixed on the
+  // screen whatever the size of the panel.
+  &.is-collapsed {
+    max-height: 0;
+    max-width: 0;
+    min-width: 0;
+  }
 }
 
 .preview-container {
@@ -2862,6 +3062,12 @@ defineExpose({
   // would otherwise let Chrome's two-finger swipe navigate back / forward
   // and drop any unsaved comment — issue #1700.
   overscroll-behavior-x: contain;
+
+  // The fingers navigate the media there: the page must not scroll or
+  // zoom under them.
+  &.touch-navigation {
+    touch-action: none;
+  }
 }
 
 .viewers {

@@ -14,12 +14,19 @@ import '@/lib/auth'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ActionPanel from '@/components/tops/ActionPanel.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+import drafts from '@/lib/drafts'
+import i18n, { loadLocaleMessages } from '@/lib/i18n'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotStore from '@/store/modules/shots'
+
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
+import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
 
 // The eleven events the panel declares through its socketEvents table.
 const SOCKET_EVENTS = [
@@ -60,6 +67,9 @@ const buildTask = (overrides = {}) => ({
   ...overrides
 })
 
+// The default stub swallows its slot, which holds the panel title.
+const RouterLinkStub = { props: ['to'], template: '<a><slot /></a>' }
+
 const mountPanel = async ({
   task = buildTask(),
   props = {},
@@ -67,15 +77,25 @@ const mountPanel = async ({
   stubs = {},
   comments = [],
   previews = [],
-  slots = {}
+  slots = {},
+  mocks = {},
+  path = '/'
 } = {}) => {
   const socket = { on: vi.fn(), off: vi.fn() }
 
+  const page = { template: '<div />' }
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: [{ path: '/', name: 'home', component: { template: '<div />' } }]
+    routes: [
+      { path: '/', name: 'home', component: page },
+      { path: '/productions/:production_id/:section', component: page },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/:section',
+        component: page
+      }
+    ]
   })
-  await router.push('/')
+  await router.push(path)
   await router.isReady()
 
   const store = createStore({
@@ -125,6 +145,7 @@ const mountPanel = async ({
     props: { task, ...props },
     slots,
     global: {
+      mocks,
       stubs: {
         // reset() runs after every load; the default stub has no such method
         // and the resulting throw would cut the reset short.
@@ -132,12 +153,14 @@ const mountPanel = async ({
         // reset() focuses the player and the timecode handler seeks it;
         // the default stub carries neither method.
         PreviewPlayer: {
-          props: ['fps', 'previews', 'readOnly'],
+          props: ['canComment', 'fps', 'previews', 'readOnly'],
           template: '<div />',
           methods: { focus: () => {}, setCurrentFrame: () => {} }
         },
-        // The default stub swallows its slot, which holds the panel title.
-        RouterLink: { props: ['to'], template: '<a><slot /></a>' },
+        RouterLink: RouterLinkStub,
+        // The shallow stub drops the modals the player opens: they stay in
+        // the panel, or go into the player in full screen.
+        teleport: false,
         // Provided by the animxyz plugin, which the specs do not install.
         XyzTransitionGroup: { template: '<div><slot /></div>' },
         ...stubs
@@ -258,6 +281,48 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  describe('empty cell selection', () => {
+    afterEach(() => {
+      i18n.global.locale.value = 'en'
+    })
+
+    // Korean puts the count after the noun, with a counter.
+    it('lets the language place the number of empty cells', async () => {
+      await loadLocaleMessages('ko')
+      i18n.global.locale.value = 'ko'
+      const { wrapper } = await mountPanel({
+        task: null,
+        props: { withActions: true },
+        getterOverrides: { nbSelectedValidations: () => 3 },
+        mocks: { $t: (key, named) => i18n.global.t(key, named) }
+      })
+      expect(wrapper.find('.mt2.selected-task-line').text()).toBe(
+        '빈 셀 3개 선택됨'
+      )
+    })
+  })
+
+  describe('action panel', () => {
+    it('shows the actions of a task selection', async () => {
+      const { wrapper } = await mountPanel({
+        props: { withActions: true },
+        getterOverrides: { nbSelectedTasks: () => 1 }
+      })
+      expect(wrapper.findComponent(ActionPanel).exists()).toBe(true)
+    })
+
+    it('keeps the actions from a client', async () => {
+      const { wrapper } = await mountPanel({
+        props: { withActions: true },
+        getterOverrides: {
+          isCurrentUserClient: () => true,
+          nbSelectedTasks: () => 1
+        }
+      })
+      expect(wrapper.findComponent(ActionPanel).exists()).toBe(false)
+    })
+  })
+
   describe('title', () => {
     it('names the entity the task belongs to', async () => {
       const { wrapper } = await mountPanel()
@@ -287,6 +352,249 @@ describe('TaskInfo.vue', () => {
       // A link without an entity id has no route to resolve.
       expect(wrapper.find('.header-title .title').text()).toBe('SH01')
       expect(wrapper.find('.header-title .title a').exists()).toBe(false)
+    })
+  })
+
+  // The panel also shows tasks of other productions (notifications, my
+  // tasks), and the store keeps the episode browsed last.
+  describe('task page link', () => {
+    const assetTaskType = {
+      id: 'task-type-2',
+      name: 'Modeling',
+      for_entity: 'Asset'
+    }
+    const productionMap = (firstType, secondType) => () =>
+      new Map([
+        ['production-1', { id: 'production-1', production_type: firstType }],
+        ['production-2', { id: 'production-2', production_type: secondType }]
+      ])
+    const tvShowContext = {
+      currentEpisode: () => ({ id: 'episode-9' }),
+      isTVShow: () => true,
+      taskTypeMap: () =>
+        new Map([
+          [taskType.id, taskType],
+          [assetTaskType.id, assetTaskType]
+        ])
+    }
+    const mainPackAssetTask = () =>
+      buildTask({ entity_type_name: 'Props', task_type_id: assetTaskType.id })
+
+    const taskPageLink = wrapper =>
+      wrapper
+        .findAllComponents(RouterLinkStub)
+        .find(link => link.classes().includes('history-button'))
+        .props('to')
+
+    it('links the task of a short without episode from a tv show', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ project_id: 'production-2' }),
+        getterOverrides: {
+          ...tvShowContext,
+          productionMap: productionMap('tvshow', 'short')
+        }
+      })
+
+      expect(taskPageLink(wrapper)).toEqual({
+        name: 'task',
+        params: {
+          production_id: 'production-2',
+          task_id: TASK_ID,
+          type: 'shots'
+        }
+      })
+    })
+
+    it('links the task of a tv show under its episode from a short', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ project_id: 'production-2', episode_id: 'episode-2' }),
+        getterOverrides: { productionMap: productionMap('short', 'tvshow') }
+      })
+
+      expect(taskPageLink(wrapper)).toEqual({
+        name: 'episode-task',
+        params: {
+          production_id: 'production-2',
+          task_id: TASK_ID,
+          episode_id: 'episode-2',
+          type: 'shots'
+        }
+      })
+    })
+
+    it('opens a task without episode under all of them on a page without one', async () => {
+      const { wrapper } = await mountPanel({
+        task: mainPackAssetTask(),
+        path: '/productions/production-1/news-feed',
+        getterOverrides: {
+          ...tvShowContext,
+          productionMap: productionMap('tvshow', 'short')
+        }
+      })
+
+      expect(taskPageLink(wrapper).params.episode_id).toBe('all')
+    })
+
+    it('opens a task without episode under the episode of the page', async () => {
+      const { wrapper } = await mountPanel({
+        task: mainPackAssetTask(),
+        path: '/productions/production-1/episodes/main/assets',
+        getterOverrides: {
+          ...tvShowContext,
+          currentEpisode: () => ({ id: 'main' }),
+          productionMap: productionMap('tvshow', 'short')
+        }
+      })
+
+      expect(taskPageLink(wrapper).params.episode_id).toBe('main')
+    })
+
+    // An asset of an episode is listed in the episodes it is cast in too.
+    it('opens a task under its own episode before the one of the page', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({
+          entity_type_name: 'Props',
+          task_type_id: assetTaskType.id,
+          episode_id: 'episode-1'
+        }),
+        path: '/productions/production-1/episodes/episode-3/assets',
+        getterOverrides: {
+          ...tvShowContext,
+          currentEpisode: () => ({ id: 'episode-3' }),
+          productionMap: productionMap('tvshow', 'short')
+        }
+      })
+
+      expect(taskPageLink(wrapper).params.episode_id).toBe('episode-1')
+    })
+
+    // The task page shows the latest revision unless its URL names another.
+    describe('with a revision picked', () => {
+      const previews = [
+        { id: 'preview-2', revision: 2, extension: 'mp4', task_id: TASK_ID },
+        { id: 'preview-1', revision: 1, extension: 'mp4', task_id: TASK_ID }
+      ]
+      const pick = async (wrapper, preview) => {
+        wrapper
+          .findComponent(PreviewPlayer)
+          .vm.$emit('change-current-preview', preview)
+        await flushPromises()
+      }
+
+      it('opens the task page on the revision the panel shows', async () => {
+        const { wrapper } = await mountPanel({ previews })
+        await pick(wrapper, previews[1])
+
+        expect(taskPageLink(wrapper)).toEqual({
+          name: 'task-preview',
+          params: {
+            production_id: 'production-1',
+            task_id: TASK_ID,
+            type: 'shots',
+            preview_id: 'preview-1'
+          }
+        })
+      })
+
+      it('opens the task page as it is on the latest revision', async () => {
+        const { wrapper } = await mountPanel({ previews })
+        await pick(wrapper, previews[0])
+
+        expect(taskPageLink(wrapper).name).toBe('task')
+      })
+
+      // Until the comments of a new task load, the panel shows the revisions
+      // of the task shown before.
+      it('leaves out a revision of another task', async () => {
+        const otherPreviews = previews.map(preview => ({
+          ...preview,
+          task_id: 'task-0'
+        }))
+        const { wrapper } = await mountPanel({ previews: otherPreviews })
+        await pick(wrapper, otherPreviews[1])
+
+        expect(taskPageLink(wrapper).name).toBe('task')
+      })
+    })
+  })
+
+  describe('entity page link', () => {
+    const productionMap = () =>
+      new Map([
+        ['production-1', { id: 'production-1', production_type: 'tvshow' }],
+        ['production-2', { id: 'production-2', production_type: 'short' }]
+      ])
+
+    const entityPageLink = wrapper =>
+      wrapper
+        .find('.header-title .title')
+        .findComponent(RouterLinkStub)
+        .props('to')
+
+    it('opens the entity under its own episode on a page without one', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ episode_id: 'episode-2' }),
+        path: '/productions/production-1/news-feed',
+        getterOverrides: { productionMap }
+      })
+
+      expect(entityPageLink(wrapper)).toEqual({
+        name: 'episode-shot',
+        params: {
+          production_id: 'production-1',
+          shot_id: ENTITY_ID,
+          episode_id: 'episode-2'
+        }
+      })
+    })
+
+    it('opens an asset of the main pack under the main pack on a page without episode', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ entity_type_name: 'Props' }),
+        path: '/productions/production-1/news-feed',
+        getterOverrides: { productionMap }
+      })
+
+      expect(entityPageLink(wrapper).params.episode_id).toBe('main')
+    })
+
+    // As its name in the list: under all episodes, the list of all of them.
+    it('opens the entity under the episode of the page', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ episode_id: 'episode-2' }),
+        path: '/productions/production-1/episodes/all/shots',
+        getterOverrides: { productionMap }
+      })
+
+      expect(entityPageLink(wrapper).params.episode_id).toBe('all')
+    })
+
+    it('leaves the episode of a page of another production out', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ project_id: 'production-2' }),
+        path: '/productions/production-1/episodes/episode-9/shots',
+        getterOverrides: { productionMap }
+      })
+
+      expect(entityPageLink(wrapper)).toEqual({
+        name: 'shot',
+        params: { production_id: 'production-2', shot_id: ENTITY_ID }
+      })
+    })
+
+    // A short has no episode pages: a sequence may keep the episode it had
+    // before the production type changed.
+    it('opens the entity of a short without episode', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ project_id: 'production-2', episode_id: 'episode-2' }),
+        path: '/productions/production-2/news-feed',
+        getterOverrides: { productionMap }
+      })
+
+      expect(entityPageLink(wrapper)).toEqual({
+        name: 'shot',
+        params: { production_id: 'production-2', shot_id: ENTITY_ID }
+      })
     })
   })
 
@@ -464,6 +772,24 @@ describe('TaskInfo.vue', () => {
           own: true
         })
       })
+
+      it('answers the clients of its studio', async () => {
+        const { wrapper } = await mountPanel({
+          comments: [
+            {
+              id: 'same-studio',
+              person: { id: 'client-2', role: 'client', studio_id: 'studio-1' }
+            }
+          ],
+          getterOverrides: {
+            currentUserRoleForProduction: () => () => 'client',
+            isCurrentUserArtist: () => false,
+            isCurrentUserClient: () => true,
+            user: () => ({ id: USER_ID, departments: [], studio_id: 'studio-1' })
+          }
+        })
+        expect(replyable(wrapper)).toEqual({ 'same-studio': true })
+      })
     })
 
     it('lets a manager answer every thread', async () => {
@@ -580,6 +906,18 @@ describe('TaskInfo.vue', () => {
         }
       })
       expect(isReadOnly(wrapper)).toBe(false)
+    })
+
+    // Annotating and commenting are two rights: the player shows its
+    // comments in full screen to whoever can comment here.
+    it.each([
+      ['a plain artist', false, {}],
+      ['an assigned artist', true, { task: buildTask({ assignees: [USER_ID] }) }]
+    ])('lets %s comment in the player: %s', async (_, canComment, options) => {
+      const { wrapper } = await mountPanel({ previews, ...options })
+      expect(wrapper.findComponent(PreviewPlayer).props('canComment')).toBe(
+        canComment
+      )
     })
 
     it('is read only for the supervisor of another department', async () => {
@@ -801,6 +1139,274 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  describe('publishing', () => {
+    const previewForm = name => {
+      const form = new FormData()
+      form.append('file', new File(['frame'], name))
+      return form
+    }
+
+    const mountCommentingPanel = async ({
+      previews = [],
+      getterOverrides = {},
+      stubs = {}
+    } = {}) => {
+      const reset = vi.fn()
+      const mounted = await mountPanel({
+        previews,
+        // A manager comments on every task the panel shows.
+        getterOverrides: {
+          currentUserRoleForProduction: () => () => 'manager',
+          ...getterOverrides
+        },
+        stubs: {
+          AddComment: {
+            props: ['previewForms'],
+            template: '<div />',
+            methods: { focus: () => {}, reset }
+          },
+          ...stubs
+        }
+      })
+      return { ...mounted, reset }
+    }
+
+    const commentBox = wrapper => wrapper.findComponent(AddComment)
+
+    const publish = async wrapper => {
+      commentBox(wrapper).vm.$emit('add-comment', 'Done', [], [], 'status-1')
+      await flushPromises()
+    }
+
+    it('publishes the files of its comment box with the comment', async () => {
+      const { wrapper, store } = await mountCommentingPanel()
+      const form = previewForm('sh010.mp4')
+
+      commentBox(wrapper).vm.$emit('file-drop', [form])
+      await publish(wrapper)
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        'commentTaskWithPreview',
+        expect.objectContaining({ taskId: TASK_ID, forms: [form] })
+      )
+    })
+
+    // The extra preview modal may upload at the same time.
+    it('clears the progress of the published files only', async () => {
+      const { wrapper, store } = await mountCommentingPanel()
+
+      commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.mp4')])
+      await publish(wrapper)
+
+      expect(store.commit).toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS', [
+        'sh010.mp4'
+      ])
+      expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+    })
+
+    // The extra preview modal uploads its own files: the comment box keeps
+    // what it holds, and a refused file never lands in it.
+    describe('beside an extra preview', () => {
+      const extraModal = wrapper =>
+        wrapper.findComponent({ ref: 'add-extra-preview-modal' })
+      const boxFiles = wrapper =>
+        commentBox(wrapper)
+          .props('previewForms')
+          .map(form => form.get('file').name)
+
+      let consoleError = null
+
+      afterEach(() => {
+        consoleError?.mockRestore()
+        consoleError = null
+        vi.useRealTimers()
+      })
+
+      it('keeps the comment box files when the modal opens', async () => {
+        const previews = [
+          { id: 'preview-1', revision: 1, extension: 'mp4', previews: [] }
+        ]
+        const { wrapper, store } = await mountCommentingPanel({ previews })
+        const form = previewForm('sh010.mp4')
+        commentBox(wrapper).vm.$emit('file-drop', [form])
+        store.commit.mockClear()
+
+        wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+        await flushPromises()
+
+        expect(boxFiles(wrapper)).toEqual(['sh010.mp4'])
+        // The bars of a publication in progress keep their values.
+        expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+      })
+
+      it('shows its upload progress in the modal', async () => {
+        const uploadProgress = { 'sh010-alt.png': 30 }
+        const { wrapper } = await mountCommentingPanel({
+          getterOverrides: { uploadProgress: () => uploadProgress }
+        })
+
+        expect(extraModal(wrapper).vm.$attrs['upload-progress']).toEqual(
+          uploadProgress
+        )
+      })
+
+      it('keeps the comment box files once the extra preview is added', async () => {
+        const { wrapper, store } = await mountCommentingPanel()
+        const form = previewForm('sh010.mp4')
+        commentBox(wrapper).vm.$emit('file-drop', [form])
+        store.commit.mockClear()
+
+        extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+        await flushPromises()
+
+        expect(boxFiles(wrapper)).toEqual(['sh010.mp4'])
+        // The upload clears the progress of its own files.
+        expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+      })
+
+      it('keeps a refused extra preview out of the comment box', async () => {
+        const { wrapper, store } = await mountCommentingPanel()
+        const refusal = new Error('Request Entity Too Large')
+        store.dispatch.mockImplementation(type =>
+          type === 'addCommentExtraPreview'
+            ? Promise.reject(refusal)
+            : Promise.resolve()
+        )
+        consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+
+        extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+        await flushPromises()
+
+        expect(boxFiles(wrapper)).toEqual([])
+        expect(consoleError).toHaveBeenCalledWith(refusal)
+      })
+
+      // The upload ends on the task it went to: a task the panel moved on
+      // to meanwhile keeps the revision its player shows.
+      describe('once it is uploaded', () => {
+        const previews = [
+          { id: 'preview-1', revision: 1, extension: 'mp4', previews: [] }
+        ]
+        const playerWithLast = displayLast => ({
+          props: ['fps', 'previews', 'readOnly'],
+          template: '<div />',
+          methods: { displayLast, focus: () => {}, setCurrentFrame: () => {} }
+        })
+
+        it('shows the last revision of the task', async () => {
+          const displayLast = vi.fn()
+          const { wrapper } = await mountCommentingPanel({
+            previews,
+            stubs: { PreviewPlayer: playerWithLast(displayLast) }
+          })
+          vi.useFakeTimers({ toFake: ['setTimeout'] })
+
+          extraModal(wrapper).vm.$emit('confirm', [
+            previewForm('sh010-alt.png')
+          ])
+          await flushPromises()
+          vi.runAllTimers()
+
+          expect(displayLast).toHaveBeenCalledTimes(1)
+        })
+
+        it('leaves the player of the task the panel moved on to', async () => {
+          const displayLast = vi.fn()
+          const { wrapper, store } = await mountCommentingPanel({
+            previews,
+            stubs: { PreviewPlayer: playerWithLast(displayLast) }
+          })
+          vi.useFakeTimers({ toFake: ['setTimeout'] })
+          let endUpload
+          store.dispatch.mockImplementation(type =>
+            type === 'addCommentExtraPreview'
+              ? new Promise(resolve => {
+                  endUpload = resolve
+                })
+              : Promise.resolve()
+          )
+
+          extraModal(wrapper).vm.$emit('confirm', [
+            previewForm('sh010-alt.png')
+          ])
+          await wrapper.setProps({ task: buildTask({ id: 'task-2' }) })
+          await flushPromises()
+          expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+          endUpload()
+          await flushPromises()
+          vi.runAllTimers()
+
+          expect(displayLast).not.toHaveBeenCalled()
+        })
+      })
+    })
+
+    it('uploads the files of the extra preview modal', async () => {
+      const { wrapper, store } = await mountCommentingPanel()
+      const form = previewForm('sh010-alt.png')
+
+      wrapper
+        .findComponent({ ref: 'add-extra-preview-modal' })
+        .vm.$emit('confirm', [form])
+      await flushPromises()
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        'addCommentExtraPreview',
+        expect.objectContaining({ taskId: TASK_ID, forms: [form] })
+      )
+    })
+
+    describe('once the upload ends', () => {
+      afterEach(() => localStorage.clear())
+
+      it('empties the comment box of the published task', async () => {
+        const { wrapper, reset } = await mountCommentingPanel()
+        drafts.setTaskDraft(TASK_ID, { text: 'Done' })
+
+        commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.mp4')])
+        await publish(wrapper)
+
+        expect(commentBox(wrapper).props('previewForms')).toEqual([])
+        expect(reset).toHaveBeenCalled()
+        expect(drafts.getTaskDraft(TASK_ID)).toBeNull()
+      })
+
+      it('leaves alone the comment box of the task shown since', async () => {
+        const { wrapper, store, reset } = await mountCommentingPanel()
+        let endUpload
+        store.dispatch.mockImplementation(type =>
+          type === 'commentTaskWithPreview'
+            ? new Promise(resolve => {
+                endUpload = resolve
+              })
+            : Promise.resolve()
+        )
+        const otherTask = buildTask({ id: 'task-2' })
+        drafts.setTaskDraft(TASK_ID, { text: 'Done' })
+        drafts.setTaskDraft(otherTask.id, { text: 'Lighting fixed' })
+
+        commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.mp4')])
+        await publish(wrapper)
+        await wrapper.setProps({ task: otherTask })
+        await flushPromises()
+        const otherForm = previewForm('sh020.mp4')
+        commentBox(wrapper).vm.$emit('file-drop', [otherForm])
+        endUpload()
+        await flushPromises()
+
+        expect(commentBox(wrapper).props('previewForms')).toEqual([otherForm])
+        expect(reset).not.toHaveBeenCalled()
+        expect(drafts.getTaskDraft(TASK_ID)).toBeNull()
+        expect(drafts.getTaskDraft(otherTask.id)).toEqual({
+          text: 'Lighting fixed',
+          checklist: []
+        })
+      })
+    })
+  })
+
   // Zou may still build the files of a preview another user adds.
   describe('preview-file:add-file', () => {
     const emitPreviewAdded = socket => {
@@ -895,6 +1501,108 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  // Zou sends every comment update to every open tab, whatever the
+  // production. App.vue reloads the comment of a task the event names;
+  // older Zou versions leave the task out of the preview events.
+  describe('comment:update', () => {
+    const shownComment = { id: 'comment-1', previews: [] }
+    const emitCommentUpdate = (socket, eventData) => {
+      const [, onRemoteCommentUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'comment:update'
+      )
+      onRemoteCommentUpdate(eventData)
+    }
+    const reloads = store =>
+      store.dispatch.mock.calls.filter(([type]) => type === 'loadComment')
+
+    it('reloads a comment it shows when the event names no task', async () => {
+      const { socket, store } = await mountPanel({ comments: [shownComment] })
+      emitCommentUpdate(socket, { comment_id: shownComment.id })
+      expect(reloads(store)).toEqual([
+        ['loadComment', { commentId: shownComment.id }]
+      ])
+    })
+
+    // An artist may not read the comments of the other productions.
+    it('leaves alone the comments it does not show', async () => {
+      const { socket, store } = await mountPanel({ comments: [shownComment] })
+      emitCommentUpdate(socket, { comment_id: 'comment-of-another-task' })
+      expect(reloads(store)).toEqual([])
+    })
+
+    it('leaves to App.vue a comment whose task the event names', async () => {
+      const { socket, store } = await mountPanel({ comments: [shownComment] })
+      emitCommentUpdate(socket, {
+        comment_id: shownComment.id,
+        task_id: TASK_ID
+      })
+      expect(reloads(store)).toEqual([])
+    })
+
+    it('waits for the end of the preview upload of the user', async () => {
+      const { socket, store } = await mountPanel({
+        comments: [shownComment],
+        getterOverrides: { isSavingCommentPreview: () => true }
+      })
+      emitCommentUpdate(socket, { comment_id: shownComment.id })
+      expect(reloads(store)).toEqual([])
+    })
+
+    it('leaves a bug in the reload to Sentry', async () => {
+      const bug = new TypeError('Cannot read properties of undefined')
+      const { socket, store } = await mountPanel({ comments: [shownComment] })
+      store.dispatch.mockImplementation(type =>
+        type === 'loadComment' ? Promise.reject(bug) : Promise.resolve()
+      )
+
+      const rejections = await recordUnhandledRejections(() =>
+        emitCommentUpdate(socket, { comment_id: shownComment.id })
+      )
+
+      expect(rejections).toEqual([bug])
+    })
+  })
+
+  // The panel PreviewPlayer holds for its full screen comments gets the
+  // events of the panel or page around it.
+  describe('comment:acknowledge', () => {
+    const TEAMMATE_ID = 'person-2'
+
+    it.each([
+      ['comment:acknowledge', [], [TEAMMATE_ID]],
+      ['comment:unacknowledge', [TEAMMATE_ID], []]
+    ])(
+      'applies a %s of a teammate once, however many panels get it',
+      async (event, acknowledgements, expected) => {
+        const comment = { id: 'comment-1', acknowledgements }
+        const { socket, store } = await mountPanel({
+          getterOverrides: {
+            getTaskComment: () => () => comment,
+            personMap: () => new Map([[TEAMMATE_ID, { id: TEAMMATE_ID }]])
+          }
+        })
+        // The toggle of the ACK_COMMENT mutation.
+        store.commit.mockImplementation((type, { user }) => {
+          if (type === 'ACK_COMMENT') {
+            comment.acknowledgements = comment.acknowledgements.includes(
+              user.id
+            )
+              ? comment.acknowledgements.filter(id => id !== user.id)
+              : [...comment.acknowledgements, user.id]
+          }
+        })
+        const [, handler] = socket.on.mock.calls.find(
+          ([name]) => name === event
+        )
+
+        handler({ comment_id: comment.id, person_id: TEAMMATE_ID })
+        handler({ comment_id: comment.id, person_id: TEAMMATE_ID })
+
+        expect(comment.acknowledgements).toEqual(expected)
+      }
+    )
+  })
+
   describe('preview-file:update', () => {
     const emitPreviewFileUpdate = async (socket, eventData) => {
       const [, onRemotePreviewUpdate] = socket.on.mock.calls.find(
@@ -981,6 +1689,76 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  describe('full screen', () => {
+    const previews = [
+      { id: 'preview-1', revision: 1, extension: 'png', previews: ['p-1'] }
+    ]
+
+    const mountWithModals = () =>
+      mountPanel({
+        previews,
+        stubs: {
+          AddPreviewModal: {
+            props: ['active'],
+            template: '<div />',
+            methods: { reset: () => {} }
+          }
+        }
+      })
+
+    const openModal = async (wrapper, event, Modal) => {
+      wrapper.findComponent(PreviewPlayer).vm.$emit(event, { id: 'preview-1' })
+      await flushPromises()
+      return wrapper
+        .findAllComponents(Modal)
+        .find(modal => modal.props('active'))
+    }
+
+    afterEach(() => {
+      resetFullScreen()
+    })
+
+    // The browser shows the player alone: the modals of its "+" and trash
+    // buttons go into it, and come back to the panel once it ends.
+    it.each([
+      ['add-extra-preview', AddPreviewModal],
+      ['remove-extra-preview', DeleteModal]
+    ])('opens the %s modal in the player', async (event, Modal) => {
+      const { wrapper } = await mountWithModals()
+      const player = wrapper.findComponent(PreviewPlayer).element
+      setFullScreenElement(player)
+
+      const modal = await openModal(wrapper, event, Modal)
+      expect(player.contains(modal.element)).toBe(true)
+
+      setFullScreenElement(null)
+      await flushPromises()
+      expect(player.contains(modal.element)).toBe(false)
+      expect(wrapper.element.contains(modal.element)).toBe(true)
+    })
+
+    // The modal plays the video picked for upload, which can go full screen
+    // on its own.
+    it.each([
+      ['in the panel', false],
+      ['in the player in full screen', true]
+    ])(
+      'keeps the modal %s when its video goes full screen',
+      async (_, isPlayerFullScreen) => {
+        const { wrapper } = await mountWithModals()
+        const player = wrapper.findComponent(PreviewPlayer).element
+        if (isPlayerFullScreen) setFullScreenElement(player)
+        const modal = await openModal(wrapper, 'add-extra-preview', AddPreviewModal)
+        const parent = modal.element.parentNode
+
+        const video = document.createElement('video')
+        setFullScreenElement(modal.element.appendChild(video))
+        await flushPromises()
+        expect(modal.element.parentNode).toBe(parent)
+      }
+    )
+  })
+
   describe('player requests', () => {
     const previews = [
       { id: 'preview-1', revision: 1, extension: 'mp4', previews: ['p-1'] }
@@ -1003,6 +1781,50 @@ describe('TaskInfo.vue', () => {
 
     afterEach(() => {
       vi.restoreAllMocks()
+    })
+
+    // The player takes a while over the snapshots, and the panel can close
+    // meanwhile: its comment box is gone when they come back.
+    it('drops the snapshots that come back once the panel is closed', async () => {
+      let returnSnapshots = null
+      const { wrapper } = await mountPanel({
+        previews,
+        // A manager comments on every task the panel shows.
+        getterOverrides: {
+          currentUserRoleForProduction: () => () => 'manager'
+        },
+        stubs: {
+          AddComment: {
+            template: '<div />',
+            methods: {
+              hideAnnotationLoading: () => {},
+              setAnnotationSnapshots: () => {},
+              showAnnotationLoading: () => {}
+            }
+          },
+          PreviewPlayer: {
+            ...PlayerStub,
+            methods: {
+              ...PlayerStub.methods,
+              extractAnnotationSnapshots: () =>
+                new Promise(resolve => {
+                  returnSnapshots = resolve
+                })
+            }
+          }
+        }
+      })
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+      wrapper
+        .findComponent(AddComment)
+        .vm.$emit('annotation-snapshots-requested')
+      wrapper.unmount()
+      returnSnapshots([])
+      await flushPromises()
+
+      expect(errorHandler).not.toHaveBeenCalled()
     })
 
     it('logs an annotation refresh that fails', async () => {

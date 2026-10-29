@@ -12,13 +12,10 @@ export default defineConfig([
   {
     name: 'global-ignores',
     ignores: [
-      'build/*.js',
-      'config/*.js',
       'src/locales/*',
       '!src/locales/en.js',
       '!src/locales/en_nft.js',
-      '!src/locales/en_video-game.js',
-      'src/stories/*'
+      '!src/locales/en_video-game.js'
     ]
   },
 

@@ -33,7 +33,7 @@ const makeFormWithFile = name => {
 }
 
 describe('AddComment', () => {
-  let store, wrapper, draftComment
+  let store, wrapper, draftComment, clearedProgress
 
   const taskStatusList = [
     {
@@ -64,8 +64,9 @@ describe('AddComment', () => {
     project_id: 'production-1'
   }
 
-  beforeEach(async () => {
+  const mountComment = async (getterOverrides = {}) => {
     draftComment = makeDraftComment()
+    clearedProgress = []
 
     store = createStore({
       strict: true,
@@ -96,10 +97,11 @@ describe('AddComment', () => {
           new Map([
             ['task-type-1', { id: 'task-type-1', name: 'Animation' }]
           ]),
-        uploadProgress: () => ({})
+        uploadProgress: () => ({}),
+        ...getterOverrides
       },
       mutations: {
-        CLEAR_UPLOAD_PROGRESS: () => {}
+        CLEAR_UPLOAD_PROGRESS: (state, names) => clearedProgress.push(names)
       }
     })
 
@@ -130,7 +132,9 @@ describe('AddComment', () => {
         }
       }
     })
-  })
+  }
+
+  beforeEach(() => mountComment())
 
   it('renders the status tab as active by default', () => {
     const tabs = wrapper.findAll('.tab-row span')
@@ -142,6 +146,13 @@ describe('AddComment', () => {
     const tabs = wrapper.findAll('.tab-row span')
     await tabs[1].trigger('click')
     expect(draftComment.mode).toBe('publish')
+  })
+
+  it('keeps the publish tab from a client', async () => {
+    wrapper.unmount()
+    await mountComment({ isCurrentUserClient: () => true })
+    expect(wrapper.findAll('.tab-row span')).toHaveLength(1)
+    expect(draftComment.mode).toBe('status')
   })
 
   it('has the comment input area in status mode', () => {
@@ -156,6 +167,15 @@ describe('AddComment', () => {
     const postButton = wrapper.find('.post-button')
     await postButton.trigger('click')
     expect(wrapper.emitted('add-comment')).toBeTruthy()
+  })
+
+  // The extra preview modal of the panel may upload at the same time.
+  it('clears the progress of its own files only when it publishes', async () => {
+    await wrapper.setProps({ previewForms: [makeFormWithFile('sh010.mp4')] })
+
+    await wrapper.find('.post-button').trigger('click')
+
+    expect(clearedProgress).toEqual([['sh010.mp4']])
   })
 
   describe('exposed methods', () => {

@@ -2,6 +2,12 @@ import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
+import csv from '@/lib/csv'
+
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+
 export const production = {
   id: 'production-1',
   name: 'Production',
@@ -9,8 +15,16 @@ export const production = {
   task_types: []
 }
 
+export const allVisible = {
+  isStatsVisible: true,
+  isTaskListVisible: true,
+  isTaskPanelVisible: true,
+  isTaskTypeVisible: () => true
+}
+
 const neutralValue = name => {
   if (name.endsWith('Map') || name.startsWith('selected')) return new Map()
+  if (name === 'clientAccess') return allVisible
   if (name.startsWith('is')) return false
   if (name.startsWith('nb') || name.endsWith('ScrollPosition')) return 0
   if (name.endsWith('SearchText')) return ''
@@ -69,7 +83,18 @@ export const buildAddThumbnailsModalStub = () => ({
 
 export const mountEntityPage = async (
   page,
-  { listName, getters = {}, actions = {}, props = {}, query = {}, stubs = {} }
+  {
+    listName,
+    config = {},
+    getters = {},
+    actions = {},
+    props = {},
+    query = {},
+    stubs = {},
+    // The script reads these, the template keeps the key mock.
+    locale = 'en',
+    messages = {}
+  }
 ) => {
   const store = buildStore(getters, actions)
   const router = createRouter({
@@ -79,21 +104,27 @@ export const mountEntityPage = async (
   await router.push({ path: '/', query })
   const i18n = createI18n({
     legacy: false,
-    locale: 'en',
-    messages: { en: {} },
+    locale,
+    messages: { [locale]: messages },
     missingWarn: false,
     fallbackWarn: false
   })
   const searchField = buildSearchFieldStub()
   const list = {
     name: listName,
-    props: { departmentFilter: { type: Array, default: () => [] } },
+    props: {
+      departmentFilter: { type: Array, default: () => [] },
+      isError: { type: Boolean, default: false },
+      isLoading: { type: Boolean, default: false },
+      validationColumns: { type: Array, default: () => [] }
+    },
     template: '<div />',
     methods: { setScrollPosition: vi.fn(), selectTaskFromQuery: vi.fn() }
   }
   const wrapper = shallowMount(page, {
     props,
     global: {
+      config,
       mocks: { $store: store, $t: key => key },
       plugins: [router, i18n],
       provide: { store },
@@ -109,5 +140,26 @@ export const mountEntityPage = async (
     list: list.methods,
     dispatched: name =>
       store.dispatch.mock.calls.filter(([action]) => action === name)
+  }
+}
+
+// Exports the list, then imports the exported file back as is: returns the
+// headers of the file and the ones the import preview gets.
+export const reimportExport = async wrapper => {
+  const buildCsvFile = vi.spyOn(csv, 'buildCsvFile').mockReturnValue('')
+  await wrapper
+    .findAllComponents(ButtonSimple)
+    .find(button => button.props('icon') === 'export')
+    .vm.$emit('click')
+  await flushPromises()
+  const [, entries] = buildCsvFile.mock.calls[0]
+  buildCsvFile.mockRestore()
+  await wrapper
+    .findComponent(ImportModal)
+    .vm.$emit('confirm', csv.turnEntriesToCsvString(entries), 'text')
+  await flushPromises()
+  return {
+    exported: entries[0],
+    imported: wrapper.findComponent(ImportRenderModal).props('parsedCsv')[0]
   }
 }

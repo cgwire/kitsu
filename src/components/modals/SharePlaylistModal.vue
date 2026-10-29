@@ -140,7 +140,7 @@
               <button-simple
                 class="flexrow-item"
                 :is-loading="inviteState[link.token].loading"
-                :is-disabled="!hasRecipients(link.token)"
+                :disabled="!hasRecipients(link.token)"
                 :text="$t('playlists.share_modal.invite_send')"
                 @click="sendInvite(link.token)"
               />

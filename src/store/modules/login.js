@@ -24,6 +24,17 @@ const state = {
   ...initialState
 }
 
+// Offline, the reload would show the error page of the browser, and the
+// logout has not reached Zou, which keeps the session open: once the network
+// is back, the tab logs out again, then reloads.
+const reloadWhenOnline = dispatch => {
+  if (navigator.onLine) {
+    window.location.reload()
+  } else {
+    window.addEventListener('online', () => dispatch('logout'), { once: true })
+  }
+}
+
 const getters = {
   email: state => state.email,
   password: state => state.password,
@@ -57,18 +68,27 @@ const actions = {
     }
   },
 
-  async logout({ commit }) {
+  // RESET_ALL leaves objects of the session in the stores and in their
+  // module caches: the reload leaves none of them to the next login in this
+  // tab.
+  async logout({ commit, dispatch }) {
     this.$socket.disconnect()
-    await auth.logout()
-    commit(RESET_ALL)
+    try {
+      await auth.logout()
+    } finally {
+      commit(RESET_ALL)
+      reloadWhenOnline(dispatch)
+    }
   },
 
   // Purge this tab's session state without calling the logout API or
-  // re-broadcasting (used when another tab already logged out).
-  logoutLocal({ commit }) {
+  // re-broadcasting (used when another tab already logged out), unless the
+  // network is down.
+  logoutLocal({ commit, dispatch }) {
     this.$socket.disconnect()
     commit(USER_LOGOUT)
     commit(RESET_ALL)
+    reloadWhenOnline(dispatch)
   },
 
   resetPassword({}, email) {
@@ -77,6 +97,8 @@ const actions = {
 
   async resetChangePassword({ commit }, { email, token, password, password2 }) {
     await auth.resetChangePassword(email, token, password, password2)
+    // Filled in on the login page the reset page leads to.
+    commit(CHANGE_EMAIL, email)
     commit(LOGIN_SUCCESS)
   }
 }

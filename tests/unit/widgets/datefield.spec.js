@@ -1,8 +1,10 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, mount, shallowMount } from '@vue/test-utils'
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { createStore } from 'vuex'
 
 import DateField from '@/components/widgets/DateField.vue'
+
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 
 const mountField = props =>
   shallowMount(DateField, {
@@ -38,6 +40,60 @@ const pick = (wrapper, value) =>
 // UTC cannot tell them apart, so timezones.spec.js checks the conversions
 // this field uses in other time zones.
 describe('DateField', () => {
+  // The browser shows the element in full screen alone, like a player
+  // holding the share modal: the calendar opens in place there, fixed on the
+  // screen, instead of in <body>.
+  describe('in full screen', () => {
+    let player = null
+    let wrapper = null
+
+    const openCalendar = async () => {
+      wrapper = mount(DateField, {
+        attachTo: player.appendChild(document.createElement('div')),
+        global: {
+          plugins: [
+            createStore({
+              getters: {
+                isDarkTheme: () => false,
+                user: () => ({ locale: 'en_US' })
+              }
+            })
+          ]
+        }
+      })
+      await flushPromises()
+      findPicker(wrapper).vm.openMenu()
+      await flushPromises()
+      return document.querySelector('.dp--menu-wrapper')
+    }
+
+    beforeEach(() => {
+      player = document.body.appendChild(document.createElement('div'))
+    })
+
+    afterEach(() => {
+      wrapper.unmount()
+      resetFullScreen()
+      player.remove()
+    })
+
+    it('opens its calendar in the element in full screen', async () => {
+      setFullScreenElement(player)
+
+      const calendar = await openCalendar()
+
+      expect(player.contains(calendar)).toBe(true)
+      expect(calendar.style.position).toBe('fixed')
+    })
+
+    it('opens its calendar in <body> out of full screen', async () => {
+      const calendar = await openCalendar()
+
+      expect(player.contains(calendar)).toBe(false)
+      expect(calendar.style.position).toBe('absolute')
+    })
+  })
+
   describe('utc', () => {
     it('shows the UTC day of the value', async () => {
       const wrapper = mountField({ utc: true, modelValue: '2026-08-05' })

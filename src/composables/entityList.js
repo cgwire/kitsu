@@ -163,6 +163,10 @@ export const getNextEditableCell = (cell, key) => {
  *   departmentFilter)
  * - emit: the list emit
  * - entities: ref of the displayed entities, grouped for assets and shots
+ * - isEntityShown: whether the display settings show an entity of the store
+ *   result, which Select column goes through
+ * - isCellSelectable: whether the cell of an entity in a task type column
+ *   can be selected, which Select column goes through too
  * - filledColumns: ref of the columns holding at least one task
  * - metadataDescriptors: ref of the production descriptors of the type
  * - metadataDisplayHeaders: the initial column display switches
@@ -174,6 +178,8 @@ export const useEntityList = ({
   props,
   emit,
   entities,
+  isEntityShown = () => true,
+  isCellSelectable = () => true,
   filledColumns,
   metadataDescriptors,
   metadataDisplayHeaders: initialDisplayHeaders = {},
@@ -207,7 +213,6 @@ export const useEntityList = ({
 
   let lastFieldHeaderMenuDisplayed = null
   let lastFieldHeaderMenuLabel = null
-  let lastHeaderMenuDisplayedIndexInGrid = null
   let lastSelection = null
   let lineIndex = {}
   let lineIndexRef = null
@@ -453,7 +458,7 @@ export const useEntityList = ({
   // Header menus
   // --------------------------------------------------------------------------
 
-  const showHeaderMenu = (columnId, columnIndexInGrid, event) => {
+  const showHeaderMenu = (columnId, event) => {
     showHeaderMenuAt(
       getMenus(),
       'headerMenu',
@@ -463,7 +468,6 @@ export const useEntityList = ({
       lastHeaderMenuDisplayed.value === columnId
     )
     lastHeaderMenuDisplayed.value = columnId
-    lastHeaderMenuDisplayedIndexInGrid = columnIndexInGrid
   }
 
   const showMetadataHeaderMenu = (columnId, event) => {
@@ -591,6 +595,18 @@ export const useEntityList = ({
 
   const getValidationCell = (x, y) => getRef(`validation-${x}-${y}`)?.[0]
 
+  // Column of a task type in the selection grid, -1 when it is not
+  // displayed: the stuck columns come first.
+  const getColumnIndexInGrid = taskTypeId => {
+    const stickedIndex =
+      stickedDisplayedValidationColumns.value.indexOf(taskTypeId)
+    if (stickedIndex > -1) return stickedIndex
+    const nonStickedIndex =
+      nonStickedDisplayedValidationColumns.value.indexOf(taskTypeId)
+    if (nonStickedIndex === -1) return -1
+    return nonStickedIndex + stickedDisplayedValidationColumns.value.length
+  }
+
   /*
    * Writes the selected task id in the url query string, or removes it
    * when 0 or more than 1 task is selected.
@@ -641,6 +657,7 @@ export const useEntityList = ({
   }
 
   const onTaskSelected = (info, sticked) => {
+    if (!store.getters.clientAccess.isTaskPanelVisible) return
     const columnOffset = stickedDisplayedValidationColumns.value.length
     const validationInfo = sticked
       ? info
@@ -723,14 +740,19 @@ export const useEntityList = ({
 
   const onSelectColumn = () => {
     const taskTypeId = lastHeaderMenuDisplayed.value
+    const y = getColumnIndexInGrid(taskTypeId)
+    // The rows are numbered before the grayed cells leave: the next rows
+    // keep their place in the grid.
     const selection = ENTITY_STORES[type].cache.result
-      .filter(entity => !entity.canceled)
-      .map((entity, i) => ({
+      .filter(entity => !entity.canceled && isEntityShown(entity))
+      .map((entity, x) => ({ entity, x }))
+      .filter(({ entity }) => isCellSelectable(entity, taskTypeId))
+      .map(({ entity, x }) => ({
         entity,
         column: taskTypeMap.value.get(taskTypeId),
         task: taskMap.value.get(entity.validations.get(taskTypeId)),
-        x: i,
-        y: lastHeaderMenuDisplayedIndexInGrid
+        x,
+        y
       }))
 
     store.commit('CLEAR_SELECTED_TASKS')
@@ -755,14 +777,7 @@ export const useEntityList = ({
       ? entities.value.flat()
       : entities.value
     const x = list.findIndex(e => e.id === entity.id)
-    let y = stickedDisplayedValidationColumns.value.indexOf(task.task_type_id)
-    if (y === -1) {
-      const nonStickedIndex =
-        nonStickedDisplayedValidationColumns.value.indexOf(task.task_type_id)
-      if (nonStickedIndex > -1) {
-        y = nonStickedIndex + stickedDisplayedValidationColumns.value.length
-      }
-    }
+    const y = getColumnIndexInGrid(task.task_type_id)
     if (y > -1) {
       store.commit('ADD_SELECTED_TASK', {
         task,
@@ -884,6 +899,7 @@ export const useEntityList = ({
   }
 
   const stopBrowsing = () => {
+    if (!isBrowsingX && !isBrowsingY) return
     document.body.style.cursor = 'default'
     isBrowsingX = false
     isBrowsingY = false

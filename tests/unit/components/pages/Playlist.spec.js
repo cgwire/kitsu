@@ -12,6 +12,7 @@ vi.mock('vue-router', () => ({
 }))
 
 import '@/lib/auth'
+import errors from '@/lib/errors'
 import editStore from '@/store/modules/edits'
 import playlistStore from '@/store/modules/playlists'
 import sequenceStore from '@/store/modules/sequences'
@@ -22,6 +23,8 @@ import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
+
+import { recordUnhandledRejections } from '../../fixtures/unhandled-rejections'
 
 afterEach(() => {
   vi.useRealTimers()
@@ -45,7 +48,8 @@ const mountPage = async ({
   getters = {},
   mutations = {},
   query = {},
-  params = {}
+  params = {},
+  stubs = {}
 } = {}) => {
   Object.assign(routeHolder.route, { query, params })
   const resolved = () => vi.fn(() => Promise.resolve())
@@ -91,6 +95,7 @@ const mountPage = async ({
       displayedShotsBySequence: () => [],
       editsLoadingKey: fromState('editsLoadingKey'),
       isAssetsLoading: () => false,
+      isCurrentUserClient: () => false,
       isCurrentUserProductionManager: () => true,
       isCurrentUserProductionSupervisor: () => false,
       isEditsLoading: fromState('isEditsLoading'),
@@ -102,7 +107,6 @@ const mountPage = async ({
       playlistsPath: () => ({ name: 'playlists' }),
       productionTaskTypes: () => [],
       shotSearchText: () => '',
-      shotsByEpisode: () => [],
       shotsLoadingKey: fromState('shotsLoadingKey'),
       taskMap: () => new Map(),
       taskStatusMap: () => new Map(),
@@ -125,7 +129,7 @@ const mountPage = async ({
       plugins: [store],
       config: { globalProperties: { $socket: socket } },
       mocks: { $t: key => key },
-      stubs: { RouterLink: true }
+      stubs: { RouterLink: true, ...stubs }
     }
   })
   mountedWrapper = wrapper
@@ -257,18 +261,95 @@ describe.each([
   })
 })
 
-describe('Playlist page, loadShots on mount', () => {
-  it('loads nothing for the pseudo-episodes', async () => {
+describe('Playlist page, loadShots under a pseudo-episode', () => {
+  const shotQuery = { for_entity: 'shot' }
+
+  const mountOn = async (episodeId, query, state = {}) => {
     const { actions } = await mountPage({
+      query,
       state: {
         isTVShow: true,
-        currentEpisode: { id: 'all' },
-        shotsLoadingKey: 'p1/ep-a'
+        currentEpisode: { id: episodeId },
+        shotsLoadingKey: 'p1/ep-a',
+        ...state
       }
     })
     await flushPromises()
+    return actions.loadShots
+  }
 
-    expect(actions.loadShots).not.toHaveBeenCalled()
+  it.each([
+    ['the main pack', 'main', {}],
+    ['all assets', 'all', {}]
+  ])('loads nothing for %s', async (_, episodeId, query) => {
+    expect(await mountOn(episodeId, query)).not.toHaveBeenCalled()
+  })
+
+  // Its playlists hold the shots of every episode.
+  it('loads the shots of the whole production for all shots', async () => {
+    expect(await mountOn('all', shotQuery)).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the production-wide dataset for all shots', async () => {
+    const loader = await mountOn('all', shotQuery, { shotsLoadingKey: 'p1/all' })
+
+    expect(loader).not.toHaveBeenCalled()
+  })
+
+  it('loads the shots when the topbar moves an episode to all shots', async () => {
+    const { store, actions } = await mountPage({
+      state: { isTVShow: true, shotsLoadingKey: 'p1/ep-a' }
+    })
+    await flushPromises()
+    routeHolder.route.query = shotQuery
+    await moveScope(store, { currentEpisode: { id: 'all' } })
+    await flushPromises()
+
+    expect(actions.loadShots).toHaveBeenCalledTimes(1)
+  })
+
+  it('loads the shots when all assets turns to all shots', async () => {
+    const loader = await mountOn('all', {})
+    routeHolder.route.query = shotQuery
+    await flushPromises()
+
+    expect(loader).toHaveBeenCalledTimes(1)
+  })
+
+  describe('entries of several episodes', () => {
+    const shots = [
+      { id: 'e1-s1', name: 'SH010', episode_name: 'E01' },
+      { id: 'e2-s1', name: 'SH010', episode_name: 'E02' }
+    ]
+
+    afterEach(() => shots.forEach(({ id }) => shotStore.cache.shotMap.delete(id)))
+
+    it('shows the entries of every episode for all shots', async () => {
+      const loadShots = vi.fn(() => {
+        shots.forEach(shot => shotStore.cache.shotMap.set(shot.id, shot))
+        return Promise.resolve()
+      })
+      const { wrapper } = await openPlaylist(
+        {
+          for_entity: 'shot',
+          is_for_all: true,
+          shots: shots.map(({ id }) => ({ id, preview_files: {} }))
+        },
+        {
+          query: shotQuery,
+          state: {
+            isTVShow: true,
+            currentEpisode: { id: 'all' },
+            shotsLoadingKey: 'p1/ep-a'
+          },
+          actions: { loadShots }
+        }
+      )
+      await flushPromises()
+
+      const entities = wrapper.findComponent(PlaylistPlayer).props('entities')
+      expect(entities.map(({ id }) => id)).toEqual(['e1-s1', 'e2-s1'])
+    })
   })
 })
 
@@ -475,6 +556,113 @@ describe('Playlist page, list loading error', () => {
   })
 })
 
+describe('Playlist page, failed reload', () => {
+  // The topbar clears the episode of the TV show it switches to: the run
+  // loads the episodes first.
+  const switchProduction = async loadEpisodes => {
+    const page = await mountPage({ state: { isTVShow: true } })
+    await flushPromises()
+    page.actions.loadEpisodes.mockImplementationOnce(loadEpisodes)
+    await moveScope(page.store, {
+      currentProduction: { id: 'p2' },
+      currentEpisode: null
+    })
+    await flushPromises()
+    return page
+  }
+
+  const requestFailure = () => {
+    const failure = new Error('Request has been terminated')
+    errors.markRequestFailure(failure)
+    return failure
+  }
+
+  it('logs a failed load of the episodes after a production switch', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failure = new Error('Request has been terminated')
+    errors.markRequestFailure(failure)
+
+    const rejections = await recordUnhandledRejections(() =>
+      switchProduction(() => Promise.reject(failure))
+    )
+
+    expect(rejections).toEqual([])
+    expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+
+  it('leaves a bug in the reload to Sentry', async () => {
+    const bug = new TypeError('Cannot read properties of undefined')
+
+    const rejections = await recordUnhandledRejections(() =>
+      switchProduction(() => Promise.reject(bug))
+    )
+
+    expect(rejections).toEqual([bug])
+  })
+
+  it('logs a failed load of the playlists once', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failure = new Error('Request has been terminated')
+    errors.markRequestFailure(failure)
+
+    await mountPage({
+      actions: { loadPlaylists: vi.fn(() => Promise.reject(failure)) }
+    })
+    await flushPromises()
+
+    const logged = consoleError.mock.calls.filter(([err]) => err === failure)
+    expect(logged).toHaveLength(1)
+  })
+
+  // The switch emptied the list: it must not pass for a production without
+  // playlists.
+  it('shows the loading error instead of an empty production', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { wrapper } = await switchProduction(() =>
+      Promise.reject(requestFailure())
+    )
+
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(true)
+    const center = wrapper.find('.no-selection')
+    expect(center.exists()).toBe(true)
+    expect(center.findComponent({ name: 'Spinner' }).exists()).toBe(false)
+    expect(center.find('.empty-explanation').exists()).toBe(false)
+    expect(center.find('button.big').exists()).toBe(false)
+  })
+
+  it('clears the loading error once a reload succeeds', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper, store } = await switchProduction(() =>
+      Promise.reject(requestFailure())
+    )
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(true)
+
+    await moveScope(store, {
+      currentProduction: { id: 'p3' },
+      currentEpisode: { id: 'ep-c' }
+    })
+    await flushPromises()
+
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(false)
+  })
+
+  // The columns wait for the first run: a failed one must not keep them
+  // on their spinner.
+  it('shows the loading error of a failed first load', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { wrapper } = await mountPage({
+      state: { shotsLoadingKey: 'other' },
+      actions: { loadShots: vi.fn(() => Promise.reject(requestFailure())) }
+    })
+    await flushPromises()
+
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(true)
+    expect(wrapper.findAllComponents({ name: 'Spinner' })).toHaveLength(0)
+  })
+})
+
 // Mounts the page on an empty playlist, which opens the addition panel.
 const openPlaylist = (playlist = {}, options = {}) => {
   const stored = {
@@ -518,6 +706,104 @@ describe('Playlist page, addition buttons', () => {
     )
     pending.release([])
     await flushPromises()
+  })
+
+  // Under All shots, the loaded shots are those of the whole production, and
+  // the main pack loads none of its own.
+  it.each([
+    [
+      'all shots',
+      { isTVShow: true, currentEpisode: { id: 'all' } },
+      { for_entity: 'shot' },
+      []
+    ],
+    ['the main pack', { isTVShow: true, currentEpisode: { id: 'main' } }, {}, []],
+    ['an episode', { isTVShow: true }, {}, ['playlists.add_episode']],
+    ['a movie', { isTVShow: false }, {}, ['playlists.add_movie']]
+  ])('offers the entire additions for %s', async (_, state, query, labels) => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'shot' },
+      { state, query }
+    )
+    await flushPromises()
+    const additions = [
+      'playlists.build_daily',
+      'playlists.build_weekly',
+      'playlists.add_episode',
+      'playlists.add_movie'
+    ]
+    const offered = wrapper
+      .findAll('button')
+      .map(button => button.text())
+      .filter(text => additions.includes(text))
+
+    expect(offered).toEqual([
+      'playlists.build_daily',
+      'playlists.build_weekly',
+      ...labels
+    ])
+  })
+
+  describe('loaded shots', () => {
+    const shot = (id, name) => ({ id, name, sequence_name: 'SQ01' })
+    const fillShotMap = shots => {
+      shotStore.cache.shotMap.clear()
+      shots.forEach(entry => shotStore.cache.shotMap.set(entry.id, entry))
+    }
+    // The page scrolls the player to the end after an addition.
+    const playerStub = {
+      template: '<div />',
+      methods: { scrollToRight: () => {} }
+    }
+    const openWithButton = async (label, state) => {
+      const { wrapper, actions } = await openPlaylist(
+        {},
+        { state, stubs: { PlaylistPlayer: playerStub } }
+      )
+      await flushPromises()
+      const click = async () => {
+        await wrapper
+          .findAll('button')
+          .find(b => b.text() === label)
+          .trigger('click')
+        await flushPromises()
+      }
+      const addedIds = () =>
+        actions.addEntitiesToPlaylist.mock.calls.map(
+          ([, { entityIds }]) => entityIds
+        )
+      return { click, addedIds }
+    }
+
+    afterEach(() => shotStore.cache.shotMap.clear())
+
+    // The shot map is reloaded in place for each episode: the button adds
+    // the shots of the episode shown, not those of its first click.
+    it('adds the shots of the episode loaded at the time of each click', async () => {
+      fillShotMap([shot('e1-20', 'SH020'), shot('e1-10', 'SH010')])
+      const { click, addedIds } = await openWithButton(
+        'playlists.add_episode',
+        { isTVShow: true }
+      )
+
+      await click()
+      fillShotMap([shot('e2-10', 'SH010')])
+      await click()
+
+      expect(addedIds()).toEqual([['e1-10', 'e1-20'], ['e2-10']])
+    })
+
+    it('adds the shots of the movie', async () => {
+      fillShotMap([shot('s-20', 'SH020'), shot('s-10', 'SH010')])
+      const { click, addedIds } = await openWithButton(
+        'playlists.add_movie',
+        { isTVShow: false }
+      )
+
+      await click()
+
+      expect(addedIds()).toEqual([['s-10', 's-20']])
+    })
   })
 })
 
@@ -669,6 +955,60 @@ describe('Playlist page, sequence playlist', () => {
   })
 })
 
+describe('Playlist page, sequence of a shot', () => {
+  const shot = {
+    id: 's1',
+    name: 'SH010',
+    sequence_id: 'sq-1',
+    sequence_name: 'SQ01',
+    episode_name: 'E01'
+  }
+
+  beforeEach(() => shotStore.cache.shotMap.set(shot.id, shot))
+  afterEach(() => shotStore.cache.shotMap.delete(shot.id))
+
+  const openOn = async (episodeId, query, shots) => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'shot', shots },
+      {
+        query,
+        state: { isTVShow: true, currentEpisode: { id: episodeId } },
+        getters: { displayedShotsBySequence: () => [[shot]] }
+      }
+    )
+    await flushPromises()
+    return wrapper
+  }
+
+  // Sequence names repeat across episodes: All shots says which one.
+  const cases = [
+    ['all shots', 'all', { for_entity: 'shot' }, 'E01 / SQ01'],
+    ['an episode', 'ep-a', {}, 'SQ01']
+  ]
+
+  it.each(cases)(
+    'names it in the entries under %s',
+    async (_, episodeId, query, name) => {
+      const wrapper = await openOn(episodeId, query, [
+        { id: 's1', preview_files: {} }
+      ])
+
+      const [entity] = wrapper.findComponent(PlaylistPlayer).props('entities')
+      expect(entity.parent_name).toBe(name)
+    }
+  )
+
+  it.each(cases)(
+    'names it in the addition panel under %s',
+    async (_, episodeId, query, name) => {
+      const wrapper = await openOn(episodeId, query, [])
+
+      const title = wrapper.find('.entity-group-title').element
+      expect(title.firstChild.textContent.trim()).toBe(name)
+    }
+  )
+})
+
 // Zou serves an entry whose preview is unset or deleted without any: the page
 // pins it to a preview of its own, so that it plays and that the edits of
 // that entry find its stored row.
@@ -785,5 +1125,66 @@ describe('Playlist page, entries without preview', () => {
     )
 
     expect(entities.map(e => e.preview_file_id)).toEqual([undefined, ''])
+  })
+})
+
+// The browser still delivers a scroll queued before the unmount, or before the
+// spinner replaced the entities to add, once their template ref is null.
+describe('Playlist page, side column scroll', () => {
+  const catchErrors = wrapper => {
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+    return errorHandler
+  }
+
+  it('ignores a scroll that reaches the detached playlist list', async () => {
+    const { wrapper, actions } = await mountPage()
+    await flushPromises()
+    const errorHandler = catchErrors(wrapper)
+    const list = wrapper.find('.playlist-list-column').element
+    actions.loadMorePlaylists.mockClear()
+    wrapper.unmount()
+
+    list.dispatchEvent(new Event('scroll'))
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(actions.loadMorePlaylists).not.toHaveBeenCalled()
+  })
+
+  it('ignores a scroll of the addition panel while its shots load', async () => {
+    const { wrapper, actions } = await openPlaylist(
+      {},
+      { state: { isShotsLoading: true } }
+    )
+    await flushPromises()
+    const errorHandler = catchErrors(wrapper)
+
+    await wrapper.find('.addition-section').trigger('scroll')
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(actions.displayMoreShots).not.toHaveBeenCalled()
+  })
+
+  it('ignores a scroll that reaches the detached addition panel', async () => {
+    const { wrapper, actions } = await openPlaylist()
+    await flushPromises()
+    const errorHandler = catchErrors(wrapper)
+    const panel = wrapper.find('.addition-section').element
+    wrapper.unmount()
+
+    panel.dispatchEvent(new Event('scroll'))
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(actions.displayMoreShots).not.toHaveBeenCalled()
+  })
+})
+
+describe('Playlist page, client', () => {
+  it('keeps the task type filter and the sort from a client', async () => {
+    const { wrapper } = await mountPage({
+      getters: { isCurrentUserClient: () => true }
+    })
+    expect(wrapper.findComponent(ComboboxTaskType).exists()).toBe(false)
+    expect(wrapper.findComponent(Combobox).exists()).toBe(false)
   })
 })

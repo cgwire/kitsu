@@ -233,6 +233,41 @@ describe('Schedule widget - dragging a collapsed root row bar', () => {
   })
 })
 
+describe('Schedule widget - end of an interaction', () => {
+  // An outside script can take the body out of the page: only the end of a
+  // move, a resize or a grab resets its cursor.
+  test.each(['mouseup', 'mouseleave', 'touchend', 'touchcancel'])(
+    'leaves the page body alone on a %s without any interaction',
+    type => {
+      const wrapper = mountSchedule()
+      const onError = vi.fn()
+      window.addEventListener('error', onError)
+      const body = document.body
+      body.remove()
+
+      document.dispatchEvent(new Event(type))
+
+      document.documentElement.append(body)
+      window.removeEventListener('error', onError)
+      expect(onError).not.toHaveBeenCalled()
+      wrapper.unmount()
+    }
+  )
+
+  // The timeline content ends with its last row: a click below it or on the
+  // scrollbar starts nothing, yet it still closes the side panel.
+  test('unselects on a click below the rows', () => {
+    const wrapper = mountSchedule({}, { attachTo: document.body })
+    const area = wrapper.find('.timeline-content-wrapper').element
+
+    area.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+    area.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }))
+
+    expect(wrapper.emitted('task-unselected')).toHaveLength(1)
+    wrapper.unmount()
+  })
+})
+
 // The Today buttons of the schedule pages call scrollToToday.
 describe('Schedule widget - today', () => {
   // the pages pass the UTC midnight of each day, as parseSimpleDate builds it
@@ -280,6 +315,45 @@ describe('Schedule widget - today', () => {
     expect(before.scrollLeft).toBe(showTodayOn('2026-08-01').scrollLeft)
     expect(after.scrollLeft).toBe(showTodayOn('2026-10-31').scrollLeft)
     expect([before.marker, after.marker]).toEqual(['none', 'none'])
+  })
+})
+
+// The browser still delivers a scroll queued before the unmount (the pages
+// scroll the timeline right after loading), once the template refs are null.
+describe('Schedule widget - timeline scroll', () => {
+  const mountCatchingErrors = errors =>
+    mountSchedule(
+      {},
+      {
+        global: {
+          stubs: { RouterLink: true },
+          config: { errorHandler: err => errors.push(err) }
+        }
+      }
+    )
+
+  it('keeps the entity list in line with the timeline', () => {
+    const errors = []
+    const wrapper = mountCatchingErrors(errors)
+    const timeline = wrapper.find('.timeline-content-wrapper').element
+    timeline.scrollTop = 40
+
+    timeline.dispatchEvent(new Event('scroll'))
+
+    expect(wrapper.find('.entities').element.scrollTop).toBe(40)
+    expect(errors).toEqual([])
+    wrapper.unmount()
+  })
+
+  it('ignores a scroll that reaches the detached timeline', () => {
+    const errors = []
+    const wrapper = mountCatchingErrors(errors)
+    const timeline = wrapper.find('.timeline-content-wrapper').element
+    wrapper.unmount()
+
+    timeline.dispatchEvent(new Event('scroll'))
+
+    expect(errors).toEqual([])
   })
 })
 

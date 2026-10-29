@@ -1,7 +1,7 @@
 <template>
   <div class="data-list task-list">
     <div class="datatable-wrapper" ref="body">
-      <table class="datatable" v-if="!isLoading">
+      <table class="datatable datatable--cards" v-if="!isLoading">
         <thead class="datatable-head">
           <tr>
             <th
@@ -61,7 +61,7 @@
             v-for="(entry, i) in tasks"
           >
             <td
-              class="production datatable-row-header datatable-row-header--nobd"
+              class="production datatable-row-header datatable-row-header--nobd card-head"
               scope="row"
             >
               <production-name-cell
@@ -77,9 +77,10 @@
               :task-type="getTaskType(entry)"
               :style="{ left: colTypePosX }"
               :is-link="false"
+              :data-label="$t('tasks.fields.task_type')"
             />
             <td
-              class="name datatable-row-header"
+              class="name datatable-row-header card-head"
               :style="{ left: colNamePosX }"
             >
               <div class="flexrow">
@@ -94,13 +95,24 @@
               </div>
             </td>
 
-            <td class="episode" v-if="isEpisodeVisible">
+            <td
+              class="episode"
+              :data-label="
+                assetEpisodes(entry, false) ? $t('assets.fields.episode') : null
+              "
+              v-if="isEpisodeVisible"
+            >
               <div class="flexrow" :title="assetEpisodes(entry, true)">
                 {{ assetEpisodes(entry, false) }}
               </div>
             </td>
 
-            <td class="assignees">
+            <td
+              class="assignees"
+              :data-label="
+                entry.assignees.length ? $t('tasks.fields.assignees') : null
+              "
+            >
               <div class="avatars">
                 <people-avatar
                   :key="`${entry.id}-${person.id}`"
@@ -111,7 +123,10 @@
                 />
               </div>
             </td>
-            <td class="estimation number-cell">
+            <td
+              class="estimation number-cell"
+              :data-label="$t('main.estimation')"
+            >
               <input
                 class="input"
                 min="0"
@@ -130,10 +145,14 @@
               :class="{
                 error: isEstimationBurned(entry)
               }"
+              :data-label="$t('tasks.fields.duration')"
             >
               {{ formatDuration(entry.duration) }}
             </td>
-            <td class="due-date">
+            <td
+              class="due-date"
+              :data-label="entry.due_date ? $t('tasks.fields.due_date') : null"
+            >
               <date-field
                 class="flexrow-item"
                 :model-value="getDate(entry.due_date)"
@@ -153,6 +172,7 @@
               :selectable="false"
               :selected="selectionGrid[entry.id]"
               :task-test="entry"
+              :data-label="$t('tasks.fields.task_status')"
             />
             <th class="actions"></th>
           </tr>
@@ -214,18 +234,12 @@
 <script setup>
 // Imports
 import moment from 'moment-timezone'
-import {
-  computed,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  useTemplateRef,
-  watch
-} from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useStore } from 'vuex'
 
-import { pauseEvent } from '@/composables/dom'
 import { useFormat } from '@/composables/format'
+import { usePhoneLayout } from '@/composables/phoneLayout'
+import { useTaskListSelection } from '@/composables/taskSelection'
 import { useTaskHelpers } from '@/composables/tasks'
 import { getTaskEntityPath } from '@/lib/path'
 import {
@@ -234,8 +248,7 @@ import {
   getDatesFromEndDate,
   getDatesFromStartDate,
   minutesToDays,
-  parseSimpleDate,
-  range
+  parseSimpleDate
 } from '@/lib/time'
 
 import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
@@ -289,11 +302,16 @@ const emit = defineEmits(['more-clicked', 'task-selected'])
 // --------------------------------------------------------------------------
 const colNamePosX = ref('')
 const colTypePosX = ref('')
-const lastSelection = ref(null)
-const selectionGrid = ref({})
 
+const bodyRef = useTemplateRef('body')
 const thProdRef = useTemplateRef('th-prod')
 const thTypeRef = useTemplateRef('th-type')
+
+const { applySelection, selectionGrid } = useTaskListSelection({
+  tasks: () => props.tasks,
+  body: bodyRef,
+  emit
+})
 
 // Computed
 // --------------------------------------------------------------------------
@@ -301,12 +319,16 @@ const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
 )
-const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const productionMap = computed(() => store.getters.productionMap)
 const taskMap = computed(() => store.getters.taskMap)
 
+// phones get a read-only list, in landscape too
+const { isPhone } = usePhoneLayout()
+
 const isEditable = computed(
-  () => isCurrentUserManager.value || isCurrentUserSupervisor.value
+  () =>
+    !isPhone.value &&
+    (isCurrentUserManager.value || isCurrentUserSupervisor.value)
 )
 
 const isEpisodeVisible = computed(() =>
@@ -424,21 +446,6 @@ const updateDueDate = date =>
     )
   })
 
-const onKeyDown = event => {
-  if (props.tasks.length > 0 && event.altKey) {
-    let index = lastSelection.value ? lastSelection.value : 0
-    if ([37, 38].includes(event.keyCode)) {
-      index = index - 1 < 0 ? props.tasks.length - 1 : index - 1
-      selectTask({}, index, props.tasks[index])
-      pauseEvent(event)
-    } else if ([39, 40].includes(event.keyCode)) {
-      index = index + 1 >= props.tasks.length ? 0 : index + 1
-      selectTask({}, index, props.tasks[index])
-      pauseEvent(event)
-    }
-  }
-}
-
 const selectTask = (event, index, task) => {
   if (
     event &&
@@ -450,63 +457,17 @@ const selectTask = (event, index, task) => {
       ['cell day selected'].includes(event.target.className))
   )
     return
-  const isSelected = selectionGrid.value[task.id]
-  const isManySelection = Object.keys(selectionGrid.value).length > 1
-  if (event && !(event.ctrlKey || event.metaKey) && !event.shiftKey) {
-    store.dispatch('clearSelectedTasks')
-    resetSelection()
-  }
-
-  if (event && !event.shiftKey) {
-    if (isSelected && !isManySelection) {
-      store.dispatch('removeSelectedTask', { task })
-      selectionGrid.value[task.id] = undefined
-    } else if (!isSelected || isManySelection) {
-      store.dispatch('addSelectedTask', { task })
-      emit('task-selected', task)
-      selectionGrid.value[task.id] = true
-      lastSelection.value = index
-    }
-  } else {
-    selectionGrid.value = {}
-    const taskIndices =
-      lastSelection.value > index
-        ? range(index, lastSelection.value)
-        : range(lastSelection.value, index)
-    const selection = taskIndices.map(i => ({ task: props.tasks[i] }))
-    selection.forEach(task => {
-      selectionGrid.value[task.task.id] = true
-    })
-    store.dispatch('addSelectedTasks', selection)
-  }
+  applySelection(event, index, task)
 }
-
-const resetSelection = () => {
-  selectionGrid.value = {}
-  lastSelection.value = null
-}
-
-// Watchers
-// --------------------------------------------------------------------------
-watch(() => props.tasks, resetSelection)
-
-watch(nbSelectedTasks, () => {
-  if (nbSelectedTasks.value === 0) resetSelection()
-})
 
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
-  window.addEventListener('keydown', onKeyDown, false)
   if (thProdRef.value) {
     colTypePosX.value = thProdRef.value.offsetWidth + 'px'
     colNamePosX.value =
       thProdRef.value.offsetWidth + thTypeRef.value.offsetWidth + 'px'
   }
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeyDown)
 })
 </script>
 
@@ -622,5 +583,27 @@ input[type='number'] {
 
 .footer-info {
   padding: 0.5em;
+}
+
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
+  .datatable-wrapper {
+    background: transparent;
+    border: 0;
+    overflow-x: visible;
+  }
+
+  // the production avatar tops the entity head
+  .datatable-body td.production.card-head {
+    padding-bottom: 0;
+  }
+
+  .datatable-body th.actions {
+    display: none;
+  }
+
+  .name .flexrow {
+    gap: 0.75em;
+  }
 }
 </style>

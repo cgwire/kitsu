@@ -14,20 +14,19 @@
             :label="$t('playlists.filter_task_type')"
             :thin="true"
             v-model="taskTypeId"
-            v-if="!isListToggled"
+            v-if="!isListToggled && !isCurrentUserClient"
           />
           <span class="filler" v-if="!isListToggled"></span>
           <button-simple
             class="flexrow-item"
             style="flex: 0"
             :icon="isListToggled ? 'right' : 'left'"
-            is-small
             @click="isListToggled = !isListToggled"
           />
         </div>
 
         <div class="flexrow">
-          <template v-if="!isListToggled">
+          <template v-if="!isListToggled && !isCurrentUserClient">
             <combobox
               class="flexrow-item mb2"
               :label="$t('main.sorted_by')"
@@ -178,17 +177,19 @@
         v-else-if="playlists.length === 0"
       >
         <div v-if="!loading.playlists && !loading.playlistsInit">
-          <p class="empty-explanation">
-            {{ $t('playlists.no_playlist') }}
-          </p>
-          <button
-            class="big button"
-            @click="showAddModal"
-            key="new-playlist-button"
-            v-if="isCurrentUserManager || isCurrentUserSupervisor"
-          >
-            {{ $t('playlists.new_playlist') }}
-          </button>
+          <template v-if="!errors.playlistLoading">
+            <p class="empty-explanation">
+              {{ $t('playlists.no_playlist') }}
+            </p>
+            <button
+              class="big button"
+              @click="showAddModal"
+              key="new-playlist-button"
+              v-if="isCurrentUserManager || isCurrentUserSupervisor"
+            >
+              {{ $t('playlists.new_playlist') }}
+            </button>
+          </template>
         </div>
         <spinner class="mt2" v-else />
       </div>
@@ -285,38 +286,40 @@
               >
                 {{ $t('playlists.build_weekly') }}
               </button>
-              <button
-                :class="{
-                  button: true,
-                  'add-sequence': true,
-                  'is-loading': loading.addEpisode
-                }"
-                :disabled="isAdditionLoading"
-                @click="addEpisodePending"
-                v-if="
-                  isTVShow &&
-                  !isAssetPlaylist &&
-                  !isSequencePlaylist &&
-                  !isEditPlaylist &&
-                  !isEpisodePlaylist
-                "
-              >
-                {{ $t('playlists.add_episode') }}
-              </button>
-              <button
-                :class="{
-                  button: true,
-                  'add-sequence': true,
-                  'is-loading': loading.addMovie
-                }"
-                :disabled="isAdditionLoading"
-                @click="addMovie"
-                v-else-if="
-                  !isAssetPlaylist && !isEditPlaylist && !isEpisodePlaylist
-                "
-              >
-                {{ $t('playlists.add_movie') }}
-              </button>
+              <template v-if="isEntireAdditionOffered">
+                <button
+                  :class="{
+                    button: true,
+                    'add-sequence': true,
+                    'is-loading': loading.addEpisode
+                  }"
+                  :disabled="isAdditionLoading"
+                  @click="addEpisodePending"
+                  v-if="
+                    isTVShow &&
+                    !isAssetPlaylist &&
+                    !isSequencePlaylist &&
+                    !isEditPlaylist &&
+                    !isEpisodePlaylist
+                  "
+                >
+                  {{ $t('playlists.add_episode') }}
+                </button>
+                <button
+                  :class="{
+                    button: true,
+                    'add-sequence': true,
+                    'is-loading': loading.addMovie
+                  }"
+                  :disabled="isAdditionLoading"
+                  @click="addMovie"
+                  v-else-if="
+                    !isAssetPlaylist && !isEditPlaylist && !isEpisodePlaylist
+                  "
+                >
+                  {{ $t('playlists.add_movie') }}
+                </button>
+              </template>
             </div>
           </div>
         </div>
@@ -428,7 +431,7 @@
                 v-for="(sequenceShots, i) in displayedShotsBySequence"
               >
                 <h2 class="entity-group-title" v-if="sequenceShots.length > 0">
-                  {{ sequenceShots[0].sequence_name }}
+                  {{ getSequenceName(sequenceShots[0]) }}
                   <button
                     class="button"
                     @click="addSequence(sequenceShots)"
@@ -491,15 +494,19 @@
       </div>
     </div>
 
-    <edit-playlist-modal
-      :active="modals.isEditDisplayed"
-      :is-loading="loading.editPlaylist"
-      :is-error="errors.editPlaylist"
-      :playlist-to-edit="playlistToEdit"
-      :task-type-id="taskTypeId"
-      @cancel="hideEditModal"
-      @confirm="confirmEditPlaylist"
-    />
+    <!-- The browser shows a player in full screen alone: the form of its
+         Edit button goes into it. -->
+    <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
+      <edit-playlist-modal
+        :active="modals.isEditDisplayed"
+        :is-loading="loading.editPlaylist"
+        :is-error="errors.editPlaylist"
+        :playlist-to-edit="playlistToEdit"
+        :task-type-id="taskTypeId"
+        @cancel="hideEditModal"
+        @confirm="confirmEditPlaylist"
+      />
+    </teleport>
 
     <build-filter-modal
       :active="modals.isBuildFilterDisplayed"
@@ -528,6 +535,8 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useFullScreenTarget } from '@/composables/fullScreen'
+import { logRequestFailure } from '@/lib/errors'
 import { removeModelFromList, updateModelFromList } from '@/lib/models'
 import { getPlaylistPath as buildPlaylistPath } from '@/lib/path'
 import { DEFAULT_NB_FRAMES_PICTURE, isPlaylistInScope } from '@/lib/playlist'
@@ -578,6 +587,7 @@ const newPlaylistForm = () => ({
 const entityListContentRef = useTemplateRef('entityListContent')
 const playlistListRef = useTemplateRef('playlistList')
 const playlistPlayerRef = useTemplateRef('playlist-player')
+const fullScreenPlayer = useFullScreenTarget(() => playlistPlayerRef.value?.$el)
 const searchFieldRef = useTemplateRef('search-field')
 
 const currentEntitiesList = ref([])
@@ -646,6 +656,7 @@ const displayedShotsBySequence = computed(
 )
 const editsLoadingKey = computed(() => store.getters.editsLoadingKey)
 const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
@@ -661,7 +672,6 @@ const playlists = computed(() => store.getters.playlists)
 const playlistsPath = computed(() => store.getters.playlistsPath)
 const productionTaskTypes = computed(() => store.getters.productionTaskTypes)
 const shotSearchText = computed(() => store.getters.shotSearchText)
-const shotsByEpisode = computed(() => store.getters.shotsByEpisode)
 const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
 const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -681,6 +691,13 @@ const allForEntity = computed(() => {
 
 const allShotsQuery = computed(() =>
   allForEntity.value === 'shot' ? { for_entity: 'shot' } : {}
+)
+
+// The entire episode and movie additions add every loaded shot: those of
+// the whole production under All shots, those another page left loaded
+// under the main pack, which loads none.
+const isEntireAdditionOffered = computed(
+  () => !isTVShow.value || !['all', 'main'].includes(currentEpisode.value?.id)
 )
 
 // The store keeps the last loaded list across pages: on mount it can
@@ -836,6 +853,12 @@ const getCachedEntity = entityId => {
   return shotStore.cache.shotMap.get(entityId)
 }
 
+// Sequence names repeat across episodes: All shots says which one.
+const getSequenceName = entity =>
+  allForEntity.value === 'shot' && entity.episode_name && entity.sequence_name
+    ? `${entity.episode_name} / ${entity.sequence_name}`
+    : entity.sequence_name
+
 // Data loading
 
 const loadShotsData = async () => {
@@ -847,9 +870,12 @@ const loadShotsData = async () => {
     isShotsLoading.value ||
     shotsLoadingKey.value !== `${currentProduction.value.id}/${scope}`
   ) {
-    if (isTVShow.value && ['main', 'all'].includes(currentEpisode.value?.id)) {
-      // Pseudo-episodes load nothing of their own: only let the load in
-      // flight refill the map it emptied.
+    // The main pack and All assets list no shot: only let the load in
+    // flight refill the map it emptied. All shots loads every episode.
+    const isWithoutShots =
+      (isTVShow.value && currentEpisode.value?.id === 'main') ||
+      allForEntity.value === 'asset'
+    if (isWithoutShots) {
       if (isShotsLoading.value) await shotStore.cache.shotsLoadingPromise
     } else {
       if (isTVShow.value && !currentEpisode.value) {
@@ -909,20 +935,14 @@ const listQuery = () => ({
 
 const loadPlaylistsData = async (force = false) => {
   if (playlists.value.length === 0 || force) {
-    errors.playlistLoading = false
-    try {
-      await store.dispatch('loadPlaylists', listQuery())
-    } catch (err) {
-      console.error(err)
-      errors.playlistLoading = true
-      throw err
-    }
+    await store.dispatch('loadPlaylists', listQuery())
   }
 }
 
 const onPlaylistListScroll = event => {
   if (isSilentMore) return
   const listEl = playlistListRef.value
+  if (!listEl) return
   const maxHeight = listEl.scrollHeight - listEl.offsetHeight
   if (maxHeight < event.target.scrollTop + 20) {
     onLoadMoreClicked()
@@ -1032,7 +1052,8 @@ const convertEntityToPlaylistFormat = entityInfo => {
   const playlistEntity = {
     id: entityInfo.id,
     name: entity.name,
-    parent_name: entity.sequence_name || episodeName || entity.asset_type_name,
+    parent_name:
+      getSequenceName(entity) || episodeName || entity.asset_type_name,
     // Per-entity fps: an entity can override the production fps via
     // data.fps. Carried here so the player uses the right rate for
     // whichever entity is playing (a playlist can mix fps).
@@ -1242,13 +1263,13 @@ const addAllPending = () =>
 const addDailyPending = () =>
   addWithLoading('addDaily', () => getPendingEntities(true))
 
-const addEpisodePending = () =>
-  addWithLoading('addEpisode', () => sortShots(shotsByEpisode.value.flat()))
+// The shot map is not reactive: it is read on each click.
+const getLoadedShots = () =>
+  sortShots(Array.from(shotStore.cache.shotMap.values()))
 
-const addMovie = () =>
-  addWithLoading('addMovie', () =>
-    sortShots(Array.from(shotStore.cache.shotMap.values()))
-  )
+const addEpisodePending = () => addWithLoading('addEpisode', getLoadedShots)
+
+const addMovie = () => addWithLoading('addMovie', getLoadedShots)
 
 // Save data
 
@@ -1433,6 +1454,8 @@ const onUpdateToLatestVersion = () =>
 
 const onBodyScroll = event => {
   const content = entityListContentRef.value
+  // The spinner replaces the list while its entities load.
+  if (!content) return
   const maxHeight = content.scrollHeight - content.offsetHeight
   if (maxHeight < event.target.scrollTop) {
     store.dispatch(
@@ -1478,7 +1501,8 @@ const reloadScope = () =>
 // Every reload goes through this gate. The watchers can ask again while
 // a run is in flight: remember it and, once the run settles, run a full
 // forced reload if the run did not serve the scope asked for since.
-// `work` publishes the scope it serves through servedScope, or throws.
+// `work` publishes the scope it serves through servedScope, or throws: no
+// caller waits on a run, so a failed request ends here.
 const runReload = async work => {
   if (loading.playlists) {
     isReloadPending = true
@@ -1490,10 +1514,16 @@ const runReload = async work => {
     return
   }
   loading.playlists = true
+  errors.playlistLoading = false
   let isServed = false
   try {
     await work()
     isServed = true
+  } catch (err) {
+    errors.playlistLoading = true
+    // The columns wait for the end of the first run.
+    loading.playlistsInit = false
+    logRequestFailure(err)
   } finally {
     loading.playlists = false
     const isStale =

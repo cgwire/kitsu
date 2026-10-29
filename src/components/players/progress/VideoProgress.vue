@@ -560,19 +560,26 @@ const getFrameBackgroundStyle = frame => {
   }
 }
 
+// Chrome fires mouseleave on the document when a held pointer exits the
+// window, and keeps sending the moves: only a released button ends a drag.
+const onDocumentLeave = event => {
+  if (event.buttons) return
+  stopProgressDrag()
+  stopHandleInDrag()
+  stopHandleOutDrag()
+}
+
 const domEvents = [
   ['mousemove', doProgressDrag],
   ['touchmove', doProgressDrag],
   ['mouseup', stopProgressDrag],
-  ['mouseleave', stopProgressDrag],
+  ['mouseleave', onDocumentLeave],
   ['touchend', stopProgressDrag],
   ['touchcancel', stopProgressDrag],
   ['mouseup', stopHandleInDrag],
-  ['mouseleave', stopHandleInDrag],
   ['touchend', stopHandleInDrag],
   ['touchcancel', stopHandleInDrag],
   ['mouseup', stopHandleOutDrag],
-  ['mouseleave', stopHandleOutDrag],
   ['touchend', stopHandleOutDrag],
   ['touchcancel', stopHandleOutDrag]
 ]

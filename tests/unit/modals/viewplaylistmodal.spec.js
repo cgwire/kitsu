@@ -1,4 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { reactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
@@ -24,14 +25,23 @@ vi.mock('vue-router', () => ({
 
 // PlaylistPlayer is a very heavy component and is only rendered, never used in
 // the save flow we exercise here, so stub it away.
-vi.mock('@/components/players/players/PlaylistPlayer.vue', () => ({
-  default: { name: 'PlaylistPlayer', props: ['canSave'], render: () => null }
-}))
+vi.mock('@/components/players/players/PlaylistPlayer.vue', async () => {
+  const { h } = await import('vue')
+  // Its root is the element the browser puts in full screen.
+  return {
+    default: { name: 'PlaylistPlayer', props: ['canSave'], render: () => h('div') }
+  }
+})
+
+const crisp = vi.hoisted(() => ({ setChatVisibility: vi.fn() }))
+vi.mock('@/lib/crisp', () => ({ default: crisp }))
 
 import shotStore from '@/store/modules/shots'
 
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
+
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 
 describe('ViewPlaylistModal', () => {
   let store
@@ -41,6 +51,8 @@ describe('ViewPlaylistModal', () => {
   let newPlaylistError
   let newPlaylistRequest
   let tempEntities
+  // The episode the topbar sets, which a test can move.
+  const scope = reactive({ episode: null, isTVShow: false })
 
   beforeEach(() => {
     routeState.path = '/shots'
@@ -49,12 +61,14 @@ describe('ViewPlaylistModal', () => {
     newPlaylistError = null
     newPlaylistRequest = null
     tempEntities = []
+    Object.assign(scope, { episode: null, isTVShow: false })
     store = createStore({
       strict: true,
       getters: {
-        currentEpisode: () => null,
+        currentEpisode: () => scope.episode,
         currentProduction: () => ({ id: 'production-1' }),
-        isTVShow: () => false,
+        isSupportChat: () => true,
+        isTVShow: () => scope.isTVShow,
         selectedTasks: () => new Map()
       },
       mutations: {
@@ -90,13 +104,15 @@ describe('ViewPlaylistModal', () => {
     })
 
     wrapper = shallowMount(ViewPlaylistModal, {
-      global: { plugins: [store, i18n] },
+      // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
       props: { active: false }
     })
   })
 
   afterEach(() => {
     shotStore.cache.shotMap.delete('shot-1')
+    resetFullScreen()
     vi.restoreAllMocks()
   })
 
@@ -114,6 +130,22 @@ describe('ViewPlaylistModal', () => {
 
     expect(editPlaylistPayload).not.toBeNull()
     expect(editPlaylistPayload.data.task_type_id).toBe('task-type-1')
+  })
+
+  // The browser shows the player in full screen alone: its Save button opens
+  // the save form in it, back in the modal once the full screen ends.
+  it('opens the save form in the player in full screen', async () => {
+    const player = wrapper.findComponent({ name: 'PlaylistPlayer' })
+    setFullScreenElement(player.element)
+    player.vm.$emit('save-clicked')
+    await flushPromises()
+    const editModal = wrapper.findComponent(EditPlaylistModal)
+    expect(player.element.contains(editModal.element)).toBe(true)
+
+    setFullScreenElement(null)
+    await flushPromises()
+    expect(player.element.contains(editModal.element)).toBe(false)
+    expect(wrapper.element.contains(editModal.element)).toBe(true)
   })
 
   it('shows a success state instead of closing the modal right after creation', async () => {
@@ -240,6 +272,27 @@ describe('ViewPlaylistModal', () => {
     expect(tempEntities[0].preview_file_previews[0].duration).toBe(3.5)
   })
 
+  // Sequence names repeat across episodes: All shots says which one.
+  it.each([
+    ['all shots', { id: 'all' }, 'E01 / SQ01'],
+    ['an episode', { id: 'episode-1', name: 'E01' }, 'SQ01']
+  ])('names the sequence of a shot under %s', async (_, episode, name) => {
+    Object.assign(scope, { episode, isTVShow: true })
+    shotStore.cache.shotMap.set('shot-1', {
+      id: 'shot-1',
+      name: 'SH01',
+      sequence_name: 'SQ01',
+      episode_name: 'E01'
+    })
+    tempEntities = [
+      { id: 'shot-1', preview_file_id: 'pf-1', preview_files: {} }
+    ]
+    await wrapper.setProps({ active: true })
+    await new Promise(resolve => setTimeout(resolve))
+
+    expect(tempEntities[0].parent_name).toBe(name)
+  })
+
   it.each([
     // A shots page under an episode contains "episodes" in the URL but is a
     // shot view: it must save a shot playlist, not an empty episode one.
@@ -250,7 +303,8 @@ describe('ViewPlaylistModal', () => {
   ])('infers for_entity "%s" → "%s" when saving from a selection', async (path, expected) => {
     routeState.path = path
     const localWrapper = shallowMount(ViewPlaylistModal, {
-      global: { plugins: [store, i18n] },
+      // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
       props: { active: false }
     })
 
@@ -273,11 +327,76 @@ describe('ViewPlaylistModal', () => {
     routeState.path = '/my-checks'
     routeState.params = {}
     const localWrapper = shallowMount(ViewPlaylistModal, {
-      global: { plugins: [store, i18n] },
+      // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
       props: { active: false }
     })
     expect(
       localWrapper.findComponent({ name: 'PlaylistPlayer' }).props('canSave')
     ).toBe(false)
+  })
+
+  describe('on a phone', () => {
+    const stubPhone = isPhone => {
+      window.matchMedia = query => ({
+        matches: isPhone && query === '(max-width: 768px)',
+        addEventListener: () => {},
+        removeEventListener: () => {}
+      })
+    }
+
+    const mountActive = () =>
+      shallowMount(ViewPlaylistModal, {
+        attachTo: document.body,
+        // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
+        props: { active: true }
+      })
+    const findModal = () => document.querySelector('#temp-playlist-modal')
+
+    beforeEach(() => {
+      crisp.setChatVisibility.mockClear()
+    })
+
+    afterEach(() => {
+      delete window.matchMedia
+    })
+
+    it('closes from the close button on a phone', async () => {
+      stubPhone(true)
+      const modal = mountActive()
+      findModal().querySelector('.close-button').click()
+      expect(modal.emitted('cancel')).toHaveLength(1)
+      expect(findModal().classList.contains('phone')).toBe(true)
+      modal.unmount()
+    })
+
+    // the fixed page container traps the z-index of what it holds under
+    // the topbar: the modal leaves it on phones
+    it('renders right under the body on a phone', async () => {
+      stubPhone(true)
+      const modal = mountActive()
+      expect(findModal().parentElement).toBe(document.body)
+      modal.unmount()
+    })
+
+    it('hides the support chat while open on a phone', async () => {
+      stubPhone(true)
+      const modal = mountActive()
+      await flushPromises()
+      expect(crisp.setChatVisibility).toHaveBeenCalledWith(false)
+      modal.unmount()
+      expect(crisp.setChatVisibility).toHaveBeenLastCalledWith(true)
+    })
+
+    it('leaves the chat alone off a phone', async () => {
+      stubPhone(false)
+      const modal = mountActive()
+      await flushPromises()
+      expect(crisp.setChatVisibility).not.toHaveBeenCalled()
+      expect(findModal().classList.contains('phone')).toBe(false)
+      expect(findModal().parentElement).not.toBe(document.body)
+      modal.unmount()
+    })
   })
 })

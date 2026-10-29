@@ -214,8 +214,8 @@ export default {
     return client.pget(`/api/auth/fido?email=${email}`)
   },
 
-  unregisterFIDO(deviceName) {
-    const data = { device_name: deviceName }
+  unregisterFIDO(deviceName, twoFactorPayload) {
+    const data = { ...twoFactorPayload, device_name: deviceName }
     return client.pdel('/api/auth/fido', data)
   },
 
@@ -245,6 +245,12 @@ export default {
 
   loadTimeSpents(date) {
     return client.pget(`/api/data/user/time-spents/${date}`)
+  },
+
+  getUserTimeSpentsByPeriod(startDate, endDate) {
+    return client.pget(
+      `/api/data/user/time-spents?start_date=${startDate}&end_date=${endDate}`
+    )
   },
 
   getPersonTasks(personId) {
@@ -491,9 +497,7 @@ export default {
   ) {
     let path = `/api/data/persons/${personId}/quota-shots/`
 
-    if (detailLevel === 'year') {
-      path += `year/${year}`
-    } else if (detailLevel === 'month') {
+    if (detailLevel === 'month') {
       path += `month/${year}/${month}`
     } else if (detailLevel === 'week') {
       path += `week/${year}/${week}`
@@ -501,18 +505,12 @@ export default {
       path += `day/${year}/${month}/${day}`
     }
 
-    if (productionId) {
-      path += `?project_id=${productionId}`
+    const params = {
+      project_id: productionId,
+      task_type_id: taskTypeId,
+      count_mode: computeMode
     }
-
-    if (taskTypeId) {
-      if (!productionId) path += '?'
-      else path += '&'
-      path += `&task_type_id=${taskTypeId}`
-    }
-    path += `&count_mode=${computeMode}`
-
-    return client.pget(path)
+    return client.pget(buildQueryString(path, params))
   },
 
   getContext() {

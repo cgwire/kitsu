@@ -24,8 +24,7 @@ defineProps({
   },
   label: {
     default: '',
-    type: String,
-    required: true
+    type: String
   },
   modelValue: {
     default: false,

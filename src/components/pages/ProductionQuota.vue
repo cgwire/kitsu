@@ -123,7 +123,7 @@
         :week="currentWeek"
         :day="currentDay"
         :is-loading="isPersonShotsLoading"
-        :is-loading-error="false"
+        :is-loading-error="isPersonShotsLoadingError"
         :shots="personShots"
         :count-mode="params.countMode"
       />
@@ -142,6 +142,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
+import errors from '@/lib/errors'
 import { episodifyRoute as addEpisodeToRoute } from '@/lib/path'
 import { roleOptions } from '@/lib/people'
 import preferences from '@/lib/preferences'
@@ -182,6 +183,7 @@ const currentWeek = ref(moment().week())
 const currentYear = ref(moment().year())
 const detailLevelString = ref('day')
 const isPersonShotsLoading = ref(false)
+const isPersonShotsLoadingError = ref(false)
 const maxQuota = ref(0)
 const monthString = ref(`${moment().month() + 1}`)
 const params = ref({
@@ -200,6 +202,9 @@ const yearString = ref(`${moment().year()}`)
 let detailLevel = 'day'
 let paramsProductionId = null
 let silent = false
+// A click on a cell loads twice, and the user can move on or close the
+// panel before an answer: only the latest load may update the panel.
+let latestShotsLoad = 0
 
 // Computed
 // --------------------------------------------------------------------------
@@ -304,20 +309,36 @@ const loadRoute = async () => {
   if (week) currentWeek.value = Number(week)
   if (day) currentDay.value = Number(day)
 
+  const load = ++latestShotsLoad
+  const isLatest = () => load === latestShotsLoad
   if (route.path.includes('person')) {
     isPersonShotsLoading.value = true
-    personShots.value = await store.dispatch('getPersonQuotaShots', {
-      personId: currentPerson.value.id,
-      detailLevel,
-      taskTypeId: params.value.taskTypeId,
-      year,
-      month,
-      week,
-      day,
-      computeMode: params.value.computeMode
-    })
-    isPersonShotsLoading.value = false
-    showInfo.value = true
+    isPersonShotsLoadingError.value = false
+    try {
+      const shots = await store.dispatch('getPersonQuotaShots', {
+        productionId: currentProduction.value.id,
+        personId: currentPerson.value.id,
+        detailLevel,
+        taskTypeId: params.value.taskTypeId,
+        year,
+        month,
+        week,
+        day,
+        computeMode: params.value.computeMode
+      })
+      if (isLatest()) personShots.value = shots
+    } catch (err) {
+      if (isLatest()) {
+        personShots.value = []
+        isPersonShotsLoadingError.value = true
+      }
+      errors.logRequestFailure(err)
+    } finally {
+      if (isLatest()) {
+        isPersonShotsLoading.value = false
+        showInfo.value = true
+      }
+    }
   } else {
     showInfo.value = false
   }

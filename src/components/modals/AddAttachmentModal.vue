@@ -127,7 +127,8 @@
               'is-disabled': forms.length === 0
             }"
             role="button"
-            tabindex="0"
+            :aria-disabled="forms.length === 0"
+            :tabindex="forms.length === 0 ? -1 : 0"
             @click="confirm()"
             @keydown.enter.prevent="confirm()"
             @keydown.space.prevent="confirm()"
@@ -200,8 +201,10 @@ const onRecorded = file => {
   recordingMode.value = null
 }
 
+// The disabled and loading looks only stop the mouse: Enter and Space still
+// reach the button.
 const confirm = () => {
-  emit('confirm', forms.value)
+  if (forms.value.length > 0 && !props.isLoading) emit('confirm', forms.value)
 }
 
 const reset = () => {

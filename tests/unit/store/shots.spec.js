@@ -1,6 +1,7 @@
 // @vitest-environment node
 
 import { vi } from 'vitest'
+import { computed, reactive } from 'vue'
 
 // Importing the shots module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -670,13 +671,27 @@ describe('Shots store, UPDATE_SHOT', () => {
       tasks: ['t1']
     })
     shotsStore.mutations.UPDATE_SHOT(
-      {},
+      { displayedShots: [] },
       { id: 'sh-upd', name: 'new', tasks: [{ id: 't1' }] }
     )
     expect(shotsStore.cache.shotMap.get('sh-upd')).toMatchObject({
       name: 'new',
       tasks: ['t1']
     })
+  })
+
+  // The list reads the displayed shots through the reactive state: a change
+  // made to the raw object of the cache does not reach it.
+  test('shows the new name of a shot another user renamed', () => {
+    const shot = { id: 'sh-upd', name: 'SH020', tasks: [] }
+    shotsStore.cache.shotMap.set(shot.id, shot)
+    const state = reactive({ displayedShots: [shot] })
+    const names = computed(() => state.displayedShots.map(({ name }) => name))
+    expect(names.value).toEqual(['SH020'])
+
+    shotsStore.mutations.UPDATE_SHOT(state, { id: 'sh-upd', name: 'SH999' })
+
+    expect(names.value).toEqual(['SH999'])
   })
 })
 
@@ -996,4 +1011,31 @@ describe('Shots store, getShotsCsvLines', () => {
 
     expect(lines[0].slice(3)).toEqual(['a', 'z'])
   })
+})
+
+describe('Shots store, list totals', () => {
+  test.each(['CLEAR_SHOTS', 'LOAD_SHOTS_START'])(
+    '%s resets the totals of the list',
+    mutation => {
+      const state = {
+        displayedShotsCount: 2,
+        displayedShotsLength: 2,
+        displayedShotsTimeSpent: 960,
+        displayedShotsEstimation: 1440,
+        displayedShotsFrames: 150,
+        displayedShotsDrawings: 12
+      }
+
+      shotsStore.mutations[mutation](state)
+
+      expect(state).toMatchObject({
+        displayedShotsCount: 0,
+        displayedShotsLength: 0,
+        displayedShotsTimeSpent: 0,
+        displayedShotsEstimation: 0,
+        displayedShotsFrames: 0,
+        displayedShotsDrawings: 0
+      })
+    }
+  )
 })

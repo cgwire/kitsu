@@ -19,14 +19,22 @@
         <form v-if="!(isMissingOTP || isWrongOTP)">
           <div class="field" v-if="mainConfig?.saml_enabled">
             <p class="control">
-              <a class="button is-fullwidth" href="/api/auth/saml/login">
+              <a
+                class="button is-fullwidth"
+                href="/api/auth/saml/login"
+                @click="saveSSORedirect"
+              >
                 {{ loginSAMLButtonInfo }}
               </a>
             </p>
           </div>
           <div class="field" v-if="mainConfig?.oidc_enabled">
             <p class="control">
-              <a class="button is-fullwidth" href="/api/auth/oidc/login">
+              <a
+                class="button is-fullwidth"
+                href="/api/auth/oidc/login"
+                @click="saveSSORedirect"
+              >
                 {{ loginOIDCButtonInfo }}
               </a>
             </p>
@@ -51,6 +59,7 @@
           <div class="field">
             <p class="control has-icon">
               <input
+                ref="passwordFieldRef"
                 class="input is-medium password"
                 type="password"
                 autocomplete="current-password"
@@ -124,6 +133,8 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import auth from '@/lib/auth'
+
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 
 // Composables
@@ -139,6 +150,7 @@ const store = useStore()
 
 const email = ref('')
 const password = ref('')
+const passwordFieldRef = ref(null)
 const fadeAway = ref(false)
 const isInactiveUserError = ref(false)
 const isMissingOTP = ref(false)
@@ -222,6 +234,10 @@ const confirmLogIn = async twoFactorPayload => {
   }
 }
 
+const saveSSORedirect = () => {
+  auth.saveSSORedirect(route.query.redirect)
+}
+
 const changedTwoFA = () => {
   isWrongOTP.value = false
 }
@@ -232,6 +248,8 @@ const changedTwoFA = () => {
 onMounted(() => {
   email.value = store.state.login.email
   password.value = store.state.login.password
+  // Back with the email filled in, the user only has the password to type.
+  if (email.value) passwordFieldRef.value?.focus()
 })
 
 // Head

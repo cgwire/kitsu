@@ -1,12 +1,14 @@
 import Bowser from 'bowser'
 
 import auth from '@/lib/auth'
+import errors from '@/lib/errors'
 import init from '@/lib/init'
 import lang from '@/lib/lang'
 import sentry from '@/lib/sentry'
 import timezone from '@/lib/timezone'
 
 import peopleStore from '@/store/modules/people'
+import productionsStore from '@/store/modules/productions'
 import taskTypeStore from '@/store/modules/tasktypes'
 import userStore from '@/store/modules/user'
 import store from '@/store'
@@ -15,6 +17,7 @@ import Login from '@/components/pages/Login.vue'
 import Main from '@/components/Main.vue'
 
 const AllTasks = () => import('@/components/pages/AllTasks.vue')
+const AppLogin = () => import('@/components/pages/AppLogin.vue')
 const SharedPlaylist = () => import('@/components/pages/SharedPlaylist.vue')
 const Asset = () => import('@/components/pages/Asset.vue')
 const AssetLibrary = () => import('@/components/pages/AssetLibrary.vue')
@@ -89,6 +92,43 @@ const Timesheets = () => import('@/components/pages/Timesheets.vue')
 const Todos = () => import('@/components/pages/Todos.vue')
 const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 
+// The route state still holds the previous page during a navigation: the
+// role is read on the target one.
+const isTargetClient = to =>
+  userStore.getters.isCurrentUserClient(userStore.state, {}, { route: to })
+
+// Runs on every navigation, as the guard of the main route skips moves
+// between its children, such as a production switch.
+export const checkClientAccess = to => {
+  const isClient = isTargetClient(to)
+  if (isClient && to?.matched.some(({ meta }) => meta.forbiddenForClient)) {
+    return { name: 'not-found' }
+  }
+  const { production_id: productionId, episode_id: episodeId } =
+    to?.params || {}
+  const clientAccess = productionsStore.getters.getClientAccess(
+    productionsStore.state,
+    {},
+    {},
+    { isCurrentUserClient: isClient }
+  )(productionId)
+  const isHidden = to?.matched.some(
+    ({ meta }) =>
+      (meta.clientAccess === 'stats' && !clientAccess.isStatsVisible) ||
+      (meta.clientAccess === 'taskList' && !clientAccess.isTaskListVisible)
+  )
+  // The production switcher keeps the section: the playlists are always
+  // open to clients.
+  if (isHidden && episodeId) {
+    return {
+      name: 'episode-playlists',
+      params: { production_id: productionId, episode_id: episodeId }
+    }
+  } else if (isHidden) {
+    return { name: 'playlists', params: { production_id: productionId } }
+  }
+}
+
 export const routes = [
   {
     path: '',
@@ -113,6 +153,9 @@ export const routes = [
       const redirect = await auth.requireAuth(to, from)
       if (redirect) return redirect
 
+      const ssoRedirect = auth.popSSORedirect()
+      if (ssoRedirect) return ssoRedirect
+
       timezone.setTimezone()
       lang.setLocale(userStore.state.user.locale)
       sentry.setContext(peopleStore.state.organisation, userStore.state.user)
@@ -121,7 +164,11 @@ export const routes = [
         try {
           const ready = await init()
           if (!ready) return false
-        } catch {
+        } catch (err) {
+          // The server-down page loads the app again once the server answers,
+          // where a bug would fail again on each check: it fails the
+          // navigation instead, which Sentry reports.
+          if (!errors.isRequestFailure(err)) throw err
           return { name: 'server-down' }
         }
       } else {
@@ -146,6 +193,22 @@ export const routes = [
       lang.setLocale(userStore.state.user.locale)
       sentry.setContext(peopleStore.state.organisation, userStore.state.user)
 
+      if (taskTypeStore.state.taskTypes.length === 0) {
+        try {
+          const ready = await init()
+          store.commit('DATA_LOADING_END')
+          if (!ready) return false
+        } catch (err) {
+          store.commit('DATA_LOADING_END')
+          // As in the home guard: a bug fails the navigation.
+          if (!errors.isRequestFailure(err)) throw err
+          return { name: 'server-down', query: { redirect: to.fullPath } }
+        }
+      } else {
+        store.commit('DATA_LOADING_END')
+      }
+
+      // After init: it loads the project roles and the production flags.
       const isSupervisorOrManager =
         userStore.getters.isCurrentUserManager(userStore.state) ||
         userStore.getters.isCurrentUserSupervisor(userStore.state)
@@ -153,26 +216,10 @@ export const routes = [
         (!userStore.getters.isCurrentUserAdmin(userStore.state) &&
           to?.matched.some(record => record.meta.requiresAdmin)) ||
         (!isSupervisorOrManager &&
-          to?.matched.some(
-            record => record.meta.requiresSupervisorOrManager
-          )) ||
-        (userStore.getters.isCurrentUserClient(userStore.state) &&
-          to?.matched.some(record => record.meta.forbiddenForClient))
-
-      if (taskTypeStore.state.taskTypes.length === 0) {
-        try {
-          const ready = await init()
-          store.commit('DATA_LOADING_END')
-          if (!ready) return false
-        } catch {
-          store.commit('DATA_LOADING_END')
-          return { name: 'server-down' }
-        }
-      } else {
-        store.commit('DATA_LOADING_END')
-      }
+          to?.matched.some(record => record.meta.requiresSupervisorOrManager))
 
       if (isProhibited) return { name: 'not-found' }
+      return checkClientAccess(to)
     },
 
     children: [
@@ -639,37 +686,43 @@ export const routes = [
       {
         path: 'productions/:production_id/assets',
         component: Assets,
-        name: 'assets'
+        name: 'assets',
+        meta: { clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/assets/:asset_id',
         component: Asset,
-        name: 'asset'
+        name: 'asset',
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/shots',
         component: Shots,
-        name: 'shots'
+        name: 'shots',
+        meta: { clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/shots/:shot_id',
         component: Shot,
-        name: 'shot'
+        name: 'shot',
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/edits',
         component: Edits,
-        name: 'edits'
+        name: 'edits',
+        meta: { clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/edits/:edit_id',
         component: Edit,
-        name: 'edit'
+        name: 'edit',
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
@@ -703,19 +756,22 @@ export const routes = [
       {
         path: 'productions/:production_id/sequence-stats',
         component: SequenceStats,
-        name: 'sequence-stats'
+        name: 'sequence-stats',
+        meta: { clientAccess: 'stats' }
       },
 
       {
         path: 'productions/:production_id/asset-types',
         component: ProductionAssetTypes,
-        name: 'production-asset-types'
+        name: 'production-asset-types',
+        meta: { clientAccess: 'stats' }
       },
 
       {
         path: 'productions/:production_id/:type/task-types/:task_type_id',
         component: TaskType,
         name: 'task-type',
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' },
         children: [
           {
             name: 'task-type-schedule',
@@ -732,6 +788,7 @@ export const routes = [
 
       {
         name: 'episode-task',
+        meta: { clientAccess: 'taskList' },
         path: 'productions/:production_id/episodes/:episode_id/:type/tasks/:task_id',
         component: Task,
         children: [
@@ -745,6 +802,7 @@ export const routes = [
 
       {
         name: 'task',
+        meta: { clientAccess: 'taskList' },
         path: 'productions/:production_id/:type/tasks/:task_id',
         component: Task,
         children: [
@@ -760,6 +818,7 @@ export const routes = [
         path: 'productions/:production_id/episode-stats',
         component: EpisodeStats,
         name: 'episode-stats',
+        meta: { clientAccess: 'stats' },
         children: []
       },
 
@@ -798,44 +857,51 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/assets',
         component: Assets,
-        name: 'episode-assets'
+        name: 'episode-assets',
+        meta: { clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/assets/:asset_id',
         component: Asset,
-        name: 'episode-asset'
+        name: 'episode-asset',
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/shots',
         component: Shots,
-        name: 'episode-shots'
+        name: 'episode-shots',
+        meta: { clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/shots/:shot_id',
         component: Shot,
-        name: 'episode-shot'
+        name: 'episode-shot',
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/edits',
         component: Edits,
         name: 'episode-edits',
+        meta: { clientAccess: 'taskList' },
         children: []
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/edits/:edit_id',
         component: Edit,
-        name: 'episode-edit'
+        name: 'episode-edit',
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/asset-types',
         component: ProductionAssetTypes,
-        name: 'episode-production-asset-types'
+        name: 'episode-production-asset-types',
+        meta: { clientAccess: 'stats' }
       },
 
       {
@@ -855,13 +921,15 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/sequence-stats',
         component: SequenceStats,
-        name: 'episode-sequence-stats'
+        name: 'episode-sequence-stats',
+        meta: { clientAccess: 'stats' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id',
         component: TaskType,
         name: 'episode-task-type',
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' },
         children: [
           {
             name: 'episode-task-type-schedule',
@@ -881,6 +949,7 @@ export const routes = [
         component: TaskType,
         name: 'episodes-task-type',
         meta: {
+          clientAccess: 'taskList',
           section: 'episodes',
           forbiddenForClient: true
         },
@@ -901,6 +970,7 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/tasks/:task_id',
         name: 'episode-episode-task',
+        meta: { clientAccess: 'taskList' },
         component: Task,
         children: [
           {
@@ -924,6 +994,17 @@ export const routes = [
     name: 'login-2fa',
     beforeEnter: (to, from) => {
       if (!store.getters.user) return { name: 'login' }
+    }
+  },
+  {
+    path: '/app-login',
+    component: AppLogin,
+    name: 'app-login',
+    beforeEnter: async (to, from) => {
+      const redirect = await auth.requireAuth(to, from)
+      if (redirect) return redirect
+      lang.setLocale(userStore.state.user.locale)
+      store.commit('DATA_LOADING_END')
     }
   },
   {

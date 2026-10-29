@@ -204,6 +204,13 @@ export default {
     }
   },
 
+  getPersonQuotas(productionId, personId, computeMode) {
+    return client.pget(
+      `/api/data/projects/${productionId}/quotas/persons/` +
+        `${personId}?count_mode=${computeMode}`
+    )
+  },
+
   getPeopleQuotas(productionId, personId, detailLevel, computeMode) {
     return client.pget(
       `/api/data/projects/${productionId}/quotas/person/` +

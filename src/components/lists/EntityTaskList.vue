@@ -268,6 +268,7 @@ const entityAssignees = computed(() => [
 // Functions
 // --------------------------------------------------------------------------
 const onBodyScroll = event => {
+  if (!headerWrapper.value) return
   headerWrapper.value.style.left = `-${event.target.scrollLeft}px`
 }
 

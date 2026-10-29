@@ -34,7 +34,7 @@
           @click="mode = 'publish'"
           @keydown.enter.prevent="mode = 'publish'"
           @keydown.space.prevent="mode = 'publish'"
-          v-if="!isConcept"
+          v-if="!isConcept && !isCurrentUserClient"
         >
           {{ $t('tasks.publish_revision') }}
         </span>
@@ -764,7 +764,11 @@ const runAddComment = (
     )
   }
 
-  store.commit('CLEAR_UPLOAD_PROGRESS')
+  // The extra preview modal of the panel may upload at the same time.
+  store.commit(
+    'CLEAR_UPLOAD_PROGRESS',
+    props.previewForms.map(form => form.get('file').name)
+  )
   if (mode.value === 'publish') {
     if (!showCommentArea.value) textVal = ''
     attachmentsVal = []

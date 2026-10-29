@@ -36,6 +36,8 @@ import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Breakdown from '@/components/pages/Breakdown.vue'
 
+import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
+
 const production = { id: 'p1', production_type: 'tvshow' }
 
 // The page is mounted on a store whose scope (production, episode) the tests
@@ -398,6 +400,61 @@ describe('Breakdown page, CSV import', () => {
     expect(importModal.props('active')).toBe(true)
     expect(importModal.props('isError')).toBe(false)
     wrapper.unmount()
+  })
+
+  describe('of a file', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    const confirmFile = async wrapper => {
+      await flushPromises()
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.props('icon') === 'import')
+        .vm.$emit('click')
+      const formData = new FormData()
+      formData.append('file', new File(['Name'], 'import.csv'))
+      wrapper.findComponent(ImportModal).vm.$emit('confirm', formData, 'file')
+      await flushPromises()
+      return wrapper.findComponent(ImportModal)
+    }
+
+    test('shows the error of a file the browser cannot read', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { wrapper } = mountPage()
+
+      const importModal = await confirmFile(wrapper)
+
+      expect(importModal.props()).toMatchObject({
+        active: true,
+        isError: true,
+        isLoading: false
+      })
+      wrapper.unmount()
+    })
+
+    test('releases the modal on a bug, left to the error handler', async () => {
+      vi.stubGlobal('FileReader', BrokenFileReader)
+      const { wrapper } = mountPage()
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+      const importModal = await confirmFile(wrapper)
+
+      expect(importModal.props()).toMatchObject({
+        isError: true,
+        isLoading: false
+      })
+      expect(errorHandler).toHaveBeenCalledWith(
+        expect.any(TypeError),
+        expect.anything(),
+        expect.anything()
+      )
+      wrapper.unmount()
+    })
   })
 })
 
@@ -1062,5 +1119,29 @@ describe('Breakdown page, asset creation', () => {
 
     expect(modal.props('active')).toBe(true)
     expect(modal.props('isSuccess')).toBe(false)
+  })
+})
+
+describe('Breakdown page, asset column scroll', () => {
+  // The browser still delivers a scroll queued before the unmount, once the
+  // template refs are null.
+  test('ignores a scroll that reaches the detached asset column', async () => {
+    const displayMoreAssets = vi.fn()
+    const { wrapper } = mountPage({ actions: { displayMoreAssets } })
+    await flushPromises()
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+    const column = wrapper.find('.assets-column').element
+    displayMoreAssets.mockClear()
+    // jsdom has no layout: the column reads as scrolled to its bottom.
+    column.dispatchEvent(new Event('scroll'))
+    expect(displayMoreAssets).toHaveBeenCalledTimes(1)
+    displayMoreAssets.mockClear()
+    wrapper.unmount()
+
+    column.dispatchEvent(new Event('scroll'))
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(displayMoreAssets).not.toHaveBeenCalled()
   })
 })

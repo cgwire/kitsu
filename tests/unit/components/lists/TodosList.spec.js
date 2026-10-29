@@ -1,10 +1,16 @@
 import { shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
+import { nextTick } from 'vue'
 import { createStore } from 'vuex'
+
+import { trackTaskSelection } from '../../fixtures/task-selection'
 
 import resizableColumn from '@/directives/resizable-column'
 
 import TodosList from '@/components/lists/TodosList.vue'
+
+// The tasks module of the selection fixture reaches the store index.
+vi.mock('@/store', () => ({ default: {} }))
 
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
@@ -21,12 +27,19 @@ const task = {
   estimation: 240
 }
 
-const mountList = (props, config, { getters = {}, actions = {} } = {}) =>
+const mountList = (
+  props,
+  config,
+  { getters = {}, actions = {}, selection, attachTo } = {}
+) =>
   shallowMount(TodosList, {
+    attachTo,
     global: {
       config,
       plugins: [
         createStore({
+          state: selection?.state,
+          mutations: selection?.mutations,
           getters: {
             dateFormat: () => 'YYYY-MM-DD',
             isCurrentUserManager: () => false,
@@ -36,16 +49,19 @@ const mountList = (props, config, { getters = {}, actions = {} } = {}) =>
             organisation: () => ({ hours_by_day: 8 }),
             personMap: () => new Map(),
             productionMap: () => new Map(),
+            selectedTasks: () => new Map(),
             taskMap: () => new Map(),
             taskTypeMap: () => new Map(),
             use12HourClock: () => false,
             user: () => ({ id: 'user-1', departments: [] }),
+            ...selection?.getters,
             ...getters
           },
           actions: {
             addSelectedTask: () => {},
             clearSelectedTasks: () => {},
             removeSelectedTask: () => {},
+            ...selection?.actions,
             ...actions
           }
         }),
@@ -97,6 +113,70 @@ describe('lists/TodosList', () => {
     localStorage.clear()
   })
 
+  // Phones get read-only cards from the global datatable--cards rule
+  describe('cards on mobile', () => {
+    const cell = (wrapper, name) =>
+      wrapper.find(`.datatable-body tr > .${name}`)
+
+    test('opts the table into the card layout', async () => {
+      const wrapper = await mountLoadedList()
+      expect(wrapper.find('table').classes()).toContain('datatable--cards')
+      expect(cell(wrapper, 'name').classes()).toContain('card-head')
+      wrapper.unmount()
+    })
+
+    test('labels the cells that carry a value', async () => {
+      const wrapper = await mountLoadedList()
+      expect(cell(wrapper, 'production').attributes('data-label')).toBe(
+        'main.production'
+      )
+      expect(cell(wrapper, 'type').attributes('data-label')).toBe(
+        'tasks.fields.task_type'
+      )
+      expect(cell(wrapper, 'status').attributes('data-label')).toBe(
+        'tasks.fields.task_status'
+      )
+      expect(cell(wrapper, 'due-date').attributes('data-label')).toBe(
+        'tasks.fields.due_date'
+      )
+      expect(cell(wrapper, 'estimation').attributes('data-label')).toBe(
+        'main.estimation'
+      )
+      wrapper.unmount()
+    })
+
+    test('labels the end date of a done task', async () => {
+      const wrapper = mountList({ done: true, isLoading: true, tasks: [] })
+      await wrapper.setProps({
+        isLoading: false,
+        tasks: [{ ...task, end_date: '2026-10-02' }]
+      })
+      expect(cell(wrapper, 'end-date').attributes('data-label')).toBe(
+        'tasks.fields.end_date'
+      )
+      wrapper.unmount()
+    })
+
+    test('leaves the empty and secondary cells out of the card', async () => {
+      const wrapper = await mountLoadedList()
+      ;['start-date', 'duration', 'last-comment'].forEach(name => {
+        expect(cell(wrapper, name).attributes('data-label')).toBeUndefined()
+      })
+      wrapper.unmount()
+    })
+  })
+
+  test('can show the empty message without the illustration', () => {
+    const wrapper = mountList({
+      emptyText: 'Nothing waiting',
+      tasks: [],
+      withIllustration: false
+    })
+    expect(wrapper.find('.empty-list').text()).toBe('Nothing waiting')
+    expect(wrapper.find('.empty-list img').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   test('lets the user resize the entity column once the tasks load', async () => {
     const wrapper = await mountLoadedList()
 
@@ -144,6 +224,119 @@ describe('lists/TodosList', () => {
     wrapper.unmount()
   })
 
+  describe('selection', () => {
+    const tasks = ['task-1', 'task-2', 'task-3'].map(id => ({ ...task, id }))
+
+    const mountSelectableList = async ({ actions, getters, selection }) => {
+      const wrapper = mountList({ isLoading: true, tasks: [] }, undefined, {
+        actions,
+        getters,
+        selection
+      })
+      await wrapper.setProps({ isLoading: false, tasks })
+      return wrapper
+    }
+
+    // A Ctrl+click left the row selected, and the edits reached it.
+    test('unselects a row of a multi-selection on Ctrl+click', async () => {
+      const updateTask = vi.fn()
+      const selection = trackTaskSelection()
+      const wrapper = await mountSelectableList({
+        selection,
+        actions: { updateTask },
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () => new Map(tasks.map(entry => [entry.id, entry]))
+        }
+      })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+      await cells[2].trigger('click', { ctrlKey: true })
+
+      await cells[1].trigger('click', { ctrlKey: true })
+      await wrapper.find('tbody td.estimation input').setValue('1')
+
+      expect(selection.selectedIds()).toEqual(['task-1', 'task-3'])
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1',
+        'task-3'
+      ])
+
+      wrapper.unmount()
+    })
+
+    test('selects a row of a multi-selection alone on a click', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = await mountSelectableList({ selection })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+
+      await cells[1].trigger('click')
+
+      expect(selection.selectedIds()).toEqual(['task-2'])
+
+      wrapper.unmount()
+    })
+
+    // A Shift+click back to a closer row shrank the highlight only: the
+    // action panel still changed the rows left out.
+    test('gives the store only the range of the last Shift+click', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = await mountSelectableList({ selection })
+      const cells = wrapper.findAll('tbody td.duration')
+
+      await cells[0].trigger('click')
+      await cells[2].trigger('click', { shiftKey: true })
+      await cells[1].trigger('click', { shiftKey: true })
+
+      expect(wrapper.findAll('tbody tr.selected')).toHaveLength(2)
+      expect(selection.selectedIds()).toEqual(['task-1', 'task-2'])
+
+      wrapper.unmount()
+    })
+
+    // A new sort dropped the highlight but not the store selection: the
+    // action panel changed rows the list no longer showed as selected.
+    test('keeps the selected rows highlighted through a new sort', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = await mountSelectableList({ selection })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+
+      await wrapper.setProps({ tasks: [...tasks].reverse() })
+
+      expect(
+        wrapper.findAll('tbody tr').map(row => row.classes('selected'))
+      ).toEqual([false, true, true])
+      expect(selection.selectedIds()).toEqual(['task-1', 'task-2'])
+
+      wrapper.unmount()
+    })
+
+    // Alt+Down came back to the only row and unselected it.
+    test('keeps the only row selected on Alt+Down', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = mountList({ isLoading: true, tasks: [] }, undefined, {
+        selection
+      })
+      await wrapper.setProps({ isLoading: false, tasks: [task] })
+      await wrapper.find('tbody td.duration').trigger('click')
+
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { altKey: true, keyCode: 40 })
+      )
+      await nextTick()
+
+      expect(wrapper.findAll('tbody tr.selected')).toHaveLength(1)
+      expect(selection.selectedIds()).toEqual(['task-1'])
+
+      wrapper.unmount()
+    })
+  })
+
   // 2.05 hours make 122.99999999999999 minutes in floats.
   test('saves an estimation typed in hours in whole minutes', async () => {
     const updateTask = vi.fn()
@@ -167,6 +360,32 @@ describe('lists/TodosList', () => {
     expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
       { taskId: 'task-1', data: { estimation: 123 } }
     ])
+
+    wrapper.unmount()
+  })
+
+  // My tasks shows the list read-only, the person page keeps the editors
+  test('shows no editor when not editable', async () => {
+    const wrapper = mountList(
+      { isLoading: true, tasks: [], editable: false },
+      undefined,
+      {
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () => new Map([[task.id, task]])
+        }
+      }
+    )
+    await wrapper.setProps({ isLoading: false, tasks: [task] })
+    await wrapper.find('tbody td.duration').trigger('click')
+
+    expect(wrapper.find('tbody td.estimation input').exists()).toBe(false)
+    expect(wrapper.find('tbody td.start-date date-field-stub').exists()).toBe(
+      false
+    )
+    expect(wrapper.find('tbody td.due-date date-field-stub').exists()).toBe(
+      false
+    )
 
     wrapper.unmount()
   })
@@ -222,6 +441,48 @@ describe('lists/TodosList', () => {
 
       expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
         { taskId: 'task-1', data: { estimation: 0 } }
+      ])
+
+      wrapper.unmount()
+    })
+
+    // The field goes away with the selection of its row, and a browser fires
+    // the change of a field removed while focused once the next row is
+    // selected: the typed value was saved on that row.
+    test('saves the value typed before Alt+Down on its own row', async () => {
+      const next = { ...task, id: 'task-2' }
+      const updateTask = vi.fn()
+      const wrapper = mountList({ isLoading: true, tasks: [] }, undefined, {
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () =>
+            new Map([
+              [task.id, task],
+              [next.id, next]
+            ])
+        },
+        actions: { updateTask },
+        attachTo: document.body
+      })
+      await wrapper.setProps({ isLoading: false, tasks: [task, next] })
+      await wrapper.find('tbody td.duration').trigger('click')
+      const field = wrapper.find('tbody td.estimation input').element
+      field.focus()
+      field.value = '1'
+      // jsdom fires no change on blur, nor on the removal of a focused field
+      field.addEventListener('blur', () =>
+        field.dispatchEvent(new Event('change'))
+      )
+
+      field.dispatchEvent(
+        new KeyboardEvent('keydown', { altKey: true, keyCode: 40, bubbles: true })
+      )
+      const isFocusedAtRemoval = document.activeElement === field
+      await nextTick()
+      if (isFocusedAtRemoval) field.dispatchEvent(new Event('change'))
+
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1'
       ])
 
       wrapper.unmount()

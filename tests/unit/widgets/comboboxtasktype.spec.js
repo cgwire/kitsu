@@ -1,9 +1,11 @@
 import { shallowMount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
 import i18n from '@/lib/i18n'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 import './setup'
 
 describe('ComboboxTaskType', () => {
@@ -71,6 +73,66 @@ describe('ComboboxTaskType', () => {
     expect(findTeleportedList()).not.toBeNull()
     await trigger.trigger('keydown', { key: 'Escape' })
     expect(findTeleportedList()).toBeNull()
+  })
+
+  // The browser shows the element in full screen alone, like a player
+  // holding the move comment modal: the list opens inside it.
+  describe('in full screen', () => {
+    let player = null
+
+    const openIn = async element => {
+      wrapper.unmount()
+      wrapper = shallowMount(ComboboxTaskType, {
+        props: { taskTypeList, modelValue: 'tt-2' },
+        attachTo: element.appendChild(document.createElement('div')),
+        global: { plugins: [i18n, store], stubs: { teleport: false } }
+      })
+      await nextTick()
+      await wrapper.find('.flexrow.selector').trigger('click')
+      return findTeleportedList()
+    }
+
+    beforeEach(() => {
+      player = document.body.appendChild(document.createElement('div'))
+      vi.spyOn(window, 'pageYOffset', 'get').mockReturnValue(300)
+    })
+
+    afterEach(() => {
+      resetFullScreen()
+      player.remove()
+      vi.restoreAllMocks()
+    })
+
+    // The element starts at the top of the screen, whatever the scroll of
+    // the page, and its modals are above the page's.
+    it('opens its list inside it, over its modals', async () => {
+      setFullScreenElement(player)
+
+      const list = await openIn(player)
+
+      expect(list.parentElement).toBe(player)
+      expect(list.classList.contains('in-full-screen')).toBe(true)
+      expect(list.style.top).toBe('35px')
+    })
+
+    it('opens its list in <body> out of it, below the page scroll', async () => {
+      const list = await openIn(player)
+
+      expect(list.parentElement).toBe(document.body)
+      expect(list.classList.contains('in-full-screen')).toBe(false)
+      expect(list.style.top).toBe('335px')
+    })
+
+    // The list would stay where the full screen put it.
+    it('closes its list as the full screen ends', async () => {
+      setFullScreenElement(player)
+      await openIn(player)
+
+      setFullScreenElement(null)
+      await nextTick()
+
+      expect(findTeleportedList()).toBeNull()
+    })
   })
 
   it('removes the trigger from tab order when disabled', async () => {

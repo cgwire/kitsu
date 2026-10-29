@@ -4,6 +4,7 @@ import {
   buildAssetIndex,
   buildExactNameIndex,
   buildNameIndex,
+  buildPeopleIndex,
   buildShotIndex,
   buildTaskIndex,
   buildTaskTypeIndex,
@@ -143,6 +144,27 @@ describe('lib/indexing', () => {
     expect(index.bunny[0].id).toEqual(3)
     expect(index.nny).toHaveLength(1)
     expect(index.nny[0].id).toEqual(3)
+  })
+
+  describe('buildPeopleIndex', () => {
+    it('indexes the user and domain names of the email', () => {
+      const people = [{ id: 1, name: 'Jane Doe', email: 'jdoe@studio.com' }]
+      const index = buildPeopleIndex(people)
+      expect(indexSearch(index, ['jdoe'])).toEqual(people)
+      expect(indexSearch(index, ['studio'])).toEqual(people)
+    })
+
+    it('indexes an email without a domain', () => {
+      const people = [
+        { id: 1, name: 'Jane Doe', email: 'jdoe' },
+        { id: 2, name: 'John Roe', email: 'jroe@' },
+        { id: 3, name: 'Ann Poe', email: 'apoe@studio.com' }
+      ]
+      const index = buildPeopleIndex(people)
+      expect(indexSearch(index, ['jdoe'])).toEqual([people[0]])
+      expect(indexSearch(index, ['jroe'])).toEqual([people[1]])
+      expect(indexSearch(index, ['studio'])).toEqual([people[2]])
+    })
   })
 
   describe('buildExactNameIndex', () => {

@@ -24,7 +24,7 @@
           class="file-upload-status"
           v-if="uploadedFiles.length > 1 && !hideFileNames"
         >
-          {{ uploadedFiles.length }} {{ $t('main.files_selected') }}
+          {{ $t('main.files_selected', { count: uploadedFiles.length }) }}
         </span>
         <span
           class="file-upload-status"
@@ -109,8 +109,9 @@ const reset = () => {
   }
 }
 
+// A drop of text or of a link holds no file.
 const onDrop = event => {
-  if (event.dataTransfer.files) {
+  if (event.dataTransfer.files?.length) {
     isSaving.value = false
     filesChange('file', event.dataTransfer.files)
   }

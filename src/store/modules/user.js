@@ -2,6 +2,7 @@ import peopleApi from '@/store/api/people'
 import peopleStore from '@/store/modules/people'
 import taskStatusStore from '@/store/modules/taskstatus'
 import auth from '@/lib/auth'
+import { isLatestTaskComment, isPostedSince } from '@/lib/comments'
 import { sortTasks, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex } from '@/lib/indexing'
 import { getKeyWords } from '@/lib/filtering'
@@ -53,7 +54,9 @@ import {
   CHANGE_AVATAR_FILE,
   CLEAR_AVATAR,
   EDIT_PEOPLE_END,
+  LOAD_TASK_END,
   NEW_TASK_COMMENT_END,
+  SET_TASK_LAST_COMMENT,
   SET_TODO_LIST_SCROLL_POSITION,
   SAVE_ASSET_SEARCH_END,
   SAVE_SHOT_SEARCH_END,
@@ -90,6 +93,20 @@ const cache = {
   doneIndex: {},
   doneTasks: [],
   todosIndex: {}
+}
+
+// Zou's order (TWO_FACTOR_FALLBACKS), so the page agrees with it until a
+// reload.
+const TWO_FACTOR_FALLBACKS = {
+  totp: ['fido', 'email_otp'],
+  email_otp: ['fido', 'totp'],
+  fido: ['totp', 'email_otp']
+}
+
+const preferNextTwoFactor = (user, method) => {
+  if (user.preferred_two_factor_authentication !== method) return
+  user.preferred_two_factor_authentication =
+    TWO_FACTOR_FALLBACKS[method].find(next => user[`${next}_enabled`]) ?? null
 }
 
 const initialState = {
@@ -324,8 +341,11 @@ const actions = {
       .then(body => coercePublicKeyFromJSON(body))
   },
 
-  async unregisterFIDO({ commit }, { deviceName }) {
-    await peopleApi.unregisterFIDO(deviceName)
+  async unregisterFIDO({ commit }, { deviceName, twoFactorPayload }) {
+    await peopleApi.unregisterFIDO(
+      deviceName,
+      coerceTwoFactorPayload(twoFactorPayload)
+    )
     commit(USER_UNREGISTER_FIDO_SUCCESS, deviceName)
   },
 
@@ -574,15 +594,7 @@ const mutations = {
 
   [USER_DISABLE_TOTP_SUCCESS](state) {
     state.user.totp_enabled = false
-    if (state.user.preferred_two_factor_authentication === 'totp') {
-      if (state.user.fido_enabled) {
-        state.user.preferred_two_factor_authentication = 'fido'
-      } else if (state.user.email_otp_enabled) {
-        state.user.preferred_two_factor_authentication = 'email_otp'
-      } else {
-        state.user.preferred_two_factor_authentication = null
-      }
-    }
+    preferNextTwoFactor(state.user, 'totp')
   },
 
   [USER_ENABLE_EMAIL_OTP_SUCCESS](state) {
@@ -594,15 +606,7 @@ const mutations = {
 
   [USER_DISABLE_EMAIL_OTP_SUCCESS](state) {
     state.user.email_otp_enabled = false
-    if (state.user.preferred_two_factor_authentication === 'email_otp') {
-      if (state.user.fido_enabled) {
-        state.user.preferred_two_factor_authentication = 'fido'
-      } else if (state.user.totp_otp_enabled) {
-        state.user.preferred_two_factor_authentication = 'totp'
-      } else {
-        state.user.preferred_two_factor_authentication = null
-      }
-    }
+    preferNextTwoFactor(state.user, 'email_otp')
   },
 
   [USER_REGISTER_FIDO_SUCCESS](state, deviceName) {
@@ -623,15 +627,7 @@ const mutations = {
     }
     if (state.user.fido_devices.length === 0) {
       state.user.fido_enabled = false
-      if (state.user.preferred_two_factor_authentication === 'fido') {
-        if (state.user.email_otp_enabled) {
-          state.user.preferred_two_factor_authentication = 'email_otp'
-        } else if (state.user.totp_otp_enabled) {
-          state.user.preferred_two_factor_authentication = 'totp'
-        } else {
-          state.user.preferred_two_factor_authentication = null
-        }
-      }
+      preferNextTwoFactor(state.user, 'fido')
     }
   },
 
@@ -695,18 +691,45 @@ const mutations = {
 
   [NEW_TASK_COMMENT_END](state, { comment, taskId }) {
     const task = state.todos.find(task => task.id === taskId)
+    // A status created after the context is missing from the store.
+    const taskStatus = helpers.getTaskStatus(comment.task_status_id)
 
-    if (task) {
-      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
-
+    if (task && taskStatus && isLatestTaskComment(task, comment)) {
       Object.assign(task, {
         task_status_id: taskStatus.id,
         task_status_name: taskStatus.name,
         task_status_short_name: taskStatus.short_name,
         task_status_color: taskStatus.color,
-        last_comment: comment
+        last_comment: comment,
+        last_comment_date: comment.created_at || task.last_comment_date
       })
       cache.todosIndex = buildTaskIndex(state.todos)
+    }
+  },
+
+  // A task reloads on each update Zou announces, the reset that follows a
+  // comment deletion included: the todo takes its status and last comment
+  // date.
+  [LOAD_TASK_END](state, loadedTask) {
+    const task = state.todos.find(task => task.id === loadedTask.id)
+    const taskStatus = helpers.getTaskStatus(loadedTask.task_status_id)
+
+    if (task && taskStatus) {
+      Object.assign(task, {
+        task_status_id: taskStatus.id,
+        task_status_name: taskStatus.name,
+        task_status_short_name: taskStatus.short_name,
+        task_status_color: taskStatus.color,
+        last_comment_date: loadedTask.last_comment_date
+      })
+      cache.todosIndex = buildTaskIndex(state.todos)
+    }
+  },
+
+  [SET_TASK_LAST_COMMENT](state, { taskId, commentId, comment }) {
+    const task = state.todos.find(task => task.id === taskId)
+    if (task && !isPostedSince(task.last_comment, comment, commentId)) {
+      task.last_comment = comment || {}
     }
   },
 

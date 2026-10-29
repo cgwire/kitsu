@@ -1049,6 +1049,7 @@ const removeOneAssetFromSelection = async assetId => {
 
 const onAssetListScroll = event => {
   const assetList = assetListRef.value
+  if (!assetList) return
   const maxHeight = assetList.scrollHeight - assetList.offsetHeight
   if (maxHeight < event.target.scrollTop + 100) {
     store.dispatch('displayMoreAssets')
@@ -1092,10 +1093,11 @@ const renderImport = async (data, mode) => {
     hideImportModal()
     modals.isImportRenderDisplayed = true
   } catch (err) {
-    console.error(err)
     errors.importing = true
+    csv.logReadFailure(err)
+  } finally {
+    loading.importing = false
   }
-  loading.importing = false
 }
 
 const uploadImportFile = async data => {

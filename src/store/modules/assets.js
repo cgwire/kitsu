@@ -237,16 +237,18 @@ const helpers = {
     }
   ) {
     const taskMap = tasksStore.state.taskMap
-    const taskTypes = Array.from(taskTypeMap.values()).filter(
-      taskType => taskType.for_entity === 'Asset'
-    )
+    const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = assetSearch
     const keywords = getKeyWords(query) || []
     const filters = getFilters({
       entryIndex: cache.assetIndex,
       assetTypes: state.assetTypes,
-      taskTypes,
+      taskTypes: taskTypes.filter(taskType => taskType.for_entity === 'Asset'),
+      // An asset is ready for a shot task type.
+      readyForTaskTypes: taskTypes.filter(
+        taskType => taskType.for_entity === 'Shot'
+      ),
       taskStatuses,
       descriptors: production?.descriptors || [],
       persons,
@@ -344,7 +346,6 @@ const state = {
 }
 
 const getters = {
-  assets: state => cache.assets,
   assetMap: state => cache.assetMap,
   assetSearchText: state => state.assetSearchText,
   assetSearchQueries: state => state.assetSearchQueries,
@@ -457,9 +458,14 @@ const actions = {
     const marker = isPartial ? '#partial' : all ? '#shared' : ''
     const scope = all ? 'all' : (episode?.id ?? '')
     const loadingKey = `${production.id}/${scope}${marker}`
+    // The full list of the same scope, loaded or on its way, holds every
+    // asset a partial load would fetch: a partial load takes it rather than
+    // replace the list a page displays with assets without their tasks.
+    const isFullListOfScope =
+      isPartial && state.assetsLoadingKey === `${production.id}/${scope}`
 
     if (state.isAssetsLoading) {
-      if (state.assetsLoadingKey === loadingKey) {
+      if (state.assetsLoadingKey === loadingKey || isFullListOfScope) {
         return cache.assetsLoadingPromise || cache.assets
       }
       // Another scope is in flight (the user switched episode mid-load): wait
@@ -471,6 +477,7 @@ const actions = {
         () => dispatch('loadAssets', { all, withShared, withTasks })
       )
     }
+    if (isFullListOfScope) return cache.assets
 
     if (all || episode?.id === 'all') {
       episode = null // Do not filter by episode

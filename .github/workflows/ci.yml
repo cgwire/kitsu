@@ -1,7 +1,13 @@
 ---
 name: Kitsu CI
 
-on: [push, pull_request]
+# Branches only: scripts/release.sh pushes each tag together with its
+# commit on main, which the main run already tests.
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
 
 # A new push to the same branch makes the run in flight pointless: stop it
 # instead of paying for it to finish.
@@ -89,10 +95,12 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v7
+      # Same Node as the release build, so a build that would fail the
+      # release fails here first.
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: current
+          node-version-file: package.json
           cache: npm
       - name: Install npm dependencies
         run: |

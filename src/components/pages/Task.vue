@@ -186,6 +186,7 @@
               <div v-if="isPreviews">
                 <preview-player
                   ref="preview-player"
+                  :can-comment="isCommentingAllowed"
                   :entity-preview-files="taskEntityPreviews"
                   :extra-wide="true"
                   :fps="currentFps"
@@ -423,21 +424,36 @@
         @confirm="confirmAddPreviewModal"
       />
 
-      <add-preview-modal
-        ref="add-extra-preview-modal"
-        :active="modals.addExtraPreview"
-        :is-loading="loading.addExtraPreview"
-        :is-error="errors.addExtraPreview"
-        :form-data="addExtraPreviewFormData"
-        message=""
-        :title="
-          task
-            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
-            : ''
-        "
-        @cancel="hideExtraPreviewModal"
-        @confirm="createExtraPreview"
-      />
+      <!-- The browser shows a player in full screen alone: the modals of its
+           "+" and trash buttons go into it. -->
+      <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
+        <add-preview-modal
+          ref="add-extra-preview-modal"
+          :active="modals.addExtraPreview"
+          :is-loading="loading.addExtraPreview"
+          :is-error="errors.addExtraPreview"
+          :form-data="addExtraPreviewFormData"
+          message=""
+          :upload-progress="uploadProgress"
+          :title="
+            task
+              ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
+              : ''
+          "
+          @cancel="hideExtraPreviewModal"
+          @confirm="createExtraPreview"
+        />
+
+        <delete-modal
+          :active="modals.deleteExtraPreview"
+          :is-loading="loading.deleteExtraPreview"
+          :is-error="errors.deleteExtraPreview"
+          :text="$t('tasks.delete_preview')"
+          :error-text="$t('tasks.delete_preview_error')"
+          @cancel="hideRemoveExtraPreviewModal"
+          @confirm="confirmDeleteTaskPreview"
+        />
+      </teleport>
 
       <edit-comment-modal
         :active="modals.editComment"
@@ -462,16 +478,6 @@
         @confirm="confirmDeleteTaskComment"
         @cancel="onCancelDeleteComment"
       />
-
-      <delete-modal
-        :active="modals.deleteExtraPreview"
-        :is-loading="loading.deleteExtraPreview"
-        :is-error="errors.deleteExtraPreview"
-        :text="$t('tasks.delete_preview')"
-        :error-text="$t('tasks.delete_preview_error')"
-        @cancel="hideRemoveExtraPreviewModal"
-        @confirm="confirmDeleteTaskPreview"
-      />
     </div>
   </div>
 </template>
@@ -479,6 +485,7 @@
 <script setup>
 import {
   computed,
+  defineAsyncComponent,
   getCurrentInstance,
   nextTick,
   onBeforeUnmount,
@@ -502,8 +509,11 @@ import {
   ImageIcon
 } from 'lucide-vue-next'
 
-import { isClientThread } from '@/lib/comments'
+import { isListOfPageLoaded } from '@/composables/entity'
+import { useFullScreenTarget } from '@/composables/fullScreen'
+import { isCommentReplyable } from '@/lib/comments'
 import drafts from '@/lib/drafts'
+import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
 import { formatRevision } from '@/lib/preview'
@@ -541,8 +551,11 @@ import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import TaskWorkingFiles from '@/components/widgets/TaskWorkingFiles.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 /* eslint-enable no-unused-vars */
+
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
 
 defineOptions({
   name: 'task'
@@ -564,7 +577,8 @@ const taskComments = ref([])
 const taskPreviews = ref([])
 const commentToEdit = ref(null)
 const failedActionCommentId = ref(null)
-const selectedPreviewId = ref(null)
+// The revision of the URL shows from the first render, not after the latest.
+const selectedPreviewId = ref(route.params.preview_id || null)
 const previewForms = ref([])
 const currentFrame = ref(0)
 const isUseCurrentFrame = ref(false)
@@ -610,6 +624,7 @@ provide('draftComment', draftComment)
 
 const taskColumns = useTemplateRef('task-columns')
 const previewPlayerRef = useTemplateRef('preview-player')
+const fullScreenPlayer = useFullScreenTarget(() => previewPlayerRef.value?.$el)
 const addCommentRef = useTemplateRef('add-comment')
 const addPreviewModalRef = useTemplateRef('add-preview-modal')
 const addExtraPreviewModalRef = useTemplateRef('add-extra-preview-modal')
@@ -635,6 +650,7 @@ const taskMetadataDescriptors = computed(
   () => store.getters.taskMetadataDescriptors
 )
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const uploadProgress = computed(() => store.getters.uploadProgress)
 const user = computed(() => store.getters.user)
 const organisation = computed(() => store.getters.organisation)
 const isCurrentUserManager = computed(
@@ -665,7 +681,20 @@ const entityListsByType = {
   Shot: () => shotsStore.cache.shots
 }
 
-const entityList = computed(() => entityListsByType[currentType.value]())
+// The page loads the list of its episode once the task shows, and a list load
+// replaces the cached array out of sight of Vue: the chevrons walk the list
+// once that load is over. The sequences and the episodes reload without the
+// tasks the chevrons read: their lists stay as they were.
+const entityList = computed(() => {
+  const type = currentType.value
+  if (
+    ['Asset', 'Edit', 'Shot'].includes(type) &&
+    !isListOfPageLoaded(store.getters, type)
+  ) {
+    return []
+  }
+  return entityListsByType[type]()
+})
 
 // Computed (task)
 // --------------------------------------------------------------------------
@@ -1080,8 +1109,12 @@ function taskPath(targetTask, section = 'task') {
 
     if (isTVShow.value && currentEpisode.value) {
       target.name = `episode-${section}`
+      // The episode of the URL, the one of the list the chevrons walk: a task
+      // the store reloads carries its own, for an asset its source episode.
       target.params.episode_id =
-        targetTask.episode_id || currentEpisode.value.id
+        route.params.episode_id ||
+        targetTask.episode_id ||
+        currentEpisode.value.id
     }
   }
   return target
@@ -1126,9 +1159,11 @@ const resetPreview = (changeRoute = true) => {
 }
 
 const clearPreviewFiles = () => {
+  store.commit(
+    'CLEAR_UPLOAD_PROGRESS',
+    previewForms.value.map(form => form.get('file').name)
+  )
   previewForms.value = []
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
-  store.commit('CLEAR_UPLOAD_PROGRESS')
 }
 
 const reset = ({ keepPreviewFiles = false } = {}) => {
@@ -1228,12 +1263,14 @@ const postComment = (
   link = undefined,
   forClient = false
 ) => {
+  const taskId = task.value.id
   const params = {
-    taskId: task.value.id,
+    taskId,
     taskStatusId,
     attachment,
     checklist,
     comment,
+    forms: previewForms.value,
     links: link ? [link] : null,
     revision,
     forClient
@@ -1246,9 +1283,13 @@ const postComment = (
   store
     .dispatch(action, params)
     .then(() => {
-      drafts.clearTaskDraft(task.value.id)
-      addCommentRef.value?.reset()
-      reset()
+      drafts.clearTaskDraft(taskId)
+      // A long upload may end once the page shows another task, whose
+      // comment box holds a comment still to publish.
+      if (route.params.task_id === taskId) {
+        addCommentRef.value?.reset()
+        reset()
+      }
       loading.value.addComment = false
     })
     .catch(err => {
@@ -1340,27 +1381,16 @@ const confirmDeleteTaskComment = () => {
     })
 }
 
-// The client is shown who answers the threads it sees: there, the production
-// managers answer for the studio, and the client once mentioned. The other
-// threads reach the client emptied of their text, so only the studio answers.
-const canReplyTo = comment => {
-  if (isCurrentUserManager.value) return true
-  const isAuthor = Boolean(user.value) && user.value.id === comment.person?.id
-  if (isCurrentUserClient.value) {
-    return (
-      isAuthor ||
-      (isClientThread(comment, teamRoles.value) &&
-        (isAssigned.value || isMentioned.value))
-    )
-  }
-  return (
-    !isClientThread(comment, teamRoles.value) &&
-    (isAuthor ||
-      isAssigned.value ||
-      isMentioned.value ||
-      isDepartmentSupervisor.value)
-  )
-}
+const canReplyTo = comment =>
+  isCommentReplyable(comment, {
+    user: user.value,
+    teamRoles: teamRoles.value,
+    isManager: isCurrentUserManager.value,
+    isClient: isCurrentUserClient.value,
+    isAssigned: isAssigned.value,
+    isMentioned: isMentioned.value,
+    isDepartmentSupervisor: isDepartmentSupervisor.value
+  })
 
 const isStatusChange = index => {
   const comments = taskComments.value
@@ -1410,29 +1440,30 @@ const onCancelDeleteComment = () => {
 // --------------------------------------------------------------------------
 const selectFile = forms => {
   previewForms.value = previewForms.value.concat(forms)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const createExtraPreview = forms => {
-  selectFile(forms)
   errors.value.addExtraPreview = false
   loading.value.addExtraPreview = true
   const comment = getCurrentTaskComments().find(item =>
     item.previews.find(preview => preview.id === currentPreviewId.value)
   )
+  const taskId = task.value.id
   store
     .dispatch('addCommentExtraPreview', {
-      taskId: task.value.id,
+      taskId,
       commentId: comment?.id,
-      previewId: currentPreviewId.value
+      previewId: currentPreviewId.value,
+      forms
     })
     .then(() => {
       loading.value.addExtraPreview = false
       modals.value.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
-      clearPreviewFiles()
       setTimeout(() => {
-        previewPlayerRef.value.displayLast()
+        // The page may have moved on to another task, with or without a
+        // player.
+        if (task.value?.id === taskId) previewPlayerRef.value?.displayLast()
       }, 0)
     })
     .catch(err => {
@@ -1528,7 +1559,6 @@ const onPreviewAdded = eventData => {
 }
 
 const onAddExtraPreviewClicked = () => {
-  clearPreviewFiles()
   modals.value.addExtraPreview = true
 }
 
@@ -1567,7 +1597,6 @@ const onPreviewsOrderChanged = () => {
 
 const onPreviewFormRemoved = previewForm => {
   previewForms.value = previewForms.value.filter(f => f !== previewForm)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const changeCurrentPreview = preview => {
@@ -1605,8 +1634,9 @@ const extractAnnotationSnapshots = async (withLabel = false) => {
   const files = await previewPlayerRef.value.extractAnnotationSnapshots({
     withLabel
   })
-  addCommentRef.value.setAnnotationSnapshots(files)
-  addCommentRef.value.hideAnnotationLoading()
+  // The page may have been left during the extraction.
+  addCommentRef.value?.setAnnotationSnapshots(files)
+  addCommentRef.value?.hideAnnotationLoading()
   return files
 }
 
@@ -1681,14 +1711,9 @@ const onRemoteAcknowledge = (eventData, type) => {
   const comment = taskComments.value.find(c => c.id === eventData.comment_id)
   const person = personMap.value.get(eventData.person_id)
   if (!comment || !person) return
-  if (user.value?.id === person.id) {
-    if (
-      (type === 'ack' && !comment.acknowledgements.includes(person.id)) ||
-      (type === 'unack' && comment.acknowledgements.includes(person.id))
-    ) {
-      store.commit('ACK_COMMENT', { comment, user: person })
-    }
-  } else {
+  // The event may be applied already: by the user's own click, or by the
+  // panel the player holds for its full screen comments, which gets it too.
+  if ((type === 'ack') !== comment.acknowledgements.includes(person.id)) {
     store.commit('ACK_COMMENT', { comment, user: person })
   }
 }
@@ -1735,12 +1760,18 @@ const onCommentNew = eventData => {
   }, 1000)
 }
 
+// App.vue reloads the comment when the event names its task. Older Zou
+// versions leave the task out of the preview events: the page then reloads
+// the comments it shows.
 const onCommentUpdate = eventData => {
   const commentId = eventData.comment_id
-  if (!taskComments.value.some(({ id }) => id === commentId)) {
+  if (
+    eventData.task_id ||
+    !taskComments.value.some(({ id }) => id === commentId)
+  ) {
     return
   }
-  store.dispatch('loadComment', { commentId }).catch(console.error)
+  store.dispatch('loadComment', { commentId }).catch(logRequestFailure)
 }
 
 const onCommentReply = eventData => {
@@ -1964,10 +1995,6 @@ video {
   margin-bottom: 0.3em;
   border-width: 2px;
   font-weight: bold;
-}
-
-.preview-row {
-  margin-bottom: 0.5em;
 }
 
 .add-comment {

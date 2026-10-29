@@ -337,7 +337,6 @@ const state = {
 }
 
 const getters = {
-  shots: state => cache.shots,
   shotValidationColumns: state => state.shotValidationColumns,
 
   shotSearchQueries: state => state.shotSearchQueries,
@@ -379,27 +378,9 @@ const getters = {
   isShotsLoadingError: state => state.isShotsLoadingError,
   shotCreated: state => state.shotCreated,
 
-  isLongShotList: state => cache.shotMap.size > 500,
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
 
-  shotsByEpisode: state => {
-    const shotsBySequence = []
-    let sequenceShots = []
-    let previousShot = null
-
-    Array.from(cache.shotMap.values()).forEach(shot => {
-      if (previousShot && shot.sequence_name !== previousShot.sequence_name) {
-        shotsBySequence.push(sequenceShots.slice(0))
-        sequenceShots = []
-      }
-      sequenceShots.push(shot)
-      previousShot = shot
-    })
-    shotsBySequence.push(sortShots(sequenceShots))
-
-    return shotsBySequence
-  },
   selectedShots: state => state.selectedShots
 }
 
@@ -966,11 +947,7 @@ const mutations = {
     state.isShotsLoadingError = false
     state.shotsLoadingKey = null
     state.displayedShots = []
-    state.displayedShotsCount = 0
-    state.displayedShotsLength = 0
-    state.displayedTimeSpent = 0
-    state.displayedEstimation = 0
-    state.displayedFrames = 0
+    helpers.setListStats(state, [])
     state.shotSearchQueries = []
     state.shotSearchFilterGroups = []
 
@@ -991,10 +968,7 @@ const mutations = {
     state.shotsLoadingKey = loadingKey ?? null
 
     state.displayedShots = []
-    state.displayedShotsCount = 0
-    state.displayedShotsLength = 0
-    state.displayedEstimation = 0
-    state.displayedFrames = 0
+    helpers.setListStats(state, [])
     state.shotSearchQueries = []
     state.shotSearchFilterGroups = []
 
@@ -1511,6 +1485,12 @@ const mutations = {
       // task columns and the detail page resolve: tasks have their own events.
       const fields = { ...shot }
       delete fields.tasks
+      // The map holds raw objects: assigned through it only, the displayed
+      // list would see no change.
+      const displayedShot = state.displayedShots.find(
+        ({ id }) => id === shot.id
+      )
+      if (displayedShot) Object.assign(displayedShot, fields)
       Object.assign(cachedShot, fields)
       updateEntryInIndex(
         cache.shotIndex,

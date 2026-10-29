@@ -50,7 +50,8 @@
               'is-disabled': missingTaskTypes.length === 0
             }"
             role="button"
-            tabindex="0"
+            :aria-disabled="missingTaskTypes.length === 0"
+            :tabindex="missingTaskTypes.length === 0 ? -1 : 0"
             @click="confirmAllMissingClicked"
             @keydown.enter.prevent="confirmAllMissingClicked"
             @keydown.space.prevent="confirmAllMissingClicked"
@@ -214,16 +215,18 @@ const buildPayload = () => ({
   selectionOnly: selectionOnly.value === 'true'
 })
 
+// The loading and disabled looks only stop the mouse: Enter and Space still
+// reach the buttons.
 const confirmClicked = () => {
-  emit('confirm', buildPayload())
+  if (!props.isLoading) emit('confirm', buildPayload())
 }
 
 const confirmAndStayClicked = () => {
-  emit('confirm-and-stay', buildPayload())
+  if (!props.isLoadingStay) emit('confirm-and-stay', buildPayload())
 }
 
 const confirmAllMissingClicked = () => {
-  if (missingTaskTypes.value.length === 0) return
+  if (missingTaskTypes.value.length === 0 || props.isLoadingAll) return
   emit('confirm-all-missing', {
     missingTaskTypeIds: missingTaskTypes.value.map(taskType => taskType.id),
     selectionOnly: selectionOnly.value === 'true'

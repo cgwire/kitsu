@@ -88,7 +88,8 @@ describe('script setup bindings', () => {
     expect(offenders).toEqual([])
   })
 
-  it('binds every name a template reads', () => {
+  // Compiles every component: past the default timeout under coverage or load.
+  it('binds every name a template reads', { timeout: 30000 }, () => {
     const offenders = files
       .map(file => ({
         file,

@@ -19,7 +19,7 @@
         <span class="ml05 ellipsis">{{ person.name }}</span>
       </template>
     </span>
-    <teleport to=".theme">
+    <teleport to="#theme-popups">
       <template v-if="isOpen">
         <div class="metadata-person-mask" @click="onClose"></div>
         <!-- Tab leaves it like a click outside. Captured: the people field

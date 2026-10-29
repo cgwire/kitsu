@@ -25,10 +25,7 @@ const getters = {
   backgrounds: state =>
     state.backgrounds.filter(background => !background.archived),
   archivedBackgrounds: state =>
-    state.backgrounds.filter(background => background.archived),
-  backgroundMap: state => cache.backgroundMap,
-  editBackgrounds: state => state.editBackgrounds,
-  deleteBackground: state => state.deleteBackground
+    state.backgrounds.filter(background => background.archived)
 }
 
 const actions = {

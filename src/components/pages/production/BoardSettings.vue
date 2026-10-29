@@ -68,6 +68,8 @@
 import BooleanField from '@/components/widgets/BooleanField.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   taskStatuses: { type: Array, default: () => [] },
   rolesMap: { type: Object, default: () => ({}) }
@@ -75,25 +77,25 @@ const props = defineProps({
 
 const emit = defineEmits(['update-roles'])
 
+// State
+// --------------------------------------------------------------------------
 const availableRoles = ['user', 'vendor', 'supervisor', 'manager', 'admin']
 
-const getActiveRoles = taskStatusId => {
-  return props.rolesMap[taskStatusId] || []
-}
+// Functions
+// --------------------------------------------------------------------------
+const getActiveRoles = taskStatusId => props.rolesMap[taskStatusId] || []
 
-const isActiveRole = (taskStatusId, role) => {
-  return getActiveRoles(taskStatusId).includes(role)
-}
+const isActiveRole = (taskStatusId, role) =>
+  getActiveRoles(taskStatusId).includes(role)
 
 const onToggleRole = (taskStatusId, role, active) => {
-  const roles = [...getActiveRoles(taskStatusId)]
-  if (active && !roles.includes(role)) {
-    roles.push(role)
-  } else if (!active) {
-    const idx = roles.indexOf(role)
-    if (idx >= 0) roles.splice(idx, 1)
-  }
-  emit('update-roles', { taskStatusId, roles })
+  const roles = getActiveRoles(taskStatusId)
+  emit('update-roles', {
+    taskStatusId,
+    roles: active
+      ? [...new Set([...roles, role])]
+      : roles.filter(activeRole => activeRole !== role)
+  })
 }
 
 const onSelectAll = taskStatusId => {

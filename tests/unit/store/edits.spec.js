@@ -1,6 +1,7 @@
 // @vitest-environment node
 
 import { vi } from 'vitest'
+import { computed, reactive } from 'vue'
 
 // Importing the edits module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -567,13 +568,27 @@ describe('Edits store, UPDATE_EDIT', () => {
       tasks: ['t1']
     })
     editsStore.mutations.UPDATE_EDIT(
-      {},
+      { displayedEdits: [] },
       { id: 'e-upd', name: 'new', tasks: [{ id: 't1' }] }
     )
     expect(editsStore.cache.editMap.get('e-upd')).toMatchObject({
       name: 'new',
       tasks: ['t1']
     })
+  })
+
+  // The list reads the displayed edits through the reactive state: a change
+  // made to the raw object of the cache does not reach it.
+  test('shows the new name of an edit another user renamed', () => {
+    const edit = { id: 'e-upd', name: 'ED020', tasks: [] }
+    editsStore.cache.editMap.set(edit.id, edit)
+    const state = reactive({ displayedEdits: [edit] })
+    const names = computed(() => state.displayedEdits.map(({ name }) => name))
+    expect(names.value).toEqual(['ED020'])
+
+    editsStore.mutations.UPDATE_EDIT(state, { id: 'e-upd', name: 'ED999' })
+
+    expect(names.value).toEqual(['ED999'])
   })
 })
 

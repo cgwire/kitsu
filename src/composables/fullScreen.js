@@ -7,7 +7,14 @@
  * transition (button click, ESC key, browser UI), so onChange is the
  * single source of truth for side-effects.
  */
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  onScopeDispose,
+  ref,
+  shallowRef
+} from 'vue'
 
 const FULLSCREEN_EVENTS = [
   'fullscreenchange',
@@ -90,4 +97,63 @@ export const useFullScreen = ({ container, onChange }) => {
   })
 
   return { fullScreen, enter, exit, toggle }
+}
+
+// One element in full screen for all the components that follow it: a list
+// can hold a date field per row.
+const fullScreenElement = shallowRef(null)
+let followerCount = 0
+
+const updateFullScreenElement = () => {
+  fullScreenElement.value = getFullScreenElement()
+}
+
+export const useFullScreenElement = () => {
+  if (followerCount === 0) {
+    updateFullScreenElement()
+    FULLSCREEN_EVENTS.forEach(name =>
+      document.addEventListener(name, updateFullScreenElement)
+    )
+  }
+  followerCount++
+  onScopeDispose(() => {
+    followerCount--
+    if (followerCount === 0) {
+      FULLSCREEN_EVENTS.forEach(name =>
+        document.removeEventListener(name, updateFullScreenElement)
+      )
+    }
+  })
+  return fullScreenElement
+}
+
+/**
+ * The element while it, or an element it holds, is in full screen, null
+ * otherwise. The browser then shows nothing else: a modal opened for the
+ * element must be teleported into it.
+ *
+ * @param {Function} getElement - returns the element, read when needed
+ */
+export const useFullScreenTarget = getElement => {
+  const fullScreenElement = useFullScreenElement()
+  return computed(() => {
+    const element = getElement()
+    return element?.contains(fullScreenElement.value) ? element : null
+  })
+}
+
+/**
+ * The element in full screen while it holds the given element, null
+ * otherwise. A popup of that element teleported to <body> would open behind
+ * it: it must go into the element in full screen instead.
+ *
+ * @param {Function} getElement - returns the element, read when needed
+ */
+export const useFullScreenContainer = getElement => {
+  const fullScreenElement = useFullScreenElement()
+  return computed(() => {
+    const element = getElement()
+    const container = fullScreenElement.value
+    return element && container?.contains(element) ? container : null
+  })
 }

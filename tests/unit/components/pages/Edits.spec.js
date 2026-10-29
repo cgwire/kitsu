@@ -10,11 +10,13 @@ import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Edits from '@/components/pages/Edits.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import fr from '@/locales/fr.json'
 
 import {
   buildAddThumbnailsModalStub,
   mountEntityPage,
-  production
+  production,
+  reimportExport
 } from '../../fixtures/entity-page'
 
 // Two edits with their tasks in the store: the page decides on mount
@@ -24,12 +26,18 @@ const editMap = new Map([
   ['edit-2', { id: 'edit-2', project_id: production.id, validations: new Map() }]
 ])
 
-const mountPage = async ({ getters = {}, actions = {}, stubs = {} } = {}) => {
+const mountPage = async ({
+  getters = {},
+  actions = {},
+  stubs = {},
+  ...options
+} = {}) => {
   const page = await mountEntityPage(Edits, {
     listName: 'EditList',
     getters: { editMap, editValidationColumns: ['task-type-1'], ...getters },
     actions,
-    stubs
+    stubs,
+    ...options
   })
   await flushPromises()
   return page
@@ -88,6 +96,8 @@ describe('Edits page, reload of another episode', () => {
 })
 
 describe('Edits page, CSV import', () => {
+  afterEach(() => vi.restoreAllMocks())
+
   const lines = [
     ['Name', 'Description'],
     ['E01', 'intro']
@@ -143,6 +153,25 @@ describe('Edits page, CSV import', () => {
     expect(wrapper.findComponent(ImportRenderModal).props('columns')).toContain(
       'Description'
     )
+  })
+
+  // The export writes the labels of the language of the user.
+  test('imports back a file exported in the language of the user', async () => {
+    const { wrapper } = await mountPage({
+      getters: {
+        editValidationColumns: [],
+        isCurrentUserProductionManager: true
+      },
+      actions: { getEditsCsvLines: () => [] },
+      locale: 'fr',
+      messages: fr.default
+    })
+
+    const { exported, imported } = await reimportExport(wrapper)
+
+    const { edits } = fr.default
+    expect(exported).toEqual([edits.fields.name, edits.fields.description])
+    expect(imported).toEqual(['Name', 'Description'])
   })
 })
 
@@ -275,6 +304,25 @@ describe('Edits page, past confirmation errors', () => {
 })
 
 describe('Edits page, search', () => {
+  const searchesFor = (dispatched, query) =>
+    dispatched('setEditSearch').filter(([, search]) => search === query)
+
+  const mountLongList = () =>
+    mountPage({
+      getters: {
+        editMap: new Map(
+          Array.from({ length: 501 }, (_, index) => [
+            `edit-${index}`,
+            {
+              id: `edit-${index}`,
+              project_id: production.id,
+              validations: new Map()
+            }
+          ])
+        )
+      }
+    })
+
   test('applies the search on Enter', async () => {
     const { wrapper, searchField, dispatched } = await mountPage()
     searchField.value = 'e01'
@@ -282,6 +330,46 @@ describe('Edits page, search', () => {
     await wrapper.findComponent({ name: 'SearchField' }).vm.$emit('enter', 'e01')
 
     expect(dispatched('setEditSearch')).toContainEqual(['setEditSearch', 'e01'])
+  })
+
+  test('searches a short list as it is typed', async () => {
+    const { wrapper, searchField, dispatched } = await mountPage()
+    searchField.value = 'e01'
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', 'e01')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, 'e01')).not.toHaveLength(0)
+  })
+
+  // Like the shot list: searching a long list on every key is too slow.
+  test('searches a long list on Enter only', async () => {
+    const { wrapper, router, searchField, dispatched } = await mountLongList()
+    const field = wrapper.findComponent({ name: 'SearchField' })
+    searchField.value = 'e01'
+
+    field.vm.$emit('change', 'e01')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, 'e01')).toHaveLength(0)
+    expect(router.currentRoute.value.query.search).toBeUndefined()
+
+    field.vm.$emit('enter', 'e01')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, 'e01')).not.toHaveLength(0)
+    expect(router.currentRoute.value.query.search).toBe('e01')
+  })
+
+  test('clears the search of a long list as it is typed', async () => {
+    const { wrapper, searchField, dispatched } = await mountLongList()
+    const clearsAtMount = searchesFor(dispatched, '').length
+    searchField.value = ''
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', '')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, '').length).toBeGreaterThan(clearsAtMount)
   })
 })
 

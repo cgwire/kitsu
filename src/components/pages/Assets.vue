@@ -305,7 +305,6 @@ const listRef = useTemplateRef('asset-list')
 const searchFieldRef = useTemplateRef('asset-search-field')
 
 const initialLoading = ref(true)
-const optionalColumns = ref(['Description', 'Ready for', 'Resolution'])
 
 let resetTimeout = null
 
@@ -316,8 +315,10 @@ const assetMap = computed(() => store.getters.assetMap)
 const assetsCsvFormData = computed(() => store.getters.assetsCsvFormData)
 const assetSearchText = computed(() => store.getters.assetSearchText)
 const assetSorting = computed(() => store.getters.assetSorting)
-const assetValidationColumns = computed(
-  () => store.getters.assetValidationColumns
+const assetValidationColumns = computed(() =>
+  store.getters.assetValidationColumns.filter(
+    store.getters.clientAccess.isTaskTypeVisible
+  )
 )
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
@@ -355,6 +356,13 @@ const productionAssetFilterGroups = computed(
 const dataMatchers = computed(() =>
   isTVShow.value ? ['Episode', 'Type', 'Name'] : ['Type', 'Name']
 )
+// Zou reads these names only, whatever the language: it drops a translated
+// column without a word.
+const optionalColumns = computed(() => [
+  'Description',
+  ...(isPaperProduction.value ? [] : ['Ready for']),
+  'Resolution'
+])
 
 // Built from the full asset cache, not the paginated display list, so the
 // import duplicate check sees every asset. The cache Map is not reactive:
@@ -405,6 +413,7 @@ const {
   confirmDeleteAllTasks,
   confirmDeleteMetadata,
   confirmRestore: confirmRestoreAsset,
+  csvLabel,
   deleteAllTasksLockText,
   deleteAllTasksText,
   deleteText,
@@ -478,16 +487,16 @@ const onExportClick = () =>
   exportCsv(
     [
       ...(isTVShow.value ? ['Episode'] : []),
-      t('assets.fields.type'),
-      t('assets.fields.name'),
-      t('assets.fields.description'),
-      t('assets.fields.ready_for'),
+      csvLabel('Type'),
+      csvLabel('Name'),
+      csvLabel('Description'),
+      csvLabel('Ready for'),
       ...getExportDescriptors(currentProduction.value, 'Asset').map(
         descriptor => descriptor.name
       ),
       ...(isAssetTime.value ? [t('assets.fields.time_spent')] : []),
       ...(isAssetEstimation.value ? [t('main.estimation_short')] : []),
-      ...(isAssetResolution.value ? [t('shots.fields.resolution')] : []),
+      ...(isAssetResolution.value ? [csvLabel('Resolution')] : []),
       // Qualified by the task type so a re-import can tell the columns
       // apart: bare duplicated headers collapse in the server's reader.
       ...assetValidationColumns.value.flatMap(taskTypeId => {
@@ -497,14 +506,6 @@ const onExportClick = () =>
     ],
     currentEpisode.value?.name
   )
-
-const setOptionalImportColumns = () => {
-  optionalColumns.value = [
-    t('assets.fields.description'),
-    ...(isPaperProduction.value ? [] : [t('assets.fields.ready_for')]),
-    t('shots.fields.resolution')
-  ]
-}
 
 const saveAsset = async (form, { stay = false } = {}) => {
   const loadingKey = stay ? 'stay' : 'edit'
@@ -562,7 +563,6 @@ const onAssetChanged = async asset => {
 // --------------------------------------------------------------------------
 
 watch(currentProduction, () => {
-  setOptionalImportColumns()
   clearSearchAndScroll()
   initialLoading.value = true
   if (!isTVShow.value) reset()

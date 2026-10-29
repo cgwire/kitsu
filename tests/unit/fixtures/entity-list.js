@@ -76,8 +76,16 @@ export const stickColumns = type => {
   )
 }
 
+export const allVisible = {
+  isStatsVisible: true,
+  isTaskListVisible: true,
+  isTaskPanelVisible: true,
+  isTaskTypeVisible: () => true
+}
+
 const neutralValue = name => {
   if (name.endsWith('Map') || name.startsWith('selected')) return new Map()
+  if (name === 'clientAccess') return allVisible
   if (name.startsWith('is')) return false
   if (name.startsWith('displayed') || name.startsWith('nb')) return 0
   if (name.endsWith('SearchText')) return ''
@@ -103,12 +111,13 @@ const buildStore = getters => ({
 
 // The store is both mocked for the Options API lists and provided for the
 // script setup ones: useStore() injects it under the 'store' key.
-export const mountEntityList = async (component, { getters, props }) => {
+export const mountEntityList = async (component, { getters, props, query }) => {
   const store = buildStore(getters)
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: '/', component: { template: '<div />' } }]
   })
+  if (query) await router.push({ path: '/', query })
   // The task links resolve named routes the test router does not know.
   router.resolve = () => ({ href: '' })
   const i18n = createI18n({

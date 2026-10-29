@@ -5,6 +5,7 @@ import { createStore } from 'vuex'
 
 import PlaylistedEntity from '@/components/players/players/PlaylistedEntity.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail.vue'
 
 const taskTypes = [
   { id: 'tt-anim', name: 'Animation', priority: 1 },
@@ -26,10 +27,11 @@ const entity = {
 }
 
 // Another entry of the shot holds its latest compositing revision.
-const mountEntity = () => {
+const mountEntity = ({ isClient = false } = {}) => {
   const store = createStore({
     getters: {
       currentProduction: () => ({ id: 'production-1' }),
+      isCurrentUserClient: () => isClient,
       isCurrentUserManager: () => true,
       isCurrentUserSupervisor: () => false,
       playlistEntryMap: () => new Map([['s1-pf-compo-2', {}]]),
@@ -45,6 +47,25 @@ const mountEntity = () => {
 }
 
 describe('PlaylistedEntity.vue', () => {
+  it('locks the task type and revision combos for a client', async () => {
+    const wrapper = mountEntity({ isClient: true })
+    await nextTick()
+    const combos = wrapper.findAllComponents(Combobox)
+    expect(combos).toHaveLength(2)
+    expect(combos.map(combo => combo.props('disabled'))).toEqual([true, true])
+    expect(
+      mountEntity()
+        .findAllComponents(Combobox)
+        .map(combo => combo.props('disabled'))
+    ).toEqual([false, false])
+  })
+
+  // Like the revision files of the task panel, a sound shows its extension.
+  it('asks the thumbnail for the extension of a file', () => {
+    const thumbnail = mountEntity().findComponent(LightEntityThumbnail)
+    expect(thumbnail.props('withExtension')).toBe(true)
+  })
+
   // The playlist would hold the same revision of the shot twice.
   it('switches to a revision no other entry of the shot holds', async () => {
     const wrapper = mountEntity()

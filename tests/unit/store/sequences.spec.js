@@ -1,6 +1,8 @@
 // @vitest-environment node
 
 import { vi } from 'vitest'
+import { computed, reactive } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the sequences module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -726,5 +728,222 @@ describe('Sequences store, late responses', () => {
     })
 
     expect(commit).not.toHaveBeenCalled()
+  })
+})
+
+describe('Sequences store, DELETE_TASK_END', () => {
+  afterEach(() => {
+    sequencesStore.cache.sequenceMap.clear()
+    sequencesStore.cache.sequences = []
+  })
+
+  // The task page reloads the plain list, whose rows carry no tasks: deleting
+  // a task of one of them threw, and the modules after this one kept the task.
+  test('leaves a sequence loaded without its tasks unchanged', () => {
+    sequencesStore.mutations.LOAD_SEQUENCES_END(
+      { displayedSequences: [] },
+      {
+        sequences: [{ id: 'sq-plain', name: 'SQ01', parent_id: 'ep-a' }],
+        episodeMap: new Map(),
+        production: { id: 'p-delete' },
+        userFilters: {},
+        loadingKey: 'p-delete/ep-a#partial'
+      }
+    )
+
+    sequencesStore.mutations.DELETE_TASK_END(
+      {},
+      { id: 't1', entity_id: 'sq-plain', task_type_id: 'tt1' }
+    )
+
+    const sequence = sequencesStore.cache.sequenceMap.get('sq-plain')
+    expect(sequence.tasks).toBeUndefined()
+    expect(sequence.validations).toBeUndefined()
+  })
+
+  test('removes the task of a sequence loaded with its tasks', () => {
+    sequencesStore.cache.sequenceMap.set('sq-full', {
+      id: 'sq-full',
+      tasks: ['t1', 't2'],
+      validations: new Map([
+        ['tt1', 't1'],
+        ['tt2', 't2']
+      ])
+    })
+
+    sequencesStore.mutations.DELETE_TASK_END(
+      {},
+      { id: 't1', entity_id: 'sq-full', task_type_id: 'tt1' }
+    )
+
+    const sequence = sequencesStore.cache.sequenceMap.get('sq-full')
+    expect(sequence.tasks).toEqual(['t2'])
+    expect([...sequence.validations]).toEqual([['tt2', 't2']])
+  })
+})
+
+// The search reads the index of the cached list: every change of that list
+// has to rebuild this index.
+describe('Sequences store, search index', () => {
+  const production = { id: 'p-search', descriptors: [] }
+
+  const buildSequence = (id, name) => ({
+    id,
+    name,
+    data: {},
+    description: '',
+    tasks: []
+  })
+
+  const load = sequences => {
+    const state = { sequenceSorting: [] }
+    sequencesStore.mutations.SET_SEQUENCES_WITH_TASKS(state, {
+      episodeMap: new Map(),
+      userFilters: {},
+      personMap: new Map(),
+      production,
+      sequences,
+      taskMap: new Map(),
+      taskTypeMap: new Map(),
+      taskStatusMap: new Map(),
+      loadingKey: 'p-search/all'
+    })
+    return state
+  }
+
+  const search = (state, sequenceSearch) => {
+    sequencesStore.mutations.SET_SEQUENCE_SEARCH(state, {
+      sequenceSearch,
+      production,
+      taskStatusMap: new Map(),
+      taskTypeMap: new Map(),
+      persons: [],
+      taskMap: new Map()
+    })
+    return state.displayedSequences.map(({ name }) => name)
+  }
+
+  test('finds an edited sequence under its new name only', () => {
+    const state = load([
+      buildSequence('sq-1', 'SQ010'),
+      buildSequence('sq-2', 'SQ020')
+    ])
+
+    sequencesStore.mutations.EDIT_SEQUENCE_END(
+      state,
+      buildSequence('sq-2', 'SQ999')
+    )
+
+    expect(search(state, 'SQ999')).toEqual(['SQ999'])
+    expect(search(state, 'SQ020')).toEqual([])
+  })
+
+  test('finds a sequence another user renamed', () => {
+    const state = load([
+      buildSequence('sq-1', 'SQ010'),
+      buildSequence('sq-2', 'SQ020')
+    ])
+
+    sequencesStore.mutations.UPDATE_SEQUENCE(
+      state,
+      buildSequence('sq-2', 'SQ999')
+    )
+
+    expect(search(state, 'SQ999')).toEqual(['SQ999'])
+  })
+
+  test('finds a sequence another user renamed while the search hid it', () => {
+    const state = load([
+      buildSequence('sq-1', 'SQ010'),
+      buildSequence('sq-2', 'SQ020')
+    ])
+    search(state, 'SQ010')
+
+    sequencesStore.mutations.UPDATE_SEQUENCE(
+      state,
+      buildSequence('sq-2', 'SQ999')
+    )
+
+    expect(search(state, 'SQ999')).toEqual(['SQ999'])
+  })
+
+  test('finds a sequence another user added', () => {
+    const state = load([buildSequence('sq-1', 'SQ010')])
+
+    sequencesStore.mutations.ADD_SEQUENCE(state, {
+      sequence: buildSequence('sq-3', 'SQ030'),
+      episodeMap: new Map()
+    })
+
+    expect(search(state, 'SQ030')).toEqual(['SQ030'])
+  })
+
+  test('searches the sequences of a load without tasks', () => {
+    const state = load([buildSequence('sq-1', 'SQ010')])
+
+    sequencesStore.mutations.LOAD_SEQUENCES_END(state, {
+      sequences: [buildSequence('sq-4', 'SQ040')],
+      episodeMap: new Map(),
+      production,
+      userFilters: {},
+      loadingKey: 'p-search/all'
+    })
+
+    expect(search(state, 'SQ040')).toEqual(['SQ040'])
+    expect(search(state, 'SQ010')).toEqual([])
+  })
+})
+
+describe('Sequences store, UPDATE_SEQUENCE', () => {
+  // The list reads the displayed sequences through the reactive state: a
+  // change made to the raw object of the cache does not reach it.
+  test('shows the new name of a sequence another user renamed', () => {
+    const state = reactive({ sequenceSorting: [] })
+    sequencesStore.mutations.SET_SEQUENCES_WITH_TASKS(state, {
+      episodeMap: new Map(),
+      userFilters: {},
+      personMap: new Map(),
+      production: { id: 'p-update', descriptors: [] },
+      sequences: [
+        { id: 'sq-1', name: 'SQ010', data: {}, tasks: [] },
+        { id: 'sq-2', name: 'SQ020', data: {}, tasks: [] }
+      ],
+      taskMap: new Map(),
+      taskTypeMap: new Map(),
+      taskStatusMap: new Map(),
+      loadingKey: 'p-update/all'
+    })
+    const names = computed(() =>
+      state.displayedSequences.map(({ name }) => name)
+    )
+    expect(names.value).toEqual(['SQ010', 'SQ020'])
+
+    sequencesStore.mutations.UPDATE_SEQUENCE(state, {
+      id: 'sq-2',
+      name: 'SQ999',
+      data: {}
+    })
+
+    expect(names.value).toEqual(['SQ010', 'SQ999'])
+  })
+})
+
+describe('Sequences store, production switch', () => {
+  // The back link of a sequence page carries this search: the lists of
+  // another production must not inherit it.
+  test('forgets the search typed in the previous production', () => {
+    const store = createStore({
+      modules: {
+        sequences: {
+          state: { sequenceSearchText: 'SQ01' },
+          getters: sequencesStore.getters,
+          mutations: sequencesStore.mutations
+        }
+      }
+    })
+
+    store.commit('SET_CURRENT_PRODUCTION', 'production-2')
+
+    expect(store.getters.sequenceSearchText).toBe('')
   })
 })

@@ -27,7 +27,12 @@ const parseIds = queryValue =>
  * rows and columnIds are refs: the entities listed by the page and the ids of
  * its task type columns. rowsParam names the URL param of the hidden rows.
  */
-export const useStatsPage = ({ preferenceKey, rowsParam, rows, columnIds }) => {
+export const useStatsPage = ({
+  preferenceKey,
+  rowsParam,
+  rows,
+  columnIds: allColumnIds
+}) => {
   const route = useRoute()
   const router = useRouter()
   const store = useStore()
@@ -48,6 +53,10 @@ export const useStatsPage = ({ preferenceKey, rowsParam, rows, columnIds }) => {
     () => displayedRows.value.length < rows.value.length
   )
 
+  const columnIds = computed(() =>
+    allColumnIds.value.filter(store.getters.clientAccess.isTaskTypeVisible)
+  )
+
   const columnTaskTypes = computed(() =>
     columnIds.value.map(id => store.getters.taskTypeMap.get(id)).filter(Boolean)
   )
@@ -64,8 +73,13 @@ export const useStatsPage = ({ preferenceKey, rowsParam, rows, columnIds }) => {
     { omitColumns = omitStatsColumns, aggregate = aggregateStats } = {}
   ) => {
     const ids = displayedRows.value.map(row => row.id).filter(id => stats[id])
+    const { isTaskTypeVisible } = store.getters.clientAccess
+    const omitted = entry => [
+      ...hiddenColumnIds.value,
+      ...Object.keys(entry).filter(key => !isTaskTypeVisible(key))
+    ]
     const entries = Object.fromEntries(
-      ids.map(id => [id, omitColumns(stats[id], hiddenColumnIds.value)])
+      ids.map(id => [id, omitColumns(stats[id], omitted(stats[id]))])
     )
     return { ...entries, all: { all: {}, ...aggregate(entries, ids) } }
   }

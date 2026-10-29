@@ -61,7 +61,7 @@
 
     <modal-footer
       :confirm-label="$t('main.csv.preview')"
-      :error-text="$t('main.csv.error_upload')"
+      :error-text="errorText"
       :is-loading="isLoading"
       :is-disabled="!isValid"
       :is-error="isError"
@@ -121,9 +121,19 @@ const columnGroups = computed(() =>
   ].filter(group => group.columns.length > 0)
 )
 
+// Only a picked file fails to read: a paste cannot be empty. Picked again, an
+// empty file would fail the same way.
+const errorText = computed(() =>
+  formData.value?.get('file')?.size === 0
+    ? t('main.csv.error_empty')
+    : t('main.csv.error_read')
+)
+
+// Read again, a file that failed would fail the same way: another pick
+// starts a new import on its own.
 const isValid = computed(
   () =>
-    (activeTab.value === 'file' && formData.value) ||
+    (activeTab.value === 'file' && formData.value && !props.isError) ||
     (activeTab.value === 'text' && pastedCode.value)
 )
 
@@ -137,8 +147,11 @@ const onConfirmClicked = () => {
   emit('confirm', data, mode)
 }
 
+// The browser fires no change event for the file the picker still holds:
+// clear it, so that a file that could not be read can be picked again.
 const onFileSelected = data => {
   formData.value = data
+  inputFile.value?.reset()
   onConfirmClicked()
 }
 

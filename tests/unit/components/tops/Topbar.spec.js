@@ -6,7 +6,11 @@ import { createStore } from 'vuex'
 vi.mock('@/composables/desktopNotifications', () => ({
   useDesktopNotifications: vi.fn()
 }))
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, values) => (values ? `${key}:${JSON.stringify(values)}` : key)
+  })
+}))
 
 // The component reads the route of useRoute(): each mount hands it the same
 // object as the $route mock, which tests move to simulate navigations.
@@ -22,7 +26,10 @@ const socketMock = { on: vi.fn(), off: vi.fn() }
 import '@/lib/auth'
 
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
+import errors from '@/lib/errors'
 import Topbar from '@/components/tops/Topbar.vue'
+
+import { recordUnhandledRejections } from '../../fixtures/unhandled-rejections'
 
 // A memory history keeps each test's navigation out of the jsdom URL shared by
 // the whole file: with a hash history, installing the next router replays the
@@ -74,6 +81,7 @@ const makeStore = (getterOverrides = {}) => {
   const store = createStore({
     state: () => ({}),
     getters: {
+      clientAccess: () => ({ isStatsVisible: true, isTaskListVisible: true }),
       currentEpisode: () => null,
       currentProduction: () => null,
       episodes: () => [],
@@ -168,6 +176,76 @@ describe('Topbar.vue', () => {
   afterEach(() => {
     if (wrapper) wrapper.unmount()
     vi.clearAllMocks()
+  })
+
+  it('titles the home of a client with the productions of the studio', async () => {
+    expect(wrapper.find('.page-title').exists()).toBe(false)
+    const { store: clientStore } = makeStore({
+      isCurrentUserClient: () => true
+    })
+    const client = shallowMount(Topbar, {
+      global: {
+        config: { globalProperties: { $socket: socketMock } },
+        plugins: [clientStore, makeRouter()],
+        mocks: { $t: key => key, $route: mockRoute({ path: '/', name: 'open-productions', params: {}, query: {}, fullPath: '/' }) },
+        stubs: { GlobalSearchField: true, NotificationBell: true, PeopleAvatar: true, ShortcutModal: true }
+      }
+    })
+    await nextTick()
+    expect(client.find('.page-title').text()).toBe(
+      'productions.home.studio_productions:{"studio":"Test Studio"}'
+    )
+    client.unmount()
+  })
+
+  describe('client access sections', () => {
+    const sectionValues = async (getters = {}) => {
+      const { store: sectionStore } = makeStore({
+        currentProduction: () => ({ id: 'production-1', production_type: 'tvshow' }),
+        isCurrentUserClient: () => true,
+        isTVShow: () => true,
+        productionEditTaskTypes: () => [],
+        ...getters
+      })
+      const topbar = shallowMount(Topbar, {
+        global: {
+          config: { globalProperties: { $socket: socketMock } },
+          plugins: [sectionStore, makeRouter()],
+          mocks: { $t: key => key, $route: mockRoute({ path: '/', name: 'open-productions', params: {}, query: {}, fullPath: '/' }) },
+          stubs: { GlobalSearchField: true, NotificationBell: true, PeopleAvatar: true, ShortcutModal: true }
+        }
+      })
+      await nextTick()
+      const values = topbar.vm.sectionOptions.map(option => option.value)
+      topbar.unmount()
+      return values
+    }
+
+    it('lists the entities and stats when everything is visible', async () => {
+      const values = await sectionValues()
+      expect(values).toEqual(
+        expect.arrayContaining(['playlists', 'assets', 'shots', 'sequence-stats', 'episode-stats', 'assetTypes'])
+      )
+    })
+
+    it('drops the entity entries when the task list is hidden', async () => {
+      const values = await sectionValues({
+        clientAccess: () => ({ isStatsVisible: true, isTaskListVisible: false })
+      })
+      expect(values).not.toContain('assets')
+      expect(values).not.toContain('shots')
+      expect(values).toEqual(['playlists', 'sequence-stats', 'episode-stats', 'assetTypes'])
+    })
+
+    it('drops the stat entries when the stats are hidden', async () => {
+      const values = await sectionValues({
+        clientAccess: () => ({ isStatsVisible: false, isTaskListVisible: true })
+      })
+      expect(values).toContain('shots')
+      expect(values).not.toContain('sequence-stats')
+      expect(values).not.toContain('episode-stats')
+      expect(values).not.toContain('assetTypes')
+    })
   })
 
   // Artists land on pages without production: the fallback production of the
@@ -661,6 +739,59 @@ describe('Topbar.vue', () => {
       })
     })
 
+    // A production switch loads the episodes, and so does an episode change
+    // before the list is in. The API client reports a failed request: a bug
+    // is left to Sentry.
+    describe('failed load of the episodes', () => {
+      const loads = [
+        ['on a production switch', vm => vm.configureProduction('production-1')],
+        ['on an episode change', vm => vm.configureEpisode()]
+      ]
+
+      it.each(loads)('logs a failed request %s', async (_label, load) => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper, actions } = mountFor('sequences', 'episode-1', {
+          holdEpisodes: true
+        })
+        const failure = new Error('Request has been terminated')
+        errors.markRequestFailure(failure)
+        actions.loadEpisodes.mockRejectedValueOnce(failure)
+
+        const rejections = await recordUnhandledRejections(async () => {
+          load(wrapper.vm)
+          await flushPromises()
+        })
+
+        expect(rejections).toEqual([])
+        expect(consoleError).toHaveBeenCalledWith(failure)
+        consoleError.mockRestore()
+        wrapper.unmount()
+      })
+
+      it.each(loads)('leaves a bug %s to Sentry', async (_label, load) => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper, actions } = mountFor('sequences', 'episode-1', {
+          holdEpisodes: true
+        })
+        const bug = new TypeError('Cannot read properties of undefined')
+        actions.loadEpisodes.mockRejectedValueOnce(bug)
+
+        const rejections = await recordUnhandledRejections(async () => {
+          load(wrapper.vm)
+          await flushPromises()
+        })
+
+        expect(rejections).toEqual([bug])
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
+        consoleError.mockRestore()
+        wrapper.unmount()
+      })
+    })
+
     // A direct link keeps a pseudo-episode wherever the selector offers it.
     describe('pseudo-episodes on a direct link', () => {
       // The last navigation is the one the user lands on: a coercion made on
@@ -905,18 +1036,48 @@ describe('Topbar.vue', () => {
         wrapper.unmount()
       })
 
-      // Deleted, or not shared with the user: there is nothing to show.
-      it('leaves a production that fails to load', async () => {
+      // Deleted, not shared with the user or out of reach: the page would
+      // show the production of the store under the route of this one.
+      it.each([
+        ['missing', { status: 404 }],
+        ['out of reach', {}]
+      ])(
+        'leaves a production that fails to load, %s',
+        async (_label, failureFields) => {
+          const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+          const { wrapper, actions, replaceSpy } = mountOnClosed()
+          const failure = Object.assign(new Error('Failed'), failureFields)
+          errors.markRequestFailure(failure)
+          actions.loadProduction.mockRejectedValueOnce(failure)
+
+          wrapper.vm.setProductionFromRoute()
+          await flushPromises()
+
+          expect(replaceSpy).toHaveBeenCalledWith({ name: 'open-productions' })
+          expect(consoleError).toHaveBeenCalledWith(failure)
+          consoleError.mockRestore()
+          wrapper.unmount()
+        }
+      )
+
+      it('leaves a production whose load hits a bug, left to Sentry', async () => {
         const consoleError = vi
           .spyOn(console, 'error')
           .mockImplementation(() => {})
         const { wrapper, actions, replaceSpy } = mountOnClosed()
-        actions.loadProduction.mockRejectedValueOnce(new Error('Not found'))
+        const bug = new TypeError('Cannot read properties of undefined')
+        actions.loadProduction.mockRejectedValueOnce(bug)
 
-        wrapper.vm.setProductionFromRoute()
-        await flushPromises()
+        const rejections = await recordUnhandledRejections(async () => {
+          wrapper.vm.setProductionFromRoute()
+          await flushPromises()
+        })
 
+        expect(rejections).toEqual([bug])
         expect(replaceSpy).toHaveBeenCalledWith({ name: 'open-productions' })
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
         consoleError.mockRestore()
         wrapper.unmount()
       })
@@ -938,7 +1099,9 @@ describe('Topbar.vue', () => {
         wrapper.vm.setProductionFromRoute()
         route.params.production_id = 'production-1'
         wrapper.vm.setProductionFromRoute()
-        failLoad(new Error('Not found'))
+        const missing = Object.assign(new Error('Not found'), { status: 404 })
+        errors.markRequestFailure(missing)
+        failLoad(missing)
         await flushPromises()
 
         expect(replaceSpy).not.toHaveBeenCalledWith({

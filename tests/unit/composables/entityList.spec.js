@@ -9,7 +9,11 @@ import {
   useEntityList
 } from '@/composables/entityList'
 
-import { mountEntityList, production } from '../fixtures/entity-list'
+import {
+  allVisible,
+  mountEntityList,
+  production
+} from '../fixtures/entity-list'
 
 // A bare host: the composable only needs the list props and emit.
 const Host = defineComponent({
@@ -20,7 +24,7 @@ const Host = defineComponent({
     isLoading: { type: Boolean, default: false },
     validationColumns: { type: Array, default: () => [] }
   },
-  emits: ['metadata-changed'],
+  emits: ['keep-task-panel-open', 'metadata-changed'],
   setup(props, { emit }) {
     const list = useEntityList({
       type: 'shot',
@@ -286,6 +290,28 @@ describe('entity list drag browsing', () => {
 
     wrapper.unmount()
   })
+
+  // An outside script can take the body out of the page: only the end of a
+  // grab resets its cursor.
+  test.each(['mouseup', 'mouseleave', 'touchend', 'touchcancel', 'keyup'])(
+    'leaves the page body alone on a %s without any grab',
+    async type => {
+      const wrapper = await mountEntityList(Host, {
+        getters: { currentProduction: production }
+      })
+      const onError = vi.fn()
+      window.addEventListener('error', onError)
+      const body = document.body
+      body.remove()
+
+      document.dispatchEvent(new Event(type))
+
+      document.documentElement.append(body)
+      window.removeEventListener('error', onError)
+      expect(onError).not.toHaveBeenCalled()
+      wrapper.unmount()
+    }
+  )
 })
 
 describe('entity list keyboard navigation', () => {
@@ -347,5 +373,32 @@ describe('entity list keyboard navigation', () => {
     expect(getNextEditableCell(cell(body, 0, 0), 'ArrowRight')).toBeNull()
     expect(getNextEditableCell(cell(body, 0, 0), 'ArrowDown')).toBeNull()
     expect(getNextEditableCell(cell(body, 0, 0), 'Enter')).toBeNull()
+  })
+})
+
+describe('entity list task selection', () => {
+  const info = { x: 0, y: 0, task: { id: 'task-1' } }
+
+  test('selects the task of a clicked cell', async () => {
+    const wrapper = await mountEntityList(Host, {
+      getters: { currentProduction: production }
+    })
+    wrapper.vm.list.onTaskSelected(info, true)
+    expect(wrapper.vm.$store.commit).toHaveBeenCalledWith(
+      'ADD_SELECTED_TASK',
+      expect.objectContaining({ task: info.task })
+    )
+  })
+
+  test('selects nothing when the task panel is hidden from the client', async () => {
+    const wrapper = await mountEntityList(Host, {
+      getters: {
+        currentProduction: production,
+        clientAccess: { ...allVisible, isTaskPanelVisible: false }
+      }
+    })
+    wrapper.vm.list.onTaskSelected(info, true)
+    expect(wrapper.vm.$store.commit).not.toHaveBeenCalled()
+    expect(wrapper.emitted('keep-task-panel-open')).toBeUndefined()
   })
 })

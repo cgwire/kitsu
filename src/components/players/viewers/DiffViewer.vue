@@ -19,8 +19,7 @@
 </template>
 
 <script setup>
-import { html as diff2html } from 'diff2html'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import filesApi from '@/store/api/files'
@@ -49,12 +48,13 @@ const props = defineProps({
 const isLoading = ref(true)
 const hasError = ref(false)
 const rawContent = ref('')
+const diff2html = shallowRef(null)
 
 // Computed
 
 const renderedHtml = computed(() => {
-  if (!rawContent.value) return ''
-  return diff2html(rawContent.value, {
+  if (!rawContent.value || !diff2html.value) return ''
+  return diff2html.value(rawContent.value, {
     drawFileList: true,
     outputFormat: 'line-by-line',
     highlight: true,
@@ -74,11 +74,15 @@ const loadContent = async () => {
   isLoading.value = true
   hasError.value = false
   try {
-    rawContent.value = await filesApi.getPreviewFileText(
-      props.preview.id,
-      'diff',
-      props.urlPrefix
-    )
+    // diff2html and its styles only serve diff previews: they load with the
+    // first one, alongside the diff, instead of with every player.
+    const [content, { html }] = await Promise.all([
+      filesApi.getPreviewFileText(props.preview.id, 'diff', props.urlPrefix),
+      import('diff2html'),
+      import('diff2html/bundles/css/diff2html.min.css')
+    ])
+    rawContent.value = content
+    diff2html.value = html
   } catch (err) {
     console.error('Failed to load diff preview', err)
     hasError.value = true
@@ -256,8 +260,4 @@ watch(() => props.preview?.id, loadContent, { immediate: true })
   background: rgba(0, 0, 0, 0.5);
   color: $white;
 }
-</style>
-
-<style>
-@import 'diff2html/bundles/css/diff2html.min.css';
 </style>

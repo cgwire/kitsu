@@ -249,7 +249,6 @@ const quotaMap = ref({})
 
 const currentMonth = moment().month() + 1
 const currentYear = moment().year()
-let personIndex = null
 
 // Computed
 // --------------------------------------------------------------------------
@@ -271,13 +270,18 @@ const dayRange = computed(() =>
 
 const weekRange = computed(() => getWeekRange(props.year, currentYear))
 
+// Search results come in index order: build it from the sorted ids.
+const personIndex = computed(() =>
+  buildNameIndex(personIds.value.map(personId => personMap.value.get(personId)))
+)
+
 // The total row goes with the first filter: it sums everybody.
 const filteredPersonIds = computed(() => {
   const isFiltered =
     props.searchText.length > 0 || props.departmentId || props.role !== 'all'
   if (!isFiltered) return personIds.value
   const searched = props.searchText.length
-    ? indexSearch(personIndex, props.searchText.split(' '))
+    ? indexSearch(personIndex.value, props.searchText.split(' ')) || []
     : personIds.value.map(personId => personMap.value.get(personId))
   return filterPeople(searched.filter(Boolean), {
     departmentId: props.departmentId,
@@ -412,9 +416,6 @@ const resetPersonIds = () => {
   const ids = Object.keys(quotaMap.value).filter(
     personId => personId !== 'total'
   )
-  personIndex = buildNameIndex(
-    ids.map(personId => personMap.value.get(personId))
-  )
   personIds.value = [
     ...ids.sort((a, b) => fullName(a).localeCompare(fullName(b))),
     'total'
@@ -429,6 +430,8 @@ watch(
     // Bring a selected cell hidden on the right into view.
     if (document.getElementsByClassName('selected').length === 0) {
       setTimeout(() => {
+        // The page can be left in between.
+        if (!bodyRef.value) return
         bodyRef.value.scrollLeft += 380
       }, 100)
     }

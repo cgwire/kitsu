@@ -85,7 +85,7 @@
             <chevron-left-icon />
           </router-link>
         </div>
-        <div class="nav-item page-title pl0 ml0" v-if="pageTitle">
+        <div class="nav-item page-title" v-if="pageTitle">
           {{ pageTitle }}
         </div>
       </div>
@@ -126,7 +126,7 @@
           class="flexrow-item mr0 global-search"
           v-if="mainConfig.indexer_configured && !isCurrentUserClient"
         />
-        <div class="nav-item">
+        <div class="nav-item" v-if="!isCurrentUserClient">
           <a
             class="changelog-button"
             target="_blank"
@@ -329,6 +329,7 @@ import { useStore } from 'vuex'
 
 import { version as kitsuVersion } from '@/../package.json'
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
+import errors from '@/lib/errors'
 import {
   buildDesktopNotificationPayload,
   buildTestNotificationPayload
@@ -393,6 +394,7 @@ const display = reactive({
 // Computed
 // --------------------------------------------------------------------------
 
+const clientAccess = computed(() => store.getters.clientAccess)
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const episodeOptionGroups = computed(() => store.getters.episodeOptionGroups)
@@ -486,6 +488,12 @@ const isProductionContext = computed(
 
 const pageTitle = computed(() => {
   if (isProductionContext.value) return ''
+  // The home of a client is the productions of the studio.
+  if (isCurrentUserClient.value && route.name === 'open-productions') {
+    return t('productions.home.studio_productions', {
+      studio: organisation.value.name
+    })
+  }
   const titleKey = route.meta?.title
   return titleKey ? t(titleKey) : ''
 })
@@ -537,7 +545,12 @@ const sectionOptions = computed(() => {
   ]
 
   if (isClient) {
-    return [playlists, ...entityOptions, ...statOptions].filter(Boolean)
+    const access = clientAccess.value
+    return [
+      playlists,
+      ...(access.isTaskListVisible ? entityOptions : []),
+      ...(access.isStatsVisible ? statOptions : [])
+    ].filter(Boolean)
   }
 
   // The sections below are shown to studio members only.
@@ -686,10 +699,11 @@ const loadProductionFromRoute = async productionId => {
   try {
     await store.dispatch('loadProduction', productionId)
   } catch (err) {
-    // Deleted, or not shared with the user.
-    console.error(err)
-    // The user may have moved to another page during the load.
+    // Deleted, not shared with the user or out of reach: the page would show
+    // the production of the store under the route of this one. The user may
+    // have moved to another page during the load.
     if (route.params.production_id === productionId) leaveToOpenProductions()
+    errors.logRequestFailure(err)
     return
   } finally {
     pendingProductionIds.delete(productionId)
@@ -822,7 +836,7 @@ const configureProduction = async routeProductionId => {
     // the coercion navigates a second time, over this very one.
     updateCombosFromRoute(currentEpisodeId.value)
   } catch (err) {
-    console.error(err)
+    errors.logRequestFailure(err)
   }
 }
 
@@ -834,7 +848,7 @@ const configureEpisode = async () => {
     try {
       await store.dispatch('loadEpisodes')
     } catch (err) {
-      console.error(err)
+      errors.logRequestFailure(err)
       return
     }
     if (route.params.production_id !== routeProductionId) return
@@ -1286,7 +1300,8 @@ onBeforeUnmount(() => {
   margin-top: 3px;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
   .nav-item:has(.changelog-button),
   .nav-item:has(.help-button) {
     display: none;
@@ -1299,6 +1314,14 @@ onBeforeUnmount(() => {
 
   .studio-logo-wrapper {
     margin-right: 0;
+  }
+
+  .page-title {
+    font-size: 1.1em;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .global-search {
@@ -1331,5 +1354,18 @@ onBeforeUnmount(() => {
 
 .notification-bell {
   margin-top: 9px;
+}
+
+// a landscape phone is short: the bar gives the page 16px back
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .nav {
+    max-height: 44px;
+    min-height: 44px;
+  }
+
+  .user-menu {
+    max-height: calc(100% - 44px);
+    top: 44px;
+  }
 }
 </style>

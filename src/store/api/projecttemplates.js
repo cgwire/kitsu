@@ -21,10 +21,14 @@ export default {
       max_retakes: template.max_retakes,
       homepage: template.homepage,
       is_clients_isolated: template.is_clients_isolated,
+      is_client_stats_visible: template.is_client_stats_visible,
+      is_client_task_list_visible: template.is_client_task_list_visible,
+      is_client_task_panel_visible: template.is_client_task_panel_visible,
       is_preview_download_allowed: template.is_preview_download_allowed,
       is_set_preview_automated: template.is_set_preview_automated,
       is_publish_default_for_artists: template.is_publish_default_for_artists,
-      is_single_preview_per_revision: template.is_single_preview_per_revision
+      is_single_preview_per_revision: template.is_single_preview_per_revision,
+      is_frame_in_numbering: template.is_frame_in_numbering
     }
     return client.ppost('/api/data/project-templates', data)
   },
@@ -41,12 +45,16 @@ export default {
       max_retakes: template.max_retakes,
       homepage: template.homepage,
       is_clients_isolated: template.is_clients_isolated,
+      is_client_stats_visible: template.is_client_stats_visible,
+      is_client_task_list_visible: template.is_client_task_list_visible,
+      is_client_task_panel_visible: template.is_client_task_panel_visible,
       is_preview_download_allowed: template.is_preview_download_allowed,
       is_set_preview_automated: template.is_set_preview_automated,
       is_publish_default_for_artists: template.is_publish_default_for_artists,
       is_single_preview_per_revision: template.is_single_preview_per_revision,
       hd_bitrate_compression: template.hd_bitrate_compression,
-      ld_bitrate_compression: template.ld_bitrate_compression
+      ld_bitrate_compression: template.ld_bitrate_compression,
+      is_frame_in_numbering: template.is_frame_in_numbering
     }
     return client.pput(`/api/data/project-templates/${template.id}`, data)
   },
@@ -101,10 +109,18 @@ export default {
     )
   },
 
-  addTaskStatusToTemplate(templateId, taskStatusId, priority, rolesForBoard) {
+  addTaskStatusToTemplate(
+    templateId,
+    taskStatusId,
+    priority,
+    rolesForBoard,
+    isClientAllowed
+  ) {
     const data = { task_status_id: taskStatusId }
     if (priority != null) data.priority = priority
     if (rolesForBoard != null) data.roles_for_board = rolesForBoard
+    // null clears the template override, undefined leaves it unchanged
+    if (isClientAllowed !== undefined) data.is_client_allowed = isClientAllowed
     return client.ppost(
       `/api/data/project-templates/${templateId}/task-statuses`,
       data

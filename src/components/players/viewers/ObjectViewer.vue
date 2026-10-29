@@ -61,8 +61,29 @@
   </div>
 </template>
 
+<script>
+// The model-viewer stack (three.js) requires WebGL2, absent from
+// Safari 14: probe before loading the chunk and show a message instead.
+// Browsers cap the number of live WebGL contexts and evict the oldest one,
+// so the probe context is released and the verdict kept for the page's life.
+let isWebGL2Supported
+
+const supportsWebGL2 = () => {
+  if (isWebGL2Supported === undefined) {
+    try {
+      const context = document.createElement('canvas').getContext('webgl2')
+      context?.getExtension('WEBGL_lose_context')?.loseContext()
+      isWebGL2Supported = !!context
+    } catch {
+      isWebGL2Supported = false
+    }
+  }
+  return isWebGL2Supported
+}
+</script>
+
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 
 const props = defineProps({
   backgroundUrl: {
@@ -97,24 +118,8 @@ const props = defineProps({
 
 const emit = defineEmits(['model-loaded'])
 
-// The model-viewer stack (three.js) requires WebGL2, absent from
-// Safari 14: probe before loading the chunk and show a message instead.
-// Browsers cap the number of live WebGL contexts and evict the oldest one,
-// so the probe context is released and the verdict computed only once.
-const supportsWebGL2 = () => {
-  try {
-    const context = document.createElement('canvas').getContext('webgl2')
-    context?.getExtension('WEBGL_lose_context')?.loseContext()
-    return !!context
-  } catch {
-    return false
-  }
-}
-
-const isWebGL2Supported = supportsWebGL2()
-
 const modelViewer = ref(null)
-const viewerUnavailable = ref(!isWebGL2Supported)
+const viewerUnavailable = ref(false)
 const panningHDR = ref(false)
 const changingFocale = ref(false)
 const fieldOfView = ref(50)
@@ -159,6 +164,8 @@ const createWireframeVariant = model => {
 }
 
 const onModelLoaded = event => {
+  // A model loaded right after the close finds its scene disposed.
+  if (!modelViewer.value) return
   createWireframeVariant(event.target.model)
   if (props.isWireframe) {
     // model-viewer only re-applies a variant when `variantName` changes; a new
@@ -168,19 +175,23 @@ const onModelLoaded = event => {
   emit('model-loaded')
 }
 
+// Until the library defines the element, it has none of the viewer methods.
+const getLoadedViewer = () =>
+  customElements.get('model-viewer') ? modelViewer.value : null
+
 const getAnimations = () => {
   return modelViewer.value?.availableAnimations || []
 }
 
 const play = animationName => {
-  const mv = modelViewer.value
+  const mv = getLoadedViewer()
   if (!mv) return
   mv.animationName = animationName
   mv.play()
 }
 
 const pause = () => {
-  modelViewer.value?.pause()
+  getLoadedViewer()?.pause()
 }
 
 const startPanHDR = thisX => {
@@ -349,8 +360,14 @@ const removeEventListeners = () => {
   window.removeEventListener('mouseup', handleMouseUp, true)
 }
 
-onMounted(async () => {
-  if (viewerUnavailable.value) return
+// A playlist keeps this viewer mounted, hidden, while it shows other
+// previews: the library and its WebGL context wait for a model. The next
+// models run it again, and the DOM ignores a listener added twice.
+const loadViewer = async () => {
+  if (!supportsWebGL2()) {
+    viewerUnavailable.value = true
+    return
+  }
   if (!customElements.get('model-viewer')) {
     try {
       await import('@google/model-viewer')
@@ -359,7 +376,20 @@ onMounted(async () => {
       return
     }
   }
+  // Closed while the library loaded: nothing would remove the listeners.
+  if (!modelViewer.value) return
   addEventListeners()
+}
+
+watch(
+  () => props.previewUrl,
+  previewUrl => {
+    if (previewUrl) loadViewer()
+  }
+)
+
+onMounted(() => {
+  if (props.previewUrl) loadViewer()
 })
 
 onBeforeUnmount(() => {

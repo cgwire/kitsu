@@ -24,6 +24,33 @@ export const GENERIC_IMPORT_COLUMNS = [
   'Task type name + comment (text value)'
 ]
 
+// The columns the export writes under a translated label, by the name Zou
+// reads, with the key of their label: the import gives these labels their
+// name back, so a file exported in the language of the user imports as is.
+const CSV_LABEL_KEYS = {
+  asset: {
+    Type: 'assets.fields.type',
+    Name: 'assets.fields.name',
+    Description: 'assets.fields.description',
+    'Ready for': 'assets.fields.ready_for',
+    Resolution: 'shots.fields.resolution'
+  },
+  edit: {
+    Name: 'edits.fields.name',
+    Description: 'edits.fields.description'
+  },
+  shot: {
+    Sequence: 'shots.fields.sequence',
+    Name: 'shots.fields.name',
+    Description: 'shots.fields.description',
+    Frames: 'main.frames',
+    'Frame In': 'main.frame_in',
+    'Frame Out': 'main.frame_out',
+    FPS: 'main.fps',
+    Resolution: 'shots.fields.resolution'
+  }
+}
+
 const DISPLAY_SETTINGS = {
   bigThumbnails: false,
   contactSheetMode: false,
@@ -114,6 +141,7 @@ export const useEntityPage = ({
 
   const entityTypeName = stringHelpers.capitalize(type)
   const TYPE = type.toUpperCase()
+  const csvLabelKeys = CSV_LABEL_KEYS[type] || {}
 
   // State
   // --------------------------------------------------------------------------
@@ -174,10 +202,11 @@ export const useEntityPage = ({
 
   const isTaskSidePanelOpen = computed(
     () =>
-      nbSelectedTasks.value > 0 ||
-      keepTaskPanelOpen.value ||
-      nbSelectedEntities.value > 0 ||
-      nbSelectedValidations.value > 0
+      store.getters.clientAccess.isTaskPanelVisible &&
+      (nbSelectedTasks.value > 0 ||
+        keepTaskPanelOpen.value ||
+        nbSelectedEntities.value > 0 ||
+        nbSelectedValidations.value > 0)
   )
 
   const deleteAllTasksText = computed(() => {
@@ -460,6 +489,9 @@ export const useEntityPage = ({
   // CSV export
   // --------------------------------------------------------------------------
 
+  // The header the export writes for the column Zou reads as `name`.
+  const csvLabel = name => t(csvLabelKeys[name])
+
   // `episodeName` goes in the file name when given.
   const exportCsv = async (headers, episodeName) => {
     const lines = await store.dispatch(`get${entityTypeName}sCsvLines`)
@@ -616,15 +648,35 @@ export const useEntityPage = ({
   // CSV import
   // --------------------------------------------------------------------------
 
+  // A descriptor or a task type named like a label keeps its column.
+  const renameExportLabels = headers =>
+    csv.renameHeaders(
+      headers,
+      new Map(Object.keys(csvLabelKeys).map(name => [csvLabel(name), name])),
+      [
+        ...(currentProduction.value?.descriptors || [])
+          .filter(descriptor => descriptor.entity_type === entityTypeName)
+          .map(descriptor => descriptor.name),
+        ...productionTaskTypes.value.map(taskType => taskType.name)
+      ]
+    )
+
   const renderImport = async (data, mode) => {
     loading.importing = true
     errors.importing = false
-    parsedCSV.value = await csv.processCSV(
-      mode === 'file' ? data.get('file') : data
-    )
-    hideImportModal()
-    loading.importing = false
-    showImportRenderModal()
+    try {
+      const [headers, ...lines] = await csv.processCSV(
+        mode === 'file' ? data.get('file') : data
+      )
+      parsedCSV.value = [renameExportLabels(headers), ...lines]
+      hideImportModal()
+      showImportRenderModal()
+    } catch (err) {
+      errors.importing = true
+      csv.logReadFailure(err)
+    } finally {
+      loading.importing = false
+    }
   }
 
   const uploadImportFile = async (data, toUpdate) => {
@@ -670,7 +722,7 @@ export const useEntityPage = ({
         taskId: form.task.id,
         commentText: '',
         taskStatusId: form.task.task_status_id,
-        form
+        forms: [form]
       })
       await store.dispatch('setPreview', {
         taskId: form.task.id,
@@ -801,6 +853,7 @@ export const useEntityPage = ({
     confirmDeleteAllTasks,
     confirmDeleteMetadata,
     confirmRestore,
+    csvLabel,
     exportCsv,
     focusSearchField,
     getPath,

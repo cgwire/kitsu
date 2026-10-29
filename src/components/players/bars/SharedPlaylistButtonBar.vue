@@ -40,7 +40,7 @@
       />
     </div>
 
-    <div class="flexrow flexrow-item time-info" v-if="isMovie">
+    <div class="flexrow flexrow-item time-info" v-if="isMovie || isSound">
       <span
         class="flexrow-item time-indicator"
         :title="$t('playlists.actions.current_time')"
@@ -57,12 +57,13 @@
       <span
         class="flexrow-item frame-counter nowrap"
         :title="$t('playlists.actions.frame_number')"
+        v-if="isMovie"
       >
         ({{ currentFrameDisplay }} / {{ nbFramesDisplay }})
       </span>
     </div>
 
-    <div class="flexrow flexrow-item" v-if="isMovie">
+    <div class="flexrow flexrow-item" v-if="isMovie || isSound">
       <button-simple
         class="playlist-button flexrow-item"
         :active="isRepeating"
@@ -74,7 +75,6 @@
         class="flexrow-item playlist-button"
         v-model:muted="isMuted"
         v-model:volume="volume"
-        @change-sound="$emit('toggle-sound')"
       />
     </div>
 
@@ -94,7 +94,7 @@
       icon="pencil"
       :title="$t('playlists.actions.annotation_draw')"
       @click="isAnnotating = !isAnnotating"
-      v-if="canComment && guestId"
+      v-if="canComment && guestId && (isMovie || isPicture)"
     />
     <button-simple
       class="playlist-button flexrow-item"
@@ -147,8 +147,7 @@ defineEmits([
   'play',
   'previous-preview',
   'reset-zoom',
-  'toggle-full-screen',
-  'toggle-sound'
+  'toggle-full-screen'
 ])
 
 const isAnnotating = defineModel('isAnnotating', {

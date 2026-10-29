@@ -46,4 +46,10 @@ const activeTab = computed(() => {
 :deep(.tabs) {
   overflow: visible;
 }
+
+@media screen and (max-width: 768px) {
+  .fixed-page {
+    padding: 1em;
+  }
+}
 </style>

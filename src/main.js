@@ -5,6 +5,7 @@ import { createHead } from '@unhead/vue/client'
 import { sync } from 'vuex-router-sync'
 
 import 'bulma/css/bulma.css'
+import '@/styles/theme.scss'
 
 import App from '@/App.vue'
 import i18n from '@/lib/i18n'
@@ -12,9 +13,10 @@ import resizableColumn from '@/directives/resizable-column'
 import router from '@/router'
 import store from '@/store'
 import { setupChunkErrorHandler } from '@/lib/chunk-error'
+import { followLostRedirects } from '@/lib/navigation-failure'
+import { createSocket } from '@/lib/socket'
 
 import vAutosize from '@/directives/autosize'
-import IO from 'socket.io-client'
 import VueAnimXYZ from '@animxyz/vue3'
 import '@animxyz/core'
 
@@ -26,7 +28,7 @@ app.use(head)
 app.use(router)
 app.use(store)
 app.use(resizableColumn)
-app.config.globalProperties.$socket = IO('/events')
+app.config.globalProperties.$socket = createSocket()
 app.directive('autosize', vAutosize)
 app.use(VueAnimXYZ)
 
@@ -74,5 +76,6 @@ window.addEventListener('unhandledrejection', event => {
 })
 
 setupChunkErrorHandler(router)
+followLostRedirects(router)
 
 app.mount('#app')

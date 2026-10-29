@@ -26,7 +26,6 @@ vi.mock('vue-router', () => ({
 
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
-import csv from '@/lib/csv'
 
 import PeopleList from '@/components/lists/PeopleList.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
@@ -36,9 +35,15 @@ import People from '@/components/pages/People.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 
+import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
+
 const currentUser = { id: 'person-1', role: 'admin' }
 
-const mountPage = async ({ user = currentUser, query = {} } = {}) => {
+const mountPage = async ({
+  user = currentUser,
+  query = {},
+  getters = {}
+} = {}) => {
   routeHolder.route = reactive({ params: {}, query })
   const resolved = () => vi.fn(() => Promise.resolve())
   const actions = {
@@ -66,7 +71,8 @@ const mountPage = async ({ user = currentUser, query = {} } = {}) => {
       personCsvFormData: () => null,
       studioMap: () => new Map(),
       user: () => user,
-      userLimit: () => 10
+      userLimit: () => 10,
+      ...getters
     },
     actions
   })
@@ -143,6 +149,29 @@ describe('People page', () => {
 
       expect(downgradeModal().exists()).toBe(false)
       expect(payloadOf(actions.newPerson)).toEqual({ role: 'user' })
+    })
+  })
+
+  describe('save errors', () => {
+    afterEach(() => vi.restoreAllMocks())
+
+    // Where the instance checks deliverability, Zou refuses a dotless
+    // domain with a message that does not say "domain name".
+    it('flags the email domain when Zou refuses a dotless domain', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { wrapper, actions, submitEdit } = await mountPage()
+      actions.editPerson.mockRejectedValueOnce({
+        body: {
+          message:
+            'The part after the @-sign is not valid. It should have a period.'
+        }
+      })
+
+      await submitEdit({ id: 'person-2', role: 'user' }, { role: 'user' })
+
+      const modal = wrapper.findComponent(EditPersonModal)
+      expect(modal.props('isEmailDomainError')).toBe(true)
+      expect(modal.props('isError')).toBe(false)
     })
   })
 
@@ -224,23 +253,63 @@ describe('People page', () => {
   })
 
   describe('CSV import', () => {
-    afterEach(() => vi.restoreAllMocks())
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
 
-    it('keeps the import modal open on an error when the CSV cannot be read', async () => {
-      vi.spyOn(console, 'error').mockImplementation(() => {})
-      vi.spyOn(csv, 'processCSV').mockRejectedValue(new Error('unreadable'))
-      const { wrapper } = await mountPage()
+    const buildFormData = () => {
+      const formData = new FormData()
+      formData.append('file', new File(['First Name;Last Name'], 'import.csv'))
+      return formData
+    }
+
+    const openImportModal = async options => {
+      const { wrapper } = await mountPage(options)
       await wrapper
         .findAllComponents(ButtonSimple)
         .find(button => button.props('icon') === 'import')
         .vm.$emit('click')
-      const importModal = () => wrapper.findComponent(ImportModal)
+      return { wrapper, importModal: () => wrapper.findComponent(ImportModal) }
+    }
+
+    it('keeps the import modal open on an error when the CSV cannot be read', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { importModal } = await openImportModal()
       expect(importModal().props('isError')).toBe(false)
 
-      await importModal().vm.$emit('confirm', 'First Name;Last Name', 'text')
+      await importModal().vm.$emit('confirm', buildFormData(), 'file')
       await flushPromises()
 
       expect(importModal().props('isError')).toBe(true)
+    })
+
+    // The preview shows the error of a failed upload: the import modal says
+    // that the file could not be read.
+    it('opens the import without the error of a failed upload', async () => {
+      const { importModal } = await openImportModal({
+        getters: { isImportPeopleLoadingError: () => true }
+      })
+
+      expect(importModal().props('isError')).toBe(false)
+    })
+
+    it('shows the error of a bug, left to the error handler', async () => {
+      vi.stubGlobal('FileReader', BrokenFileReader)
+      const { wrapper, importModal } = await openImportModal()
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+      await importModal().vm.$emit('confirm', buildFormData(), 'file')
+      await flushPromises()
+
+      expect(importModal().props('isError')).toBe(true)
+      expect(errorHandler).toHaveBeenCalledWith(
+        expect.any(TypeError),
+        expect.anything(),
+        expect.anything()
+      )
     })
   })
 })

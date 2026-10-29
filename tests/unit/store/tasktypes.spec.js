@@ -1,7 +1,14 @@
 // @vitest-environment node
 
+import process from 'node:process'
 import { createStore } from 'vuex'
 
+// The episodes module pulls in the root store (lib/models, timezone): stub
+// it so no Vuex store is built.
+vi.mock('@/store', () => ({ default: {} }))
+
+import shotsApi from '@/store/api/shots'
+import episodesStore from '@/store/modules/episodes'
 import store from '@/store/modules/tasktypes'
 import taskTypesApi from '@/store/api/tasktypes'
 
@@ -61,6 +68,30 @@ describe('Task types store', () => {
       expect(store.getters.currentTaskType(state, null, rootState))
         .toStrictEqual(taskTypes[1])
     }),
+    test.each(['Asset', 'Shot', 'Sequence', 'Edit'])(
+      'currentTaskTypeEpisode of the %s task types is the current episode',
+      forEntity => {
+        const episode = { id: 'ep-1' }
+        expect(
+          store.getters.currentTaskTypeEpisode(
+            state,
+            { currentTaskType: { for_entity: forEntity } },
+            null,
+            { currentEpisode: episode }
+          )
+        ).toBe(episode)
+      }
+    )
+    test('currentTaskTypeEpisode of the Episode task types is none', () => {
+      expect(
+        store.getters.currentTaskTypeEpisode(
+          state,
+          { currentTaskType: { for_entity: 'Episode' } },
+          null,
+          { currentEpisode: { id: 'all' } }
+        )
+      ).toBeNull()
+    })
     test('assetTaskTypes', () => {
       expect(store.getters.assetTaskTypes(state, null, null, rootGetters))
         .toHaveLength(2)
@@ -117,6 +148,30 @@ describe('Task types store', () => {
       vi.restoreAllMocks()
     })
 
+    test('uploadTaskTypeEstimations posts with the estimations episode', async () => {
+      vi.spyOn(taskTypesApi, 'postTaskTypeEstimations').mockResolvedValue([])
+      const production = { id: 'p' }
+      const taskType = { id: 'task-type-5', for_entity: 'Episode' }
+      const formData = {}
+      await store.actions.uploadTaskTypeEstimations(
+        {
+          getters: { currentTaskTypeEpisode: null },
+          rootGetters: {
+            currentEpisode: { id: 'all' },
+            currentProduction: production,
+            currentTaskType: taskType
+          }
+        },
+        formData
+      )
+      expect(taskTypesApi.postTaskTypeEstimations).toHaveBeenCalledWith(
+        production,
+        null,
+        taskType,
+        formData
+      )
+    })
+
     test('loadTaskType', async () => {
       const taskType = { id: 'task-type-9', name: 'Rigging' }
       vi.spyOn(taskTypesApi, 'getTaskType').mockResolvedValue(taskType)
@@ -126,12 +181,61 @@ describe('Task types store', () => {
       expect(commit).toHaveBeenCalledWith('EDIT_TASK_TYPE_END', taskType)
     })
 
+    test('loadTaskType resolves with the task type', async () => {
+      const taskType = { id: 'task-type-9', name: 'Rigging' }
+      vi.spyOn(taskTypesApi, 'getTaskType').mockResolvedValue(taskType)
+      await expect(
+        store.actions.loadTaskType({ commit: vi.fn() }, 'task-type-9')
+      ).resolves.toEqual(taskType)
+    })
+
+    // The callers log the failure: a rejection dropped by the action would
+    // surface as an unhandled one.
+    test('loadTaskType rejects with the API error', async () => {
+      const rejections = []
+      const onRejection = reason => rejections.push(reason)
+      process.on('unhandledRejection', onRejection)
+      const error = new Error('Request has been terminated')
+      vi.spyOn(taskTypesApi, 'getTaskType').mockRejectedValue(error)
+
+      await expect(
+        store.actions.loadTaskType({ commit: vi.fn() }, 'task-type-9')
+      ).rejects.toBe(error)
+      await new Promise(resolve => setTimeout(resolve))
+      process.off('unhandledRejection', onRejection)
+
+      expect(rejections).toEqual([])
+    })
+
     test('loadTaskTypes', async () => {
       vi.spyOn(taskTypesApi, 'getTaskTypes').mockResolvedValue([...taskTypes])
       const commit = vi.fn()
       await store.actions.loadTaskTypes({ commit })
       expect(commit).toHaveBeenCalledWith('LOAD_TASK_TYPES_START')
       expect(commit).toHaveBeenCalledWith('LOAD_TASK_TYPES_END', taskTypes)
+    })
+
+    test('loadTaskTypes resolves with the task types', async () => {
+      vi.spyOn(taskTypesApi, 'getTaskTypes').mockResolvedValue([...taskTypes])
+      await expect(
+        store.actions.loadTaskTypes({ commit: vi.fn() })
+      ).resolves.toEqual(taskTypes)
+    })
+
+    test('loadTaskTypes rejects with the API error', async () => {
+      const rejections = []
+      const onRejection = reason => rejections.push(reason)
+      process.on('unhandledRejection', onRejection)
+      const error = new Error('Request has been terminated')
+      vi.spyOn(taskTypesApi, 'getTaskTypes').mockRejectedValue(error)
+
+      await expect(
+        store.actions.loadTaskTypes({ commit: vi.fn() })
+      ).rejects.toBe(error)
+      await new Promise(resolve => setTimeout(resolve))
+      process.off('unhandledRejection', onRejection)
+
+      expect(rejections).toEqual([])
     })
 
     test('newTaskType', async () => {
@@ -246,6 +350,48 @@ describe('Task types store', () => {
       expect(dispatch).toHaveBeenCalledWith('loadSequencesWithTasks')
     })
 
+    test('initTaskType reloads the episodes listed without their tasks', async () => {
+      const dispatch = vi.fn().mockResolvedValue()
+      const rootGetters = {
+        currentTaskType: { for_entity: 'Episode' },
+        // Filled by the topbar: plain rows, without any task column.
+        episodeMap: new Map([
+          ['ep-1', { id: 'ep-1' }],
+          ['ep-2', { id: 'ep-2' }]
+        ])
+      }
+      await store.actions.initTaskType({ dispatch, rootGetters }, false)
+      expect(dispatch).toHaveBeenCalledWith('loadEpisodesWithTasks')
+    })
+
+    test('initTaskType reloads the episodes when one lacks its tasks', async () => {
+      const dispatch = vi.fn().mockResolvedValue()
+      const rootGetters = {
+        currentTaskType: { for_entity: 'Episode' },
+        // An episode created from the shot list holds its tasks, the
+        // plain rows of the topbar next to it do not.
+        episodeMap: new Map([
+          ['ep-1', { id: 'ep-1', validations: new Map() }],
+          ['ep-2', { id: 'ep-2' }]
+        ])
+      }
+      await store.actions.initTaskType({ dispatch, rootGetters }, false)
+      expect(dispatch).toHaveBeenCalledWith('loadEpisodesWithTasks')
+    })
+
+    test('initTaskType keeps the episodes loaded with their tasks', async () => {
+      const dispatch = vi.fn().mockResolvedValue()
+      const rootGetters = {
+        currentTaskType: { for_entity: 'Episode' },
+        episodeMap: new Map([
+          ['ep-1', { id: 'ep-1', validations: new Map() }],
+          ['ep-2', { id: 'ep-2', validations: new Map() }]
+        ])
+      }
+      await store.actions.initTaskType({ dispatch, rootGetters }, false)
+      expect(dispatch).not.toHaveBeenCalled()
+    })
+
     test('initTaskType loads shots when the shot map is empty', async () => {
       const dispatch = vi.fn().mockResolvedValue()
       const rootGetters = {
@@ -256,6 +402,109 @@ describe('Task types store', () => {
       }
       await store.actions.initTaskType({ dispatch, rootGetters }, false)
       expect(dispatch).toHaveBeenCalledWith('loadShots')
+    })
+  })
+
+  describe('Episode task type page after the topbar', () => {
+    const production = { id: 'p', name: 'Prod' }
+    const plainEpisodes = [
+      { id: 'ep-1', name: 'E01', status: 'running', data: {} },
+      { id: 'ep-2', name: 'E02', status: 'running', data: {} }
+    ]
+    const task = {
+      id: 'task-1',
+      task_type_id: 'task-type-5',
+      task_status_id: 'status-1',
+      assignees: [],
+      duration: 0,
+      estimation: 0
+    }
+    const episodeTaskType = {
+      id: 'task-type-5',
+      name: 'Storyboard',
+      for_entity: 'Episode',
+      priority: 1
+    }
+    const route = {
+      params: { production_id: 'p', task_type_id: 'task-type-5' }
+    }
+
+    const createPageStore = () =>
+      createStore({
+        state: { route },
+        getters: {
+          currentProduction: () => production,
+          isTVShow: () => true,
+          personMap: () => new Map(),
+          route: () => route,
+          taskMap: () => new Map(),
+          taskStatusMap: () => new Map(),
+          taskTypeMap: () => new Map([[episodeTaskType.id, episodeTaskType]]),
+          userFilters: () => ({})
+        },
+        modules: {
+          episodes: {
+            state: { ...episodesStore.state },
+            getters: episodesStore.getters,
+            actions: episodesStore.actions,
+            mutations: episodesStore.mutations
+          },
+          tasktypes: {
+            state: { ...store.state },
+            getters: {
+              currentTaskType: () => episodeTaskType
+            },
+            actions: store.actions
+          }
+        }
+      })
+
+    beforeEach(() => {
+      vi.spyOn(shotsApi, 'getEpisodes').mockResolvedValue(
+        plainEpisodes.map(episode => ({ ...episode }))
+      )
+      vi.spyOn(shotsApi, 'getEpisodesWithTasks').mockResolvedValue([
+        { ...plainEpisodes[0], tasks: [task] },
+        { ...plainEpisodes[1], tasks: [] }
+      ])
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+      episodesStore.cache.episodeMap.clear()
+    })
+
+    test('lists the episodes with their tasks', async () => {
+      const vuexStore = createPageStore()
+
+      await vuexStore.dispatch('loadEpisodes')
+      await vuexStore.dispatch('initTaskType', false)
+
+      const episodeMap = vuexStore.getters.episodeMap
+      expect(shotsApi.getEpisodesWithTasks).toHaveBeenCalledTimes(1)
+      expect([...episodeMap.get('ep-1').validations]).toEqual([
+        ['task-type-5', 'task-1']
+      ])
+      expect(episodeMap.get('ep-2').validations).toBeInstanceOf(Map)
+    })
+
+    test('lists the episodes with their tasks after an episode creation', async () => {
+      const vuexStore = createPageStore()
+
+      await vuexStore.dispatch('loadEpisodes')
+      // Created from the shot list: the new episode alone holds its tasks.
+      vuexStore.commit('NEW_EPISODE_END', {
+        id: 'ep-3',
+        name: 'E03',
+        project_id: 'p'
+      })
+      await vuexStore.dispatch('initTaskType', false)
+
+      const episodeMap = vuexStore.getters.episodeMap
+      expect(shotsApi.getEpisodesWithTasks).toHaveBeenCalledTimes(1)
+      expect([...episodeMap.get('ep-1').validations]).toEqual([
+        ['task-type-5', 'task-1']
+      ])
     })
   })
 

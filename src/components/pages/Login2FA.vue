@@ -55,7 +55,9 @@ function continueLogin() {
 }
 
 useHead({
-  title: `${t('profile.two_factor_authentication.title')} - Kitsu`
+  title: computed(
+    () => `${t('profile.two_factor_authentication.title')} - Kitsu`
+  )
 })
 </script>
 

@@ -7,6 +7,45 @@ import stringHelpers from '@/lib/string'
 import { getDayRange, getMonthRange, getWeekRange } from '@/lib/time'
 import { convertHours } from '@/lib/timesheet'
 
+// The errors of the imported files the browser could not read (moved,
+// deleted or changed since they were picked) and of the empty ones.
+const readFailures = new WeakSet()
+
+const ESTIMATIONS_PARENTS = {
+  Asset: { field: 'asset_type_name', labelKey: 'tasks.fields.asset_type' },
+  Edit: { field: 'episode_name', labelKey: 'shots.fields.episode' },
+  Sequence: { field: 'episode_name', labelKey: 'shots.fields.episode' },
+  Shot: { field: 'sequence_name', labelKey: 'tasks.fields.sequence' }
+}
+
+/*
+ * The columns of a task type export that the estimations import of Zou
+ * reads, by the name Zou reads, with the key of their label: the export
+ * writes these labels and the import gives them their name back. The parent
+ * of a sequence or an edit is its episode, so only a TV show has one, and an
+ * episode has none.
+ */
+export const getEstimationsCsvLabelKeys = (
+  entityType,
+  { isPaperProduction = false, isTVShow = false } = {}
+) => {
+  const hasParent =
+    ESTIMATIONS_PARENTS[entityType] &&
+    (isTVShow || !['Edit', 'Sequence'].includes(entityType))
+  return {
+    ...(hasParent && { Parent: ESTIMATIONS_PARENTS[entityType].labelKey }),
+    Entity: 'tasks.fields.entity_name',
+    ...(isPaperProduction && { Drawings: 'tasks.fields.drawings' }),
+    Difficulty: 'tasks.fields.difficulty',
+    Estimation: 'tasks.fields.estimation',
+    'Start date': 'tasks.fields.start_date',
+    'Due date': 'tasks.fields.due_date'
+  }
+}
+
+export const getEstimationsParentField = entityType =>
+  ESTIMATIONS_PARENTS[entityType]?.field
+
 const csv = {
   generateTimesheet({
     name,
@@ -276,6 +315,20 @@ const csv = {
     return [...names.values()]
   },
 
+  /*
+   * Give each header that is a label its name (`names` maps labels to
+   * names), unless the file already has a header of that name or the label
+   * is also the name of a column of its own, listed in `kept`.
+   */
+  renameHeaders(headers, names, kept = []) {
+    return headers.map(header => {
+      const name = names.get(header)
+      return name && !headers.includes(name) && !kept.includes(header)
+        ? name
+        : header
+    })
+  },
+
   turnEntriesToCsvString(entries, config = {}) {
     return Papa.unparse(entries, {
       delimiter: ';',
@@ -543,17 +596,33 @@ const csv = {
 
   processCSV: (data, config = {}) => {
     return new Promise((resolve, reject) => {
+      const fail = err => {
+        if (Object(err) === err) readFailures.add(err)
+        reject(err)
+      }
       Papa.parse(data, {
         encoding: 'UTF-8',
-        error: reject,
+        error: fail,
         transform: value => value.trim(),
+        // For a file, this runs in a FileReader callback, outside the
+        // promise: a throw here would leave it pending.
         complete: results => {
-          results.data[0].forEach(stringHelpers.capitalize)
-          resolve(results.data)
+          if (results.data.length) {
+            resolve(results.data)
+          } else {
+            fail(new Error('The CSV file is empty'))
+          }
         },
         ...config
       })
     })
+  },
+
+  // A file the browser could not read is the user's: the import modal says
+  // so. Anything else is a bug that must stay unhandled for Sentry.
+  logReadFailure: err => {
+    if (!readFailures.has(err)) throw err
+    console.error(err)
   }
 }
 

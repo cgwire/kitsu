@@ -1,12 +1,12 @@
 ---
 name: Kitsu release
 
+# Version tags only (v1.0.74, v0.20.0-beta.0): each run publishes an
+# immutable release, whose name can never be reused.
 on:
   push:
-    branches:
-      - main
     tags:
-      - '*'
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 env:
   NODE_OPTIONS: --max_old_space_size=8192
@@ -44,14 +44,14 @@ jobs:
           (cd dist && tar cvzf "../${ARTEFACT_FILENAME}" .)
           sha512sum "${ARTEFACT_FILENAME}" > "${CHECKSUM_FILENAME}"
       - name: Create release
-        if: startsWith(github.ref, 'refs/tags')
         uses: ncipollo/release-action@v1
         id: create_release
         with:
           artifacts: kitsu-*.tgz,kitsu-*.SHA512
+          artifactErrorsFailBuild: true
+          immutableCreate: true
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Update "build" branch
-        if: startsWith(github.ref, 'refs/tags')
         run: |
           KITSU_VERSION="$(cat dist/.version.txt)"
           mv dist ..
@@ -66,7 +66,6 @@ jobs:
           git commit -m "New release (${KITSU_VERSION})"
           git tag ${KITSU_VERSION}-build
       - name: Push changes
-        if: startsWith(github.ref, 'refs/tags')
         uses: ad-m/github-push-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

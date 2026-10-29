@@ -22,6 +22,7 @@
           :extension="entity.preview_file_extension"
           :preview-file-id="previewFileId"
           :url-prefix="urlPrefix"
+          with-extension
         />
       </div>
 
@@ -45,6 +46,7 @@
           v-if="taskTypeOptions.length > 0"
         >
           <combobox
+            :disabled="isCurrentUserClient"
             :thin="true"
             :width="150"
             :with-margin="false"
@@ -53,6 +55,7 @@
           />
           <combobox
             class="version-combo"
+            :disabled="isCurrentUserClient"
             :thin="true"
             :width="150"
             :with-margin="false"
@@ -147,6 +150,7 @@ const dropAreaRef = useTemplateRef('drop-area')
 const previewFileId = ref(props.entity.preview_file_id)
 const taskTypeId = ref(null)
 
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
@@ -379,6 +383,10 @@ onMounted(() => {
 
   :deep(.thumbnail-picture) {
     background-color: #000;
+  }
+
+  :deep(.thumbnail-extension) {
+    color: $white-grey;
   }
 }
 

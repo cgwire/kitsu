@@ -1,7 +1,16 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import process from 'node:process'
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi
+} from 'vitest'
+import { createApp, h, markRaw, nextTick, ref } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -11,8 +20,12 @@ vi.mock('vue-i18n', async importOriginal => ({
 
 // Pre-load the real store to avoid a circular-import race from child components.
 import '@/lib/auth'
+import { useModal } from '@/composables/modal'
+import clipboard from '@/lib/clipboard'
 
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 
 const task = {
   id: 'task-1',
@@ -32,6 +45,10 @@ const preview = {
 
 // One set of spies shared by the main and the comparison viewer stubs.
 const viewer = {
+  extractFrame: vi.fn(),
+  goNextFrame: vi.fn(),
+  goPreviousFrame: vi.fn(),
+  panBy: vi.fn(),
   pause: vi.fn(),
   play: vi.fn(),
   resetZoom: vi.fn(),
@@ -39,7 +56,10 @@ const viewer = {
   resumeZoom: vi.fn(),
   setCurrentFrame: vi.fn(),
   setCurrentTimeRaw: vi.fn(),
-  setVolume: vi.fn()
+  setPanZoom: vi.fn(),
+  setSoundTime: vi.fn(),
+  setVolume: vi.fn(),
+  zoomAt: vi.fn()
 }
 
 const moviePreview = {
@@ -51,7 +71,75 @@ const moviePreview = {
   duration: 10
 }
 
-const mountPlayer = ({ props = {}, getterOverrides = {}, config = {} } = {}) => {
+const annotatedPreview = {
+  ...preview,
+  annotations: [
+    {
+      time: 0,
+      width: 800,
+      height: 600,
+      drawing: {
+        objects: [
+          {
+            id: 'stroke-1',
+            type: 'path',
+            path: 'M 0 0 L 10 10',
+            left: 100,
+            top: 50,
+            scaleX: 1,
+            scaleY: 1,
+            stroke: '#ff0000',
+            strokeWidth: 2
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// Enough of a fabric canvas for the annotation composable, which wires its
+// handlers with on() and off().
+const createFakeCanvas = () => {
+  const handlers = {}
+  const objects = []
+  return {
+    width: 800,
+    height: 600,
+    _objects: objects,
+    contextContainer: {},
+    freeDrawingBrush: { pressureManager: {} },
+    add: vi.fn(),
+    clear: vi.fn(),
+    discardActiveObject: vi.fn(),
+    fire: (event, options) =>
+      (handlers[event] || []).forEach(handler => handler(options)),
+    getActiveObject: vi.fn(),
+    getObjects: () => objects,
+    off: (event, handler) => {
+      handlers[event] = (handlers[event] || []).filter(h => h !== handler)
+    },
+    on: (event, handler) => {
+      handlers[event] = [...(handlers[event] || []), handler]
+    },
+    remove: vi.fn(),
+    requestRenderAll: vi.fn()
+  }
+}
+
+// Raw like the canvas AnnotationCanvas exposes: a reactive proxy would fail
+// the identity checks of the composable.
+const annotationCanvasStub = canvas => ({
+  name: 'AnnotationCanvas',
+  template: '<div />',
+  setup: () => ({ canvas: markRaw(canvas), overlay: ref(null) })
+})
+
+const mountPlayer = ({
+  props = {},
+  getterOverrides = {},
+  config = {},
+  stubs = {}
+} = {}) => {
   const store = createStore({
     getters: {
       assetMap: () => new Map(),
@@ -85,25 +173,49 @@ const mountPlayer = ({ props = {}, getterOverrides = {}, config = {} } = {}) => 
           methods: viewer
         },
         RouterLink: { template: '<a><slot /></a>' },
+        // The default stub of an async component imports it: an import still
+        // running when the file ends rejects once its module runner closes.
+        TaskInfo: { name: 'TaskInfo', template: '<div />' },
         VideoProgress: {
           name: 'VideoProgress',
           template: '<div />',
           methods: { updateProgressBar: () => {} }
-        }
+        },
+        ...stubs
       },
       plugins: [store]
     }
   })
 }
 
+const pointer = (target, type, { id, x, y }) => {
+  const event = new MouseEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    clientX: x,
+    clientY: y
+  })
+  Object.defineProperties(event, {
+    pointerId: { value: id },
+    pointerType: { value: 'touch' }
+  })
+  target.dispatchEvent(event)
+}
+
 describe('PreviewPlayer.vue', () => {
   let wrapper = null
+  // callback of the last resize observer created
+  let onResize = null
 
   beforeAll(() => {
     // jsdom has no ResizeObserver: mirror the browser check on the target.
     vi.stubGlobal(
       'ResizeObserver',
       class {
+        constructor(callback) {
+          onResize = callback
+        }
+
         observe(target) {
           if (!(target instanceof Element)) {
             throw new TypeError(
@@ -128,6 +240,74 @@ describe('PreviewPlayer.vue', () => {
     wrapper = null
     vi.restoreAllMocks()
     Object.values(viewer).forEach(spy => spy.mockClear())
+  })
+
+  describe('finger navigation', () => {
+    // Fingers on the annotations move the media of the main viewer: the
+    // comparison viewer only mirrors it.
+    it('zooms the main viewer with a pinch on the annotations', async () => {
+      wrapper = mountPlayer({
+        stubs: {
+          AnnotationCanvas: {
+            name: 'AnnotationCanvas',
+            template: '<div ref="overlay"><canvas /></div>',
+            setup: () => ({ overlay: ref(null) })
+          }
+        }
+      })
+      await nextTick()
+      const upper = wrapper
+        .findComponent({ ref: 'main-annotation-canvas' })
+        .find('canvas').element
+
+      pointer(upper, 'pointerdown', { id: 1, x: 100, y: 100 })
+      pointer(upper, 'pointerdown', { id: 2, x: 200, y: 100 })
+      pointer(upper, 'pointermove', { id: 2, x: 300, y: 100 })
+
+      expect(viewer.zoomAt.mock.calls).toEqual([[200, 100, 2]])
+      expect(viewer.zoomAt.mock.contexts.map(vm => vm.$attrs.name)).toEqual([
+        'main'
+      ])
+    })
+
+    it.each([
+      ['pencil', 'pencil-annotate-clicked'],
+      ['eraser', 'erase-clicked'],
+      ['shape', 'shape-mode-clicked'],
+      ['text', 'type-clicked']
+    ])('hands a finger on the annotations to the %s', async (tool, click) => {
+      wrapper = mountPlayer({
+        stubs: {
+          AnnotationCanvas: {
+            name: 'AnnotationCanvas',
+            template: '<div ref="overlay"><canvas /></div>',
+            setup: () => ({
+              canvas: markRaw(createFakeCanvas()),
+              overlay: ref(null)
+            })
+          }
+        }
+      })
+      await nextTick()
+      wrapper.findComponent({ name: 'PlayerAnnotationBar' }).vm.$emit(click)
+      await nextTick()
+      const upper = wrapper
+        .findComponent({ ref: 'main-annotation-canvas' })
+        .find('canvas').element
+      const heard = []
+      upper.addEventListener('pointerdown', event =>
+        heard.push(event.pointerType)
+      )
+
+      vi.useFakeTimers()
+      pointer(upper, 'pointerdown', { id: 1, x: 100, y: 100 })
+      pointer(upper, 'pointermove', { id: 1, x: 105, y: 100 })
+      vi.advanceTimersByTime(300)
+      vi.useRealTimers()
+
+      expect(heard).toEqual(['touch'])
+      expect(viewer.panBy).not.toHaveBeenCalled()
+    })
   })
 
   describe('movie playback', () => {
@@ -167,6 +347,183 @@ describe('PreviewPlayer.vue', () => {
         120 / 30 + 0.001,
         6
       )
+    })
+
+    // The main movie cannot be read: its play ends at once, and the
+    // compared movie stays still under a play button.
+    it('leaves the comparison still when the movie cannot be played', async () => {
+      const comparisonPlay = vi.fn()
+      wrapper = mountPlayer({
+        props: {
+          previews: [moviePreview],
+          entityPreviewFiles: {
+            [task.task_type_id]: [
+              { ...moviePreview, id: 'preview-3', revision: 2 },
+              moviePreview
+            ]
+          },
+          taskTypeMap: new Map([
+            [task.task_type_id, { id: task.task_type_id, name: 'Animation' }]
+          ])
+        },
+        stubs: {
+          PreviewViewer: {
+            name: 'PreviewViewer',
+            template: '<div />',
+            emits: ['play-ended'],
+            methods: {
+              ...viewer,
+              play() {
+                if (this.$attrs.name === 'main') this.$emit('play-ended')
+                else comparisonPlay()
+              }
+            }
+          }
+        }
+      })
+      await nextTick()
+      wrapper
+        .findComponent({ name: 'PlayerComparisonBar' })
+        .vm.$emit('compare-clicked')
+      await flushPromises()
+
+      wrapper.vm.play()
+
+      expect(comparisonPlay).not.toHaveBeenCalled()
+      expect(
+        wrapper.findComponent({ name: 'PlayerPlaybackBar' }).props('isPlaying')
+      ).toBe(false)
+    })
+
+    // The playback wipes the canvas, and the movie stops on the frame it
+    // shows: no frame change reloaded its drawing.
+    it('shows the drawing of the frame a movie stops on', async () => {
+      const [drawing] = annotatedPreview.annotations
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        props: {
+          previews: [{ ...moviePreview, annotations: [{ ...drawing, time: 4 }] }]
+        },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      const togglePlayback = () =>
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))
+      togglePlayback()
+      wrapper
+        .findAllComponents({ name: 'PreviewViewer' })[0]
+        .vm.$emit('frame-update', 100)
+      await flushPromises()
+      canvas.add.mockClear()
+
+      togglePlayback()
+      await flushPromises()
+
+      expect(canvas.add.mock.calls.map(([object]) => object.id)).toEqual([
+        'stroke-1'
+      ])
+    })
+  })
+
+  // The arrows, Home, End and the drawing keys (, and .) wipe the canvas,
+  // then the frame the movie goes to reloads its drawing. A picture has no
+  // frame to go to, and a movie stops at its ends: nothing reloaded the
+  // drawing there.
+  describe('frame keys', () => {
+    const press = key =>
+      window.dispatchEvent(new KeyboardEvent('keydown', { key }))
+
+    // 250 frames at 25 fps for the movie.
+    const mountOnFrame = async (shown, frame = 0) => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        props: { previews: [shown] },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      if (frame > 0) {
+        wrapper
+          .findAllComponents({ name: 'PreviewViewer' })[0]
+          .vm.$emit('frame-update', frame)
+        await flushPromises()
+      }
+      canvas.clear.mockClear()
+      return canvas
+    }
+
+    it.each(['ArrowLeft', 'ArrowRight', ',', '.'])(
+      'keeps the drawing of a picture on %s',
+      async key => {
+        const canvas = await mountOnFrame(annotatedPreview)
+
+        press(key)
+
+        expect(canvas.clear).not.toHaveBeenCalled()
+      }
+    )
+
+    it.each([
+      ['first', 0, 'ArrowLeft'],
+      ['last', 249, 'ArrowRight']
+    ])('keeps the drawing of the %s frame of a movie', async (_, frame, key) => {
+      const canvas = await mountOnFrame(moviePreview, frame)
+
+      press(key)
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      ['ArrowLeft', 'goPreviousFrame'],
+      ['ArrowRight', 'goNextFrame']
+    ])('steps a movie one frame on %s', async (key, step) => {
+      const canvas = await mountOnFrame(moviePreview, 100)
+
+      press(key)
+
+      expect(viewer[step]).toHaveBeenCalledTimes(1)
+      expect(canvas.clear).toHaveBeenCalled()
+    })
+
+    it.each([
+      ['first', 'Home', 0],
+      ['last', 'End', 249]
+    ])(
+      'keeps the drawing of the %s frame of a movie on %s',
+      async (_, key, frame) => {
+        const canvas = await mountOnFrame(moviePreview, frame)
+
+        press(key)
+
+        expect(canvas.clear).not.toHaveBeenCalled()
+      }
+    )
+
+    it.each([
+      ['Home', 0],
+      ['End', 249]
+    ])('takes a movie to its first or last frame on %s', async (key, frame) => {
+      const canvas = await mountOnFrame(moviePreview, 100)
+      viewer.setCurrentFrame.mockClear()
+
+      press(key)
+
+      expect(viewer.setCurrentFrame).toHaveBeenCalledWith(frame)
+      expect(canvas.clear).toHaveBeenCalled()
+    })
+
+    it('takes a movie to its next drawing on .', async () => {
+      const [drawing] = annotatedPreview.annotations
+      const canvas = await mountOnFrame({
+        ...moviePreview,
+        annotations: [{ ...drawing, time: 4 }]
+      })
+      viewer.setCurrentFrame.mockClear()
+
+      press('.')
+
+      expect(viewer.setCurrentFrame).toHaveBeenCalledWith(100)
+      expect(canvas.clear).toHaveBeenCalled()
     })
   })
 
@@ -222,13 +579,800 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  // Like the playlists, by a frame of the production, up to its last frame.
+  describe('sound keys', () => {
+    const soundPreview = { ...preview, id: 'preview-sound', extension: 'mp3' }
+    const press = key =>
+      window.dispatchEvent(new KeyboardEvent('keydown', { key }))
+    const soundTimes = () => viewer.setSoundTime.mock.calls.map(([t]) => t)
+
+    const mountOnSound = async time => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      const [main] = wrapper.findAllComponents({ name: 'PreviewViewer' })
+      main.vm.$emit('sound-duration-changed', 3)
+      main.vm.$emit('sound-time-update', time)
+      await nextTick()
+      viewer.setCurrentFrame.mockClear()
+      return main
+    }
+
+    it('steps the sound, not the hidden movie', async () => {
+      await mountOnSound(1.5)
+
+      press('ArrowRight')
+      press('ArrowLeft')
+      press('Home')
+      press('End')
+
+      const times = soundTimes()
+      expect(times).toHaveLength(4)
+      expect(times[0]).toBeCloseTo(1.52)
+      expect(times[1]).toBeCloseTo(1.44)
+      expect(times[2]).toBe(0)
+      expect(times[3]).toBeCloseTo(2.96)
+      expect(viewer.goNextFrame).not.toHaveBeenCalled()
+      expect(viewer.goPreviousFrame).not.toHaveBeenCalled()
+      expect(viewer.setCurrentFrame).not.toHaveBeenCalled()
+      expect(viewer.pause).not.toHaveBeenCalled()
+    })
+
+    it('keeps the sound between its first and last frames', async () => {
+      const main = await mountOnSound(2.96)
+      press('ArrowRight')
+      main.vm.$emit('sound-time-update', 0)
+      await nextTick()
+      press('ArrowLeft')
+      expect(soundTimes()).toEqual([2.96, 0])
+    })
+
+    it('starts a new sound from its first frame', async () => {
+      const main = await mountOnSound(2)
+      main.vm.$emit('sound-duration-changed', 0)
+      main.vm.$emit('sound-duration-changed', 3)
+      await nextTick()
+      press('ArrowRight')
+      expect(soundTimes()[0]).toBeCloseTo(0.04)
+    })
+  })
+
+  // The mute and the volume come back on the next visit, in the keys the
+  // Playlists page shares.
+  describe('mute', () => {
+    const playbackBar = () =>
+      wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+
+    afterEach(() => {
+      localStorage.removeItem('player:muted')
+      localStorage.removeItem('player:volume')
+    })
+
+    // ButtonSound gives back 50 on an unmute, the volume the player already
+    // has after a muted visit: no volume change follows.
+    it('plays at the volume of an unmute after a muted visit', async () => {
+      localStorage.setItem('player:muted', 'true')
+      localStorage.setItem('player:volume', '0')
+      wrapper = mountPlayer({ props: { previews: [moviePreview] } })
+      await nextTick()
+
+      playbackBar().vm.$emit('update:isMuted', false)
+      await nextTick()
+
+      expect(viewer.setVolume.mock.calls.at(-1)).toEqual([50])
+      expect(localStorage.getItem('player:muted')).toBe('false')
+      expect(localStorage.getItem('player:volume')).toBe('50')
+    })
+
+    // The playlist modal, opened over the task panel, stores a mute this
+    // player never saw.
+    it('stores the mute with the volume', async () => {
+      wrapper = mountPlayer({ props: { previews: [moviePreview] } })
+      await nextTick()
+      localStorage.setItem('player:muted', 'true')
+
+      playbackBar().vm.$emit('update:volume', 70)
+      await nextTick()
+
+      expect(localStorage.getItem('player:volume')).toBe('70')
+      expect(localStorage.getItem('player:muted')).toBe('false')
+    })
+
+    // Unmuted, a stored 0 can only be what such an unmute left before it
+    // stored its volume.
+    it('reads an unmuted volume of 0 as the default', async () => {
+      localStorage.setItem('player:muted', 'false')
+      localStorage.setItem('player:volume', '0')
+      wrapper = mountPlayer({ props: { previews: [moviePreview] } })
+      await nextTick()
+
+      expect(viewer.setVolume.mock.calls.at(-1)).toEqual([50])
+    })
+  })
+
+  // Annotations go on movies and pictures only: the canvas hides over a
+  // sound, but a paste still saved there what nothing showed again.
+  describe('sound annotations', () => {
+    afterEach(() => {
+      clipboard.copyAnnotations([])
+    })
+
+    it('pastes no annotation on a sound', async () => {
+      const canvas = { ...createFakeCanvas(), setActiveObject: vi.fn() }
+      wrapper = mountPlayer({
+        props: {
+          previews: [{ ...preview, id: 'preview-sound', extension: 'mp3' }],
+          readOnly: false
+        },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      clipboard.copyAnnotations({
+        mainObject: { clone: async () => ({ left: 0, top: 0, set: vi.fn() }) },
+        subObjects: []
+      })
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'v', ctrlKey: true })
+      )
+      await flushPromises()
+      expect(canvas.add).not.toHaveBeenCalled()
+    })
+  })
+
+  // Zou stores no duration for a sound: the bar takes the decoded one.
+  describe('sound time', () => {
+    const soundPreview = {
+      ...preview,
+      id: 'preview-sound',
+      extension: 'mp3'
+    }
+    const viewers = () => wrapper.findAllComponents({ name: 'PreviewViewer' })
+    const bar = () => wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+
+    it('shows the time and the duration of the sound', async () => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      const [main, comparison] = viewers()
+      comparison.vm.$emit('sound-duration-changed', 9)
+      comparison.vm.$emit('sound-time-update', 7)
+      await nextTick()
+      expect(bar().props('currentTime')).toBe('00:00:00:00')
+      expect(bar().props('maxDuration')).toBe('00:00:00:00')
+
+      main.vm.$emit('sound-duration-changed', 3.2)
+      main.vm.$emit('sound-time-update', 1.48)
+      await nextTick()
+
+      expect(bar().props('currentTime')).toBe('00:00:01:12')
+      expect(bar().props('maxDuration')).toBe('00:00:03:05')
+      expect(bar().props('nbFrames')).toBe(0)
+    })
+
+    it('restarts the time and the duration on a switch to a sound', async () => {
+      wrapper = mountPlayer({ props: { previews: [moviePreview] } })
+      await nextTick()
+      const [main] = viewers()
+      main.vm.$emit('duration-changed', 10)
+      wrapper.vm.setCurrentFrame(50)
+      await nextTick()
+      expect(bar().props('currentTime')).toBe('00:00:02:00')
+
+      await wrapper.setProps({ previews: [soundPreview] })
+      main.vm.$emit('sound-duration-changed', 0)
+      await nextTick()
+
+      expect(bar().props('currentTime')).toBe('00:00:00:00')
+      expect(bar().props('maxDuration')).toBe('00:00:00:00')
+    })
+
+    // A sound Zou has not processed yet loads nothing: the sound left stays
+    // loaded under it, hidden.
+    it('leaves nothing of the sound left to a sound not ready yet', async () => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      const [main] = viewers()
+      main.vm.$emit('sound-duration-changed', 3)
+      main.vm.$emit('sound-time-update', 2)
+      await nextTick()
+
+      await wrapper.setProps({
+        previews: [
+          { ...soundPreview, id: 'preview-sound-2', status: 'processing' }
+        ]
+      })
+      main.vm.$emit('sound-time-update', 2.1)
+      await nextTick()
+      expect(bar().props('currentTime')).toBe('00:00:00:00')
+      expect(bar().props('maxDuration')).toBe('00:00:00:00')
+
+      viewer.setSoundTime.mockClear()
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
+      expect(viewer.setSoundTime).not.toHaveBeenCalled()
+    })
+
+    // A store reload hands over new objects for the same previews: the sound
+    // on screen stays loaded, and sends no new duration.
+    it('keeps the sound on a reload of its preview', async () => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      const [main] = viewers()
+      main.vm.$emit('sound-duration-changed', 3)
+      await nextTick()
+
+      await wrapper.setProps({ previews: [{ ...soundPreview }] })
+      expect(bar().props('maxDuration')).toBe('00:00:03:00')
+
+      viewer.setSoundTime.mockClear()
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))
+      expect(viewer.setSoundTime).toHaveBeenCalledTimes(1)
+    })
+
+    // As on a switch to another movie.
+    it.each([
+      ['a movie', moviePreview],
+      ['another sound', { ...soundPreview, id: 'preview-sound-0' }]
+    ])('ends the play on a switch from %s to a sound', async (_, previous) => {
+      wrapper = mountPlayer({ props: { previews: [previous] } })
+      await nextTick()
+      bar().vm.$emit('play-pause-clicked')
+      await nextTick()
+      expect(bar().props('isPlaying')).toBe(true)
+
+      await wrapper.setProps({ previews: [soundPreview] })
+      expect(bar().props('isPlaying')).toBe(false)
+    })
+
+    it('plays on through a reload of the preview of its sound', async () => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      bar().vm.$emit('play-pause-clicked')
+      await nextTick()
+
+      await wrapper.setProps({ previews: [{ ...soundPreview }] })
+      expect(bar().props('isPlaying')).toBe(true)
+    })
+
+    // Pausing the sound on a switch away sends its time one last time.
+    it('leaves the time of a movie to the movie', async () => {
+      wrapper = mountPlayer({ props: { previews: [soundPreview] } })
+      await nextTick()
+      await wrapper.setProps({ previews: [moviePreview] })
+      const [main] = viewers()
+      main.vm.$emit('duration-changed', 10)
+      main.vm.$emit('sound-time-update', 1.48)
+      main.vm.$emit('sound-duration-changed', 3.2)
+      await nextTick()
+
+      expect(bar().props('currentTime')).toBe('00:00:00:00')
+      expect(bar().props('maxDuration')).toBe('00:00:09:24')
+    })
+  })
+
+  describe('full screen', () => {
+    const soundPreview = { ...preview, id: 'preview-sound', extension: 'mp3' }
+
+    afterEach(() => {
+      delete document.fullscreen
+      vi.useRealTimers()
+    })
+
+    // jsdom has no full screen: the player follows the change event.
+    const enterFullScreen = async () => {
+      Object.defineProperty(document, 'fullscreen', {
+        configurable: true,
+        value: true
+      })
+      wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+      await nextTick()
+    }
+
+    const leaveFullScreen = async () => {
+      delete document.fullscreen
+      wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+      await nextTick()
+    }
+
+    const commentToggle = () =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('icon') === 'comment')
+
+    // The box of the panel takes the focus once the panel shows.
+    it('focuses the comment box of the panel it opens', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      let displayOnFocus = null
+      wrapper = mountPlayer({
+        props: { readOnly: false },
+        stubs: {
+          PlayerAnnotationBar: false,
+          TaskInfo: {
+            name: 'TaskInfo',
+            template: '<div />',
+            methods: {
+              focusCommentTextarea() {
+                displayOnFocus = this.$el.style.display
+              }
+            }
+          }
+        }
+      })
+      await enterFullScreen()
+
+      commentToggle().vm.$emit('click')
+      await nextTick()
+
+      expect(displayOnFocus).toBe('')
+    })
+
+    // Shift+Tab goes from the player to a comment box. The browser shows the
+    // player alone in full screen: a box of the page behind it would take
+    // the keys out of sight.
+    describe('Shift+Tab', () => {
+      let pageForm = null
+
+      const pressShiftTab = () => {
+        const event = new KeyboardEvent('keydown', {
+          key: 'Tab',
+          shiftKey: true,
+          bubbles: true,
+          cancelable: true
+        })
+        document.dispatchEvent(event)
+        return event
+      }
+
+      const goFullScreen = async () => {
+        setFullScreenElement(wrapper.element)
+        await enterFullScreen()
+      }
+
+      // A comment box of the page, shown: jsdom lays nothing out.
+      const addPageBox = ({ disabled = false } = {}) => {
+        if (!pageForm) {
+          pageForm = document.body.appendChild(document.createElement('div'))
+          pageForm.className = 'add-comment'
+        }
+        const box = pageForm.appendChild(document.createElement('textarea'))
+        box.disabled = disabled
+        Object.defineProperty(box, 'offsetParent', { value: document.body })
+        return box
+      }
+
+      // A modal registered with useModal, which the player yields to. In an
+      // app of its own: a second mount would swap the stubs of the player.
+      let closeModal = null
+      const openModalHost = (parent = document.body) => {
+        const element = parent.appendChild(document.createElement('div'))
+        const app = createApp({
+          setup: () => {
+            useModal(ref(true), vi.fn())
+            return () => h('div', { class: 'modal' }, [h('button', 'Cancel')])
+          }
+        })
+        app.mount(element)
+        closeModal = () => {
+          app.unmount()
+          element.remove()
+        }
+        return nextTick()
+      }
+
+      afterEach(() => {
+        closeModal?.()
+        closeModal = null
+        pageForm?.remove()
+        pageForm = null
+        resetFullScreen()
+      })
+
+      // A box posting its comment is disabled: Shift+Tab goes past it.
+      it('focuses the comment box of the page out of full screen', async () => {
+        addPageBox({ disabled: true })
+        const pageBox = addPageBox()
+        wrapper = mountPlayer()
+        await flushPromises()
+
+        const event = pressShiftTab()
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(document.activeElement).toBe(pageBox)
+      })
+
+      // The comments keep their state: opened here, they would show at the
+      // next full screen.
+      it('leaves the comments closed out of full screen', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            TaskInfo: {
+              name: 'TaskInfo',
+              template: '<div />',
+              methods: { focusCommentTextarea: () => {} }
+            }
+          }
+        })
+        await flushPromises()
+
+        const event = pressShiftTab()
+        await goFullScreen()
+
+        expect(event.defaultPrevented).toBe(false)
+        expect(
+          wrapper.findComponent({ name: 'TaskInfo' }).element.style.display
+        ).toBe('none')
+      })
+
+      // The closed panel still holds its box, hidden.
+      it('opens the comments of the player in full screen', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const pageBox = addPageBox()
+        const focusCommentTextarea = vi.fn()
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            TaskInfo: {
+              name: 'TaskInfo',
+              template: '<div><div class="add-comment"><textarea /></div></div>',
+              methods: { focusCommentTextarea }
+            }
+          }
+        })
+        await goFullScreen()
+
+        const event = pressShiftTab()
+        await nextTick()
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(document.activeElement).not.toBe(pageBox)
+        expect(wrapper.findComponent({ name: 'TaskInfo' }).isVisible()).toBe(
+          true
+        )
+        expect(focusCommentTextarea).toHaveBeenCalled()
+      })
+
+      it('focuses the box of its open comments in full screen', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const pageBox = addPageBox()
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            TaskInfo: {
+              name: 'TaskInfo',
+              template: '<div><div class="add-comment"><textarea /></div></div>',
+              methods: { focusCommentTextarea: () => {} }
+            }
+          }
+        })
+        await goFullScreen()
+        pressShiftTab()
+        await nextTick()
+        expect(wrapper.findComponent({ name: 'TaskInfo' }).isVisible()).toBe(
+          true
+        )
+        const panelBox = wrapper
+          .findComponent({ name: 'TaskInfo' })
+          .find('textarea').element
+        // Shown with its comments: jsdom lays nothing out.
+        Object.defineProperty(panelBox, 'offsetParent', {
+          value: wrapper.element
+        })
+        const focus = vi.spyOn(panelBox, 'focus')
+
+        const event = pressShiftTab()
+
+        expect(event.defaultPrevented).toBe(true)
+        expect(document.activeElement).not.toBe(pageBox)
+        expect(focus).toHaveBeenCalled()
+      })
+
+      it('leaves the page alone in full screen without comments', async () => {
+        const pageBox = addPageBox()
+        wrapper = mountPlayer()
+        await goFullScreen()
+
+        const event = pressShiftTab()
+
+        expect(event.defaultPrevented).toBe(false)
+        expect(document.activeElement).not.toBe(pageBox)
+      })
+
+      // Like the "+" modal back in the page once the full screen ended: the
+      // player took the focus away as it ended.
+      it('leaves Shift+Tab to a modal of the page out of full screen', async () => {
+        const pageBox = addPageBox()
+        wrapper = mountPlayer()
+        await flushPromises()
+        await openModalHost()
+
+        pressShiftTab()
+
+        expect(document.activeElement).not.toBe(pageBox)
+        expect(document.activeElement).toBe(
+          document.querySelector('.modal button')
+        )
+      })
+
+      it('leaves the keys alone with its comments open and no box', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            PlayerAnnotationBar: false,
+            TaskInfo: {
+              name: 'TaskInfo',
+              template: '<div />',
+              methods: { focusCommentTextarea: () => {} }
+            }
+          }
+        })
+        await goFullScreen()
+        commentToggle().vm.$emit('click')
+        await nextTick()
+
+        const event = pressShiftTab()
+
+        expect(event.defaultPrevented).toBe(false)
+      })
+
+      // A modal over the player, like the "+" one that it holds in full
+      // screen, keeps its own Shift+Tab.
+      it('leaves Shift+Tab to a modal over it in full screen', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const focusCommentTextarea = vi.fn()
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            TaskInfo: {
+              name: 'TaskInfo',
+              template: '<div />',
+              methods: { focusCommentTextarea }
+            }
+          }
+        })
+        await goFullScreen()
+        await openModalHost(wrapper.element)
+
+        pressShiftTab()
+        await nextTick()
+
+        expect(focusCommentTextarea).not.toHaveBeenCalled()
+        expect(
+          wrapper.findComponent({ name: 'TaskInfo' }).element.style.display
+        ).toBe('none')
+      })
+    })
+
+    // Chrome leaves the full screen to show a file chooser: a modal of the
+    // player stays on screen, to bring it back, and the comments keep their
+    // state for that return.
+    describe('comments as the full screen ends', () => {
+      const isPanelModalOpen = ref(false)
+      const isPlayerModalOpen = ref(false)
+
+      const openComments = async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        wrapper = mountPlayer({
+          props: { readOnly: false },
+          stubs: {
+            // In the player, out of the comments panel: where the task
+            // panel puts the modal of its "+" button.
+            BrowsingBar: {
+              name: 'BrowsingBar',
+              setup: () => useModal(isPlayerModalOpen, vi.fn()),
+              template: '<div />'
+            },
+            PlayerAnnotationBar: false,
+            TaskInfo: {
+              name: 'TaskInfo',
+              setup: () => useModal(isPanelModalOpen, vi.fn()),
+              template: '<div />',
+              methods: { focusCommentTextarea: () => {} }
+            }
+          }
+        })
+        await enterFullScreen()
+        commentToggle().vm.$emit('click')
+        await nextTick()
+        return wrapper.findComponent({ name: 'TaskInfo' })
+      }
+
+      // Detached v-show toggles fool isVisible: read the style instead.
+      const isShown = panel => panel.element.style.display !== 'none'
+
+      afterEach(() => {
+        isPanelModalOpen.value = false
+        isPlayerModalOpen.value = false
+      })
+
+      it('hides the comments panel', async () => {
+        const panel = await openComments()
+
+        await leaveFullScreen()
+
+        expect(isShown(panel)).toBe(false)
+      })
+
+      it('keeps the panel of an open modal, out of the layout', async () => {
+        isPanelModalOpen.value = true
+        const panel = await openComments()
+
+        expect(panel.classes()).not.toContain('is-collapsed')
+
+        await leaveFullScreen()
+
+        expect(isShown(panel)).toBe(true)
+        expect(panel.classes()).toContain('is-collapsed')
+        // WebKit lays a fixed element out in the size container holding it.
+        expect(wrapper.classes()).toContain('keeps-comment-modal')
+
+        isPanelModalOpen.value = false
+        await nextTick()
+
+        expect(isShown(panel)).toBe(false)
+        expect(wrapper.classes()).not.toContain('keeps-comment-modal')
+      })
+
+      it('keeps the comments for a modal of the player', async () => {
+        isPlayerModalOpen.value = true
+        const panel = await openComments()
+
+        await leaveFullScreen()
+        isPlayerModalOpen.value = false
+        await nextTick()
+
+        expect(isShown(panel)).toBe(false)
+
+        await enterFullScreen()
+
+        expect(isShown(panel)).toBe(true)
+      })
+
+      // Hiding it would hide the modal still open, and its keyboard trap.
+      it('keeps the panel of an open modal through a task change', async () => {
+        isPanelModalOpen.value = true
+        const panel = await openComments()
+        await leaveFullScreen()
+
+        await wrapper.setProps({ task: { ...task, id: 'task-2' } })
+
+        expect(isShown(panel)).toBe(true)
+      })
+
+      it('keeps the comments through a task change in full screen', async () => {
+        const panel = await openComments()
+
+        await wrapper.setProps({ task: { ...task, id: 'task-2' } })
+
+        expect(isShown(panel)).toBe(true)
+      })
+
+      it('forgets the comments of a task left out of full screen', async () => {
+        isPanelModalOpen.value = true
+        const panel = await openComments()
+        await leaveFullScreen()
+        isPanelModalOpen.value = false
+        await nextTick()
+
+        await wrapper.setProps({ task: { ...task, id: 'task-2' } })
+        await enterFullScreen()
+
+        expect(isShown(panel)).toBe(false)
+      })
+    })
+
+    // Annotating and commenting are two rights: an assigned artist reads and
+    // writes the comments of a file it cannot draw on.
+    it.each([
+      [false, false],
+      [true, true]
+    ])(
+      'shows the comments to a read-only viewer who can comment: %s',
+      async (canComment, isShown) => {
+        wrapper = mountPlayer({
+          props: { canComment, readOnly: true },
+          stubs: { PlayerAnnotationBar: false }
+        })
+        await enterFullScreen()
+
+        const toggle = wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(button => button.attributes('icon') === 'comment')
+        expect(Boolean(toggle)).toBe(isShown)
+        expect(wrapper.findComponent({ name: 'TaskInfo' }).exists()).toBe(
+          isShown
+        )
+      }
+    )
+
+    const unannotated = ['mp3', 'glb', 'pdf', 'zip']
+
+    it.each(unannotated)('shows the comments of a %s file', async extension => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper = mountPlayer({
+        props: {
+          previews: [{ ...soundPreview, extension }],
+          readOnly: false
+        },
+        stubs: {
+          PlayerAnnotationBar: false,
+          TaskInfo: {
+            name: 'TaskInfo',
+            template: '<div />',
+            methods: { focusCommentTextarea: () => {} }
+          }
+        }
+      })
+      await enterFullScreen()
+      const toggle = wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('icon') === 'comment')
+      expect(toggle).toBeDefined()
+
+      toggle.vm.$emit('click')
+      await nextTick()
+
+      expect(wrapper.findComponent({ name: 'TaskInfo' }).isVisible()).toBe(
+        true
+      )
+    })
+
+    // The combo lists each revision by its first file.
+    describe('version combo', () => {
+      const firstFile = { ...moviePreview, id: 'preview-v2', revision: 2 }
+      const previousRevision = {
+        ...soundPreview,
+        id: 'preview-v1',
+        previews: [{ ...soundPreview, id: 'preview-v1' }]
+      }
+      const combo = () =>
+        wrapper
+          .findAllComponents({ name: 'ComboboxStyled' })
+          .find(item => item.classes('preview-combo'))
+
+      const showSecondFile = async extension => {
+        const secondFile = {
+          ...firstFile,
+          id: 'preview-v2-2',
+          extension,
+          position: 2
+        }
+        wrapper = mountPlayer({
+          props: {
+            previews: [firstFile, secondFile],
+            lastPreviewFiles: [
+              { ...firstFile, previews: [firstFile, secondFile] },
+              previousRevision
+            ]
+          }
+        })
+        await enterFullScreen()
+        wrapper.findComponent({ name: 'BrowsingBar' }).vm.$emit('next-clicked')
+        await nextTick()
+      }
+
+      it.each(['mp3', 'png', 'mp4'])(
+        'shows the revision of a second %s file',
+        async extension => {
+          await showSecondFile(extension)
+          expect(combo().props('modelValue')).toBe('preview-v2')
+        }
+      )
+
+      it('changes the version from a second file', async () => {
+        await showSecondFile('mp3')
+        combo().vm.$emit('update:modelValue', 'preview-v1')
+        expect(wrapper.emitted('change-current-preview')).toEqual([
+          [previousRevision]
+        ])
+      })
+    })
+  })
+
   describe('render', () => {
     // The Task page mounts the player with its task still null when a
     // comment lands before the task is loaded, and TaskInfo drops its task
     // when the notification is toggled off.
     it('renders without a task', () => {
-      // A picture preview has no annotation for the player to load.
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
       wrapper = mountPlayer({ props: { task: null } })
       expect(wrapper.find('.preview-player').exists()).toBe(true)
     })
@@ -236,7 +1380,6 @@ describe('PreviewPlayer.vue', () => {
     // A plain link navigates the tab: the browser fires beforeunload, which
     // closes the socket in Firefox and asks about unsaved annotations.
     it('downloads the original without leaving the page', () => {
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
       wrapper = mountPlayer()
       const link = wrapper.get(
         'a[href="/api/pictures/originals/preview-files/preview-1/download"]'
@@ -249,7 +1392,6 @@ describe('PreviewPlayer.vue', () => {
     // Vue mounts a comment node in place of a tree whose render threw and
     // still runs the mounted hook: every template ref is null in there.
     it('does not fail a second time after a failed render', () => {
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
       const errorHandler = vi.fn()
       const mountFailing = () =>
         mountPlayer({
@@ -279,7 +1421,6 @@ describe('PreviewPlayer.vue', () => {
       const onRejection = reason => rejections.push(reason)
       process.on('unhandledRejection', onRejection)
 
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
       wrapper = mountPlayer()
       await nextTick()
       wrapper.findComponent({ name: 'BrowsingBar' }).vm.$emit('current-index-clicked')
@@ -294,12 +1435,334 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  // A timecode clicked in the task panel moves the movie to its frame 20 ms
+  // later: the player can close in between.
+  describe('timecode click', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('drops the frame jump of a closed player', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper = mountPlayer({
+        props: {
+          previews: [moviePreview],
+          lastPreviewFiles: [moviePreview],
+          readOnly: false
+        }
+      })
+      await nextTick()
+      wrapper
+        .findComponent({ name: 'TaskInfo' })
+        .vm.$emit('time-code-clicked', { versionRevision: '1', frame: 12 })
+      wrapper.unmount()
+      wrapper = null
+
+      expect(() => vi.advanceTimersByTime(20)).not.toThrow()
+    })
+  })
+
+  // The resize observer reports the size of the container as soon as it
+  // observes it, then at each resize: a player closed within the 200 ms of
+  // the debounce still reloaded the annotation of its frame.
+  describe('container resize', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('drops the annotation reload of a closed player', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        props: { previews: [annotatedPreview] },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      expect(canvas.add).toHaveBeenCalled()
+      canvas.add.mockClear()
+
+      onResize([])
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(200)
+
+      expect(canvas.add).not.toHaveBeenCalled()
+    })
+
+    // On a phone the keyboard resizes the player as it opens: the reload
+    // ended the typing of the note at once.
+    it('leaves a note being typed through a resize', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        props: { previews: [annotatedPreview] },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      // Lets the resizes of the mount run first.
+      await vi.advanceTimersByTimeAsync(1000)
+      canvas.getActiveObject.mockReturnValue({ isEditing: true })
+      canvas.clear.mockClear()
+      viewer.resize.mockClear()
+
+      onResize([])
+      await vi.advanceTimersByTimeAsync(200)
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+      expect(viewer.resize).toHaveBeenCalled()
+    })
+  })
+
+  // The comparison canvas realigns 500 ms after the media of the comparison
+  // viewer loads: a player closed in between still reloaded the annotation
+  // of the compared revision.
+  describe('comparison', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('drops the realign of a closed player', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const canvas = createFakeCanvas()
+      const comparedPreview = { ...annotatedPreview, id: 'preview-3' }
+      wrapper = mountPlayer({
+        props: {
+          entityPreviewFiles: {
+            [task.task_type_id]: [comparedPreview, preview]
+          },
+          taskTypeMap: new Map([
+            [task.task_type_id, { id: task.task_type_id, name: 'Animation' }]
+          ])
+        },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      wrapper
+        .findComponent({ name: 'PlayerComparisonBar' })
+        .vm.$emit('compare-clicked')
+      await flushPromises()
+      expect(canvas.add).toHaveBeenCalled()
+      canvas.add.mockClear()
+
+      wrapper
+        .findAllComponents({ name: 'PreviewViewer' })[1]
+        .vm.$emit('video-loaded')
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(500)
+
+      expect(canvas.add).not.toHaveBeenCalled()
+    })
+
+    describe('after a revision change', () => {
+      const revision = number => ({
+        ...moviePreview,
+        id: `preview-r${number}`,
+        revision: number
+      })
+      // Layout comes first in the payload, the revisions are Animation ones.
+      const mountOnRevision2 = async () => {
+        wrapper = mountPlayer({
+          props: {
+            previews: [revision(3)],
+            entityPreviewFiles: {
+              'task-type-layout': [{ ...moviePreview, id: 'preview-layout' }],
+              [task.task_type_id]: [revision(3), revision(2)]
+            },
+            taskTypeMap: new Map([
+              ['task-type-layout', { id: 'task-type-layout', name: 'Layout' }],
+              [task.task_type_id, { id: task.task_type_id, name: 'Animation' }]
+            ])
+          },
+          stubs: {
+            PreviewViewer: {
+              name: 'PreviewViewer',
+              template: '<div />',
+              props: { preview: Object },
+              methods: viewer
+            }
+          }
+        })
+        await nextTick()
+        await wrapper.setProps({ previews: [revision(2)] })
+        await flushPromises()
+      }
+      const comparedPreview = () =>
+        wrapper.findAllComponents({ name: 'PreviewViewer' })[1].props('preview')
+
+      // The change picked a revision to compare with the comparison closed:
+      // the hidden comparison viewer loaded its movie.
+      it('gives the closed comparison no revision', async () => {
+        await mountOnRevision2()
+
+        expect(comparedPreview()).toBeNull()
+      })
+
+      it('compares with the other revision on Alt+O', async () => {
+        await mountOnRevision2()
+
+        window.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'o', code: 'KeyO', altKey: true })
+        )
+        await flushPromises()
+
+        expect(comparedPreview().id).toBe('preview-r3')
+      })
+    })
+  })
+
+  // The comment box waits for the snapshots, and each of them waits 500 ms
+  // for its frame or picture: the player can close in between.
+  describe('annotation snapshots', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it.each([
+      [
+        'video',
+        {
+          ...moviePreview,
+          annotations: [{ time: 1, drawing: { objects: [] } }]
+        }
+      ],
+      ['picture', annotatedPreview]
+    ])('drops the %s snapshots of a closed player', async (_, shown) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper = mountPlayer({
+        props: { previews: [shown] },
+        stubs: { AnnotationCanvas: annotationCanvasStub(createFakeCanvas()) }
+      })
+      await nextTick()
+
+      const snapshots = wrapper.vm.extractAnnotationSnapshots()
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(500)
+
+      await expect(snapshots).resolves.toEqual([])
+    })
+
+    // After its frame is read, a snapshot is composited and encoded: the
+    // next frame, or the restore of the user's frame, comes after.
+    it.each([1, 2])(
+      'drops the video snapshots of a player closed after frame 1 of %i',
+      async count => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      // jsdom draws and encodes nothing
+      const snapshotCanvas = document.createElement('canvas')
+      snapshotCanvas.toBlob = callback => callback(new Blob())
+      vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        drawImage: () => {}
+      })
+      const canvas = {
+        ...createFakeCanvas(),
+        getWidth: () => 800,
+        toCanvasElement: () => document.createElement('canvas')
+      }
+      const annotations = Array.from({ length: count }, (_, index) => ({
+        time: index + 1,
+        drawing: { objects: [] }
+      }))
+      wrapper = mountPlayer({
+        props: { previews: [{ ...moviePreview, annotations }] },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+
+      const snapshots = wrapper.vm.extractAnnotationSnapshots()
+      await vi.advanceTimersByTimeAsync(550)
+      expect(viewer.extractFrame).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(600)
+
+      await expect(snapshots).resolves.toEqual([])
+    }
+    )
+  })
+
+  // fabric disposes a text still in editing without the object:modified of
+  // a regular exit, and the typing only reaches the save 400 ms after the
+  // last keystroke: closing the player right after typing lost it.
+  describe('text annotation in editing', () => {
+    // Like fabric, a regular exit fires object:modified only for a text
+    // that differs from the one the editing started with.
+    const createEditingText = (canvas, textBeforeEdit) => ({
+      id: 'text-1',
+      canvas,
+      isEditing: true,
+      text: textBeforeEdit,
+      _textBeforeEdit: textBeforeEdit,
+      set(key, value) {
+        this[key] = value
+      },
+      toJSON() {
+        return { type: 'i-text', text: this.text }
+      },
+      exitEditing() {
+        this.isEditing = false
+        if (this.text !== this._textBeforeEdit) {
+          canvas.fire('object:modified', { target: this })
+        }
+      }
+    })
+
+    const mountWithText = async textBeforeEdit => {
+      const canvas = createFakeCanvas()
+      const text = createEditingText(canvas, textBeforeEdit)
+      canvas.getActiveObject.mockReturnValue(text)
+      const player = mountPlayer({
+        props: { readOnly: false },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      const type = value => {
+        text.text = value
+        canvas.fire('text:changed', { target: text })
+      }
+      return { player, type }
+    }
+
+    const savedTexts = player =>
+      (player.emitted('annotation-changed') || []).flatMap(([{ updates }]) =>
+        updates.flatMap(({ drawing }) => drawing.objects.map(({ text }) => text))
+      )
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('saves the text typed right before the player closes', async () => {
+      const { player, type } = await mountWithText('Type...')
+
+      type('Fix the hand')
+      player.unmount()
+
+      expect(savedTexts(player)).toEqual(['Fix the hand'])
+    })
+
+    it('saves a text typed back to its start right before closing', async () => {
+      const { player, type } = await mountWithText('Fix hand')
+      type('Fix hand now')
+      await vi.advanceTimersByTimeAsync(400)
+
+      type('Fix hand')
+      player.unmount()
+
+      expect(savedTexts(player)).toEqual(['Fix hand'])
+    })
+  })
+
   describe('focus', () => {
     // TaskInfo focuses the player in a nextTick once a task is loaded. A
     // render that threw on update keeps the player mounted with every
     // template ref null.
     it('does nothing after a failed render', async () => {
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
       const errorHandler = vi.fn()
       let isRenderFailing = false
       wrapper = mountPlayer({

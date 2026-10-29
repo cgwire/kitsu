@@ -1,0 +1,337 @@
+// Panels and filters of the task pages (My tasks, Person): the filters panel
+// on top, then one raised panel per tab. Include it inside the scoped style
+// block of the page, whose root carries the task-page class.
+
+@use '@/variables.scss' as *;
+
+@mixin task-panels {
+  .task-page {
+    display: flex;
+    flex-direction: column;
+  }
+
+  // tighter than the global .page: the panels carry their own padding
+  .task-page.page {
+    padding: 66px 1em 1em;
+  }
+
+  // the tabs still scroll sideways, without a bar eating their height
+  .section-tabs {
+    min-height: 36px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  // beats the 1.5rem of Bulma's .tabs:not(:last-child)
+  .section-tabs.tabs {
+    margin-bottom: 1em;
+  }
+
+  .search-field-column {
+    margin: 0 1em 0 0;
+  }
+
+  .query-list {
+    // the global rule leaves 2em under the list, inside the filters panel
+    margin-bottom: 0;
+    margin-top: 0.5em;
+  }
+
+  .todos-filters,
+  .todos-panel {
+    background: var(--background-panel-raised);
+    border-radius: 12px;
+    --text-strong: var(--text-panel);
+  }
+
+  .filters-toggle {
+    display: none;
+  }
+
+  .todos-filters {
+    margin: 0 0 1em;
+    padding: 1em;
+
+    .search-field-wrapper {
+      background: var(--background);
+    }
+
+    // the dark background of the comboboxes next to it
+    .dark & .search-field-wrapper,
+    .dark & :deep(.task-type-combo),
+    .dark & :deep(.selected-task-type-line) {
+      background: $dark-grey-light;
+    }
+
+    // the label metrics of the production combobox, to share its row: the
+    // task type one pads its label and pushes its box 3px lower than the rest
+    .search-field-column .label,
+    .task-type-field :deep(.label) {
+      margin-bottom: 5px;
+      padding-top: 0;
+    }
+
+    // On the timesheet tab, the filters and the timesheet header form one
+    // panel.
+    &.is-attached {
+      border-radius: 12px 12px 0 0;
+      margin-bottom: 0;
+
+      & ~ .user-timesheet :deep(.timesheet-header),
+      & ~ .calendar-panel :deep(.calendar-toolbar),
+      & ~ .productivity-panel :deep(.productivity-toolbar) {
+        border-radius: 0 0 12px 12px;
+        border-top: 1px solid rgba(var(--skeleton-rgb), 0.25);
+      }
+    }
+  }
+
+  .todos-panel {
+    padding: 1em;
+
+    // overflow: auto clips the rows and the sticky head to the corners
+    :deep(.datatable-wrapper) {
+      border-radius: 10px;
+      margin-bottom: 0;
+    }
+
+    // margin-top auto keeps the task count at the bottom of the panel
+    :deep(.footer-info) {
+      margin: auto 0 0;
+      padding-top: 0.75em;
+    }
+  }
+
+  .board-panel,
+  .calendar-panel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  // The calendar keeps its content height in a flex panel and the day rows
+  // shrink: it must fill the panel as it filled the page before.
+  .calendar-panel :deep(.user-calendar) {
+    flex: 1;
+    margin-top: 0;
+    max-height: none;
+    min-height: 0;
+  }
+
+  .calendar-panel :deep(.calendar-toolbar),
+  .calendar-panel :deep(.calendar-body),
+  .day-off-list :deep(.header),
+  .day-off-list :deep(.day-off-group) {
+    background: var(--background-panel-raised);
+  }
+
+  // The lanes share the panel color: in light theme they would melt into it
+  .board-panel :deep(.board-column:not(.droppable)) {
+    background: var(--background);
+  }
+
+  .dark .board-panel :deep(.board-column:not(.droppable)) {
+    background: var(--background-panel);
+  }
+
+  .data-list {
+    margin-top: 0;
+  }
+
+  .field {
+    margin-bottom: 0;
+  }
+
+  // A bit more air at the top of the panels under the header ones
+  @media screen and (min-width: 769px) {
+    .todos-panel,
+    .user-timesheet :deep(.timesheet-panel),
+    .calendar-panel :deep(.calendar-body),
+    .day-off-list :deep(.day-off-group) {
+      padding-top: 1.25em;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    // The page grows with its cards: at a fixed height, the list panel
+    // overflows it and its bottom margin never shows.
+    .task-page.page {
+      height: auto;
+      min-height: 100%;
+      padding-left: 0.5em;
+      padding-right: 0.5em;
+    }
+
+    // the funnel of the other pages, next to the search
+    .filters-toggle {
+      align-self: flex-end;
+      display: flex;
+      flex: none;
+      height: 42px;
+      margin-left: auto;
+      margin-right: 0;
+    }
+
+    .todos-filters.collapsed .collapsible {
+      display: none;
+    }
+
+    .todos-filters {
+      padding: 0.5em;
+
+      > .flexrow {
+        align-items: flex-end;
+        flex-wrap: wrap;
+        row-gap: 0.5em;
+      }
+
+      .filler {
+        display: none;
+      }
+    }
+
+    // the gap left of the funnel, which margin-left: auto pushes right. The
+    // search keeps its line with the funnel: unfolded, the other filters
+    // would share it and squeeze the search.
+    .search-field-column {
+      flex: 1 1 calc(100% - 60px);
+      margin-right: 0.75em;
+      min-width: 0;
+    }
+
+    // the 200px input pushed the save icon out of the box, under the funnel
+    .search-field-column :deep(.search-field-wrapper) {
+      margin-right: 0;
+      max-width: none;
+
+      .search-field {
+        flex: 1;
+        min-width: 0;
+        width: auto;
+      }
+    }
+
+    // like the task lists: a flexible height would clip the page bottom
+    // padding under the panel
+    .user-timesheet {
+      flex: none;
+      min-height: auto;
+    }
+
+    .todos-panel {
+      flex: none;
+      min-height: auto;
+      padding: 0.5em;
+    }
+
+    // A flexible height loops on a phone: the page scrollbar comes and goes,
+    // the grid resizes and the overflow with it.
+    .calendar-panel {
+      flex: none;
+      height: 85vh;
+    }
+
+    // A fixed height keeps the cards scrolling inside their lanes, and the
+    // sideways scrollbar of the lanes in view.
+    .board-panel.todos-panel {
+      height: 75vh;
+    }
+
+    // smaller cards: a lane shows several tasks at once
+    .board-panel :deep(.board-card .ui-droppable) {
+      min-height: 110px;
+    }
+
+    // one lane per screen, the next one peeking: drag and drop does not start
+    // from a touch, so the board is read-only there anyway
+    .board-panel :deep(.board-column) {
+      max-width: 75vw;
+      min-width: 75vw;
+      width: 75vw;
+    }
+  }
+
+  // the same air around the period panel as on the Timesheets page. The
+  // panel fills the column as a flex item: a min-height of 100% left the
+  // column scrolling with nothing more to show.
+  .productivity-side-column {
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    padding: 1em 1em 1em 0;
+
+    > :deep(*) {
+      flex: 1 0 auto;
+      min-height: 0;
+    }
+
+    // the quota panel takes the card look of the time spent one here, and
+    // keeps its plain look on the Quota page
+    :deep(.people-quota-info) {
+      // rounded like the task list of the time spent panel; a collapsed
+      // table ignores the radius
+      .details.table {
+        border-collapse: separate;
+        border-radius: 10px;
+        border-spacing: 0;
+        overflow: hidden;
+      }
+
+      background: var(--background-panel);
+      border-left: 0;
+      border-radius: 12px;
+      color: var(--text);
+      height: auto;
+      padding: 1.5em 1.5em 1em;
+      position: relative;
+
+      > .flexrow {
+        margin-right: 1em;
+      }
+
+      .title {
+        font-size: 1.5rem;
+      }
+
+      .close {
+        position: absolute;
+        right: 0.75em;
+        top: 0.75em;
+      }
+
+      .close-button {
+        height: 26px;
+        padding-top: 5px;
+        width: 26px;
+
+        &:hover {
+          background: rgba(var(--skeleton-rgb), 0.25);
+        }
+      }
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    // the period panel stacks under the chart, and the page scrolls as a whole
+    .columns.is-productivity {
+      flex-direction: column;
+      overflow-y: auto;
+
+      .column {
+        flex: none;
+        overflow-y: visible;
+      }
+
+      .productivity-side-column {
+        margin-top: 0;
+        max-width: none;
+        padding: 0.5em;
+        width: 100%;
+      }
+    }
+  }
+}

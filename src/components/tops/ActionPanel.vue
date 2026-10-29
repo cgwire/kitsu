@@ -13,15 +13,7 @@
           @click="selectBar('change-status')"
           @keydown.enter.prevent="selectBar('change-status')"
           @keydown.space.prevent="selectBar('change-status')"
-          v-if="
-            (isCurrentUserManager ||
-              isSupervisorInDepartment ||
-              isInDepartment ||
-              isCurrentViewTodos) &&
-            !isEntitySelection &&
-            !isCurrentViewConcept &&
-            isTaskSelection
-          "
+          v-if="availableBars.has('change-status')"
         >
           {{ $t('main.status') }}
         </div>
@@ -37,16 +29,7 @@
           @click="selectBar('assignation')"
           @keydown.enter.prevent="selectBar('assignation')"
           @keydown.space.prevent="selectBar('assignation')"
-          v-if="
-            (isCurrentViewSingleEntity || isCurrentViewEntity) &&
-            (isCurrentUserManager ||
-              isSupervisorInDepartment ||
-              isInDepartment ||
-              isCurrentViewSingleEntity) &&
-            !isEntitySelection &&
-            isTaskSelection &&
-            !isCurrentUserArtist
-          "
+          v-if="availableBars.has('assignation')"
         >
           <kitsu-icon
             name="user-check"
@@ -61,14 +44,7 @@
             active: selectedBar === 'priorities'
           }"
           :title="$t('menu.change_priority')"
-          v-if="
-            (isCurrentViewSingleEntity ||
-              isCurrentViewEntity ||
-              isCurrentViewPerson) &&
-            (isCurrentUserManager || isSupervisorInDepartment) &&
-            !isEntitySelection &&
-            isTaskSelection
-          "
+          v-if="availableBars.has('priorities')"
           role="button"
           tabindex="0"
           @click="selectBar('priorities')"
@@ -85,12 +61,26 @@
         <div
           class="menu-item"
           :class="{
+            active: selectedBar === 'copy-client-comments'
+          }"
+          :title="$t('menu.copy_client_comments')"
+          v-if="availableBars.has('copy-client-comments')"
+          role="button"
+          tabindex="0"
+          @click="selectBar('copy-client-comments')"
+          @keydown.enter.prevent="selectBar('copy-client-comments')"
+          @keydown.space.prevent="selectBar('copy-client-comments')"
+        >
+          <message-square-quote-icon />
+        </div>
+
+        <div
+          class="menu-item"
+          :class="{
             active: selectedBar === 'thumbnails'
           }"
           :title="$t('menu.set_thumbnails')"
-          v-if="
-            isTaskSelection && !isCurrentUserArtist && !isCurrentViewConcept
-          "
+          v-if="availableBars.has('thumbnails')"
           role="button"
           tabindex="0"
           @click="selectBar('thumbnails')"
@@ -105,31 +95,6 @@
         </div>
 
         <div
-          class="menu-item"
-          :class="{
-            active: selectedBar === 'subscribe'
-          }"
-          :title="$t('menu.subscribe')"
-          v-if="
-            isTaskSelection &&
-            !isCurrentViewSingleEntity &&
-            !isCurrentViewTodos &&
-            !isCurrentViewConcept
-          "
-          role="button"
-          tabindex="0"
-          @click="selectBar('subscribe')"
-          @keydown.enter.prevent="selectBar('subscribe')"
-          @keydown.space.prevent="selectBar('subscribe')"
-        >
-          <kitsu-icon
-            name="watch"
-            :active="selectedBar === 'subscribe'"
-            :title="$t('menu.subscribe')"
-          />
-        </div>
-
-        <div
           class="menu-item ml05"
           :class="{
             active: selectedBar === 'edit-concepts'
@@ -140,11 +105,7 @@
           @click="selectBar('edit-concepts')"
           @keydown.enter.prevent="selectBar('edit-concepts')"
           @keydown.space.prevent="selectBar('edit-concepts')"
-          v-if="
-            isCurrentViewConcept &&
-            (isCurrentUserManager || isConceptPublisher) &&
-            nbSelectedConcepts > 0
-          "
+          v-if="availableBars.has('edit-concepts')"
         >
           <link-icon />
         </div>
@@ -160,20 +121,10 @@
           @click="selectBar('move-concepts')"
           @keydown.enter.prevent="selectBar('move-concepts')"
           @keydown.space.prevent="selectBar('move-concepts')"
-          v-if="
-            isCurrentViewConcept &&
-            (isCurrentUserManager || isCurrentUserSupervisor) &&
-            nbSelectedConcepts > 0 &&
-            conceptFolders.length > 0
-          "
+          v-if="availableBars.has('move-concepts')"
         >
           <folder-input-icon />
         </div>
-
-        <div
-          class="menu-separator"
-          v-if="!isEntitySelection && isTaskSelection && nbSelectedTasks > 1"
-        ></div>
 
         <div
           class="menu-item"
@@ -181,17 +132,7 @@
             active: selectedBar === 'playlists'
           }"
           :title="$t('menu.generate_playlist')"
-          v-if="
-            (isCurrentViewAsset ||
-              isCurrentViewShot ||
-              isCurrentViewSequence ||
-              isCurrentViewTodos ||
-              isCurrentViewTaskType) &&
-            !isEntitySelection &&
-            !isCurrentViewSingleEntity &&
-            isTaskSelection &&
-            nbSelectedTasks > 0
-          "
+          v-if="availableBars.has('playlists')"
           role="button"
           tabindex="0"
           @click="selectBar('playlists')"
@@ -206,19 +147,6 @@
         </div>
 
         <div
-          v-if="
-            (isCurrentViewAsset ||
-              isCurrentViewShot ||
-              isCurrentViewTaskType) &&
-            !isEntitySelection &&
-            !isCurrentViewSingleEntity &&
-            isTaskSelection &&
-            isCurrentUserManager
-          "
-          class="menu-separator"
-        ></div>
-
-        <div
           class="menu-item"
           :class="{
             active: selectedBar === 'create-tasks'
@@ -229,59 +157,9 @@
           @click="selectBar('create-tasks')"
           @keydown.enter.prevent="selectBar('create-tasks')"
           @keydown.space.prevent="selectBar('create-tasks')"
-          v-if="
-            isCurrentViewEntity &&
-            !isCurrentViewTaskType &&
-            isCurrentUserManager &&
-            !isEntitySelection &&
-            nbSelectedTasks !== 1
-          "
+          v-if="availableBars.has('create-tasks')"
         >
           <check-square-icon />
-        </div>
-
-        <div
-          class="menu-item"
-          :class="{
-            active: selectedBar === 'delete-tasks'
-          }"
-          :title="$t('menu.delete_tasks')"
-          role="button"
-          tabindex="0"
-          @click="selectBar('delete-tasks')"
-          @keydown.enter.prevent="selectBar('delete-tasks')"
-          @keydown.space.prevent="selectBar('delete-tasks')"
-          v-if="
-            isCurrentViewEntity &&
-            isCurrentUserManager &&
-            !isEntitySelection &&
-            !isCurrentViewSingleEntity &&
-            isTaskSelection
-          "
-        >
-          <kitsu-icon
-            name="trash"
-            :active="selectedBar === 'delete-tasks'"
-            :title="$t('menu.delete_tasks')"
-          />
-        </div>
-
-        <div class="menu-separator" v-if="isCustomActionAvailable"></div>
-
-        <div
-          class="menu-item"
-          :class="{
-            active: selectedBar === 'custom-actions'
-          }"
-          :title="$t('menu.run_custom_action')"
-          role="button"
-          tabindex="0"
-          @click="selectBar('custom-actions')"
-          @keydown.enter.prevent="selectBar('custom-actions')"
-          @keydown.space.prevent="selectBar('custom-actions')"
-          v-if="isCustomActionAvailable"
-        >
-          <play-circle-icon />
         </div>
 
         <div
@@ -295,7 +173,7 @@
           @click="selectBar('delete-assets')"
           @keydown.enter.prevent="selectBar('delete-assets')"
           @keydown.space.prevent="selectBar('delete-assets')"
-          v-if="isCurrentViewAsset && isCurrentUserManager && !isTaskSelection"
+          v-if="availableBars.has('delete-assets')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_assets')" />
         </div>
@@ -311,7 +189,7 @@
           @click="selectBar('delete-shots')"
           @keydown.enter.prevent="selectBar('delete-shots')"
           @keydown.space.prevent="selectBar('delete-shots')"
-          v-if="isCurrentViewShot && isCurrentUserManager && !isTaskSelection"
+          v-if="availableBars.has('delete-shots')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_shots')" />
         </div>
@@ -327,7 +205,7 @@
           @click="selectBar('delete-edits')"
           @keydown.enter.prevent="selectBar('delete-edits')"
           @keydown.space.prevent="selectBar('delete-edits')"
-          v-if="isCurrentViewEdit && isCurrentUserManager && !isTaskSelection"
+          v-if="availableBars.has('delete-edits')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_edits')" />
         </div>
@@ -343,11 +221,58 @@
           @click="selectBar('delete-concepts')"
           @keydown.enter.prevent="selectBar('delete-concepts')"
           @keydown.space.prevent="selectBar('delete-concepts')"
-          v-if="
-            isCurrentViewConcept && (isCurrentUserManager || isConceptPublisher)
-          "
+          v-if="availableBars.has('delete-concepts')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_concepts')" />
+        </div>
+
+        <div class="more-actions" v-if="moreActions.length">
+          <div
+            class="menu-item"
+            ref="more-actions-button"
+            :class="{ active: isMoreActionSelected }"
+            :title="$t('menu.more_actions')"
+            role="combobox"
+            tabindex="0"
+            aria-haspopup="listbox"
+            :aria-expanded="isMoreActionsOpen"
+            :aria-activedescendant="
+              moreActionIndex > -1 ? moreActionId(moreActionIndex) : undefined
+            "
+            @click="toggleMoreActions"
+            @keydown="onMoreActionsKeydown"
+          >
+            <ellipsis-icon />
+          </div>
+          <div
+            class="more-actions-list"
+            ref="more-actions-list"
+            role="listbox"
+            :style="moreActionsPosition"
+            v-if="isMoreActionsOpen"
+          >
+            <div
+              :id="moreActionId(index)"
+              :key="action.bar"
+              class="more-action flexrow"
+              :class="{
+                active: selectedBar === action.bar,
+                focused: index === moreActionIndex
+              }"
+              role="option"
+              :aria-selected="selectedBar === action.bar"
+              @click="selectMoreAction(action)"
+              v-for="(action, index) in moreActions"
+            >
+              <component :is="action.icon" :size="16" class="flexrow-item" />
+              <span class="flexrow-item">{{ action.label }}</span>
+            </div>
+          </div>
+          <div
+            class="c-mask"
+            :class="{ 'is-active': isMoreActionsOpen }"
+            @click="toggleMoreActions"
+          ></div>
         </div>
 
         <div class="filler"></div>
@@ -545,6 +470,45 @@
               }}
             </button>
           </div>
+        </div>
+
+        <div
+          class="flexcolumn is-wide copy-client-comments"
+          v-if="selectedBar === 'copy-client-comments'"
+        >
+          <div class="flexrow-item prefix-field mb05">
+            <input
+              class="comment-text input"
+              type="text"
+              :placeholder="$t('tasks.copy_client_comments_prefix')"
+              v-model="clientCommentsPrefix"
+            />
+          </div>
+          <div class="flexrow-item is-wide">
+            <button
+              class="button confirm-button is-wide"
+              :class="{
+                'is-loading': loading.copyClientComments
+              }"
+              @click="confirmClientCommentsCopy"
+            >
+              {{
+                $t('tasks.copy_client_comments', {
+                  count: nbSelectedTasks,
+                  nbSelectedTasks
+                })
+              }}
+            </button>
+          </div>
+          <p class="result mt05" v-if="clientCommentsCopy">
+            {{ $t('tasks.client_comments_copied', clientCommentsCopy) }}
+          </p>
+          <p
+            class="is-danger has-text-centered mt05"
+            v-if="errors.copyClientComments"
+          >
+            {{ $t('tasks.copy_client_comments_error') }}
+          </p>
         </div>
 
         <div class="flexrow is-wide" v-if="selectedBar === 'create-tasks'">
@@ -938,13 +902,18 @@
 /* eslint-disable no-unused-vars */
 import {
   CheckSquareIcon,
+  EllipsisIcon,
+  EyeIcon,
   FolderInputIcon,
   LinkIcon,
+  MessageSquareQuoteIcon,
   PlayCircleIcon,
+  Trash2Icon,
   XIcon
 } from 'lucide-vue-next'
 import {
   computed,
+  defineAsyncComponent,
   onBeforeUnmount,
   onMounted,
   reactive,
@@ -956,13 +925,13 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
 import { intersection } from '@/lib/array'
 import func from '@/lib/func'
 import { isFreeEscape } from '@/lib/keyboard'
 import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import DeleteEntities from '@/components/tops/actions/DeleteEntities.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxModel from '@/components/widgets/ComboboxModel.vue'
@@ -974,6 +943,12 @@ import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 /* eslint-enable no-unused-vars */
+
+// The playlist player weighs more than the rest of the panel, which every
+// task panel shows: it loads after the first page (see Main.vue).
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
 
 const { t } = useI18n()
 const route = useRoute()
@@ -991,6 +966,8 @@ const props = defineProps({
 
 const emit = defineEmits(['export-task', 'set-frame-thumbnail'])
 
+const CLIENT_COMMENTS_PREFIX_KEY = 'action-panel:client-comments-prefix'
+
 // State
 // --------------------------------------------------------------------------
 
@@ -1000,6 +977,12 @@ const entitySearchFieldRef = useTemplateRef('entity-search-field')
 const availableTaskStatuses = ref([])
 const customAction = ref({})
 const customActions = ref([])
+const clientCommentsCopy = ref(null)
+const clientCommentsPrefix = ref(
+  localStorage.getItem(CLIENT_COMMENTS_PREFIX_KEY) || ''
+)
+const isMoreActionsOpen = ref(false)
+const moreActionsPosition = ref({})
 const isUseCurrentFrame = ref(false)
 const person = ref(null)
 const priority = ref('0')
@@ -1018,6 +1001,7 @@ const loading = reactive({
   changePriority: false,
   changeStatus: false,
   conceptDeletion: false,
+  copyClientComments: false,
   editDeletion: false,
   taskCreation: false,
   taskDeletion: false,
@@ -1029,6 +1013,7 @@ const loading = reactive({
 const errors = reactive({
   assetDeletion: false,
   conceptDeletion: false,
+  copyClientComments: false,
   editDeletion: false,
   shotDeletion: false,
   taskAssignation: false,
@@ -1230,12 +1215,59 @@ const isEntitySelection = computed(
     nbSelectedEdits.value > 0
 )
 
+const isTaskCreationAvailable = computed(
+  () =>
+    isCurrentViewEntity.value &&
+    !isCurrentViewTaskType.value &&
+    isCurrentUserManager.value &&
+    !isEntitySelection.value &&
+    nbSelectedValidations.value > 0 &&
+    nbSelectedTasks.value !== 1
+)
+
 const isCustomActionAvailable = computed(
   () =>
     !isEntitySelection.value &&
     isTaskSelection.value &&
     !isCurrentViewConcept.value &&
     customActions.value.length > 0
+)
+
+// Secondary actions, listed in the more actions menu instead of the bar
+const moreActions = computed(() =>
+  [
+    {
+      bar: 'subscribe',
+      icon: EyeIcon,
+      label: t('menu.subscribe'),
+      isAvailable:
+        isTaskSelection.value &&
+        !isCurrentViewSingleEntity.value &&
+        !isCurrentViewTodos.value &&
+        !isCurrentViewConcept.value
+    },
+    {
+      bar: 'custom-actions',
+      icon: PlayCircleIcon,
+      label: t('menu.run_custom_action'),
+      isAvailable: isCustomActionAvailable.value
+    },
+    {
+      bar: 'delete-tasks',
+      icon: Trash2Icon,
+      label: t('menu.delete_tasks'),
+      isAvailable:
+        isCurrentViewEntity.value &&
+        isCurrentUserManager.value &&
+        !isEntitySelection.value &&
+        !isCurrentViewSingleEntity.value &&
+        isTaskSelection.value
+    }
+  ].filter(action => action.isAvailable)
+)
+
+const isMoreActionSelected = computed(() =>
+  moreActions.value.some(action => action.bar === selectedBar.value)
 )
 
 const allAssetsCanceled = computed(() =>
@@ -1287,6 +1319,89 @@ const isSupervisorInDepartment = computed(
     (user.value.departments.length === 0 || isInDepartment.value)
 )
 
+// The bars the menu offers to this selection. The bar used last comes back
+// only when offered: several pages share it, and it may come from a
+// selection of lines or of empty cells.
+const availableBars = computed(() => {
+  const menuBars = {
+    'change-status':
+      (isCurrentUserManager.value ||
+        isSupervisorInDepartment.value ||
+        isInDepartment.value ||
+        isCurrentViewTodos.value) &&
+      !isEntitySelection.value &&
+      !isCurrentViewConcept.value &&
+      isTaskSelection.value,
+    assignation:
+      (isCurrentViewSingleEntity.value || isCurrentViewEntity.value) &&
+      (isCurrentUserManager.value ||
+        isSupervisorInDepartment.value ||
+        isInDepartment.value ||
+        isCurrentViewSingleEntity.value) &&
+      !isEntitySelection.value &&
+      isTaskSelection.value &&
+      !isCurrentUserArtist.value,
+    priorities:
+      (isCurrentViewSingleEntity.value ||
+        isCurrentViewEntity.value ||
+        isCurrentViewPerson.value) &&
+      (isCurrentUserManager.value || isSupervisorInDepartment.value) &&
+      !isEntitySelection.value &&
+      isTaskSelection.value,
+    'copy-client-comments':
+      isCurrentUserManager.value &&
+      isTaskSelection.value &&
+      !isEntitySelection.value &&
+      !isCurrentViewConcept.value,
+    thumbnails:
+      isTaskSelection.value &&
+      !isCurrentUserArtist.value &&
+      !isCurrentViewConcept.value,
+    'edit-concepts':
+      isCurrentViewConcept.value &&
+      (isCurrentUserManager.value || isConceptPublisher.value) &&
+      nbSelectedConcepts.value > 0,
+    'move-concepts':
+      isCurrentViewConcept.value &&
+      (isCurrentUserManager.value || isCurrentUserSupervisor.value) &&
+      nbSelectedConcepts.value > 0 &&
+      conceptFolders.value.length > 0,
+    playlists:
+      (isCurrentViewAsset.value ||
+        isCurrentViewShot.value ||
+        isCurrentViewSequence.value ||
+        isCurrentViewTodos.value ||
+        isCurrentViewTaskType.value) &&
+      !isEntitySelection.value &&
+      !isCurrentViewSingleEntity.value &&
+      isTaskSelection.value &&
+      nbSelectedTasks.value > 0,
+    'create-tasks': isTaskCreationAvailable.value,
+    'delete-assets':
+      isCurrentViewAsset.value &&
+      isCurrentUserManager.value &&
+      nbSelectedAssets.value > 0 &&
+      !isTaskSelection.value,
+    'delete-shots':
+      isCurrentViewShot.value &&
+      isCurrentUserManager.value &&
+      nbSelectedShots.value > 0 &&
+      !isTaskSelection.value,
+    'delete-edits':
+      isCurrentViewEdit.value &&
+      isCurrentUserManager.value &&
+      nbSelectedEdits.value > 0 &&
+      !isTaskSelection.value,
+    'delete-concepts':
+      isCurrentViewConcept.value &&
+      (isCurrentUserManager.value || isConceptPublisher.value)
+  }
+  return new Set([
+    ...Object.keys(menuBars).filter(bar => menuBars[bar]),
+    ...moreActions.value.map(action => action.bar)
+  ])
+})
+
 const storagePrefix = computed(() => {
   if (isCurrentViewTaskType.value) return 'tasks-'
   if (isCurrentViewConcept.value) return 'concepts-'
@@ -1298,10 +1413,11 @@ const storagePrefix = computed(() => {
 // --------------------------------------------------------------------------
 
 const confirmTaskStatusChange = async () => {
-  loading.changeStatus = true
   if (!taskStatusId.value) {
-    taskStatusId.value = availableTaskStatuses.value[0].id
+    taskStatusId.value = availableTaskStatuses.value[0]?.id ?? ''
   }
+  if (!taskStatusId.value) return
+  loading.changeStatus = true
   try {
     await store.dispatch('changeSelectedTaskStatus', {
       taskStatusId: taskStatusId.value,
@@ -1366,6 +1482,22 @@ const confirmPriorityChange = async () => {
     console.error(err)
   }
   loading.changePriority = false
+}
+
+const confirmClientCommentsCopy = async () => {
+  loading.copyClientComments = true
+  errors.copyClientComments = false
+  clientCommentsCopy.value = null
+  localStorage.setItem(CLIENT_COMMENTS_PREFIX_KEY, clientCommentsPrefix.value)
+  try {
+    clientCommentsCopy.value = await store.dispatch('copyLastClientComments', {
+      prefix: clientCommentsPrefix.value
+    })
+  } catch (err) {
+    console.error(err)
+    errors.copyClientComments = true
+  }
+  loading.copyClientComments = false
 }
 
 const confirmTaskCreation = async () => {
@@ -1485,12 +1617,45 @@ const selectBar = barName => {
   selectedBar.value = selectedBar.value !== barName ? barName : ''
 }
 
+// The menu bar scrolls horizontally, which clips any absolute child: the
+// list is fixed, under the button and opening leftwards.
+const moreActionsButtonRef = useTemplateRef('more-actions-button')
+const toggleMoreActions = () => {
+  isMoreActionsOpen.value = !isMoreActionsOpen.value
+  if (isMoreActionsOpen.value) {
+    const rect = moreActionsButtonRef.value.getBoundingClientRect()
+    moreActionsPosition.value = {
+      top: `${rect.bottom}px`,
+      right: `${document.documentElement.clientWidth - rect.right}px`
+    }
+  }
+}
+
+const selectMoreAction = action => {
+  isMoreActionsOpen.value = false
+  selectBar(action.bar)
+}
+
+const {
+  activeIndex: moreActionIndex,
+  onKeydown: onMoreActionsKeydown,
+  optionId: moreActionId
+} = useComboboxKeyboard({
+  isOpen: isMoreActionsOpen,
+  toggle: toggleMoreActions,
+  optionsLength: () => moreActions.value.length,
+  onSelect: index => selectMoreAction(moreActions.value[index]),
+  listRef: useTemplateRef('more-actions-list')
+})
+
 const autoChooseSelectBar = () => {
   if (isHidden.value) {
     window.removeEventListener('keydown', onKeyDown)
     return
   }
   window.addEventListener('keydown', onKeyDown)
+  // The watcher of the task count may run after this choice.
+  refreshSelectionActions()
   if (isCurrentViewAsset.value && nbSelectedAssets.value > 0) {
     selectedBar.value = 'delete-assets'
   } else if (isCurrentViewShot.value && nbSelectedShots.value > 0) {
@@ -1501,15 +1666,20 @@ const autoChooseSelectBar = () => {
     if (!['edit-concepts', 'move-concepts'].includes(selectedBar.value)) {
       selectedBar.value = 'delete-concepts'
     }
+  } else if (!isTaskSelection.value && nbSelectedValidations.value > 0) {
+    // Empty cells only: the task bars would have no task to act on.
+    selectedBar.value = isTaskCreationAvailable.value ? 'create-tasks' : ''
   } else {
     if (nbSelectedTasks.value === 1) selectedBar.value = ''
     const lastSelection = localStorage.getItem(
       `${storagePrefix.value}-selected-bar`
     )
-    if (lastSelection) {
+    if (availableBars.value.has(lastSelection)) {
       selectedBar.value = lastSelection
     } else if (isCurrentViewAssetShotOrEdit.value) {
       selectedBar.value = 'change-status'
+    } else if (!availableBars.value.has(selectedBar.value)) {
+      selectedBar.value = ''
     }
   }
 }
@@ -1541,6 +1711,20 @@ const getSelectionCustomActions = () => {
       selectedTypes.has(type)
     )
   )
+}
+
+// The bars offered to a selection of tasks depend on its statuses and custom
+// actions.
+const refreshSelectionActions = () => {
+  if (nbSelectedTasks.value === 0) return
+  availableTaskStatuses.value = getAvailableStatuses()
+  customActions.value = getSelectionCustomActions()
+  const isActionStillAvailable =
+    customAction.value.url &&
+    customActions.value.some(action => action.id === customAction.value.id)
+  if (customActions.value.length > 0 && !isActionStillAvailable) {
+    customAction.value = customActions.value[0]
+  }
 }
 
 const isLinkedTo = (concept, entity) =>
@@ -1620,24 +1804,15 @@ watchEntitySelection(nbSelectedShots)
 watchEntitySelection(nbSelectedEdits)
 watchEntitySelection(nbSelectedConcepts, 1)
 
-watch(isHidden, autoChooseSelectBar)
+watch([isHidden, isTaskSelection], autoChooseSelectBar)
 
-watch(
-  nbSelectedTasks,
-  () => {
-    if (nbSelectedTasks.value > 0) {
-      availableTaskStatuses.value = getAvailableStatuses()
-      customActions.value = getSelectionCustomActions()
-      const isActionStillAvailable =
-        customAction.value.url &&
-        customActions.value.some(action => action.id === customAction.value.id)
-      if (customActions.value.length > 0 && !isActionStillAvailable) {
-        customAction.value = customActions.value[0]
-      }
-    }
-  },
-  { immediate: true }
-)
+// A selection change can take the open bar out of the menu, such as the task
+// creation once its cells hold the created tasks.
+watch(availableBars, bars => {
+  if (selectedBar.value && !bars.has(selectedBar.value)) autoChooseSelectBar()
+})
+
+watch(nbSelectedTasks, refreshSelectionActions, { immediate: true })
 
 watch(
   () => route.name,
@@ -1752,16 +1927,41 @@ onBeforeUnmount(() => {
   padding: 8px;
 }
 
+.prefix-field,
+.prefix-field .input {
+  width: 100%;
+}
+
 .priority-combobox {
   color: var(--text);
   margin-left: 0.3em;
 }
 
-.menu-separator {
-  padding: 0.2em;
-  border-right: 2px solid $light-grey-light;
-  height: 26px;
-  margin-bottom: 8px;
+.more-actions-list {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  color: var(--text);
+  min-width: 200px;
+  overflow: hidden;
+  position: fixed;
+  z-index: 1001;
+}
+
+.more-action {
+  cursor: pointer;
+  padding: 0.6em 0.8em;
+  white-space: nowrap;
+
+  &:hover,
+  &.focused {
+    background: var(--background-hover);
+  }
+
+  &.active {
+    color: var(--text-selected);
+  }
 }
 
 .is-wide {

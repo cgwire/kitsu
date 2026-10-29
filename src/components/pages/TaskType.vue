@@ -36,7 +36,8 @@
               v-if="
                 !isActiveTab('schedule') &&
                 !isActiveTab('estimation') &&
-                isSupervisorInDepartment
+                isSupervisorInDepartment &&
+                !isEstimationsImportHidden
               "
             >
               <button-simple
@@ -90,12 +91,18 @@
               class="flexrow-item flexrow align-end"
               v-if="isActiveTab('tasks')"
             >
-              <combobox-status
+              <combobox-multiple
+                class="flexrow-item selector"
+                :label="$t('entities.build_filter.asset_type')"
+                :options="assetTypeOptions"
+                v-model="assetTypeIdsFilter"
+                v-if="entityType === 'Asset'"
+              />
+              <combobox-status-multiple
                 class="flexrow-item selector"
                 :label="$t('news.task_status')"
                 :task-status-list="taskStatusList"
-                :with-margin="false"
-                v-model="taskStatusIdFilter"
+                v-model="taskStatusIdsFilter"
               />
               <combobox-styled
                 class="flexrow-item"
@@ -358,10 +365,13 @@
           :is-loading="loading.importing"
           :is-error="errors.importing"
           :import-error="errors.importingError"
+          :imported-rows="importedRows"
           :parsed-csv="parsedCSV"
           :form-data="importCsvFormData"
           :columns="[...dataMatchers, ...optionalColumns]"
           :data-matchers="dataMatchers"
+          :required-values="dataMatchers"
+          :block-missing-columns="true"
           :database="{}"
           :disable-update="true"
           @reupload="resetImport"
@@ -432,7 +442,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { getEntityMap } from '@/composables/entity'
-import csv from '@/lib/csv'
+import csv, { getEstimationsCsvLabelKeys } from '@/lib/csv'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
 import func from '@/lib/func'
 import {
@@ -443,7 +453,7 @@ import {
   getTaskFilters
 } from '@/lib/filtering'
 import { buildSupervisorTaskIndex, indexSearch } from '@/lib/indexing'
-import { getPersonPath } from '@/lib/path'
+import { getPersonPath, pluralizeEntityType } from '@/lib/path'
 import preferences from '@/lib/preferences'
 import { sortByMetadata, sortByName, sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
@@ -468,7 +478,8 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
+import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -560,21 +571,29 @@ const descriptorIdToDelete = ref(null)
 const descriptorToEdit = ref({})
 const difficultyFilter = ref('-1')
 const dueDateFilter = ref('all')
-const entityType = ref('Asset')
+const routeEntityType = ref('Asset')
 const estimationFilter = ref('all')
 const importCsvFormData = ref({})
 const isScheduleVisible = ref(false)
 const parsedCSV = ref([])
+const importedRows = ref(null)
 const priorityFilter = ref('-1')
 const retakeCountFilter = ref('all')
 const tasks = ref([])
-const taskStatusIdFilter = ref(null)
+const assetTypeIdsFilter = ref([])
+const taskStatusIdsFilter = ref([])
 
 // Search index for the supervisor filters, non-reactive by design
 let taskIndex = null
 
-const dataMatchers = ['Parent', 'Entity']
 const genericColumns = ['Metadata column name (text value)']
+const pageEntityTypes = ['Asset', 'Shot', 'Sequence', 'Edit', 'Episode']
+const allEpisodesLabelKeys = {
+  Asset: 'main.all_assets',
+  Edit: 'main.all_edits',
+  Sequence: 'sequences.all_sequences',
+  Shot: 'main.all_shots'
+}
 const difficultyOptions = [
   { label: 'all_tasks', value: '-1' },
   { label: 'difficulty.very_easy', value: '1' },
@@ -674,6 +693,9 @@ const taskListRef = useTemplateRef('task-list')
 
 // Computed
 const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentTaskTypeEpisode = computed(
+  () => store.getters.currentTaskTypeEpisode
+)
 const currentProduction = computed(() => store.getters.currentProduction)
 const currentTaskType = computed(() => store.getters.currentTaskType)
 const isCurrentUserProductionManager = computed(
@@ -687,6 +709,7 @@ const isTVShow = computed(() => store.getters.isTVShow)
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const organisation = computed(() => store.getters.organisation)
 const personMap = computed(() => store.getters.personMap)
+const productionAssetTypes = computed(() => store.getters.productionAssetTypes)
 const productionTaskStatuses = computed(
   () => store.getters.productionTaskStatuses
 )
@@ -698,18 +721,28 @@ const user = computed(() => store.getters.user)
 const taskStatusMap = computed(() => taskStatusStore.cache.taskStatusMap)
 const taskTypeMap = computed(() => taskTypeStore.cache.taskTypeMap)
 
+// Old links of the episode stats open shot task types on the episodes route,
+// which names no entity type.
+const entityType = computed(() =>
+  pageEntityTypes.includes(currentTaskType.value?.for_entity)
+    ? currentTaskType.value.for_entity
+    : routeEntityType.value
+)
+
 const entityMap = computed(() => getEntityMap(entityType.value))
 
 const isEpisodesSection = computed(() => route.meta.section === 'episodes')
 
-const taskStatusList = computed(() => [
-  {
-    id: '',
-    color: '#999',
-    short_name: t('news.all')
-  },
-  ...sortByName([...productionTaskStatuses.value])
-])
+const assetTypeOptions = computed(() =>
+  productionAssetTypes.value.map(assetType => ({
+    label: assetType.name,
+    value: assetType.id
+  }))
+)
+
+const taskStatusList = computed(() =>
+  sortByName([...productionTaskStatuses.value])
+)
 
 const displayTaskType = computed(
   () => 'tasktype-' + entityType.value.toLowerCase()
@@ -769,6 +802,19 @@ const isSupervisorInDepartment = computed(
     )
 )
 
+// Read the episode the import is posted with, not the route: a route without
+// episode keeps the one of the store. Under All shots and All assets, the rows
+// of two episodes can share their sequence or asset type, and their name.
+// Main pack only holds assets: another task type kept there by a link without
+// episode lists nothing.
+const isEstimationsImportHidden = computed(() => {
+  const episodeId = currentTaskTypeEpisode.value?.id
+  const forEntity = currentTaskType.value?.for_entity
+  if (episodeId === 'all') return ['Asset', 'Shot'].includes(forEntity)
+  if (episodeId === 'main') return forEntity !== 'Asset'
+  return false
+})
+
 const taskMetadataDescriptors = computed(() =>
   store.getters.taskMetadataDescriptors.filter(
     descriptor => descriptor.task_type_id === currentTaskType.value?.id
@@ -787,11 +833,22 @@ const sortOptions = computed(() => [
   ...staticSortOptions.slice(1)
 ])
 
-const optionalColumns = computed(() =>
-  isPaperProduction.value
-    ? ['Drawings', 'Estimation', 'Start date', 'Due date', 'Difficulty']
-    : ['Estimation', 'Start date', 'Due date', 'Difficulty']
+// Zou ignores the parent of an episode row, and takes an empty one of a
+// sequence or edit row as any episode.
+const dataMatchers = computed(() =>
+  ['Episode', 'Sequence', 'Edit'].includes(currentTaskType.value?.for_entity)
+    ? ['Entity']
+    : ['Parent', 'Entity']
 )
+
+const optionalColumns = computed(() => {
+  const columns = ['Estimation', 'Start date', 'Due date', 'Difficulty']
+  if (isPaperProduction.value) columns.unshift('Drawings')
+  if (['Sequence', 'Edit'].includes(currentTaskType.value?.for_entity)) {
+    columns.unshift('Parent')
+  }
+  return columns
+})
 
 const productionStartDate = computed(() =>
   parseDate(currentProduction.value.start_date)
@@ -807,16 +864,22 @@ const disabledDates = computed(() => ({
   days: [6, 0]
 }))
 
+// The pseudo-episodes have no name: they get the label of the entity type.
+const currentTaskTypeEpisodeLabel = computed(() => {
+  const episode = currentTaskTypeEpisode.value
+  if (episode?.id === 'all') {
+    return t(allEpisodesLabelKeys[entityType.value] ?? 'episodes.all_episodes')
+  }
+  if (episode?.id === 'main') return t('main.main_pack')
+  return episode?.name
+})
+
 const title = computed(() => {
   if (currentProduction.value) {
-    if (isTVShow.value && currentEpisode.value) {
-      const episodeName =
-        currentEpisode.value.id === 'all'
-          ? t('main.all_assets')
-          : currentEpisode.value.name
+    if (isTVShow.value && currentTaskTypeEpisode.value) {
       return (
         `${currentProduction.value.name} / ` +
-        `${episodeName} / ` +
+        `${currentTaskTypeEpisodeLabel.value} / ` +
         `${currentTaskType.value.name}`
       )
     }
@@ -920,7 +983,10 @@ const initData = force => {
         priorityFilter.value = route.query.priority || '-1'
         difficultyFilter.value = route.query.difficulty || '-1'
         retakeCountFilter.value = route.query.retake_count || 'all'
-        taskStatusIdFilter.value = route.query.task_status_id || ''
+        assetTypeIdsFilter.value =
+          route.query.asset_type_id?.split(',').filter(Boolean) || []
+        taskStatusIdsFilter.value =
+          route.query.task_status_id?.split(',').filter(Boolean) || []
 
         const taskId = route.query.task_id
         const task = taskMap.value.get(taskId)
@@ -1008,11 +1074,19 @@ const getRoute = section => {
       task_type_id: taskTypeId
     }
   }
-  if (currentTaskType.value.for_entity === 'Episode') {
+  // The episodes route has no type to inherit, and old links of the episode
+  // stats open shot task types there. The route's own type comes first: it
+  // is the only one known for a task type missing from the map.
+  const type =
+    route.params.type || pluralizeEntityType(currentTaskType.value.for_entity)
+  if (currentTaskType.value.for_entity === 'Episode' || !type) {
     sectionRoute.name = `episodes-${sectionRoute.name}`
-  } else if (isTVShow.value && currentEpisode.value) {
-    sectionRoute.name = `episode-${sectionRoute.name}`
-    sectionRoute.params.episode_id = currentEpisode.value.id
+  } else {
+    sectionRoute.params.type = type
+    if (isTVShow.value && currentEpisode.value) {
+      sectionRoute.name = `episode-${sectionRoute.name}`
+      sectionRoute.params.episode_id = currentEpisode.value.id
+    }
   }
 
   return sectionRoute
@@ -1106,9 +1180,14 @@ const onSearchChange = query => {
   } else if (retakeCountFilter.value === 'with_retakes') {
     tasks.value = tasks.value.filter(t => t.retake_count > 0)
   }
-  if (taskStatusIdFilter.value !== null && taskStatusIdFilter.value !== '') {
-    tasks.value = tasks.value.filter(
-      t => t.task_status_id === taskStatusIdFilter.value
+  if (assetTypeIdsFilter.value.length) {
+    tasks.value = tasks.value.filter(t =>
+      assetTypeIdsFilter.value.includes(getEntity(t.entity_id).asset_type_id)
+    )
+  }
+  if (taskStatusIdsFilter.value.length) {
+    tasks.value = tasks.value.filter(t =>
+      taskStatusIdsFilter.value.includes(t.task_status_id)
     )
   }
 }
@@ -1140,7 +1219,8 @@ const updateUrlParams = () => {
       priority: priorityFilter.value,
       difficulty: difficultyFilter.value,
       retake_count: retakeCount === 'all' ? undefined : retakeCount,
-      task_status_id: taskStatusIdFilter.value || null
+      task_status_id: taskStatusIdsFilter.value.join(',') || null,
+      asset_type_id: assetTypeIdsFilter.value.join(',') || null
     }
   })
 }
@@ -1286,8 +1366,8 @@ const onExportClick = () => {
     currentTaskType.value.name,
     'tasks'
   ]
-  if (currentEpisode.value) {
-    nameData.splice(1, 0, currentEpisode.value.name)
+  if (currentTaskTypeEpisode.value) {
+    nameData.splice(1, 0, currentTaskTypeEpisodeLabel.value)
   }
   const name = stringHelpers.slugify(nameData.join('_'))
   csv.buildCsvFile(name, taskLines)
@@ -1295,6 +1375,7 @@ const onExportClick = () => {
 
 const updateEstimation = ({ taskId, estimation, item, daysOff }) => {
   const task = taskMap.value.get(taskId)
+  if (!task) return
   let data = { estimation }
   if (task.start_date) {
     const startDate = parseDate(task.start_date)
@@ -1842,6 +1923,7 @@ const confirmDeleteMetadata = () => {
 }
 
 const showImportModal = () => {
+  errors.importing = false
   modals.importing = true
 }
 
@@ -1855,6 +1937,7 @@ const showImportRenderModal = () => {
 
 const hideImportRenderModal = () => {
   modals.isImportRenderDisplayed = false
+  importedRows.value = null
 }
 
 const resetImport = () => {
@@ -1881,8 +1964,11 @@ const uploadImportFile = data => {
 
   store
     .dispatch('uploadTaskTypeEstimations', importCsvFormData.value)
-    .then(() => {
-      hideImportRenderModal()
+    .then(rows => {
+      // A picked file opens its preview even while an upload runs: the count
+      // only goes to the file it was uploaded from. The list needs no
+      // reload: Zou sends a task:update for each row.
+      if (parsedCSV.value === data) importedRows.value = rows.length
     })
     .catch(err => {
       errors.importingError = err
@@ -1893,26 +1979,37 @@ const uploadImportFile = data => {
     })
 }
 
-const renderImport = (data, mode) => {
+// The labels of the export, in the language of the user, get their name
+// back. A descriptor named like a label keeps its column.
+const renameExportLabels = headers => {
+  const labelKeys = getEstimationsCsvLabelKeys(
+    currentTaskType.value?.for_entity,
+    { isPaperProduction: isPaperProduction.value, isTVShow: isTVShow.value }
+  )
+  return csv.renameHeaders(
+    headers,
+    new Map(Object.entries(labelKeys).map(([name, key]) => [t(key), name])),
+    taskMetadataDescriptors.value.map(descriptor => descriptor.name)
+  )
+}
+
+const renderImport = async (data, mode) => {
   loading.importing = true
   errors.importing = false
-  if (mode === 'file') {
-    data = data.get('file')
+  try {
+    const [headers, ...lines] = await csv.processCSV(
+      mode === 'file' ? data.get('file') : data
+    )
+    parsedCSV.value = [renameExportLabels(headers), ...lines]
+    importedRows.value = null
+    hideImportModal()
+    showImportRenderModal()
+  } catch (err) {
+    errors.importing = true
+    csv.logReadFailure(err)
+  } finally {
+    loading.importing = false
   }
-  csv
-    .processCSV(data)
-    .then(results => {
-      parsedCSV.value = results
-      hideImportModal()
-      showImportRenderModal()
-    })
-    .catch(err => {
-      console.error(err)
-      errors.importing = true
-    })
-    .finally(() => {
-      loading.importing = false
-    })
 }
 
 const resetTaskTypeDates = () => {
@@ -1949,8 +2046,7 @@ const resetScheduleScroll = () => {
 const resetScheduleItemsDebounced = func.debounce(resetScheduleItems, 400)
 
 // Same bursts, and this is the heavier half: onSearchChange walks every
-// entity, re-sorts the tasks and rebuilds the search index. The field is
-// read again on fire, as the page may have been left in the meantime.
+// entity, re-sorts the tasks and rebuilds the search index.
 const refreshTasksDebounced = func.debounce(() => {
   if (searchFieldRef.value) onSearchChange(searchFieldRef.value.getValue())
 }, 400)
@@ -2043,7 +2139,8 @@ watch(
     dueDateFilter,
     estimationFilter,
     priorityFilter,
-    taskStatusIdFilter,
+    taskStatusIdsFilter,
+    assetTypeIdsFilter,
     retakeCountFilter
   ],
   () => {
@@ -2116,7 +2213,7 @@ onMounted(() => {
   const isShots = route.path.includes('shots')
   const isEdits = route.path.includes('edits')
   const isSequences = route.path.includes('sequences')
-  entityType.value = isAssets
+  routeEntityType.value = isAssets
     ? 'Asset'
     : isShots
       ? 'Shot'
@@ -2137,6 +2234,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   store.dispatch('clearSelectedTasks')
   socket.off('task:update', onRemoteTaskUpdate)
+  resetScheduleItemsDebounced.cancel()
+  refreshTasksDebounced.cancel()
 })
 
 // Head

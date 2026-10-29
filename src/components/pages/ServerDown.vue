@@ -7,16 +7,31 @@
     <p>
       {{ $t('server_down.text') }}
     </p>
+    <p class="retrying" v-if="isRetrying">
+      {{ $t('server_down.retrying') }}
+    </p>
   </div>
 </template>
 
 <script>
-// Module scope: shared with the copies App.vue mounts of this page.
+import { ref } from 'vue'
+
+// Quick checks catch a short outage, like a restart, then one a minute is
+// enough.
+const FIRST_RETRY_DELAY = 5000
+const MAX_RETRY_DELAY = 60000
+
+// Module scope: shared with the copies App.vue mounts of this page, so the
+// checks keep slowing down while the / guard sends back here.
 let isRedirecting = false
+let retryDelay = FIRST_RETRY_DELAY
+// A redirect that throws, on a bug in a guard for instance, would throw again
+// after the next check. A ref: the copy on screen drops its retrying line.
+const isRetrying = ref(true)
 </script>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onBeforeUnmount, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import auth from '@/lib/auth'
@@ -27,19 +42,42 @@ import auth from '@/lib/auth'
 const route = useRoute()
 const router = useRouter()
 
-// Lifecycle
+// State
 // --------------------------------------------------------------------------
 
-onMounted(async () => {
+let retryTimer = null
+let isChecking = false
+let isUnmounted = false
+
+// Functions
+// --------------------------------------------------------------------------
+
+const scheduleCheck = () => {
+  if (isUnmounted) return
+  clearTimeout(retryTimer)
+  retryTimer = setTimeout(checkServer, retryDelay)
+  retryDelay = Math.min(retryDelay * 2, MAX_RETRY_DELAY)
+}
+
+const checkServer = async () => {
+  if (!isRetrying.value) return
   // The redirect runs the / guard, whose loading screen mounts this page
   // again while the navigation waits: a check from that copy would push the
-  // redirect anew and restart the guard, once more on every answer.
-  if (isRedirecting) return
+  // redirect anew and restart the guard. Check later, in case the guard
+  // sends back here.
+  if (isRedirecting) {
+    scheduleCheck()
+    return
+  }
+  isChecking = true
   try {
     await auth.isServerLoggedIn()
   } catch {
     // Server still down: stay on this page.
+    scheduleCheck()
     return
+  } finally {
+    isChecking = false
   }
   // A copy mounted during a navigation it did not start answers after the
   // app has moved on, and must not navigate.
@@ -47,9 +85,45 @@ onMounted(async () => {
   isRedirecting = true
   try {
     await router.push(route.query.redirect || '/')
+  } catch (err) {
+    isRetrying.value = false
+    throw err
   } finally {
     isRedirecting = false
   }
+  // Sent back here without a new copy: the server went down again.
+  if (route.name === 'server-down') scheduleCheck()
+}
+
+const checkServerNow = () => {
+  if (isChecking) return
+  clearTimeout(retryTimer)
+  checkServer()
+}
+
+const onVisibilityChange = () => {
+  if (document.visibilityState === 'visible') checkServerNow()
+}
+
+// Lifecycle
+// --------------------------------------------------------------------------
+
+onMounted(() => {
+  // A copy mounted during a redirect goes on with the same outage.
+  if (!isRedirecting) {
+    retryDelay = FIRST_RETRY_DELAY
+    isRetrying.value = true
+  }
+  window.addEventListener('online', checkServerNow)
+  document.addEventListener('visibilitychange', onVisibilityChange)
+  checkServer()
+})
+
+onBeforeUnmount(() => {
+  isUnmounted = true
+  clearTimeout(retryTimer)
+  window.removeEventListener('online', checkServerNow)
+  document.removeEventListener('visibilitychange', onVisibilityChange)
 })
 </script>
 
@@ -70,6 +144,10 @@ p {
   a {
     text-decoration: underline;
   }
+}
+
+.retrying {
+  font-size: 1.1em;
 }
 
 .title {

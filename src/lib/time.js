@@ -366,6 +366,14 @@ export const removeBusinessDays = (
   return adjustBusinessDays(originalDate, numDaysToRemove, daysOff, 'subtract')
 }
 
+export const formatDayOffLabel = (
+  { description, date, end_date },
+  defaultText
+) => {
+  const period = end_date && date !== end_date ? `${date} - ${end_date}` : date
+  return `${description || defaultText} (${period})`
+}
+
 export const getDayOffRange = (daysOff = []) => {
   return daysOff.reduce((range, dayOff) => {
     // 'YYYY-MM-DD' parses as UTC midnight, so step in UTC: a local day step

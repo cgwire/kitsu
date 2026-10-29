@@ -10,7 +10,64 @@ import moment from 'moment'
 
 import csv from '@/lib/csv'
 
+import { GoneFileReader, TextFileReader } from '../fixtures/file-reader'
+
 describe('lib/csv', () => {
+  describe('processCSV', () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    const failedReading = file =>
+      csv.processCSV(file).then(
+        data => {
+          throw new Error(`Read ${JSON.stringify(data)}`)
+        },
+        err => err
+      )
+
+    test('parses a CSV file', async () => {
+      vi.stubGlobal('FileReader', TextFileReader)
+      const file = new File(['Type,Name\nProp, Sword '], 'assets.csv')
+
+      expect(await csv.processCSV(file)).toEqual([
+        ['Type', 'Name'],
+        ['Prop', 'Sword']
+      ])
+    })
+
+    test('rejects an empty file as a read failure', async () => {
+      vi.stubGlobal('FileReader', TextFileReader)
+      const error = await failedReading(new File([], 'assets.csv'))
+
+      csv.logReadFailure(error)
+
+      expect(console.error).toHaveBeenCalledWith(error)
+    })
+
+    test('rejects a file the browser cannot read as a read failure', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      const error = await failedReading(new File(['Type,Name'], 'assets.csv'))
+
+      csv.logReadFailure(error)
+
+      expect(error.name).toBe('NotFoundError')
+      expect(console.error).toHaveBeenCalledWith(error)
+    })
+
+    test('leaves any other failure to the caller', () => {
+      const bug = new TypeError('data is undefined')
+
+      expect(() => csv.logReadFailure(bug)).toThrow(bug)
+      expect(console.error).not.toHaveBeenCalled()
+    })
+  })
+
   describe('turnEntriesToCsvString', () => {
     test('escapes spreadsheet formula cells (SEC-8)', () => {
       const entries = [
@@ -202,6 +259,32 @@ describe('lib/csv', () => {
         2000,
         1000
       ])
+    })
+  })
+
+  describe('renameHeaders', () => {
+    const names = new Map([
+      ['Séquence', 'Sequence'],
+      ['Nom', 'Name'],
+      ['Résolution', 'Resolution']
+    ])
+
+    test('gives each label its name', () => {
+      expect(csv.renameHeaders(['Séquence', 'Nom', 'Notes'], names)).toEqual([
+        'Sequence',
+        'Name',
+        'Notes'
+      ])
+    })
+
+    test('keeps a label the file also has under its name', () => {
+      expect(csv.renameHeaders(['Name', 'Nom'], names)).toEqual(['Name', 'Nom'])
+    })
+
+    test('keeps a label that is also the name of a column of its own', () => {
+      expect(
+        csv.renameHeaders(['Nom', 'Résolution'], names, ['Résolution'])
+      ).toEqual(['Name', 'Résolution'])
     })
   })
 

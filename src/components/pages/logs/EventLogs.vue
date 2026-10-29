@@ -1,8 +1,8 @@
 <template>
   <div class="mt1">
-    <div class="flexrow filters">
+    <div class="flexrow filters" :class="{ collapsed: !showFilters }">
       <date-field
-        class="flexrow-item"
+        class="date-range flexrow-item"
         :can-delete="false"
         :label="$t('logs.date_range_label')"
         :max-date="today"
@@ -12,7 +12,7 @@
         @change="onDateRangeChange"
       />
       <people-field
-        class="flexrow-item field"
+        class="flexrow-item field collapsible"
         multiple
         search-email
         :label="$t('logs.people_label')"
@@ -22,14 +22,14 @@
         @select="onPeopleSelect"
       />
       <combobox-production
-        class="flexrow-item"
+        class="flexrow-item collapsible"
         :label="$t('main.production')"
         :production-list="productionList"
         v-model="selectedProductionId"
         @update:model-value="onProductionChange"
       />
       <multiselect-field
-        class="flexrow-item"
+        class="flexrow-item collapsible"
         :label="$t('logs.object_label')"
         :options="objectOptions"
         :placeholder="$t('logs.object_placeholder')"
@@ -37,7 +37,7 @@
         @update:model-value="onObjectsChange"
       />
       <multiselect-field
-        class="flexrow-item"
+        class="flexrow-item collapsible"
         :label="$t('logs.action_label')"
         :options="actionOptions"
         :placeholder="$t('logs.action_placeholder')"
@@ -45,7 +45,7 @@
         @update:model-value="onActionsChange"
       />
       <checkbox
-        class="flexrow-item mt2"
+        class="flexrow-item mt2 collapsible"
         :label="$t('logs.only_files')"
         toggle
         v-model="onlyFiles"
@@ -60,11 +60,19 @@
         @click="loadEvents"
       />
       <button-simple
-        class="flexrow-item small mt2"
+        class="flexrow-item small mt2 export-button"
         :disabled="!events.length"
         icon="download"
         :title="$t('main.csv.export_file')"
         @click="exportCsv"
+      />
+      <button-simple
+        class="flexrow-item small filters-toggle"
+        icon="funnel"
+        :aria-expanded="`${showFilters}`"
+        :is-on="showFilters"
+        :title="$t(showFilters ? 'main.less_filters' : 'main.more_filters')"
+        @click="showFilters = !showFilters"
       />
     </div>
 
@@ -193,6 +201,7 @@ const selectedEvents = ref({})
 const selectedObjects = ref([])
 const selectedPeople = ref([])
 const selectedProductionId = ref('')
+const showFilters = ref(false)
 const loading = reactive({ events: false, moreEvents: false })
 
 // Functions
@@ -468,6 +477,11 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
   flex-wrap: wrap;
 }
 
+// small screens only: the filters fold behind the toggle
+.filters-toggle {
+  display: none;
+}
+
 .event-count {
   padding: 1em;
   font-style: italic;
@@ -550,5 +564,71 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
   display: flex;
   flex-direction: column;
   margin-bottom: 2em;
+}
+
+@media screen and (max-width: 768px) {
+  .filters {
+    align-items: flex-end;
+    row-gap: 0.5em;
+
+    .filler {
+      display: none;
+    }
+
+    // measured: 32px buttons against the 40px date input
+    .button {
+      height: 40px;
+    }
+
+    .mt2 {
+      margin-top: 0;
+    }
+  }
+
+  .filters-toggle {
+    display: flex;
+    flex: none;
+  }
+
+  // the .field bottom margin of DateField lifted it above the buttons
+  .date-range {
+    flex: 1;
+    margin-bottom: 0;
+    min-width: 0;
+  }
+
+  .collapsed .collapsible {
+    display: none;
+  }
+
+  // unfolded, each filter takes a line under the date range
+  .filters > .collapsible {
+    flex: 0 0 100%;
+    margin-right: 0;
+    order: 1;
+  }
+
+  .export-button {
+    display: none;
+  }
+
+  .event-line {
+    .tag {
+      margin-bottom: 0.25em;
+    }
+
+    ul {
+      margin-right: 0;
+
+      li {
+        overflow-wrap: anywhere;
+      }
+
+      .key {
+        display: block;
+        width: auto;
+      }
+    }
+  }
 }
 </style>

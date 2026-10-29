@@ -45,6 +45,43 @@ describe('modals/AddAttachmentModal', () => {
     expect(wrapper.find('audio').exists()).toBe(true)
   })
 
+  it('does not confirm without a file, even from the keyboard', async () => {
+    const wrapper = mountModal()
+    const confirm = wrapper.find('a.button.is-primary')
+
+    await confirm.trigger('keydown', { key: 'Enter' })
+    await confirm.trigger('click')
+
+    expect(wrapper.emitted('confirm')).toBeUndefined()
+    expect(confirm.attributes('aria-disabled')).toBe('true')
+    expect(confirm.attributes('tabindex')).toBe('-1')
+  })
+
+  it('confirms a recorded file from the keyboard', async () => {
+    const wrapper = mountModal()
+    await wrapper.find('.record-audio').trigger('click')
+    const file = new File(['x'], 'audio-note-1.webm', { type: 'audio/webm' })
+    wrapper.findComponent('.panel-stub').vm.$emit('recorded', file)
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('a.button.is-primary').trigger('keydown', { key: 'Enter' })
+
+    expect(wrapper.emitted('confirm')).toHaveLength(1)
+    expect(wrapper.emitted('confirm')[0][0]).toHaveLength(1)
+  })
+
+  it('does not confirm again while loading', async () => {
+    const wrapper = mountModal({ isLoading: true })
+    await wrapper.find('.record-audio').trigger('click')
+    const file = new File(['x'], 'audio-note-1.webm', { type: 'audio/webm' })
+    wrapper.findComponent('.panel-stub').vm.$emit('recorded', file)
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('a.button.is-primary').trigger('keydown', { key: 'Enter' })
+
+    expect(wrapper.emitted('confirm')).toBeUndefined()
+  })
+
   it('prefixes the recorded file name with namePrefix', async () => {
     const wrapper = mountModal({ namePrefix: 'ep01-sh03-compositing' })
     await wrapper.find('.record-audio').trigger('click')

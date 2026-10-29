@@ -1,45 +1,61 @@
 <template>
-  <div
-    id="temp-playlist-modal"
-    :class="{
-      dark: true,
-      modal: true,
-      'is-active': active
-    }"
-  >
-    <div class="modal-background" @click="$emit('cancel')"></div>
-    <div class="modal-content wide xyz-in" xyz="fade">
-      <div class="box">
-        <playlist-player
-          ref="playlistPlayer"
-          :playlist="currentPlaylist"
-          :entities="currentEntities"
-          :is-loading="isLoading"
-          :temp-mode="true"
-          :can-save="isSaveAllowed"
-          :current-entity-type="currentEntityType"
-          @save-clicked="onSaveClicked"
-          @annotation-changed="onAnnotationChanged"
-          @annotations-refreshed="onAnnotationsRefreshed"
-          @preview-changed="onPreviewChanged"
-          v-if="!isPlaylistPage"
-        />
+  <!-- the fixed page container traps the z-index of what it holds under the
+       topbar: on phones the modal leaves it to cover the whole screen -->
+  <teleport to="body" :disabled="!isPhone">
+    <div
+      id="temp-playlist-modal"
+      ref="modal"
+      :class="{
+        dark: true,
+        modal: true,
+        'is-active': active,
+        phone: isPhone
+      }"
+    >
+      <div class="modal-background" @click="$emit('cancel')"></div>
+      <div class="modal-content wide xyz-in" xyz="fade">
+        <div class="box">
+          <button-simple
+            class="close-button"
+            icon="remove"
+            :title="$t('main.close')"
+            @click="$emit('cancel')"
+          />
+          <playlist-player
+            ref="playlistPlayer"
+            :playlist="currentPlaylist"
+            :entities="currentEntities"
+            :is-loading="isLoading"
+            :temp-mode="true"
+            :can-save="isSaveAllowed"
+            :current-entity-type="currentEntityType"
+            @save-clicked="onSaveClicked"
+            @annotation-changed="onAnnotationChanged"
+            @annotations-refreshed="onAnnotationsRefreshed"
+            @preview-changed="onPreviewChanged"
+            v-if="!isPlaylistPage"
+          />
+        </div>
       </div>
-    </div>
 
-    <edit-playlist-modal
-      :active="modals.edit"
-      :is-loading="loading.edit"
-      :is-error="errors.edit"
-      :is-success="editSuccess"
-      :success-text="successText"
-      :playlist-to-edit="playlistToEdit"
-      :type-disabled="true"
-      @confirm="savePlaylist"
-      @view="onViewCreatedPlaylist"
-      @cancel="closeEditModal"
-    />
-  </div>
+      <!-- The browser shows a player in full screen alone: the save form
+           of its Save button goes into it. -->
+      <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
+        <edit-playlist-modal
+          :active="modals.edit"
+          :is-loading="loading.edit"
+          :is-error="errors.edit"
+          :is-success="editSuccess"
+          :success-text="successText"
+          :playlist-to-edit="playlistToEdit"
+          :type-disabled="true"
+          @confirm="savePlaylist"
+          @view="onViewCreatedPlaylist"
+          @cancel="closeEditModal"
+        />
+      </teleport>
+    </div>
+  </teleport>
 </template>
 
 <script setup>
@@ -48,16 +64,27 @@
  * is used in entity list to display playlists from the selection.
  */
 
-import { computed, ref, toRef, watch } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  ref,
+  toRef,
+  useTemplateRef,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useFullScreenTarget } from '@/composables/fullScreen'
 import { useModal } from '@/composables/modal'
+import { usePhoneLayout } from '@/composables/phoneLayout'
+import crisp from '@/lib/crisp'
 import { getPlaylistPath } from '@/lib/path'
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 // eslint-disable-next-line no-unused-vars
 import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
 
@@ -83,7 +110,11 @@ const props = defineProps({
 
 const emit = defineEmits(['cancel'])
 
-useModal(toRef(props, 'active'), emit)
+const { isPhone } = usePhoneLayout()
+
+// the teleport makes the root a fragment: the dialog is passed explicitly
+const modalRef = useTemplateRef('modal')
+useModal(toRef(props, 'active'), emit, modalRef)
 
 const currentEntities = ref([])
 const currentPlaylist = ref({
@@ -99,6 +130,7 @@ const modals = ref({ edit: false })
 const editSuccess = ref(false)
 const createdPlaylist = ref(null)
 const playlistPlayer = ref(null)
+const fullScreenPlayer = useFullScreenTarget(() => playlistPlayer.value?.$el)
 const playlistToEdit = ref({})
 let previewFileMap = new Map()
 let previewFileEntityMap = new Map()
@@ -138,6 +170,9 @@ const currentEntityType = computed(() => {
 const isAssetPlaylist = computed(() => currentEntityType.value === 'asset')
 const isSequencePlaylist = computed(
   () => currentEntityType.value === 'sequence'
+)
+const isAllShots = computed(
+  () => currentEpisode.value?.id === 'all' && currentEntityType.value === 'shot'
 )
 
 const onPreviewChanged = async ({
@@ -193,6 +228,12 @@ const lookupEntity = entityInfo => {
   return shotStore.cache.shotMap.get(entityInfo.id)
 }
 
+// Sequence names repeat across episodes: All shots says which one.
+const getSequenceName = entity =>
+  isAllShots.value && entity.episode_name && entity.sequence_name
+    ? `${entity.episode_name} / ${entity.sequence_name}`
+    : entity.sequence_name
+
 const convertEntityToPlaylistFormat = entityInfo => {
   const entity = lookupEntity(entityInfo)
   if (!entity) return entityInfo
@@ -209,7 +250,7 @@ const convertEntityToPlaylistFormat = entityInfo => {
       parseFloat(currentProduction.value?.fps) ||
       25,
     parent_name:
-      entity.sequence_name || entity.episode_name || entity.asset_type_name,
+      getSequenceName(entity) || entity.episode_name || entity.asset_type_name,
     preview_files: entityInfo.preview_files,
     preview_file_id: entityInfo.preview_file_id || entity.preview_file_id,
     preview_file_extension:
@@ -290,10 +331,7 @@ const onViewCreatedPlaylist = () => {
     currentEpisode.value?.id,
     createdPlaylist.value.id
   )
-  if (
-    currentEpisode.value?.id === 'all' &&
-    currentEntityType.value === 'shot'
-  ) {
+  if (isAllShots.value) {
     // The playlists page splits the all pseudo-episode by entity type.
     route.query = { for_entity: 'shot' }
   }
@@ -340,6 +378,19 @@ const savePlaylist = async form => {
     loading.value.edit = false
   }
 }
+
+// the support chat bubble covers the player on a phone
+let isChatHidden = false
+const setChatHidden = hidden => {
+  if (hidden !== isChatHidden) {
+    isChatHidden = hidden
+    crisp.setChatVisibility(hidden ? false : store.getters.isSupportChat)
+  }
+}
+
+watch(() => props.active && isPhone.value, setChatHidden, { immediate: true })
+
+onBeforeUnmount(() => setChatHidden(false))
 
 watch(
   () => props.active,
@@ -397,6 +448,61 @@ watch(
   .box {
     background: #3d4048;
     padding-bottom: 0;
+  }
+}
+
+.close-button {
+  display: none;
+}
+
+// phones get the whole screen; top and bottom rather than 100vh, which
+// iOS Safari measures under its toolbar
+#temp-playlist-modal.phone {
+  .modal-content.wide {
+    bottom: 0;
+    height: auto;
+    left: 0;
+    margin: 0;
+    max-height: none;
+    position: fixed;
+    right: 0;
+    top: 0;
+
+    .box {
+      border-radius: 0;
+      height: 100%;
+      padding: 0;
+      position: relative;
+    }
+  }
+
+  // a light round button, no box around it
+  .close-button {
+    align-items: center;
+    background: rgba(0, 0, 0, 0.55);
+    border: 0;
+    border-radius: 50%;
+    box-shadow: none;
+    color: $white;
+    display: flex;
+    height: 36px;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    right: 4px;
+    top: 6px;
+    width: 36px;
+    z-index: 10;
+
+    // 44px tap target around the 36px circle
+    &::after {
+      content: '';
+      bottom: -4px;
+      left: -4px;
+      position: absolute;
+      right: -4px;
+      top: -4px;
+    }
   }
 }
 </style>

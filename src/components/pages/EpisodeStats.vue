@@ -6,6 +6,7 @@
         ref="episode-search-field"
         placeholder="ex: e01"
         @change="onSearchChange"
+        v-if="!isCurrentUserClient"
       />
       <combobox-visible-options
         class="flexrow-item options-filter"
@@ -25,6 +26,7 @@
         :label="$t('statistics.data_mode')"
         :options="dataModeOptions"
         v-model="dataMode"
+        v-if="!isCurrentUserClient"
       />
       <combobox
         class="mb0 flexrow-item"
@@ -66,7 +68,7 @@
 
     <episode-stats-list
       :count-mode="countMode"
-      :data-mode="dataMode"
+      :data-mode="displayedDataMode"
       :display-mode="displayMode"
       :entries="displayedEpisodeEntries"
       :episode-retake-stats="displayedRetakeStats"
@@ -143,6 +145,7 @@ const episodeStats = computed(() => store.getters.episodeStats)
 const episodeValidationColumns = computed(
   () => store.getters.episodeValidationColumns
 )
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isPaperProduction = computed(() => store.getters.isPaperProduction)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -160,7 +163,13 @@ const episodeEntries = computed(() =>
     : displayedEpisodes.value
 )
 
-const isRetakeDataMode = computed(() => dataMode.value === 'retakes')
+// Zou refuses the retake stats to clients: they get the status mode only.
+const isRetakeDataMode = computed(
+  () => !isCurrentUserClient.value && dataMode.value === 'retakes'
+)
+const displayedDataMode = computed(() =>
+  isRetakeDataMode.value ? 'retakes' : 'status'
+)
 
 // The selector works on the result of the search and of the status filter.
 const {
@@ -249,7 +258,7 @@ const reset = async () => {
 // Watchers
 // --------------------------------------------------------------------------
 watch(currentProduction, () => {
-  searchFieldRef.value.setValue('')
+  searchFieldRef.value?.setValue('')
   reset()
 })
 

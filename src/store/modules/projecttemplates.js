@@ -102,13 +102,14 @@ const actions = {
 
   addTaskStatusToTemplate(
     _,
-    { templateId, taskStatusId, priority, rolesForBoard }
+    { templateId, taskStatusId, priority, rolesForBoard, isClientAllowed }
   ) {
     return projectTemplatesApi.addTaskStatusToTemplate(
       templateId,
       taskStatusId,
       priority,
-      rolesForBoard
+      rolesForBoard,
+      isClientAllowed
     )
   },
 

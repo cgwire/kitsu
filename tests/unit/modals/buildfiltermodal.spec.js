@@ -143,7 +143,18 @@ describe('BuildFilterModal', () => {
       strict: true,
       modules: {
         assets: assetStore,
-        productions: { ...productionStoreFixture },
+        // The asset types of the production match the ones of assetStore.
+        productions: {
+          ...productionStoreFixture,
+          getters: {
+            ...productionStoreFixture.getters,
+            productionAssetTypes: () => [
+              { id: 'asset-type-1', name: 'chars' },
+              { id: 'asset-type-2', name: 'sets' },
+              { id: 'asset-type-3', name: 'props' }
+            ]
+          }
+        },
         people: peopleStore,
         shots: shotStore,
         tasks: taskStore
@@ -254,7 +265,7 @@ describe('BuildFilterModal', () => {
             setState({
               assetTypeFilters: {
                 operator: '=',
-                value: 'asset-type-1'
+                values: ['asset-type-1']
               }
             })
             const query = wrapper.vm.buildFilter()
@@ -264,11 +275,31 @@ describe('BuildFilterModal', () => {
             setState({
               assetTypeFilters: {
                 operator: '=-',
-                value: 'asset-type-1'
+                values: ['asset-type-1']
               }
             })
             const query = wrapper.vm.buildFilter()
             expect(query).toBe('type=[-chars]')
+          })
+          it('type in', () => {
+            setState({
+              assetTypeFilters: {
+                operator: 'in',
+                values: ['asset-type-1', 'asset-type-3']
+              }
+            })
+            const query = wrapper.vm.buildFilter()
+            expect(query).toBe('type=[chars,props]')
+          })
+          it('type not in', () => {
+            setState({
+              assetTypeFilters: {
+                operator: 'notin',
+                values: ['asset-type-1', 'asset-type-3']
+              }
+            })
+            const query = wrapper.vm.buildFilter()
+            expect(query).toBe('type=[-chars,props]')
           })
         })
         describe('task types', () => {
@@ -286,6 +317,21 @@ describe('BuildFilterModal', () => {
             })
             const query = wrapper.vm.buildFilter()
             expect(query).toBe('[Modeling]=[-WIP]')
+          })
+          it('status not in', () => {
+            setState({
+              taskTypeFilters: {
+                values: [
+                  {
+                    id: 'task-type-1',
+                    operator: 'notin',
+                    values: ['task-status-2', 'task-status-1']
+                  }
+                ]
+              }
+            })
+            const query = wrapper.vm.buildFilter()
+            expect(query).toBe('[Modeling]=[-WIP,WFA]')
           })
         })
         describe('descriptors', () => {
@@ -336,6 +382,22 @@ describe('BuildFilterModal', () => {
             })
             const query = wrapper.vm.buildFilter()
             expect(query).toBe('[Difficulty]=[easy,hard]')
+          })
+          it('descriptor not in', () => {
+            setState({
+              metadataDescriptorFilters: {
+                values: [
+                  {
+                    id: 'descriptor-1',
+                    operator: 'notin',
+                    values: ['easy', 'hard'],
+                    is_checklist: false
+                  }
+                ]
+              }
+            })
+            const query = wrapper.vm.buildFilter()
+            expect(query).toBe('[Difficulty]=[-easy,hard]')
           })
         })
         describe('assignation', () => {
@@ -466,6 +528,27 @@ describe('BuildFilterModal', () => {
               }
             ])
           })
+          it('status not in', () => {
+            changeSearch('Modeling=-WIP,Done')
+            wrapper.vm.setFiltersFromCurrentQuery()
+            expect(wrapper.vm.taskTypeFilters.values).toMatchObject([
+              {
+                id: 'task-type-1',
+                operator: 'notin',
+                values: ['task-status-2', 'task-status-1']
+              }
+            ])
+          })
+        })
+        describe('asset types', () => {
+          it('type not in', () => {
+            changeSearch('type=[-chars,props]')
+            wrapper.vm.setFiltersFromCurrentQuery()
+            expect(wrapper.vm.assetTypeFilters).toMatchObject({
+              operator: 'notin',
+              values: ['asset-type-1', 'asset-type-3']
+            })
+          })
         })
         describe('descriptors', () => {
           it('descriptor is', () => {
@@ -499,6 +582,18 @@ describe('BuildFilterModal', () => {
               {
                 id: 'descriptor-1',
                 operator: 'in',
+                values: ['easy', 'hard'],
+                is_checklist: false
+              }
+            ])
+          })
+          it('descriptor not in', () => {
+            changeSearch('Difficulty=[-easy,hard]')
+            wrapper.vm.setFiltersFromCurrentQuery()
+            expect(wrapper.vm.metadataDescriptorFilters.values).toMatchObject([
+              {
+                id: 'descriptor-1',
+                operator: 'notin',
                 values: ['easy', 'hard'],
                 is_checklist: false
               }

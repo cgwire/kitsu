@@ -10,6 +10,7 @@
       <action-panel
         v-if="
           withActions &&
+          !isCurrentUserClient &&
           (!isConceptTask || selectedConcepts.size > 0) &&
           (nbSelectedEntities > 0 ||
             nbSelectedTasks > 0 ||
@@ -59,7 +60,6 @@
           </div>
           <div class="mt2 selected-task-line" v-if="nbSelectedValidations > 0">
             <span v-if="nbSelectedTasks > 0">+</span>
-            {{ nbSelectedValidations }}
             {{
               $t('tasks.empty_cells_selected', { count: nbSelectedValidations })
             }}
@@ -147,6 +147,7 @@
               <div class="preview">
                 <template v-if="taskPreviews && taskPreviews.length > 0">
                   <preview-player
+                    :can-comment="isCommentingAllowed"
                     :entity-preview-files="taskEntityPreviews"
                     :entity-type="entityType"
                     :extra-wide="isExtraWide"
@@ -289,15 +290,30 @@
           @confirm="confirmAddPreviewModal"
         />
 
-        <add-preview-modal
-          ref="add-extra-preview-modal"
-          :active="modals.addExtraPreview"
-          :is-loading="loading.addExtraPreview"
-          :is-error="errors.addExtraPreview"
-          message=""
-          @cancel="onCloseExtraPreview"
-          @confirm="createExtraPreview"
-        />
+        <!-- The browser shows a player in full screen alone: the modals of
+             its "+" and trash buttons go into it. -->
+        <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
+          <add-preview-modal
+            ref="add-extra-preview-modal"
+            :active="modals.addExtraPreview"
+            :is-loading="loading.addExtraPreview"
+            :is-error="errors.addExtraPreview"
+            message=""
+            :upload-progress="uploadProgress"
+            @cancel="onCloseExtraPreview"
+            @confirm="createExtraPreview"
+          />
+
+          <delete-modal
+            :active="modals.deleteExtraPreview"
+            :is-loading="loading.deleteExtraPreview"
+            :is-error="errors.deleteExtraPreview"
+            :text="$t('tasks.delete_preview')"
+            :error-text="$t('tasks.delete_preview_error')"
+            @cancel="onCancelRemoveExtraPreview"
+            @confirm="confirmDeleteTaskPreview"
+          />
+        </teleport>
 
         <edit-comment-modal
           :active="modals.editComment"
@@ -330,16 +346,6 @@
           :is-error="errors.moveComment"
           @cancel="onCancelMoveComment"
           @confirm="confirmMoveComment"
-        />
-
-        <delete-modal
-          :active="modals.deleteExtraPreview"
-          :is-loading="loading.deleteExtraPreview"
-          :is-error="errors.deleteExtraPreview"
-          :text="$t('tasks.delete_preview')"
-          :error-text="$t('tasks.delete_preview_error')"
-          @cancel="onCancelRemoveExtraPreview"
-          @confirm="confirmDeleteTaskPreview"
         />
       </div>
       <div class="side task-info pa1" v-else-if="nbSelectedEntities > 0">
@@ -403,11 +409,13 @@ import { useStore } from 'vuex'
 
 import { addEvents, getClientX, removeEvents } from '@/composables/dom'
 import { getEntityMap } from '@/composables/entity'
+import { useFullScreenTarget } from '@/composables/fullScreen'
 import { useTime } from '@/composables/time'
-import { isClientThread } from '@/lib/comments'
+import { isCommentReplyable } from '@/lib/comments'
 import csv from '@/lib/csv'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
 import drafts from '@/lib/drafts'
+import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import {
   getDownloadAttachmentPath,
@@ -564,11 +572,11 @@ const addCommentRef = useTemplateRef('add-comment')
 const addExtraPreviewModalRef = useTemplateRef('add-extra-preview-modal')
 const addPreviewModalRef = useTemplateRef('add-preview-modal')
 const previewPlayerRef = useTemplateRef('preview-player')
+const fullScreenPlayer = useFullScreenTarget(() => previewPlayerRef.value?.$el)
 const sideWrapperRef = useTemplateRef('side-wrapper')
 
 // Computed
 // --------------------------------------------------------------------------
-const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
@@ -586,7 +594,6 @@ const isCurrentUserManager = computed(
 const isCurrentUserSupervisor = computed(
   () => currentUserProductionRole.value === 'supervisor'
 )
-const isTVShow = computed(() => store.getters.isTVShow)
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const nbSelectedValidations = computed(
   () => store.getters.nbSelectedValidations
@@ -599,6 +606,7 @@ const shotMap = computed(() => store.getters.shotMap)
 const taskEntityPreviews = computed(() => store.getters.taskEntityPreviews)
 const taskMap = computed(() => store.getters.taskMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const uploadProgress = computed(() => store.getters.uploadProgress)
 const user = computed(() => store.getters.user)
 
 const sideColumnParent = computed(() => {
@@ -826,19 +834,56 @@ const taskStatuses = computed(() => {
   )
 })
 
-const taskPath = computed(() =>
-  getTaskPath(
-    props.task,
-    null,
-    isTVShow.value,
-    currentEpisode.value,
-    taskTypeMap.value
-  )
+const pageEpisodeId = computed(() =>
+  route.params.production_id === props.task.project_id
+    ? route.params.episode_id
+    : null
 )
 
-const taskEntityPath = computed(() =>
-  getTaskEntityPath(props.task, route.params.episode_id)
+const isTaskOfTVShow = computed(
+  () =>
+    productionMap.value.get(props.task.project_id)?.production_type === 'tvshow'
 )
+
+// The store keeps the episode browsed last, maybe of another production: a
+// task without its own episode opens under the one of a page of its
+// production, else under all of them. The task page shows the latest revision
+// first: another one goes along, if it belongs to the task shown (until its
+// comments load, the panel shows the revisions of the previous task).
+const taskPath = computed(() => {
+  const path = getTaskPath(
+    props.task,
+    null,
+    isTaskOfTVShow.value,
+    { id: pageEpisodeId.value || 'all' },
+    taskTypeMap.value
+  )
+  const preview = currentPreview.value
+  if (
+    !preview ||
+    preview.task_id !== props.task.id ||
+    preview.id === taskPreviews.value[0]?.id
+  ) {
+    return path
+  }
+  return {
+    name: `${path.name}-preview`,
+    params: { ...path.params, preview_id: preview.id }
+  }
+})
+
+// The entity opens under the episode of the page, as from its name in the
+// list, else under its own one on a TV show: the main pack for an asset
+// without episode.
+const taskEntityPath = computed(() => {
+  const isAsset = !['Shot', 'Edit', 'Episode', 'Sequence'].includes(
+    props.task.entity_type_name
+  )
+  const ownEpisodeId = isTaskOfTVShow.value
+    ? props.task.episode_id || (isAsset ? 'main' : null)
+    : null
+  return getTaskEntityPath(props.task, pageEpisodeId.value || ownEpisodeId)
+})
 
 const previewOptions = computed(() => {
   if (!taskPreviews.value) return []
@@ -904,12 +949,14 @@ const postComment = (
 ) => {
   animOn.value = true
   nextTick(() => {
+    const taskId = props.task.id
     const params = {
-      taskId: props.task.id,
+      taskId,
       taskStatusId,
       attachment,
       checklist,
       comment,
+      forms: previewForms.value,
       links: link ? [link] : null,
       revision,
       forClient
@@ -922,9 +969,13 @@ const postComment = (
     store
       .dispatch(action, params)
       .then(() => {
-        drafts.clearTaskDraft(props.task.id)
-        addCommentRef.value?.reset()
-        reset()
+        drafts.clearTaskDraft(taskId)
+        // A long upload may end once the panel shows another task, whose
+        // comment box holds a comment still to publish.
+        if (props.task?.id === taskId) {
+          addCommentRef.value?.reset()
+          reset()
+        }
         loading.addComment = false
         emit('comment-added')
       })
@@ -966,39 +1017,42 @@ const focusCommentTextarea = () => {
 
 const selectFile = forms => {
   previewForms.value = previewForms.value.concat(forms)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const onPreviewFormRemoved = previewForm => {
   previewForms.value = previewForms.value.filter(f => f !== previewForm)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const clearPreviewFiles = () => {
+  store.commit(
+    'CLEAR_UPLOAD_PROGRESS',
+    previewForms.value.map(form => form.get('file').name)
+  )
   previewForms.value = []
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
-  store.commit('CLEAR_UPLOAD_PROGRESS')
 }
 
 const createExtraPreview = forms => {
-  selectFile(forms)
   errors.addExtraPreview = false
   loading.addExtraPreview = true
   const comment = taskComments.value.find(comment =>
     comment.previews.some(preview => preview.id === currentPreviewId.value)
   )
+  const taskId = props.task.id
   store
     .dispatch('addCommentExtraPreview', {
-      taskId: props.task.id,
+      taskId,
       commentId: comment?.id,
-      previewId: currentPreviewId.value
+      previewId: currentPreviewId.value,
+      forms
     })
     .then(() => {
       loading.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
-      reset()
+      reset({ keepPreviewFiles: true })
       setTimeout(() => {
-        previewPlayerRef.value?.displayLast()
+        // The panel may have moved on to another task, with or without a
+        // player.
+        if (props.task?.id === taskId) previewPlayerRef.value?.displayLast()
       }, 0)
       modals.addExtraPreview = false
     })
@@ -1075,7 +1129,6 @@ const onAddPreviewClicked = () => {
 }
 
 const onAddExtraPreview = () => {
-  clearPreviewFiles()
   modals.addExtraPreview = true
 }
 
@@ -1241,33 +1294,16 @@ const confirmMoveComment = async targetTaskId => {
   }
 }
 
-const isClientFromSameStudio = person =>
-  isCurrentUserClient.value &&
-  user.value.studio_id === person.studio_id &&
-  person.role === 'client'
-
-// The client is shown who answers the threads it sees: there, the production
-// managers answer for the studio, and the client once mentioned. The other
-// threads reach the client emptied of their text, so only the studio answers.
-const canReplyTo = comment => {
-  if (isCurrentUserManager.value) return true
-  const isAuthor = Boolean(user.value) && user.value.id === comment.person?.id
-  if (isCurrentUserClient.value) {
-    return (
-      isAuthor ||
-      isClientFromSameStudio(comment.person) ||
-      (isClientThread(comment, teamRoles.value) &&
-        (isAssigned.value || isMentioned.value))
-    )
-  }
-  return (
-    !isClientThread(comment, teamRoles.value) &&
-    (isAuthor ||
-      isAssigned.value ||
-      isMentioned.value ||
-      isDepartmentSupervisor.value)
-  )
-}
+const canReplyTo = comment =>
+  isCommentReplyable(comment, {
+    user: user.value,
+    teamRoles: teamRoles.value,
+    isManager: isCurrentUserManager.value,
+    isClient: isCurrentUserClient.value,
+    isAssigned: isAssigned.value,
+    isMentioned: isMentioned.value,
+    isDepartmentSupervisor: isDepartmentSupervisor.value
+  })
 
 const saveComment = async comment => {
   try {
@@ -1342,9 +1378,9 @@ const onRemoteAcknowledge = (eventData, type) => {
   const person = personMap.value.get(eventData.person_id)
   if (!comment || !person) return
   const hasAck = comment.acknowledgements.includes(person.id)
-  // For the current user's own events, skip commits that would double
-  // apply an acknowledgement already reflected locally.
-  if (user.value.id !== person.id || (type === 'ack') !== hasAck) {
+  // The event may be applied already: by the user's own click, or by the
+  // panel a player holds for its full screen comments, which gets it too.
+  if ((type === 'ack') !== hasAck) {
     store.commit('ACK_COMMENT', { comment, user: person })
   }
 }
@@ -1384,8 +1420,9 @@ const extractAnnotationSnapshots = async (withLabel = false) => {
   const files = await previewPlayer.extractAnnotationSnapshots({
     withLabel
   })
-  addCommentRef.value.hideAnnotationLoading()
-  addCommentRef.value.setAnnotationSnapshots(files)
+  // The panel may have closed during the extraction.
+  addCommentRef.value?.hideAnnotationLoading()
+  addCommentRef.value?.setAnnotationSnapshots(files)
   return files
 }
 
@@ -1582,15 +1619,19 @@ const onRemoteCommentNew = eventData => {
   }, 1000)
 }
 
+// App.vue reloads the comment when the event names its task. Older Zou
+// versions leave the task out of the preview events: the panel then
+// reloads the comments it shows.
 const onRemoteCommentUpdate = eventData => {
   const commentId = eventData.comment_id
   if (
+    eventData.task_id ||
     store.getters.isSavingCommentPreview ||
-    (!props.task && !taskComments.value.some(({ id }) => id === commentId))
+    !taskComments.value.some(({ id }) => id === commentId)
   ) {
     return
   }
-  store.dispatch('loadComment', { commentId }).catch(console.error)
+  store.dispatch('loadComment', { commentId }).catch(logRequestFailure)
 }
 
 const onRemoteCommentAck = eventData => onRemoteAcknowledge(eventData, 'ack')

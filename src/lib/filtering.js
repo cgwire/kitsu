@@ -65,7 +65,9 @@ const getFilterTasks = (entry, filter, taskMap) =>
 
 const applyFiltersFunctions = {
   assettype(entry, filter, taskMap) {
-    let isOk = filter.assetType && entry.asset_type_id === filter.assetType.id
+    let isOk = filter.assetTypes.some(
+      assetType => entry.asset_type_id === assetType.id
+    )
     if (filter.excluding) isOk = !isOk
     return isOk
   },
@@ -318,6 +320,7 @@ export const getFilters = ({
   entryIndex,
   assetTypes = [],
   taskTypes = [],
+  readyForTaskTypes = taskTypes,
   taskStatuses = [],
   descriptors = [],
   departments = [],
@@ -334,7 +337,7 @@ export const getFilters = ({
     ...getDepartmentFilters(departments, query),
     ...(getThumbnailFilters(query) || []),
     ...getPriorityFilter(taskTypes, query),
-    ...getReadyForFilter(taskTypes, query),
+    ...getReadyForFilter(readyForTaskTypes, query),
     ...getAssetsReadyFilter(taskTypes, query),
     ...getExcludingFilters(entryIndex, query)
   ]
@@ -418,7 +421,8 @@ const cleanParenthesis = value => {
 }
 
 /*
- * Extract asset type filters (like type=characters from given query.
+ * Extract asset type filters (like type=characters or type=[-chars,props])
+ * from given query.
  */
 export const getAssetTypeFilters = (assetTypes, queryText) => {
   if (!queryText) return []
@@ -432,9 +436,9 @@ export const getAssetTypeFilters = (assetTypes, queryText) => {
       let value = cleanParenthesis(pattern[1])
       const excluding = value.startsWith('-')
       if (excluding) value = value.substring(1)
-      const assetType = assetTypes.find(t => t.name === value)
+      const names = value.split(',')
       results.push({
-        assetType,
+        assetTypes: assetTypes.filter(t => names.includes(t.name)),
         excluding,
         type: 'assettype'
       })

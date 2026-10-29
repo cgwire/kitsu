@@ -1,19 +1,25 @@
 import { flushPromises } from '@vue/test-utils'
+import { reactive } from 'vue'
 
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
 import Assets from '@/components/pages/Assets.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import fr from '@/locales/fr.json'
 
 import {
+  allVisible,
   buildAddThumbnailsModalStub,
   mountEntityPage,
-  production
+  production,
+  reimportExport
 } from '../../fixtures/entity-page'
+import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
 
 // Two assets with their tasks in the store: the page decides on mount
 // whether their scope (episode) is the displayed one.
@@ -138,6 +144,155 @@ describe('Assets page, thumbnails import', () => {
     expect(modalStub.methods.markLoading).toHaveBeenCalledWith('asset-1')
     expect(modalStub.methods.markUploaded).toHaveBeenCalledWith('asset-1')
   })
+
+  test('uploads each thumbnail as the only file of its comment', async () => {
+    const commentTaskWithPreview = vi.fn(() => ({
+      preview: { id: 'preview-1' }
+    }))
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isCurrentUserProductionManager: true },
+      actions: { commentTaskWithPreview },
+      stubs: { AddThumbnailsModal: buildAddThumbnailsModalStub() }
+    })
+    const form = {
+      task: { id: 'task-1', entity_id: 'asset-1', task_status_id: 'status-1' }
+    }
+
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import-files')
+      .vm.$emit('click')
+    await wrapper
+      .findComponent({ name: 'AddThumbnailsModal' })
+      .vm.$emit('confirm', [form])
+    await flushPromises()
+
+    expect(commentTaskWithPreview).toHaveBeenCalledWith(
+      expect.objectContaining({ taskId: 'task-1', forms: [form] })
+    )
+  })
+})
+
+describe('Assets page, CSV import', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  const openImportModal = async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isCurrentUserProductionManager: true }
+    })
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import')
+      .vm.$emit('click')
+    return { wrapper, modal: () => wrapper.findComponent(ImportModal) }
+  }
+
+  const buildFormData = () => {
+    const formData = new FormData()
+    formData.append('file', new File(['Type,Name'], 'import.csv'))
+    return formData
+  }
+
+  // Zou reads the English names only: it drops a translated column without
+  // a word.
+  test('keeps the names Zou reads for the optional columns', async () => {
+    const getters = reactive({
+      currentProduction: production,
+      isCurrentUserProductionManager: true
+    })
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters
+    })
+
+    getters.currentProduction = { ...production, id: 'production-2' }
+    await flushPromises()
+
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description', 'Ready for', 'Resolution']
+    )
+  })
+
+  test('leaves the ready for column out of a paper production', async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isPaperProduction: true }
+    })
+
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description', 'Resolution']
+    )
+  })
+
+  // The export writes the labels of the language of the user.
+  test('imports back a file exported in the language of the user', async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: {
+        assetValidationColumns: [],
+        isAssetResolution: true,
+        isCurrentUserProductionManager: true
+      },
+      actions: { getAssetsCsvLines: () => [] },
+      locale: 'fr',
+      messages: fr.default
+    })
+
+    const { exported, imported } = await reimportExport(wrapper)
+
+    const { assets, shots } = fr.default
+    expect(exported).toEqual([
+      assets.fields.type,
+      assets.fields.name,
+      assets.fields.description,
+      assets.fields.ready_for,
+      shots.fields.resolution
+    ])
+    expect(imported).toEqual([
+      'Type',
+      'Name',
+      'Description',
+      'Ready for',
+      'Resolution'
+    ])
+  })
+
+  test('shows the error of a file the browser cannot read', async () => {
+    vi.stubGlobal('FileReader', GoneFileReader)
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { modal } = await openImportModal()
+
+    await modal().vm.$emit('confirm', buildFormData(), 'file')
+    await flushPromises()
+
+    expect(modal().props()).toMatchObject({
+      active: true,
+      isError: true,
+      isLoading: false
+    })
+  })
+
+  test('releases the modal on a bug, left to the error handler', async () => {
+    vi.stubGlobal('FileReader', BrokenFileReader)
+    const { wrapper, modal } = await openImportModal()
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+    await modal().vm.$emit('confirm', buildFormData(), 'file')
+    await flushPromises()
+
+    expect(modal().props()).toMatchObject({ isError: true, isLoading: false })
+    expect(errorHandler).toHaveBeenCalledWith(
+      expect.any(TypeError),
+      expect.anything(),
+      expect.anything()
+    )
+  })
 })
 
 describe('Assets page, department filter', () => {
@@ -210,5 +365,53 @@ describe('Assets page, edit modal messages', () => {
 
     expect(modal().props('active')).toBe(true)
     expect(modal().props('isSuccess')).toBe(false)
+  })
+})
+
+describe('Assets page, client access', () => {
+  const hideTaskTypeAndPanel = {
+    clientAccess: {
+      ...allVisible,
+      isTaskPanelVisible: false,
+      isTaskTypeVisible: id => id !== 'task-type-1'
+    }
+  }
+
+  test('drops the hidden task type columns', async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { assetValidationColumns: ['task-type-1', 'task-type-2'] }
+    })
+    expect(
+      wrapper.findComponent({ name: 'AssetList' }).props('validationColumns')
+    ).toEqual(['task-type-1', 'task-type-2'])
+
+    const client = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: {
+        assetValidationColumns: ['task-type-1', 'task-type-2'],
+        ...hideTaskTypeAndPanel
+      }
+    })
+    expect(
+      client.wrapper.findComponent({ name: 'AssetList' }).props(
+        'validationColumns'
+      )
+    ).toEqual(['task-type-2'])
+  })
+
+  test('keeps the side panel closed when the task panel is hidden', async () => {
+    const open = { nbSelectedTasks: 1 }
+    const shown = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: open
+    })
+    expect(shown.wrapper.find('#side-column').isVisible()).toBe(true)
+
+    const hidden = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { ...open, ...hideTaskTypeAndPanel }
+    })
+    expect(hidden.wrapper.find('#side-column').isVisible()).toBe(false)
   })
 })

@@ -283,9 +283,4 @@ defineExpose({
     max-width: 50px;
   }
 }
-
-.modal-content {
-  max-height: calc(100vh - 7rem);
-  margin-top: 3rem;
-}
 </style>

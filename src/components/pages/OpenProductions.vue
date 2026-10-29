@@ -1,6 +1,12 @@
 <template>
-  <div class="open-productions page">
-    <div class="social-contributions" v-if="isContributions">
+  <div
+    class="open-productions page"
+    :class="{ 'is-client': isCurrentUserClient }"
+  >
+    <div
+      class="social-contributions"
+      v-if="isContributions && !isCurrentUserClient"
+    >
       <div class="flexrow">
         <div class="flexrow-item left-column">
           <h1 class="subtitle">
@@ -58,12 +64,9 @@
         </div>
       </div>
     </div>
-    <div class="has-text-centered" v-if="isOpenProductionsLoading">
-      <spinner />
-    </div>
     <div
       class="flexrow open-productions-header"
-      v-if="!isOpenProductionsLoading && openProductions.length > 0"
+      v-if="openProductions.length > 0 && !isCurrentUserClient"
     >
       <img class="logo" src="../../assets/kitsu.png" width="23" alt="" />
       <h1 class="title filler">
@@ -77,11 +80,48 @@
         {{ $t('productions.home.create_new') }}
       </button>
     </div>
+    <div class="client-welcome" v-if="isWelcome">
+      <span
+        class="close-welcome"
+        role="button"
+        tabindex="0"
+        @click="hideWelcome"
+        @keydown.enter.prevent="hideWelcome"
+        @keydown.space.prevent="hideWelcome"
+      >
+        <x-icon :size="14" />
+      </span>
+      <h2 class="welcome-title">
+        {{
+          $t('productions.home.welcome_title', { studio: organisation.name })
+        }}
+      </h2>
+      <p>
+        {{ $t('productions.home.welcome_text', { studio: organisation.name }) }}
+      </p>
+    </div>
     <div
       class="open-productions-box"
-      v-if="!isOpenProductionsLoading && openProductions.length > 0"
+      :class="{ 'is-client': isCurrentUserClient }"
+      v-if="openProductions.length > 0"
     >
-      <div class="flexrow search-area" v-if="openProductions.length > 6">
+      <!-- A client follows a production rather than browsing a list: each
+           one is laid out with its progress and latest playlists. -->
+      <template v-if="isCurrentUserClient">
+        <production-overview
+          :key="production.id"
+          :production="production"
+          :entities="overviews[production.id]?.entities"
+          :episodes="overviews[production.id]?.episodes"
+          :playlists="overviews[production.id]?.playlists"
+          :is-loading="!overviews[production.id]"
+          v-for="production in openProductions"
+        />
+      </template>
+      <div
+        class="flexrow search-area"
+        v-if="openProductions.length > 6 && !isCurrentUserClient"
+      >
         <search-field
           ref="searchField"
           class="search-field ml1"
@@ -95,6 +135,7 @@
           'open-productions-list': true,
           'is-grid': openProductions?.length > 4
         }"
+        v-if="!isCurrentUserClient"
       >
         <div
           class="open-production has-text-centered"
@@ -172,8 +213,8 @@ import colors from '@/lib/colors'
 import { buildNameIndex } from '@/lib/indexing'
 import preferences from '@/lib/preferences'
 
+import ProductionOverview from '@/components/widgets/ProductionOverview.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
-import Spinner from '@/components/widgets/Spinner.vue'
 
 // Composables
 // --------------------------------------------------------------------------
@@ -189,6 +230,9 @@ const searchFieldRef = useTemplateRef('searchField')
 
 const filteredProductions = ref([])
 const isContributions = ref(false)
+const isWelcome = ref(false)
+// The client overviews, by production id.
+const overviews = ref({})
 
 // The index is only read on search, it does not need to be reactive.
 let productionIndex = {}
@@ -199,9 +243,7 @@ let productionIndex = {}
 const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
-const isOpenProductionsLoading = computed(
-  () => store.getters.isOpenProductionsLoading
-)
+const organisation = computed(() => store.getters.organisation)
 const lastProductionScreen = computed(() => store.getters.lastProductionScreen)
 const mainConfig = computed(() => store.getters.mainConfig)
 const openProductions = computed(() => store.getters.openProductions)
@@ -273,9 +315,37 @@ const onSearchChange = search => {
     : openProductions.value
 }
 
+// Only the productions new to the list are loaded: the list changes on
+// every production event. A failed load shows an empty overview rather
+// than a spinner for good.
+const loadOverviews = () => {
+  const loaded = overviews.value
+  overviews.value = {}
+  openProductions.value.forEach(production => {
+    if (loaded[production.id]) {
+      overviews.value[production.id] = loaded[production.id]
+    } else {
+      store
+        .dispatch('loadProductionOverview', production)
+        .catch(err => {
+          console.error(err)
+          return { entities: [], episodes: [], playlists: [] }
+        })
+        .then(overview => {
+          overviews.value[production.id] = overview
+        })
+    }
+  })
+}
+
 const hideContributions = () => {
   isContributions.value = false
   preferences.setPreference('open-productions:contributions', false)
+}
+
+const hideWelcome = () => {
+  isWelcome.value = false
+  preferences.setPreference('open-productions:client-welcome', false)
 }
 
 // Watchers
@@ -286,6 +356,7 @@ watch(
   () => {
     productionIndex = buildNameIndex(openProductions.value)
     onSearchChange(searchFieldRef.value?.getValue() || '')
+    if (isCurrentUserClient.value) loadOverviews()
   },
   { immediate: true }
 )
@@ -297,6 +368,9 @@ onMounted(() => {
   isContributions.value =
     mainConfig.value.is_self_hosted &&
     preferences.getPreference('open-productions:contributions') !== 'false'
+  isWelcome.value =
+    isCurrentUserClient.value &&
+    preferences.getPreference('open-productions:client-welcome') !== 'false'
 })
 
 // Head
@@ -311,7 +385,7 @@ useHead({ title: computed(() => `${t('productions.home.title')} - Kitsu`) })
     background: $dark-grey-light;
   }
 
-  .open-productions-box {
+  .open-productions-box:not(.is-client) {
     background: $dark-grey-lighter;
     box-shadow: 0 0 4px 2px #333;
   }
@@ -443,6 +517,62 @@ a.secondary:hover {
   margin-left: auto;
   margin-right: auto;
   padding: 3em 3em 4em 3em;
+
+  // A client gets one panel per production instead of the shared box.
+  &.is-client {
+    background: none;
+    box-shadow: none;
+    margin-top: 1.5em;
+    max-width: 1100px;
+    padding: 0;
+  }
+}
+
+.close-contributions,
+.close-welcome {
+  align-items: center;
+  border-radius: 50%;
+  color: var(--text-alt);
+  cursor: pointer;
+  display: flex;
+  height: 28px;
+  justify-content: center;
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  transition: all 0.2s ease-in-out;
+  width: 28px;
+
+  &:hover {
+    background: var(--background-alt);
+    color: var(--text);
+  }
+}
+
+.client-welcome {
+  background: var(--background);
+  border: 3px solid var(--selected);
+  border-radius: 1em;
+  box-shadow: 0 0 3px 3px var(--box-shadow-alt);
+  color: var(--text);
+  margin: 1.5em auto 0;
+  max-width: 1100px;
+  padding: 1.5em 3.5em 1.5em 2em;
+  position: relative;
+
+  // The global h2 is an uppercase, underlined section title.
+  .welcome-title {
+    border-bottom: 0;
+    color: var(--text-strong);
+    font-size: 1.3em;
+    font-weight: 600;
+    margin: 0 0 0.4em;
+    text-transform: none;
+  }
+
+  p {
+    margin: 0;
+  }
 }
 
 .open-productions-header {
@@ -542,26 +672,6 @@ a.secondary:hover {
     --accent: #{$green};
   }
 
-  .close-contributions {
-    align-items: center;
-    border-radius: 50%;
-    color: var(--text-alt);
-    cursor: pointer;
-    display: flex;
-    height: 28px;
-    justify-content: center;
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    transition: all 0.2s ease-in-out;
-    width: 28px;
-
-    &:hover {
-      background: var(--background-alt);
-      color: var(--text);
-    }
-  }
-
   .kitsu-with-body {
     width: 320px;
   }
@@ -608,6 +718,11 @@ a.secondary:hover {
     padding-top: 3em;
   }
 
+  // Clear the topbar: the client home has no title to push its content down.
+  .page.is-client {
+    padding-top: 4.5em;
+  }
+
   .open-productions-header {
     margin-bottom: 2em;
     h1 {
@@ -621,6 +736,15 @@ a.secondary:hover {
 
   .open-productions-box {
     padding: 1em 0;
+  }
+
+  .open-productions-box.is-client {
+    margin: 1em 0.5em 0;
+  }
+
+  .client-welcome {
+    margin: 1em 0.5em 0;
+    padding: 1.2em 2.5em 1.2em 1.2em;
   }
 
   .open-productions-header,

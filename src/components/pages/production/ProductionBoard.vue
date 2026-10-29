@@ -1,9 +1,12 @@
 <template>
-  <board-settings
-    :task-statuses="sortedProductionTaskStatuses"
-    :roles-map="rolesMap"
-    @update-roles="onUpdateRoles"
-  />
+  <div>
+    <p class="explanation mb1">{{ $t('board.settings.description') }}</p>
+    <board-settings
+      :task-statuses="sortedProductionTaskStatuses"
+      :roles-map="rolesMap"
+      @update-roles="onUpdateRoles"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -16,6 +19,8 @@ import BoardSettings from '@/components/pages/production/BoardSettings.vue'
 
 const store = useStore()
 
+// Computed
+// --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
 const productionTaskStatuses = computed(
   () => store.getters.productionTaskStatuses
@@ -26,14 +31,17 @@ const sortedProductionTaskStatuses = computed(() =>
 )
 
 const rolesMap = computed(() => {
-  const map = {}
   const links = currentProduction.value.task_statuses_link || {}
-  productionTaskStatuses.value.forEach(ts => {
-    map[ts.id] = links[ts.id]?.roles_for_board || []
-  })
-  return map
+  return Object.fromEntries(
+    productionTaskStatuses.value.map(ts => [
+      ts.id,
+      links[ts.id]?.roles_for_board || []
+    ])
+  )
 })
 
+// Functions
+// --------------------------------------------------------------------------
 const onUpdateRoles = async ({ taskStatusId, roles }) => {
   const taskStatusLink = {
     ...currentProduction.value.task_statuses_link?.[taskStatusId],

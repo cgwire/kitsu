@@ -2,9 +2,11 @@
 
 import {
   getDescriptorChoicesOptions,
+  getDescriptorFieldName,
   getExportDescriptors,
   getMetadataChecklistValues,
-  getMetadataFieldValue
+  getMetadataFieldValue,
+  isBuiltInFieldName
 } from '@/lib/descriptors'
 
 describe('lib/descriptors', () => {
@@ -135,6 +137,47 @@ describe('lib/descriptors', () => {
         { label: 'a', value: 'a' },
         { label: 'b', value: 'b' }
       ])
+    })
+  })
+
+  describe('getDescriptorFieldName', () => {
+    test('makes the field name Zou makes from a column name', () => {
+      expect(getDescriptorFieldName('Frame In')).toBe('frame_in')
+      expect(getDescriptorFieldName(' Résolution ')).toBe('resolution')
+      expect(getDescriptorFieldName('frame-out')).toBe('frame_out')
+      expect(getDescriptorFieldName("Max  Retakes'!")).toBe('max_retakes')
+      expect(getDescriptorFieldName('F.P.S.')).toBe('f_p_s')
+    })
+
+    // Zou spells these words in Latin letters: dropping them here turned
+    // the name into a built-in key that Zou does not see in it.
+    test('keeps the letters of other scripts', () => {
+      expect(getDescriptorFieldName('Разрешение (Resolution)')).toBe(
+        'разрешение_resolution'
+      )
+      expect(getDescriptorFieldName('解像度 Resolution')).toBe('解像度_resolution')
+    })
+  })
+
+  describe('isBuiltInFieldName', () => {
+    test('flags the key of a built-in field for an entity column', () => {
+      const entityTypes = ['Asset', 'Shot', 'Sequence', 'Episode', 'Edit']
+      entityTypes.forEach(entityType => {
+        expect(isBuiltInFieldName(entityType, 'resolution')).toBe(true)
+      })
+      expect(isBuiltInFieldName('Shot', 'fps')).toBe(true)
+      expect(isBuiltInFieldName('Shot', 'frame_in')).toBe(true)
+      expect(isBuiltInFieldName('Shot', 'frame_out')).toBe(true)
+      expect(isBuiltInFieldName('Shot', 'handle_in')).toBe(true)
+      expect(isBuiltInFieldName('Shot', 'handle_out')).toBe(true)
+      expect(isBuiltInFieldName('Shot', 'max_retakes')).toBe(true)
+      expect(isBuiltInFieldName('Shot', 'shot_resolution')).toBe(false)
+    })
+
+    // Their values live in the project or the task data.
+    test('leaves the project and task columns free', () => {
+      expect(isBuiltInFieldName('Project', 'resolution')).toBe(false)
+      expect(isBuiltInFieldName('Task', 'fps')).toBe(false)
     })
   })
 })

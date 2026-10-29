@@ -202,6 +202,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { isSearchShortcut } from '@/lib/keyboard'
 import { getEntityPath } from '@/lib/path'
 
 import Checkbox from '@/components/widgets/Checkbox.vue'
@@ -354,11 +355,7 @@ const getMatchDetails = entity =>
   t('search.match_details', { target: entity.matched_terms.join(', ') })
 
 const onKeyDown = event => {
-  if (
-    (event.ctrlKey || event.metaKey) &&
-    event.altKey &&
-    event.code === 'KeyF'
-  ) {
+  if (isSearchShortcut(event)) {
     searchField.value?.focus()
   } else if (event.key === 'ArrowDown') {
     selectNext()

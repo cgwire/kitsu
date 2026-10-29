@@ -225,7 +225,7 @@
                         <task-type-name
                           class="flexrow-item"
                           :task-type="taskTypeMap.get(asset.ready_for)"
-                          :current-production-id="currentProduction.id"
+                          :is-link="false"
                           :title="
                             'Ready for: ' +
                             (taskTypeMap.get(asset.ready_for)?.name || '')
@@ -341,13 +341,21 @@ import {
   ChevronRightIcon,
   CornerLeftUpIcon
 } from 'lucide-vue-next'
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useCastingView } from '@/composables/castingView'
-import { useEntity } from '@/composables/entity'
+import { isListOfPageLoaded, useEntity } from '@/composables/entity'
 import { episodifyRoute, getEntitiesPath } from '@/lib/path'
 import sequenceStore from '@/store/modules/sequences'
 
@@ -355,7 +363,6 @@ import DescriptionCell from '@/components/cells/DescriptionCell.vue'
 import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditSequenceModal from '@/components/modals/EditSequenceModal.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
@@ -372,6 +379,10 @@ import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
 
 defineOptions({ name: 'sequence' })
 
@@ -406,7 +417,13 @@ const sequenceMetadataDescriptors = computed(
 const sequenceSearchText = computed(() => store.getters.sequenceSearchText)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-const entityList = computed(() => sequenceStore.cache.sequences)
+// The list of the page, once loaded: a load replaces the cached array out of
+// sight of Vue, and its scope and loading flag have it read again.
+const entityList = computed(() =>
+  isListOfPageLoaded(store.getters, 'sequence')
+    ? sequenceStore.cache.sequences
+    : []
+)
 
 const title = computed(() => {
   if (!currentSequence.value) return t('main.loading')
@@ -572,7 +589,10 @@ const {
   type: 'sequence',
   currentEntity: currentSequence,
   entityList,
-  init
+  init,
+  // The list loaded holds its own object for the sequence, the one the store
+  // updates from then on.
+  loadList: () => store.dispatch('loadSequencesWithTasks').then(resetData)
 })
 
 // Watchers

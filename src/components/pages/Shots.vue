@@ -361,14 +361,6 @@ const searchFieldRef = useTemplateRef('shot-search-field')
 
 const historyShot = ref({})
 const initialLoading = ref(true)
-const optionalColumns = ref([
-  'Description',
-  'Nb Frames',
-  'Frame In',
-  'Frame Out',
-  'FPS',
-  'Resolution'
-])
 
 // Computed
 // --------------------------------------------------------------------------
@@ -408,8 +400,10 @@ const shotSearchQueries = computed(() => store.getters.shotSearchQueries)
 const shotSearchText = computed(() => store.getters.shotSearchText)
 const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
 const shotSorting = computed(() => store.getters.shotSorting)
-const shotValidationColumns = computed(
-  () => store.getters.shotValidationColumns
+const shotValidationColumns = computed(() =>
+  store.getters.shotValidationColumns.filter(
+    store.getters.clientAccess.isTaskTypeVisible
+  )
 )
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
@@ -420,6 +414,16 @@ const isAllEpisodes = computed(
 const dataMatchers = computed(() =>
   isTVShow.value ? ['Episode', 'Sequence', 'Name'] : ['Sequence', 'Name']
 )
+// Zou reads these names only, whatever the language: it drops a translated
+// column without a word.
+const optionalColumns = computed(() => [
+  'Description',
+  ...(isPaperProduction.value ? [] : ['Frames']),
+  'Frame In',
+  'Frame Out',
+  'FPS',
+  'Resolution'
+])
 
 // Built from the full shot cache, not the filtered display list, so the
 // import creation check sees every shot. The cache Map is not reactive:
@@ -457,6 +461,7 @@ const {
   confirmDeleteAllTasks,
   confirmDeleteMetadata,
   confirmRestore: confirmRestoreShot,
+  csvLabel,
   deleteAllTasksLockText,
   deleteAllTasksText,
   deleteText,
@@ -526,19 +531,19 @@ const onExportClick = () =>
   exportCsv(
     [
       ...(currentEpisode.value ? ['Episode'] : []),
-      t('shots.fields.sequence'),
-      t('shots.fields.name'),
-      t('shots.fields.description'),
+      csvLabel('Sequence'),
+      csvLabel('Name'),
+      csvLabel('Description'),
       ...getExportDescriptors(currentProduction.value, 'Shot').map(
         descriptor => descriptor.name
       ),
       ...(isShotTime.value ? [t('shots.fields.time_spent')] : []),
       ...(isShotEstimation.value ? [t('main.estimation_short')] : []),
-      ...(isFrames.value ? [t('main.frames')] : []),
-      ...(isFrameIn.value ? [t('main.frame_in')] : []),
-      ...(isFrameOut.value ? [t('main.frame_out')] : []),
-      ...(isFps.value ? [t('main.fps')] : []),
-      ...(isResolution.value ? [t('shots.fields.resolution')] : []),
+      ...(isFrames.value ? [csvLabel('Frames')] : []),
+      ...(isFrameIn.value ? [csvLabel('Frame In')] : []),
+      ...(isFrameOut.value ? [csvLabel('Frame Out')] : []),
+      ...(isFps.value ? [csvLabel('FPS')] : []),
+      ...(isResolution.value ? [csvLabel('Resolution')] : []),
       ...(isMaxRetakes.value ? [t('shots.fields.max_retakes')] : []),
       // Qualified by the task type so a re-import can tell the columns
       // apart: bare duplicated headers collapse in the server's reader.
@@ -550,17 +555,6 @@ const onExportClick = () =>
     currentEpisode.value &&
       (isAllEpisodes.value ? t('main.all_shots') : currentEpisode.value.name)
   )
-
-const setOptionalImportColumns = () => {
-  optionalColumns.value = [
-    t('shots.fields.description'),
-    ...(isPaperProduction.value ? [] : [t('shots.fields.nb_frames')]),
-    t('shots.fields.frame_in'),
-    t('shots.fields.frame_out'),
-    t('shots.fields.fps'),
-    t('shots.fields.resolution')
-  ]
-}
 
 const reloadShots = async () => {
   initialLoading.value = true
@@ -771,7 +765,6 @@ const onSearchTyped = () => {
 watch(currentSection, reloadEpisodeShotsIfNeeded)
 
 watch(currentProduction, () => {
-  setOptionalImportColumns()
   clearSearchAndScroll()
   // Even during the first load: the switch dropped its response. A TV
   // show reloads from the episode watcher instead.
@@ -800,7 +793,6 @@ watch(isShotsLoading, isLoading => {
 // --------------------------------------------------------------------------
 
 onMounted(() => {
-  setOptionalImportColumns()
   const firstShot = shotMap.get(shotMap.keys().next().value)
   if (
     shotMap.size < 2 ||

@@ -21,7 +21,9 @@ import '@/lib/auth'
 
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
 import NotificationsPage from '@/components/pages/Notifications.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 import BooleanField from '@/components/widgets/BooleanField.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const ButtonSimpleStub = {
@@ -196,6 +198,111 @@ describe('Notifications.vue', () => {
 
       expect(actions.toggleNotificationReadStatus).toHaveBeenCalled()
       expect(consoleError).toHaveBeenCalledWith(error)
+    })
+  })
+
+  describe('task selection', () => {
+    const notificationOf = (id, taskId) => ({
+      id,
+      author_id: 'person-1',
+      created_at: '2026-09-21T10:00:00',
+      notification_type: 'comment',
+      project_id: 'production-1',
+      read: false,
+      task_id: taskId,
+      task_type_id: 'task-type-1'
+    })
+    const notifications = [
+      notificationOf('notification-1', 'task-1'),
+      notificationOf('notification-2', 'task-2')
+    ]
+
+    // Each task load ends on demand: the user may select another
+    // notification, or change a filter, before it lands.
+    const mountWithDeferredLoads = async () => {
+      const settlers = new Map()
+      wrapper.unmount()
+      let actions
+      ;({ store, actions } = makeStore({ notifications: () => notifications }))
+      actions.loadTask.mockImplementation(
+        (_, { taskId }) =>
+          new Promise((resolve, reject) => {
+            settlers.set(taskId, { resolve, reject })
+          })
+      )
+      wrapper = mountPage(store)
+      await flushPromises()
+      const finish = async taskId => {
+        settlers.get(taskId).resolve({ id: taskId })
+        await flushPromises()
+      }
+      const fail = async taskId => {
+        settlers.get(taskId).reject(new Error('Bad Gateway'))
+        await flushPromises()
+      }
+      return { actions, fail, finish }
+    }
+
+    const rows = () => wrapper.findAll('.notification')
+    const panelTask = () => wrapper.findComponent(TaskInfo).props('task')
+    const isSelected = row => row.classes().includes('selected')
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('shows the task of the notification selected last when an earlier load ends after it', async () => {
+      const { finish } = await mountWithDeferredLoads()
+
+      await rows()[0].trigger('click')
+      await rows()[1].trigger('click')
+      await finish('task-2')
+      await finish('task-1')
+
+      expect(panelTask()?.id).toBe('task-2')
+      expect(isSelected(rows()[0])).toBe(false)
+      expect(isSelected(rows()[1])).toBe(true)
+    })
+
+    it('drops a task that loads once the notifications are loaded again', async () => {
+      const { finish } = await mountWithDeferredLoads()
+
+      await rows()[0].trigger('click')
+      wrapper
+        .findComponent(ComboboxTaskType)
+        .vm.$emit('update:modelValue', 'task-type-1')
+      await flushPromises()
+      await finish('task-1')
+
+      expect(panelTask()).toBe(null)
+      expect(rows().some(isSelected)).toBe(false)
+    })
+
+    it('opens a notification clicked twice while its task loads', async () => {
+      const { finish } = await mountWithDeferredLoads()
+
+      await rows()[0].trigger('click')
+      await rows()[0].trigger('click')
+      await finish('task-1')
+
+      expect(panelTask()?.id).toBe('task-1')
+      expect(isSelected(rows()[0])).toBe(true)
+    })
+
+    it('loads a task again on a click after its load failed', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { actions, fail, finish } = await mountWithDeferredLoads()
+
+      await rows()[0].trigger('click')
+      await fail('task-1')
+      await rows()[0].trigger('click')
+      await finish('task-1')
+
+      expect(actions.loadTask).toHaveBeenCalledTimes(2)
+      expect(consoleError).toHaveBeenCalledTimes(1)
+      expect(panelTask()?.id).toBe('task-1')
     })
   })
 

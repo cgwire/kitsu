@@ -169,6 +169,16 @@ const setPanZoom = (x, y, scale) => {
   if (viewer) viewer.setPanZoom(x, y, scale)
 }
 
+const panBy = (dx, dy) => {
+  const viewer = getCurrentViewer()
+  if (viewer) viewer.panBy(dx, dy)
+}
+
+const zoomAt = (clientX, clientY, ratio) => {
+  const viewer = getCurrentViewer()
+  if (viewer) viewer.zoomAt(clientX, clientY, ratio)
+}
+
 // Lifecycle
 
 onMounted(() => {
@@ -207,11 +217,13 @@ defineExpose({
   getDimensions,
   getNaturalDimensions,
   getPictureElement,
+  panBy,
   pausePanZoom,
   resetPanZoom,
   resetPicture,
   resumePanZoom,
-  setPanZoom
+  setPanZoom,
+  zoomAt
 })
 </script>
 

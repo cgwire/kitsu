@@ -2,6 +2,7 @@
 
 import { vi } from 'vitest'
 import { computed, reactive } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the episodes module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -320,6 +321,27 @@ describe('Episodes store', () => {
     })
   })
 
+  describe('EDIT_EPISODE_END', () => {
+    // A metadata cell sends only its own field: the other fields must stay.
+    test('merges the edited metadata into the existing data', () => {
+      const state = { episodes: [], displayedEpisodes: [] }
+      episodesStore.mutations.LOAD_EPISODES_END(state, {
+        episodes: [
+          { id: 'episode-1', name: 'E01', data: { start: 'A', end: 'B' } }
+        ],
+        routeEpisodeId: 'episode-1'
+      })
+      state.displayedEpisodes = [...state.episodes]
+      episodesStore.mutations.EDIT_EPISODE_END(state, {
+        id: 'episode-1',
+        data: { start: 'C' }
+      })
+      const expected = { start: 'C', end: 'B' }
+      expect(state.episodes[0].data).toEqual(expected)
+      expect(state.displayedEpisodes[0].data).toEqual(expected)
+    })
+  })
+
   describe('REMOVE_EPISODE', () => {
     // The topbar validates route episodes against the episodes getter: a
     // deleted episode must leave that list too, not only the map.
@@ -532,5 +554,150 @@ describe('Episodes store, UPDATE_EPISODE', () => {
     })
 
     expect(labels.value).toEqual(['E01 new'])
+  })
+})
+
+describe('Episodes store, DELETE_TASK_END', () => {
+  afterEach(() => {
+    episodesStore.cache.episodeMap.clear()
+  })
+
+  // The topbar and the task page load the plain list, whose rows carry no
+  // tasks: deleting a task of one of them threw, and the modules after this
+  // one kept the task.
+  test('leaves an episode loaded without its tasks unchanged', () => {
+    episodesStore.mutations.LOAD_EPISODES_END(
+      {
+        episodes: [],
+        displayedEpisodes: [],
+        isEpisodeListLoaded: false,
+        currentEpisode: null
+      },
+      {
+        episodes: [{ id: 'ep-plain', name: 'E01', status: 'running' }],
+        routeEpisodeId: 'ep-plain'
+      }
+    )
+
+    episodesStore.mutations.DELETE_TASK_END(
+      {},
+      { id: 't1', entity_id: 'ep-plain', task_type_id: 'tt1' }
+    )
+
+    const episode = episodesStore.cache.episodeMap.get('ep-plain')
+    expect(episode.tasks).toBeUndefined()
+    expect(episode.validations).toBeUndefined()
+  })
+
+  test('removes the task of an episode loaded with its tasks', () => {
+    episodesStore.cache.episodeMap.set('ep-full', {
+      id: 'ep-full',
+      tasks: ['t1', 't2'],
+      validations: new Map([
+        ['tt1', 't1'],
+        ['tt2', 't2']
+      ])
+    })
+
+    episodesStore.mutations.DELETE_TASK_END(
+      {},
+      { id: 't1', entity_id: 'ep-full', task_type_id: 'tt1' }
+    )
+
+    const episode = episodesStore.cache.episodeMap.get('ep-full')
+    expect(episode.tasks).toEqual(['t2'])
+    expect([...episode.validations]).toEqual([['tt2', 't2']])
+  })
+})
+
+describe('Episodes store, production switch', () => {
+  // The back link of an episode page carries this search: the lists of
+  // another production must not inherit it.
+  test('forgets the search typed in the previous production', () => {
+    const store = createStore({
+      modules: {
+        episodes: {
+          state: { episodeSearchText: 'E01' },
+          getters: episodesStore.getters,
+          mutations: episodesStore.mutations
+        }
+      }
+    })
+
+    store.commit('SET_CURRENT_PRODUCTION', 'production-2')
+
+    expect(store.getters.episodeSearchText).toBe('')
+  })
+})
+
+describe('Episodes store, retake stats', () => {
+  const production = { id: 'production-1' }
+  // The user holds `role` on the production of the stats. The route may
+  // show another production by the time the load runs.
+  const loadRetakeStats = (
+    commit,
+    { role, isAdmin = false, isRouteClient = role === 'client' }
+  ) =>
+    episodesStore.actions.loadEpisodeRetakeStats(
+      {
+        commit,
+        rootGetters: {
+          currentUserRoleForProduction: id =>
+            id === production.id ? role : null,
+          isCurrentUserAdmin: isAdmin,
+          isCurrentUserClient: isRouteClient
+        }
+      },
+      production.id
+    )
+
+  // Zou refuses the retake stats to clients since 1.0.97.
+  test('asks no retake stats for a client', async () => {
+    shotsApi.getEpisodeRetakeStats = vi.fn(() => Promise.resolve({}))
+    await loadRetakeStats(vi.fn(), { role: 'client' })
+    expect(shotsApi.getEpisodeRetakeStats).not.toHaveBeenCalled()
+  })
+
+  // The page loads the episodes and the status stats first.
+  test('asks no retake stats for a client once the route moved on', async () => {
+    shotsApi.getEpisodeRetakeStats = vi.fn(() => Promise.resolve({}))
+    await loadRetakeStats(vi.fn(), { role: 'client', isRouteClient: false })
+    expect(shotsApi.getEpisodeRetakeStats).not.toHaveBeenCalled()
+  })
+
+  test('loads the retake stats for the studio', async () => {
+    const episodeRetakeStats = { all: { all: {} } }
+    shotsApi.getEpisodeRetakeStats = vi.fn(() =>
+      Promise.resolve(episodeRetakeStats)
+    )
+    const commit = vi.fn()
+    await loadRetakeStats(commit, { role: 'manager' })
+    expect(shotsApi.getEpisodeRetakeStats).toHaveBeenCalledWith(production.id)
+    expect(commit).toHaveBeenLastCalledWith(
+      'SET_EPISODE_RETAKE_STATS',
+      expect.objectContaining({ episodeRetakeStats })
+    )
+  })
+
+  // Admin is a global-only role, as in Zou.
+  test('loads the retake stats for an admin, whatever its project role', async () => {
+    shotsApi.getEpisodeRetakeStats = vi.fn(() => Promise.resolve({}))
+    await loadRetakeStats(vi.fn(), {
+      role: 'client',
+      isAdmin: true,
+      isRouteClient: false
+    })
+    expect(shotsApi.getEpisodeRetakeStats).toHaveBeenCalledWith(production.id)
+  })
+
+  // Both stats count the same tasks: a retake load that is skipped or fails
+  // must not empty the table.
+  test('keeps the columns of the status stats', () => {
+    const state = { episodeValidationColumns: ['layout', 'anim'] }
+    episodesStore.mutations.SET_EPISODE_RETAKE_STATS(state, {
+      episodeRetakeStats: {}
+    })
+    expect(state.episodeValidationColumns).toEqual(['layout', 'anim'])
+    expect(state.episodeRetakeStats).toEqual({})
   })
 })

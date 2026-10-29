@@ -431,6 +431,62 @@ describe('Assets store', () => {
     })
   })
 
+  describe('SET_ASSET_SEARCH ready for filter', () => {
+    const makeAsset = (id, readyFor) => ({
+      id,
+      name: id,
+      asset_type_name: 'Char',
+      canceled: false,
+      ready_for: readyFor,
+      timeSpent: 0,
+      estimation: 0,
+      tasks: [],
+      validations: new Map(),
+      data: {}
+    })
+
+    const taskTypeMap = new Map(
+      [
+        { id: 'tt-modeling', name: 'Modeling', for_entity: 'Asset' },
+        { id: 'tt-lighting', name: 'Lighting', for_entity: 'Shot' },
+        { id: 'tt-animation', name: 'Animation', for_entity: 'Shot' }
+      ].map(taskType => [taskType.id, taskType])
+    )
+
+    beforeEach(() => {
+      assetsStore.cache.assets = [
+        makeAsset('a1', 'tt-lighting'),
+        makeAsset('a2', 'tt-animation'),
+        // Zou serializes an unset ready_for with str(None).
+        makeAsset('a3', 'None')
+      ]
+      assetsStore.cache.assetIndex = {}
+      assetsStore.cache.result = []
+    })
+
+    // An asset is ready for a shot task type, while the task status filters
+    // of the page only resolve asset task types.
+    test('keeps the assets ready for the given shot task type', () => {
+      const state = {
+        assetSorting: [],
+        assetTypes: [],
+        displayedAssets: [],
+        displayedAssetsTimeSpent: 0,
+        displayedAssetsEstimation: 0
+      }
+
+      assetsStore.mutations.SET_ASSET_SEARCH(state, {
+        assetSearch: 'readyfor=[lighting]',
+        production: { id: 'p1', descriptors: [] },
+        taskStatusMap: new Map(),
+        taskTypeMap,
+        persons: []
+      })
+
+      expect(state.displayedAssets.map(asset => asset.id)).toEqual(['a1'])
+    })
+  })
+
   describe('LOAD_ASSETS_END', () => {
     test('keeps the task own metadata (task descriptors) on reload', () => {
       taskStatusStore.cache.taskStatusMap = new Map([
@@ -1012,6 +1068,109 @@ describe('Assets store, partial loads', () => {
     expect(state.assetsLoadingKey).not.toBe('p1/')
     expect(state.assetsLoadingKey.startsWith('p1/')).toBe(true)
     await loading
+  })
+})
+
+describe('Assets store, partial load over the full list', () => {
+  // The full list of a scope, the one the Assets page displays, holds every
+  // asset a partial load of that scope would fetch, with their tasks: a
+  // partial load (the schedule) must not replace it with a poorer dataset.
+  const buildAsset = id => ({
+    id,
+    name: id,
+    asset_type_id: 't1',
+    asset_type_name: 'Char',
+    canceled: false,
+    tasks: [],
+    data: {}
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    assetsStore.cache.assetsLoadingPromise = null
+    assetsStore.cache.assets = []
+  })
+
+  test('takes the full list of its scope', async () => {
+    const getAssets = vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([])
+    const assets = [buildAsset('a1')]
+    assetsStore.cache.assets = assets
+    const state = {
+      isAssetsLoading: false,
+      isAssetsLoadingError: false,
+      assetsLoadingKey: 'p1/'
+    }
+    const commit = realCommit(state)
+
+    const result = await assetsStore.actions.loadAssets(
+      { commit, dispatch: vi.fn(), state, rootGetters: baseRootGetters() },
+      { withTasks: false, withShared: false }
+    )
+
+    expect(getAssets).not.toHaveBeenCalled()
+    expect(commit).not.toHaveBeenCalled()
+    expect(state.assetsLoadingKey).toBe('p1/')
+    expect(result).toBe(assets)
+  })
+
+  test('joins the full list of its scope on its way', async () => {
+    let release = () => {}
+    const getAssets = vi.spyOn(assetsApi, 'getAssets').mockImplementation(
+      () =>
+        new Promise(resolve => {
+          release = () => resolve([buildAsset('a1')])
+        })
+    )
+    vi.spyOn(assetsApi, 'getUsedSharedAssets').mockResolvedValue([])
+    const state = {
+      isAssetsLoading: false,
+      isAssetsLoadingError: false,
+      assetsLoadingKey: null,
+      assetSearchText: ''
+    }
+    const ctx = {
+      commit: realCommit(state),
+      dispatch: vi.fn(),
+      state,
+      rootGetters: baseRootGetters()
+    }
+
+    const full = assetsStore.actions.loadAssets(ctx)
+    const partial = assetsStore.actions.loadAssets(ctx, {
+      withTasks: false,
+      withShared: false
+    })
+    release()
+    const [, result] = await Promise.all([full, partial])
+
+    expect(getAssets).toHaveBeenCalledTimes(1)
+    expect(ctx.dispatch).not.toHaveBeenCalled()
+    expect(state.assetsLoadingKey).toBe('p1/')
+    expect(result.map(asset => asset.id)).toEqual(['a1'])
+  })
+
+  test('still loads the episode the full list does not cover', async () => {
+    const getAssets = vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([])
+    const state = {
+      isAssetsLoading: false,
+      isAssetsLoadingError: false,
+      assetsLoadingKey: 'p1/ep-a',
+      assetSearchText: ''
+    }
+    const rootGetters = {
+      ...baseRootGetters(),
+      isTVShow: true,
+      currentEpisode: { id: 'ep-b' },
+      episodes: [{ id: 'ep-a' }, { id: 'ep-b' }]
+    }
+
+    await assetsStore.actions.loadAssets(
+      { commit: realCommit(state), dispatch: vi.fn(), state, rootGetters },
+      { withTasks: false, withShared: false }
+    )
+
+    expect(getAssets).toHaveBeenCalledTimes(1)
+    expect(state.assetsLoadingKey).toBe('p1/ep-b#partial')
   })
 })
 

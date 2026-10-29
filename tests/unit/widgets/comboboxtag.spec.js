@@ -184,9 +184,10 @@ describe('ComboboxTag', () => {
     let theme, w
 
     beforeEach(() => {
-      // The list teleports to the app root that App.vue renders.
+      // The list teleports to the layer that App.vue renders.
       theme = document.createElement('div')
       theme.className = 'theme'
+      theme.innerHTML = '<div id="theme-popups"></div>'
       document.body.appendChild(theme)
       vi.stubGlobal('innerWidth', 1912)
       vi.stubGlobal('innerHeight', 962)
@@ -199,7 +200,7 @@ describe('ComboboxTag', () => {
       vi.restoreAllMocks()
     })
 
-    const list = () => document.querySelector('.theme .select-input')
+    const list = () => document.querySelector('#theme-popups .select-input')
 
     // jsdom lays nothing out: the combo gets the rect of a laid out one, the
     // list the size of ten tags.
@@ -274,7 +275,7 @@ describe('ComboboxTag', () => {
 
     it('closes the list on a click outside of it', async () => {
       await openAt(roomBelow)
-      document.querySelector('.theme .c-mask').click()
+      document.querySelector('#theme-popups .c-mask').click()
       await flushPromises()
       expect(list()).toBeNull()
     })
@@ -306,7 +307,7 @@ describe('ComboboxTag', () => {
       await flushPromises()
       expect(w.find('.modal').classes()).not.toContain('is-active')
       expect(list()).toBeNull()
-      expect(document.querySelector('.theme > .c-mask')).toBeNull()
+      expect(document.querySelector('#theme-popups > .c-mask')).toBeNull()
     })
 
     it('closes the list on an Escape from the combo', async () => {

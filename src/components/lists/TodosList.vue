@@ -1,7 +1,7 @@
 <template>
   <div class="data-list task-list">
     <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-      <table class="datatable" v-if="!isLoading">
+      <table class="datatable datatable--cards" v-if="!isLoading">
         <thead class="datatable-head" id="datatable-todos" v-columns-resizable>
           <tr>
             <th
@@ -72,7 +72,7 @@
         </thead>
         <tbody class="datatable-body" v-if="tasks.length > 0">
           <tr
-            :key="entry + '-' + i"
+            :key="entry.id"
             class="datatable-row datatable-row--selectable"
             :class="{
               selected: selectionGrid[entry.id]
@@ -86,6 +86,7 @@
             <td
               class="production datatable-row-header datatable-row-header--nobd"
               scope="row"
+              :data-label="$t('main.production')"
             >
               <production-name-cell
                 :is-tooltip="true"
@@ -100,9 +101,10 @@
               :task-type="getTaskType(entry)"
               :style="{ left: colTypePosX }"
               :is-link="false"
+              :data-label="$t('tasks.fields.task_type')"
             />
             <td
-              class="name datatable-row-header"
+              class="name datatable-row-header card-head"
               :style="{ left: colNamePosX }"
             >
               <div class="flexrow">
@@ -128,7 +130,10 @@
               :entry="{ description: entry.entity_description }"
               v-if="isDescriptionPresent"
             />
-            <td class="estimation number-cell">
+            <td
+              class="estimation number-cell"
+              :data-label="entry.estimation ? $t('main.estimation') : null"
+            >
               <input
                 class="input"
                 min="0"
@@ -148,7 +153,6 @@
             <td class="start-date">
               <date-field
                 class="flexrow-item"
-                :min-date="disabledDates"
                 :model-value="getDate(entry.start_date)"
                 :with-margin="false"
                 @update:model-value="updateStartDate"
@@ -158,10 +162,12 @@
                 {{ formatDisplayDate(entry.start_date) }}
               </template>
             </td>
-            <td class="due-date">
+            <td
+              class="due-date"
+              :data-label="entry.due_date ? $t('tasks.fields.due_date') : null"
+            >
               <date-field
                 class="flexrow-item"
-                :min-date="disabledDates"
                 :model-value="getDate(entry.due_date)"
                 :with-margin="false"
                 @update:model-value="updateDueDate"
@@ -239,13 +245,18 @@
               :row-x="i"
               :selected="selectionGrid[entry.id]"
               :task-test="entry"
+              :data-label="$t('tasks.fields.task_status')"
             />
             <last-comment-cell
               class="last-comment"
               :task="entry"
               v-if="!done"
             />
-            <td class="end-date" v-else>
+            <td
+              class="end-date"
+              :data-label="entry.end_date ? $t('tasks.fields.end_date') : null"
+              v-else
+            >
               {{ formatDisplayDate(entry.end_date) }}
             </td>
           </tr>
@@ -262,9 +273,10 @@
 
     <div
       class="has-text-centered empty-list"
+      :class="{ 'empty-state': !withIllustration }"
       v-if="tasks.length === 0 && !isLoading"
     >
-      <p>
+      <p v-if="withIllustration">
         <img src="../../assets/illustrations/empty_todo.png" alt="" />
       </p>
       <p>
@@ -291,26 +303,18 @@
           : $t('main.days_estimated', {
               count: formatDuration(timeEstimated, false)
             })
-      }}
-      )
+      }})
     </p>
   </div>
 </template>
 
 <script setup>
 import moment from 'moment-timezone'
-import {
-  computed,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  useTemplateRef,
-  watch
-} from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useStore } from 'vuex'
 
-import { pauseEvent } from '@/composables/dom'
 import { useFormat } from '@/composables/format'
+import { useTaskListSelection } from '@/composables/taskSelection'
 import { useTaskHelpers } from '@/composables/tasks'
 import {
   getDescriptorChecklistValues,
@@ -324,8 +328,7 @@ import {
   getDatesFromEndDate,
   getDatesFromStartDate,
   minutesToDays,
-  parseSimpleDate,
-  range
+  parseSimpleDate
 } from '@/lib/time'
 
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
@@ -366,9 +369,13 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  disabledDates: {
-    type: Object,
-    default: () => {}
+  withIllustration: {
+    type: Boolean,
+    default: true
+  },
+  editable: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -378,12 +385,16 @@ const emit = defineEmits(['scroll', 'task-selected'])
 // --------------------------------------------------------------------------
 const colNamePosX = ref('')
 const colTypePosX = ref('')
-const lastSelection = ref(null)
-const selectionGrid = ref({})
 
 const bodyRef = useTemplateRef('body')
 const thProdRef = useTemplateRef('th-prod')
 const thTypeRef = useTemplateRef('th-type')
+
+const { applySelection, selectionGrid } = useTaskListSelection({
+  tasks: () => props.tasks,
+  body: bodyRef,
+  emit
+})
 
 // Computed
 // --------------------------------------------------------------------------
@@ -391,14 +402,15 @@ const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
 )
-const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const openProductions = computed(() => store.getters.openProductions)
 const productionMap = computed(() => store.getters.productionMap)
 const taskMap = computed(() => store.getters.taskMap)
 const user = computed(() => store.getters.user)
 
 const isEditable = computed(
-  () => isCurrentUserManager.value || isCurrentUserSupervisor.value
+  () =>
+    props.editable &&
+    (isCurrentUserManager.value || isCurrentUserSupervisor.value)
 )
 
 const isDescriptionPresent = computed(() =>
@@ -413,12 +425,10 @@ const metadataDescriptorsMap = computed(() => {
         descriptor.departments.includes(department)
       )
       if (isUserDepartment) {
-        // group them by field_name if they have the same field_name
         if (!(descriptor.field_name in descriptorsMap)) {
           descriptorsMap[descriptor.field_name] = {}
         }
         const descriptorFieldNameEntry = descriptorsMap[descriptor.field_name]
-        // group them by entity_type if the have the same entity_type
         if (!(descriptor.entity_type in descriptorFieldNameEntry)) {
           descriptorFieldNameEntry[descriptor.entity_type] = {}
         }
@@ -498,21 +508,6 @@ const entityPath = entity => {
   return getTaskEntityPath(entity, episodeId)
 }
 
-const onKeyDown = event => {
-  if (props.tasks.length > 0 && event.altKey) {
-    let index = lastSelection.value ? lastSelection.value : 0
-    if ([37, 38].includes(event.keyCode)) {
-      index = index - 1 < 0 ? props.tasks.length - 1 : index - 1
-      selectTask({}, index, props.tasks[index])
-      pauseEvent(event)
-    } else if ([39, 40].includes(event.keyCode)) {
-      index = index + 1 >= props.tasks.length ? 0 : index + 1
-      selectTask({}, index, props.tasks[index])
-      pauseEvent(event)
-    }
-  }
-}
-
 const mergeMetadataDescriptors = descriptors => {
   const firstKeyEntityType = Object.keys(descriptors)[0]
   const firstKeyProjectId = Object.keys(descriptors[firstKeyEntityType])[0]
@@ -521,7 +516,6 @@ const mergeMetadataDescriptors = descriptors => {
     field_name: descriptors[firstKeyEntityType][firstKeyProjectId].field_name,
     name: descriptors[firstKeyEntityType][firstKeyProjectId].name
   }
-  // merge departments
   Object.keys(descriptors).forEach(entityType =>
     Object.keys(descriptors[entityType]).forEach(projectId => {
       mergedDescriptors.departments = [
@@ -648,72 +642,25 @@ const selectTask = (event, index, task) => {
       ['cell day selected'].includes(event.target.className))
   )
     return
-  const isSelected = selectionGrid.value[task.id]
-  const isManySelection = Object.keys(selectionGrid.value).length > 1
-  if (event && !(event.ctrlKey || event.metaKey) && !event.shiftKey) {
-    store.dispatch('clearSelectedTasks')
-    resetSelection()
-  }
-
-  if (event && !event.shiftKey) {
-    if (isSelected && !isManySelection) {
-      store.dispatch('removeSelectedTask', { task })
-      selectionGrid.value[task.id] = undefined
-    } else if (!isSelected || isManySelection) {
-      store.dispatch('addSelectedTask', { task })
-      emit('task-selected', task)
-      selectionGrid.value[task.id] = true
-      lastSelection.value = index
-    }
-  } else {
-    selectionGrid.value = {}
-    const taskIndices =
-      lastSelection.value > index
-        ? range(index, lastSelection.value)
-        : range(lastSelection.value, index)
-    const selection = taskIndices.map(i => ({ task: props.tasks[i] }))
-    selection.forEach(task => {
-      selectionGrid.value[task.task.id] = true
-    })
-    store.dispatch('addSelectedTasks', selection)
-  }
-}
-
-const resetSelection = () => {
-  selectionGrid.value = {}
-  lastSelection.value = null
+  applySelection(event, index, task)
 }
 
 // The parent pages restore the scroll position and trigger header
 // resizes through a template ref.
 defineExpose({ resizeHeaders, setScrollPosition })
 
-// Watchers
-// --------------------------------------------------------------------------
-watch(() => props.tasks, resetSelection)
-
-watch(nbSelectedTasks, () => {
-  if (nbSelectedTasks.value === 0) resetSelection()
-})
-
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
-  window.addEventListener('keydown', onKeyDown, false)
   if (thProdRef.value) {
     colTypePosX.value = thProdRef.value.offsetWidth + 'px'
     colNamePosX.value =
       thProdRef.value.offsetWidth + thTypeRef.value.offsetWidth + 'px'
   }
 })
-
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeyDown)
-})
 </script>
 
 <style lang="scss" scoped>
-.datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
 }
@@ -730,11 +677,6 @@ thead .name {
 .description {
   width: 200px;
   min-width: 200px;
-}
-
-.description li {
-  list-style-type: disc;
-  margin-left: 2em;
 }
 
 .name a {
@@ -799,11 +741,11 @@ td.end-date {
   color: $grey;
 }
 
-.thumbnail {
-  min-width: 60px;
-  max-width: 60px;
-  width: 60px;
-  padding: 0;
+// the empty state of the admin pages: a plain message, without picture
+.empty-state {
+  color: var(--text-alt);
+  font-size: 1.1em;
+  margin-top: 3em;
 }
 
 .empty-list img {
@@ -812,7 +754,6 @@ td.end-date {
 }
 
 .entity-name {
-  color: var(--text);
   font-weight: bold;
 }
 
@@ -835,7 +776,69 @@ input[type='number'] {
   -moz-appearance: textfield;
 }
 
-.error {
-  color: $red;
+@media screen and (max-width: 768px) {
+  // the page scrolls on a phone, not the list: the filters leave it too
+  // little height for a single card
+  .datatable-wrapper {
+    background: transparent;
+    border: 0;
+    overflow: visible;
+  }
+
+  .empty-state {
+    margin: 1.5em 0;
+  }
+
+  // the status wrapper pads itself inline: its tag stopped 6px short of the
+  // other card values
+  .datatable--cards .datatable-body td.status :deep(.status-wrapper) {
+    padding-right: 0 !important;
+  }
+
+  // The production avatar opens the card head, left of the thumbnail: the
+  // card wraps as a row, every other line takes the full width.
+  // the global card rule also names :hover and :last-child, which a bare
+  // row selector loses against: the tapped and the last card stacked again
+  .datatable--cards .datatable-row,
+  .datatable--cards .datatable-row:last-child,
+  .datatable--cards .datatable-row:hover {
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .datatable--cards .datatable-body td[data-label] {
+    flex: 1 0 100%;
+  }
+
+  .datatable--cards .datatable-body td.production {
+    display: block;
+    flex: none;
+    order: -2;
+    padding-right: 0.75em;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .datatable--cards .datatable-body td.card-head {
+    flex: 1;
+    min-width: 0;
+  }
+
+  // status right under the task type: the other lines come after it
+  .datatable-body td.estimation,
+  .datatable-body td.due-date,
+  .datatable-body td.end-date {
+    order: 1;
+  }
+
+  // read-only cards: no inline editor, even on a selected row
+  .estimation .input,
+  .start-date :deep(.datepicker),
+  .due-date :deep(.datepicker) {
+    display: none;
+  }
 }
 </style>

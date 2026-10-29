@@ -1,6 +1,7 @@
 <template>
   <div
     class="preview-wrapper preview-video"
+    :class="{ 'is-broken': isMovieBroken }"
     v-if="isPlayableMovie && showMovie"
   >
     <video-viewer
@@ -12,8 +13,8 @@
         extension: entity.preview_file_extension
       }"
       :is-rounded-top-border="isRoundedTopBorder"
-      role="button"
-      tabindex="0"
+      :role="isMovieBroken ? undefined : 'button'"
+      :tabindex="isMovieBroken ? undefined : 0"
       @click="onVideoClicked()"
       @keydown.enter.prevent="onVideoClicked()"
       @keydown.space.prevent="onVideoClicked()"
@@ -24,6 +25,7 @@
       ref="buttonPlayRef"
       :title="$t('playlists.actions.play')"
       @click="onVideoClicked()"
+      v-if="!isMovieBroken"
     />
   </div>
   <div
@@ -154,6 +156,9 @@ const isPlayableMovie = computed(
   () => isMovie.value && !isProcessing.value && !isBroken.value
 )
 
+// The viewer finds out when the browser cannot read the movie file.
+const isMovieBroken = computed(() => Boolean(videoViewerRef.value?.isBroken))
+
 const thumbnailPath = computed(() => {
   const fileName = `${previewFileId.value}.png${reloadQuery.value}`
   return `/api/pictures/previews/preview-files/${fileName}`
@@ -175,6 +180,7 @@ const onPictureClicked = () => {
 }
 
 const onVideoClicked = () => {
+  if (isMovieBroken.value) return
   if (isPlaying.value) {
     videoViewerRef.value.pause()
     buttonPlayRef.value.$el.style.display = 'initial'
@@ -192,6 +198,10 @@ const onVideoClicked = () => {
   width: 300px;
   min-height: 200px;
   cursor: pointer;
+
+  &.is-broken {
+    cursor: default;
+  }
 }
 
 .button-play {

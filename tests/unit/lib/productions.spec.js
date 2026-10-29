@@ -9,6 +9,7 @@ import {
   getMovieMegabytesPerMinute,
   getTaskTypePriorityOfProd,
   getTaskStatusPriorityOfProd,
+  isTaskStatusClientAllowed,
   parseBitrate
 } from '@/lib/productions'
 
@@ -172,6 +173,32 @@ describe('productions', () => {
     it('falls back to taskStatus priority when production is null', () => {
       const taskStatus = { id: 'ts-3', priority: 6 }
       expect(getTaskStatusPriorityOfProd(taskStatus, null)).toBe(6)
+    })
+  })
+
+  describe('isTaskStatusClientAllowed', () => {
+    const taskStatus = { id: 'ts-1', is_client_allowed: true }
+
+    it('uses the production value when it is a boolean', () => {
+      const production = {
+        task_statuses_link: { 'ts-1': { is_client_allowed: false } }
+      }
+      expect(isTaskStatusClientAllowed(production, taskStatus)).toBe(false)
+      expect(
+        isTaskStatusClientAllowed(
+          { task_statuses_link: { 'ts-1': { is_client_allowed: true } } },
+          { ...taskStatus, is_client_allowed: false }
+        )
+      ).toBe(true)
+    })
+
+    it('falls back to the studio value when the link is null or missing', () => {
+      const production = {
+        task_statuses_link: { 'ts-1': { is_client_allowed: null } }
+      }
+      expect(isTaskStatusClientAllowed(production, taskStatus)).toBe(true)
+      expect(isTaskStatusClientAllowed({}, taskStatus)).toBe(true)
+      expect(isTaskStatusClientAllowed(null, taskStatus)).toBe(true)
     })
   })
 })

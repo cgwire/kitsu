@@ -215,7 +215,8 @@ const addPerson = () => {
 const importTeamFromProduction = () => {
   const production = productionMap.value.get(importProductionId.value)
   production.team.forEach(personId => {
-    addPersonToTeam(personMap.value.get(personId))
+    const member = personMap.value.get(personId)
+    if (member) addPersonToTeam(member)
   })
 }
 

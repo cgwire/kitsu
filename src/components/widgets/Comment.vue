@@ -1192,10 +1192,6 @@ article.comment {
   hyphens: auto;
 }
 
-.media {
-  padding: 0.6em;
-}
-
 .content .comment-person {
   min-height: 40px;
   margin-bottom: 0;

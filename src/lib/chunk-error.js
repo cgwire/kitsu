@@ -16,13 +16,19 @@ export function isChunkError(error) {
  * Sets up a global error handler for chunk loading errors in a Vue Router application.
  * When a chunk loading error is detected during navigation, the page will be reloaded
  * to attempt to load the chunk again. A sessionStorage flag is used to prevent infinite reload loops.
+ * Offline, the page stays: the reload would show the error page of the browser instead
+ * of the app, and the next navigation tries again.
  *
  * @param {import('vue-router').Router} router - The Vue Router instance to attach the error handler to.
  */
 export async function setupChunkErrorHandler(router) {
   // Listen for navigation errors in the router.
   router.onError((error, to) => {
-    if (chunkErrors.has(error) && !sessionStorage.getItem(PRELOAD_ERROR_FLAG)) {
+    if (
+      chunkErrors.has(error) &&
+      navigator.onLine &&
+      !sessionStorage.getItem(PRELOAD_ERROR_FLAG)
+    ) {
       sessionStorage.setItem(PRELOAD_ERROR_FLAG, 'true')
       window.location.assign(to.fullPath)
     }
@@ -33,8 +39,9 @@ export async function setupChunkErrorHandler(router) {
   try {
     await router.isReady()
   } catch (error) {
-    // A chunk error keeps the flag: window.location.assign is about to reload,
-    // and clearing it first would re-arm the loop on a missing initial chunk.
+    // A chunk error keeps the flag: unless offline, window.location.assign is
+    // about to reload, and clearing it first would re-arm the loop on a
+    // missing initial chunk.
     if (isChunkError(error)) {
       return
     }

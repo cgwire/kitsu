@@ -294,7 +294,6 @@ const state = {
 }
 
 const getters = {
-  edits: state => cache.edits,
   editValidationColumns: state => state.editValidationColumns,
 
   editSearchQueries: state => state.editSearchQueries,
@@ -321,7 +320,6 @@ const getters = {
   editsLoadingKey: state => state.editsLoadingKey,
   editCreated: state => state.editCreated,
 
-  isLongEditList: state => cache.editMap.size > 500,
   editsCsvFormData: state => state.editsCsvFormData,
   editListScrollPosition: state => state.editListScrollPosition,
 
@@ -1156,6 +1154,10 @@ const mutations = {
     // task columns resolve: tasks have their own events.
     const fields = { ...edit }
     delete fields.tasks
+    // The map holds raw objects: assigned through it only, the displayed
+    // list would see no change.
+    const displayedEdit = state.displayedEdits.find(({ id }) => id === edit.id)
+    if (displayedEdit) Object.assign(displayedEdit, fields)
     Object.assign(cache.editMap.get(edit.id), fields)
     cache.editIndex = buildEditIndex(cache.edits)
   },

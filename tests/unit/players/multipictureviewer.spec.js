@@ -25,4 +25,40 @@ describe('players/MultiPictureViewer', () => {
 
     expect(rejections).toEqual([])
   })
+
+  // The neighbours of the displayed picture stay mounted to preload.
+  test('sends the finger gestures to the picture on screen', () => {
+    const calls = []
+    const wrapper = mount(MultiPictureViewer, {
+      props: {
+        currentPreview: preview(1),
+        previews: [preview(0), preview(1), preview(2)]
+      },
+      global: {
+        stubs: {
+          PictureViewer: {
+            props: ['preview'],
+            template: '<div />',
+            methods: {
+              panBy(...args) {
+                calls.push([this.preview.id, 'panBy', ...args])
+              },
+              zoomAt(...args) {
+                calls.push([this.preview.id, 'zoomAt', ...args])
+              }
+            }
+          }
+        }
+      }
+    })
+
+    wrapper.vm.panBy(3, 4)
+    wrapper.vm.zoomAt(100, 50, 2)
+
+    expect(calls).toEqual([
+      ['preview-1', 'panBy', 3, 4],
+      ['preview-1', 'zoomAt', 100, 50, 2]
+    ])
+    wrapper.unmount()
+  })
 })

@@ -26,7 +26,7 @@ const mountSettings = async (production = {}) => {
   })
   store.dispatch = vi.fn(() => Promise.resolve())
   const wrapper = shallowMount(ProductionVideoSettings, {
-    global: { plugins: [store], mocks: { $t: key => key } }
+    global: { plugins: [store], stubs: { VideoSettingsForm: false }, mocks: { $t: key => key } }
   })
   // The form fills on mount.
   await flushPromises()
@@ -42,13 +42,13 @@ describe('ProductionVideoSettings', () => {
   it('says the settings only apply to the next uploads', async () => {
     const { wrapper } = await mountSettings()
 
-    expect(wrapper.text()).toContain('productions.video.next_uploads_only')
+    expect(wrapper.text()).toContain('productions.video.encoding_explanation')
     expect(wrapper.text()).toContain('productions.video.bitrate_explanation')
   })
 
   it('groups the bitrates under their own title and explanation', async () => {
     const { wrapper } = await mountSettings()
-    const title = wrapper.find('h3.section-title')
+    const title = wrapper.find('.bitrates h2.subtitle')
 
     expect(title.text()).toBe('productions.video.bitrates')
     expect(title.element.nextElementSibling.textContent.trim()).toBe(
@@ -109,5 +109,35 @@ describe('ProductionVideoSettings', () => {
       })
     )
     expect(ld.props('modelValue')).toBe(13)
+  })
+})
+
+describe('ProductionVideoSettings: preview options', () => {
+  it('maps an explicit true to an enabled toggle', async () => {
+    const { wrapper } = await mountSettings({ is_frame_in_numbering: true })
+    expect(wrapper.vm.form.is_frame_in_numbering).toBe(true)
+  })
+
+  it('defaults to disabled when the field is missing', async () => {
+    const { wrapper } = await mountSettings()
+    expect(wrapper.vm.form.is_frame_in_numbering).toBe(false)
+    expect(wrapper.vm.form.is_preview_download_allowed).toBe(false)
+  })
+
+  it('saves the preview options with the video settings', async () => {
+    const { store, wrapper } = await mountSettings({
+      revision_padding: 3,
+      is_set_preview_automated: true
+    })
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+    expect(store.dispatch).toHaveBeenCalledWith(
+      'editProduction',
+      expect.objectContaining({
+        id: 'production-1',
+        revision_padding: 3,
+        is_set_preview_automated: true
+      })
+    )
   })
 })

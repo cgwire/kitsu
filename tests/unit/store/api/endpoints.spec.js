@@ -24,6 +24,7 @@ import previewsApi from '@/store/api/previews'
 import projectTemplatesApi from '@/store/api/projecttemplates'
 import scheduleApi from '@/store/api/schedule'
 import shotsApi from '@/store/api/shots'
+import tasksApi from '@/store/api/tasks'
 import taskTypesApi from '@/store/api/tasktypes'
 
 describe('store/api endpoints', () => {
@@ -33,6 +34,43 @@ describe('store/api endpoints', () => {
     client.ppost.mockClear()
     client.ppostImport.mockClear()
     client.pput.mockClear()
+  })
+
+  describe('user time spents', () => {
+    test('asks for a period of the current user', () => {
+      peopleApi.getUserTimeSpentsByPeriod('2026-10-01', '2026-10-31')
+      expect(client.pget).toHaveBeenCalledWith(
+        '/api/data/user/time-spents?start_date=2026-10-01&end_date=2026-10-31'
+      )
+    })
+  })
+
+  describe('person quotas', () => {
+    test('asks for the quotas of a person in a production', () => {
+      shotsApi.getPersonQuotas('p1', 'u1', 'weighted')
+      expect(client.pget).toHaveBeenCalledWith(
+        '/api/data/projects/p1/quotas/persons/u1?count_mode=weighted'
+      )
+    })
+
+    test('joins the shots params with a single ampersand', () => {
+      peopleApi.getPersonQuotaShots(
+        'p1', 'tt1', 'u1', 'week', 2026, 10, 41, 8, 'raw'
+      )
+      expect(client.pget).toHaveBeenCalledWith(
+        '/api/data/persons/u1/quota-shots/week/2026/41' +
+          '?project_id=p1&task_type_id=tt1&count_mode=raw'
+      )
+    })
+
+    test('leaves out the empty production and task type', () => {
+      peopleApi.getPersonQuotaShots(
+        null, null, 'u1', 'day', 2026, 10, 41, 8, 'raw'
+      )
+      expect(client.pget).toHaveBeenCalledWith(
+        '/api/data/persons/u1/quota-shots/day/2026/10/8?count_mode=raw'
+      )
+    })
   })
 
   // Zou answers an import only once every row is processed: the imports
@@ -77,6 +115,17 @@ describe('store/api endpoints', () => {
             formData
           ),
         '/api/import/csv/projects/p1/episodes/e1/task-types/t1/estimations'
+      ],
+      [
+        'estimations CSV without episode',
+        () =>
+          taskTypesApi.postTaskTypeEstimations(
+            production,
+            null,
+            { id: 't1' },
+            formData
+          ),
+        '/api/import/csv/projects/p1/task-types/t1/estimations'
       ]
     ])('%s posts through ppostImport', (label, post, path) => {
       post()
@@ -173,6 +222,18 @@ describe('store/api endpoints', () => {
     })
   })
 
+  // Zou checks a 2FA code before it removes a key.
+  describe('people unregisterFIDO', () => {
+    test('sends the 2FA code with the device name', () => {
+      peopleApi.unregisterFIDO('Yubikey', { totp: '123456' })
+
+      expect(client.pdel).toHaveBeenCalledWith('/api/auth/fido', {
+        totp: '123456',
+        device_name: 'Yubikey'
+      })
+    })
+  })
+
   describe('people setTimeSpent', () => {
     const path =
       '/api/actions/tasks/task-1/time-spents/2026-10-06/persons/person-1'
@@ -218,6 +279,76 @@ describe('store/api endpoints', () => {
           hd_bitrate_compression: 20,
           ld_bitrate_compression: null
         })
+      )
+    })
+  })
+
+  describe('project templates frame in numbering', () => {
+    test('sends the frame in numbering flag of the template', () => {
+      projectTemplatesApi.editProjectTemplate({
+        id: 'template-1',
+        is_frame_in_numbering: true
+      })
+
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/project-templates/template-1',
+        expect.objectContaining({ is_frame_in_numbering: true })
+      )
+    })
+  })
+
+  describe('project templates creation', () => {
+    test('sends the frame in numbering flag of the template', () => {
+      projectTemplatesApi.newProjectTemplate({
+        name: 'Feature',
+        is_frame_in_numbering: true
+      })
+
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/data/project-templates',
+        expect.objectContaining({ is_frame_in_numbering: true })
+      )
+    })
+  })
+
+  describe('project templates client access', () => {
+    test('sends the client access flags of the template', () => {
+      projectTemplatesApi.editProjectTemplate({
+        id: 'template-1',
+        is_clients_isolated: true,
+        is_client_stats_visible: false,
+        is_client_task_list_visible: true,
+        is_client_task_panel_visible: false
+      })
+
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/project-templates/template-1',
+        expect.objectContaining({
+          is_clients_isolated: true,
+          is_client_stats_visible: false,
+          is_client_task_list_visible: true,
+          is_client_task_panel_visible: false
+        })
+      )
+    })
+
+    // null drops the override of the template, a missing value keeps it
+    test.each([
+      [null, { is_client_allowed: null }],
+      [false, { is_client_allowed: false }],
+      [undefined, {}]
+    ])('sends a status client value of %s', (value, expected) => {
+      projectTemplatesApi.addTaskStatusToTemplate(
+        'template-1',
+        'status-1',
+        null,
+        null,
+        value
+      )
+
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/data/project-templates/template-1/task-statuses',
+        { task_status_id: 'status-1', ...expected }
       )
     })
   })
@@ -285,5 +416,21 @@ describe('store/api endpoints', () => {
       `/api/data/preview-files?id=${encodeURIComponent('["p1","p2"]')}` +
         '&fields=id,status'
     )
+  })
+
+  // A paginated page carries the total of the matching tasks: one row is
+  // enough to count them.
+  test('counts the tasks with a one row page', async () => {
+    client.pget.mockResolvedValueOnce({ data: [{ id: 'task-1' }], total: 12 })
+
+    const nbTasks = await tasksApi.countTasks({
+      project_id: 'p1',
+      task_type_id: 'tt1'
+    })
+
+    expect(client.pget).toHaveBeenCalledWith(
+      '/api/data/tasks?project_id=p1&task_type_id=tt1&page=1&limit=1'
+    )
+    expect(nbTasks).toBe(12)
   })
 })

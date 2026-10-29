@@ -14,6 +14,8 @@ import playlistsApi from '@/store/api/playlists'
 import SharedCommentsPanel from '@/components/players/sides/SharedCommentsPanel.vue'
 import TaskComment from '@/components/widgets/Comment.vue'
 
+import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
+
 const i18n = createI18n({
   legacy: false,
   locale: 'en',
@@ -62,6 +64,43 @@ describe('players/SharedCommentsPanel', () => {
         created_at: '2026-10-01T10:00:00'
       }
     ])
+  })
+
+  // The browser shows the player in full screen alone: the attachment, edit
+  // and delete modals of the guest go into it, and back to <body> after.
+  describe('in full screen', () => {
+    let player = null
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper.unmount()
+      resetFullScreen()
+      player.remove()
+    })
+
+    it('opens its modals in the player', async () => {
+      player = document.body.appendChild(document.createElement('div'))
+      wrapper = shallowMount(SharedCommentsPanel, {
+        props: { token: 'token', currentTaskId: 'task-1' },
+        attachTo: player.appendChild(document.createElement('div')),
+        global: {
+          directives: { autosize: {} },
+          plugins: [store, i18n],
+          stubs: { teleport: false }
+        }
+      })
+      await flushPromises()
+      const modals = () => document.querySelector('.shared-modals')
+      expect(modals().parentElement).toBe(document.body)
+
+      setFullScreenElement(player)
+      await flushPromises()
+      expect(modals().parentElement).toBe(player)
+
+      setFullScreenElement(null)
+      await flushPromises()
+      expect(modals().parentElement).toBe(document.body)
+    })
   })
 
   // External clients reviewing a shared playlist have no use for it.

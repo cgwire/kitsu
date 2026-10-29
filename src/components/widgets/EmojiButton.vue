@@ -32,6 +32,7 @@
 <script setup>
 import {
   computed,
+  defineAsyncComponent,
   useTemplateRef,
   ref,
   nextTick,
@@ -40,10 +41,17 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
-import EmojiPicker from 'vue3-emoji-picker'
-import 'vue3-emoji-picker/css'
-
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+
+// The picker and its emoji data weigh about 40 kB gzipped and most comments
+// never open it: load them on the first click.
+const EmojiPicker = defineAsyncComponent(async () => {
+  const [{ default: picker }] = await Promise.all([
+    import('vue3-emoji-picker'),
+    import('vue3-emoji-picker/css')
+  ])
+  return picker
+})
 
 const showEmojiPicker = ref(false)
 const buttonRef = useTemplateRef('buttonRef')

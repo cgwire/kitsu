@@ -38,13 +38,26 @@ const confirmForm = wrapper => {
   return wrapper.emitted('confirm').at(-1)[0]
 }
 
+// The link field of a preview comment reports its browser validity.
+let isLinkValid = true
+const TextFieldStub = {
+  name: 'TextField',
+  emits: ['enter', 'update:modelValue'],
+  methods: {
+    checkValidity: () => isLinkValid,
+    focus() {}
+  },
+  template: '<input />'
+}
+
 describe('modals/EditCommentModal', () => {
   let wrapper
 
   beforeEach(() => {
     vi.useFakeTimers()
+    isLinkValid = true
     wrapper = shallowMount(EditCommentModal, {
-      global: { plugins: [store] },
+      global: { plugins: [store], stubs: { TextField: TextFieldStub } },
       props: { active: false, commentToEdit: null }
     })
   })
@@ -77,6 +90,27 @@ describe('modals/EditCommentModal', () => {
       text: 'Text of legacy',
       task_status_id: 'status-legacy',
       checklist: []
+    })
+  })
+
+  // The link field confirms on Enter, past the grayed confirm button.
+  it('does not confirm on Enter while the link is invalid', async () => {
+    await openOn(wrapper, {
+      ...buildComment('with-preview', []),
+      previews: [{ id: 'preview-1' }]
+    })
+    const linkField = wrapper.findComponent({ name: 'TextField' })
+    isLinkValid = false
+
+    await linkField.vm.$emit('update:modelValue', 'not a link')
+    linkField.vm.$emit('enter')
+    expect(wrapper.emitted('confirm')).toBeUndefined()
+
+    isLinkValid = true
+    await linkField.vm.$emit('update:modelValue', 'https://example.com')
+    linkField.vm.$emit('enter')
+    expect(wrapper.emitted('confirm')[0][0]).toMatchObject({
+      links: ['https://example.com']
     })
   })
 })

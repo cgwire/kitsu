@@ -113,6 +113,7 @@ describe('cells/MetadataPerson', () => {
     focusedPopupRect = null
     theme = document.createElement('div')
     theme.className = 'theme'
+    theme.innerHTML = '<div id="theme-popups"></div>'
     document.body.appendChild(theme)
     document.addEventListener('focus', onFocus, true)
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(

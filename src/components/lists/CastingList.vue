@@ -54,7 +54,6 @@
             >
               <task-type-name
                 :task-type="taskTypeMap.get(entry.ready_for)"
-                :current-production-id="currentProduction.id"
                 v-if="!entry.shared && entry.ready_for"
               />
             </td>
@@ -101,7 +100,6 @@ defineEmits(['remove'])
 
 // Computed
 // --------------------------------------------------------------------------
-const currentProduction = computed(() => store.getters.currentProduction)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 </script>
 

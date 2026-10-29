@@ -66,6 +66,14 @@
                 >x</span
               >
             </p>
+            <div class="progress-wrapper" v-if="isLoading && uploadProgress">
+              <div
+                class="progress"
+                :style="{
+                  width: (uploadProgress[form.get('file').name] || 0) + '%'
+                }"
+              ></div>
+            </div>
             <img alt="uploaded file" :src="getURL(form)" v-if="isImage(form)" />
             <video
               :src="getURL(form)"
@@ -108,7 +116,8 @@
               'is-disabled': forms.length === 0
             }"
             role="button"
-            tabindex="0"
+            :aria-disabled="forms.length === 0"
+            :tabindex="forms.length === 0 ? -1 : 0"
             @click="confirm"
             @keydown.enter.prevent="confirm"
             @keydown.space.prevent="confirm"
@@ -155,7 +164,9 @@ const props = defineProps({
   isLoading: { type: Boolean, default: false },
   isMultiple: { type: Boolean, default: true },
   message: { type: String, default: 'tasks.revision_preview_file' },
-  title: { type: String, default: '' }
+  title: { type: String, default: '' },
+  // By file name, for the uploads no other part of the page shows.
+  uploadProgress: { type: Object, default: null }
 })
 
 const emit = defineEmits(['cancel', 'confirm', 'fileselected'])
@@ -176,8 +187,10 @@ const onFileSelected = newForms => {
   emit('fileselected', forms.value)
 }
 
+// The disabled and loading looks only stop the mouse: Enter and Space still
+// reach the button.
 const confirm = () => {
-  if (forms.value.length > 0) emit('confirm', forms.value)
+  if (forms.value.length > 0 && !props.isLoading) emit('confirm', forms.value)
 }
 
 const reset = () => {
@@ -311,6 +324,18 @@ h3.subtitle {
 .preview-name span {
   cursor: pointer;
   float: right;
+}
+
+.progress-wrapper {
+  border-radius: 5px;
+  background: var(--background-alt);
+  height: 5px;
+  margin-bottom: 1em;
+}
+
+.progress {
+  height: 5px;
+  background-color: $light-green;
 }
 
 .message-body {

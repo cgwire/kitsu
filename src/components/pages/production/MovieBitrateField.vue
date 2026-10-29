@@ -42,8 +42,6 @@
 </template>
 
 <script setup>
-// Imports
-// --------------------------------------------------------------------------
 import { computed, ref } from 'vue'
 
 import {

@@ -1,6 +1,9 @@
 <template>
   <div class="production-brief">
-    <div v-if="!isEditing" class="box" @dblclick="openEditing">
+    <div v-if="!isEditing" class="box section" @dblclick="openEditing">
+      <p class="explanation edit-hint mb1">
+        {{ $t('productions.brief.edit_hint') }}
+      </p>
       <div v-if="!currentProduction?.description">
         <p>{{ $t('productions.brief.empty') }}</p>
       </div>
@@ -10,7 +13,7 @@
         v-else
       ></div>
     </div>
-    <div v-else class="box has-text-right">
+    <div v-else class="box section has-text-right">
       <textarea-field
         class="editor"
         ref="textarea"
@@ -52,21 +55,23 @@ import TextareaField from '@/components/widgets/TextareaField.vue'
 
 const store = useStore()
 
+// State
+// --------------------------------------------------------------------------
 const brief = ref('')
 const isEditing = ref(false)
 const isLoading = ref(false)
 const errors = reactive({ editBrief: false })
 const textarea = useTemplateRef('textarea')
 
+// Computed
+// --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserProductionManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
 
-onMounted(() => {
-  brief.value = currentProduction.value?.description
-})
-
+// Functions
+// --------------------------------------------------------------------------
 const openEditing = () => {
   if (!isCurrentUserProductionManager.value) return
   isEditing.value = true
@@ -89,31 +94,55 @@ const editBrief = async () => {
   }
   isLoading.value = false
 }
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  brief.value = currentProduction.value?.description
+})
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .content {
-    color: $white;
-  }
-}
-
 .production-brief {
+  display: flex;
   flex: 1;
+  flex-direction: column;
 }
 
 .box {
   display: flex;
   flex: 1;
   flex-direction: column;
-  height: calc(100% - 20px);
-  max-width: 800px;
   overflow: auto;
-  margin-bottom: 0.5em;
 }
 
 .content {
+  color: var(--text-strong);
   padding-bottom: 1em;
+
+  // The global ul rule only indents by 1em, so the bullets sit on the edge
+  :deep(ul),
+  :deep(ol) {
+    margin: 0 0 1em;
+    padding-left: 1.8em;
+  }
+
+  :deep(ul) {
+    list-style-type: disc;
+  }
+
+  :deep(ol) {
+    list-style-type: decimal;
+  }
+
+  :deep(li) {
+    margin-bottom: 0.3em;
+  }
+
+  :deep(li > ul),
+  :deep(li > ol) {
+    margin: 0.3em 0 0;
+  }
 }
 
 .editor {

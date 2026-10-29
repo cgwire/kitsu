@@ -8,6 +8,7 @@
         @change="onSearchChange"
         @save="saveSearchQuery"
         placeholder="ex: e01 s01"
+        v-if="!isCurrentUserClient"
       />
       <combobox-visible-options
         class="flexrow-item options-filter"
@@ -50,7 +51,7 @@
       />
     </div>
 
-    <div class="query-list mt1">
+    <div class="query-list mt1" v-if="!isCurrentUserClient">
       <search-query-list
         :queries="sequenceSearchQueries"
         type="sequenceStat"
@@ -115,6 +116,7 @@ const isSavingSearch = ref(false)
 // --------------------------------------------------------------------------
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isPaperProduction = computed(() => store.getters.isPaperProduction)
 const isShotsLoading = computed(() => store.getters.isShotsLoading)
 const isShotsLoadingError = computed(() => store.getters.isShotsLoadingError)
@@ -237,7 +239,7 @@ const exportStatisticsToCsv = () => {
 // Watchers
 // --------------------------------------------------------------------------
 watch(currentProduction, () => {
-  searchFieldRef.value.setValue('')
+  searchFieldRef.value?.setValue('')
   countMode.value = 'count'
   if (!isTVShow.value) loadSequences()
 })
