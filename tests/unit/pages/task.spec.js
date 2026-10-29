@@ -233,6 +233,15 @@ describe('Task.vue', () => {
       expect(workingFiles.props('canAccess')).toBe(true)
       expect(workingFiles.props('canUpload')).toBe(true)
     })
+
+    it('hides Working files from an assigned vendor', async () => {
+      const { wrapper } = await mountPage({
+        task: buildTask({ assignees: ['user-1'] }),
+        getterOverrides: { isCurrentUserVendor: () => true }
+      })
+
+      expect(wrapper.findComponent(TaskWorkingFiles).exists()).toBe(false)
+    })
   })
 
   describe('socket subscriptions', () => {

@@ -343,10 +343,11 @@
               <task-working-files
                 :task="task"
                 :can-access="
-                  isAssigned || isCurrentUserManager || isCurrentUserAdmin
+                  !isCurrentUserVendor &&
+                  (isAssigned || isCurrentUserManager || isCurrentUserAdmin)
                 "
                 :can-upload="isAssigned && isCurrentUserArtist"
-                v-if="!isCurrentUserClient && task"
+                v-if="!isCurrentUserClient && !isCurrentUserVendor && task"
               />
               <div
                 class="comments"
@@ -637,6 +638,7 @@ const getTaskComments = computed(() => store.getters.getTaskComments)
 const getTaskPreviews = computed(() => store.getters.getTaskPreviews)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserVendor = computed(() => store.getters.isCurrentUserVendor)
 const isTVShow = computed(() => store.getters.isTVShow)
 const personMap = computed(() => store.getters.personMap)
 const productionMap = computed(() => store.getters.productionMap)
