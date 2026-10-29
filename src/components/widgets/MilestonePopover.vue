@@ -103,26 +103,20 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .milestone-popover {
-  background: $white;
-  border: 1px solid #eee;
+  background: var(--background-alt-2);
+  border: 1px solid var(--border);
   border-radius: 5px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  color: $grey-strong;
+  box-shadow: 0 2px 6px var(--box-shadow);
+  color: var(--text-strong);
   font-size: 0.8em;
   min-width: 200px;
   padding: 6px 0;
   position: fixed;
   z-index: 1000;
-
-  &.dark {
-    background: $dark-grey-lighter;
-    border-color: $dark-grey;
-    color: $white;
-  }
 }
 
 .milestone-popover-date {
-  color: $grey;
+  color: var(--text-alt);
   padding: 0 10px 4px;
 }
 
@@ -150,7 +144,7 @@ onBeforeUnmount(() => {
 }
 
 .milestone-popover-type {
-  color: $grey;
+  color: var(--text-alt);
 }
 
 .milestone-popover-status {
