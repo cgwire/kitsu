@@ -1512,6 +1512,36 @@
       "assign_no_fit": "{count} taak paste niet in het datumbereik. | {count} taken pasten niet in het datumbereik.",
       "batch_schedule": "Taken in bulk plannen",
       "confirm_move_children": "Deze balk verplaatsen wijzigt ook de datums van {count} subitem. Doorgaan? | Deze balk verplaatsen wijzigt ook de datums van {count} subitems. Doorgaan?",
+      "create_task": {
+        "asset_type": "Assettype",
+        "button": "Taak aanmaken",
+        "color": "Kleur",
+        "department": "Afdeling",
+        "description": "Beschrijving",
+        "due_date": "Einddatum (optioneel)",
+        "error": "Er is een fout opgetreden bij het aanmaken van de taken. Probeer het opnieuw.",
+        "kind": "Aanmaken",
+        "kinds": {
+          "asset": "Een nieuw asset",
+          "edit": "Een nieuwe montage",
+          "shot": "Een nieuw shot",
+          "untracked": "Een niet-gevolgd item (alleen planning)"
+        },
+        "link": "Gekoppeld aan",
+        "link_episode": "Aflevering {name}",
+        "link_none": "De hele productie",
+        "name": "Naam",
+        "new_sequence": "Nieuwe sequentie…",
+        "new_sequence_name": "Naam van de sequentie",
+        "no_task_types": "De productie heeft geen taaktype voor dit soort item. Voeg er een toe in de productie-instellingen.",
+        "sequence": "Sequentie",
+        "shot": "Shot",
+        "shot_none": "De hele sequentie",
+        "start_date": "Startdatum",
+        "task_types": "Aan te maken taaktypes",
+        "title": "Taken aanmaken in de planning",
+        "untracked_hint": "Een niet-gevolgd item verschijnt alleen in de planning, niet in de lijsten met assets, shots of montages. Koppel het later aan een sequentie of shot, zodra die bestaan."
+      },
       "create_version": "Planningsversie maken",
       "daily_quota": "Taken per persoon per dag",
       "daily_quota_estimated": "Elke taak heeft een schatting: de datums volgen die, {quota} per persoon per dag. Een ingevoerde waarde geldt voor elke taak, schattingen inbegrepen.",
@@ -1577,6 +1607,9 @@
       "title": "Planning",
       "title_main": "Algemene planning",
       "today": "Vandaag",
+      "untracked": {
+        "title": "Niet gevolgd"
+      },
       "version": "Versie",
       "versions": {
         "reference": "Referentieprognose",

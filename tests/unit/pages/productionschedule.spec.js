@@ -37,6 +37,7 @@ import assetTypeStore from '@/store/modules/assettypes'
 import taskTypeStore from '@/store/modules/tasktypes'
 
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import CreateScheduleTaskModal from '@/components/modals/CreateScheduleTaskModal.vue'
 import ProductionSchedule from '@/components/pages/ProductionSchedule.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
@@ -3046,6 +3047,386 @@ describe('ProductionSchedule page', () => {
       await waitForLoad()
 
       expect(storeActions.loadShots).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('create task', () => {
+    const soundDesign = {
+      id: 'tt-sound',
+      name: 'Sound Design',
+      for_entity: 'Untracked',
+      color: '#444444',
+      priority: 1
+    }
+
+    // The store holds the tasks the creation actions add.
+    const mountWithCreation = async (options = {}) => {
+      const taskMap = new Map()
+      const addTasks = (entityId, taskTypeIds) =>
+        taskTypeIds.forEach(taskTypeId =>
+          taskMap.set(`${entityId}-${taskTypeId}`, {
+            id: `${entityId}-${taskTypeId}`,
+            entity_id: entityId,
+            task_type_id: taskTypeId
+          })
+        )
+      const mounted = await mountPage({
+        ...options,
+        actions: {
+          // like the shot store, the shot lists the ids of its tasks
+          newShot: vi.fn((context, data) => {
+            addTasks('shot-new', data.taskTypeIds)
+            return {
+              id: 'shot-new',
+              tasks: data.taskTypeIds.map(id => `shot-new-${id}`)
+            }
+          }),
+          // the server creates the task, with the task type of the
+          // department
+          newUntracked: vi.fn(() => ({
+            id: 'untracked-new',
+            tasks: [
+              {
+                id: 'untracked-new-tt-sound',
+                entity_id: 'untracked-new',
+                task_type_id: 'tt-sound'
+              }
+            ]
+          })),
+          loadProduction: vi.fn(),
+          loadTaskTypes: vi.fn(),
+          ...options.actions
+        },
+        getters: { taskMap: () => taskMap, ...options.getters }
+      })
+      return { ...mounted, taskMap }
+    }
+
+    const createButton = wrapper =>
+      findButton(wrapper, 'schedule.create_task.button')
+
+    const openModal = async wrapper => {
+      createButton(wrapper).vm.$emit('click')
+      await flushPromises()
+      return wrapper.findComponent(CreateScheduleTaskModal)
+    }
+
+    const shotForm = {
+      kind: 'Shot',
+      name: 'SH030',
+      description: '',
+      sequenceId: 'seq-1',
+      parentId: null,
+      taskTypeIds: ['tt-layout', 'tt-animation'],
+      startDate: '2026-05-04',
+      dueDate: '2026-05-04'
+    }
+
+    it('creates the new sequence of a shot first, without its tasks', async () => {
+      const { storeActions, wrapper } = await mountWithCreation({
+        actions: { newSequence: vi.fn(() => ({ id: 'seq-new' })) }
+      })
+
+      const modal = await openModal(wrapper)
+      modal.vm.$emit('confirm', {
+        ...shotForm,
+        sequenceId: null,
+        newSequenceName: 'SQ02'
+      })
+      await waitForLoad()
+
+      expect(payloadsOf(storeActions.newSequence)).toEqual([
+        {
+          name: 'SQ02',
+          episode_id: null,
+          project_id: 'production-1',
+          taskTypeIds: []
+        }
+      ])
+      expect(payloadsOf(storeActions.newShot)).toEqual([
+        expect.objectContaining({ name: 'SH030', sequence_id: 'seq-new' })
+      ])
+    })
+
+    it('creates a shot with the chosen tasks and dates them', async () => {
+      const { storeActions, wrapper } = await mountWithCreation()
+
+      const modal = await openModal(wrapper)
+      expect(modal.exists()).toBe(true)
+      modal.vm.$emit('confirm', shotForm)
+      await waitForLoad()
+
+      expect(payloadsOf(storeActions.newShot)).toEqual([
+        expect.objectContaining({
+          name: 'SH030',
+          sequence_id: 'seq-1',
+          project_id: 'production-1',
+          taskTypeIds: ['tt-layout', 'tt-animation']
+        })
+      ])
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'shot-new-tt-layout',
+          data: { start_date: '2026-05-04', due_date: '2026-05-04' }
+        },
+        {
+          taskId: 'shot-new-tt-animation',
+          data: { start_date: '2026-05-04', due_date: '2026-05-04' }
+        }
+      ])
+      // the rows are rebuilt, the ones of the new tasks opened
+      expect(storeActions.loadScheduleItems).toHaveBeenCalledTimes(2)
+      expect(
+        rowsOf(wrapper)
+          .filter(row => row.expanded)
+          .map(row => row.task_type_id)
+      ).toEqual(['tt-layout', 'tt-animation'])
+      expect(wrapper.findComponent(CreateScheduleTaskModal).exists()).toBe(
+        false
+      )
+    })
+
+    it('creates an untracked item with the task of its department', async () => {
+      const { storeActions, wrapper } = await mountWithCreation()
+
+      const modal = await openModal(wrapper)
+      modal.vm.$emit('confirm', {
+        ...shotForm,
+        kind: 'Untracked',
+        name: 'Foley',
+        parentId: 'seq-1',
+        departmentId: 'dep-sound',
+        color: '#F06292',
+        taskTypeIds: []
+      })
+      await waitForLoad()
+
+      expect(payloadsOf(storeActions.newUntracked)).toEqual([
+        expect.objectContaining({
+          name: 'Foley',
+          parent_id: 'seq-1',
+          create_task: true,
+          department_id: 'dep-sound',
+          color: '#F06292'
+        })
+      ])
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'untracked-new-tt-sound',
+          data: { start_date: '2026-05-04', due_date: '2026-05-04' }
+        }
+      ])
+      // the task type may be new to the page and to the production
+      expect(storeActions.loadTaskTypes).toHaveBeenCalled()
+      expect(payloadsOf(storeActions.loadProduction)).toEqual(['production-1'])
+    })
+
+    it('keeps the modal open on an error', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { wrapper } = await mountWithCreation({
+        actions: {
+          newShot: vi.fn(() => Promise.reject(new Error('Shot exists')))
+        }
+      })
+
+      const modal = await openModal(wrapper)
+      modal.vm.$emit('confirm', shotForm)
+      await waitForLoad()
+
+      expect(console.error).toHaveBeenCalled()
+      expect(
+        wrapper.findComponent(CreateScheduleTaskModal).props('isError')
+      ).toBe(true)
+    })
+
+    describe('task type bar', () => {
+      const lamp = {
+        id: 'asset-new',
+        name: 'Lamp',
+        asset_type_id: 'asset-type-props'
+      }
+
+      // the store dates the task, the drill-down then loads it dated
+      const createAsset = async (startDate, dueDate) => {
+        assetStore.cache.assetMap.set(lamp.id, lamp)
+        const mounted = await mountWithCreation({
+          actions: {
+            newAsset: vi.fn((context, data) => {
+              mounted.taskMap.set('task-lamp', {
+                id: 'task-lamp',
+                entity_id: lamp.id,
+                task_type_id: data.taskTypeIds[0]
+              })
+              return { id: lamp.id, tasks: ['task-lamp'] }
+            }),
+            loadTasks: vi.fn(() => [
+              {
+                id: 'task-lamp',
+                entity_id: lamp.id,
+                task_type_id: 'tt-modeling',
+                assignees: [],
+                start_date: startDate,
+                due_date: dueDate
+              }
+            ])
+          },
+          getters: {
+            productionAssetTypes: () => [
+              { id: 'asset-type-props', name: 'Props', task_types: [] }
+            ]
+          }
+        })
+        const modal = await openModal(mounted.wrapper)
+        modal.vm.$emit('confirm', {
+          ...shotForm,
+          kind: 'Asset',
+          name: 'Lamp',
+          assetTypeId: 'asset-type-props',
+          taskTypeIds: ['tt-modeling'],
+          startDate,
+          dueDate
+        })
+        await waitForLoad()
+        return mounted
+      }
+
+      afterEach(() => assetStore.cache.assetMap.clear())
+
+      // like a task drag: the bar grows to the new task, never shrinks
+      it('widens the bar of a task type to its new task', async () => {
+        const { storeActions } = await createAsset('2026-05-04', '2026-05-08')
+
+        expect(
+          payloadsOf(storeActions.saveScheduleItem)
+            .filter(item => item.id === 'bar-modeling')
+            .map(item => [item.start_date, item.end_date])
+        ).toEqual([['2026-02-01', '2026-05-08']])
+      })
+
+      it('leaves the bar of a task type covering the new task', async () => {
+        const { storeActions } = await createAsset('2026-02-10', '2026-02-12')
+
+        expect(storeActions.saveScheduleItem).not.toHaveBeenCalled()
+      })
+    })
+
+    // the shot and its new sequence exist once the dating failed
+    it('creates nothing twice when confirming again after an error', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const updateTask = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockResolvedValue({})
+      const { storeActions, wrapper } = await mountWithCreation({
+        actions: {
+          newSequence: vi.fn(() => ({ id: 'seq-new', name: 'SQ02' })),
+          updateTask
+        }
+      })
+      const form = { ...shotForm, sequenceId: null, newSequenceName: 'SQ02' }
+
+      const modal = await openModal(wrapper)
+      modal.vm.$emit('confirm', form)
+      await waitForLoad()
+      expect(modal.props('isError')).toBe(true)
+
+      modal.vm.$emit('confirm', form)
+      await waitForLoad()
+
+      expect(storeActions.newSequence).toHaveBeenCalledTimes(1)
+      expect(storeActions.newShot).toHaveBeenCalledTimes(1)
+      expect(wrapper.findComponent(CreateScheduleTaskModal).exists()).toBe(
+        false
+      )
+
+      // another shot, in the same new sequence
+      const nextModal = await openModal(wrapper)
+      nextModal.vm.$emit('confirm', { ...form, name: 'SH040' })
+      await waitForLoad()
+      expect(storeActions.newShot).toHaveBeenCalledTimes(2)
+    })
+
+    it('is disabled for a user who cannot edit the schedule', async () => {
+      const { wrapper } = await mountWithCreation({
+        getters: { isCurrentUserProductionManager: () => false }
+      })
+
+      expect(createButton(wrapper).props('disabled')).toBe(true)
+    })
+
+    it('is disabled on a schedule version', async () => {
+      const { wrapper } = await mountWithCreation({
+        query: { mode: 'prev', version: unlockedVersion.id },
+        versions: [unlockedVersion]
+      })
+
+      expect(createButton(wrapper).props('disabled')).toBe(true)
+    })
+
+    it('shows the untracked items with their link', async () => {
+      taskTypeStore.cache.taskTypeMap.set(soundDesign.id, soundDesign)
+      const untrackedMap = new Map([
+        [
+          'untracked-1',
+          {
+            id: 'untracked-1',
+            name: 'Foley',
+            parent_id: 'seq-1',
+            link_name: 'SQ01'
+          }
+        ]
+      ])
+      const { storeActions, wrapper } = await mountWithCreation({
+        actions: {
+          loadScheduleItems: vi.fn(() => [
+            {
+              id: 'bar-sound',
+              task_type_id: 'tt-sound',
+              object_id: null,
+              start_date: '2026-02-01',
+              end_date: '2026-03-01'
+            }
+          ]),
+          loadUntracked: vi.fn(),
+          loadUntrackedScheduleItems: vi.fn(() => [
+            {
+              id: 'bar-foley',
+              task_type_id: 'tt-sound',
+              object_id: 'untracked-1',
+              name: 'Foley',
+              start_date: '2026-02-01',
+              end_date: '2026-02-20'
+            }
+          ]),
+          loadTasks: vi.fn(() => [
+            {
+              id: 'task-foley',
+              entity_id: 'untracked-1',
+              task_type_id: 'tt-sound',
+              start_date: '2026-02-02',
+              due_date: '2026-02-10',
+              assignees: []
+            }
+          ])
+        },
+        getters: {
+          untrackedItems: () => [...untrackedMap.values()],
+          untrackedMap: () => untrackedMap
+        }
+      })
+      const [row] = rowsOf(wrapper)
+      expect(row.name).toBe('Sound Design')
+      expect(row.route).toBeNull()
+
+      findSchedule(wrapper).vm.$emit('root-element-expanded', row)
+      await waitForLoad()
+
+      expect(storeActions.loadUntracked).toHaveBeenCalled()
+      const [child] = rowsOf(wrapper)[0].children
+      expect(child.name).toBe('Foley (SQ01)')
+      expect(child.children.get('unassigned').map(task => task.id)).toEqual([
+        'task-foley'
+      ])
     })
   })
 })

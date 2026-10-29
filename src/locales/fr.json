@@ -1512,6 +1512,36 @@
       "assign_no_fit": "{count} tâche ne tient pas dans la plage de dates. | {count} tâches ne tiennent pas dans la plage de dates.",
       "batch_schedule": "Planifier des tâches en lot",
       "confirm_move_children": "Déplacer cette barre change aussi les dates de {count} sous-élément. Continuer ? | Déplacer cette barre change aussi les dates de {count} sous-éléments. Continuer ?",
+      "create_task": {
+        "asset_type": "Type d'asset",
+        "button": "Créer une tâche",
+        "color": "Couleur",
+        "department": "Département",
+        "description": "Description",
+        "due_date": "Date d'échéance (facultative)",
+        "error": "Une erreur est survenue lors de la création des tâches. Veuillez réessayer.",
+        "kind": "Créer",
+        "kinds": {
+          "asset": "Un nouvel asset",
+          "edit": "Un nouveau montage",
+          "shot": "Un nouveau plan",
+          "untracked": "Un élément non suivi (planning seulement)"
+        },
+        "link": "Lié à",
+        "link_episode": "Épisode {name}",
+        "link_none": "Toute la production",
+        "name": "Nom",
+        "new_sequence": "Nouvelle séquence…",
+        "new_sequence_name": "Nom de la séquence",
+        "no_task_types": "La production n'a aucun type de tâche pour ce genre d'élément. Ajoutez-en un dans les paramètres de la production.",
+        "sequence": "Séquence",
+        "shot": "Plan",
+        "shot_none": "Toute la séquence",
+        "start_date": "Date de début",
+        "task_types": "Types de tâche à créer",
+        "title": "Créer des tâches dans le planning",
+        "untracked_hint": "Un élément non suivi n'apparaît que dans le planning, pas dans les listes d'assets, de plans ou de montages. Liez-le plus tard à une séquence ou à un plan, une fois qu'ils existent."
+      },
       "create_version": "Créer une version du planning",
       "daily_quota": "Tâches par personne et par jour",
       "daily_quota_estimated": "Toutes les tâches ont une estimation : les dates la suivent, {quota} par personne et par jour. Une valeur saisie s'applique à toutes les tâches, estimations comprises.",
@@ -1577,6 +1607,9 @@
       "title": "Planning",
       "title_main": "Planning principal",
       "today": "Aujourd'hui",
+      "untracked": {
+        "title": "Non suivi"
+      },
       "version": "Version",
       "versions": {
         "reference": "Prévisions de référence",
