@@ -115,6 +115,42 @@ describe('TaskWorkingFiles', () => {
     )
   })
 
+  it('blocks another revision after an ambiguous create until the refreshed list is reviewed', async () => {
+    const uncertainRevision = {
+      ...existingFile,
+      id: 'working-2',
+      revision: 3,
+      path: '/working/main_v003.nk'
+    }
+    filesApi.getTaskWorkingFiles
+      .mockResolvedValueOnce([existingFile])
+      .mockResolvedValueOnce([uncertainRevision, existingFile])
+    filesApi.createTaskWorkingFile.mockRejectedValue({ status: 502 })
+    await mountComponent()
+
+    const input = wrapper.get('[data-testid="working-file-input"]')
+    const file = new File(['synthetic'], 'shot.nk', {
+      type: 'application/octet-stream'
+    })
+    Object.defineProperty(input.element, 'files', {
+      value: [file],
+      configurable: true
+    })
+    await input.trigger('change')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('tasks.working_files.ambiguous_create')
+    expect(wrapper.text()).toContain('main_v003.nk')
+    expect(wrapper.get('[data-testid="working-file-submit"]').element.disabled).toBe(true)
+
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+
+    expect(filesApi.createTaskWorkingFile).toHaveBeenCalledTimes(1)
+    expect(filesApi.uploadWorkingFile).not.toHaveBeenCalled()
+  })
+
   it('keeps the same revision id and file when upload fails', async () => {
     filesApi.createTaskWorkingFile.mockResolvedValue({ id: 'working-3' })
     const request = { on: vi.fn() }
