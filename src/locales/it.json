@@ -1501,6 +1501,36 @@
       "assign_no_fit": "{count} task non è rientrato nell'intervallo di date. | {count} task non sono rientrati nell'intervallo di date.",
       "batch_schedule": "Pianifica task in blocco",
       "confirm_move_children": "Spostare questa barra cambia anche le date di {count} sottoelemento. Continuare? | Spostare questa barra cambia anche le date di {count} sottoelementi. Continuare?",
+      "create_task": {
+        "asset_type": "Tipo di asset",
+        "button": "Crea attività",
+        "color": "Colore",
+        "department": "Reparto",
+        "description": "Descrizione",
+        "due_date": "Scadenza (facoltativa)",
+        "error": "Si è verificato un errore durante la creazione delle attività. Riprova.",
+        "kind": "Crea",
+        "kinds": {
+          "asset": "Un nuovo asset",
+          "edit": "Un nuovo montaggio",
+          "shot": "Una nuova inquadratura",
+          "untracked": "Un elemento non tracciato (solo pianificazione)"
+        },
+        "link": "Collegato a",
+        "link_episode": "Episodio {name}",
+        "link_none": "L'intera produzione",
+        "name": "Nome",
+        "new_sequence": "Nuova sequenza…",
+        "new_sequence_name": "Nome della sequenza",
+        "no_task_types": "La produzione non ha alcun tipo di attività per questo genere di elemento. Aggiungine uno nelle impostazioni della produzione.",
+        "sequence": "Sequenza",
+        "shot": "Inquadratura",
+        "shot_none": "L'intera sequenza",
+        "start_date": "Data di inizio",
+        "task_types": "Tipi di attività da creare",
+        "title": "Crea attività nella pianificazione",
+        "untracked_hint": "Un elemento non tracciato appare solo nella pianificazione, non negli elenchi di asset, inquadrature o montaggi. Collegalo in seguito a una sequenza o a un'inquadratura, quando esistono."
+      },
       "create_version": "Crea una versione della pianificazione",
       "daily_quota": "Task per persona al giorno",
       "daily_quota_estimated": "Tutti i task hanno una stima: le date la seguono, {quota} per persona al giorno. Un valore inserito si applica a tutti i task, stime comprese.",
@@ -1566,6 +1596,9 @@
       "title": "Pianificazione",
       "title_main": "Pianificazione principale",
       "today": "Oggi",
+      "untracked": {
+        "title": "Non tracciato"
+      },
       "version": "Versione",
       "versions": {
         "reference": "Previsioni di riferimento",

@@ -2004,6 +2004,36 @@ export default {
     batch_schedule: 'Batch schedule tasks',
     confirm_move_children:
       'Moving this bar also changes the dates of {count} sub-item. Continue? | Moving this bar also changes the dates of {count} sub-items. Continue?',
+    create_task: {
+      asset_type: 'Asset type',
+      button: 'Create task',
+      color: 'Color',
+      department: 'Department',
+      description: 'Description',
+      due_date: 'Due date (optional)',
+      error: 'An error occurred while creating the tasks. Please try again.',
+      kind: 'Create',
+      kinds: {
+        asset: 'A new asset',
+        edit: 'A new edit',
+        shot: 'A new shot',
+        untracked: 'An untracked item (schedule only)'
+      },
+      link: 'Linked to',
+      link_episode: 'Episode {name}',
+      link_none: 'The whole production',
+      name: 'Name',
+      new_sequence: 'New sequence…',
+      new_sequence_name: 'Sequence name',
+      no_task_types: 'The production has no task type for this kind of item. Add one in the production settings.',
+      sequence: 'Sequence',
+      shot: 'Shot',
+      shot_none: 'The whole sequence',
+      start_date: 'Start date',
+      task_types: 'Task types to create',
+      title: 'Create tasks in the schedule',
+      untracked_hint: 'An untracked item only shows in the schedule, not in the asset, shot or edit lists. Link it to a sequence or a shot later, once they exist.'
+    },
     create_version: 'Create schedule version',
     daily_quota: 'Tasks per assignee per day',
     daily_quota_estimated:
@@ -2073,6 +2103,9 @@ export default {
     title: 'Schedule',
     title_main: 'Main Schedule',
     today: 'Today',
+    untracked: {
+      title: 'Untracked'
+    },
     version: 'Version',
     versions: {
       reference: 'Reference forecast',

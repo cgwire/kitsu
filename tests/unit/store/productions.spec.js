@@ -177,6 +177,41 @@ describe('Productions store', () => {
         ])
     })
 
+    // they only live in the schedule
+    test('productionTaskTypes leaves the untracked task types out', () => {
+      const productions = rootState.productions
+      const sounddesign = {
+        id: 'task-type-untracked',
+        name: 'Sounddesign',
+        for_entity: 'Untracked'
+      }
+      taskTypeStore.cache.taskTypeMap.set(sounddesign.id, sounddesign)
+      const state = {
+        ...rootState,
+        taskTypes: {
+          ...rootState.taskTypes,
+          taskTypes: [...rootState.taskTypes.taskTypes, sounddesign]
+        }
+      }
+      expect(store.getters.productionTaskTypes(productions, null, state))
+        .toEqual(rootState.taskTypes.taskTypes)
+      productions.currentProduction.task_types = [
+        'task-type-1',
+        sounddesign.id
+      ]
+      expect(store.getters.productionTaskTypes(productions, null, state))
+        .toEqual([{ id: 'task-type-1', name: 'Task type 1' }])
+      productions.productionMap.set('production-1', {
+        id: 'production-1',
+        task_types: ['task-type-1', sounddesign.id]
+      })
+      expect(store.getters.getProductionTaskTypes(
+        productions, null, state
+      )('production-1'))
+        .toEqual([{ id: 'task-type-1', name: 'Task type 1' }])
+      taskTypeStore.cache.taskTypeMap.delete(sounddesign.id)
+    })
+
     test('currentProduction', () => {
       let state = {
         openProductions: []

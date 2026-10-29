@@ -465,9 +465,11 @@ const actions = {
     ) {
       return Promise.reject(new Error('Edit already exists'))
     }
+    const chosenTaskTypeIds = edit.taskTypeIds
     return editsApi.newEdit(edit).then(edit => {
       commit(NEW_EDIT_END, edit)
-      const taskTypeIds = rootGetters.productionEditTaskTypeIds
+      const taskTypeIds =
+        chosenTaskTypeIds || rootGetters.productionEditTaskTypeIds
       // An empty list means "all valid task types" server-side: skip the call.
       if (taskTypeIds.length === 0) return edit
       return dispatch('createEntityTasks', { entityId: edit.id, taskTypeIds })

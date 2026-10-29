@@ -576,10 +576,11 @@ const actions = {
       .catch(err => console.error(err))
   },
 
-  newShot({ commit, dispatch, rootGetters }, shot) {
-    return shotsApi.newShot(shot).then(shot => {
+  newShot({ commit, dispatch, rootGetters }, data) {
+    return shotsApi.newShot(data).then(shot => {
       commit(NEW_SHOT_END, { shot })
-      const taskTypeIds = rootGetters.productionShotTaskTypeIds
+      const taskTypeIds =
+        data.taskTypeIds || rootGetters.productionShotTaskTypeIds
       // An empty list means "all valid task types" server-side: skip the call.
       if (taskTypeIds.length === 0) return shot
       return dispatch('createEntityTasks', { entityId: shot.id, taskTypeIds })

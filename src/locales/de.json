@@ -1501,6 +1501,36 @@
       "assign_no_fit": "{count} Aufgabe passte nicht in den Zeitraum. | {count} Aufgaben passten nicht in den Zeitraum.",
       "batch_schedule": "Aufgaben gesammelt planen",
       "confirm_move_children": "Das Verschieben dieses Balkens ändert auch die Daten von {count} Unterelement. Fortfahren? | Das Verschieben dieses Balkens ändert auch die Daten von {count} Unterelementen. Fortfahren?",
+      "create_task": {
+        "asset_type": "Asset-Typ",
+        "button": "Aufgabe erstellen",
+        "color": "Farbe",
+        "department": "Abteilung",
+        "description": "Beschreibung",
+        "due_date": "Fälligkeitsdatum (optional)",
+        "error": "Beim Erstellen der Aufgaben ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+        "kind": "Erstellen",
+        "kinds": {
+          "asset": "Ein neues Asset",
+          "edit": "Einen neuen Schnitt",
+          "shot": "Einen neuen Shot",
+          "untracked": "Einen nicht verfolgten Eintrag (nur Zeitplan)"
+        },
+        "link": "Verknüpft mit",
+        "link_episode": "Episode {name}",
+        "link_none": "Die gesamte Produktion",
+        "name": "Name",
+        "new_sequence": "Neue Sequenz…",
+        "new_sequence_name": "Name der Sequenz",
+        "no_task_types": "Die Produktion hat keinen Aufgabentyp für diese Art von Eintrag. Füge einen in den Produktionseinstellungen hinzu.",
+        "sequence": "Sequenz",
+        "shot": "Shot",
+        "shot_none": "Die gesamte Sequenz",
+        "start_date": "Startdatum",
+        "task_types": "Zu erstellende Aufgabentypen",
+        "title": "Aufgaben im Zeitplan erstellen",
+        "untracked_hint": "Ein nicht verfolgter Eintrag erscheint nur im Zeitplan, nicht in den Listen der Assets, Shots oder Schnitte. Verknüpfe ihn später mit einer Sequenz oder einem Shot, sobald sie existieren."
+      },
       "create_version": "Version des Zeitplans erstellen",
       "daily_quota": "Aufgaben pro Person und Tag",
       "daily_quota_estimated": "Jede Aufgabe hat eine Schätzung: die Termine folgen ihr, {quota} pro Person und Tag. Ein eingegebener Wert gilt für alle Aufgaben, Schätzungen eingeschlossen.",
@@ -1566,6 +1596,9 @@
       "title": "Zeitplan",
       "title_main": "Hauptzeitplan",
       "today": "Heute",
+      "untracked": {
+        "title": "Nicht verfolgt"
+      },
       "version": "Version",
       "versions": {
         "reference": "Referenz-Prognose",

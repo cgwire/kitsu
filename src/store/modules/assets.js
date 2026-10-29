@@ -616,8 +616,12 @@ const actions = {
     return assetsApi.newAsset(data).then(asset => {
       const assetTypeMap = rootGetters.assetTypeMap
       const assetType = assetTypeMap.get(asset.entity_type_id)
-      const workflow = assetType ? assetType.task_types || [] : []
-      let taskTypeIds = rootGetters.productionAssetTaskTypeIds
+      // The caller may pick the task types itself (schedule creation);
+      // otherwise every production task type of the workflow is created.
+      const workflow =
+        assetType && !data.taskTypeIds ? assetType.task_types || [] : []
+      let taskTypeIds =
+        data.taskTypeIds || rootGetters.productionAssetTaskTypeIds
       const sortInfo =
         state.assetSorting && state.assetSorting.length > 0
           ? state.assetSorting[0]

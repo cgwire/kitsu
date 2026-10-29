@@ -1501,6 +1501,36 @@
       "assign_no_fit": "{count} tarefa não coube no intervalo de datas. | {count} tarefas não couberam no intervalo de datas.",
       "batch_schedule": "Planejar tarefas em lote",
       "confirm_move_children": "Mover esta barra também altera as datas de {count} subitem. Continuar? | Mover esta barra também altera as datas de {count} subitens. Continuar?",
+      "create_task": {
+        "asset_type": "Tipo de asset",
+        "button": "Criar tarefa",
+        "color": "Cor",
+        "department": "Departamento",
+        "description": "Descrição",
+        "due_date": "Data de entrega (opcional)",
+        "error": "Ocorreu um erro ao criar as tarefas. Tente novamente.",
+        "kind": "Criar",
+        "kinds": {
+          "asset": "Um novo asset",
+          "edit": "Uma nova edição",
+          "shot": "Um novo plano",
+          "untracked": "Um item não acompanhado (apenas cronograma)"
+        },
+        "link": "Vinculado a",
+        "link_episode": "Episódio {name}",
+        "link_none": "Toda a produção",
+        "name": "Nome",
+        "new_sequence": "Nova sequência…",
+        "new_sequence_name": "Nome da sequência",
+        "no_task_types": "A produção não tem nenhum tipo de tarefa para este tipo de item. Adicione um nas configurações da produção.",
+        "sequence": "Sequência",
+        "shot": "Plano",
+        "shot_none": "Toda a sequência",
+        "start_date": "Data de início",
+        "task_types": "Tipos de tarefa a criar",
+        "title": "Criar tarefas no cronograma",
+        "untracked_hint": "Um item não acompanhado aparece apenas no cronograma, não nas listas de assets, planos ou edições. Vincule-o mais tarde a uma sequência ou a um plano, quando existirem."
+      },
       "create_version": "Criar versão do cronograma",
       "daily_quota": "Tarefas por pessoa por dia",
       "daily_quota_estimated": "Todas as tarefas têm uma estimativa: as datas seguem-na, {quota} por pessoa por dia. Um valor escrito aplica-se a todas as tarefas, estimativas incluídas.",
@@ -1566,6 +1596,9 @@
       "title": "Cronograma",
       "title_main": "Cronograma Geral",
       "today": "Hoje",
+      "untracked": {
+        "title": "Não acompanhado"
+      },
       "version": "Versão",
       "versions": {
         "reference": "Previsão de referência",

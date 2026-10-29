@@ -1924,6 +1924,36 @@
       "assign_no_fit": "{count} zadanie nie zmieściło się w zakresie dat. | Zadania, które nie zmieściły się w zakresie dat: {count}.",
       "batch_schedule": "Zaplanuj zadania zbiorczo",
       "confirm_move_children": "Przesunięcie tego paska zmieni także daty {count} podelementu. Kontynuować? | Przesunięcie tego paska zmieni także daty podelementów ({count}). Kontynuować?",
+      "create_task": {
+        "asset_type": "Typ assetu",
+        "button": "Utwórz zadanie",
+        "color": "Kolor",
+        "department": "Dział",
+        "description": "Opis",
+        "due_date": "Termin (opcjonalnie)",
+        "error": "Wystąpił błąd podczas tworzenia zadań. Spróbuj ponownie.",
+        "kind": "Utwórz",
+        "kinds": {
+          "asset": "Nowy asset",
+          "edit": "Nowy montaż",
+          "shot": "Nowe ujęcie",
+          "untracked": "Element nieśledzony (tylko harmonogram)"
+        },
+        "link": "Powiązane z",
+        "link_episode": "Odcinek {name}",
+        "link_none": "Cała produkcja",
+        "name": "Nazwa",
+        "new_sequence": "Nowa sekwencja…",
+        "new_sequence_name": "Nazwa sekwencji",
+        "no_task_types": "Produkcja nie ma typu zadania dla tego rodzaju elementu. Dodaj go w ustawieniach produkcji.",
+        "sequence": "Sekwencja",
+        "shot": "Ujęcie",
+        "shot_none": "Cała sekwencja",
+        "start_date": "Data rozpoczęcia",
+        "task_types": "Typy zadań do utworzenia",
+        "title": "Utwórz zadania w harmonogramie",
+        "untracked_hint": "Element nieśledzony pojawia się tylko w harmonogramie, a nie na listach assetów, ujęć czy montaży. Powiąż go później z sekwencją lub ujęciem, gdy już powstaną."
+      },
       "create_version": "Utwórz wersję harmonogramu",
       "daily_quota": "Zadania na osobę dziennie",
       "daily_quota_estimated": "Każde zadanie ma estymację: daty z niej wynikają, {quota} na osobę dziennie. Wpisana wartość dotyczy wszystkich zadań, także oszacowanych.",
@@ -1989,6 +2019,9 @@
       "title": "Harmonogram",
       "title_main": "Harmonogram główny",
       "today": "Dziś",
+      "untracked": {
+        "title": "Nieśledzone"
+      },
       "version": "Wersja",
       "versions": {
         "reference": "Prognoza referencyjna",

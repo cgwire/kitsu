@@ -99,6 +99,15 @@ export default {
     )
   },
 
+  getUntrackedScheduleItems(production, taskType, episodeId = null) {
+    return this.getEntityScheduleItems(
+      production,
+      taskType,
+      'untracked',
+      episodeId
+    )
+  },
+
   getEntityScheduleItems(production, taskType, entity, episodeId = null) {
     let path = `/api/data/projects/${production.id}/schedule-items/${taskType.id}/${entity}`
     if (episodeId) path += `?episode_id=${episodeId}`
