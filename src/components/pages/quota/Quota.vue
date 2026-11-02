@@ -327,7 +327,10 @@ const calcAverageColumnX = () => {
 }
 
 const loadData = async () => {
-  if (!props.taskTypeId && !props.personId) return
+  if (!props.taskTypeId && !props.personId) {
+    isLoading.value = false
+    return
+  }
   isLoading.value = true
   try {
     quotaMap.value = await store.dispatch('computeQuota', {

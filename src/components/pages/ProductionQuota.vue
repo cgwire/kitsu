@@ -398,7 +398,7 @@ const initParams = () => {
   }
   if (!params.value.taskTypeId && !params.value.person) {
     params.value.taskTypeId =
-      savedParams.taskTypeId || productionShotTaskTypes.value[0].id
+      savedParams.taskTypeId || productionShotTaskTypes.value[0]?.id
   }
   paramsProductionId = currentProduction.value.id
 }

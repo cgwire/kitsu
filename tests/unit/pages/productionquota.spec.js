@@ -61,6 +61,7 @@ let wrapper
 const mountPage = async (
   query = {},
   {
+    getters = {},
     quotas = {},
     stubs = {},
     path = '/productions/production-1/quota/day/2026/9',
@@ -78,7 +79,8 @@ const mountPage = async (
       productionShotTaskTypes: () => shotTaskTypes,
       shotMap: () => new Map([['shot-a'], ['shot-b']]),
       taskTypeMap: () => new Map(),
-      user: () => ({ id: 'user-1' })
+      user: () => ({ id: 'user-1' }),
+      ...getters
     }
   })
   store.dispatch = vi.fn((action, payload) => {
@@ -105,6 +107,7 @@ describe('ProductionQuota', () => {
     wrapper?.unmount()
     wrapper = null
     vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   it('lets the user pick a task type on a first visit', async () => {
@@ -115,6 +118,27 @@ describe('ProductionQuota', () => {
     expect(combobox.props('modelValue')).toBe('shot-1')
     expect(combobox.props('disabled')).toBe(false)
     expect(wrapper.findComponent(PeopleField).exists()).toBe(false)
+  })
+
+  // The list loads the shots first when it has fewer than two, then has
+  // no task type to compute the quotas of.
+  it('shows no quota for a production without shot task types', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const { wrapper } = await mountPage(
+      {},
+      {
+        getters: {
+          productionShotTaskTypes: () => [],
+          shotMap: () => new Map()
+        },
+        stubs: { Quota: false }
+      }
+    )
+    vi.advanceTimersByTime(100)
+    await flushPromises()
+
+    expect(wrapper.findComponent(ComboboxTaskType).props('modelValue')).toBe('')
+    expect(wrapper.find('.empty-quota').exists()).toBe(true)
   })
 
   // The page reads the quotas computed by the list through its template ref.
