@@ -150,6 +150,27 @@ describe('cells/MetadataInput', () => {
       expect(onRowClick).not.toHaveBeenCalled()
     })
 
+    // A task list row selects itself on Enter and cancels the key: the link
+    // keeps it, so the browser opens the url.
+    test.each([
+      ['the open button', {}],
+      ['the link of an unselected task row', { selected: false }]
+    ])('keeps Enter on %s away from the row', (_, options) => {
+      const wrapper = mountCell(options)
+      const onRowKeydown = vi.fn()
+      wrapper.element.parentElement.addEventListener('keydown', onRowKeydown)
+      const event = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        bubbles: true,
+        cancelable: true
+      })
+
+      wrapper.find('a').element.dispatchEvent(event)
+
+      expect(onRowKeydown).not.toHaveBeenCalled()
+      expect(event.defaultPrevented).toBe(false)
+    })
+
     test('has no link without a value', () => {
       expect(mountCell({ value: '' }).find('a').exists()).toBe(false)
       expect(

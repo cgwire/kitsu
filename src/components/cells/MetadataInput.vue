@@ -16,6 +16,7 @@
       target="_blank"
       rel="noopener noreferrer"
       @click.stop
+      @keydown.enter.stop
       v-else-if="selected === false && linkUrl"
     >
       {{ displayValue }}
@@ -88,6 +89,7 @@
         target="_blank"
         rel="noopener noreferrer"
         @click.stop
+        @keydown.enter.stop
         v-if="linkUrl"
       >
         <external-link-icon :size="14" />
