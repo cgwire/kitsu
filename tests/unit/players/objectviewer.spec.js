@@ -13,8 +13,6 @@ beforeEach(async () => {
   // The real library needs WebGL2 and a laid out page. The mock defines no
   // element: the viewer stays a plain one, as while the real library loads.
   // A hoisted vi.mock() would run its factory once per file, not per test.
-  // Two imports of it in flight at once leave the next test with the real
-  // library: let one viewer load before mounting another.
   vi.doMock('@google/model-viewer', () => {
     loadLibrary()
     return {}
@@ -87,7 +85,6 @@ describe('players/ObjectViewer with WebGL2', () => {
 
   test('probes WebGL2 once per page', async () => {
     const first = mount(ObjectViewer, { props: { previewUrl } })
-    await flushPromises()
     const second = mount(ObjectViewer, { props: { previewUrl } })
     await flushPromises()
 
