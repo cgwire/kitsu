@@ -469,7 +469,10 @@ const actions = {
     return tasks
   },
 
-  async loadPersonTasks({ commit, rootGetters }, { personId, date }) {
+  async loadPersonTasks(
+    { commit, rootGetters },
+    { personId, date, withTimeSpents }
+  ) {
     const userFilters = rootGetters.userFilters
     const taskTypeMap = rootGetters.taskTypeMap
     commit(LOAD_PERSON_TASKS_END, {
@@ -482,7 +485,9 @@ const actions = {
 
     const [tasks, timeSpents] = await Promise.all([
       peopleApi.getPersonTasks(personId).catch(() => []),
-      peopleApi.getTimeSpents(personId, date).catch(() => [])
+      withTimeSpents
+        ? peopleApi.getTimeSpents(personId, date).catch(() => [])
+        : []
     ])
     commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
     commit(LOAD_PERSON_TASKS_END, {

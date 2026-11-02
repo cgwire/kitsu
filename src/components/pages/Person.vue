@@ -370,6 +370,9 @@ const scheduleWidgetRef = useTemplateRef('schedule-widget')
 
 // Computed
 // --------------------------------------------------------------------------
+const currentUserRoleForProduction = computed(
+  () => store.getters.currentUserRoleForProduction
+)
 const displayedPersonTasks = computed(() => store.getters.displayedPersonTasks)
 const displayedPersonDoneTasks = computed(
   () => store.getters.displayedPersonDoneTasks
@@ -430,19 +433,37 @@ const isCurrentUserAllowed = computed(
     !(isCurrentUserClient.value || isCurrentUserVendor.value)
 )
 
-const isTimelogShown = computed(
-  () =>
-    isActiveTab('timesheets') &&
-    (isCurrentUserManager.value || user.value.id === person.value?.id)
+// the route param, not the person: the tabs are picked before the person
+// loads
+const canSeeTimelog = computed(
+  () => isCurrentUserManager.value || user.value.id === route.params.person_id
 )
 
-// the route param, not the person: the tab is picked before the person loads
 const canSeeProductivity = computed(
   () =>
     isCurrentUserAdmin.value ||
     isCurrentUserManager.value ||
     isCurrentUserSupervisor.value ||
     user.value.id === route.params.person_id
+)
+
+// Zou only shows the days off of someone else to the managers and
+// supervisors of their productions
+const canReadDaysOff = computed(
+  () =>
+    isCurrentUserAdmin.value ||
+    user.value.id === route.params.person_id ||
+    openProductions.value.some(
+      production =>
+        production.team.includes(route.params.person_id) &&
+        ['manager', 'supervisor'].includes(
+          currentUserRoleForProduction.value(production.id)
+        )
+    )
+)
+
+const isTimelogShown = computed(
+  () => isActiveTab('timesheets') && canSeeTimelog.value
 )
 
 const sortedTasks = computed(() =>
@@ -771,7 +792,8 @@ const loadPerson = async personId => {
   try {
     await store.dispatch('loadPersonTasks', {
       personId: person.value.id,
-      date: selectedDate.value
+      date: selectedDate.value,
+      withTimeSpents: canSeeTimelog.value
     })
     setTimeout(() => {
       nextTick(() => {
@@ -799,9 +821,11 @@ const loadPerson = async personId => {
 }
 
 const loadDaysOff = async () => {
-  daysOff.value = await store
-    .dispatch('loadAggregatedPersonDaysOff', { personId: person.value.id })
-    .catch(() => [])
+  daysOff.value = canReadDaysOff.value
+    ? await store
+        .dispatch('loadAggregatedPersonDaysOff', { personId: person.value.id })
+        .catch(() => [])
+    : []
 }
 
 const loadTimeSpents = async () => {
@@ -896,7 +920,8 @@ const updateActiveTab = () => {
     moment(day, 'YYYY-MM-DD', true).isValid()
   ) {
     selectedDate.value = day
-    if (person.value) {
+    // after a person change, loadPerson reads the day for the next person
+    if (person.value?.id === route.params.person_id && canSeeTimelog.value) {
       loadTimeSpents()
     }
   }
@@ -929,6 +954,11 @@ const onCalendarTimeClicked = date => {
 
 const onCalendarDatesChanged = async ({ start, end }) => {
   if (!person.value) {
+    return
+  }
+  // Zou shows the time of someone else to the viewers of their productivity
+  if (!canSeeProductivity.value) {
+    calendarTimeSpents.value = []
     return
   }
   try {
