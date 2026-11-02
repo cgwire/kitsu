@@ -24,6 +24,14 @@ describe('render', () => {
       expect(safeUrl('')).toBe(null)
       expect(safeUrl(undefined)).toBe(null)
     })
+
+    test('reads the scheme the way the browser does', () => {
+      expect(safeUrl('java\tscript:alert(1)')).toBe(null)
+      expect(safeUrl('java\nscript:alert(1)')).toBe(null)
+      expect(safeUrl('java\rscript:alert(1)')).toBe(null)
+      expect(safeUrl('\u0001javascript:alert(1)')).toBe(null)
+      expect(safeUrl('ht\ttps://cg-wire.com')).toBe('ht\ttps://cg-wire.com')
+    })
   })
 
   test('renderComment', () => {

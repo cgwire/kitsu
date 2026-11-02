@@ -12,13 +12,11 @@
     <!-- read-only URL: clickable link until the row is selected -->
     <a
       class="metadata-readonly align-left metadata-link"
-      :href="displayValue"
+      :href="linkUrl"
       target="_blank"
       rel="noopener noreferrer"
       @click.stop
-      v-else-if="
-        selected === false && descriptor.data_type === 'url' && displayValue
-      "
+      v-else-if="selected === false && linkUrl"
     >
       {{ displayValue }}
     </a>
@@ -73,15 +71,28 @@
       "
       v-else-if="descriptor.data_type === 'date'"
     />
-    <!-- url input -->
-    <input
-      class="input-editor"
-      :readonly="!isEditable"
-      type="url"
-      @input="event => onMetadataFieldChanged(entity, descriptor, event)"
-      :value="getMetadataFieldValue(descriptor, entity)"
-      v-else-if="descriptor.data_type === 'url'"
-    />
+    <!-- url input, and a button opening the link: a click in the input
+         only edits it. -->
+    <template v-else-if="descriptor.data_type === 'url'">
+      <input
+        class="input-editor"
+        :readonly="!isEditable"
+        type="url"
+        @input="event => onMetadataFieldChanged(entity, descriptor, event)"
+        :value="getMetadataFieldValue(descriptor, entity)"
+      />
+      <a
+        class="open-link"
+        :href="linkUrl"
+        :title="$t('playlists.actions.open_link')"
+        target="_blank"
+        rel="noopener noreferrer"
+        @click.stop
+        v-if="linkUrl"
+      >
+        <external-link-icon :size="14" />
+      </a>
+    </template>
     <!-- boolean input -->
     <input
       class="input-editor"
@@ -160,6 +171,7 @@
 </template>
 
 <script setup>
+import { ExternalLinkIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 
@@ -172,6 +184,7 @@ import {
   getMetadataFieldValue,
   isSupervisorInDepartments
 } from '@/lib/descriptors'
+import { safeUrl } from '@/lib/render'
 import { sortPeople } from '@/lib/sorting'
 
 import MetadataPerson from '@/components/cells/MetadataPerson.vue'
@@ -285,7 +298,8 @@ const metadataInputClass = computed(() => ({
     getDescriptorChecklistValues(props.descriptor).length,
   'is-date': !isReadonly.value && props.descriptor.data_type === 'date',
   'is-list': !isReadonly.value && props.descriptor.data_type === 'list',
-  'is-taglist': !isReadonly.value && props.descriptor.data_type === 'taglist'
+  'is-taglist': !isReadonly.value && props.descriptor.data_type === 'taglist',
+  'is-url': !isReadonly.value && props.descriptor.data_type === 'url'
 }))
 
 const displayValue = computed(() => {
@@ -295,6 +309,11 @@ const displayValue = computed(() => {
   }
   return value
 })
+
+// The input accepts any absolute URL, javascript: included.
+const linkUrl = computed(() =>
+  props.descriptor.data_type === 'url' ? safeUrl(displayValue.value) : null
+)
 
 // VueDatePicker's input format uses date-fns tokens; the stored date format
 // option (dateFormat) uses moment tokens. Only YYYY/MM/DD tokens are in play.
@@ -417,6 +436,26 @@ const onNumberFieldKeyDown = event => {
 .metadata-link {
   color: inherit;
   text-decoration: underline;
+}
+
+.metadata-input.is-url {
+  flex-direction: row;
+
+  .input-editor {
+    min-width: 0;
+  }
+}
+
+.open-link {
+  align-items: center;
+  color: var(--text);
+  display: flex;
+  flex: none;
+  padding: 0 0.5rem 0 0.25rem;
+
+  &:hover {
+    color: var(--text-strong);
+  }
 }
 
 /* Raise the cell so an open inline editor is not trapped behind neighbours. */

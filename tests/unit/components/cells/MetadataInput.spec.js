@@ -79,4 +79,99 @@ describe('cells/MetadataInput', () => {
       wrapper.unmount()
     })
   })
+
+  describe('url', () => {
+    const url = 'https://example.com/reference'
+
+    const mountCell = ({ value = url, isAdmin = true, selected } = {}) => {
+      const store = createStore({
+        getters: {
+          currentProduction: () => ({ id: 'production-1', team: [] }),
+          isCurrentUserAdmin: () => isAdmin,
+          isCurrentUserManager: () => isAdmin,
+          isCurrentUserSupervisor: () => false,
+          personMap: () => new Map(),
+          selectedAssets: () => new Map(),
+          selectedEdits: () => new Map(),
+          selectedShots: () => new Map(),
+          selectedTasks: () => new Map(),
+          taskTypeMap: () => new Map(),
+          user: () => ({ departments: [] })
+        }
+      })
+      return mount(MetadataInput, {
+        props: {
+          descriptor: {
+            id: 'descriptor-2',
+            field_name: 'reference',
+            data_type: 'url',
+            departments: []
+          },
+          entity: { id: 'asset-1', data: { reference: value } },
+          selected
+        },
+        global: {
+          plugins: [store, createI18n({ legacy: false, locale: 'en' })]
+        }
+      })
+    }
+
+    test('opens the url in a new tab from the list editor', () => {
+      const wrapper = mountCell()
+
+      expect(wrapper.find('input[type="url"]').element.value).toBe(url)
+      expect(wrapper.find('input[type="url"]').attributes()).not.toHaveProperty(
+        'readonly'
+      )
+      const link = wrapper.find('a')
+      expect(link.attributes()).toMatchObject({
+        href: url,
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      })
+    })
+
+    test('opens the url when the user cannot edit it', () => {
+      const wrapper = mountCell({ isAdmin: false })
+
+      expect(wrapper.find('input[type="url"]').attributes()).toHaveProperty(
+        'readonly'
+      )
+      expect(wrapper.find('a').attributes('href')).toBe(url)
+    })
+
+    test('keeps the click away from the row', async () => {
+      const wrapper = mountCell()
+      const onRowClick = vi.fn()
+      wrapper.element.parentElement.addEventListener('click', onRowClick)
+
+      await wrapper.find('a').trigger('click')
+
+      expect(onRowClick).not.toHaveBeenCalled()
+    })
+
+    test('has no link without a value', () => {
+      expect(mountCell({ value: '' }).find('a').exists()).toBe(false)
+      expect(
+        mountCell({ value: '', selected: false }).find('a').exists()
+      ).toBe(false)
+    })
+
+    test('links no unsafe scheme', () => {
+      const value = 'javascript:alert(1)'
+
+      expect(mountCell({ value }).find('a').exists()).toBe(false)
+      const readonly = mountCell({ value, selected: false })
+      expect(readonly.find('a').exists()).toBe(false)
+      expect(readonly.text()).toBe(value)
+    })
+
+    test('shows a link on an unselected task row', () => {
+      const wrapper = mountCell({ selected: false })
+
+      expect(wrapper.find('input').exists()).toBe(false)
+      expect(wrapper.find('a').attributes('href')).toBe(url)
+      expect(wrapper.find('a').text()).toBe(url)
+    })
+  })
 })

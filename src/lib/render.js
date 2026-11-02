@@ -149,8 +149,13 @@ const encodeHtmlEntities = str => {
 }
 
 // Allow relative URLs and http(s) only; block javascript:, data:, vbscript:…
+// Like the browser, skip the tabs and line breaks anywhere, and the spaces
+// and control characters in front of the scheme.
 const isSafeHref = url => {
-  const scheme = /^\s*([a-z][a-z0-9+.-]*):/i.exec(url)
+  const href = String(url)
+    .replace(/[\t\n\r]/g, '')
+    .replace(/^[\s\p{Cc}]+/u, '')
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(href)
   return !scheme || ['http', 'https'].includes(scheme[1].toLowerCase())
 }
 
