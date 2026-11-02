@@ -10,8 +10,7 @@ import MediaRecorderPanel from '@/components/widgets/MediaRecorderPanel.vue'
 
 const mountPanel = (mode = 'audio') =>
   mount(MediaRecorderPanel, {
-    props: { mode },
-    global: { mocks: { $t: key => key } }
+    props: { mode }
   })
 
 beforeEach(() => {

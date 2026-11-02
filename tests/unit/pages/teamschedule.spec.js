@@ -91,7 +91,6 @@ const mountPage = async ({
         {
           install: app => {
             app.config.globalProperties.$socket = socket
-            app.config.globalProperties.$t = key => key
           }
         }
       ],

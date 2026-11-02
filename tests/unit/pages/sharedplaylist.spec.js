@@ -45,7 +45,7 @@ const mountPage = async ({ canComment }) => {
   }
   const store = createStore({ actions, mutations })
   const wrapper = shallowMount(SharedPlaylist, {
-    global: { mocks: { $t: key => key }, plugins: [store] }
+    global: { plugins: [store] }
   })
   await flushPromises()
   return wrapper

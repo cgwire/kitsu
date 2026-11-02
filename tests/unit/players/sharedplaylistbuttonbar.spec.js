@@ -4,8 +4,7 @@ import SharedPlaylistButtonBar from '@/components/players/bars/SharedPlaylistBut
 
 const mountBar = (props = { isMovie: true }) =>
   mount(SharedPlaylistButtonBar, {
-    props: { ...props, token: 'token' },
-    global: { mocks: { $t: key => key } }
+    props: { ...props, token: 'token' }
   })
 
 const timeProps = {

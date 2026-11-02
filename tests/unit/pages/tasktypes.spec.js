@@ -55,7 +55,7 @@ const mountComponent = async (deleteError, deleteImpl) => {
   await router.push('/task-types?tab=archived')
   await router.isReady()
   const wrapper = shallowMount(TaskTypes, {
-    global: { plugins: [store, router], mocks: { $t: key => key } }
+    global: { plugins: [store, router] }
   })
   await flushPromises()
   return { store, wrapper }
@@ -90,8 +90,7 @@ const mountForReorder = async reorder => {
   const wrapper = shallowMount(TaskTypes, {
     global: {
       config: { errorHandler },
-      plugins: [store, router],
-      mocks: { $t: key => key }
+      plugins: [store, router]
     }
   })
   await flushPromises()

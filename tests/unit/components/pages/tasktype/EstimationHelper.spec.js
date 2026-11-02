@@ -40,7 +40,7 @@ const mountHelper = isDurationInHours => {
   })
   return shallowMount(EstimationHelper, {
     props: { entityType: 'Asset', tasks: [task] },
-    global: { plugins: [store], mocks: { $t: key => key } }
+    global: { plugins: [store] }
   })
 }
 

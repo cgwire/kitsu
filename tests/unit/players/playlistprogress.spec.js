@@ -59,8 +59,7 @@ const mountProgress = () =>
       playlistDuration: 8100 / FPS,
       playlistProgress: 0,
       playlistShotPosition: positions
-    },
-    global: { mocks: { $t: key => key } }
+    }
   })
 
 describe('players/PlaylistProgress', () => {

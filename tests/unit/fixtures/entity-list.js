@@ -130,7 +130,7 @@ export const mountEntityList = async (component, { getters, props, query }) => {
   const wrapper = shallowMount(component, {
     global: {
       // No task in the rows: task links never resolve a route.
-      mocks: { $router: {}, $store: store, $t: key => key },
+      mocks: { $router: {}, $store: store },
       plugins: [resizableColumn, router, i18n],
       provide: { store },
       stubs: { RouterLink: true }

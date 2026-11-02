@@ -23,7 +23,7 @@ const workflow = ['Todo', 'Ready', 'WIP', 'Done'].map((name, index) => ({
 const mountList = () => {
   const wrapper = shallowMount(TaskStatusList, {
     props: { entries: workflow },
-    global: { mocks: { $t: key => key }, stubs: { draggable: false } }
+    global: { stubs: { draggable: false } }
   })
   const rows = () => wrapper.findAll('tr.task-status')
   const names = () => rows().map(row => row.find('td.name').text())

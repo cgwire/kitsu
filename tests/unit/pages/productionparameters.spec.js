@@ -18,7 +18,6 @@ const mountWithProduction = production => {
   return shallowMount(ProductionParameters, {
     global: {
       plugins: [store],
-      mocks: { $t: key => key },
       directives: { focus: () => {} },
       stubs: {
         // resetForm calls the upload widget's reset() through a template ref.

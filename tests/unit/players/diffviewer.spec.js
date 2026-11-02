@@ -34,8 +34,7 @@ const PRETTY_DIFF = `/dev/null → tests/test_demarrage.py
 // The viewer imports diff2html along with the diff: wait for both.
 const mountViewer = async () => {
   const wrapper = mount(DiffViewer, {
-    props: { preview: { id: 'p1' } },
-    global: { mocks: { $t: key => key } }
+    props: { preview: { id: 'p1' } }
   })
   await vi.dynamicImportSettled()
   await flushPromises()

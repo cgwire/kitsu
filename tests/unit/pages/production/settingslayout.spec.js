@@ -26,7 +26,7 @@ const mountLayout = async () => {
   return mount(SettingsLayout, {
     props: { menuGroups, activeTab: 'video' },
     slots: { default: '<div class="tab">Video content</div>' },
-    global: { plugins: [router], mocks: { $t: key => key } }
+    global: { plugins: [router] }
   })
 }
 

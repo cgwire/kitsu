@@ -29,7 +29,6 @@ const mountModal = () =>
   shallowMount(EditBudgetEntryModal, {
     global: {
       plugins: [store],
-      mocks: { $t: key => key },
       renderStubDefaultSlot: true,
       stubs: {
         ComboboxDepartment: focusable('ComboboxDepartment', [

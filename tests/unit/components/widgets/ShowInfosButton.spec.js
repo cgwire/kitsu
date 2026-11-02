@@ -18,7 +18,6 @@ const mountButton = errorHandler => {
     global: {
       plugins: [store],
       config: { errorHandler },
-      mocks: { $t: key => key },
       stubs: { KitsuIcon: true }
     }
   })

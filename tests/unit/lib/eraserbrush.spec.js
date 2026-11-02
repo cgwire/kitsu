@@ -45,8 +45,7 @@ vi.mock('fabric', () => {
     constructor(canvas) { this.canvas = canvas; this.color = '#000'; this.width = 4 }
     createPath(d) { return new FakePath(d, { fill: null, stroke: this.color, strokeWidth: this.width }) }
     onMouseUp() { return false }
-    // eslint-disable-next-line no-unused-vars
-    convertPointsToSVGPath(points) { return 'M 0 0 L 10 10' }
+    convertPointsToSVGPath() { return 'M 0 0 L 10 10' }
     decimatePoints(points) { return points }
   }
   const ObjectProto = {

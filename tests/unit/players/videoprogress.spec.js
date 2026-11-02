@@ -27,8 +27,7 @@ const mountProgress = (props = {}) =>
       fps: 24,
       nbFrames: 200,
       ...props
-    },
-    global: { mocks: { $t: key => key } }
+    }
   })
 
 describe('players/VideoProgress', () => {

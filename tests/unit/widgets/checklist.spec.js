@@ -12,8 +12,7 @@ const mountChecklist = (props = {}) => {
   return shallowMount(Checklist, {
     props: { checklist: makeChecklist(), ...props },
     global: {
-      directives: { autosize: () => {} },
-      mocks: { $t: key => key }
+      directives: { autosize: () => {} }
     }
   })
 }
@@ -40,8 +39,7 @@ describe('Checklist', () => {
         ]
       },
       global: {
-        directives: { autosize: () => {} },
-        mocks: { $t: key => key }
+        directives: { autosize: () => {} }
       }
     })
     expect(w.findAll('.checklist-entry')).toHaveLength(2)
@@ -68,8 +66,7 @@ describe('Checklist', () => {
     const w = shallowMount(Checklist, {
       props: { checklist, isEditable: false },
       global: {
-        directives: { autosize: () => {} },
-        mocks: { $t: key => key }
+        directives: { autosize: () => {} }
       }
     })
     const originalChecked = checklist[0].checked
@@ -118,8 +115,7 @@ describe('Checklist', () => {
     const w = shallowMount(Checklist, {
       props: { checklist },
       global: {
-        directives: { autosize: () => {} },
-        mocks: { $t: key => key }
+        directives: { autosize: () => {} }
       }
     })
     const textareas = w.findAll('.checklist-text')

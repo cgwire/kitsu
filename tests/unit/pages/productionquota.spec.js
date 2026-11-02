@@ -113,7 +113,7 @@ const mountPage = async (
   await router.push({ path, query })
   await router.isReady()
   wrapper = shallowMount(ProductionQuota, {
-    global: { plugins: [store, router], mocks: { $t: key => key }, stubs }
+    global: { plugins: [store, router], stubs }
   })
   await flushPromises()
   return { store, wrapper }

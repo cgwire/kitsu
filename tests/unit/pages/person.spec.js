@@ -110,7 +110,6 @@ const mountPage = async ({
         {
           install: app => {
             app.config.globalProperties.$socket = { on: vi.fn(), off: vi.fn() }
-            app.config.globalProperties.$t = key => key
           }
         }
       ],

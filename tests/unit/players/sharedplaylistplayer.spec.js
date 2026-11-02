@@ -66,7 +66,6 @@ const mountPlayer = ({
       token: 'token'
     },
     global: {
-      mocks: { $t: key => key },
       plugins: [store],
       stubs: {
         // The player drives these through refs; the default stubs have none

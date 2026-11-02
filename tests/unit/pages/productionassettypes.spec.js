@@ -72,8 +72,7 @@ const mountPage = async (getters = {}, query = {}) => {
   const replace = vi.spyOn(router, 'replace')
   wrapper = shallowMount(ProductionAssetTypes, {
     global: {
-      plugins: [store, router],
-      mocks: { $t: key => key }
+      plugins: [store, router]
     }
   })
   await flushPromises()

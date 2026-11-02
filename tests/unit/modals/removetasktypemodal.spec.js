@@ -12,8 +12,7 @@ const taskType = { id: 'task-type-modeling', name: 'Modeling' }
 
 const mountModal = (props = {}) =>
   mount(RemoveTaskTypeModal, {
-    props: { active: true, nbTasks: 3, taskType, ...props },
-    global: { mocks: { $t: key => key } }
+    props: { active: true, nbTasks: 3, taskType, ...props }
   })
 
 describe('RemoveTaskTypeModal', () => {
