@@ -1454,6 +1454,7 @@
       "remaining_tasks": "{name} ha ancora {count} task in questa produzione. Rimuovere il tipo di task non lo elimina. | {name} ha ancora {count} task in questa produzione. Rimuovere il tipo di task non li elimina.",
       "remaining_tasks_delete": "Elimina anche questo task, con i suoi commenti e le sue anteprime | Elimina anche questi {count} task, con i loro commenti e le loro anteprime",
       "remaining_tasks_lock": "Digita {name} per confermare l'eliminazione",
+      "remaining_tasks_lock_error": "Il nome non corrisponde.",
       "remove_error": "Impossibile rimuovere il tipo di task. Riprova.",
       "remove_title": "Rimuovi il tipo di task",
       "select_task_type": "Seleziona un tipo di task...",

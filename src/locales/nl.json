@@ -1454,6 +1454,7 @@
       "remaining_tasks": "{name} heeft nog {count} taak in deze productie. Als je het taaktype verwijdert, wordt de taak niet gewist. | {name} heeft nog {count} taken in deze productie. Als je het taaktype verwijdert, worden de taken niet gewist.",
       "remaining_tasks_delete": "Deze taak ook wissen, met de opmerkingen en previews | Deze {count} taken ook wissen, met hun opmerkingen en previews",
       "remaining_tasks_lock": "Typ {name} om het wissen te bevestigen",
+      "remaining_tasks_lock_error": "De naam komt niet overeen.",
       "remove_error": "Kon het taaktype niet verwijderen. Probeer het opnieuw.",
       "remove_title": "Taaktype verwijderen",
       "select_task_type": "Selecteer een taaktype...",

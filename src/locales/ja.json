@@ -1454,6 +1454,7 @@
       "remaining_tasks": "{name} には、このプロダクションにまだ {count} 件のタスクがあります。タスクタイプを外しても、タスクは削除されません。 | {name} には、このプロダクションにまだ {count} 件のタスクがあります。タスクタイプを外しても、タスクは削除されません。",
       "remaining_tasks_delete": "このタスクもコメントとプレビューごと削除する | これら {count} 件のタスクもコメントとプレビューごと削除する",
       "remaining_tasks_lock": "削除を確認するには {name} と入力してください",
+      "remaining_tasks_lock_error": "名前が一致しません。",
       "remove_error": "タスクタイプを外せませんでした。もう一度お試しください。",
       "remove_title": "タスクタイプを外す",
       "select_task_type": "タスクタイプを選択…",

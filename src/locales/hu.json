@@ -1455,6 +1455,7 @@
       "remaining_tasks": "{name}: még {count} feladat maradt ebben a produkcióban. A feladat típus eltávolítása nem törli a feladatot. | {name}: még {count} feladat maradt ebben a produkcióban. A feladat típus eltávolítása nem törli a feladatokat.",
       "remaining_tasks_delete": "Töröld ezt a feladatot is a hozzászólásaival és előnézeteivel együtt | Töröld ezt a(z) {count} feladatot is a hozzászólásaikkal és előnézeteikkel együtt",
       "remaining_tasks_lock": "A törlés megerősítéséhez írd be: {name}",
+      "remaining_tasks_lock_error": "A név nem egyezik.",
       "remove_error": "Nem sikerült eltávolítani a feladat típust. Kérlek próbáld újra.",
       "remove_title": "Feladat típus eltávolítása",
       "select_task_type": "Válassz egy feladat típust..."

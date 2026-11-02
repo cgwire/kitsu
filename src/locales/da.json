@@ -1454,6 +1454,7 @@
       "remaining_tasks": "{name} har stadig {count} opgave i denne produktion. Hvis opgavetypen fjernes, slettes opgaven ikke. | {name} har stadig {count} opgaver i denne produktion. Hvis opgavetypen fjernes, slettes opgaverne ikke.",
       "remaining_tasks_delete": "Slet også denne opgave med dens kommentarer og previews | Slet også disse {count} opgaver med deres kommentarer og previews",
       "remaining_tasks_lock": "Skriv {name} for at bekræfte sletningen",
+      "remaining_tasks_lock_error": "Navnet stemmer ikke overens.",
       "remove_error": "Opgavetypen kunne ikke fjernes. Prøv venligst igen.",
       "remove_title": "Fjern opgavetypen",
       "select_task_type": "Vælg en opgavetype...",

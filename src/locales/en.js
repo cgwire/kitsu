@@ -1910,6 +1910,7 @@ export default {
     remaining_tasks_delete:
       'Also delete this task, with its comments and previews | Also delete these {count} tasks, with their comments and previews',
     remaining_tasks_lock: 'Type {name} to confirm the deletion',
+    remaining_tasks_lock_error: 'The name does not match.',
     remove_error: 'Could not remove the task type. Please try again.',
     remove_title: 'Remove the task type',
     select_task_type: 'Select a task type...',
