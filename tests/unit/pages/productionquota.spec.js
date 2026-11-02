@@ -1,4 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { ref } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -15,6 +16,7 @@ import personStore from '@/store/modules/people'
 
 import ProductionQuota from '@/components/pages/ProductionQuota.vue'
 import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 
@@ -33,6 +35,11 @@ const router = createRouter({
       component: ProductionQuota
     },
     {
+      path: '/productions/:production_id/quota/day/:year/:month/:day/persons/:person_id',
+      name: 'quota-day-person',
+      component: ProductionQuota
+    },
+    {
       path: '/productions/:production_id/quota/week/:year',
       name: 'quota-week',
       component: ProductionQuota
@@ -47,6 +54,24 @@ const router = createRouter({
 
 const personWeekPath = week =>
   `/productions/production-1/quota/week/2026/${week}/persons/person-1`
+
+const jane = { id: 'person-1', name: 'Jane Doe', full_name: 'Jane Doe' }
+
+// A quota on the first day of the month the page opens on.
+const dayQuota = () => {
+  const period = () => ({ frames: {}, entries: {} })
+  return {
+    day: { frames: { '2026-09-01': 5 }, entries: {} },
+    week: period(),
+    month: period(),
+    year: period()
+  }
+}
+
+const shotsLoads = store =>
+  store.dispatch.mock.calls.filter(
+    ([action]) => action === 'getPersonQuotaShots'
+  )
 
 // The shots loads, answered when and how the test decides.
 const holdLoads = () => {
@@ -74,10 +99,8 @@ const mountPage = async (
       currentProduction: () => currentProduction,
       isCurrentUserArtist: () => false,
       isPaperProduction: () => false,
-      isShotsLoading: () => false,
       personMap: () => personStore.cache.personMap,
       productionShotTaskTypes: () => shotTaskTypes,
-      shotMap: () => new Map([['shot-a'], ['shot-b']]),
       taskTypeMap: () => new Map(),
       user: () => ({ id: 'user-1' }),
       ...getters
@@ -106,6 +129,7 @@ describe('ProductionQuota', () => {
   afterEach(() => {
     wrapper?.unmount()
     wrapper = null
+    personStore.cache.personMap.delete(jane.id)
     vi.restoreAllMocks()
     vi.useRealTimers()
   })
@@ -120,25 +144,98 @@ describe('ProductionQuota', () => {
     expect(wrapper.findComponent(PeopleField).exists()).toBe(false)
   })
 
-  // The list loads the shots first when it has fewer than two, then has
-  // no task type to compute the quotas of.
   it('shows no quota for a production without shot task types', async () => {
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     const { wrapper } = await mountPage(
       {},
       {
-        getters: {
-          productionShotTaskTypes: () => [],
-          shotMap: () => new Map()
-        },
+        getters: { productionShotTaskTypes: () => [] },
         stubs: { Quota: false }
       }
+    )
+
+    expect(wrapper.findComponent(ComboboxTaskType).props('modelValue')).toBe('')
+    expect(wrapper.find('.empty-quota').exists()).toBe(true)
+  })
+
+  // The quotas come from Zou: no part of the page reads the shots.
+  it('loads no shot', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const { store } = await mountPage(
+      {},
+      { getters: { shotMap: () => new Map() }, stubs: { Quota: false } }
     )
     vi.advanceTimersByTime(100)
     await flushPromises()
 
-    expect(wrapper.findComponent(ComboboxTaskType).props('modelValue')).toBe('')
-    expect(wrapper.find('.empty-quota').exists()).toBe(true)
+    expect(store.dispatch).not.toHaveBeenCalledWith('loadShots')
+  })
+
+  it('loads no shot on a production or an episode switch', async () => {
+    const production = ref(currentProduction)
+    const episode = ref(null)
+    localStorage.setItem(
+      'quota:production-2:params',
+      JSON.stringify({ taskTypeId: 'shot-2' })
+    )
+    const { store } = await mountPage(
+      {},
+      {
+        getters: {
+          currentEpisode: () => episode.value,
+          currentProduction: () => production.value
+        }
+      }
+    )
+
+    // The production list of the topbar opens the page without its query.
+    await router.push('/productions/production-2/quota/day/2026/9')
+    production.value = { ...currentProduction, id: 'production-2' }
+    await flushPromises()
+    episode.value = { id: 'episode-1' }
+    await flushPromises()
+
+    expect(store.dispatch).not.toHaveBeenCalledWith('loadShots')
+    expect(router.currentRoute.value.query.taskTypeId).toBe('shot-2')
+  })
+
+  // The page rewrites the query of a cell link: one click changed the
+  // route twice.
+  it('loads the shots of a clicked quota once', async () => {
+    personStore.cache.personMap.set(jane.id, jane)
+    const { store, wrapper } = await mountPage(
+      {},
+      {
+        quotas: { [jane.id]: dayQuota(), total: dayQuota() },
+        stubs: { Quota: false, RouterLink: false }
+      }
+    )
+
+    await wrapper.find('a.quota-button').trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.name).toBe('quota-day-person')
+    expect(shotsLoads(store)).toHaveLength(1)
+  })
+
+  it('loads the shots of a clicked task type of a person once', async () => {
+    personStore.cache.personMap.set(jane.id, jane)
+    const { store, wrapper } = await mountPage(
+      { tab: 'persons', personId: jane.id },
+      {
+        getters: {
+          taskTypeMap: () => new Map([['shot-1', shotTaskTypes[0]]])
+        },
+        quotas: { 'shot-1': dayQuota(), total: dayQuota() },
+        stubs: { Quota: false, RouterLink: false }
+      }
+    )
+
+    await wrapper.find('a.quota-button').trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.name).toBe('quota-day-person')
+    expect(shotsLoads(store)).toHaveLength(1)
+    expect(shotsLoads(store)[0][1].taskTypeId).toBe('shot-1')
   })
 
   // The page reads the quotas computed by the list through its template ref.
@@ -187,6 +284,36 @@ describe('ProductionQuota', () => {
     expect(panel.props('isLoading')).toBe(false)
     expect(panel.props('isLoadingError')).toBe(true)
     expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+
+  // A filter that leaves the request as it was, like the count unit, still
+  // tries a failed load again.
+  it('loads the shots of a person again after a failed load', async () => {
+    const failure = new Error('Internal server error')
+    errors.markRequestFailure(failure)
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const shots = [{ id: 'shot-a', weight: 1 }]
+    const { loads, load } = holdLoads()
+    const { wrapper } = await mountPage(
+      {},
+      { path: personWeekPath(42), loadPersonShots: load }
+    )
+    loads[0].reject(failure)
+    await flushPromises()
+    expect(consoleError).toHaveBeenCalledWith(failure)
+
+    wrapper
+      .findAllComponents(Combobox)
+      .find(combobox => combobox.props('label') === 'quota.count_label')
+      .vm.$emit('update:model-value', 'seconds')
+    await flushPromises()
+    loads[1]?.resolve(shots)
+    await flushPromises()
+
+    const panel = wrapper.findComponent(PeopleQuotaInfo)
+    expect(loads).toHaveLength(2)
+    expect(panel.props('isLoadingError')).toBe(false)
+    expect(panel.props('shots')).toEqual(shots)
   })
 
   // The list shows its shots above the error: those of the week left must

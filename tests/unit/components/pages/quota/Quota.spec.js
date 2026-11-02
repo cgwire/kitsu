@@ -43,11 +43,7 @@ const mountQuota = async (props, peopleByMode = {}, quota = periods) => {
     },
     getters: {
       personMap: new Map(people.map(person => [person.id, person])),
-      productionTeamRoles: { cat: 'supervisor' },
-      shotMap: new Map([
-        ['shot-1', {}],
-        ['shot-2', {}]
-      ])
+      productionTeamRoles: { cat: 'supervisor' }
     },
     actions: {
       computeQuota: ({ computeMode }) => {
@@ -120,11 +116,7 @@ const loadingGetters = () =>
   reactive({
     currentProduction: { id: 'production-1' },
     personMap: new Map(people.map(person => [person.id, person])),
-    productionTeamRoles: {},
-    shotMap: new Map([
-      ['shot-1', {}],
-      ['shot-2', {}]
-    ])
+    productionTeamRoles: {}
   })
 
 const mountLoading = async (getters, computeQuota) => {

@@ -258,10 +258,8 @@ let latestLoad = 0
 // --------------------------------------------------------------------------
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
-const isShotsLoading = computed(() => store.getters.isShotsLoading)
 const personMap = computed(() => store.getters.personMap)
 const productionTeamRoles = computed(() => store.getters.productionTeamRoles)
-const shotMap = computed(() => store.getters.shotMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
 const monthRange = computed(() =>
@@ -462,16 +460,10 @@ watch(
 
 // Lifecycle
 // --------------------------------------------------------------------------
+// The page sets its params once the list is mounted, and the watcher loads
+// them: only a list mounted with a selection loads now.
 onMounted(() => {
-  if (shotMap.value.size < 2) {
-    setTimeout(async () => {
-      await store.dispatch('loadShots')
-      loadData()
-    }, 100)
-  } else {
-    if (!isShotsLoading.value) isLoading.value = false
-    loadData()
-  }
+  if (props.taskTypeId || props.personId) loadData()
 })
 
 // The page exports the quotas displayed by this list.

@@ -202,9 +202,12 @@ const yearString = ref(`${moment().year()}`)
 let detailLevel = 'day'
 let paramsProductionId = null
 let silent = false
-// A click on a cell loads twice, and the user can move on or close the
-// panel before an answer: only the latest load may update the panel.
+// The user can move on or close the panel before an answer: only the latest
+// load may update the panel.
 let latestShotsLoad = 0
+// A click on a cell changes the route twice, the page rewriting the query
+// of its link: the second change asks for the shots already loaded.
+let latestShotsKey = null
 
 // Computed
 // --------------------------------------------------------------------------
@@ -309,13 +312,8 @@ const loadRoute = async () => {
   if (week) currentWeek.value = Number(week)
   if (day) currentDay.value = Number(day)
 
-  const load = ++latestShotsLoad
-  const isLatest = () => load === latestShotsLoad
-  if (route.path.includes('person')) {
-    isPersonShotsLoading.value = true
-    isPersonShotsLoadingError.value = false
-    try {
-      const shots = await store.dispatch('getPersonQuotaShots', {
+  const shotsParams = route.path.includes('person')
+    ? {
         productionId: currentProduction.value.id,
         personId: currentPerson.value.id,
         detailLevel,
@@ -325,12 +323,25 @@ const loadRoute = async () => {
         week,
         day,
         computeMode: params.value.computeMode
-      })
+      }
+    : null
+  const shotsKey = JSON.stringify(shotsParams)
+  if (shotsParams && shotsKey === latestShotsKey) return
+  latestShotsKey = shotsKey
+  const load = ++latestShotsLoad
+  const isLatest = () => load === latestShotsLoad
+  if (shotsParams) {
+    isPersonShotsLoading.value = true
+    isPersonShotsLoadingError.value = false
+    try {
+      const shots = await store.dispatch('getPersonQuotaShots', shotsParams)
       if (isLatest()) personShots.value = shots
     } catch (err) {
       if (isLatest()) {
         personShots.value = []
         isPersonShotsLoadingError.value = true
+        // Not loaded: the same request may try again.
+        latestShotsKey = null
       }
       errors.logRequestFailure(err)
     } finally {
@@ -447,12 +458,6 @@ const throttledResetRouteQuery = () => {
 const loadTeamRoles = () =>
   store.dispatch('loadProductionTeam').catch(console.error)
 
-const reloadShots = async () => {
-  await store.dispatch('loadShots')
-  resetRouteQuery()
-  loadRoute()
-}
-
 const pushPeriodRoute = (name, periodParams) => {
   router.push(episodifyRoute({ name, params: periodParams, query: getQuery() }))
 }
@@ -520,11 +525,8 @@ watch(currentProduction, () => {
   // one nor written into its URL.
   initParams()
   loadTeamRoles()
-  reloadShots()
-})
-
-watch(currentEpisode, () => {
-  reloadShots()
+  resetRouteQuery()
+  loadRoute()
 })
 
 watch(
