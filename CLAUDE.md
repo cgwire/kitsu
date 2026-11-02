@@ -259,7 +259,7 @@ vue-i18n runs in **Composition mode** (`src/lib/i18n.js`, `legacy: false`): the 
 - **A `t()` at setup top level does not follow a locale change.** It resolves once, in the language of that moment. Call `t()` inside a `computed` or a handler (template `$t()` is unaffected).
 - **A string second argument is a default message, not a locale.** `t('main.cancel', 'fr')` returns "Cancel" to an English user. Pass the locale as an option: `t(key, {}, { locale: 'fr' })`.
 
-To test real translations rather than the global `$t` mock, mount with `mountWithI18n` from `tests/unit/fixtures/i18n.js`.
+To test real translations rather than the global `$t` mock, mount with `mountWithI18n` or `shallowMountWithI18n` from `tests/unit/fixtures/i18n.js`.
 
 ### Plural calls
 

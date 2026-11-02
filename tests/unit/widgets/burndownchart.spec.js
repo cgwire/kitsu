@@ -1,4 +1,3 @@
-import { shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 
 import i18n from '@/lib/i18n'
@@ -6,7 +5,7 @@ import i18n from '@/lib/i18n'
 import BurndownChart from '@/components/widgets/BurndownChart.vue'
 import ToggleButton from '@/components/widgets/ToggleButton.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 // The real line-chart is registered globally by main.js.
 const LineChart = {
@@ -23,10 +22,10 @@ const store = createStore({
 })
 
 const mountChart = burndown =>
-  shallowMount(BurndownChart, {
+  shallowMountWithI18n(BurndownChart, {
     props: { burndown },
     global: {
-      plugins: [i18n, store],
+      plugins: [store],
       components: { LineChart },
       stubs: { LineChart }
     }

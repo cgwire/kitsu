@@ -1,15 +1,13 @@
-import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
-import i18n from '@/lib/i18n'
 import { today } from '@/lib/timesheet'
 
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ProductivityChart from '@/components/widgets/ProductivityChart.vue'
 
-import './setup'
+import { mountWithI18n } from '../fixtures/i18n'
 
 // The real column-chart is registered globally by main.js.
 const ColumnChart = {
@@ -45,7 +43,7 @@ const rows = [
 ]
 
 const mountChart = props =>
-  mount(ProductivityChart, {
+  mountWithI18n(ProductivityChart, {
     props: {
       level: 'day',
       year,
@@ -54,7 +52,7 @@ const mountChart = props =>
       ...props
     },
     global: {
-      plugins: [i18n, router, store],
+      plugins: [router, store],
       components: { ColumnChart },
       stubs: { ColumnChart }
     }

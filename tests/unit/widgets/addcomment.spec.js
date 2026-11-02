@@ -1,12 +1,10 @@
 import { nextTick, reactive } from 'vue'
-import { shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 import { createRouter, createWebHistory } from 'vue-router'
 
-import i18n from '@/lib/i18n'
 import AddComment from '@/components/widgets/AddComment.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -108,7 +106,7 @@ describe('AddComment', () => {
     await router.push('/tasks/task-1')
     await router.isReady()
 
-    wrapper = shallowMount(AddComment, {
+    wrapper = shallowMountWithI18n(AddComment, {
       props: {
         task,
         taskStatus: taskStatusList,
@@ -116,7 +114,7 @@ describe('AddComment', () => {
         taskTypes: []
       },
       global: {
-        plugins: [i18n, store, router],
+        plugins: [store, router],
         provide: {
           draftComment
         },

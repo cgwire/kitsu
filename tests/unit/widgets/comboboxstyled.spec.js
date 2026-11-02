@@ -1,10 +1,8 @@
-import { shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 
-import i18n from '@/lib/i18n'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 // Catch-all route so vue-router doesn't warn about the initial location not
 // matching any route (the component only needs `router.resolve(...)`).
@@ -23,9 +21,9 @@ describe('ComboboxStyled', () => {
   let wrapper
 
   beforeEach(() => {
-    wrapper = shallowMount(ComboboxStyled, {
+    wrapper = shallowMountWithI18n(ComboboxStyled, {
       props: { options, modelValue: 'v1' },
-      global: { plugins: [i18n, router] }
+      global: { plugins: [router] }
     })
   })
 
@@ -79,9 +77,9 @@ describe('ComboboxStyled', () => {
   })
 
   it('selects first option when modelValue does not match', () => {
-    const w = shallowMount(ComboboxStyled, {
+    const w = shallowMountWithI18n(ComboboxStyled, {
       props: { options, modelValue: 'nonexistent' },
-      global: { plugins: [i18n, router] }
+      global: { plugins: [router] }
     })
     expect(w.find('.selected-line').text()).toBe('Version 1')
   })
