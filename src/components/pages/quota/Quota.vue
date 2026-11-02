@@ -250,6 +250,10 @@ const quotaMap = ref({})
 const currentMonth = moment().month() + 1
 const currentYear = moment().year()
 
+// The selection can change before an answer: only the latest load fills
+// the list.
+let latestLoad = 0
+
 // Computed
 // --------------------------------------------------------------------------
 const currentEpisode = computed(() => store.getters.currentEpisode)
@@ -327,29 +331,28 @@ const calcAverageColumnX = () => {
 }
 
 const loadData = async () => {
-  if (!props.taskTypeId && !props.personId) {
-    isLoading.value = false
-    return
+  const load = ++latestLoad
+  let quotas = {}
+  if (props.taskTypeId || props.personId) {
+    isLoading.value = true
+    try {
+      quotas = await store.dispatch('computeQuota', {
+        taskTypeId: props.taskTypeId,
+        personId: props.personId,
+        detailLevel: props.detailLevel,
+        countMode: props.countMode,
+        computeMode: props.computeMode
+      })
+    } catch (err) {
+      console.error(err)
+    }
+    if (load !== latestLoad) return
   }
-  isLoading.value = true
-  try {
-    quotaMap.value = await store.dispatch('computeQuota', {
-      taskTypeId: props.taskTypeId,
-      personId: props.personId,
-      detailLevel: props.detailLevel,
-      countMode: props.countMode,
-      computeMode: props.computeMode
-    })
-    quotaLength.value = Object.keys(quotaMap.value).length
-    calcAverageColumnX()
-    await nextTick()
-  } catch (err) {
-    console.error(err)
-    quotaMap.value = {}
-    quotaLength.value = 0
-    calcAverageColumnX()
-  }
-  isLoading.value = false
+  quotaMap.value = quotas
+  quotaLength.value = Object.keys(quotas).length
+  calcAverageColumnX()
+  await nextTick()
+  if (load === latestLoad) isLoading.value = false
 }
 
 const getQuota = (personId, opt = {}) => {
@@ -441,29 +444,20 @@ watch(
   }
 )
 
-watch(
-  () => props.computeMode,
-  () => {
-    loadData()
-  }
-)
-
 watch(quotaMap, () => {
   if (props.taskTypeId) resetPersonIds()
 })
 
+// Productions share their task types: a switch can keep the selected one.
+// Changes made together, like the params of a production, load once.
 watch(
-  () => props.taskTypeId,
-  () => {
-    if (props.taskTypeId) loadData()
-  }
-)
-
-watch(
-  () => props.personId,
-  () => {
-    if (props.personId) loadData()
-  }
+  [
+    () => currentProduction.value?.id,
+    () => props.taskTypeId,
+    () => props.personId,
+    () => props.computeMode
+  ],
+  () => loadData()
 )
 
 // Lifecycle
