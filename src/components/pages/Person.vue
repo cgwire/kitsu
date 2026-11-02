@@ -165,6 +165,7 @@
               :days-off="daysOff"
               :tasks="sortedAllTasks"
               :time-spents="calendarTimeSpents"
+              :with-day-links="canSeeTimelog"
               @dates-changed="onCalendarDatesChanged"
               @time-clicked="onCalendarTimeClicked"
             />
@@ -644,10 +645,12 @@ const todoTabs = computed(() => {
           })`,
           name: 'done'
         },
-    {
-      label: t('timesheets.timelog_title'),
-      name: 'timesheets'
-    }
+    canSeeTimelog.value
+      ? {
+          label: t('timesheets.timelog_title'),
+          name: 'timesheets'
+        }
+      : undefined
   ].filter(Boolean)
 })
 
@@ -890,14 +893,9 @@ const setPersonTasksScrollPosition = position =>
   store.dispatch('setPersonTasksScrollPosition', position)
 
 const isAvailableSection = section => {
-  const availableSections = [
-    'board',
-    'calendar',
-    'done',
-    'schedule',
-    'timesheets'
-  ]
+  const availableSections = ['board', 'calendar', 'done', 'schedule']
   if (canSeeProductivity.value) availableSections.push('productivity')
+  if (canSeeTimelog.value) availableSections.push('timesheets')
   const isHiddenOnPhone = isPhone.value && section === 'done'
   return availableSections.includes(section) && !isHiddenOnPhone
 }

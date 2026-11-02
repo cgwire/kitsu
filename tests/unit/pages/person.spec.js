@@ -852,6 +852,49 @@ describe('Person page', () => {
     })
   })
 
+  describe('timelog tab', () => {
+    const viewers = [
+      ['the person', {}],
+      ['a manager', { isCurrentUserManager: () => true, user: () => otherUser }]
+    ]
+    // the timelog shows them nothing
+    const others = [
+      [
+        'a supervisor',
+        { isCurrentUserSupervisor: () => true, user: () => otherUser }
+      ],
+      ['another artist', { user: () => otherUser }]
+    ]
+
+    const dayLinks = wrapper =>
+      wrapper.findComponent(UserCalendar).props('withDayLinks')
+
+    it.each(viewers)('shows to %s', async (_, getters) => {
+      const wrapper = await mountPage({ getters, query: { section: 'calendar' } })
+      expect(tabNames(wrapper)).toContain('timesheets')
+      expect(dayLinks(wrapper)).toBe(true)
+      wrapper.unmount()
+    })
+
+    it.each(others)('hides from %s', async (_, getters) => {
+      const wrapper = await mountPage({ getters, query: { section: 'calendar' } })
+      expect(tabNames(wrapper)).not.toContain('timesheets')
+      expect(dayLinks(wrapper)).toBe(false)
+      wrapper.unmount()
+    })
+
+    it.each(others)('opens the tasks tab from its URL for %s', async (_, getters) => {
+      const wrapper = await mountPage({
+        getters,
+        query: { section: 'timesheets' }
+      })
+      expect(
+        wrapper.findComponent(RouteSectionTabs).props('activeTab')
+      ).toBe('todos')
+      wrapper.unmount()
+    })
+  })
+
   describe('days off', () => {
     // The timesheet clears the error of a refused confirm each time it opens
     // a day-off form

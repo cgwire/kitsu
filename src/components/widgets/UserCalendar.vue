@@ -75,12 +75,11 @@
             <span>{{ arg.dayNumberText }}</span>
             <span
               class="day-hours"
-              role="button"
-              tabindex="0"
-              @click.stop="emit('time-clicked', toDateKey(arg.date))"
-              @keydown.enter.stop.prevent="
-                emit('time-clicked', toDateKey(arg.date))
-              "
+              :class="{ linked: withDayLinks }"
+              :role="withDayLinks ? 'button' : undefined"
+              :tabindex="withDayLinks ? 0 : undefined"
+              @click.stop="onDayHoursClicked(arg.date)"
+              @keydown.enter.stop.prevent="onDayHoursClicked(arg.date)"
               v-if="timeByDay.get(toDateKey(arg.date))"
             >
               {{ formatHours(timeByDay.get(toDateKey(arg.date))) }}
@@ -189,6 +188,10 @@ const props = defineProps({
   isLoading: {
     type: Boolean,
     default: true
+  },
+  withDayLinks: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -216,7 +219,7 @@ const calendarOptions = ref({
   locales: allLocales,
   locale: localeCode.value,
   // day numbers and week-view day headers open the timesheet of that day
-  navLinks: true,
+  navLinks: props.withDayLinks,
   navLinkDayClick: date => emit('time-clicked', toDateKey(date)),
   datesSet: info => onDatesSet(info)
 })
@@ -278,6 +281,10 @@ const toDateKey = date =>
 const formatHours = minutes => {
   const hours = minutes / 60
   return `${Number.isInteger(hours) ? hours : hours.toFixed(1)}h`
+}
+
+const onDayHoursClicked = date => {
+  if (props.withDayLinks) emit('time-clicked', toDateKey(date))
 }
 
 const getApi = () => calendarRef.value.getApi()
@@ -475,6 +482,13 @@ watch(
 watch(
   () => props.timeSpents,
   () => nextTick(refreshTimeDisplays)
+)
+
+watch(
+  () => props.withDayLinks,
+  withDayLinks => {
+    calendarOptions.value.navLinks = withDayLinks
+  }
 )
 
 watch(localeCode, code => {
@@ -696,6 +710,12 @@ onBeforeUnmount(() => {
   width: 100%;
 }
 
+// Bulma gives every anchor a pointer, nav link or not
+:deep(.fc-col-header-cell-cushion:not([data-navlink])),
+:deep(.fc-daygrid-day-number:not([data-navlink])) {
+  cursor: default;
+}
+
 :deep(.fc-daygrid-day-top) {
   // fc defaults to row-reverse, which parks the day number on the right
   flex-direction: row;
@@ -713,13 +733,16 @@ onBeforeUnmount(() => {
   background: var(--background-selectable);
   border-radius: 4px;
   color: var(--text-strong);
-  cursor: pointer;
   font-size: 0.7rem;
   font-weight: 600;
   padding: 0 4px;
 
-  &:hover {
-    background: var(--background-selected);
+  &.linked {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--background-selected);
+    }
   }
 }
 
