@@ -45,7 +45,6 @@ const mountList = (component, props = {}, getters = {}) => {
     props: { entries: [{ id: 'episode-1', name: 'E01' }], ...props },
     global: {
       plugins: [store],
-      mocks: { $t: key => key },
       stubs: { RouterLink: RouterLinkStub }
     }
   })

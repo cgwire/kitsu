@@ -17,7 +17,7 @@ const mountDays = messages => {
   })
   return shallowMount(EntityChatDays, {
     props: { messages },
-    global: { plugins: [store], mocks: { $t: key => key } }
+    global: { plugins: [store] }
   })
 }
 

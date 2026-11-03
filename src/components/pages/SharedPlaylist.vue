@@ -28,6 +28,7 @@
         :token="token"
         :guest-id="guestId || ''"
         :can-comment="shareLink?.can_comment || false"
+        :can-download="shareLink?.can_download || false"
         @logout="logoutGuest"
       />
     </div>
@@ -40,13 +41,12 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
+import crisp from '@/lib/crisp'
 import {
   TOGGLE_DARK_THEME,
   USER_LOGIN,
   USER_LOGOUT
 } from '@/store/mutation-types'
-
-import crisp from '@/lib/crisp'
 
 import SharedPlaylistIdentityCard from '@/components/pages/SharedPlaylistIdentityCard.vue'
 import SharedPlaylistPlayer from '@/components/players/players/SharedPlaylistPlayer.vue'
@@ -58,6 +58,9 @@ const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
 
+// State
+// --------------------------------------------------------------------------
+
 const loading = ref(true)
 const loadingPlayer = ref(false)
 const error = ref(false)
@@ -67,6 +70,9 @@ const playlistEntities = ref([])
 const guestId = ref(null)
 const guestName = ref('')
 const identityError = ref('')
+
+// Computed
+// --------------------------------------------------------------------------
 
 const token = computed(() => route.params.token)
 
@@ -78,21 +84,26 @@ const needsIdentity = computed(
   () => shareLink.value?.can_comment && !guestId.value
 )
 
-watch(guestName, () => {
-  identityError.value = ''
-})
+// Functions
+// --------------------------------------------------------------------------
 
-const loginAsGuest = guest => {
-  if (!guest) return
+const loginAsClient = user => {
   store.commit(USER_LOGIN, {
-    id: guest.id,
-    first_name: guest.first_name || 'Guest',
-    last_name: guest.last_name || '',
-    email: guest.email || '',
     role: 'client',
     is_guest: true,
     has_avatar: false,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+    ...user
+  })
+}
+
+const loginAsGuest = guest => {
+  if (!guest) return
+  loginAsClient({
+    id: guest.id,
+    first_name: guest.first_name || 'Guest',
+    last_name: guest.last_name || '',
+    email: guest.email || '',
     locale: guest.locale
   })
 }
@@ -100,14 +111,7 @@ const loginAsGuest = guest => {
 // A link closed to comments asks for no name, but its comments still render
 // for the client role, as they do for a guest.
 const loginAsViewer = () => {
-  store.commit(USER_LOGIN, {
-    first_name: '',
-    last_name: '',
-    role: 'client',
-    is_guest: true,
-    has_avatar: false,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-  })
+  loginAsClient({ first_name: '', last_name: '' })
 }
 
 const restoreStoredGuest = async () => {
@@ -179,6 +183,16 @@ const logoutGuest = () => {
   store.commit(USER_LOGOUT)
 }
 
+// Watchers
+// --------------------------------------------------------------------------
+
+watch(guestName, () => {
+  identityError.value = ''
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+
 onMounted(() => {
   store.commit(TOGGLE_DARK_THEME, true)
   crisp.setChatVisibility(false)
@@ -223,7 +237,15 @@ onBeforeUnmount(() => {
   display: flex;
   height: 100%;
   justify-content: center;
+  overflow-y: auto;
+  padding: 1em;
   width: 100%;
+
+  // a margin keeps the top of a card taller than a landscape phone in reach,
+  // which centering would cut off
+  > * {
+    margin: auto;
+  }
 }
 
 .shared-playlist {

@@ -20,13 +20,14 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import { renderMarkdown } from '@/lib/render'
-import filesApi from '@/store/api/files'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const { t } = useI18n()
+const store = useStore()
 
 const props = defineProps({
   preview: {
@@ -62,11 +63,11 @@ const loadContent = async () => {
   isLoading.value = true
   hasError.value = false
   try {
-    rawContent.value = await filesApi.getPreviewFileText(
-      props.preview.id,
-      'md',
-      props.urlPrefix
-    )
+    rawContent.value = await store.dispatch('loadPreviewFileText', {
+      previewId: props.preview.id,
+      extension: 'md',
+      urlPrefix: props.urlPrefix
+    })
   } catch (err) {
     console.error('Failed to load markdown preview', err)
     hasError.value = true

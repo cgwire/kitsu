@@ -10,7 +10,7 @@ vi.mock('vue-router', () => ({
 vi.mock('@/components/players/players/SharedPlaylistPlayer.vue', () => ({
   default: {
     name: 'SharedPlaylistPlayer',
-    props: ['canComment', 'entities', 'guestId', 'loading', 'playlist', 'token'],
+    props: ['canComment', 'canDownload', 'entities', 'guestId', 'loading', 'playlist', 'token'],
     template: '<div />'
   }
 }))
@@ -24,11 +24,11 @@ import SharedPlaylistPlayer from '@/components/players/players/SharedPlaylistPla
 let actions
 let mutations
 
-const mountPage = async ({ canComment }) => {
+const mountPage = async ({ canComment, canDownload = false }) => {
   actions = {
     loadSharedPlaylist: vi.fn(async () => ({ id: 'playlist-1', shots: [] })),
     loadSharedPlaylistContext: vi.fn(async () => ({
-      share_link: { can_comment: canComment },
+      share_link: { can_comment: canComment, can_download: canDownload },
       project: { id: 'production-1' },
       task_types: [],
       task_statuses: []
@@ -45,7 +45,7 @@ const mountPage = async ({ canComment }) => {
   }
   const store = createStore({ actions, mutations })
   const wrapper = shallowMount(SharedPlaylist, {
-    global: { mocks: { $t: key => key }, plugins: [store] }
+    global: { plugins: [store] }
   })
   await flushPromises()
   return wrapper
@@ -85,6 +85,13 @@ describe('pages/SharedPlaylist', () => {
     const player = wrapper.findComponent(SharedPlaylistPlayer)
     expect(player.props('canComment')).toBe(false)
     expect(player.props('guestId')).toBe('')
+  })
+
+  test('hands the download setting of the link to the player', async () => {
+    const wrapper = await mountPage({ canComment: false, canDownload: true })
+    expect(
+      wrapper.findComponent(SharedPlaylistPlayer).props('canDownload')
+    ).toBe(true)
   })
 
   test('shows a link closed to comments as a client sees it', async () => {

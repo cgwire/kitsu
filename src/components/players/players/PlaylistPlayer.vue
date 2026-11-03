@@ -1017,7 +1017,6 @@ import {
 } from '@/lib/preview'
 import { formatDisplayDate, formatTimeOfDay } from '@/lib/time'
 import {
-  ceilToFrame,
   floorToFrame,
   formatFrame,
   formatTime,
@@ -1820,6 +1819,7 @@ const {
   removeObjectFromCanvas,
   updateObjectInCanvas,
   isWriting,
+  isTypingText,
   getNewAnnotations,
   loadSingleAnnotation,
   loadSingleAnnotationComparison,
@@ -2402,21 +2402,12 @@ const pause = () => {
     isPlaying.value = false
     _stopPlaylistProgressUpdateLoop()
   } else if (isCurrentPreviewMovie.value) {
-    const comparisonPlayer = rawPlayerComparison.value
-    let currentTimeValue = 0
-    if (rawPlayer.value) {
-      // The next frame boundary, but within the last frame: the very end of
-      // the movie holds no drawing.
-      currentTimeValue = Math.min(
-        ceilToFrame(rawPlayer.value.getCurrentTimeRaw(), fps.value),
-        frameStartTime(nbFrames.value - 1, fps.value)
-      )
-    }
+    // The viewer pauses on the frame on screen. The comparison viewer is
+    // mounted even when not comparing: seeking the movie again for it
+    // moved the picture off that frame.
     rawPlayer.value?.pause()
-    if (comparisonPlayer) {
-      comparisonPlayer.pause()
-      rawPlayer.value.setCurrentTimeRaw(currentTimeValue)
-      comparisonPlayer.setCurrentTimeRaw(currentTimeValue)
+    if (isComparing.value) {
+      rawPlayerComparison.value?.pause(rawPlayer.value?.getCurrentFrame())
     }
   } else if (isCurrentPreviewSound.value) {
     soundPlayer.value?.pause()
@@ -2608,7 +2599,9 @@ const goPreviousFrame = () => {
     if (!rawPlayer.value) return
     rawPlayer.value.goPreviousFrame()
     if (isComparing.value) syncComparisonPlayer()
-    const time = rawPlayer.value.getCurrentTime()
+    // The time of the frame the step sent, as drawings are saved: the
+    // movie time runs ahead of frame * frameDuration along the movie.
+    const time = currentTimeRaw.value
     const ann = getAnnotation(time)
     if (ann) loadSingleAnnotation(ann)
     if (isComparing.value && !isComparisonOverlay.value) {
@@ -2642,7 +2635,9 @@ const goNextFrame = () => {
     clearCanvas()
     rawPlayer.value.goNextFrame()
     if (isComparing.value) syncComparisonPlayer()
-    const time = rawPlayer.value.getCurrentTime()
+    // The time of the frame the step sent, as drawings are saved: the
+    // movie time runs ahead of frame * frameDuration along the movie.
+    const time = currentTimeRaw.value
     const ann = getAnnotation(time)
     if (ann) loadSingleAnnotation(ann)
     if (isComparing.value && !isComparisonOverlay.value) {
@@ -2822,7 +2817,8 @@ const togglePlayPause = () => {
     playClicked()
   } else {
     pauseClicked()
-    const ann = getAnnotation(rawPlayer.value?.getCurrentTime())
+    // The frame the viewer paused on, as drawings are saved.
+    const ann = getAnnotation(currentTimeRaw.value)
     if (ann) loadAnnotation(ann)
     updateRoomStatus()
   }
@@ -4873,8 +4869,10 @@ const onPreviewFileAnnotationUpdate = eventData => {
       taskId: currentPreview.value.task_id
     })
     .then(preview => {
+      // A reload under a text being typed ends the typing.
       if (
         !notSaved.value &&
+        !isTypingText() &&
         currentPreview.value?.id === eventData.preview_file_id &&
         !isWriting(eventData.updated_at)
       ) {

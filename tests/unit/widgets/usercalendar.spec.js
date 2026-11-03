@@ -35,7 +35,7 @@ const previewPath = '/api/pictures/previews/preview-files/preview-1.png'
 
 const mountCalendar = async (
   taskStatus,
-  { task: taskOverrides = {}, previewFileStatusMap } = {}
+  { task: taskOverrides = {}, previewFileStatusMap, props = {} } = {}
 ) => {
   const today = toDateKey(new Date())
   const task = {
@@ -59,7 +59,7 @@ const mountCalendar = async (
     }
   })
   const wrapper = mount(UserCalendar, {
-    props: { tasks: [task], isLoading: false },
+    props: { tasks: [task], isLoading: false, ...props },
     global: { plugins: [store] }
   })
   await flushPromises()
@@ -176,6 +176,45 @@ describe('UserCalendar', () => {
       await flushPromises()
       expect(button(wrapper, 'dayGridWeek').classes()).toContain('active')
       expect(button(wrapper, 'dayGridMonth').classes()).not.toContain('active')
+      wrapper.unmount()
+    })
+  })
+
+  describe('links to the timesheet of a day', () => {
+    const today = toDateKey(new Date())
+    const timeSpents = [{ date: today, duration: 120 }]
+    const dayNumber = wrapper =>
+      wrapper.find(`.fc-day[data-date="${today}"] .fc-daygrid-day-number`)
+
+    it('opens the timesheet of a day from its number and its hours', async () => {
+      const wrapper = await mountCalendar(todoStatus, { props: { timeSpents } })
+      expect(dayNumber(wrapper).attributes('data-navlink')).toBeDefined()
+      const hours = wrapper.find('.day-hours')
+      expect(hours.attributes('role')).toBe('button')
+      await hours.trigger('click')
+      expect(wrapper.emitted('time-clicked')).toEqual([[today]])
+      wrapper.unmount()
+    })
+
+    it('leaves the days unlinked when asked', async () => {
+      const wrapper = await mountCalendar(todoStatus, {
+        props: { timeSpents, withDayLinks: false }
+      })
+      expect(dayNumber(wrapper).attributes('data-navlink')).toBeUndefined()
+      const hours = wrapper.find('.day-hours')
+      expect(hours.attributes('role')).toBeUndefined()
+      expect(hours.attributes('tabindex')).toBeUndefined()
+      await hours.trigger('click')
+      expect(wrapper.emitted('time-clicked')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    // the person page keeps its calendar from a person to the next
+    it('unlinks the days of a calendar already shown', async () => {
+      const wrapper = await mountCalendar(todoStatus, { props: { timeSpents } })
+      await wrapper.setProps({ withDayLinks: false })
+      await flushPromises()
+      expect(dayNumber(wrapper).attributes('data-navlink')).toBeUndefined()
       wrapper.unmount()
     })
   })

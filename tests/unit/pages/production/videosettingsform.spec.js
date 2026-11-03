@@ -24,8 +24,7 @@ const mountForm = (props = {}, slots = {}) =>
       defaultBitrates: { hd_bitrate_compression: 40, ld_bitrate_compression: 8 },
       ...props
     },
-    slots,
-    global: { mocks: { $t: key => key } }
+    slots
   })
 
 describe('VideoSettingsForm', () => {

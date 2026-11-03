@@ -52,7 +52,6 @@ const mountPage = async ({
   const wrapper = shallowMount(OpenProductions, {
     global: {
       plugins: [router, store],
-      mocks: { $t: key => key },
       directives: { focus: () => {} }
     }
   })

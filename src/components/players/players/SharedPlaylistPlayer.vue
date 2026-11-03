@@ -1,5 +1,14 @@
 <template>
-  <div class="shared-player playlist-player" ref="container">
+  <div
+    class="shared-player playlist-player"
+    :class="{
+      'bars-hidden': isOnlyMediaShown,
+      phone: isPhone,
+      'phone-full-screen': isPhoneFullScreen,
+      'phone-landscape': isPhoneLandscape
+    }"
+    ref="container"
+  >
     <shared-playlist-header
       :current-entity-display-name="currentEntityDisplayName"
       :entity-count="entityList.length"
@@ -8,14 +17,22 @@
       :playing-entity-index="playingEntityIndex"
       :playlist-name="playlistName"
       :project-name="projectName"
+      :zip-url="zipUrl"
       @logout="emit('logout')"
       @next-entity="nextEntity"
       @previous-entity="previousEntity"
+      v-if="!isPhoneFullScreen"
     />
 
     <div class="player-row">
       <div class="player-area">
-        <div class="video-container" ref="videoContainer" @contextmenu.prevent>
+        <div
+          class="video-container"
+          ref="videoContainer"
+          @contextmenu.prevent
+          @pointerdown.capture="onMediaPointerDown"
+          @pointerup.capture="onMediaPointerUp"
+        >
           <multi-video-viewer
             ref="rawPlayer"
             class="raw-player"
@@ -30,7 +47,7 @@
             @max-duration-update="onMaxDurationUpdate"
             @panzoom-changed="onPanzoomChanged"
             @panzoom-ready="onPanzoomReady"
-            @play-failed="onMoviePlayFailed"
+            @play-failed="onMediaPlayFailed"
             @play-next="onPlayNext"
             @video-loaded="onVideoLoaded"
             v-show="isMovie && !loading"
@@ -58,7 +75,7 @@
             :volume="volume"
             @duration-changed="onSoundDurationChanged"
             @play-ended="onPlayNext"
-            @play-failed="onSoundPlayFailed"
+            @play-failed="onMediaPlayFailed"
             @time-update="onSoundTimeUpdate"
             v-if="isSound && !loading"
           />
@@ -172,13 +189,14 @@
       :current-time-formatted="currentTimeFormatted"
       :entity-preview-length="currentEntityPreviewLength"
       :guest-id="guestId"
-      :is-full-screen="isFullScreen"
+      :is-full-screen="isFullScreen || isPhoneFullScreen"
       :is-movie="isMovie"
       :is-picture="isPicture"
       :is-playing="isPlaying"
       :is-sound="isSound"
       :max-duration-formatted="maxDurationFormatted"
       :nb-frames-display="nbFramesDisplay"
+      :phone="isPhone"
       :token="token"
       v-model:is-annotating="isAnnotating"
       v-model:is-comments-hidden="isCommentsHidden"
@@ -251,6 +269,7 @@ import { useStore } from 'vuex'
 
 import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
 import { usePanzoomSync } from '@/composables/panzoom'
+import { usePhoneLayout } from '@/composables/phoneLayout'
 import { useMediaKind } from '@/composables/players/mediaKind'
 import {
   isAltLetter,
@@ -281,12 +300,21 @@ import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
 import SoundViewer from '@/components/players/viewers/SoundViewer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
+// A finger that moved further was panning, not tapping.
+const TAP_TOLERANCE = 10
+
 const store = useStore()
+const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
+  usePanzoomSync()
+const { isPhone, isPhoneLandscape } = usePhoneLayout()
+const { isMuted, isPlaying, isRepeating } = usePlayerTransport()
 
 // Props / Emits
+// --------------------------------------------------------------------------
 
 const props = defineProps({
   canComment: { type: Boolean, default: false },
+  canDownload: { type: Boolean, default: false },
   entities: { type: Array, default: () => [] },
   guestId: { type: String, default: '' },
   loading: { type: Boolean, default: false },
@@ -297,9 +325,7 @@ const props = defineProps({
 const emit = defineEmits(['logout'])
 
 // State
-
-const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
-  usePanzoomSync()
+// --------------------------------------------------------------------------
 
 const annotationOverlay = ref(null)
 const container = ref(null)
@@ -312,13 +338,11 @@ const currentFrameNumber = ref(0)
 const currentPlaylistProgress = ref(0)
 const currentPreviewIndex = ref(0)
 const isAnnotating = ref(false)
-const isCommentsHidden = ref(
-  typeof window !== 'undefined' &&
-    window.matchMedia?.('(max-width: 768px)').matches
-)
-const isEntitiesHidden = ref(false)
+const isCommentsHidden = ref(false)
+const isEntitiesHidden = ref(isPhoneLandscape.value)
 const isFullScreen = ref(false)
-const { isMuted, isPlaying, isRepeating } = usePlayerTransport()
+const isPhoneFullScreen = ref(false)
+const isPhoneFullScreenBarsShown = ref(false)
 const maxDuration = ref(0)
 const movieDimensions = ref({ width: 0, height: 0 })
 const picturePlayer = ref(null)
@@ -333,7 +357,7 @@ const videoProgressRef = ref(null)
 const volume = ref(100)
 
 // Tracks whether the very first entity has been auto-loaded after mount.
-// Plain `let` (not ref) — only used by the watchers below.
+// Plain `let`, not a ref: only used by the watchers below.
 let firstEntityLoaded = false
 
 // requestAnimationFrame id for the picture playback timer (null when idle).
@@ -342,7 +366,22 @@ let picturePlayFrame = null
 // Frame of its slot clicked on the playlist bar for a sound not decoded yet.
 let pendingSoundFrame = null
 
+let mediaPointerStart = null
+let panelsBeforePhoneFullScreen = null
+let pictureResizeObserver = null
+let playerResizeTimeout = null
+
 // Computed
+// --------------------------------------------------------------------------
+
+// Drawing needs the pencil and the undo at hand.
+const isOnlyMediaShown = computed(
+  () =>
+    isPhoneLandscape.value &&
+    isPhoneFullScreen.value &&
+    !isPhoneFullScreenBarsShown.value &&
+    !isAnnotating.value
+)
 
 const entityList = computed(() => props.entities || [])
 
@@ -456,6 +495,10 @@ const downloadFileName = computed(() => {
   return extension.value ? `${entityName}.${extension.value}` : entityName
 })
 
+const zipUrl = computed(() =>
+  props.canDownload ? `/api/shared/playlists/${props.token}/download/zip` : ''
+)
+
 const modelUrl = computed(() => {
   if (!currentPreview.value) return ''
   const base = sharedApiPrefix.value || '/api'
@@ -556,7 +599,8 @@ const entityListForProgress = computed(
   () => playlistFrameData.value.entitiesWithStart
 )
 
-// Functions — playback
+// Functions: playback
+// --------------------------------------------------------------------------
 
 const play = () => {
   isPlaying.value = true
@@ -576,7 +620,7 @@ const togglePlay = () => (isPlaying.value ? pause() : play())
 
 // Picture playback: the picture viewer (not MultiVideoViewer, which is
 // movie-only) shows the image, and a timer advances the playlist after the
-// image's frame budget elapses — mirroring the studio player's playPicture.
+// image's frame budget elapses, mirroring the studio player's playPicture.
 // Matches playlistFrameData so a picture is shown for the same span the
 // playlist-progress bar allots to it.
 const pictureFrameCount = () =>
@@ -690,7 +734,8 @@ const selectEntity = index => {
 const previousEntity = () => selectEntity(playingEntityIndex.value - 1)
 const nextEntity = () => selectEntity(playingEntityIndex.value + 1)
 
-// Functions — sub-previews & zoom
+// Functions: sub-previews & zoom
+// --------------------------------------------------------------------------
 
 // A frame clicked on a sound not decoded yet is no frame of another file.
 const onPreviousPreviewClicked = () => {
@@ -778,12 +823,53 @@ const loadFirstEntity = () => {
   }
 }
 
-// Functions — fullscreen / sound
+// Functions: fullscreen / sound
+// --------------------------------------------------------------------------
 
 const isDocumentFullScreen = () =>
   Boolean(document.fullscreenElement || document.webkitIsFullScreen)
 
+// iPhones cannot put an element full screen: phones fill the page with the
+// media instead, and get their panels back on the way out.
+const togglePhoneFullScreen = () => {
+  if (isPhoneFullScreen.value) {
+    isCommentsHidden.value = panelsBeforePhoneFullScreen.isCommentsHidden
+    isEntitiesHidden.value = panelsBeforePhoneFullScreen.isEntitiesHidden
+    isPhoneFullScreen.value = false
+  } else {
+    panelsBeforePhoneFullScreen = {
+      isCommentsHidden: isCommentsHidden.value,
+      isEntitiesHidden: isEntitiesHidden.value
+    }
+    isCommentsHidden.value = true
+    isEntitiesHidden.value = true
+    isPhoneFullScreenBarsShown.value = false
+    isPhoneFullScreen.value = true
+  }
+}
+
+// Captured: the pan/zoom of the media keeps these events for itself, and no
+// click follows a touch.
+const onMediaPointerDown = event => {
+  mediaPointerStart = { x: event.clientX, y: event.clientY }
+}
+
+const onMediaPointerUp = event => {
+  if (!isPhoneLandscape.value || !isPhoneFullScreen.value) return
+  if (isAnnotating.value || !mediaPointerStart) return
+  const isTap =
+    Math.abs(event.clientX - mediaPointerStart.x) < TAP_TOLERANCE &&
+    Math.abs(event.clientY - mediaPointerStart.y) < TAP_TOLERANCE
+  if (isTap) {
+    isPhoneFullScreenBarsShown.value = !isPhoneFullScreenBarsShown.value
+  }
+}
+
 const toggleFullScreen = async () => {
+  if (isPhone.value) {
+    togglePhoneFullScreen()
+    return
+  }
   if (isDocumentFullScreen()) {
     await (document.exitFullscreen?.() || document.webkitCancelFullScreen?.())
   } else if (container.value) {
@@ -796,7 +882,8 @@ const onFullScreenChange = () => {
   isFullScreen.value = isDocumentFullScreen()
 }
 
-// Functions — player events
+// Functions: player events
+// --------------------------------------------------------------------------
 
 const onEntityChange = index => {
   playingEntityIndex.value = index
@@ -909,13 +996,9 @@ const onPlayNext = () => {
   advancePlaylist()
 }
 
-// A sound that cannot be read keeps its slot like a picture, then the
+// A media that cannot be read keeps its slot like a picture, then the
 // playlist moves on.
-const onSoundPlayFailed = () => {
-  if (isPlaying.value) playPicture()
-}
-
-const onMoviePlayFailed = () => {
+const onMediaPlayFailed = () => {
   if (isPlaying.value) playPicture()
 }
 
@@ -960,7 +1043,8 @@ const onStatusChanged = ({ taskStatusId, color }) => {
   entity.task_status_color = color
 }
 
-// Functions — entity strip
+// Functions: entity strip
+// --------------------------------------------------------------------------
 
 const onEntitiesWheel = event => {
   if (playlistedEntities.value) {
@@ -990,7 +1074,8 @@ const scrollPlayingEntityIntoView = () => {
 // before asking the raw player to re-measure.
 const triggerPlayerResize = () => {
   window.dispatchEvent(new Event('resize'))
-  setTimeout(() => {
+  clearTimeout(playerResizeTimeout)
+  playerResizeTimeout = setTimeout(() => {
     rawPlayer.value?.resetHeight?.()
     window.dispatchEvent(new Event('resize'))
   }, 50)
@@ -1001,7 +1086,8 @@ const updatePictureHeight = () => {
   if (el?.clientHeight) pictureHeight.value = el.clientHeight
 }
 
-// Functions — keyboard
+// Functions: keyboard
+// --------------------------------------------------------------------------
 
 const onKeyDown = event => {
   if (['INPUT', 'TEXTAREA'].includes(event.target.tagName)) return
@@ -1025,7 +1111,7 @@ const onKeyDown = event => {
   }
 
   // Entity navigation reuses isAltLetter (shared with usePreviewShortcuts)
-  // so Alt+J/K match identically here. Arrows below stay event.code-only —
+  // so Alt+J/K match identically here. Arrows below stay event.code-only:
   // no letter glyph to worry about.
   if (isAltLetter(event, 'KeyJ', 'j')) {
     stop()
@@ -1063,6 +1149,7 @@ const onKeyDown = event => {
 }
 
 // Watchers
+// --------------------------------------------------------------------------
 
 watchEffect(() => {
   if (!firstEntityLoaded && entityList.value.length > 0 && rawPlayer.value) {
@@ -1082,6 +1169,20 @@ watch(volume, newVolume => {
 })
 
 watch(isCommentsHidden, triggerPlayerResize)
+
+watch(isPhoneFullScreen, triggerPlayerResize)
+
+watch(isPhone, phone => {
+  if (!phone && isPhoneFullScreen.value) togglePhoneFullScreen()
+  triggerPlayerResize()
+})
+
+// a rotation lays the phone out again: the strip folds in landscape
+watch(isPhoneLandscape, isLandscape => {
+  if (isPhoneFullScreen.value) togglePhoneFullScreen()
+  isEntitiesHidden.value = isLandscape
+  triggerPlayerResize()
+})
 
 watch(isEntitiesHidden, hidden => {
   triggerPlayerResize()
@@ -1103,8 +1204,7 @@ watch(
 )
 
 // Lifecycle
-
-let pictureResizeObserver = null
+// --------------------------------------------------------------------------
 
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown, false)
@@ -1122,6 +1222,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', onFullScreenChange)
   document.removeEventListener('webkitfullscreenchange', onFullScreenChange)
   pictureResizeObserver?.disconnect()
+  clearTimeout(playerResizeTimeout)
   stopPicturePlayback()
 })
 </script>
@@ -1428,15 +1529,115 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-// Responsive
+// Phones (see usePhoneLayout). Portrait: one scrolling column, the compact
+// entity strip on top and the comments under the bars. Landscape: the
+// comments beside the media. The in-page full screen hides both panels.
 
-@media screen and (max-width: 900px) and (orientation: landscape) {
-  .video-progress {
-    display: none;
+.shared-player.phone .playlisted-entities {
+  flex: none;
+  height: auto;
+  min-height: 0;
+  padding-bottom: 0.4em;
+
+  .playlisted-wrapper {
+    flex: none;
+    margin-right: 0.5em;
   }
 
-  .shared-player :deep(.playlist-progress) {
-    display: none !important;
+  // one size for every card, whatever the title or the picture ratio
+  :deep(.playlisted-entity) {
+    min-width: 0;
+    width: 100px;
+  }
+
+  // the thumbnail sizes itself inline
+  :deep(.thumbnail-picture) {
+    height: 50px !important;
+    max-width: none !important;
+    object-fit: cover;
+    width: 100% !important;
+  }
+
+  :deep(.entity-title) {
+    max-width: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :deep(.preview-meta) {
+    display: none;
+  }
+}
+
+.shared-player.phone:not(.phone-landscape):not(.phone-full-screen) {
+  overflow-y: auto;
+
+  // the row of the media and the comments hands its children to the column
+  .player-row {
+    display: contents;
+  }
+
+  // 16/9 of the screen width: Safari 14 has no aspect-ratio
+  .player-area {
+    flex: none;
+    height: 56.25vw;
+  }
+
+  .playlisted-entities {
+    order: -1;
+  }
+
+  // the column scrolls: the panel takes its height, and its status and emoji
+  // menus can pass its edge when it holds no comment
+  .shared-comments-panel {
+    border-left: 0;
+    flex: none;
+    height: auto;
+    order: 1;
+    overflow: visible;
+    width: 100%;
+  }
+
+  .shared-header {
+    order: -2;
+  }
+}
+
+.shared-player.phone-landscape .shared-comments-panel {
+  flex: none;
+  width: 40%;
+}
+
+// The media covers the whole screen and the bars come over it on a tap, so
+// that it keeps its size. z-index 0 keeps the annotation overlay (z-index 500)
+// inside the media row, under the bars.
+.shared-player.phone-landscape.phone-full-screen {
+  justify-content: flex-end;
+  position: relative;
+
+  .player-row {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 0;
+  }
+
+  .video-progress,
+  .playlist-footer,
+  :deep(.playlist-progress) {
+    position: relative;
+    z-index: 1;
+  }
+
+  &.bars-hidden {
+    .video-progress,
+    .playlist-footer,
+    :deep(.playlist-progress) {
+      display: none;
+    }
   }
 }
 </style>

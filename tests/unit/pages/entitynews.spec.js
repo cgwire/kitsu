@@ -55,8 +55,11 @@ const mountNews = async ({
   const [, onNewsNew] = socket.on.mock.calls.find(
     ([eventName]) => eventName === 'news:new'
   )
-  return { getEntityNews, onNewsNew, wrapper }
+  return { getEntityNews, onNewsNew, socket, wrapper }
 }
+
+const handlerOf = (socket, event) =>
+  socket.on.mock.calls.find(([eventName]) => eventName === event)?.[1]
 
 describe('EntityNews', () => {
   test('passes the task type scoped to the episode when it is known', async () => {
@@ -111,6 +114,57 @@ describe('EntityNews', () => {
     await flushPromises()
 
     expect(getEntityNews).toHaveBeenCalledTimes(1)
+  })
+
+  // Removing a task or an entity sends one news:delete per news.
+  test('drops a deleted news without loading the list again', async () => {
+    const { getEntityNews, socket, wrapper } = await mountNews({
+      newsList: [news, { ...news, id: 'news-2' }]
+    })
+    expect(socket.on).toHaveBeenCalledWith('news:delete', expect.any(Function))
+
+    handlerOf(socket, 'news:delete')({ news_id: 'news-1' })
+    await flushPromises()
+
+    expect(wrapper.findAll('.timeline-entry')).toHaveLength(1)
+    expect(getEntityNews).toHaveBeenCalledTimes(1)
+  })
+
+  test('keeps out a news deleted while the list loads again', async () => {
+    const { getEntityNews, onNewsNew, socket, wrapper } = await mountNews()
+    let answer = null
+    getEntityNews.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          answer = resolve
+        })
+    )
+
+    onNewsNew({ news_id: 'news-2', project_id: 'production-1' })
+    handlerOf(socket, 'news:delete')({ news_id: 'news-1' })
+    answer({ data: [news] })
+    await flushPromises()
+
+    expect(wrapper.findAll('.timeline-entry')).toHaveLength(0)
+  })
+
+  test('ignores the deletion of a news it does not show', async () => {
+    const { socket, wrapper } = await mountNews()
+
+    handlerOf(socket, 'news:delete')?.({ news_id: 'news-9' })
+    await flushPromises()
+
+    expect(wrapper.findAll('.timeline-entry')).toHaveLength(1)
+  })
+
+  test('stops listening to the deletions once unmounted', async () => {
+    const { socket, wrapper } = await mountNews()
+    const onNewsDelete = handlerOf(socket, 'news:delete')
+
+    wrapper.unmount()
+
+    expect(onNewsDelete).toEqual(expect.any(Function))
+    expect(socket.off).toHaveBeenCalledWith('news:delete', onNewsDelete)
   })
 
   test('shows the task types unlinked while the store holds no production', async () => {

@@ -15,6 +15,8 @@ vi.mock('@/store/api/people', () => ({
     getDayTable: vi.fn(),
     getMonthTable: vi.fn(),
     getPersonQuotaShots: vi.fn(),
+    getPersonTasks: vi.fn(),
+    getTimeSpents: vi.fn(),
     getWeekTable: vi.fn(),
     getYearTable: vi.fn(),
     postOrganisationLogo: vi.fn(),
@@ -449,6 +451,47 @@ describe('People store loadDaysOff action', () => {
     expect(commit).not.toHaveBeenCalled()
     expect(consoleError).toHaveBeenCalledTimes(3)
     consoleError.mockRestore()
+  })
+})
+
+describe('People store loadPersonTasks action', () => {
+  const rootGetters = { taskTypeMap: new Map(), userFilters: {} }
+
+  beforeEach(() => {
+    peopleApi.getPersonTasks.mockResolvedValue([])
+    peopleApi.getTimeSpents.mockClear()
+    peopleApi.getTimeSpents.mockResolvedValue([])
+  })
+
+  test('reads the time spents of the day along with the tasks', async () => {
+    const timeSpent = { id: 'time-1', task_id: 'task-1', duration: 60 }
+    peopleApi.getTimeSpents.mockResolvedValue([timeSpent])
+    const commit = vi.fn()
+
+    await store.actions.loadPersonTasks(
+      { commit, rootGetters },
+      { personId: 'person-1', date: '2026-11-02', withTimeSpents: true }
+    )
+
+    expect(peopleApi.getTimeSpents).toHaveBeenCalledWith(
+      'person-1',
+      '2026-11-02'
+    )
+    expect(commit).toHaveBeenCalledWith('PERSON_LOAD_TIME_SPENTS_END', [
+      timeSpent
+    ])
+  })
+
+  test('leaves the time spents out when not asked', async () => {
+    const commit = vi.fn()
+
+    await store.actions.loadPersonTasks(
+      { commit, rootGetters },
+      { personId: 'person-1', date: '2026-11-02', withTimeSpents: false }
+    )
+
+    expect(peopleApi.getTimeSpents).not.toHaveBeenCalled()
+    expect(commit).toHaveBeenCalledWith('PERSON_LOAD_TIME_SPENTS_END', [])
   })
 })
 

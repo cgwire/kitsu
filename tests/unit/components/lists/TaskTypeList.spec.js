@@ -30,7 +30,6 @@ const mountList = () => {
     props: { entries: workflow },
     global: {
       plugins: [store],
-      mocks: { $t: key => key },
       stubs: { draggable: false }
     }
   })

@@ -66,7 +66,6 @@ const mountPlayer = ({
       token: 'token'
     },
     global: {
-      mocks: { $t: key => key },
       plugins: [store],
       stubs: {
         // The player drives these through refs; the default stubs have none
@@ -116,6 +115,18 @@ const mountPlayer = ({
 }
 
 describe('players/SharedPlaylistPlayer', () => {
+  it('hands the zip url to the header on a link allowing downloads', async () => {
+    const wrapper = mountPlayer()
+    const header = wrapper.findComponent(SharedPlaylistHeader)
+    expect(header.props('zipUrl')).toBe('')
+
+    await wrapper.setProps({ canDownload: true })
+    expect(header.props('zipUrl')).toBe(
+      '/api/shared/playlists/token/download/zip'
+    )
+    wrapper.unmount()
+  })
+
   beforeAll(() => {
     vi.stubGlobal(
       'ResizeObserver',
@@ -820,6 +831,191 @@ describe('players/SharedPlaylistPlayer', () => {
       await clickTimeCode(wrapper, '1')
       expect(setCurrentFrame).not.toHaveBeenCalledWith(420)
       expect(frameDisplay(wrapper)).toBe('001')
+      wrapper.unmount()
+    })
+  })
+
+  describe('on a phone', () => {
+    const PORTRAIT = '(max-width: 768px)'
+    const LANDSCAPE = '(max-height: 500px) and (orientation: landscape)'
+
+    const stubScreen = matched => {
+      const lists = {}
+      globalThis.matchMedia = query => {
+        lists[query] = {
+          matches: matched.includes(query),
+          addEventListener: (name, listener) => {
+            lists[query].listener = listener
+          },
+          removeEventListener: () => {}
+        }
+        return lists[query]
+      }
+      return lists
+    }
+    const bar = wrapper => wrapper.findComponent(SharedPlaylistButtonBar)
+    const header = wrapper => wrapper.findComponent(SharedPlaylistHeader)
+    const panel = wrapper => wrapper.findComponent(SharedCommentsPanel)
+    const strip = wrapper => wrapper.find('.playlisted-entities')
+    const toggleFullScreen = async wrapper => {
+      bar(wrapper).vm.$emit('toggle-full-screen')
+      await nextTick()
+    }
+
+    afterEach(() => {
+      delete globalThis.matchMedia
+    })
+
+    it('leaves the desktop layout alone', () => {
+      stubScreen([])
+      const wrapper = mountPlayer()
+      expect(wrapper.classes()).not.toContain('phone')
+      expect(bar(wrapper).props('phone')).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('keeps the comments open and the strip shown in portrait', () => {
+      stubScreen([PORTRAIT])
+      const wrapper = mountPlayer()
+      expect(wrapper.classes()).toContain('phone')
+      expect(wrapper.classes()).not.toContain('phone-landscape')
+      expect(bar(wrapper).props('phone')).toBe(true)
+      expect(panel(wrapper).exists()).toBe(true)
+      expect(strip(wrapper).classes()).not.toContain('hidden')
+      wrapper.unmount()
+    })
+
+    it('folds the strip in landscape, the comments staying open', () => {
+      stubScreen([LANDSCAPE])
+      const wrapper = mountPlayer()
+      expect(wrapper.classes()).toContain('phone-landscape')
+      expect(panel(wrapper).exists()).toBe(true)
+      expect(strip(wrapper).classes()).toContain('hidden')
+      wrapper.unmount()
+    })
+
+    it('folds the strip on a rotation, and unfolds it on the way back', async () => {
+      const lists = stubScreen([PORTRAIT])
+      const wrapper = mountPlayer()
+      lists[LANDSCAPE].matches = true
+      lists[LANDSCAPE].listener()
+      await nextTick()
+      expect(strip(wrapper).classes()).toContain('hidden')
+      lists[LANDSCAPE].matches = false
+      lists[LANDSCAPE].listener()
+      await nextTick()
+      expect(strip(wrapper).classes()).not.toContain('hidden')
+      wrapper.unmount()
+    })
+
+    // iPhones cannot put an element full screen.
+    it('fills the page with the media instead of the browser full screen', async () => {
+      stubScreen([PORTRAIT])
+      const wrapper = mountPlayer()
+      const requestFullscreen = vi.fn()
+      wrapper.element.requestFullscreen = requestFullscreen
+      await toggleFullScreen(wrapper)
+      expect(requestFullscreen).not.toHaveBeenCalled()
+      expect(wrapper.classes()).toContain('phone-full-screen')
+      expect(bar(wrapper).props('isFullScreen')).toBe(true)
+      expect(header(wrapper).exists()).toBe(false)
+      expect(panel(wrapper).exists()).toBe(false)
+      expect(strip(wrapper).classes()).toContain('hidden')
+      wrapper.unmount()
+    })
+
+    it('gives the panels back on the way out of the full screen', async () => {
+      stubScreen([PORTRAIT])
+      const wrapper = mountPlayer()
+      bar(wrapper).vm.$emit('update:isEntitiesHidden', true)
+      await nextTick()
+      await toggleFullScreen(wrapper)
+      await toggleFullScreen(wrapper)
+      expect(wrapper.classes()).not.toContain('phone-full-screen')
+      expect(header(wrapper).exists()).toBe(true)
+      expect(panel(wrapper).exists()).toBe(true)
+      expect(strip(wrapper).classes()).toContain('hidden')
+      wrapper.unmount()
+    })
+
+    describe('in the landscape full screen', () => {
+      const tap = async (wrapper, moved = 0) => {
+        const media = wrapper.find('.video-container').element
+        const send = (type, clientX) =>
+          media.dispatchEvent(new PointerEvent(type, { clientX, clientY: 100 }))
+        send('pointerdown', 100)
+        send('pointerup', 100 + moved)
+        await nextTick()
+      }
+      const mountFullScreen = async () => {
+        stubScreen([LANDSCAPE])
+        const wrapper = mountPlayer()
+        await toggleFullScreen(wrapper)
+        return wrapper
+      }
+
+      it('shows only the media', async () => {
+        const wrapper = await mountFullScreen()
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('keeps the bars of the portrait full screen', async () => {
+        stubScreen([PORTRAIT])
+        const wrapper = mountPlayer()
+        await toggleFullScreen(wrapper)
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('brings the bars back on a tap, and folds them on the next', async () => {
+        const wrapper = await mountFullScreen()
+        await tap(wrapper)
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        await tap(wrapper)
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('leaves the bars alone when the finger pans the media', async () => {
+        const wrapper = await mountFullScreen()
+        await tap(wrapper, 40)
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('hides the bars again on the next full screen', async () => {
+        const wrapper = await mountFullScreen()
+        await tap(wrapper)
+        await toggleFullScreen(wrapper)
+        await toggleFullScreen(wrapper)
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('keeps the bars and ignores the taps while drawing', async () => {
+        const wrapper = await mountFullScreen()
+        bar(wrapper).vm.$emit('update:isAnnotating', true)
+        await nextTick()
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        await tap(wrapper)
+        bar(wrapper).vm.$emit('update:isAnnotating', false)
+        await nextTick()
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+    })
+
+    it('leaves the full screen on a rotation', async () => {
+      const lists = stubScreen([PORTRAIT])
+      const wrapper = mountPlayer()
+      await toggleFullScreen(wrapper)
+      lists[LANDSCAPE].matches = true
+      lists[LANDSCAPE].listener()
+      await nextTick()
+      expect(wrapper.classes()).not.toContain('phone-full-screen')
+      expect(panel(wrapper).exists()).toBe(true)
+      expect(strip(wrapper).classes()).toContain('hidden')
       wrapper.unmount()
     })
   })

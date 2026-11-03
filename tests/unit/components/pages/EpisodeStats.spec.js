@@ -84,7 +84,6 @@ const mountPage = async ({ getters = {}, query = {} } = {}) => {
   wrapper = shallowMount(EpisodeStats, {
     global: {
       plugins: [store, router],
-      mocks: { $t: key => key },
       stubs: { SearchField: false }
     }
   })

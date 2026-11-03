@@ -29,7 +29,6 @@ const mountChat = async ({ participants = [], failing = {} } = {}) => {
     props: { entity, name: 'Asset' },
     global: {
       plugins: [store],
-      mocks: { $t: key => key },
       config: {
         globalProperties: { $socket: { on: vi.fn(), off: vi.fn() } }
       }

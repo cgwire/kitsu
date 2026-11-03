@@ -89,7 +89,6 @@ const mountOverview = (props = {}, getterOverrides = {}) => {
     props: { production, entities, playlists: [playlist(1)], ...props },
     global: {
       plugins: [router, store],
-      mocks: { $t: key => key },
       stubs: { LightEntityThumbnail: true, Spinner: true }
     }
   })

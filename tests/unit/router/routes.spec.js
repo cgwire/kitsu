@@ -7,7 +7,8 @@ const h = vi.hoisted(() => ({
   isAdmin: false,
   isClient: false,
   isManager: false,
-  isSupervisor: false
+  isSupervisor: false,
+  managerProductionIds: []
 }))
 
 // Stub everything the route guards touch so importing the route table does
@@ -44,7 +45,12 @@ vi.mock('@/store/modules/user', () => ({
       isCurrentUserClient: (state, getters, rootState) =>
         h.isClient ||
         h.clientProductionIds.includes(rootState?.route?.params?.production_id),
-      isCurrentUserManager: () => h.isAdmin || h.isManager,
+      isCurrentUserManager: (state, getters, rootState) =>
+        h.isAdmin ||
+        h.isManager ||
+        h.managerProductionIds.includes(
+          rootState?.route?.params?.production_id
+        ),
       isCurrentUserSupervisor: () => h.isSupervisor
     }
   }
@@ -53,6 +59,7 @@ vi.mock('@/components/Main.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/Login.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/NotFound.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/Playlist.vue', () => ({ default: {} }))
+vi.mock('@/components/pages/ProductionNewsFeed.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/Shot.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/Shots.vue', () => ({ default: {} }))
 // The app router, on a history that needs no browser.
@@ -94,7 +101,6 @@ const ADMIN_ONLY_ROUTES = [
   'departments',
   'logs',
   'main-schedule',
-  'newsfeed',
   'people',
   'productions',
   'project-templates',
@@ -157,6 +163,7 @@ const CLIENT_STATS_ROUTES = [
 describe('router/routes', () => {
   beforeEach(() => {
     h.clientProductionIds = []
+    h.managerProductionIds = []
     productionsStore.state.productionMap = new Map()
     h.isAdmin = false
     h.isClient = false
@@ -336,6 +343,46 @@ describe('router/routes', () => {
       await router.push('/productions/production-1/shots/shot-1')
       expect(router.currentRoute.value.name).toBe('shot')
       await router.push('/productions/production-2/shots/shot-1')
+      expect(router.currentRoute.value.name).toBe('not-found')
+    })
+  })
+
+  // The guard of the main route runs once, on the way in: the studio feed
+  // checks the role on every entry, a move from another page too.
+  describe('studio feed', () => {
+    const loadPage = async path => {
+      await router.push('/login')
+      await router.push(path)
+    }
+
+    test('opens to a manager on a page load', async () => {
+      h.isManager = true
+      await loadPage('/news-feed')
+      expect(router.currentRoute.value.name).toBe('newsfeed')
+    })
+
+    test('opens to a manager from another page', async () => {
+      h.isManager = true
+      await router.push('/productions/production-1/shots')
+      await router.push('/news-feed')
+      expect(router.currentRoute.value.name).toBe('newsfeed')
+    })
+
+    test('sends any other role to not-found on a page load', async () => {
+      await loadPage('/news-feed')
+      expect(router.currentRoute.value.name).toBe('not-found')
+    })
+
+    test('sends a manager of the production left only to not-found', async () => {
+      h.managerProductionIds = ['production-1']
+      await router.push('/productions/production-1/shots')
+      await router.push('/news-feed')
+      expect(router.currentRoute.value.name).toBe('not-found')
+    })
+
+    test('sends any other role to not-found from another page', async () => {
+      await router.push('/productions/production-1/shots')
+      await router.push('/news-feed')
       expect(router.currentRoute.value.name).toBe('not-found')
     })
   })

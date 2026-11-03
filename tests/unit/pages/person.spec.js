@@ -60,6 +60,7 @@ const mountPage = async ({
 } = {}) => {
   const store = createStore({
     getters: {
+      currentUserRoleForProduction: () => () => 'user',
       displayedPersonDoneTasks: () => [],
       displayedPersonTasks: () => tasks,
       getProductionTaskStatuses: () => () => [],
@@ -110,7 +111,6 @@ const mountPage = async ({
         {
           install: app => {
             app.config.globalProperties.$socket = { on: vi.fn(), off: vi.fn() }
-            app.config.globalProperties.$t = key => key
           }
         }
       ],
@@ -681,6 +681,216 @@ describe('Person page', () => {
       await flushPromises()
 
       expect(consoleError).toHaveBeenCalledWith(error)
+      wrapper.unmount()
+    })
+  })
+
+  // Zou refuses them to an artist: no request for what it would refuse
+  describe('time and days off reads', () => {
+    const manager = { isCurrentUserManager: () => true, user: () => otherUser }
+    const supervisor = {
+      isCurrentUserSupervisor: () => true,
+      user: () => otherUser
+    }
+    const artist = { user: () => otherUser }
+
+    const timeOfTheDayRead = async getters => {
+      const loadPersonTasks = vi.fn()
+      const wrapper = await mountPage({ actions: { loadPersonTasks }, getters })
+      wrapper.unmount()
+      return loadPersonTasks.mock.calls[0][1]
+    }
+
+    it.each([
+      ['the person', {}],
+      ['a manager', manager]
+    ])('reads the time of the day for %s', async (_, getters) => {
+      expect(await timeOfTheDayRead(getters)).toMatchObject({
+        personId: person.id,
+        withTimeSpents: true
+      })
+    })
+
+    // only the timelog shows it
+    it.each([
+      ['a supervisor', supervisor],
+      ['another artist', artist]
+    ])('reads no time of the day for %s', async (_, getters) => {
+      expect(await timeOfTheDayRead(getters)).toMatchObject({
+        personId: person.id,
+        withTimeSpents: false
+      })
+    })
+
+    const pickDay = async (getters, day) => {
+      const loadPersonTimeSpents = vi.fn()
+      const wrapper = await mountPage({
+        actions: { loadPersonTimeSpents },
+        getters
+      })
+      await wrapper.vm.$router.push({
+        query: { ...wrapper.vm.$route.query, day }
+      })
+      await flushPromises()
+      wrapper.unmount()
+      return loadPersonTimeSpents
+    }
+
+    it('reads the time of a day picked in the URL for the person', async () => {
+      const loadPersonTimeSpents = await pickDay({}, '2026-10-30')
+      expect(loadPersonTimeSpents.mock.calls[0][1]).toEqual({
+        personId: person.id,
+        date: '2026-10-30'
+      })
+    })
+
+    it('reads no time of a day picked in the URL for another artist', async () => {
+      const loadPersonTimeSpents = await pickDay(artist, '2026-10-30')
+      expect(loadPersonTimeSpents).not.toHaveBeenCalled()
+    })
+
+    // Back from a colleague's page: the person and the day change together,
+    // and the day is read for the person shown next only.
+    it('reads the time of a new day for the person shown next', async () => {
+      const loadPersonTasks = vi.fn()
+      const loadPersonTimeSpents = vi.fn()
+      const wrapper = await mountPage({
+        actions: { loadPersonTasks, loadPersonTimeSpents },
+        getters: {
+          ...artist,
+          personMap: () =>
+            new Map([person, otherUser].map(people => [people.id, people]))
+        },
+        query: { day: '2026-10-29' }
+      })
+
+      await wrapper.vm.$router.push({
+        path: `/people/${otherUser.id}`,
+        query: { day: '2026-10-30' }
+      })
+      await flushPromises()
+      wrapper.unmount()
+
+      expect(loadPersonTimeSpents).not.toHaveBeenCalled()
+      expect(loadPersonTasks.mock.calls.at(-1)[1]).toEqual({
+        personId: otherUser.id,
+        date: '2026-10-30',
+        withTimeSpents: true
+      })
+    })
+
+    const showCalendar = async getters => {
+      const loadPersonTimeSpentsByPeriod = vi.fn(() => [{ duration: 60 }])
+      const wrapper = await mountPage({
+        actions: { loadPersonTimeSpentsByPeriod },
+        getters,
+        query: { section: 'calendar' }
+      })
+      const calendar = wrapper.findComponent(UserCalendar)
+      calendar.vm.$emit('dates-changed', {
+        start: '2026-10-26',
+        end: '2026-12-06'
+      })
+      await flushPromises()
+      const timeSpents = calendar.props('timeSpents')
+      wrapper.unmount()
+      return { loadPersonTimeSpentsByPeriod, timeSpents }
+    }
+
+    it.each([
+      ['the person', {}],
+      ['a supervisor', supervisor]
+    ])('reads the time of the calendar for %s', async (_, getters) => {
+      const { loadPersonTimeSpentsByPeriod, timeSpents } =
+        await showCalendar(getters)
+      expect(loadPersonTimeSpentsByPeriod.mock.calls[0][1]).toEqual({
+        personId: person.id,
+        startDate: '2026-10-26',
+        endDate: '2026-12-06'
+      })
+      expect(timeSpents).toEqual([{ duration: 60 }])
+    })
+
+    it('reads no time of the calendar for another artist', async () => {
+      const { loadPersonTimeSpentsByPeriod, timeSpents } =
+        await showCalendar(artist)
+      expect(loadPersonTimeSpentsByPeriod).not.toHaveBeenCalled()
+      expect(timeSpents).toEqual([])
+    })
+
+    const onProduction = (role, team = [person.id, otherUser.id]) => ({
+      currentUserRoleForProduction: () => () => role,
+      openProductions: () => [{ id: 'prod-1', name: 'Prod', team }],
+      user: () => otherUser
+    })
+
+    const daysOffRead = async getters => {
+      const loadAggregatedPersonDaysOff = vi.fn(() => [])
+      const wrapper = await mountPage({
+        actions: { loadAggregatedPersonDaysOff },
+        getters
+      })
+      wrapper.unmount()
+      return loadAggregatedPersonDaysOff
+    }
+
+    it.each([
+      ['the person', {}],
+      ['a manager of a production of the person', onProduction('manager')],
+      ['a supervisor of a production of the person', onProduction('supervisor')]
+    ])('reads the days off for %s', async (_, getters) => {
+      expect((await daysOffRead(getters)).mock.calls[0][1]).toEqual({
+        personId: person.id
+      })
+    })
+
+    it.each([
+      ['an artist of a production of the person', onProduction('user')],
+      ['a manager of another production', onProduction('manager', [otherUser.id])]
+    ])('reads no days off for %s', async (_, getters) => {
+      expect(await daysOffRead(getters)).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('timelog tab', () => {
+    const viewers = [
+      ['the person', {}],
+      ['a manager', { isCurrentUserManager: () => true, user: () => otherUser }]
+    ]
+    // the timelog shows them nothing
+    const others = [
+      [
+        'a supervisor',
+        { isCurrentUserSupervisor: () => true, user: () => otherUser }
+      ],
+      ['another artist', { user: () => otherUser }]
+    ]
+
+    const dayLinks = wrapper =>
+      wrapper.findComponent(UserCalendar).props('withDayLinks')
+
+    it.each(viewers)('shows to %s', async (_, getters) => {
+      const wrapper = await mountPage({ getters, query: { section: 'calendar' } })
+      expect(tabNames(wrapper)).toContain('timesheets')
+      expect(dayLinks(wrapper)).toBe(true)
+      wrapper.unmount()
+    })
+
+    it.each(others)('hides from %s', async (_, getters) => {
+      const wrapper = await mountPage({ getters, query: { section: 'calendar' } })
+      expect(tabNames(wrapper)).not.toContain('timesheets')
+      expect(dayLinks(wrapper)).toBe(false)
+      wrapper.unmount()
+    })
+
+    it.each(others)('opens the tasks tab from its URL for %s', async (_, getters) => {
+      const wrapper = await mountPage({
+        getters,
+        query: { section: 'timesheets' }
+      })
+      expect(
+        wrapper.findComponent(RouteSectionTabs).props('activeTab')
+      ).toBe('todos')
       wrapper.unmount()
     })
   })

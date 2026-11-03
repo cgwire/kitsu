@@ -1,6 +1,7 @@
 vi.mock('@/store', () => ({ default: {} }))
 
 import { flushPromises } from '@vue/test-utils'
+import { reactive } from 'vue'
 
 import Quota from '@/components/pages/quota/Quota.vue'
 
@@ -42,11 +43,7 @@ const mountQuota = async (props, peopleByMode = {}, quota = periods) => {
     },
     getters: {
       personMap: new Map(people.map(person => [person.id, person])),
-      productionTeamRoles: { cat: 'supervisor' },
-      shotMap: new Map([
-        ['shot-1', {}],
-        ['shot-2', {}]
-      ])
+      productionTeamRoles: { cat: 'supervisor' }
     },
     actions: {
       computeQuota: ({ computeMode }) => {
@@ -110,6 +107,94 @@ describe('Quota list', () => {
 
     expect(wrapper.find('.datatable-body').exists()).toBe(true)
     expect(listedNames(wrapper)).toEqual([])
+  })
+})
+
+// The tests switch the production of the store under the list, and answer
+// each load when they decide.
+const loadingGetters = () =>
+  reactive({
+    currentProduction: { id: 'production-1' },
+    personMap: new Map(people.map(person => [person.id, person])),
+    productionTeamRoles: {}
+  })
+
+const mountLoading = async (getters, computeQuota) => {
+  const { wrapper, dispatched } = await mountEntityPage(Quota, {
+    listName: 'PeopleAvatar',
+    props: {
+      computeMode: 'weighted',
+      countMode: 'frames',
+      detailLevel: 'month',
+      taskTypeId: 'task-type-1',
+      year: 2026
+    },
+    getters,
+    actions: { computeQuota }
+  })
+  return { wrapper, loads: () => dispatched('computeQuota').length }
+}
+
+const quotasOf = ids =>
+  Object.fromEntries([...ids, 'total'].map(id => [id, periods()]))
+
+describe('Quota loading', () => {
+  // Productions share their task types: a switch can keep the task type.
+  test('loads the quotas of a production switched to', async () => {
+    const getters = loadingGetters()
+    const { wrapper } = await mountLoading(getters, () =>
+      quotasOf(
+        getters.currentProduction.id === 'production-1' ? ['ann'] : ['bob']
+      )
+    )
+    expect(listedNames(wrapper)).toEqual(['Ann', 'main.total'])
+
+    getters.currentProduction = { id: 'production-2' }
+    await flushPromises()
+
+    expect(listedNames(wrapper)).toEqual(['Bob', 'main.total'])
+  })
+
+  test('loads once for a task type and a compute mode changed together', async () => {
+    const { wrapper, loads } = await mountLoading(loadingGetters(), () =>
+      quotasOf(['ann'])
+    )
+    expect(loads()).toBe(1)
+
+    await wrapper.setProps({ taskTypeId: 'task-type-2', computeMode: 'done' })
+    await flushPromises()
+
+    expect(loads()).toBe(2)
+  })
+
+  // A slow answer for the task type left must not replace the one picked.
+  test('keeps the quotas of the latest selection', async () => {
+    const answers = new Map()
+    const { wrapper } = await mountLoading(
+      loadingGetters(),
+      ({ taskTypeId }) =>
+        new Promise(resolve => answers.set(taskTypeId, resolve))
+    )
+    await wrapper.setProps({ taskTypeId: 'task-type-2' })
+
+    answers.get('task-type-2')(quotasOf(['bob']))
+    await flushPromises()
+    answers.get('task-type-1')(quotasOf(['ann']))
+    await flushPromises()
+
+    expect(listedNames(wrapper)).toEqual(['Bob', 'main.total'])
+  })
+
+  test('shows no quota once nothing is selected', async () => {
+    const { wrapper } = await mountLoading(loadingGetters(), () =>
+      quotasOf(['ann'])
+    )
+
+    await wrapper.setProps({ taskTypeId: null })
+    await flushPromises()
+
+    expect(wrapper.find('.datatable-body').exists()).toBe(false)
+    expect(wrapper.find('.empty-quota').exists()).toBe(true)
   })
 })
 

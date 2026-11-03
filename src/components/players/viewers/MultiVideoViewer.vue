@@ -70,6 +70,7 @@ import { latestPreviewFileStatus } from '@/lib/preview'
 import { DEFAULT_FPS, frameStartTime, SEEK_NUDGE } from '@/lib/video'
 import {
   createFrameRenderer,
+  isPresentationAhead,
   supportsVideoFrameCallback
 } from '@/lib/players/frameRenderer'
 
@@ -182,6 +183,8 @@ let pendingSeekTime = null
 // again and skip entities.
 let trimEndFired = false
 let lastEmittedFrame = null
+// The frame painted last: the movie time runs a frame behind it.
+let presentedFrame = null
 let rate = 1
 let silent = false
 let showLoadingTimer = null
@@ -277,6 +280,7 @@ const resizeRenderer = () => {
 
 const startRenderLoop = () => {
   stopRenderLoop()
+  presentedFrame = null
   const player = currentPlayer.value
   if (!player) return
   renderLoopPlayer = player
@@ -293,6 +297,17 @@ const startRenderLoop = () => {
       if (
         seekGuardTarget !== null &&
         Math.abs(metadata.mediaTime - seekGuardTarget) > 2 * frameDuration.value
+      ) {
+        renderLoopHandle = player.requestVideoFrameCallback(tick)
+        return
+      }
+      if (
+        isPlaying.value &&
+        isPresentationAhead(
+          metadata.mediaTime,
+          player.currentTime,
+          frameDuration.value
+        )
       ) {
         renderLoopHandle = player.requestVideoFrameCallback(tick)
         return
@@ -321,6 +336,7 @@ const startRenderLoop = () => {
       }
       trimEndFired = false
       renderer?.drawFrame(player)
+      presentedFrame = Math.round(metadata.mediaTime * fps.value)
       if (isPlaying.value && props.name === 'main') {
         updateTime(player.currentTime)
       }
@@ -626,7 +642,9 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
 
 // Playing
 
-const pause = () => {
+// A comparison movie pauses on the frame of the main one, in one seek:
+// Firefox paints no frame for a second seek right after a first one.
+const pause = frame => {
   seekGuardTarget = null
   if (
     currentPlayer.value?.error &&
@@ -635,9 +653,18 @@ const pause = () => {
     reloadPlayer(currentPlayer.value)
   }
   if (currentPlayer.value) {
-    currentPlayer.value.pause()
-    const frame = Math.round(getCurrentTime() * fps.value)
-    seekNow(frameStartTime(frame, fps.value))
+    const player = currentPlayer.value
+    let onScreen = Math.round(getCurrentTime() * fps.value)
+    if (Number.isInteger(frame)) onScreen = frame
+    else if (isPlaying.value && presentedFrame !== null)
+      onScreen = presentedFrame
+    // The very end of the movie shows no frame and holds no drawing.
+    const lastFrame = Number.isFinite(player.duration)
+      ? floorToFrameNumber(player.duration) - 1
+      : onScreen
+    player.pause()
+    const target = Math.max(0, Math.min(onScreen, lastFrame))
+    seekNow(frameStartTime(target, fps.value))
     currentTimeRaw = currentPlayer.value.currentTime
     emit('frame-update', Math.round(currentTimeRaw * fps.value))
   }
@@ -762,10 +789,12 @@ const onTimeUpdate = () => {
   emit('frame-update', Math.round(currentTimeRaw * fps.value))
 }
 
+// Chrome and Firefox do not always call a frame callback for a paused seek:
+// the canvas kept a frame painted while playing.
 const onSeeked = event => {
-  if (pendingSeekTime !== null && event.target === currentPlayer.value) {
-    seekNow(pendingSeekTime)
-  }
+  if (event.target !== currentPlayer.value) return
+  if (pendingSeekTime !== null) seekNow(pendingSeekTime)
+  else if (!isPlaying.value) renderer?.drawFrame(event.target)
 }
 
 // A seek can land a paused movie on its very end, where the browser fires

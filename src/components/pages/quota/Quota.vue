@@ -250,14 +250,16 @@ const quotaMap = ref({})
 const currentMonth = moment().month() + 1
 const currentYear = moment().year()
 
+// The selection can change before an answer: only the latest load fills
+// the list.
+let latestLoad = 0
+
 // Computed
 // --------------------------------------------------------------------------
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
-const isShotsLoading = computed(() => store.getters.isShotsLoading)
 const personMap = computed(() => store.getters.personMap)
 const productionTeamRoles = computed(() => store.getters.productionTeamRoles)
-const shotMap = computed(() => store.getters.shotMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
 const monthRange = computed(() =>
@@ -327,26 +329,28 @@ const calcAverageColumnX = () => {
 }
 
 const loadData = async () => {
-  if (!props.taskTypeId && !props.personId) return
-  isLoading.value = true
-  try {
-    quotaMap.value = await store.dispatch('computeQuota', {
-      taskTypeId: props.taskTypeId,
-      personId: props.personId,
-      detailLevel: props.detailLevel,
-      countMode: props.countMode,
-      computeMode: props.computeMode
-    })
-    quotaLength.value = Object.keys(quotaMap.value).length
-    calcAverageColumnX()
-    await nextTick()
-  } catch (err) {
-    console.error(err)
-    quotaMap.value = {}
-    quotaLength.value = 0
-    calcAverageColumnX()
+  const load = ++latestLoad
+  let quotas = {}
+  if (props.taskTypeId || props.personId) {
+    isLoading.value = true
+    try {
+      quotas = await store.dispatch('computeQuota', {
+        taskTypeId: props.taskTypeId,
+        personId: props.personId,
+        detailLevel: props.detailLevel,
+        countMode: props.countMode,
+        computeMode: props.computeMode
+      })
+    } catch (err) {
+      console.error(err)
+    }
+    if (load !== latestLoad) return
   }
-  isLoading.value = false
+  quotaMap.value = quotas
+  quotaLength.value = Object.keys(quotas).length
+  calcAverageColumnX()
+  await nextTick()
+  if (load === latestLoad) isLoading.value = false
 }
 
 const getQuota = (personId, opt = {}) => {
@@ -438,43 +442,28 @@ watch(
   }
 )
 
-watch(
-  () => props.computeMode,
-  () => {
-    loadData()
-  }
-)
-
 watch(quotaMap, () => {
   if (props.taskTypeId) resetPersonIds()
 })
 
+// Productions share their task types: a switch can keep the selected one.
+// Changes made together, like the params of a production, load once.
 watch(
-  () => props.taskTypeId,
-  () => {
-    if (props.taskTypeId) loadData()
-  }
-)
-
-watch(
-  () => props.personId,
-  () => {
-    if (props.personId) loadData()
-  }
+  [
+    () => currentProduction.value?.id,
+    () => props.taskTypeId,
+    () => props.personId,
+    () => props.computeMode
+  ],
+  () => loadData()
 )
 
 // Lifecycle
 // --------------------------------------------------------------------------
+// The page sets its params once the list is mounted, and the watcher loads
+// them: only a list mounted with a selection loads now.
 onMounted(() => {
-  if (shotMap.value.size < 2) {
-    setTimeout(async () => {
-      await store.dispatch('loadShots')
-      loadData()
-    }, 100)
-  } else {
-    if (!isShotsLoading.value) isLoading.value = false
-    loadData()
-  }
+  if (props.taskTypeId || props.personId) loadData()
 })
 
 // The page exports the quotas displayed by this list.

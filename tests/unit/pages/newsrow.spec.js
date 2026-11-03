@@ -7,6 +7,7 @@ vi.mock('@/composables/time', () => ({
 }))
 
 import NewsRow from '@/components/pages/news/NewsRow.vue'
+import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const taskType = { id: 'task-type-1', name: 'Animation', for_entity: 'Shot' }
@@ -22,7 +23,10 @@ const news = {
   task_type_id: taskType.id
 }
 
-const mountRow = taskTypeMap => {
+const mountRow = (
+  taskTypeMap,
+  { previewMode = 'comments', row = news, statusMap = new Map() } = {}
+) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: '/', component: { template: '<div />' } }]
@@ -30,6 +34,7 @@ const mountRow = taskTypeMap => {
   const store = createStore({
     getters: {
       personMap: () => new Map(),
+      previewFileStatusMap: () => statusMap,
       productionMap: () => new Map(),
       taskStatusMap: () => new Map(),
       taskTypeMap: () => taskTypeMap
@@ -37,7 +42,7 @@ const mountRow = taskTypeMap => {
   })
   return shallowMount(NewsRow, {
     global: { plugins: [router, store] },
-    props: { canvasId: 'canvas-1', news }
+    props: { canvasId: 'canvas-1', news: row, previewMode }
   })
 }
 
@@ -58,5 +63,24 @@ describe('NewsRow', () => {
     const wrapper = mountRow(new Map())
 
     expect(wrapper.findComponent(TaskTypeName).props('taskType')).toBeNull()
+  })
+
+  // Zou builds a picture in a job: a news read while it was processing must
+  // not undo the ready status the registry got since.
+  test('passes the player the statuses the registry knows', () => {
+    const previewFile = { id: 'preview-1', extension: 'png', status: '' }
+    const wrapper = mountRow(new Map(), {
+      previewMode: 'previews',
+      row: {
+        ...news,
+        preview_file_id: 'preview-1',
+        preview_files: [{ ...previewFile, status: 'processing' }]
+      },
+      statusMap: new Map([['preview-1', 'ready']])
+    })
+
+    expect(wrapper.findComponent(PreviewPlayer).props('previews')).toEqual([
+      { ...previewFile, status: 'ready' }
+    ])
   })
 })

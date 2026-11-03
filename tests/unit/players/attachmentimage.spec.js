@@ -4,8 +4,7 @@ import AttachmentImage from '@/components/players/viewers/AttachmentImage.vue'
 
 const mountImage = (props = {}) =>
   mount(AttachmentImage, {
-    props: { src: '/dl/frame.png', name: 'frame.png', ...props },
-    global: { mocks: { $t: key => key } }
+    props: { src: '/dl/frame.png', name: 'frame.png', ...props }
   })
 
 describe('players/AttachmentImage', () => {

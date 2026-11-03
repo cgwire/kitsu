@@ -60,6 +60,13 @@ Text.prototype._calculateCurrentDimensions = function () {
   )
 }
 
+/* Fabric drags the selected words of a text being typed (both switches below
+ * turn it off). A new note starts fully selected, so pressing it to move it
+ * started such a drag, and fabric threw at its end when the canvas had
+ * reloaded meanwhile. */
+IText.prototype.shouldStartDragging = () => false
+IText.prototype.onDragStart = () => false
+
 if (PSStroke) {
   /* Monkey patches needed to make PSStroke work correctly by adding missing
    * expected methods to deal with Fabric and pressure.
@@ -486,6 +493,15 @@ export const useAnnotation = ({
     return lastAnnotationTime.value >= date
   }
 
+  // fabric keeps a text in editing when the user clicks outside the canvas:
+  // only the focus in its textarea tells that the text is being typed.
+  const isTypingText = () => {
+    const text = fabricCanvas.value?.getActiveObject()
+    return Boolean(
+      text?.isEditing && text.hiddenTextarea === document.activeElement
+    )
+  }
+
   // Annotations
 
   // Serialize a selection child with its ABSOLUTE transform: serialize()
@@ -899,6 +915,33 @@ export const useAnnotation = ({
     saveAnnotationsCb()
   }
 
+  // fabric moves an object wherever the pointer goes: dropped past the edge
+  // of the canvas, it was out of sight and out of reach. A move keeps the
+  // object inside, or no further out than it started (a stroke drawn past
+  // the edge), and an object larger than the canvas keeps covering it.
+  const keepObjectInCanvas = ({ target, transform }) => {
+    const shift = (edge, size, length, startEdge) => {
+      const room = length - size
+      const lowest = Math.min(0, room, startEdge)
+      const highest = Math.max(0, room, startEdge)
+      return Math.min(Math.max(edge, lowest), highest) - edge
+    }
+    target.setCoords()
+    const box = target.getBoundingRect()
+    // A move only translates the object: its box where the move started.
+    const startLeft = box.left + transform.original.left - target.left
+    const startTop = box.top + transform.original.top - target.top
+    target.set({
+      left:
+        target.left +
+        shift(box.left, box.width, fabricCanvas.value.getWidth(), startLeft),
+      top:
+        target.top +
+        shift(box.top, box.height, fabricCanvas.value.getHeight(), startTop)
+    })
+    target.setCoords()
+  }
+
   const onObjectModified = event => {
     // fabric fires object:modified from Canvas.clear() when an IText still
     // in editing gets discarded (exitEditing on a changed text). That
@@ -932,6 +975,15 @@ export const useAnnotation = ({
   const onTextChangedDebounced = func.debounce(event => {
     if (event.target?.canvas === fabricCanvas.value) onObjectModified(event)
   }, 400)
+
+  // A text left for the comment box no longer keeps the reloads away (see
+  // isTypingText): its last keystrokes start their save as it loses the
+  // focus, before a reload can drop them.
+  const onTextEditingEntered = ({ target }) => {
+    target.hiddenTextarea?.addEventListener('blur', () =>
+      onTextChangedDebounced.flush()
+    )
+  }
 
   const onWindowsClosed = event => {
     if (notSaved.value) {
@@ -1213,8 +1265,10 @@ export const useAnnotation = ({
   })
 
   const configureCanvas = () => {
+    fabricCanvas.value.off('object:moving', keepObjectInCanvas)
     fabricCanvas.value.off('object:moved', onObjectModified)
     fabricCanvas.value.off('text:changed', onObjectModified)
+    fabricCanvas.value.off('text:editing:entered', onTextEditingEntered)
     fabricCanvas.value.off('object:modified', onObjectModified)
     fabricCanvas.value.off('object:added', onObjectAdded)
     fabricCanvas.value.off('erasing:end', onErasingEnd)
@@ -1223,9 +1277,11 @@ export const useAnnotation = ({
     fabricCanvas.value.off('mouse:move', updateMousePressure)
     fabricCanvas.value.off('mouse:up', endDrawing)
     fabricCanvas.value.off('mouse:up', onCanvasReleasedCb)
+    fabricCanvas.value.on('object:moving', keepObjectInCanvas)
     fabricCanvas.value.on('object:moved', onObjectModified)
     fabricCanvas.value.on('object:modified', onObjectModified)
     fabricCanvas.value.on('text:changed', onTextChangedDebounced)
+    fabricCanvas.value.on('text:editing:entered', onTextEditingEntered)
     fabricCanvas.value.on('object:added', onObjectAdded)
     fabricCanvas.value.on('erasing:end', onErasingEnd)
     fabricCanvas.value.on('mouse:down', initializeMouseDrawing)
@@ -1616,6 +1672,9 @@ export const useAnnotation = ({
       clearModifications()
       clearTimeout(annotationToSave)
       notSaved.value = false
+      // The echo carries the time the server stores this batch, which can be
+      // long after the last change: a new text is saved when it loses focus.
+      markLastAnnotationTime()
       emit('annotation-changed', pendingSave)
     }
   }
@@ -1821,6 +1880,7 @@ export const useAnnotation = ({
     addToUpdatesSerializedObject,
     clearModifications,
     isWriting,
+    isTypingText,
 
     // Annotations
     getNewAnnotations,

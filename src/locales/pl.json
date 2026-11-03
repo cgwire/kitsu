@@ -1285,6 +1285,7 @@
         "create_new": "Utwórz nowy link",
         "expiration": "Data wygaśnięcia (opcjonalnie)",
         "can_comment": "Zezwól na komentarze",
+        "can_download": "Zezwól na pobieranie pliku .zip",
         "generate": "Wygeneruj nowy link",
         "copy": "Kopiuj link",
         "open": "Otwórz link w nowej karcie",
@@ -1305,6 +1306,7 @@
         "expires": "Wygasa",
         "no_expiration": "Bez daty wygaśnięcia",
         "comments_enabled": "Komentarze włączone",
+        "download_enabled": "Pobieranie pliku .zip włączone",
         "comments_disabled": "Komentarze wyłączone",
         "error": "Wystąpił błąd podczas tworzenia linku udostępniania."
       },
@@ -1835,6 +1837,7 @@
       "remaining_tasks": "{name} ma jeszcze {count} zadanie w tej produkcji. Usunięcie typu zadania z produkcji nie skasuje tego zadania. | Pozostałe zadania typu {name} w tej produkcji: {count}. Usunięcie typu zadania z produkcji nie skasuje tych zadań.",
       "remaining_tasks_delete": "Skasuj też to zadanie wraz z komentarzami i podglądami | Skasuj też te zadania ({count}) wraz z komentarzami i podglądami",
       "remaining_tasks_lock": "Wpisz {name}, aby potwierdzić skasowanie",
+      "remaining_tasks_lock_error": "Nazwa się nie zgadza.",
       "remove_error": "Nie udało się usunąć typu zadania. Spróbuj ponownie.",
       "remove_title": "Usuń typ zadania",
       "select_task_type": "Wybierz typ zadania...",

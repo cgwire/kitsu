@@ -32,24 +32,36 @@ import { onMounted, useTemplateRef } from 'vue'
 
 import TextField from '@/components/widgets/TextField.vue'
 
+// Props / Emits
+// --------------------------------------------------------------------------
+
 defineProps({
   errorMessage: { type: String, default: '' },
   playlistName: { type: String, required: true }
 })
 
-const nameField = useTemplateRef('nameField')
+const emit = defineEmits(['submit'])
 
 const guestName = defineModel('guestName', {
   type: String,
   default: ''
 })
 
-const emit = defineEmits(['submit'])
+// State
+// --------------------------------------------------------------------------
+
+const nameField = useTemplateRef('nameField')
+
+// Functions
+// --------------------------------------------------------------------------
 
 const onSubmit = () => {
   if (!guestName.value) return
   emit('submit')
 }
+
+// Lifecycle
+// --------------------------------------------------------------------------
 
 onMounted(() => nameField.value?.focus())
 </script>
@@ -145,5 +157,19 @@ onMounted(() => nameField.value?.focus())
   font-weight: 700;
   letter-spacing: -0.01em;
   margin-bottom: 0.5em;
+}
+
+@media screen and (max-width: 768px) {
+  .identity-card {
+    padding: 2em 1.5em;
+  }
+}
+
+// iOS zooms the page on a field under 16px
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
+  .identity-form :deep(input) {
+    font-size: 16px;
+  }
 }
 </style>

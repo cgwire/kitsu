@@ -1,12 +1,9 @@
 import { flushPromises, mount } from '@vue/test-utils'
-
-import filesApi from '@/store/api/files'
+import { createStore } from 'vuex'
 
 import DiffViewer from '@/components/players/viewers/DiffViewer.vue'
 
-vi.mock('@/store/api/files', () => ({
-  default: { getPreviewFileText: vi.fn() }
-}))
+const actions = { loadPreviewFileText: vi.fn() }
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: key => key })
@@ -35,7 +32,7 @@ const PRETTY_DIFF = `/dev/null → tests/test_demarrage.py
 const mountViewer = async () => {
   const wrapper = mount(DiffViewer, {
     props: { preview: { id: 'p1' } },
-    global: { mocks: { $t: key => key } }
+    global: { plugins: [createStore({ actions })] }
   })
   await vi.dynamicImportSettled()
   await flushPromises()
@@ -44,14 +41,14 @@ const mountViewer = async () => {
 
 describe('players/DiffViewer', () => {
   it('renders the diff2html output for a valid unified diff', async () => {
-    filesApi.getPreviewFileText.mockResolvedValue(UNIFIED_DIFF)
+    actions.loadPreviewFileText.mockResolvedValue(UNIFIED_DIFF)
     const wrapper = await mountViewer()
     expect(wrapper.find('.d2h-file-diff').exists()).toBe(true)
     expect(wrapper.find('.diff-raw').exists()).toBe(false)
   })
 
   it('falls back to readable raw text when the diff is not parseable', async () => {
-    filesApi.getPreviewFileText.mockResolvedValue(PRETTY_DIFF)
+    actions.loadPreviewFileText.mockResolvedValue(PRETTY_DIFF)
     const wrapper = await mountViewer()
     const raw = wrapper.find('.diff-raw')
     expect(raw.exists()).toBe(true)

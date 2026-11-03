@@ -125,7 +125,7 @@ export const mountEntityPage = async (
     props,
     global: {
       config,
-      mocks: { $store: store, $t: key => key },
+      mocks: { $store: store },
       plugins: [router, i18n],
       provide: { store },
       stubs: { SearchField: searchField.stub, [listName]: list, ...stubs }

@@ -88,6 +88,8 @@ const props = defineProps({
 // --------------------------------------------------------------------------
 const isLoading = ref(false)
 const newsList = ref([])
+// A load that ends after the deletion of a news keeps it out.
+const deletedNewsIds = new Set()
 
 // Computed
 // --------------------------------------------------------------------------
@@ -120,7 +122,7 @@ const reset = async () => {
   try {
     // The author is already resolved and enriched by the store action.
     const data = await store.dispatch('getEntityNews', props.entity.id)
-    newsList.value = data.data
+    newsList.value = data.data.filter(news => !deletedNewsIds.has(news.id))
   } catch (err) {
     console.error(err)
     newsList.value = []
@@ -132,6 +134,14 @@ const onNewsNew = eventData => {
   if (eventData.project_id === currentProduction.value?.id) reset()
 }
 
+// A task removal sends one event per news: drop the news here rather than
+// load the whole list again for each of them.
+const onNewsDelete = eventData => {
+  deletedNewsIds.add(eventData.news_id)
+  const index = newsList.value.findIndex(news => news.id === eventData.news_id)
+  if (index !== -1) newsList.value.splice(index, 1)
+}
+
 // Watchers
 // --------------------------------------------------------------------------
 watch(() => props.entity, reset)
@@ -140,11 +150,13 @@ watch(() => props.entity, reset)
 // --------------------------------------------------------------------------
 onMounted(() => {
   socket.on('news:new', onNewsNew)
+  socket.on('news:delete', onNewsDelete)
   reset()
 })
 
 onBeforeUnmount(() => {
   socket.off('news:new', onNewsNew)
+  socket.off('news:delete', onNewsDelete)
 })
 </script>
 

@@ -21,12 +21,12 @@
 <script setup>
 import { ref, computed, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-
-import filesApi from '@/store/api/files'
+import { useStore } from 'vuex'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const { t } = useI18n()
+const store = useStore()
 
 const props = defineProps({
   preview: {
@@ -77,7 +77,11 @@ const loadContent = async () => {
     // diff2html and its styles only serve diff previews: they load with the
     // first one, alongside the diff, instead of with every player.
     const [content, { html }] = await Promise.all([
-      filesApi.getPreviewFileText(props.preview.id, 'diff', props.urlPrefix),
+      store.dispatch('loadPreviewFileText', {
+        previewId: props.preview.id,
+        extension: 'diff',
+        urlPrefix: props.urlPrefix
+      }),
       import('diff2html'),
       import('diff2html/bundles/css/diff2html.min.css')
     ])

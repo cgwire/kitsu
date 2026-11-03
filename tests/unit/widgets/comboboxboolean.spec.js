@@ -1,17 +1,13 @@
-import { shallowMount } from '@vue/test-utils'
-
-import i18n from '@/lib/i18n'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 describe('ComboboxBoolean', () => {
   let wrapper
 
   beforeEach(() => {
-    wrapper = shallowMount(ComboboxBoolean, {
-      props: { modelValue: 'true' },
-      global: { plugins: [i18n] }
+    wrapper = shallowMountWithI18n(ComboboxBoolean, {
+      props: { modelValue: 'true' }
     })
   })
 

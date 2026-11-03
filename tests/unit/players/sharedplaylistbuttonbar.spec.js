@@ -4,8 +4,7 @@ import SharedPlaylistButtonBar from '@/components/players/bars/SharedPlaylistBut
 
 const mountBar = (props = { isMovie: true }) =>
   mount(SharedPlaylistButtonBar, {
-    props: { ...props, token: 'token' },
-    global: { mocks: { $t: key => key } }
+    props: { ...props, token: 'token' }
   })
 
 const timeProps = {
@@ -66,5 +65,30 @@ describe('players/SharedPlaylistButtonBar', () => {
       .findAll('button')
       .map(button => button.attributes('title'))
     expect(titles.includes('playlists.actions.annotation_draw')).toBe(isShown)
+  })
+
+  describe('on a phone', () => {
+    const titles = wrapper =>
+      wrapper.findAll('button').map(button => button.attributes('title'))
+
+    it('leaves out the repeat and the volume', () => {
+      const wrapper = mountBar({ isMovie: true, phone: true })
+      expect(wrapper.classes()).toContain('phone')
+      expect(titles(wrapper)).not.toContain('playlists.actions.looping')
+      expect(wrapper.findComponent({ name: 'ButtonSound' }).exists()).toBe(false)
+    })
+
+    it('keeps the frame of a movie, without its time', () => {
+      const wrapper = mountBar({ ...timeProps, isMovie: true, phone: true })
+      expect(wrapper.find('.frame-counter').text()).toBe('(031 / 075)')
+      expect(wrapper.find('.time-indicator').exists()).toBe(false)
+    })
+
+    it('keeps the time of a sound, its only position', () => {
+      const wrapper = mountBar({ ...timeProps, isSound: true, phone: true })
+      expect(wrapper.find('.time-info').text()).toMatch(
+        /00:00:01:05\s*\/\s*00:00:03:00/
+      )
+    })
   })
 })

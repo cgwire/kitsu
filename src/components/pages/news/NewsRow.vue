@@ -146,7 +146,7 @@
       <div class="has-text-centered">
         <preview-player
           :canvas-id="canvasId"
-          :previews="news.preview_files"
+          :previews="previews"
           :task="previewPlayerTask"
           :read-only="true"
           :light="true"
@@ -162,6 +162,7 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
+import { latestPreviewFileStatus } from '@/lib/preview'
 
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
@@ -192,9 +193,22 @@ defineExpose({ root })
 // Computed
 
 const personMap = computed(() => store.getters.personMap)
+const previewFileStatusMap = computed(() => store.getters.previewFileStatusMap)
 const productionMap = computed(() => store.getters.productionMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+// Zou builds a picture in a job: the registry follows its status, which a
+// news read while it was processing must not undo.
+const previews = computed(() =>
+  props.news.preview_files?.map(previewFile => ({
+    ...previewFile,
+    status: latestPreviewFileStatus(
+      previewFile.status,
+      previewFileStatusMap.value?.get(previewFile.id)
+    )
+  }))
+)
 
 const task = computed(() => ({
   id: props.news.task_id,

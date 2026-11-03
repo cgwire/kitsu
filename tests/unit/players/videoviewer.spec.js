@@ -39,7 +39,6 @@ const mountViewer = (props = {}) => {
       ...props
     },
     global: {
-      mocks: { $t: key => key },
       plugins: [store]
     }
   })
@@ -112,6 +111,41 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  // Chrome and Firefox do not always call a frame callback for a paused
+  // seek: the canvas kept a frame painted while playing.
+  it('paints the frame a paused seek lands on', async () => {
+    const wrapper = mountViewer()
+    await new Promise(resolve => setTimeout(resolve))
+    const video = wrapper.find('video').element
+    await video.dispatchEvent(new Event('loadedmetadata'))
+    fakeContext.drawImage.mockClear()
+
+    video.dispatchEvent(new Event('seeked'))
+
+    expect(fakeContext.drawImage).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  // The comparison movie pauses, then gets synced to the same frame while
+  // its pause seek is still running.
+  it('paints the frame a seek held for the same target lands on', async () => {
+    const wrapper = mountViewer({ currentFrame: 10 })
+    await new Promise(resolve => setTimeout(resolve))
+    const video = wrapper.find('video').element
+    await video.dispatchEvent(new Event('loadedmetadata'))
+    wrapper.vm.pause()
+    Object.defineProperty(video, 'seeking', { value: true, configurable: true })
+    wrapper.vm.setCurrentFrame(10)
+    Object.defineProperty(video, 'seeking', { value: false, configurable: true })
+    fakeContext.drawImage.mockClear()
+
+    video.dispatchEvent(new Event('seeked'))
+
+    expect(video.currentTime).toBeCloseTo(10.5 / 25, 5)
+    expect(fakeContext.drawImage).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
   it('starts the rVFC loop on loadedmetadata and paints + emits per tick while playing', async () => {
     const wrapper = mountViewer()
     // Wait for the setTimeout(0) in onMounted to complete
@@ -126,6 +160,7 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     })
 
     // Fire a tick: frame 10 at 25fps starts at mediaTime 0.4.
+    video.currentTime = 0.42
     const tick = rvfcCallbacks[rvfcCallbacks.length - 1]
     tick(performance.now(), { mediaTime: 0.4 })
     expect(fakeContext.drawImage).toHaveBeenCalled()
@@ -158,6 +193,7 @@ describe('players/VideoViewer (canvas pipeline)', () => {
       configurable: true
     })
 
+    video.currentTime = 18000.5 / 30
     const tick = rvfcCallbacks[rvfcCallbacks.length - 1]
     tick(performance.now(), { mediaTime: 18000 / 30 })
 
@@ -166,6 +202,31 @@ describe('players/VideoViewer (canvas pipeline)', () => {
       18000.5 / 30,
       6
     )
+    wrapper.unmount()
+  })
+
+  // Firefox sometimes reports a mediaTime seconds ahead of the playback, for
+  // one tick: the progress bar and the frame counter jumped there and back.
+  it('ignores a presentation far ahead of the playback', async () => {
+    const wrapper = mountViewer()
+    await new Promise(resolve => setTimeout(resolve))
+    const video = wrapper.find('video').element
+    await video.dispatchEvent(new Event('loadedmetadata'))
+    Object.defineProperty(video, 'paused', {
+      value: false,
+      configurable: true
+    })
+    video.currentTime = 0.82
+    fakeContext.drawImage.mockClear()
+
+    rvfcCallbacks.at(-1)(performance.now(), { mediaTime: 2.9 })
+    expect(wrapper.emitted('time-update')).toBeUndefined()
+    expect(wrapper.emitted('frame-update')).toBeUndefined()
+    expect(fakeContext.drawImage).not.toHaveBeenCalled()
+
+    rvfcCallbacks.at(-1)(performance.now(), { mediaTime: 0.84 })
+    expect(wrapper.emitted('time-update').at(-1)[0]).toBeCloseTo(0.86, 5)
+    expect(fakeContext.drawImage).toHaveBeenCalled()
     wrapper.unmount()
   })
 
@@ -322,7 +383,7 @@ describe('players/VideoViewer (canvas pipeline)', () => {
             '<video-viewer ref="viewer" :preview="preview" :fps="25" :nb-frames="100" />',
           data: () => ({ preview: { id: 'preview-1', extension: 'mp4' } })
         },
-        { global: { mocks: { $t: key => key }, plugins: [store] } }
+        { global: { plugins: [store] } }
       )
       expect(parent.vm.$refs.viewer.isBroken).toBe(false)
 

@@ -6,8 +6,7 @@ import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 const mountSettings = (props = {}) =>
   shallowMount(ClientAccessSettings, {
-    props,
-    global: { mocks: { $t: key => key } }
+    props
   })
 
 describe('ClientAccessSettings', () => {

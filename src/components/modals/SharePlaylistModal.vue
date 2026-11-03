@@ -93,6 +93,9 @@
                   : $t('playlists.share_modal.comments_disabled')
               }}
             </span>
+            <span class="info-tag" v-if="link.can_download">
+              {{ $t('playlists.share_modal.download_enabled') }}
+            </span>
           </div>
           <div class="invite-section" v-if="openInviteToken === link.token">
             <label class="label">
@@ -158,38 +161,43 @@
           />
         </div>
         <div class="create-card" v-else>
-          <h3 class="create-card-title">
+          <h3 class="subtitle">
             {{ $t('playlists.share_modal.create_new') }}
           </h3>
           <div class="create-form">
-            <div class="field">
-              <checkbox
-                :toggle="true"
-                :label="$t('playlists.share_modal.can_comment')"
-                v-model="canComment"
-              />
-            </div>
-            <div class="field">
-              <label class="label">
-                {{ $t('playlists.share_modal.expiration') }}
-              </label>
-              <date-field
-                can-delete
-                is-dark
-                :min-date="tomorrow"
-                v-model="expirationDate"
-              />
-            </div>
+            <date-field
+              can-delete
+              :label="$t('playlists.share_modal.expiration')"
+              :min-date="tomorrow"
+              v-model="expirationDate"
+            />
+            <checkbox
+              :toggle="true"
+              :label="$t('playlists.share_modal.can_comment')"
+              v-model="canComment"
+            />
+            <checkbox
+              :toggle="true"
+              :label="$t('playlists.share_modal.can_download')"
+              v-model="canDownload"
+            />
             <div class="form-actions">
+              <p class="create-error" v-if="errors.create">
+                {{ $t('playlists.share_modal.error') }}
+              </p>
               <button-simple
+                is-primary
                 :is-loading="loading.create"
                 :text="$t('playlists.share_modal.generate')"
                 @click="createLink"
               />
+              <button
+                class="button is-link cancel-button"
+                @click="hideCreateForm"
+              >
+                {{ $t('main.cancel') }}
+              </button>
             </div>
-            <p class="create-error" v-if="errors.create">
-              {{ $t('playlists.share_modal.error') }}
-            </p>
           </div>
         </div>
       </div>
@@ -204,13 +212,13 @@
 </template>
 
 <script setup>
+import { CopyIcon, ExternalLinkIcon, SendIcon, XIcon } from 'lucide-vue-next'
+import moment from 'moment-timezone'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useStore } from 'vuex'
-
-import { CopyIcon, ExternalLinkIcon, SendIcon, XIcon } from 'lucide-vue-next'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
+import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
 import { formatDisplayDate, formatSimpleDate } from '@/lib/time'
@@ -221,9 +229,15 @@ import Checkbox from '@/components/widgets/Checkbox.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
+const DEFAULT_EXPIRATION_DAYS = 30
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 const { t } = useI18n()
 const { tomorrow, dateFormat } = useTime()
 const store = useStore()
+
+// Props / Emits
+// --------------------------------------------------------------------------
 
 const props = defineProps({
   active: { type: Boolean, default: false },
@@ -232,9 +246,13 @@ const props = defineProps({
 
 const emit = defineEmits(['cancel', 'links-updated'])
 
+// State
+// --------------------------------------------------------------------------
+
 const shareLinks = ref([])
 const expirationDate = ref(null)
 const canComment = ref(true)
+const canDownload = ref(false)
 const loading = reactive({ links: false, create: false })
 const errors = reactive({ create: false })
 
@@ -243,7 +261,8 @@ const inviteState = reactive({})
 const confirmingRevoke = ref(null)
 const isCreateFormVisible = ref(false)
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Computed
+// --------------------------------------------------------------------------
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const personMap = computed(() => store.getters.personMap)
@@ -261,6 +280,9 @@ const recipientOptions = computed(() => {
     }))
     .sort((a, b) => a.label.localeCompare(b.label))
 })
+
+// Functions
+// --------------------------------------------------------------------------
 
 const ensureInviteState = token => {
   if (!inviteState[token]) {
@@ -373,14 +395,15 @@ const loadLinks = async () => {
 
 const showCreateForm = () => {
   errors.create = false
+  expirationDate.value = moment().add(DEFAULT_EXPIRATION_DAYS, 'days').toDate()
   isCreateFormVisible.value = true
 }
 
 const hideCreateForm = () => {
   isCreateFormVisible.value = false
   errors.create = false
-  expirationDate.value = null
   canComment.value = true
+  canDownload.value = false
 }
 
 const createLink = async () => {
@@ -394,7 +417,8 @@ const createLink = async () => {
       playlistId: props.playlist.id,
       data: {
         expiration_date: expDate,
-        can_comment: canComment.value
+        can_comment: canComment.value,
+        can_download: canDownload.value
       }
     })
     await loadLinks()
@@ -431,6 +455,9 @@ const formatDate = dateStr => {
   if (!dateStr) return ''
   return formatDisplayDate(dateStr, dateFormat.value)
 }
+
+// Lifecycle
+// --------------------------------------------------------------------------
 
 onMounted(() => {
   loadLinks()
@@ -531,49 +558,43 @@ onMounted(() => {
   background: var(--background-alt);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 1.25em 1em 1em;
+  margin: 0 auto;
+  max-width: 340px;
+  padding: 1em;
+  text-align: center;
+
+  .subtitle {
+    margin-bottom: 1em;
+  }
 }
 
 .dark .create-card {
   background: var(--background);
 }
 
-.create-card-title {
-  color: var(--text);
-  font-size: 1.1em;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  margin: 0 0 1.25em;
-  text-align: center;
-  text-transform: uppercase;
-}
-
 .create-form {
-  align-items: center;
   display: flex;
   flex-direction: column;
   gap: 1em;
 
-  .field {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4em;
-    margin-bottom: 0;
-    text-align: center;
+  :deep(.label) {
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 0.4em;
+    margin-top: 0.75em;
   }
 
-  .field .label {
-    margin: 0;
+  :deep(.dp--input) {
+    text-align: center;
   }
 }
 
 .form-actions {
   align-items: center;
   display: flex;
+  flex-direction: column;
   gap: 0.6em;
-  justify-content: center;
-  margin-top: 0.5em;
+  margin-top: 0.75em;
 }
 
 .revoke-confirm {
@@ -597,8 +618,7 @@ onMounted(() => {
 .create-error {
   color: $red;
   font-size: 0.85em;
-  margin: 0.75em 0 0;
-  text-align: right;
+  margin: 0;
 }
 
 .close-row {
@@ -714,7 +734,40 @@ onMounted(() => {
   }
 }
 
-.error {
-  color: $red;
+@media screen and (max-width: 768px) {
+  .share-content {
+    min-width: 0;
+  }
+
+  .share-link-row {
+    flex-wrap: wrap;
+
+    .input {
+      flex: 1 0 100%;
+      margin: 0 0 0.4em;
+    }
+
+    .copy-button,
+    .open-button,
+    .invite-button,
+    .revoke-button {
+      flex: 1 1 0;
+      min-height: 44px;
+    }
+  }
+
+  .invite-actions,
+  .revoke-confirm,
+  .share-link-info {
+    flex-wrap: wrap;
+  }
+
+  // iOS zooms the page on a field under 16px
+  .create-form :deep(.dp--input),
+  .invite-multiselect :deep(.multiselect__input),
+  .invite-section .textarea,
+  .share-link-row .input {
+    font-size: 16px;
+  }
 }
 </style>

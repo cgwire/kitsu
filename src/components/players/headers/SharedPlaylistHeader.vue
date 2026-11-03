@@ -46,6 +46,21 @@
 
     <div class="filler"></div>
 
+    <!-- Zou builds the zip while it answers: a new tab shows the wait -->
+    <a
+      class="zip-download flexrow-item"
+      :href="zipUrl"
+      :title="$t('playlists.download_zip')"
+      target="_blank"
+      rel="noopener"
+      v-if="zipUrl"
+    >
+      <download-icon class="icon" :size="16" :stroke-width="1.5" />
+      <span class="zip-download-label">
+        {{ $t('playlists.download_zip') }}
+      </span>
+    </a>
+
     <span
       class="flexrow-item guest-name"
       :title="guestDisplayName"
@@ -65,7 +80,7 @@
 </template>
 
 <script setup>
-import { LogOutIcon } from 'lucide-vue-next'
+import { DownloadIcon, LogOutIcon } from 'lucide-vue-next'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
@@ -76,7 +91,8 @@ defineProps({
   guestId: { type: String, default: '' },
   playingEntityIndex: { type: Number, default: 0 },
   playlistName: { type: String, default: '' },
-  projectName: { type: String, default: '' }
+  projectName: { type: String, default: '' },
+  zipUrl: { type: String, default: '' }
 })
 
 defineEmits(['logout', 'next-entity', 'previous-entity'])
@@ -99,6 +115,7 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
     font-size: 0.9em;
     font-weight: 500;
     max-width: 320px;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -116,6 +133,7 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
     background: #0e0e13;
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 10px;
+    flex-shrink: 0;
     gap: 0.25em;
     padding: 0.15em 0.5em;
   }
@@ -190,13 +208,40 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
     font-size: 0.95em;
     font-weight: 600;
     margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .project-name {
     color: rgba(244, 245, 250, 0.6);
     font-size: 0.78em;
     letter-spacing: 0.08em;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .zip-download {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: rgba(244, 245, 250, 0.6);
+    display: flex;
+    flex-shrink: 0;
+    font-size: 0.85em;
+    gap: 0.6em;
+    padding: 0.45em 0.55em;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: #f4f5fa;
+    }
   }
 }
 
@@ -206,21 +251,18 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
     .entity-nav,
     .guest-name,
     .header-separator,
-    .project-name {
+    .project-name,
+    .zip-download-label {
       display: none;
     }
 
     .playlist-name {
       flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
   }
 }
 
-@media screen and (max-width: 900px) and (orientation: landscape) {
+@media screen and (max-height: 500px) and (orientation: landscape) {
   .shared-header {
     display: none;
   }
