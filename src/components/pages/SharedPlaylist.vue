@@ -223,7 +223,15 @@ onBeforeUnmount(() => {
   display: flex;
   height: 100%;
   justify-content: center;
+  overflow-y: auto;
+  padding: 1em;
   width: 100%;
+
+  // a margin keeps the top of a card taller than a landscape phone in reach,
+  // which centering would cut off
+  > * {
+    margin: auto;
+  }
 }
 
 .shared-playlist {

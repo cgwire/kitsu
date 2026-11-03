@@ -99,6 +99,7 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
     font-size: 0.9em;
     font-weight: 500;
     max-width: 320px;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -116,6 +117,7 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
     background: #0e0e13;
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 10px;
+    flex-shrink: 0;
     gap: 0.25em;
     padding: 0.15em 0.5em;
   }
@@ -190,13 +192,21 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
     font-size: 0.95em;
     font-weight: 600;
     margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .project-name {
     color: rgba(244, 245, 250, 0.6);
     font-size: 0.78em;
     letter-spacing: 0.08em;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     text-transform: uppercase;
+    white-space: nowrap;
   }
 }
 
@@ -212,15 +222,11 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
 
     .playlist-name {
       flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
   }
 }
 
-@media screen and (max-width: 900px) and (orientation: landscape) {
+@media screen and (max-height: 500px) and (orientation: landscape) {
   .shared-header {
     display: none;
   }

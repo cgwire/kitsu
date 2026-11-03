@@ -1,5 +1,5 @@
 <template>
-  <div class="playlist-footer flexrow">
+  <div :class="{ 'playlist-footer': true, flexrow: true, phone }">
     <div class="flexrow flexrow-item" v-if="isMovie || isSound || isPicture">
       <button-simple
         class="playlist-button flexrow-item"
@@ -41,19 +41,21 @@
     </div>
 
     <div class="flexrow flexrow-item time-info" v-if="isMovie || isSound">
-      <span
-        class="flexrow-item time-indicator"
-        :title="$t('playlists.actions.current_time')"
-      >
-        {{ currentTimeFormatted }}
-      </span>
-      <span class="flexrow-item time-indicator"> / </span>
-      <span
-        class="flexrow-item time-indicator"
-        :title="$t('playlists.actions.max_duration')"
-      >
-        {{ maxDurationFormatted }}
-      </span>
+      <template v-if="!phone || isSound">
+        <span
+          class="flexrow-item time-indicator"
+          :title="$t('playlists.actions.current_time')"
+        >
+          {{ currentTimeFormatted }}
+        </span>
+        <span class="flexrow-item time-indicator"> / </span>
+        <span
+          class="flexrow-item time-indicator"
+          :title="$t('playlists.actions.max_duration')"
+        >
+          {{ maxDurationFormatted }}
+        </span>
+      </template>
       <span
         class="flexrow-item frame-counter nowrap"
         :title="$t('playlists.actions.frame_number')"
@@ -63,7 +65,7 @@
       </span>
     </div>
 
-    <div class="flexrow flexrow-item" v-if="isMovie || isSound">
+    <div class="flexrow flexrow-item" v-if="!phone && (isMovie || isSound)">
       <button-simple
         class="playlist-button flexrow-item"
         :active="isRepeating"
@@ -138,6 +140,7 @@ defineProps({
   isSound: { type: Boolean, default: false },
   maxDurationFormatted: { type: String, default: '' },
   nbFramesDisplay: { type: String, default: '' },
+  phone: { type: Boolean, default: false },
   token: { type: String, default: '' }
 })
 
@@ -220,37 +223,31 @@ const volume = defineModel('volume', { type: Number, default: 100 })
   padding: 0 0.3em;
 }
 
-@media screen and (max-width: 768px) {
-  .playlist-footer {
-    gap: 0;
-    padding: 0 0.2em;
+// one line on a 375px screen: it wraps when a file carries sub-previews
+.playlist-footer.phone {
+  flex-wrap: wrap;
+  gap: 0;
+  height: auto;
+  padding: 0 4px;
+
+  .flexrow-item {
+    margin-right: 0;
+  }
+
+  .playlist-button {
+    box-sizing: border-box;
+    justify-content: center;
+    margin: 6px 2px;
+    min-height: 40px;
+    min-width: 40px;
+    padding: 0;
+  }
+
+  .time-info {
+    font-size: 0.85em;
 
     .flexrow-item {
-      margin-right: 0;
-    }
-
-    .playlist-button {
-      box-sizing: border-box;
-      justify-content: center;
-      margin: 0;
-      min-width: 30px;
-      padding: 0.3em 0.25em;
-
-      :deep(.icon) {
-        height: 14px;
-        width: 14px;
-      }
-    }
-
-    .time-info {
-      .frame-counter {
-        margin-right: 0.2em;
-      }
-
-      .time-indicator {
-        display: none;
-        font-size: 0.75em;
-      }
+      margin-right: 0.2em;
     }
   }
 }
