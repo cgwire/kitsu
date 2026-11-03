@@ -1757,6 +1757,7 @@ const propagateClipToChildren = item => {
     }
     // else: child fully inside new bounds — already restored, leave untouched
   })
+  if (props.multiline) refreshItemPositionsDuringDrag([item])
 }
 
 const updateItemEstimation = item => {
@@ -2033,7 +2034,8 @@ const stopBrowsing = event => {
       // on moving or resizing selected items
       selection.value.forEach(item => {
         emit('item-changed', item)
-        refreshItemPositions(item.parentElement)
+        // a root bar has no parent: its clip changed the lines of its rows
+        refreshItemPositions(item.parentElement ?? item)
         refreshManDays(item.parentElement)
       })
       // clear selection after moving a single item

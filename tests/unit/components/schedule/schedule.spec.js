@@ -1333,6 +1333,30 @@ describe('Schedule widget - entity rows', () => {
     wrapper.unmount()
   })
 
+  // The all-episodes rows are laid out by line: rows snapped to the same
+  // edge of the bar must not stay piled up on the line they had before.
+  it('lays the multiline rows out again once the root bar clipped them', async () => {
+    const hierarchy = buildEntityHierarchy(3)
+    const [root] = hierarchy
+    root.endDate = moment('2026-09-30')
+    const wrapper = mountSchedule(
+      { hierarchy, clipChildren: true, multiline: true },
+      { attachTo: document.body }
+    )
+    wrapper.vm.refreshAllItemPositions()
+    expect(root.children.map(row => row.line)).toEqual([0, 0, 0])
+
+    await dragRootBar(wrapper, 800)
+
+    root.children.forEach(row => {
+      expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-28')
+    })
+    expect(root.children.map(row => row.line)).toEqual([0, 1, 2])
+    expect(wrapper.find('.children[data-root-element-id]').element.style.height)
+      .toBe('130px')
+    wrapper.unmount()
+  })
+
   it('moves the rows along with the root bar on a shift drag', async () => {
     const hierarchy = buildEntityHierarchy(2)
     const { wrapper } = mountCounted(hierarchy)

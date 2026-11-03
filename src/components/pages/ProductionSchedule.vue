@@ -1852,6 +1852,7 @@ const cancelChildMove = () => {
     child.startDate = child._dragOrigStartDate.clone()
     child.endDate = child._dragOrigEndDate.clone()
   })
+  scheduleRef.value?.refreshItemPositions(item.parentElement ?? item)
   pendingParentChange.value = null
   modals.value.confirmChildMove = false
 }
