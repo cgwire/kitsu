@@ -1,6 +1,8 @@
 // @vitest-environment node
 
 import {
+  buildAnnotationSnapshotTitle,
+  drawSnapshotTitle,
   formatRevision,
   hasPreviewFilePicture,
   isPreviewFileStatus,
@@ -134,6 +136,68 @@ describe('lib/preview', () => {
       expect(wait.isDone).toBe(true)
       expect(wait.isInTime).toBe(true)
       expect(vi.getTimerCount()).toBe(0)
+    })
+  })
+
+  describe('annotation snapshot title', () => {
+    const context = { production: 'Agent 327', entity: 'SQ01 / SH010' }
+
+    it('joins the parts of the source, with the frame or the index', () => {
+      expect(
+        buildAnnotationSnapshotTitle({
+          ...context,
+          taskType: 'Animation',
+          revision: 3,
+          frame: 12.4
+        })
+      ).toEqual('Agent 327 / SQ01 / SH010 / Animation / v3 / #12')
+      expect(buildAnnotationSnapshotTitle({ ...context, index: 2 })).toEqual(
+        'Agent 327 / SQ01 / SH010 / #2'
+      )
+      expect(
+        buildAnnotationSnapshotTitle({ ...context, taskType: '', revision: '' })
+      ).toEqual('Agent 327 / SQ01 / SH010')
+    })
+
+    const buildCanvas = (width, height) => {
+      const calls = []
+      const context = {
+        save: () => calls.push(['save']),
+        restore: () => calls.push(['restore']),
+        fillRect: (...args) => calls.push(['fillRect', ...args]),
+        fillText: (...args) => calls.push(['fillText', ...args])
+      }
+      return { width, height, calls, context, getContext: () => context }
+    }
+
+    it('burns the title into a band at the bottom of the canvas', () => {
+      const canvas = buildCanvas(1000, 800)
+
+      drawSnapshotTitle(canvas, 'Agent 327 / SH010')
+
+      expect(canvas.calls).toEqual([
+        ['save'],
+        ['fillRect', 0, 756, 1000, 44],
+        ['fillText', 'Agent 327 / SH010', 12, 778],
+        ['restore']
+      ])
+      expect(canvas.context.font).toEqual('20px sans-serif')
+      expect(canvas.context.fillStyle).toEqual('#ffffff')
+    })
+
+    it('keeps the text readable on a small canvas', () => {
+      const canvas = buildCanvas(320, 200)
+
+      drawSnapshotTitle(canvas, 'SH010')
+
+      expect(canvas.calls[1]).toEqual(['fillRect', 0, 170, 320, 30])
+      expect(canvas.context.font).toEqual('14px sans-serif')
+    })
+
+    it('draws nothing without a title', () => {
+      const canvas = buildCanvas(1000, 800)
+      drawSnapshotTitle(canvas, '')
+      expect(canvas.calls).toEqual([])
     })
   })
 })

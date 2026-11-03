@@ -14,7 +14,9 @@ import {
   sortTaskNames,
   sortTaskTypes,
   sortTasks,
-  sortValidationColumns, sortComments, sortRevisionPreviewFiles, sortAssetResult, sortEpisodeResult, sortShotResult
+  sortValidationColumns, sortComments, sortRevisionPreviewFiles, sortAssetResult, sortEpisodeResult, sortShotResult,
+  sortEditResult,
+  sortEdits
 } from '@/lib/sorting'
 
 const taskTypeMap = new Map(Object.entries({
@@ -59,6 +61,91 @@ describe('lib/sorting', () => {
       sortByMetadata({ column: 'steps', data_type: 'checklist' })
     )
     expect(results.slice(0, 2).map(entry => entry.id)).toEqual([4, 2])
+  })
+
+  it('sortByMetadata puts the ticked booleans last', () => {
+    const entries = [
+      { id: 1, data: { approved: 'true' } },
+      { id: 2, data: {} },
+      { id: 3, data: { approved: 'false' } },
+      { id: 4, data: { approved: 'true' } }
+    ]
+    const results = [...entries].sort(
+      sortByMetadata({ column: 'approved', data_type: 'boolean' })
+    )
+    expect(results.map(entry => entry.id)).toEqual([2, 3, 1, 4])
+  })
+
+  it('sortByMetadata sorts tag lists by their text, the empty ones last', () => {
+    const entries = [
+      { id: 1, data: { tags: 'hero,night' } },
+      { id: 2, data: {} },
+      { id: 3, data: { tags: 'crowd' } },
+      { id: 4, data: { tags: 'hero' } }
+    ]
+    const results = [...entries].sort(
+      sortByMetadata({ column: 'tags', data_type: 'taglist' })
+    )
+    expect(results.map(entry => entry.id)).toEqual([3, 4, 1, 2])
+  })
+
+  it('sortEdits', () => {
+    const edits = [
+      { id: 1, name: 'edit 10', episode_name: 'E01', canceled: false },
+      { id: 2, name: 'edit 2', episode_name: 'E02', canceled: false },
+      { id: 3, name: 'edit 2', episode_name: 'E01', canceled: false },
+      { id: 4, name: 'edit 1', episode_name: 'E01', canceled: true }
+    ]
+    expect(sortEdits(edits).map(edit => edit.id)).toEqual([3, 1, 2, 4])
+  })
+
+  it('sortEditResult', () => {
+    const entries = [
+      {
+        id: 1,
+        name: 'edit 2',
+        episode_name: 'E01',
+        canceled: false,
+        data: { cut: 'b' }
+      },
+      {
+        id: 2,
+        name: 'edit 1',
+        episode_name: 'E01',
+        canceled: false,
+        data: { cut: 'a' }
+      },
+      {
+        id: 3,
+        name: 'edit 3',
+        episode_name: 'E01',
+        canceled: true,
+        data: { cut: 'b' }
+      },
+      {
+        id: 4,
+        name: 'edit 0',
+        episode_name: 'E01',
+        canceled: false,
+        data: { cut: 'b' }
+      }
+    ]
+    const sortIds = sorting =>
+      sortEditResult([...entries], sorting, taskTypeMap, new Map()).map(
+        edit => edit.id
+      )
+
+    expect(sortIds([])).toEqual([4, 2, 1, 3])
+    expect(
+      sortIds([
+        {
+          type: 'metadata',
+          column: 'cut',
+          data_type: 'string',
+          ascending: false
+        }
+      ])
+    ).toEqual([4, 1, 2, 3])
   })
 
   it('sortByName', () => {

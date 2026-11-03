@@ -97,12 +97,6 @@ export const formatFullDate = date => {
   }
 }
 
-export const formatMonth = date => {
-  if (date && date.month === 1) return moment(date).format('YY-MM')
-  else if (date) return moment(date).format('MM')
-  else return ''
-}
-
 export const formatFullDateWithTimezone = (dateString, timezone) => {
   return moment.tz(dateString, 'UTC').tz(timezone).format('YYYY-MM-DD HH:mm:ss')
 }
@@ -191,24 +185,6 @@ export const getMonthsBetween = (startDate, endDate) => {
     const date = first.clone().add(i, 'months')
     return { year: date.year(), month: date.month() + 1 }
   })
-}
-
-export const getFirstStartDateByField = items => {
-  let startDate = moment()
-  items.forEach(item => {
-    const sDate = parseDate(item.start_date)
-    if (sDate.isBefore(startDate)) startDate = sDate
-  })
-  return startDate
-}
-
-export const getLastEndDateByField = items => {
-  let endDate = moment()
-  items.forEach(item => {
-    const eDate = parseDate(item.end_date)
-    if (eDate.isAfter(endDate)) endDate = eDate
-  })
-  return endDate
 }
 
 export const getFirstStartDate = items => {

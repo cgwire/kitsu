@@ -43,15 +43,6 @@ export const latestPreviewFileStatus = (olderStatus, newerStatus) =>
     ? olderStatus
     : newerStatus || olderStatus
 
-export const isFilePreview = extension =>
-  !isMoviePreview(extension) &&
-  !isPicturePreview(extension) &&
-  !isModelPreview(extension) &&
-  !isSoundPreview(extension) &&
-  !isPdfPreview(extension) &&
-  !isMarkdownPreview(extension) &&
-  !isDiffPreview(extension)
-
 // Format a preview revision for display, applying the project's
 // revision padding (a display-only setting; Zou stores the bare
 // integer). `revision_padding` is the minimum number of digits:

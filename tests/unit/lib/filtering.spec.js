@@ -5,8 +5,10 @@ import {
   getKeyWords,
   getMultipleKeyWords,
   getExcludingKeyWords,
-  getFilters
+  getFilters,
+  getTaskFilters
 } from '@/lib/filtering'
+import { buildTaskIndex } from '@/lib/indexing'
 
 describe('lib/filtering', () => {
   describe('getKeyWords', () => {
@@ -823,6 +825,85 @@ describe('lib/filtering', () => {
       expect(filters[0].taskTypeId).toEqual('task-type-1')
       expect(filters[0].value).toEqual(3)
     })
+
+    describe('department filters', () => {
+      const departments = [
+        { id: 'department-1', name: 'Modeling' },
+        { id: 'department-2', name: 'Animation' }
+      ]
+
+      it('keeps the departments the query names', () => {
+        const filters = getFilters({
+          entryIndex,
+          departments,
+          persons,
+          query: 'department=[modeling,unknown]'
+        })
+        expect(filters).toHaveLength(1)
+        expect(filters[0]).toEqual({
+          values: [departments[0]],
+          type: 'department',
+          excluding: false
+        })
+      })
+
+      it('reads a leading dash as an exclusion', () => {
+        const filters = getFilters({
+          entryIndex,
+          departments,
+          persons,
+          query: 'department=-animation'
+        })
+        expect(filters[0]).toEqual({
+          values: [departments[1]],
+          type: 'department',
+          excluding: true
+        })
+      })
+
+      it('drops a filter naming no known department', () => {
+        const filters = getFilters({
+          entryIndex,
+          departments,
+          persons,
+          query: 'department=lighting'
+        })
+        expect(filters).toHaveLength(0)
+      })
+    })
+  })
+
+  describe('getTaskFilters', () => {
+    const tasks = ['SH010', 'SH020', 'SH030'].map((name, index) => ({
+      id: `task-${index + 1}`,
+      full_entity_name: name,
+      task_type_name: 'Animation',
+      task_status_short_name: 'wip',
+      project_name: 'Agent 327'
+    }))
+    const taskIndex = buildTaskIndex(tasks)
+    const filterTasks = query =>
+      applyFilters(tasks, getTaskFilters(taskIndex, query), new Map()).map(
+        task => task.id
+      )
+
+    it('keeps the tasks of the entities listed in brackets', () => {
+      expect(getTaskFilters(taskIndex, '[sh010,sh030]')).toEqual([
+        expect.objectContaining({ type: 'taskunion' })
+      ])
+      expect(filterTasks('[sh010,sh030]')).toEqual(['task-1', 'task-3'])
+    })
+
+    it('drops the tasks of an excluded entity', () => {
+      expect(getTaskFilters(taskIndex, '-sh020')).toEqual([
+        expect.objectContaining({ type: 'exclusion' })
+      ])
+      expect(filterTasks('-sh020')).toEqual(['task-1', 'task-3'])
+    })
+
+    it('builds no filter for plain keywords', () => {
+      expect(getTaskFilters(taskIndex, 'sh010 animation')).toEqual([])
+    })
   })
 
   describe('applyFilters', () => {
@@ -1191,6 +1272,42 @@ describe('lib/filtering', () => {
     ])('keeps no entry without tasks on a %s filter', (name, filter) => {
       const episodes = [{ id: 'episode-1', name: 'E01' }]
       expect(applyFilters(episodes, [filter], taskMap)).toEqual([])
+    })
+
+    it('status=wfa matches a task of any task type', () => {
+      const filters = [
+        { type: 'statusAny', taskStatuses: ['task-status-2'], excluding: false }
+      ]
+      const withoutTasks = { id: 'asset-1', name: 'Bunny' }
+      const filterIds = () =>
+        applyFilters([...entries, withoutTasks], filters, taskMap).map(
+          entry => entry.id
+        )
+
+      expect(filterIds()).toEqual(['shot-4', 'shot-5'])
+      filters[0].excluding = true
+      expect(filterIds()).toEqual(['shot-1', 'shot-2', 'shot-3', 'asset-1'])
+    })
+
+    it('department=Modeling keeps the people of the department', () => {
+      const people = [
+        { id: 'person-1', departments: ['department-1', 'department-2'] },
+        { id: 'person-2', departments: ['department-2'] },
+        { id: 'person-3', departments: [] }
+      ]
+      const filters = [
+        {
+          type: 'department',
+          values: [{ id: 'department-1' }],
+          excluding: false
+        }
+      ]
+      const filterIds = () =>
+        applyFilters(people, filters, new Map()).map(person => person.id)
+
+      expect(filterIds()).toEqual(['person-1'])
+      filters[0].excluding = true
+      expect(filterIds()).toEqual(['person-2', 'person-3'])
     })
   })
 })

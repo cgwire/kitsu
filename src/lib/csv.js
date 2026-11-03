@@ -497,28 +497,6 @@ const csv = {
     return csv.buildCsvFile(name, lines)
   },
 
-  getRetakeStatReportsEntries(
-    mainStats,
-    taskTypeMap,
-    taskStatusMap,
-    entryMap,
-    countMode = 'count',
-    production
-  ) {
-    return csv.getStatReportsEntries(
-      mainStats,
-      taskTypeMap,
-      taskStatusMap,
-      entryMap,
-      countMode,
-      production,
-      {
-        excludeStatuses: ['max_retake_count', 'evolution'],
-        sortEntries: false
-      }
-    )
-  },
-
   generateQuotas(
     name,
     quotas,
