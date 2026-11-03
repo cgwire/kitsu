@@ -68,7 +68,10 @@
       },
       "include_all": "모든 어셋 작업 유형 포함",
       "add_asset_type_to_library": "라이브러리에 어셋 종류 추가",
-      "add_asset_type_placeholder": "+ 어셋 종류 추가"
+      "add_asset_type_placeholder": "+ 어셋 종류 추가",
+      "restore_studio_workflow": "스튜디오 워크플로 사용",
+      "workflow_production": "프로덕션 워크플로",
+      "workflow_studio": "스튜디오 워크플로"
     },
     "breakdown": {
       "all_assets": "사용 가능한 모든 어셋",

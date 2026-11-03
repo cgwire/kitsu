@@ -398,13 +398,18 @@
                   :column="taskTypeMap.get(columnId)"
                   :entity="asset"
                   :task-test="taskMap.get(asset.validations.get(columnId))"
-                  :task-href="taskHref(asset.validations.get(columnId))"
+                  :task-href="
+                    isInWorkflow(asset, columnId)
+                      ? taskHref(asset.validations.get(columnId))
+                      : undefined
+                  "
                   :selected="isSelected(i, k, j)"
                   :row-x="getIndex(i, k)"
                   :column-y="j"
                   :minimized="hiddenColumns[columnId]"
                   :is-static="true"
                   :is-assignees="displaySettings.showAssignations"
+                  :hide-task="!isInWorkflow(asset, columnId)"
                   :selectable="isSelectable(asset, columnId)"
                   :disabled="!isSelectable(asset, columnId)"
                   :left="
@@ -547,7 +552,11 @@
                   :contact-sheet="displaySettings.contactSheetMode"
                   :entity="asset"
                   :task-test="taskMap.get(asset.validations.get(columnId))"
-                  :task-href="taskHref(asset.validations.get(columnId))"
+                  :task-href="
+                    isInWorkflow(asset, columnId)
+                      ? taskHref(asset.validations.get(columnId))
+                      : undefined
+                  "
                   :selected="
                     isSelected(
                       i,
@@ -560,6 +569,7 @@
                   :minimized="hiddenColumns[columnId]"
                   :is-static="true"
                   :is-assignees="displaySettings.showAssignations"
+                  :hide-task="!isInWorkflow(asset, columnId)"
                   :selectable="isSelectable(asset, columnId)"
                   :disabled="!isSelectable(asset, columnId)"
                   @select="onTaskSelected"
@@ -615,7 +625,6 @@ import { getTaskHref } from '@/lib/path'
 import { sortTaskTypes } from '@/lib/sorting'
 import { range } from '@/lib/time'
 import assetStore from '@/store/modules/assets'
-import assetTypeStore from '@/store/modules/assettypes'
 import episodeStore from '@/store/modules/episodes'
 
 /* eslint-disable no-unused-vars */
@@ -644,7 +653,6 @@ const { formatDuration } = useFormat()
 
 // Non-reactive store caches, read at call time.
 const assetCache = assetStore.cache
-const assetTypeMap = assetTypeStore.cache.assetTypeMap
 const episodeMap = episodeStore.cache.episodeMap
 
 // Props / Emits
@@ -750,8 +758,8 @@ const getAllowedTaskTypeIds = assetTypeId => {
   const productionTaskTypeIds = productionAssetTaskTypes.value.map(
     taskType => taskType.id
   )
-  const workflow = assetTypeMap.get(assetTypeId)?.task_types
-  return workflow?.length
+  const workflow = store.getters.getAssetTypeWorkflow(assetTypeId)
+  return workflow.length
     ? productionTaskTypeIds.filter(taskTypeId => workflow.includes(taskTypeId))
     : productionTaskTypeIds
 }
@@ -790,15 +798,13 @@ const isAssetShown = asset => {
   )
 }
 
-// Selectable if the cell already holds a task or if its asset type accepts
-// the task type. Cells with existing tasks stay actionable
-// even when a workflow change removed their task type, so they can
-// still be selected and managed instead of freezing.
-const isSelectable = (asset, columnId) => {
-  if (asset.shared) return false
-  if (taskMap.value.get(asset.validations?.get(columnId))) return true
-  return getAllowedTaskTypeIds(asset.asset_type_id).includes(columnId)
-}
+const isInWorkflow = (asset, columnId) =>
+  getAllowedTaskTypeIds(asset.asset_type_id).includes(columnId)
+
+// Tasks left outside the workflow stay in the database, but their cell is
+// masked: it shows nothing and cannot be selected.
+const isSelectable = (asset, columnId) =>
+  !asset.shared && isInWorkflow(asset, columnId)
 
 // Filter the displayed assets by the display settings.
 const filteredDisplayedAssets = computed(() => {

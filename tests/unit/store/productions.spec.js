@@ -2171,3 +2171,80 @@ describe('Productions store, new production shared with the user', () => {
     ).rejects.toBe(failure)
   })
 })
+
+describe('Productions store, asset type workflow', () => {
+  let vuexStore
+  let scope
+
+  beforeEach(() => {
+    assetTypeStore.cache.assetTypeMap.set('character', {
+      id: 'character',
+      task_types: ['modeling']
+    })
+    vuexStore = createStore({
+      modules: {
+        productions: {
+          state: { currentProduction: { id: 'production-1' } },
+          getters: store.getters,
+          mutations: store.mutations,
+          actions: store.actions
+        }
+      }
+    })
+    scope = effectScope()
+  })
+
+  afterEach(() => {
+    scope.stop()
+    assetTypeStore.cache.assetTypeMap.delete('character')
+    vi.restoreAllMocks()
+  })
+
+  test('a production workflow replaces the studio one until it is reset', async () => {
+    const workflow = scope.run(() =>
+      computed(() => vuexStore.getters.getAssetTypeWorkflow('character'))
+    )
+    expect(workflow.value).toEqual(['modeling'])
+
+    const api = vi
+      .spyOn(productionApi, 'setAssetTypeWorkflow')
+      .mockResolvedValue({})
+    await vuexStore.dispatch('setAssetTypeWorkflow', {
+      assetTypeId: 'character',
+      taskTypeIds: ['rigging']
+    })
+    expect(api).toHaveBeenCalledWith('production-1', 'character', ['rigging'])
+    expect(workflow.value).toEqual(['rigging'])
+
+    await vuexStore.dispatch('setAssetTypeWorkflow', {
+      assetTypeId: 'character',
+      taskTypeIds: []
+    })
+    expect(workflow.value).toEqual(['modeling'])
+  })
+
+  test('a failed save leaves the workflow unchanged', async () => {
+    const failure = new Error('refused')
+    vi.spyOn(productionApi, 'setAssetTypeWorkflow').mockRejectedValue(failure)
+    await expect(
+      vuexStore.dispatch('setAssetTypeWorkflow', {
+        assetTypeId: 'character',
+        taskTypeIds: ['rigging']
+      })
+    ).rejects.toBe(failure)
+    expect(vuexStore.getters.getAssetTypeWorkflow('character')).toEqual([
+      'modeling'
+    ])
+  })
+
+  test('an asset type with no workflow accepts everything', () => {
+    expect(vuexStore.getters.getAssetTypeWorkflow('unknown')).toEqual([])
+    expect(vuexStore.getters.isInAssetTypeWorkflow('unknown', 'any')).toBe(true)
+  })
+
+  test('a workflow accepts its task types only', () => {
+    const { isInAssetTypeWorkflow } = vuexStore.getters
+    expect(isInAssetTypeWorkflow('character', 'modeling')).toBe(true)
+    expect(isInAssetTypeWorkflow('character', 'rigging')).toBe(false)
+  })
+})

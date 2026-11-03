@@ -68,7 +68,10 @@
       },
       "include_all": "Umfasst alle Asset-Aufgabentypen",
       "add_asset_type_to_library": "Hinzufügen eines Asset-Typs zur Bibliothek",
-      "add_asset_type_placeholder": "+ Asset-Typ hinzufügen"
+      "add_asset_type_placeholder": "+ Asset-Typ hinzufügen",
+      "restore_studio_workflow": "Studio-Workflow verwenden",
+      "workflow_production": "Produktions-Workflow",
+      "workflow_studio": "Studio-Workflow"
     },
     "breakdown": {
       "all_assets": "Alle verfügbaren Assets",

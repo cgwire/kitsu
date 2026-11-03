@@ -94,6 +94,11 @@ export default {
     return client.pdel(path)
   },
 
+  setAssetTypeWorkflow(productionId, assetTypeId, taskTypeIds) {
+    const path = `/api/data/projects/${productionId}/settings/asset-types/${assetTypeId}/task-types`
+    return client.pput(path, { task_type_ids: taskTypeIds })
+  },
+
   addBackgroundToProduction(productionId, backgroundId) {
     const data = { preview_background_file_id: backgroundId }
     return client.ppost(

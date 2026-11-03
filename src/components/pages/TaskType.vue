@@ -1297,6 +1297,11 @@ const getTasks = entities => {
       // entity-level canceled boolean.
       entity.status === 'canceled' ||
       !entity.tasks?.length ||
+      (entityType.value === 'Asset' &&
+        !store.getters.isInAssetTypeWorkflow(
+          entity.asset_type_id,
+          currentTaskType.value.id
+        )) ||
       (isTVShow.value &&
         !displaySettings.value.showLinkedAssets &&
         !isEpisodesSection.value &&

@@ -68,7 +68,10 @@
       },
       "include_all": "Incluye todos los tipos de tarea de recurso",
       "add_asset_type_to_library": "Añadir un tipo de recurso a la biblioteca",
-      "add_asset_type_placeholder": "+ Añadir tipo de recurso"
+      "add_asset_type_placeholder": "+ Añadir tipo de recurso",
+      "restore_studio_workflow": "Usar el flujo de trabajo del estudio",
+      "workflow_production": "Flujo de trabajo de la producción",
+      "workflow_studio": "Flujo de trabajo del estudio"
     },
     "breakdown": {
       "all_assets": "Todos los recursos disponibles",

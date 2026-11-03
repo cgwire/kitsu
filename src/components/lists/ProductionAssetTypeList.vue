@@ -94,6 +94,11 @@
               :key="entry.id + '-' + columnId"
               v-for="columnId in validationColumns"
             >
+              <td
+                class="disabled"
+                :style="getValidationStyle(columnId)"
+                v-if="!isInWorkflow(entry.id, columnId)"
+              ></td>
               <stats-cell
                 :key="entry.id + columnId"
                 :data-label="taskTypeMap.get(columnId)?.name"
@@ -101,7 +106,7 @@
                 :colors="chartColors(entry.id, columnId)"
                 :data="chartData(entry.id, columnId)"
                 :display-mode="displayMode"
-                v-if="isStats(entry.id, columnId)"
+                v-else-if="isStats(entry.id, columnId)"
               />
               <td :style="getValidationStyle(columnId)" v-else></td>
             </template>
@@ -210,6 +215,9 @@ const chartData = (entryId, columnId) =>
 
 const isStats = (entryId, columnId) => props.assetTypeStats[entryId]?.[columnId]
 
+const isInWorkflow = (assetTypeId, columnId) =>
+  store.getters.isInAssetTypeWorkflow(assetTypeId, columnId)
+
 const getValidationStyle = columnId => {
   const taskType = taskTypeMap.value.get(columnId)
   if (!taskType) return {}
@@ -257,6 +265,11 @@ const assetsPath = assetType => ({
   color: var(--text-alt);
   font-size: 0.8rem;
   font-weight: normal;
+}
+
+// Same gray as the masked cells of the asset list.
+.disabled {
+  background-color: rgba(0, 0, 0, 0.15) !important;
 }
 
 .actions {

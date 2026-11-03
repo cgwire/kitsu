@@ -615,8 +615,7 @@ const actions = {
     }
     return assetsApi.newAsset(data).then(asset => {
       const assetTypeMap = rootGetters.assetTypeMap
-      const assetType = assetTypeMap.get(asset.entity_type_id)
-      const workflow = assetType ? assetType.task_types || [] : []
+      const workflow = rootGetters.getAssetTypeWorkflow(asset.entity_type_id)
       let taskTypeIds = rootGetters.productionAssetTaskTypeIds
       const sortInfo =
         state.assetSorting && state.assetSorting.length > 0
@@ -787,7 +786,8 @@ const actions = {
   computeAssetTypeStats({ commit, rootGetters }) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskMap = rootGetters.taskMap
-    commit(COMPUTE_ASSET_TYPE_STATS, { taskStatusMap, taskMap })
+    const isInWorkflow = rootGetters.isInAssetTypeWorkflow
+    commit(COMPUTE_ASSET_TYPE_STATS, { taskStatusMap, taskMap, isInWorkflow })
   },
 
   getAssetsCsvLines({ state, rootGetters }) {
@@ -1527,9 +1527,16 @@ const mutations = {
     })
   },
 
-  [COMPUTE_ASSET_TYPE_STATS](state, { taskStatusMap, taskMap }) {
+  [COMPUTE_ASSET_TYPE_STATS](state, { taskStatusMap, taskMap, isInWorkflow }) {
+    const assets = cache.assets.map(asset => ({
+      ...asset,
+      tasks: asset.tasks.filter(taskId => {
+        const task = taskMap.get(taskId)
+        return task && isInWorkflow(asset.asset_type_id, task.task_type_id)
+      })
+    }))
     state.assetTypeStats = computeStats(
-      cache.assets,
+      assets,
       'asset_type_id',
       taskStatusMap,
       taskMap

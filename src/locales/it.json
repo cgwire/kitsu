@@ -68,7 +68,10 @@
       },
       "include_all": "Include tutti i tipi di task degli asset",
       "add_asset_type_to_library": "Aggiungi un tipo di asset alla libreria",
-      "add_asset_type_placeholder": "+ Aggiungi un tipo di asset"
+      "add_asset_type_placeholder": "+ Aggiungi un tipo di asset",
+      "restore_studio_workflow": "Usa il flusso di lavoro dello studio",
+      "workflow_production": "Flusso di lavoro della produzione",
+      "workflow_studio": "Flusso di lavoro dello studio"
     },
     "breakdown": {
       "all_assets": "Tutti gli asset disponibili",

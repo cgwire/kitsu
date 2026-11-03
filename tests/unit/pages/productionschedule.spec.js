@@ -207,6 +207,10 @@ const mountPage = async ({
     getters: {
       currentEpisode: () => null,
       currentProduction: state => state.production,
+      getAssetTypeWorkflow: state => assetTypeId =>
+        state.production?.asset_type_workflows?.[assetTypeId] ||
+        assetTypeStore.cache.assetTypeMap.get(assetTypeId)?.task_types ||
+        [],
       dateFormat: () => 'YYYY-MM-DD',
       isCurrentUserProductionManager: () => true,
       isCurrentUserProductionSupervisor: () => false,

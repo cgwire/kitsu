@@ -1662,10 +1662,11 @@ const loadTaskTypeRows = async taskTypeElement => {
       // filtering following custom asset types workflow
       children = children.filter(item => {
         const assetType = assetTypeMap.value.get(item.object_id)
+        const workflow = store.getters.getAssetTypeWorkflow(item.object_id)
         return (
           assetType &&
-          (!assetType.task_types.length ||
-            assetType.task_types.includes(taskTypeElement.task_type_id)) &&
+          (!workflow.length ||
+            workflow.includes(taskTypeElement.task_type_id)) &&
           (!scopedAssetTypeIds || scopedAssetTypeIds.has(item.object_id))
         )
       })
@@ -1983,10 +1984,8 @@ const selectTaskTypeElement = async (
     assignments.value.entityTypes = productionAssetTypes.value
       .filter(assetType => {
         // filtering following custom asset types workflow
-        return (
-          !assetType.task_types.length ||
-          assetType.task_types.includes(taskType.task_type_id)
-        )
+        const workflow = store.getters.getAssetTypeWorkflow(assetType.id)
+        return !workflow.length || workflow.includes(taskType.task_type_id)
       })
       .map(assetType => {
         return {

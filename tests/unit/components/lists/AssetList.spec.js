@@ -23,6 +23,9 @@ import {
   taskTypeId
 } from '../../fixtures/entity-list'
 
+const getAssetTypeWorkflow = assetTypeId =>
+  assetTypeStore.cache.assetTypeMap.get(assetTypeId)?.task_types || []
+
 const modelingId = 'task-type-modeling'
 const riggingId = 'task-type-rigging'
 const propsTypeId = 'asset-type-props'
@@ -52,6 +55,7 @@ const selectableCells = async asset => {
     getters: {
       currentProduction: production,
       displayedAssetsCount: 2,
+      getAssetTypeWorkflow,
       productionAssetTaskTypes: [{ id: modelingId }, { id: riggingId }],
       taskMap: new Map([['task-1', { id: 'task-1' }]]),
       taskTypeMap: new Map([
@@ -65,12 +69,13 @@ const selectableCells = async asset => {
       displayedAssets: [[asset], [character]]
     }
   })
-  const [modeling, rigging] = wrapper
-    .findAll('tbody validation-cell-stub')
-    .slice(0, 2)
-    .map(cell => cell.attributes('selectable') === 'true')
+  const cells = wrapper.findAll('tbody validation-cell-stub').slice(0, 2)
+  const [modeling, rigging] = cells.map(
+    cell => cell.attributes('selectable') === 'true'
+  )
+  const hidden = cells[0].attributes('hidetask') === 'true'
   wrapper.unmount()
-  return { modeling, rigging }
+  return { modeling, rigging, hidden }
 }
 
 describe('lists/AssetList', () => {
@@ -91,9 +96,11 @@ describe('lists/AssetList', () => {
       assetTypeStore.cache.assetTypeMap.delete(charactersTypeId)
     })
 
-    test('cell with an existing task stays selectable when its task type left the workflow', async () => {
+    test('cell with an existing task is masked when its task type left the workflow', async () => {
       const asset = buildAsset(new Map([[modelingId, 'task-1']]))
-      expect((await selectableCells(asset)).modeling).toBe(true)
+      const { modeling, hidden } = await selectableCells(asset)
+      expect(modeling).toBe(false)
+      expect(hidden).toBe(true)
     })
 
     test('empty cell outside the workflow is not selectable', async () => {
@@ -129,6 +136,7 @@ describe('lists/AssetList', () => {
         getters: {
           currentProduction: production,
           displayedAssetsCount: 1,
+          getAssetTypeWorkflow,
           productionAssetTaskTypes: [{ id: riggingId }],
           taskMap: new Map(),
           taskTypeMap: new Map([
@@ -206,6 +214,7 @@ describe('lists/AssetList task selection', () => {
         currentProduction: production,
         displayedAssetsCount: listedAssets.length,
         isTVShow: true,
+        getAssetTypeWorkflow,
         productionAssetTaskTypes: [layout, color],
         taskMap: new Map(
           listedAssets.flatMap(asset =>
@@ -409,6 +418,7 @@ describe('lists/AssetList sticky columns', () => {
         assetMetadataDescriptors: [descriptor],
         currentProduction: production,
         displayedAssetsCount: 1,
+        getAssetTypeWorkflow,
         productionAssetTaskTypes: [{ id: taskTypeId }]
       },
       props: {

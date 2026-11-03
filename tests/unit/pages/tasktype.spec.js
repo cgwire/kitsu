@@ -81,6 +81,7 @@ const mountPage = async ({
   }
   const store = createStore({
     getters: {
+      isInAssetTypeWorkflow: () => () => true,
       currentEpisode: () => null,
       currentProduction: () => ({ id: 'production-1', name: 'Production' }),
       currentTaskType: () => ({
@@ -315,7 +316,7 @@ describe('TaskType page', () => {
 
     // The URL filters are read on the first load only, once the tasks
     // arrive: 100 ms after mounting, then 200 ms more.
-    const mountTasks = async query => {
+    const mountTasks = async (query, getters = {}) => {
       const page = await mountPage({
         section: 'tasks',
         query,
@@ -342,7 +343,8 @@ describe('TaskType page', () => {
             { id: 'props', name: 'Props' }
           ],
           taskMap: () => new Map(statusTasks.map(t => [t.id, t])),
-          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' })
+          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' }),
+          ...getters
         }
       })
       wrapper = page.wrapper
@@ -356,6 +358,13 @@ describe('TaskType page', () => {
         .props('tasks')
         .map(t => t.id)
         .sort()
+
+    it('hides the tasks of the asset types outside the workflow', async () => {
+      await mountTasks('', {
+        isInAssetTypeWorkflow: () => assetTypeId => assetTypeId === 'chars'
+      })
+      expect(listedTaskIds()).toEqual(['task-10'])
+    })
 
     it('keeps the tasks of every status the URL selects', async () => {
       await mountTasks('?task_status_id=status-1,status-3')

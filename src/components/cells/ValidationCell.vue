@@ -114,6 +114,7 @@ const props = defineProps({
   columnY: { type: Number, default: 0 },
   contactSheet: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
+  hideTask: { type: Boolean, default: false },
   entity: { type: Object, default: null },
   isAssignees: { type: Boolean, default: true },
   isBorder: { type: Boolean, default: true },
@@ -139,7 +140,9 @@ const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const task = ref(null)
 
 const resolveTask = () => {
-  if (props.taskTest) {
+  if (props.hideTask) {
+    task.value = null
+  } else if (props.taskTest) {
     task.value = props.taskTest
   } else if (props.column && props.entity?.validations) {
     task.value = taskMap.value.get(
@@ -249,7 +252,7 @@ const onTaskLinkClick = event => {
   if (props.taskHref) event.preventDefault()
 }
 
-watch(() => props.taskTest, resolveTask)
+watch(() => [props.taskTest, props.hideTask], resolveTask)
 
 onMounted(resolveTask)
 

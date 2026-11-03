@@ -575,6 +575,24 @@ describe('Assets store', () => {
         chars: 2
       })
     })
+
+    test('leaves out the tasks outside the workflow', () => {
+      assetsStore.cache.assets = [
+        { id: 'a1', asset_type_id: 'chars', tasks: ['t1', 't2'] }
+      ]
+      const state = {}
+      assetsStore.mutations.COMPUTE_ASSET_TYPE_STATS(state, {
+        taskStatusMap: new Map([['wip', { id: 'wip', color: '#000000' }]]),
+        taskMap: new Map([
+          ['t1', { id: 't1', task_type_id: 'modeling', task_status_id: 'wip' }],
+          ['t2', { id: 't2', task_type_id: 'rigging', task_status_id: 'wip' }]
+        ]),
+        isInWorkflow: (_, taskTypeId) => taskTypeId === 'modeling'
+      })
+      expect(state.assetTypeStats.chars.modeling).toBeDefined()
+      expect(state.assetTypeStats.chars.rigging).toBeUndefined()
+      expect(state.assetTypeStats.chars.all.wip.count).toBe(1)
+    })
   })
 
   describe('getAssetsCsvLines', () => {

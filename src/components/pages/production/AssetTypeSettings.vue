@@ -6,6 +6,18 @@
           {{ $t('settings.production.empty_list') }}
         </div>
         <table class="datatable list" v-else>
+          <thead class="datatable-head">
+            <tr class="datatable-row-header">
+              <th scope="col" class="name">
+                {{ $t('asset_types.fields.name') }}
+              </th>
+              <th scope="col" class="workflow">
+                {{ $t('asset_types.fields.task_types') }}
+              </th>
+              <th scope="col" class="origin"></th>
+              <th scope="col" class="remove"></th>
+            </tr>
+          </thead>
           <tbody class="datatable-body">
             <tr
               class="datatable-row"
@@ -13,6 +25,47 @@
               :key="assetType.id"
             >
               <td class="name">{{ assetType.name }}</td>
+              <td class="workflow">
+                <div class="flexrow task-types">
+                  <span class="workflow-combo">
+                    <combobox-task-type-options
+                      :hidden="getHiddenTaskTypeIds(assetType.id)"
+                      :task-types="sortedProductionTaskTypes"
+                      @update:hidden="onHiddenChanged(assetType.id, $event)"
+                    />
+                  </span>
+                  <div class="workflow-tags">
+                    <span v-if="!getWorkflow(assetType.id).length">
+                      {{ $t('asset_types.include_all') }}
+                    </span>
+                    <task-type-name
+                      :is-link="false"
+                      :key="taskType.id"
+                      :task-type="taskType"
+                      v-for="taskType in getTaskTypes(assetType.id)"
+                    />
+                  </div>
+                </div>
+              </td>
+              <td class="origin">
+                <div
+                  class="origin-content"
+                  v-if="hasProductionWorkflow(assetType.id)"
+                >
+                  <span class="tag">
+                    {{ $t('asset_types.workflow_production') }}
+                  </span>
+                  <button
+                    class="button is-link restore-workflow"
+                    @click="saveWorkflow(assetType.id, [])"
+                  >
+                    {{ $t('asset_types.restore_studio_workflow') }}
+                  </button>
+                </div>
+                <span class="tag" v-else>
+                  {{ $t('asset_types.workflow_studio') }}
+                </span>
+              </td>
               <td class="remove">
                 <button class="button" @click="$emit('remove', assetType.id)">
                   {{ $t('main.remove') }}
@@ -42,9 +95,11 @@
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
-import { sortByName } from '@/lib/sorting'
+import { sortByName, sortTaskTypes } from '@/lib/sorting'
 
+import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOptions.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const store = useStore()
 
@@ -69,8 +124,54 @@ const remainingAssetTypes = computed(() =>
   sortByName(props.allAssetTypes.filter(at => !linkedIds.value.has(at.id)))
 )
 
+const currentProduction = computed(() => store.getters.currentProduction)
+const productionTaskTypes = computed(
+  () => store.getters.productionAssetTaskTypes
+)
+const sortedProductionTaskTypes = computed(() =>
+  sortTaskTypes(productionTaskTypes.value, currentProduction.value)
+)
+
 // Functions
 // --------------------------------------------------------------------------
+const getWorkflow = assetTypeId =>
+  store.getters.getAssetTypeWorkflow(assetTypeId)
+
+const hasProductionWorkflow = assetTypeId =>
+  Boolean(currentProduction.value?.asset_type_workflows?.[assetTypeId]?.length)
+
+// Zou accepts only the task types of the production: the ones a studio
+// workflow lists outside of it are neither shown nor sent back.
+const getTaskTypes = assetTypeId => {
+  const workflow = getWorkflow(assetTypeId)
+  return sortTaskTypes(
+    productionTaskTypes.value.filter(({ id }) => workflow.includes(id)),
+    currentProduction.value
+  )
+}
+
+// An empty workflow accepts all the task types: none of them is hidden.
+const getHiddenTaskTypeIds = assetTypeId => {
+  if (!getWorkflow(assetTypeId).length) return []
+  const shownIds = getTaskTypes(assetTypeId).map(({ id }) => id)
+  return productionTaskTypes.value
+    .map(({ id }) => id)
+    .filter(id => !shownIds.includes(id))
+}
+
+const saveWorkflow = (assetTypeId, taskTypeIds) =>
+  store
+    .dispatch('setAssetTypeWorkflow', { assetTypeId, taskTypeIds })
+    .catch(console.error)
+
+// Hiding them all saves an empty list: back to the studio workflow.
+const onHiddenChanged = (assetTypeId, hiddenIds) => {
+  const taskTypeIds = productionTaskTypes.value
+    .map(({ id }) => id)
+    .filter(id => !hiddenIds.includes(id))
+  saveWorkflow(assetTypeId, taskTypeIds)
+}
+
 const onImportItem = item => emit('add', item?.id || item)
 
 const onImportFromProduction = productionId => {
@@ -99,8 +200,8 @@ const onImportFromProduction = productionId => {
 
 .column {
   overflow-y: initial;
-  flex: 0 0 auto;
-  max-width: 400px;
+  flex: 0 1 auto;
+  max-width: 900px;
 
   // Asset type names are short: sized on its content, the importer was a
   // narrow strip
@@ -111,12 +212,54 @@ const onImportFromProduction = productionId => {
 }
 
 .list {
-  width: 400px;
-  min-width: 400px;
-  max-width: 400px;
+  width: 100%;
 
-  .name {
-    width: 100%;
+  .name,
+  .origin {
+    white-space: nowrap;
+  }
+
+  .origin-content {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .origin .tag {
+    .dark & {
+      background: $dark-grey-lightest;
+      color: var(--text);
+    }
+  }
+
+  .restore-workflow {
+    font-size: 0.8em;
+    height: auto;
+    padding: 0.1em 0.5em;
+  }
+
+  .workflow-combo {
+    flex: 0 0 auto;
+    min-width: 80px;
+  }
+
+  // Wrapped tags stay aligned on the first ones, not under the combobox.
+  .workflow-tags {
+    display: flex;
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    min-width: 0;
+  }
+
+  td.workflow {
+    vertical-align: middle;
+  }
+
+  .task-types {
+    align-items: center;
+    gap: 0.5em;
   }
 }
 
