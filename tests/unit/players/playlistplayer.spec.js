@@ -2090,6 +2090,46 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // Ctrl or Cmd+Shift+Left/Right moves the entry played.
+  describe('reorder shortcut', () => {
+    const entities = [
+      { ...entity, id: 'shot-1', preview_file_id: 'preview-1' },
+      { ...entity, id: 'shot-2', preview_file_id: 'preview-2' }
+    ]
+
+    const press = code =>
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          code,
+          key: code,
+          ctrlKey: true,
+          shiftKey: true
+        })
+      )
+
+    it.each(['ArrowLeft', 'ArrowRight'])(
+      'moves the entry on %s once the playlist is loaded',
+      async code => {
+        wrapper = mountPlayer({ entities })
+        await flushPromises()
+        press(code)
+        expect(wrapper.emitted('order-change')).toHaveLength(1)
+      }
+    )
+
+    // During the load, the entries are still those of the playlist shown
+    // before: the page saved its order.
+    it.each(['ArrowLeft', 'ArrowRight'])(
+      'ignores %s while a playlist loads',
+      async code => {
+        wrapper = mountPlayer({ entities, props: { isLoading: true } })
+        await flushPromises()
+        press(code)
+        expect(wrapper.emitted('order-change')).toBeUndefined()
+      }
+    )
+  })
+
   // The trim belongs to the shot, not to a revision: an end handle left at
   // the clip end must not pin the length of the revision on screen, or a
   // longer revision would stop at that length.

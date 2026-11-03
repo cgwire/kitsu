@@ -880,6 +880,75 @@ describe('Playlist page, silent lock', () => {
 
     expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
   })
+
+  // The lock lasts as long as the save: the reload of an update received
+  // meanwhile would bring back the order the save replaces.
+  it('ignores the updates until a reorder is saved', async () => {
+    const { fn: changePlaylistOrder, release } = gatedAction()
+    const { wrapper, actions, socket } = await openPlaylist(
+      { shots: [{ id: 's1' }] },
+      {
+        actions: {
+          changePlaylistOrder,
+          refreshPlaylist: vi.fn(() => Promise.resolve({ id: 'pl-1' }))
+        }
+      }
+    )
+    await flushPromises()
+    const onPlaylistUpdate = socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:update'
+    )[1]
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    wrapper.findComponent(PlaylistPlayer).vm.$emit('order-change', {
+      before: { entity_id: 's1', preview_file_id: 'pf-1' },
+      after: { entity_id: 's2', preview_file_id: 'pf-2' }
+    })
+    await vi.advanceTimersByTimeAsync(2100)
+    onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
+
+    expect(actions.refreshPlaylist).not.toHaveBeenCalled()
+
+    release()
+    await vi.advanceTimersByTimeAsync(2100)
+    onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
+
+    expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
+  })
+
+  // On an empty playlist, the store throws before it saves. The error still
+  // goes to the app error handler, which reports it.
+  it('listens to the updates again after a reorder that throws', async () => {
+    const bug = new TypeError('Cannot read properties of undefined')
+    const { wrapper, actions, socket } = await openPlaylist(
+      { shots: [{ id: 's1' }] },
+      {
+        actions: {
+          changePlaylistOrder: vi.fn(() => {
+            throw bug
+          }),
+          refreshPlaylist: vi.fn(() => Promise.resolve({ id: 'pl-1' }))
+        }
+      }
+    )
+    await flushPromises()
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+    const onPlaylistUpdate = socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:update'
+    )[1]
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    wrapper.findComponent(PlaylistPlayer).vm.$emit('order-change', {
+      before: { entity_id: 's1', preview_file_id: 'pf-1' },
+      after: { entity_id: 's2', preview_file_id: 'pf-2' }
+    })
+    await vi.advanceTimersByTimeAsync(2100)
+    onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
+
+    expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
+    expect(errorHandler.mock.calls.map(([error]) => error)).toEqual([bug])
+  })
 })
 
 describe('Playlist page, unreadable playlist', () => {

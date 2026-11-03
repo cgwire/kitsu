@@ -1281,14 +1281,13 @@ const onPreviewChanged = ({ entity, previewFileId, previousPreviewFileId }) =>
     previousPreviewFileId
   })
 
-const onOrderChange = info => {
-  setSilent()
-  store.dispatch('changePlaylistOrder', {
-    playlist: currentPlaylist.value,
-    info
-  })
-  clearSilent()
-}
+const onOrderChange = info =>
+  withSilent(() =>
+    store.dispatch('changePlaylistOrder', {
+      playlist: currentPlaylist.value,
+      info
+    })
+  )
 
 const onAnnotationChanged = async ({
   preview,

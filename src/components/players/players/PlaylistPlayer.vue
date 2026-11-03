@@ -4160,9 +4160,10 @@ const onEntityDropped = info => {
 
 // Read the reorder payload BEFORE moving: moveSelectedEntity empties
 // entityList synchronously (restored on nextTick), so any index read
-// after the call lands on an empty array.
+// after the call lands on an empty array. During a load, the entries are
+// still those of the playlist shown before.
 const moveSelectedEntityToLeft = () => {
-  if (entityList.value.length < 2) return
+  if (props.isLoading || entityList.value.length < 2) return
   const toMoveIndex = playingEntityIndex.value
   const targetIndex = previousEntityIndex.value
   const entityToMove = currentEntity.value
@@ -4181,7 +4182,7 @@ const moveSelectedEntityToLeft = () => {
 }
 
 const moveSelectedEntityToRight = () => {
-  if (entityList.value.length < 2) return
+  if (props.isLoading || entityList.value.length < 2) return
   const toMoveIndex = playingEntityIndex.value
   const targetIndex = nextEntityIndex.value
   const entityToMove = currentEntity.value
