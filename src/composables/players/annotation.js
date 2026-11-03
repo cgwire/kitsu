@@ -60,6 +60,13 @@ Text.prototype._calculateCurrentDimensions = function () {
   )
 }
 
+/* Fabric drags the selected words of a text being typed (both switches below
+ * turn it off). A new note starts fully selected, so pressing it to move it
+ * started such a drag, and fabric threw at its end when the canvas had
+ * reloaded meanwhile. */
+IText.prototype.shouldStartDragging = () => false
+IText.prototype.onDragStart = () => false
+
 if (PSStroke) {
   /* Monkey patches needed to make PSStroke work correctly by adding missing
    * expected methods to deal with Fabric and pressure.

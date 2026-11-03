@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { computed, defineComponent, ref, unref } from 'vue'
 
-import { Point, Text } from 'fabric'
+import { Canvas, IText, Point, Text } from 'fabric'
 import { PSStroke, PSPoint } from 'fabricjs-psbrush'
 
 import { useAnnotation } from '@/composables/players/annotation'
@@ -67,6 +67,59 @@ describe('PSStroke dimensions', () => {
       x: 120,
       y: 20
     })
+  })
+})
+
+describe('IText drag', () => {
+  const pointer = (type, x, y) =>
+    new PointerEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      clientX: x,
+      clientY: y,
+      pointerId: 1,
+      pointerType: 'mouse',
+      isPrimary: true
+    })
+
+  // A canvas reload during such a drag made fabric throw at its end.
+  it('starts no drag from the selected words of a text being typed', () => {
+    const element = document.createElement('canvas')
+    document.body.appendChild(element)
+    const canvas = new Canvas(element, {
+      width: 400,
+      height: 300,
+      enablePointerEvents: true
+    })
+    const text = new IText('Type...', { left: 100, top: 100 })
+    canvas.add(text)
+    canvas.setActiveObject(text)
+    text.enterEditing()
+    text.selectAll()
+    const onDragStart = vi.fn()
+    canvas.on('dragstart', onDragStart)
+    const { x, y } = text.getCenterPoint()
+
+    canvas.upperCanvasEl.dispatchEvent(pointer('pointerdown', x, y))
+    const move = pointer('pointermove', x + 20, y)
+    canvas.upperCanvasEl.dispatchEvent(move)
+    const drag = new MouseEvent('dragstart', {
+      bubbles: true,
+      cancelable: true,
+      clientX: x + 20,
+      clientY: y
+    })
+    Object.defineProperty(drag, 'dataTransfer', {
+      value: { setData: vi.fn(), setDragImage: vi.fn() }
+    })
+    canvas.upperCanvasEl.dispatchEvent(drag)
+
+    expect(move.defaultPrevented).toBe(true)
+    expect(drag.defaultPrevented).toBe(true)
+    expect(onDragStart).not.toHaveBeenCalled()
+    text.exitEditing()
+    canvas.dispose()
+    element.remove()
   })
 })
 
