@@ -2411,7 +2411,8 @@ const showEditMilestoneModal = (day, milestone) => {
         name: undefined,
         id: undefined,
         milestone_type: undefined,
-        color: undefined
+        color: undefined,
+        department_id: undefined
       })
     }
   }

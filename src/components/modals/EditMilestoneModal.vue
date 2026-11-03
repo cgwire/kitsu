@@ -15,6 +15,11 @@
       :options="typeOptions"
       v-model="form.milestone_type"
     />
+    <combobox-department
+      class="field"
+      :label="$t('main.department')"
+      v-model="form.department_id"
+    />
     <color-field
       class="mt2"
       :label="$t('schedule.milestone.color')"
@@ -55,6 +60,7 @@ import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ColorField from '@/components/widgets/ColorField.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxSimple from '@/components/widgets/ComboboxSimple.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
@@ -117,7 +123,8 @@ const reset = () => {
     name: milestone.name || '',
     date: milestone.date,
     milestone_type: milestone.milestone_type || DEFAULT_MILESTONE_TYPE,
-    color: milestone.color || null
+    color: milestone.color || null,
+    department_id: milestone.department_id || null
   }
 }
 

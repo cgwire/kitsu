@@ -21,6 +21,11 @@
           :style="{ background: getMilestoneColor(milestone) }"
         ></span>
         <span class="milestone-popover-name">{{ milestone.name }}</span>
+        <department-name
+          :department="departmentMap.get(milestone.department_id)"
+          no-padding
+          v-if="departmentMap.get(milestone.department_id)"
+        />
         <span class="milestone-popover-type">
           {{ $t(`schedule.milestone.types.${milestone.milestone_type}`) }}
         </span>
@@ -38,6 +43,8 @@ import { computed, onBeforeUnmount, shallowRef } from 'vue'
 import { useStore } from 'vuex'
 
 import { getMilestoneColor } from '@/lib/milestones'
+
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
 const store = useStore()
 
@@ -60,6 +67,7 @@ let hideTimeout = null
 // Computed
 // --------------------------------------------------------------------------
 
+const departmentMap = computed(() => store.getters.departmentMap)
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
 
 // Functions

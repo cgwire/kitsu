@@ -1,5 +1,6 @@
 // @vitest-environment node
 
+import moment from 'moment'
 import { vi } from 'vitest'
 
 vi.mock('@/store/api/client', () => ({
@@ -350,6 +351,42 @@ describe('store/api endpoints', () => {
         '/api/data/project-templates/template-1/task-statuses',
         { task_status_id: 'status-1', ...expected }
       )
+    })
+  })
+
+  describe('milestones', () => {
+    const milestone = {
+      id: 'm1',
+      date: moment('2026-11-02'),
+      name: 'Animation lock',
+      milestone_type: 'approval',
+      color: null,
+      department_id: 'dep-1'
+    }
+
+    test('creates a milestone with its department', () => {
+      scheduleApi.createMilestone({ id: 'p1' }, milestone)
+      expect(client.ppost).toHaveBeenCalledWith('/api/data/milestones', {
+        date: '2026-11-02',
+        name: 'Animation lock',
+        task_type_id: undefined,
+        milestone_type: 'approval',
+        color: null,
+        department_id: 'dep-1',
+        project_id: 'p1'
+      })
+    })
+
+    test('updates the department of a milestone', () => {
+      scheduleApi.updateMilestone({ ...milestone, department_id: null })
+      expect(client.pput).toHaveBeenCalledWith('/api/data/milestones/m1', {
+        date: '2026-11-02',
+        name: 'Animation lock',
+        task_type_id: undefined,
+        milestone_type: 'approval',
+        color: null,
+        department_id: null
+      })
     })
   })
 
