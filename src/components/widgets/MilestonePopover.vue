@@ -1,9 +1,13 @@
 <template>
   <teleport to="body">
     <div
+      ref="popoverRef"
       class="milestone-popover"
       :class="{ dark: isDarkTheme }"
       :style="position"
+      @focusin="keep"
+      @focusout="hide"
+      @keydown.esc.stop="close"
       @mouseenter="keep"
       @mouseleave="hide"
       v-if="group"
@@ -13,7 +17,11 @@
         class="milestone-popover-item"
         :class="{ pointer: canEdit }"
         :key="`milestone-popover-${milestone.id}`"
-        @click="emit('edit', milestone)"
+        :role="canEdit ? 'button' : undefined"
+        :tabindex="canEdit ? 0 : undefined"
+        @click="edit(milestone)"
+        @keydown.enter.prevent="edit(milestone)"
+        @keydown.space.prevent="edit(milestone)"
         v-for="milestone in group.milestones"
       >
         <span
@@ -38,8 +46,11 @@
 /*
  * Lists the milestones of a schedule header flag. It owns its hover state so
  * showing it does not re-render the whole schedule.
+ *
+ * shortcut: Tab past the last item sends the focus to the end of the page, not
+ * to the next flag. Add a focus trap if keyboard users report it.
  */
-import { computed, onBeforeUnmount, shallowRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef } from 'vue'
 import { useStore } from 'vuex'
 
 import { getMilestoneColor } from '@/lib/milestones'
@@ -62,6 +73,8 @@ const emit = defineEmits(['edit'])
 
 const group = shallowRef(null)
 const position = shallowRef({})
+const popoverRef = ref(null)
+let flag = null
 let hideTimeout = null
 
 // Computed
@@ -73,11 +86,15 @@ const isDarkTheme = computed(() => store.getters.isDarkTheme)
 // Functions
 // --------------------------------------------------------------------------
 
-const show = (newGroup, target) => {
+const show = (newGroup, target, { moveFocus = false } = {}) => {
   clearTimeout(hideTimeout)
   const rect = target.getBoundingClientRect()
+  flag = target
   group.value = newGroup
   position.value = { left: `${rect.left}px`, top: `${rect.bottom + 4}px` }
+  if (moveFocus) {
+    nextTick(() => popoverRef.value?.querySelector('[role="button"]')?.focus())
+  }
 }
 
 // Delayed so the pointer can travel from the flag into the popover.
@@ -94,6 +111,18 @@ const hide = ({ immediate = false } = {}) => {
 
 const keep = () => {
   clearTimeout(hideTimeout)
+}
+
+const close = () => {
+  flag?.focus()
+  hide({ immediate: true })
+}
+
+// The focus goes back to the flag first: the modal opening next restores it
+// on close, and the popover items are gone by then.
+const edit = milestone => {
+  close()
+  emit('edit', milestone)
 }
 
 defineExpose({ hide, show })

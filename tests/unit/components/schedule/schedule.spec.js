@@ -166,6 +166,37 @@ describe('Schedule widget - milestones', () => {
       expect(popover()).not.toBeNull()
       wrapper.unmount()
     })
+
+    it('takes the focus on Enter on a merged flag', async () => {
+      const wrapper = mountWithFlag([
+        milestone('m1', 'Delivery'),
+        milestone('m2', 'Review')
+      ])
+
+      await wrapper.find('.milestone-flag').trigger('keydown', { key: 'Enter' })
+      await nextTick()
+
+      expect(document.activeElement).toBe(
+        popover().querySelector('.milestone-popover-item')
+      )
+      wrapper.unmount()
+    })
+
+    it('leaves the focus on a merged flag clicked with the mouse', async () => {
+      const wrapper = mountWithFlag([
+        milestone('m1', 'Delivery'),
+        milestone('m2', 'Review')
+      ])
+      const flag = wrapper.find('.milestone-flag')
+
+      flag.element.focus()
+      await flag.trigger('click')
+      await nextTick()
+
+      expect(popover()).not.toBeNull()
+      expect(document.activeElement).toBe(flag.element)
+      wrapper.unmount()
+    })
   })
 })
 

@@ -303,8 +303,8 @@
               @mousedown.stop
               @touchstart.stop
               @click="onMilestoneGroupClick(group, $event)"
-              @keydown.enter.prevent="onMilestoneGroupClick(group, $event)"
-              @keydown.space.prevent="onMilestoneGroupClick(group, $event)"
+              @keydown.enter.prevent="onMilestoneGroupKeydown(group, $event)"
+              @keydown.space.prevent="onMilestoneGroupKeydown(group, $event)"
               @mouseenter="showMilestonePopover(group, $event)"
               @mouseleave="hideMilestonePopover"
               @keyup.tab="showMilestonePopover(group, $event)"
@@ -2429,6 +2429,16 @@ const onMilestoneGroupClick = (group, event) => {
     editMilestone(group.milestones[0])
   } else {
     showMilestonePopover(group, event)
+  }
+}
+
+const onMilestoneGroupKeydown = (group, event) => {
+  if (group.milestones.length === 1) {
+    editMilestone(group.milestones[0])
+  } else {
+    milestonePopoverRef.value?.show(group, event.currentTarget, {
+      moveFocus: true
+    })
   }
 }
 
