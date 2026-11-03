@@ -70,6 +70,7 @@ import { latestPreviewFileStatus } from '@/lib/preview'
 import { DEFAULT_FPS, frameStartTime, SEEK_NUDGE } from '@/lib/video'
 import {
   createFrameRenderer,
+  isPresentationAhead,
   supportsVideoFrameCallback
 } from '@/lib/players/frameRenderer'
 
@@ -296,6 +297,17 @@ const startRenderLoop = () => {
       if (
         seekGuardTarget !== null &&
         Math.abs(metadata.mediaTime - seekGuardTarget) > 2 * frameDuration.value
+      ) {
+        renderLoopHandle = player.requestVideoFrameCallback(tick)
+        return
+      }
+      if (
+        isPlaying.value &&
+        isPresentationAhead(
+          metadata.mediaTime,
+          player.currentTime,
+          frameDuration.value
+        )
       ) {
         renderLoopHandle = player.requestVideoFrameCallback(tick)
         return

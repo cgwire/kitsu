@@ -47,6 +47,7 @@ import { useStore } from 'vuex'
 
 import {
   createFrameRenderer,
+  isPresentationAhead,
   supportsVideoFrameCallback
 } from '@/lib/players/frameRenderer'
 import { panPanzoomBy, zoomPanzoomAt } from '@/lib/players/panzoom'
@@ -385,6 +386,17 @@ const startRenderLoop = () => {
       if (
         seekGuardTarget !== null &&
         Math.abs(metadata.mediaTime - seekGuardTarget) > 2 * frameDuration.value
+      ) {
+        renderLoopHandle = video.value.requestVideoFrameCallback(tick)
+        return
+      }
+      if (
+        !video.value.paused &&
+        isPresentationAhead(
+          metadata.mediaTime,
+          video.value.currentTime,
+          frameDuration.value
+        )
       ) {
         renderLoopHandle = video.value.requestVideoFrameCallback(tick)
         return

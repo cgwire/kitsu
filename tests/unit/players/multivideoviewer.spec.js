@@ -531,10 +531,31 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     await wrapper.vm.$nextTick()
     wrapper.vm.play()
     const player = wrapper.vm.currentPlayer
+    player.currentTime = 200.5 / 30
     const { cb: tick } = rvfcCallbacks.at(-1)
     tick(performance.now(), { mediaTime: 200 / 30 })
     expect(player.currentTime).toBeCloseTo(120 / 30 + 0.001, 6)
     expect(wrapper.emitted('repeat')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  // Firefox sometimes reports a mediaTime seconds ahead of the playback, for
+  // one tick: the playlist moved on before the end of the trim.
+  it('keeps playing on a presentation far ahead of the playback', async () => {
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+    const wrapper = mountViewer({
+      entities: [
+        { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 30 }
+      ],
+      handleOut: 200
+    })
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    wrapper.vm.play()
+    wrapper.vm.currentPlayer.currentTime = 120 / 30
+    const { cb: tick } = rvfcCallbacks.at(-1)
+    tick(performance.now(), { mediaTime: 200 / 30 })
+    expect(wrapper.emitted('play-next')).toBeUndefined()
     wrapper.unmount()
   })
 

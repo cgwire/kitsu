@@ -160,6 +160,7 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     })
 
     // Fire a tick: frame 10 at 25fps starts at mediaTime 0.4.
+    video.currentTime = 0.42
     const tick = rvfcCallbacks[rvfcCallbacks.length - 1]
     tick(performance.now(), { mediaTime: 0.4 })
     expect(fakeContext.drawImage).toHaveBeenCalled()
@@ -192,6 +193,7 @@ describe('players/VideoViewer (canvas pipeline)', () => {
       configurable: true
     })
 
+    video.currentTime = 18000.5 / 30
     const tick = rvfcCallbacks[rvfcCallbacks.length - 1]
     tick(performance.now(), { mediaTime: 18000 / 30 })
 
@@ -200,6 +202,31 @@ describe('players/VideoViewer (canvas pipeline)', () => {
       18000.5 / 30,
       6
     )
+    wrapper.unmount()
+  })
+
+  // Firefox sometimes reports a mediaTime seconds ahead of the playback, for
+  // one tick: the progress bar and the frame counter jumped there and back.
+  it('ignores a presentation far ahead of the playback', async () => {
+    const wrapper = mountViewer()
+    await new Promise(resolve => setTimeout(resolve))
+    const video = wrapper.find('video').element
+    await video.dispatchEvent(new Event('loadedmetadata'))
+    Object.defineProperty(video, 'paused', {
+      value: false,
+      configurable: true
+    })
+    video.currentTime = 0.82
+    fakeContext.drawImage.mockClear()
+
+    rvfcCallbacks.at(-1)(performance.now(), { mediaTime: 2.9 })
+    expect(wrapper.emitted('time-update')).toBeUndefined()
+    expect(wrapper.emitted('frame-update')).toBeUndefined()
+    expect(fakeContext.drawImage).not.toHaveBeenCalled()
+
+    rvfcCallbacks.at(-1)(performance.now(), { mediaTime: 0.84 })
+    expect(wrapper.emitted('time-update').at(-1)[0]).toBeCloseTo(0.86, 5)
+    expect(fakeContext.drawImage).toHaveBeenCalled()
     wrapper.unmount()
   })
 

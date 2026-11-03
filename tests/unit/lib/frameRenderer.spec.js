@@ -3,6 +3,7 @@
 import {
   Canvas2DFrameRenderer,
   createFrameRenderer,
+  isPresentationAhead,
   supportsVideoFrameCallback
 } from '@/lib/players/frameRenderer'
 
@@ -83,6 +84,26 @@ describe('lib/players/frameRenderer', () => {
       const { canvas } = createFakeCanvas()
       const renderer = createFrameRenderer(canvas, createFakeVideo())
       expect(renderer).toBeInstanceOf(Canvas2DFrameRenderer)
+    })
+  })
+
+  describe('isPresentationAhead', () => {
+    it('leaves the normal lag of currentTime alone', () => {
+      expect(isPresentationAhead(1.04, 1, 0.04)).toBe(false)
+      expect(isPresentationAhead(1.2, 1, 0.04)).toBe(false)
+    })
+
+    it('spots a presentation far ahead of the playback', () => {
+      expect(isPresentationAhead(2.9, 0.82, 0.04)).toBe(true)
+      expect(isPresentationAhead(0.5, 0.129, 0.04)).toBe(true)
+    })
+
+    it('leaves the next frame of a very low frame rate alone', () => {
+      expect(isPresentationAhead(1.5, 1, 0.5)).toBe(false)
+    })
+
+    it('leaves a presentation behind the playback alone', () => {
+      expect(isPresentationAhead(0.4, 3, 0.04)).toBe(false)
     })
   })
 
