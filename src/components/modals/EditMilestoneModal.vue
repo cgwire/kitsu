@@ -8,6 +8,24 @@
       @enter="confirm"
       v-focus
     />
+    <combobox-simple
+      class="field"
+      :label="$t('schedule.milestone.type')"
+      locale-key-prefix="schedule.milestone.types."
+      :options="typeOptions"
+      v-model="form.milestone_type"
+    />
+    <combobox-department
+      class="field"
+      :label="$t('main.department')"
+      v-model="form.department_id"
+    />
+    <color-field
+      class="mt2"
+      :label="$t('schedule.milestone.color')"
+      :model-value="displayedColor"
+      @update:model-value="color => (form.color = color)"
+    />
     <button-simple
       class="button is-link error"
       :text="$t('schedule.milestone.delete_milestone')"
@@ -32,14 +50,24 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import {
+  DEFAULT_MILESTONE_TYPE,
+  MILESTONE_TYPE_COLORS,
+  MILESTONE_TYPES
+} from '@/lib/milestones'
+
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ColorField from '@/components/widgets/ColorField.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxSimple from '@/components/widgets/ComboboxSimple.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 const { t } = useI18n()
 
 // Props / Emits
+// --------------------------------------------------------------------------
 
 const props = defineProps({
   active: { type: Boolean, default: false },
@@ -51,15 +79,25 @@ const props = defineProps({
 const emit = defineEmits(['cancel', 'confirm', 'remove-milestone'])
 
 // State
+// --------------------------------------------------------------------------
 
+// form.color stays null until picked by hand, so the milestone keeps
+// following its type color.
 const form = ref({ name: '' })
 const nameField = ref(null)
 
+const typeOptions = MILESTONE_TYPES.map(value => ({ label: value, value }))
+
 // Computed
+// --------------------------------------------------------------------------
 
 const isEdit = computed(() => props.milestoneToEdit.id !== undefined)
 
 const isFormFilled = computed(() => form.value.name.length > 0)
+
+const displayedColor = computed(
+  () => form.value.color || MILESTONE_TYPE_COLORS[form.value.milestone_type]
+)
 
 const modalTitle = computed(() => {
   const dateStr = props.milestoneToEdit.date?.format('YYYY-MM-DD') ?? ''
@@ -70,6 +108,7 @@ const modalTitle = computed(() => {
 })
 
 // Functions
+// --------------------------------------------------------------------------
 
 const confirm = () => {
   // Enter in a field lands here too, past the grayed confirm button.
@@ -78,14 +117,19 @@ const confirm = () => {
 }
 
 const reset = () => {
+  const milestone = props.milestoneToEdit
   form.value = {
-    id: props.milestoneToEdit.id || undefined,
-    name: props.milestoneToEdit.name || '',
-    date: props.milestoneToEdit.date
+    id: milestone.id || undefined,
+    name: milestone.name || '',
+    date: milestone.date,
+    milestone_type: milestone.milestone_type || DEFAULT_MILESTONE_TYPE,
+    color: milestone.color || null,
+    department_id: milestone.department_id || null
   }
 }
 
 // Watchers
+// --------------------------------------------------------------------------
 
 watch(
   () => props.active,
@@ -100,6 +144,7 @@ watch(
 )
 
 // Lifecycle
+// --------------------------------------------------------------------------
 
 onMounted(() => {
   reset()

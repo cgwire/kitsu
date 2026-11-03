@@ -4,7 +4,24 @@ import { createI18n } from 'vue-i18n'
 
 vi.mock('@/composables/modal', () => ({ useModal: () => {} }))
 
+const departments = [
+  { id: 'dep-1', name: 'Animation', color: '#ff0000', archived: false },
+  { id: 'dep-2', name: 'Lighting', color: '#00ff00', archived: false }
+]
+vi.mock('vuex', () => ({
+  useStore: () => ({
+    getters: {
+      departments,
+      departmentMap: new Map(departments.map(dep => [dep.id, dep])),
+      isCurrentUserManager: true,
+      isCurrentUserSupervisor: false,
+      user: { departments: [] }
+    }
+  })
+}))
+
 import EditMilestoneModal from '@/components/modals/EditMilestoneModal.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 const i18n = createI18n({
@@ -15,10 +32,10 @@ const i18n = createI18n({
   fallbackWarn: false
 })
 
-const openModal = async () => {
+const openModal = async (milestone = {}) => {
   const wrapper = mount(EditMilestoneModal, {
     global: { plugins: [i18n] },
-    props: { milestoneToEdit: { date: moment('2026-11-02') } }
+    props: { milestoneToEdit: { date: moment('2026-11-02'), ...milestone } }
   })
   await wrapper.setProps({ active: true })
   return wrapper
@@ -48,6 +65,40 @@ describe('modals/EditMilestoneModal', () => {
 
     expect(wrapper.emitted('confirm')[0][0]).toMatchObject({
       name: 'Animatic'
+    })
+  })
+
+  it('keeps the department of the milestone', async () => {
+    const wrapper = await openModal({
+      id: 'm1',
+      name: 'Animation lock',
+      department_id: 'dep-1'
+    })
+
+    expect(wrapper.findComponent(ComboboxDepartment).props('modelValue')).toBe(
+      'dep-1'
+    )
+    pressEnterInName(wrapper)
+
+    expect(wrapper.emitted('confirm')[0][0]).toMatchObject({
+      department_id: 'dep-1'
+    })
+  })
+
+  it('links the milestone to the picked department', async () => {
+    const wrapper = await openModal({ name: 'Lighting review' })
+
+    expect(wrapper.findComponent(ComboboxDepartment).props('modelValue')).toBe(
+      null
+    )
+    wrapper.findComponent(ComboboxDepartment).vm.$emit(
+      'update:model-value',
+      'dep-2'
+    )
+    pressEnterInName(wrapper)
+
+    expect(wrapper.emitted('confirm')[0][0]).toMatchObject({
+      department_id: 'dep-2'
     })
   })
 })

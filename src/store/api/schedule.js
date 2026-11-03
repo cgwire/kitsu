@@ -11,6 +11,9 @@ export default {
       date: milestone.date.format('YYYY-MM-DD'),
       name: milestone.name,
       task_type_id: milestone.task_type_id,
+      milestone_type: milestone.milestone_type,
+      color: milestone.color,
+      department_id: milestone.department_id,
       project_id: production.id
     }
     return client.ppost('/api/data/milestones', data)
@@ -20,7 +23,10 @@ export default {
     const data = {
       date: milestone.date.format('YYYY-MM-DD'),
       name: milestone.name,
-      task_type_id: milestone.task_type_id
+      task_type_id: milestone.task_type_id,
+      milestone_type: milestone.milestone_type,
+      color: milestone.color,
+      department_id: milestone.department_id
     }
     const path = `/api/data/milestones/${milestone.id}`
     return client.pput(path, data)
