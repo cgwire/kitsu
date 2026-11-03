@@ -1,15 +1,6 @@
-vi.mock('@/store/api/playlists', () => ({
-  default: {
-    loadSharedPlaylistComments: vi.fn(),
-    loadSharedPlaylistContext: vi.fn()
-  }
-}))
-
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
-
-import playlistsApi from '@/store/api/playlists'
 
 import SharedCommentsPanel from '@/components/players/sides/SharedCommentsPanel.vue'
 import TaskComment from '@/components/widgets/Comment.vue'
@@ -27,7 +18,13 @@ const i18n = createI18n({
 // The people the panel registers, as the people store receives them.
 const loadedPeople = []
 
+const actions = {
+  loadSharedPlaylistComments: vi.fn(),
+  loadSharedPlaylistContext: vi.fn()
+}
+
 const store = createStore({
+  actions,
   getters: {
     currentProduction: () => null,
     personMap: () => new Map(),
@@ -52,10 +49,10 @@ const sharedAvatarPath = personId =>
 describe('players/SharedCommentsPanel', () => {
   beforeEach(() => {
     loadedPeople.length = 0
-    playlistsApi.loadSharedPlaylistContext.mockResolvedValue({
+    actions.loadSharedPlaylistContext.mockResolvedValue({
       task_statuses: []
     })
-    playlistsApi.loadSharedPlaylistComments.mockResolvedValue([
+    actions.loadSharedPlaylistComments.mockResolvedValue([
       {
         id: 'comment-1',
         object_id: 'task-1',
@@ -119,7 +116,7 @@ describe('players/SharedCommentsPanel', () => {
   // The avatar route needs a login: the page shows the pictures through the
   // link, for the comment authors and the repliers alike.
   it('shows the avatars and the repliers through the link', async () => {
-    playlistsApi.loadSharedPlaylistComments.mockResolvedValue([
+    actions.loadSharedPlaylistComments.mockResolvedValue([
       {
         id: 'comment-1',
         object_id: 'task-1',

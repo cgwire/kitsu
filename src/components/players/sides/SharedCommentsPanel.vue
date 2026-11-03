@@ -193,7 +193,6 @@ import { useFullScreenContainer } from '@/composables/fullScreen'
 import { replaceTimeWithTimecode } from '@/lib/render'
 import stringHelpers from '@/lib/string'
 import { DEFAULT_FPS } from '@/lib/video'
-import playlistsApi from '@/store/api/playlists'
 import { LOAD_PEOPLE_END } from '@/store/mutation-types'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
@@ -373,7 +372,7 @@ const populatePersonMap = () => {
 // --------------------------------------------------------------------------
 
 const loadContext = async () => {
-  const data = await playlistsApi.loadSharedPlaylistContext(props.token)
+  const data = await store.dispatch('loadSharedPlaylistContext', props.token)
   taskStatuses.value = data.task_statuses || []
   if (availableStatuses.value.length > 0 && !selectedStatusId.value) {
     selectedStatusId.value = availableStatuses.value[0].id
@@ -381,7 +380,10 @@ const loadContext = async () => {
 }
 
 const loadComments = async () => {
-  comments.value = await playlistsApi.loadSharedPlaylistComments(props.token)
+  comments.value = await store.dispatch(
+    'loadSharedPlaylistComments',
+    props.token
+  )
   populatePersonMap()
 }
 
@@ -427,11 +429,11 @@ const replaceComment = saved => {
 const uploadAttachments = async commentId => {
   if (pendingAttachments.value.length === 0) return null
   try {
-    return await playlistsApi.postSharedPlaylistCommentAttachments(
-      props.token,
+    return await store.dispatch('postSharedPlaylistCommentAttachments', {
+      shareToken: props.token,
       commentId,
-      buildAttachmentsForm(pendingAttachments.value)
-    )
+      formData: buildAttachmentsForm(pendingAttachments.value)
+    })
   } catch {
     return null
   }
@@ -446,12 +448,15 @@ const submitComment = async () => {
   postError.value = ''
   submitting.value = true
   try {
-    let comment = await playlistsApi.postSharedPlaylistComment(props.token, {
-      guest_id: props.guestId,
-      task_id: props.currentTaskId,
-      task_status_id: selectedStatusId.value,
-      text: commentText.value,
-      checklist: checklistItems.value.filter(item => item.text.trim())
+    let comment = await store.dispatch('postSharedPlaylistComment', {
+      shareToken: props.token,
+      data: {
+        guest_id: props.guestId,
+        task_id: props.currentTaskId,
+        task_status_id: selectedStatusId.value,
+        text: commentText.value,
+        checklist: checklistItems.value.filter(item => item.text.trim())
+      }
     })
     const withAttachments = await uploadAttachments(comment.id)
     if (withAttachments) comment = withAttachments
@@ -499,30 +504,30 @@ const confirmEditComment = async updatedComment => {
   const newAttachmentFiles = updatedComment.newAttachmentFiles || []
   try {
     for (const attachment of attachmentsToDelete) {
-      await playlistsApi.deleteSharedPlaylistCommentAttachment(
-        props.token,
+      await store.dispatch('deleteSharedPlaylistCommentAttachment', {
+        shareToken: props.token,
         commentId,
-        attachment.id,
-        props.guestId
-      )
+        attachmentId: attachment.id,
+        guestId: props.guestId
+      })
     }
     if (newAttachmentFiles.length > 0) {
-      await playlistsApi.postSharedPlaylistCommentAttachments(
-        props.token,
+      await store.dispatch('postSharedPlaylistCommentAttachments', {
+        shareToken: props.token,
         commentId,
-        buildAttachmentsForm(newAttachmentFiles)
-      )
+        formData: buildAttachmentsForm(newAttachmentFiles)
+      })
     }
-    const saved = await playlistsApi.editSharedPlaylistComment(
-      props.token,
+    const saved = await store.dispatch('editSharedPlaylistComment', {
+      shareToken: props.token,
       commentId,
-      {
+      data: {
         guest_id: props.guestId,
         text: updatedComment.text,
         checklist: updatedComment.checklist || [],
         task_status_id: updatedComment.task_status_id
       }
-    )
+    })
     replaceComment(saved)
     emitStatusChanged(
       saved.task_status ||
@@ -541,11 +546,11 @@ const confirmDeleteComment = async () => {
   isDeleting.value = true
   deleteError.value = false
   try {
-    await playlistsApi.deleteSharedPlaylistComment(
-      props.token,
-      commentToEdit.value.id,
-      props.guestId
-    )
+    await store.dispatch('deleteSharedPlaylistComment', {
+      shareToken: props.token,
+      commentId: commentToEdit.value.id,
+      guestId: props.guestId
+    })
     comments.value = comments.value.filter(c => c.id !== commentToEdit.value.id)
     modals.delete = false
   } catch {
@@ -585,16 +590,16 @@ const onChecklistUpdated = async updated => {
   const previous = existing.checklist
   existing.checklist = updated.checklist
   try {
-    const saved = await playlistsApi.editSharedPlaylistComment(
-      props.token,
-      updated.id,
-      {
+    const saved = await store.dispatch('editSharedPlaylistComment', {
+      shareToken: props.token,
+      commentId: updated.id,
+      data: {
         guest_id: props.guestId,
         text: existing.text,
         checklist: updated.checklist,
         task_status_id: existing.task_status_id
       }
-    )
+    })
     replaceComment(saved)
   } catch {
     existing.checklist = previous

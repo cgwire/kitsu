@@ -216,6 +216,47 @@ describe('Playlists store', () => {
       expect(mutations).not.toContain('EDIT_TASK_TYPE_END')
       expect(mutations).not.toContain('EDIT_TASK_STATUS_END')
     })
+
+    test.each([
+      ['loadSharedPlaylistComments', 'token', ['token']],
+      [
+        'postSharedPlaylistComment',
+        { shareToken: 'token', data: { text: 'a' } },
+        ['token', { text: 'a' }]
+      ],
+      [
+        'editSharedPlaylistComment',
+        { shareToken: 'token', commentId: 'c1', data: { text: 'a' } },
+        ['token', 'c1', { text: 'a' }]
+      ],
+      [
+        'deleteSharedPlaylistComment',
+        { shareToken: 'token', commentId: 'c1', guestId: 'g1' },
+        ['token', 'c1', 'g1']
+      ],
+      [
+        'postSharedPlaylistCommentAttachments',
+        { shareToken: 'token', commentId: 'c1', formData: 'form' },
+        ['token', 'c1', 'form']
+      ],
+      [
+        'deleteSharedPlaylistCommentAttachment',
+        {
+          shareToken: 'token',
+          commentId: 'c1',
+          attachmentId: 'a1',
+          guestId: 'g1'
+        },
+        ['token', 'c1', 'a1', 'g1']
+      ]
+    ])('%s calls the API and returns its answer', async (name, payload, args) => {
+      const answer = { id: 'answer' }
+      vi.spyOn(playlistsApi, name).mockResolvedValue(answer)
+
+      await expect(store.actions[name]({}, payload)).resolves.toBe(answer)
+
+      expect(playlistsApi[name]).toHaveBeenCalledWith(...args)
+    })
   })
 
   describe('Mutations', () => {
