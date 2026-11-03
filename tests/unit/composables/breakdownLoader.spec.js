@@ -70,7 +70,7 @@ describe('useBreakdownLoader', () => {
       all: true,
       withTasks: true
     })
-    expect(actions.setCastingEpisode.mock.calls[0][1]).toBe('ep-a')
+    expect(actions.setCastingEpisode).toHaveBeenCalledTimes(1)
     expect(onLoaded).toHaveBeenCalledTimes(1)
     expect(loader.episodeId.value).toBe('ep-a')
     expect(loader.isLoading.value).toBe(false)
@@ -88,7 +88,7 @@ describe('useBreakdownLoader', () => {
     expect(actions.loadAssets).toHaveBeenCalledTimes(1)
   })
 
-  test('clears the casting episode outside TV shows', async () => {
+  test('builds the sequence options outside TV shows', async () => {
     const { loader, actions } = setup({
       state: { isTVShow: false, currentEpisode: null }
     })
@@ -96,7 +96,7 @@ describe('useBreakdownLoader', () => {
     await loader.load()
 
     expect(actions.loadEpisodes).not.toHaveBeenCalled()
-    expect(actions.setCastingEpisode.mock.calls[0][1]).toBe(null)
+    expect(actions.setCastingEpisode).toHaveBeenCalledTimes(1)
   })
 
   // The watchers ignore a change made while the loader runs: the load itself

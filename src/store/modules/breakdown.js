@@ -10,21 +10,16 @@ import episodeStore from '@/store/modules/episodes'
 
 import {
   CASTING_SET_ASSET_TYPES,
-  CASTING_SET_ASSET_TYPE,
   CASTING_SET_ASSETS,
-  CASTING_SET_EPISODE,
   CASTING_SET_CASTING,
-  CASTING_SET_EPISODES,
   CASTING_SET_ENTITY_CASTING,
   CASTING_SET_FOR_EPISODES,
   CASTING_SET_LINK_LABEL,
   CASTING_SET_SHOTS,
-  CASTING_SET_SEQUENCE,
   CASTING_SET_SEQUENCES,
   CASTING_ADD_TO_CASTING,
   CASTING_REMOVE_FROM_CASTING,
   LOAD_ASSETS_END,
-  LOAD_EPISODES_START,
   LOAD_SHOTS_START,
   LOAD_EPISODE_CASTING_END,
   LOAD_SHOT_CASTING_END,
@@ -47,13 +42,10 @@ const initialState = {
   castingAssetTypeAssets: [],
   castingAssetTypesOptions: [],
   castingByType: [],
-  castingCurrentShot: null,
   castingEpisodes: [],
   castingEpisodeSequences: [],
   castingSequencesOptions: [],
-  castingSequenceId: '',
   castingSequenceShots: [],
-  castingShotId: 0,
 
   isShowInfosBreakdown: false
 }
@@ -71,10 +63,7 @@ const getters = {
   castingAssetTypeAssets: state => state.castingAssetTypeAssets,
   castingAssetTypesOptions: state => state.castingAssetTypesOptions,
   castingByType: state => state.castingByType,
-  castingCurrentShot: state => state.castingCurrentShot,
   castingEpisodes: state => state.castingEpisodes,
-  castingEpisodeSequences: state => state.castingEpisodeSequences,
-  castingSequenceId: state => state.castingSequenceId,
   castingSequenceShots: state => state.castingSequenceShots,
   castingSequencesOptions: state => state.castingSequencesOptions,
 
@@ -112,7 +101,6 @@ const actions = {
         shot => shot.sequence_id === sequenceId || sequenceId === 'all'
       )
     )
-    commit(CASTING_SET_SEQUENCE, sequenceId)
     commit(CASTING_SET_SHOTS, shots)
     const request = ++castingRequest
     return breakdownApi
@@ -139,7 +127,6 @@ const actions = {
       .sort((a, b) =>
         a.name.localeCompare(b.name, undefined, { numeric: true })
       )
-    commit(CASTING_SET_ASSET_TYPE, assetTypeId)
     commit(CASTING_SET_ASSETS, assets)
     const request = ++castingRequest
     return breakdownApi
@@ -151,16 +138,8 @@ const actions = {
       })
   },
 
-  setCastingEpisode({ commit, rootGetters }, episodeId) {
-    const sequences = rootGetters.displayedSequences
-    commit(CASTING_SET_SEQUENCES, sequences)
-    commit(CASTING_SET_EPISODE, episodeId)
-  },
-
-  setCastingEpisodes({ commit, rootState }) {
-    const episodes = Array.from(episodeStore.cache.episodeMap.values())
-    const production = rootState.productions.currentProduction
-    commit(CASTING_SET_EPISODES, { production, episodes })
+  setCastingEpisode({ commit, rootGetters }) {
+    commit(CASTING_SET_SEQUENCES, rootGetters.displayedSequences)
   },
 
   setCastingAssetTypes({ commit, rootState }) {
@@ -360,35 +339,16 @@ const actions = {
 }
 
 const mutations = {
-  [LOAD_EPISODES_START](state) {
-    Object.assign(state, {
-      casting: {},
-      castingAssetTypeAssets: [],
-      castingAssetTypesOptions: [],
-      castingByType: [],
-      castingCurrentShot: null,
-      castingEpisodes: [],
-      castingEpisodeSequences: [],
-      castingSequencesOptions: [],
-      castingSequenceId: '',
-      castingSequenceShots: [],
-      castingShotId: 0
-    })
-  },
-
   [LOAD_SHOTS_START](state) {
     Object.assign(state, {
       casting: {},
       castingAssetTypeAssets: [],
       castingAssetTypesOptions: [],
       castingByType: [],
-      castingCurrentShot: null,
       castingEpisodes: [],
       castingEpisodeSequences: [],
       castingSequencesOptions: [],
-      castingSequenceId: '',
-      castingSequenceShots: [],
-      castingShotId: 0
+      castingSequenceShots: []
     })
   },
 
@@ -426,24 +386,6 @@ const mutations = {
     })
     state.casting = casting
     state.castingByType = castingByType
-  },
-
-  [CASTING_SET_EPISODES](state, { production, episodes }) {
-    state.castingEpisodes = episodes
-    state.castingEpisodeOptions = episodes.map(production => {
-      const route = {
-        name: 'breakdown-episode',
-        params: {
-          production_id: production.id,
-          episode_id: 'all'
-        }
-      }
-      return {
-        label: 'All',
-        value: production.id,
-        route
-      }
-    })
   },
 
   [CASTING_SET_SEQUENCES](state, sequences) {
@@ -500,18 +442,6 @@ const mutations = {
         route
       }
     })
-  },
-
-  [CASTING_SET_SEQUENCE](state, sequenceId) {
-    state.castingSequenceId = sequenceId
-  },
-
-  [CASTING_SET_EPISODE](state, episodeId) {
-    state.castingEpisodeId = episodeId
-  },
-
-  [CASTING_SET_ASSET_TYPE](state, assetTypeId) {
-    state.castingAssetTypeId = assetTypeId
   },
 
   [CASTING_SET_CASTING](state, { casting, production }) {
