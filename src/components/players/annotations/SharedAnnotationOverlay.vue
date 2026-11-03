@@ -93,6 +93,9 @@ import {
 
 const store = useStore()
 
+// Props / Emits
+// --------------------------------------------------------------------------
+
 const props = defineProps({
   annotations: { type: Array, default: () => [] },
   currentFrame: { type: Number, default: 0 },
@@ -115,6 +118,9 @@ const props = defineProps({
 
 const emit = defineEmits(['saved'])
 
+// State
+// --------------------------------------------------------------------------
+
 const canvasId = `shared-annotation-canvas-${Math.random()
   .toString(36)
   .slice(2, 9)}`
@@ -125,7 +131,11 @@ const containerSize = ref({ width: 0, height: 0 })
 const isSaving = ref(false)
 const wrapper = ref(null)
 
+let renderToken = 0
 let resizeObserver = null
+
+// Computed
+// --------------------------------------------------------------------------
 
 const videoBounds = computed(() => {
   const cw = containerSize.value.width
@@ -137,7 +147,7 @@ const videoBounds = computed(() => {
     return { width: cw, height: ch, left: 0, top: 0 }
   }
 
-  // Pictures: mirror the studio player's sizing — the image is centered and
+  // Pictures: mirror the studio player's sizing: the image is centered and
   // never upscaled beyond its natural size, so the overlay box matches the
   // actually displayed <img>. One uniform scale: independent width/height
   // clamps produced a wrong-aspect box when the container was narrower but
@@ -155,7 +165,7 @@ const videoBounds = computed(() => {
     }
   }
 
-  // Movies: contain-fit — matches the canvas, which fills the container.
+  // Movies: contain-fit: matches the canvas, which fills the container.
   const containerRatio = cw / ch
   const movieRatio = mw / mh
   let displayedW
@@ -207,7 +217,8 @@ const currentTime = computed(() => {
   return Math.round(props.currentFrame * props.frameDuration * 10000) / 10000
 })
 
-let renderToken = 0
+// Functions
+// --------------------------------------------------------------------------
 
 const render = async () => {
   const fabricCanvas = annotation.getCanvas()
@@ -293,7 +304,7 @@ const refreshLayout = () => {
 // Browser zoom (a devicePixelRatio change) and dev-console docking move
 // the media without resizing the observed elements, so the ResizeObserver
 // stays silent. window / visualViewport resize do fire, so recompute on
-// them — immediately and once more after the layout settles.
+// them: immediately and once more after the layout settles.
 const onViewportResize = () => {
   refreshLayout()
   setTimeout(refreshLayout, 250)
@@ -342,6 +353,7 @@ const save = async () => {
 }
 
 // Watchers
+// --------------------------------------------------------------------------
 
 watch(
   () => [props.currentFrame, currentTime.value],
@@ -372,6 +384,7 @@ watch(() => props.movieDimensions, refreshLayout)
 watch(() => props.panzoomTransform, refreshCanvasOffset)
 
 // Lifecycle
+// --------------------------------------------------------------------------
 
 onMounted(() => {
   const canvasEl = document.getElementById(canvasId)
@@ -412,8 +425,8 @@ defineExpose({
   position: absolute;
   // Above the media viewers (PictureViewer / MultiVideoViewer are z-index
   // 300); mirrors the non-shared AnnotationCanvas. The wrapper itself never
-  // captures pointer events — the surface re-enables them while editing and
-  // the toolbar is always interactive — so clicks pass through to the media.
+  // captures pointer events: the surface re-enables them while editing and
+  // the toolbar is always interactive, so clicks pass through to the media.
   pointer-events: none;
   z-index: 500;
 }

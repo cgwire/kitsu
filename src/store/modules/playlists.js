@@ -388,6 +388,46 @@ const actions = {
     return playlistsApi.saveSharedPlaylistAnnotations(shareToken, data)
   },
 
+  loadSharedPlaylistComments(_, shareToken) {
+    return playlistsApi.loadSharedPlaylistComments(shareToken)
+  },
+
+  postSharedPlaylistComment(_, { shareToken, data }) {
+    return playlistsApi.postSharedPlaylistComment(shareToken, data)
+  },
+
+  editSharedPlaylistComment(_, { shareToken, commentId, data }) {
+    return playlistsApi.editSharedPlaylistComment(shareToken, commentId, data)
+  },
+
+  deleteSharedPlaylistComment(_, { shareToken, commentId, guestId }) {
+    return playlistsApi.deleteSharedPlaylistComment(
+      shareToken,
+      commentId,
+      guestId
+    )
+  },
+
+  postSharedPlaylistCommentAttachments(_, { shareToken, commentId, formData }) {
+    return playlistsApi.postSharedPlaylistCommentAttachments(
+      shareToken,
+      commentId,
+      formData
+    )
+  },
+
+  deleteSharedPlaylistCommentAttachment(
+    _,
+    { shareToken, commentId, attachmentId, guestId }
+  ) {
+    return playlistsApi.deleteSharedPlaylistCommentAttachment(
+      shareToken,
+      commentId,
+      attachmentId,
+      guestId
+    )
+  },
+
   loadPlaylistShareLinks(_, playlistId) {
     return playlistsApi.getShareLinks(playlistId)
   },

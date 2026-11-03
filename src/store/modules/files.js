@@ -40,6 +40,10 @@ const actions = {
       console.error('Error loading entity output files', error)
       return []
     }
+  },
+
+  loadPreviewFileText(_, { previewId, extension, urlPrefix }) {
+    return filesApi.getPreviewFileText(previewId, extension, urlPrefix)
   }
 }
 
