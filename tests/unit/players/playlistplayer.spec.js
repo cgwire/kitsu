@@ -2018,6 +2018,78 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  describe('footer actions', () => {
+    // The task type button lives in the extra-controls slot of the bar.
+    const PlaybackBarWithSlot = {
+      name: 'PlayerPlaybackBar',
+      template: '<div><slot name="extra-controls" /></div>'
+    }
+    const mountFooter = (props = {}) =>
+      mountPlayer({ props, stubs: { PlayerPlaybackBar: PlaybackBarWithSlot } })
+
+    const footerButton = title =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('title') === title)
+    const readFooterActions = () => ({
+      taskType: footerButton('playlists.actions.change_task_type')?.props(
+        'disabled'
+      ),
+      downloadMenu: footerButton('playlists.actions.download')?.props(
+        'disabled'
+      ),
+      builds: wrapper
+        .findAll('.mp4-button, .mp4-2-button')
+        .map(build => build.classes('disabled'))
+    })
+    const builds = () =>
+      wrapper.vm.$store.dispatch.mock.calls.filter(
+        ([action]) => action === 'runPlaylistBuild'
+      )
+
+    it('enables the task type change, the download menu and the builds once loaded', async () => {
+      wrapper = mountFooter()
+      await flushPromises()
+      expect(readFooterActions()).toEqual({
+        taskType: false,
+        downloadMenu: false,
+        builds: [false, false]
+      })
+      await wrapper.get('.mp4-button').trigger('click')
+      expect(builds()).toEqual([
+        ['runPlaylistBuild', { playlist, full: false }]
+      ])
+    })
+
+    // During the load, the footer still belongs to the playlist shown before.
+    it('disables them while a playlist loads', async () => {
+      wrapper = mountFooter({ isLoading: true })
+      await flushPromises()
+      expect(readFooterActions()).toEqual({
+        taskType: true,
+        downloadMenu: true,
+        builds: [true, true]
+      })
+      await wrapper.get('.mp4-button').trigger('click')
+      await wrapper.get('.mp4-2-button').trigger('click')
+      expect(builds()).toEqual([])
+    })
+
+    // The menu only closes through its button, disabled during the load.
+    it('closes the download menu when a load starts', async () => {
+      wrapper = mountFooter()
+      await flushPromises()
+      const isMenuOpen = () => !wrapper.get('.build-options').classes('hidden')
+      footerButton('playlists.actions.download').vm.$emit('click')
+      await flushPromises()
+      expect(isMenuOpen()).toBe(true)
+
+      await wrapper.setProps({ isLoading: true })
+
+      expect(isMenuOpen()).toBe(false)
+    })
+  })
+
   // The trim belongs to the shot, not to a revision: an end handle left at
   // the clip end must not pin the length of the revision on screen, or a
   // longer revision would stop at that length.

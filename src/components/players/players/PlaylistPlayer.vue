@@ -642,6 +642,7 @@
             :title="$t('playlists.actions.change_task_type')"
             icon="check"
             @click="showTaskTypeModal"
+            :disabled="isLoading"
             v-if="!tempMode && !isFullMode && !isCurrentUserClient"
           />
         </template>
@@ -793,9 +794,7 @@
             :class="{
               'dl-button': true,
               'mp4-button': true,
-              disabled:
-                !(isCurrentUserManager || isCurrentUserSupervisor) ||
-                isJobRunning,
+              disabled: isBuildDisabled,
               hidden: isDlButtonsHidden
             }"
             @click="onBuildClicked"
@@ -806,9 +805,7 @@
             :class="{
               'dl-button': true,
               'mp4-2-button': true,
-              disabled:
-                !(isCurrentUserManager || isCurrentUserSupervisor) ||
-                isJobRunning,
+              disabled: isBuildDisabled,
               hidden: isDlButtonsHidden
             }"
             @click="onBuildFullClicked"
@@ -864,6 +861,7 @@
           class="playlist-button"
           :title="$t('playlists.actions.download')"
           icon="download"
+          :disabled="isLoading"
           @click="toggleDlButtons"
           v-if="!isCurrentUserArtist && !isCurrentUserClient"
         />
@@ -1671,6 +1669,14 @@ const isJobRunning = computed(
   () =>
     props.playlist?.build_jobs?.filter(job => job.status === 'running')
       .length !== 0
+)
+
+// During a load, the footer still belongs to the playlist shown before.
+const isBuildDisabled = computed(
+  () =>
+    !(isCurrentUserManager.value || isCurrentUserSupervisor.value) ||
+    isJobRunning.value ||
+    props.isLoading
 )
 
 const csvDlPath = computed(
@@ -4355,11 +4361,7 @@ const onBuildClicked = () => runBuild(false)
 const onBuildFullClicked = () => runBuild(true)
 
 const runBuild = (full = false) => {
-  if (
-    (isCurrentUserManager.value || isCurrentUserSupervisor.value) &&
-    !isJobRunning.value &&
-    !isBuildLaunched.value
-  ) {
+  if (!isBuildDisabled.value && !isBuildLaunched.value) {
     isBuildLaunched.value = true
     store
       .dispatch('runPlaylistBuild', { playlist: props.playlist, full })
@@ -5031,7 +5033,9 @@ watch(framesSeenOfPicture, () => {
 watch(
   () => props.isLoading,
   () => {
-    if (!props.isLoading) resetHeight()
+    // The download menu belongs to the playlist shown before the load.
+    if (props.isLoading) isDlButtonsHidden.value = true
+    else resetHeight()
   }
 )
 
