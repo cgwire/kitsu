@@ -211,12 +211,6 @@ export default {
     )
   },
 
-  deleteTaskFromScheduleVersion(taskLink) {
-    return client.pdel(
-      `/api/data/production-schedule-version-task-links/${taskLink.id}`
-    )
-  },
-
   applyScheduleVersionToProduction(version) {
     return client.ppost(
       `/api/actions/production-schedule-versions/${version.id}/apply-to-production`

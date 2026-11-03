@@ -1553,6 +1553,57 @@ describe('Shots store, through a store', () => {
       expect(store.getters.displayedShotsLength).toBe(2)
     })
 
+    // The rows read the shots of the displayed list: a row that missed the
+    // change kept the buttons of an active shot.
+    test('shows a canceled shot as canceled in its row, then restored', async () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', {
+          canceled: false,
+          tasks: [buildTask('t1', 'tt-anim')]
+        }),
+        buildShot('s2', 'SH020', {
+          canceled: false,
+          tasks: [buildTask('t2', 'tt-anim')]
+        })
+      ])
+      // A row keeps the entry it renders.
+      const row = store.getters.displayedShots[1]
+      const isCanceled = computed(() => row.canceled)
+      expect(isCanceled.value).toBe(false)
+      client.pdel.mockResolvedValue()
+      client.pput.mockResolvedValueOnce({ id: 's2', canceled: false })
+
+      await store.dispatch('deleteShot', { id: 's2' })
+      expect(isCanceled.value).toBe(true)
+
+      await store.dispatch('restoreShot', { id: 's2' })
+      expect(isCanceled.value).toBe(false)
+    })
+
+    test('shows the canceled shots of a deleted selection as canceled', async () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', {
+          canceled: false,
+          tasks: [buildTask('t1', 'tt-anim')]
+        })
+      ])
+      // A row keeps the entry it renders.
+      const row = store.getters.displayedShots[0]
+      const isCanceled = computed(() => row.canceled)
+      expect(isCanceled.value).toBe(false)
+      store.dispatch('setShotSelection', {
+        shot: store.getters.displayedShots[0],
+        selected: true
+      })
+      client.ppost.mockResolvedValueOnce({})
+
+      await store.dispatch('deleteSelectedShots')
+
+      expect(isCanceled.value).toBe(true)
+    })
+
     // The footer shows the active shots, and the list hides once empty.
     test('counts a deleted shot out of the list', async () => {
       const store = buildStore()
@@ -1952,6 +2003,23 @@ describe('Shots store, through a store', () => {
       const shot = store.getters.displayedShots[0]
       expect(shot.tasks).toEqual(['t2'])
       expect([...shot.validations.keys()]).toEqual(['tt-layout'])
+    })
+
+    test('keeps the tasks of a shot when a task it does not list is deleted', () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', {
+          tasks: [buildTask('t1', 'tt-anim'), buildTask('t2', 'tt-layout')]
+        })
+      ])
+
+      store.commit(DELETE_TASK_END, {
+        id: 't9',
+        entity_id: 's1',
+        task_type_id: 'tt-fx'
+      })
+
+      expect(store.getters.displayedShots[0].tasks).toEqual(['t1', 't2'])
     })
 
     test('sums the time of the tasks of a shot again', () => {

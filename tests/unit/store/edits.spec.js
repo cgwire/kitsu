@@ -1177,6 +1177,57 @@ describe('Edits store, through a store', () => {
       expect(store.getters.displayedEditsLength).toBe(2)
     })
 
+    // The rows read the edits of the displayed list: a row that missed the
+    // change kept the buttons of an active edit.
+    test('shows a canceled edit as canceled in its row, then restored', async () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { canceled: false }),
+        buildEdit('e2', 'E02', {
+          canceled: false,
+          tasks: [buildTask('t2', 'tt-anim')]
+        })
+      ])
+      // A row keeps the entry it renders.
+      const row = store.getters.displayedEdits[1]
+      const isCanceled = computed(() => row.canceled)
+      expect(isCanceled.value).toBe(false)
+      client.pdel.mockResolvedValueOnce()
+      client.pput.mockResolvedValueOnce({ id: 'e2', canceled: false })
+
+      await store.dispatch('deleteEdit', { id: 'e2' })
+      expect(isCanceled.value).toBe(true)
+
+      await store.dispatch('restoreEdit', { id: 'e2' })
+      expect(isCanceled.value).toBe(false)
+    })
+
+    // A save leaves a copy of the edit in the displayed list.
+    test('shows an edit saved then canceled as canceled', async () => {
+      vi.useFakeTimers()
+      try {
+        const store = buildStore()
+        load(store, [
+          buildEdit('e1', 'E01', {
+            canceled: false,
+            tasks: [buildTask('t1', 'tt-anim')]
+          })
+        ])
+        client.pput.mockResolvedValueOnce({})
+        client.pdel.mockResolvedValueOnce()
+
+        await store.dispatch('editEdit', { id: 'e1', name: 'E01 v2' })
+        await store.dispatch('deleteEdit', { id: 'e1' })
+
+        expect(store.getters.displayedEdits[0]).toMatchObject({
+          name: 'E01 v2',
+          canceled: true
+        })
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
     // The footer shows the active edits, and the list hides once empty.
     test('counts a deleted edit out of the list', async () => {
       const store = buildStore()
@@ -1568,6 +1619,23 @@ describe('Edits store, through a store', () => {
       const edit = store.getters.displayedEdits[0]
       expect(edit.tasks).toEqual(['t2'])
       expect([...edit.validations.keys()]).toEqual(['tt-comp'])
+    })
+
+    test('keeps the tasks of an edit when a task it does not list is deleted', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', {
+          tasks: [buildTask('t1', 'tt-anim'), buildTask('t2', 'tt-comp')]
+        })
+      ])
+
+      store.commit(DELETE_TASK_END, {
+        id: 't9',
+        entity_id: 'e1',
+        task_type_id: 'tt-fx'
+      })
+
+      expect(store.getters.displayedEdits[0].tasks).toEqual(['t1', 't2'])
     })
 
     test('sums the time of the tasks of an edit again', () => {

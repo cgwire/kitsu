@@ -963,7 +963,7 @@ const mutations = {
       const taskIndex = sequence.tasks.findIndex(
         sequenceTaskId => sequenceTaskId === task.id
       )
-      sequence.tasks.splice(taskIndex, 1)
+      if (taskIndex >= 0) sequence.tasks.splice(taskIndex, 1)
     }
   },
 

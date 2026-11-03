@@ -6,7 +6,6 @@ import peopleApi from '@/store/api/people'
 
 import assetTypeStore from '@/store/modules/assettypes'
 import episodeStore from '@/store/modules/episodes'
-import peopleStore from '@/store/modules/people'
 import productionsStore from '@/store/modules/productions'
 import tasksStore from '@/store/modules/tasks'
 import taskStatusStore from '@/store/modules/taskstatus'
@@ -30,7 +29,8 @@ import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
 import {
   getFilledColumns,
   groupEntitiesByParents,
-  removeModelFromList
+  removeModelFromList,
+  setCanceled
 } from '@/lib/models'
 import { computeStats, countEntities } from '@/lib/stats'
 import {
@@ -60,7 +60,6 @@ import {
   IMPORT_ASSETS_START,
   IMPORT_ASSETS_END,
   DELETE_TASK_END,
-  NEW_TASK_COMMENT_END,
   NEW_TASK_END,
   SET_ASSET_SEARCH,
   SET_SHARED_ASSET_SEARCH,
@@ -100,12 +99,6 @@ const helpers = {
   },
   getTaskType(taskTypeId) {
     return taskTypesStore.cache.taskTypeMap.get(taskTypeId)
-  },
-  getTask(taskId) {
-    return tasksStore.state.taskMap.get(taskId)
-  },
-  getPerson(personId) {
-    return peopleStore.cache.personMap.get(personId)
   },
 
   setListStats(state, assets) {
@@ -1232,9 +1225,7 @@ const mutations = {
   // one stats recompute instead of one per deleted asset. Cancel flags are
   // set first so the recomputed stats exclude the canceled assets.
   [REMOVE_ASSETS](state, { removedAssets, canceledAssets }) {
-    canceledAssets.forEach(asset => {
-      asset.canceled = true
-    })
+    setCanceled(state.displayedAssets, canceledAssets, true)
     const removedIds = new Set()
     removedAssets.forEach(asset => {
       if (cache.assetMap.get(asset.id)) {
@@ -1315,13 +1306,13 @@ const mutations = {
   },
 
   [CANCEL_ASSET](state, asset) {
-    asset.canceled = true
+    setCanceled(state.displayedAssets, [asset], true)
     state.displayedAssetsLength = cache.result.filter(a => !a.canceled).length
   },
 
   [RESTORE_ASSET_END](state, assetToRestore) {
     const asset = cache.assetMap.get(assetToRestore.id)
-    asset.canceled = false
+    setCanceled(state.displayedAssets, [asset], false)
     // No index update needed: restoring only flips `canceled`, none of the
     // indexed words change.
     state.displayedAssetsLength = cache.result.filter(a => !a.canceled).length
@@ -1338,12 +1329,10 @@ const mutations = {
 
       const tasks = JSON.parse(JSON.stringify(asset.tasks))
       const taskIndex = tasks.findIndex(assetTaskId => assetTaskId === task.id)
-      tasks.splice(taskIndex, 1)
+      if (taskIndex >= 0) tasks.splice(taskIndex, 1)
       asset.tasks = tasks
     }
   },
-
-  [NEW_TASK_COMMENT_END](state, { comment, taskId }) {},
 
   [LOAD_TASK_END](state, task) {
     const asset = cache.assetMap.get(task.entity_id)
@@ -1480,6 +1469,7 @@ const mutations = {
         state.assetFilledColumns[task.task_type_id] = true
       }
       // Push task and readds the whole map to activate the realtime display.
+      asset.tasks.push(task.id)
       const displayedAsset = state.displayedAssets.find(
         asset => asset.id === task.entity_id
       )
@@ -1502,6 +1492,7 @@ const mutations = {
           if (!asset.validations) asset.validations = new Map()
           helpers.populateTask(task, asset)
           asset.validations.set(task.task_type_id, task.id)
+          asset.tasks.push(task.id)
           if (displayedAsset) {
             displayedAsset.validations = new Map(asset.validations)
           }

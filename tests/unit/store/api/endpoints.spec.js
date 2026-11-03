@@ -390,6 +390,25 @@ describe('store/api endpoints', () => {
     })
   })
 
+  // The production schedule unfolds a task type into the schedule items of
+  // its asset types, sequences, edits, or episodes.
+  describe('schedule items of a task type', () => {
+    test.each([
+      ['getAssetTypeScheduleItems', 'asset-types'],
+      ['getSequenceScheduleItems', 'sequences'],
+      ['getEditScheduleItems', 'edits'],
+      ['getEpisodeScheduleItems', 'episodes']
+    ])('%s loads the %s items, of an episode if given', (method, path) => {
+      scheduleApi[method]({ id: 'p1' }, { id: 'tt-1' })
+      scheduleApi[method]({ id: 'p1' }, { id: 'tt-1' }, 'ep-1')
+
+      expect(client.pget.mock.calls).toEqual([
+        [`/api/data/projects/p1/schedule-items/tt-1/${path}`],
+        [`/api/data/projects/p1/schedule-items/tt-1/${path}?episode_id=ep-1`]
+      ])
+    })
+  })
+
   describe('tasktypes deleteTaskType', () => {
     // Without force Zou refuses a task type still attached to schedule
     // items or productions, and says so: that answer drives the second,

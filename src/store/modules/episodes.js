@@ -967,7 +967,7 @@ const mutations = {
       const taskIndex = episode.tasks.findIndex(
         episodeTaskId => episodeTaskId === task.id
       )
-      episode.tasks.splice(taskIndex, 1)
+      if (taskIndex >= 0) episode.tasks.splice(taskIndex, 1)
     }
   },
 

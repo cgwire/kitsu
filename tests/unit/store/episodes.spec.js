@@ -615,6 +615,27 @@ describe('Episodes store, DELETE_TASK_END', () => {
     expect(episode.tasks).toEqual(['t2'])
     expect([...episode.validations]).toEqual([['tt2', 't2']])
   })
+
+  test('keeps the tasks of an episode when a task it does not list is deleted', () => {
+    episodesStore.cache.episodeMap.set('ep-full', {
+      id: 'ep-full',
+      tasks: ['t1', 't2'],
+      validations: new Map([
+        ['tt1', 't1'],
+        ['tt2', 't2']
+      ])
+    })
+
+    episodesStore.mutations.DELETE_TASK_END(
+      {},
+      { id: 't9', entity_id: 'ep-full', task_type_id: 'tt3' }
+    )
+
+    expect(episodesStore.cache.episodeMap.get('ep-full').tasks).toEqual([
+      't1',
+      't2'
+    ])
+  })
 })
 
 describe('Episodes store, production switch', () => {

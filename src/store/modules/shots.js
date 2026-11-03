@@ -27,7 +27,8 @@ import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
 import {
   getFilledColumns,
   groupEntitiesByParents,
-  removeModelFromList
+  removeModelFromList,
+  setCanceled
 } from '@/lib/models'
 import { minutesToDays } from '@/lib/time'
 import {
@@ -1136,7 +1137,7 @@ const mutations = {
 
   [RESTORE_SHOT_END](state, shotToRestore) {
     const shot = cache.shotMap.get(shotToRestore.id)
-    shot.canceled = false
+    setCanceled(state.displayedShots, [shot], false)
     // No index update needed: restoring only flips `canceled`, none of the
     // indexed words change.
     state.displayedShotsLength = cache.result.filter(s => !s.canceled).length
@@ -1313,7 +1314,7 @@ const mutations = {
       const taskIndex = shot.tasks.findIndex(
         shotTaskId => shotTaskId === task.id
       )
-      shot.tasks.splice(taskIndex, 1)
+      if (taskIndex >= 0) shot.tasks.splice(taskIndex, 1)
     }
   },
 
@@ -1486,9 +1487,7 @@ const mutations = {
     state.displayedShots = state.displayedShots.filter(
       shot => !removedIds.has(shot.id)
     )
-    canceledShots.forEach(shot => {
-      shot.canceled = true
-    })
+    setCanceled(state.displayedShots, canceledShots, true)
     state.displayedShotsCount = cache.result.length
     state.displayedShotsLength = cache.result.filter(
       shot => !shot.canceled
@@ -1496,7 +1495,7 @@ const mutations = {
   },
 
   [CANCEL_SHOT](state, shot) {
-    shot.canceled = true
+    setCanceled(state.displayedShots, [shot], true)
     state.displayedShotsLength = cache.result.filter(s => !s.canceled).length
   },
 

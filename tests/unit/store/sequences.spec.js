@@ -789,6 +789,27 @@ describe('Sequences store, DELETE_TASK_END', () => {
     expect(sequence.tasks).toEqual(['t2'])
     expect([...sequence.validations]).toEqual([['tt2', 't2']])
   })
+
+  test('keeps the tasks of a sequence when a task it does not list is deleted', () => {
+    sequencesStore.cache.sequenceMap.set('se-full', {
+      id: 'se-full',
+      tasks: ['t1', 't2'],
+      validations: new Map([
+        ['tt1', 't1'],
+        ['tt2', 't2']
+      ])
+    })
+
+    sequencesStore.mutations.DELETE_TASK_END(
+      {},
+      { id: 't9', entity_id: 'se-full', task_type_id: 'tt3' }
+    )
+
+    expect(sequencesStore.cache.sequenceMap.get('se-full').tasks).toEqual([
+      't1',
+      't2'
+    ])
+  })
 })
 
 // The search reads the index of the cached list: every change of that list

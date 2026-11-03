@@ -19,7 +19,11 @@ import {
   sortValidationColumns
 } from '@/lib/sorting'
 import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
-import { getFilledColumns, removeModelFromList } from '@/lib/models'
+import {
+  getFilledColumns,
+  removeModelFromList,
+  setCanceled
+} from '@/lib/models'
 import { minutesToDays } from '@/lib/time'
 import { buildEditIndex, indexSearch } from '@/lib/indexing'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
@@ -783,7 +787,7 @@ const mutations = {
 
   [RESTORE_EDIT_END](state, editToRestore) {
     const edit = cache.editMap.get(editToRestore.id)
-    edit.canceled = false
+    setCanceled(state.displayedEdits, [edit], false)
     cache.editIndex = buildEditIndex(cache.edits)
     state.displayedEditsLength = cache.result.filter(e => !e.canceled).length
   },
@@ -944,7 +948,7 @@ const mutations = {
       const taskIndex = edit.tasks.findIndex(
         editTaskId => editTaskId === task.id
       )
-      edit.tasks.splice(taskIndex, 1)
+      if (taskIndex >= 0) edit.tasks.splice(taskIndex, 1)
     }
   },
 
@@ -1048,7 +1052,7 @@ const mutations = {
   },
 
   [CANCEL_EDIT](state, edit) {
-    edit.canceled = true
+    setCanceled(state.displayedEdits, [edit], true)
     state.displayedEditsLength = cache.result.filter(e => !e.canceled).length
   },
 

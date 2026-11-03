@@ -55,6 +55,19 @@ export const removeModelFromList = (items, valueToRemove) => {
   return items.filter(item => item.id !== valueToRemove.id)
 }
 
+// The rows render the entries of the displayed list, the cached entities or
+// copies of them. The cached entities are raw objects: flagged through them
+// only, no row would see the change.
+export const setCanceled = (displayedEntries, entities, canceled) => {
+  const ids = new Set(entities.map(({ id }) => id))
+  displayedEntries.forEach(entry => {
+    if (ids.has(entry.id)) entry.canceled = canceled
+  })
+  entities.forEach(entity => {
+    entity.canceled = canceled
+  })
+}
+
 export const remove = (items, modelToRemove) => {
   return items.filter(item => item !== modelToRemove)
 }
