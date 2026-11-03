@@ -12,15 +12,6 @@ export default {
     return client.pget(path)
   },
 
-  getEpisode(episodeId) {
-    return client.getModel('episodes', episodeId)
-  },
-
-  getEpisodes(production) {
-    const path = `/api/data/projects/${production.id}/episodes`
-    return client.pget(path)
-  },
-
   newEdit(edit) {
     const data = {
       name: edit.name,
@@ -63,15 +54,6 @@ export default {
     let path = `/api/import/csv/projects/${production.id}/edits`
     if (toUpdate) path += '?update=true'
     return client.ppostImport(path, formData)
-  },
-
-  getEpisodeStats(productionId) {
-    return client.pget(`/api/data/projects/${productionId}/episodes/stats`)
-  },
-
-  getEpisodeRetakeStats(productionId) {
-    const path = `/api/data/projects/${productionId}/episodes/retake-stats`
-    return client.pget(path)
   },
 
   loadEditHistory(editId) {

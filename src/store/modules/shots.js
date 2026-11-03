@@ -5,7 +5,6 @@ import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 
 import episodeStore from '@/store/modules/episodes'
-import peopleStore from '@/store/modules/people'
 import productionsStore from '@/store/modules/productions'
 import sequenceStore from '@/store/modules/sequences'
 import tasksStore from '@/store/modules/tasks'
@@ -22,7 +21,6 @@ import {
   sortByPersonName,
   sortShotResult,
   sortShots,
-  sortTasks,
   sortValidationColumns
 } from '@/lib/sorting'
 import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
@@ -50,10 +48,8 @@ import {
   MARK_SHOTS_PARTIAL,
   SORT_VALIDATION_COLUMNS,
   SET_CURRENT_EPISODE,
-  LOAD_SHOT_END,
   SHOT_CSV_FILE_SELECTED,
   IMPORT_SHOTS_END,
-  LOAD_OPEN_PRODUCTIONS_END,
   NEW_SHOT_END,
   EDIT_SHOT_END,
   ADD_SHOT,
@@ -125,17 +121,11 @@ const helpers = {
   getCurrentProduction() {
     return productionsStore.getters.currentProduction(productionsStore.state)
   },
-  getTask(taskId) {
-    return tasksStore.cache.taskMap.get(taskId)
-  },
   getTaskStatus(taskStatusId) {
     return taskStatusStore.cache.taskStatusMap.get(taskStatusId)
   },
   getTaskType(taskTypeId) {
     return taskTypesStore.cache.taskTypeMap.get(taskTypeId)
-  },
-  getPerson(personId) {
-    return peopleStore.cache.personMap.get(personId)
   },
 
   getShotName(shot) {
@@ -144,10 +134,6 @@ const helpers = {
       shotName = `${shot.episode_name} / ${shotName}`
     }
     return shotName
-  },
-
-  dateDigit(date) {
-    return date.toString().padStart(2, '0')
   },
 
   populateTask(task, shot) {
@@ -204,43 +190,6 @@ const helpers = {
       taskTypeMap,
       helpers.getCurrentProduction()
     )
-  },
-
-  getPeriod(task, detailLevel) {
-    const endDateString = helpers.getTaskEndDate(task, detailLevel)
-    let period
-    if (detailLevel === 'day') {
-      period = moment(endDateString, 'YYYY-MM').format('YYYY-MM')
-    } else if (detailLevel === 'month') {
-      period = moment(endDateString, 'YYYY').format('YYYY')
-    } else if (detailLevel === 'week') {
-      period = moment(endDateString, 'YYYY-MM-DD').format('GGGG')
-    }
-    return period
-  },
-
-  getDateFromParameters({ detailLevel, year, week, month, day }) {
-    if (detailLevel === 'day') {
-      return `${year}-${helpers.dateDigit(month)}-${helpers.dateDigit(day)}`
-    } else if (detailLevel === 'month') {
-      return `${year}-${helpers.dateDigit(month)}`
-    } else if (detailLevel === 'week') {
-      return `${year}-${week}`
-    } else {
-      return `${year}`
-    }
-  },
-
-  getTaskEndDate(task, detailLevel) {
-    let endDateString
-    if (detailLevel === 'day') {
-      endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD')
-    } else if (detailLevel === 'month') {
-      endDateString = moment(task.end_date, 'YYYY-MM').format('YYYY-MM')
-    } else if (detailLevel === 'week') {
-      endDateString = moment(task.end_date, 'YYYY-MM-DD').format('GGGG-W')
-    }
-    return endDateString
   },
 
   buildResult(
@@ -317,7 +266,6 @@ const initialState = {
   displayedShotsDrawings: 0,
   shotFilledColumns: {},
 
-  shotCreated: '',
   shotSelectionGrid: new Set(),
 
   isShotsLoading: false,
@@ -376,7 +324,6 @@ const getters = {
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
-  shotCreated: state => state.shotCreated,
 
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
@@ -1071,7 +1018,6 @@ const mutations = {
       taskTypeMap
     )
 
-    state.nbValidationColumns = state.shotValidationColumns.length
     state.isFps = isFps
     state.isFrames = isFrames
     state.isFrameIn = isFrameIn
@@ -1136,23 +1082,11 @@ const mutations = {
     }
   },
 
-  [LOAD_SHOT_END](state, { shot, taskTypeMap }) {
-    shot.tasks.forEach(task => {
-      helpers.populateTask(task, shot)
-    })
-    shot.tasks = sortTasks(shot.tasks, taskTypeMap)
-    cache.shotMap.set(shot.id, shot)
-  },
-
   [SHOT_CSV_FILE_SELECTED](state, formData) {
     state.shotsCsvFormData = formData
   },
   [IMPORT_SHOTS_END](state) {
     state.shotsCsvFormData = null
-  },
-
-  [LOAD_OPEN_PRODUCTIONS_END](state, projects) {
-    state.openProductions = projects
   },
 
   [EDIT_SHOT_END](state, { newShot, sequences }) {
@@ -1175,7 +1109,6 @@ const mutations = {
       return stateShot
     })
     updateEntryInIndex(cache.shotIndex, shot, getShotIndexWords(shot))
-    state.shotCreated = newShot.name
 
     if (state.shotSearchText) {
       helpers.setListStats(state, cache.result)
@@ -1240,8 +1173,14 @@ const mutations = {
       insertSortedShot(cache.shots, shot)
       cache.shotMap.set(shot.id, shot)
     }
-    state.displayedShots = cache.shots.slice(0, PAGE_SIZE)
-    helpers.setListStats(state, cache.shots)
+    // A search stays, and the list shows the new shot whatever it asks for.
+    if (!state.shotSearchText) {
+      cache.result = cache.shots
+    } else if (!cache.result.includes(listedShot)) {
+      insertSortedShot(cache.result, listedShot)
+    }
+    state.displayedShots = cache.result.slice(0, PAGE_SIZE)
+    helpers.setListStats(state, cache.result)
     state.shotFilledColumns = getFilledColumns(state.displayedShots)
     updateEntryInIndex(
       cache.shotIndex,
@@ -1468,7 +1407,7 @@ const mutations = {
     result = applyFilters(result, filters, taskMap)
 
     if (result && result.length > 0) {
-      cache.result.push(shot)
+      insertSortedShot(cache.result, shot)
       insertSortedShot(state.displayedShots, shot)
       state.displayedShotsCount = cache.shots.length
       state.displayedShotsLength = cache.shots.filter(s => !s.canceled).length
@@ -1520,6 +1459,8 @@ const mutations = {
       state.displayedShotsFrames -= shotToDelete.nb_frames
     }
     state.displayedShotsDrawings -= shotToDelete.nb_drawings || 0
+    state.displayedShotsCount = cache.result.length
+    state.displayedShotsLength = cache.result.filter(s => !s.canceled).length
   },
 
   // Bulk variant of REMOVE_SHOT/CANCEL_SHOT: one pass over each list
@@ -1548,6 +1489,7 @@ const mutations = {
     canceledShots.forEach(shot => {
       shot.canceled = true
     })
+    state.displayedShotsCount = cache.result.length
     state.displayedShotsLength = cache.result.filter(
       shot => !shot.canceled
     ).length
