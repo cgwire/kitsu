@@ -307,7 +307,7 @@
               @keydown.space.prevent="onMilestoneGroupClick(group, $event)"
               @mouseenter="showMilestonePopover(group, $event)"
               @mouseleave="hideMilestonePopover"
-              @focus="showMilestonePopover(group, $event)"
+              @keyup.tab="showMilestonePopover(group, $event)"
               @blur="hideMilestonePopover"
               v-for="group in milestoneGroups"
             >
@@ -2432,6 +2432,8 @@ const onMilestoneGroupClick = (group, event) => {
   }
 }
 
+// Listens to Tab rather than focus: useModal gives the focus back to the flag
+// on close, which must not reopen the popover.
 const showMilestonePopover = (group, event) => {
   milestonePopoverRef.value?.show(group, event.currentTarget)
 }

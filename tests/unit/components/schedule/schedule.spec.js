@@ -18,7 +18,12 @@ vi.mock('vuex', () => ({
       departmentMap: new Map([
         ['dep-2', { id: 'dep-2', name: 'Lighting', color: '#222222' }]
       ]),
+      // read by the department combobox of the milestone modal
+      departments: [],
+      isCurrentUserManager: true,
       isCurrentUserProductionManager: true,
+      isCurrentUserSupervisor: false,
+      user: { departments: [] },
       isDarkTheme: false,
       milestonesByDate,
       openProductions: [{ id: 'production-1', team: ['person-1'] }],
@@ -115,6 +120,52 @@ describe('Schedule widget - milestones', () => {
     expect(flags[0].find('.milestone-flag-more').text()).toBe('+1')
     expect(wrapper.findAll('.milestone-vertical-line')).toHaveLength(1)
     wrapper.unmount()
+  })
+
+  describe('flag popover', () => {
+    const milestone = (id, name) => ({
+      id,
+      name,
+      date: '2026-08-10',
+      milestone_type: 'other',
+      color: null
+    })
+    const popover = () => document.querySelector('.milestone-popover')
+    const mountWithFlag = milestones => {
+      milestonesByDate['2026-08-10'] = milestones
+      return mountSchedule(
+        { withMilestones: true, zoomLevel: 3 },
+        { attachTo: document.body }
+      )
+    }
+
+    it('stays closed when the closing modal gives the focus back', async () => {
+      const wrapper = mountWithFlag([milestone('m1', 'Solo')])
+      const flag = wrapper.find('.milestone-flag')
+
+      flag.element.focus()
+      await flag.trigger('click')
+      await nextTick()
+      expect(document.querySelector('.modal.is-active')).not.toBeNull()
+
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      await nextTick()
+      await nextTick()
+
+      expect(document.querySelector('.modal.is-active')).toBeNull()
+      expect(document.activeElement).toBe(flag.element)
+      expect(popover()).toBeNull()
+      wrapper.unmount()
+    })
+
+    it('opens when Tab lands on a flag', async () => {
+      const wrapper = mountWithFlag([milestone('m1', 'Solo')])
+
+      await wrapper.find('.milestone-flag').trigger('keyup', { key: 'Tab' })
+
+      expect(popover()).not.toBeNull()
+      wrapper.unmount()
+    })
   })
 })
 
