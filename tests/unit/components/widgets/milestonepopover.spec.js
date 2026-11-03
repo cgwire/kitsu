@@ -7,6 +7,7 @@ vi.mock('vuex', () => ({
       departmentMap: new Map([
         ['dep-1', { id: 'dep-1', name: 'Lighting', color: '#ff0000' }]
       ]),
+      dateFormat: 'DD/MM/YYYY',
       isDarkTheme: false
     }
   })
@@ -35,7 +36,43 @@ const group = {
 }
 
 describe('widgets/MilestonePopover', () => {
-  it('shows the department of each milestone that has one', async () => {
+  describe('department', () => {
+    const headerDepartment = () =>
+      document.querySelector('.milestone-popover-header .department-name')
+    const showGroup = async milestones => {
+      const wrapper = mount(MilestonePopover, {
+        global: { mocks: { $t: key => key } },
+        attachTo: document.body
+      })
+      wrapper.vm.show({ ...group, milestones }, document.body)
+      await nextTick()
+      return wrapper
+    }
+
+    it('sits next to the date for a single milestone', async () => {
+      const wrapper = await showGroup([group.milestones[0]])
+
+      expect(headerDepartment().textContent).toContain('Lighting')
+      expect(
+        document.querySelector('.milestone-popover-meta .department-name')
+      ).toBeNull()
+      wrapper.unmount()
+    })
+
+    it('sits on the line of each milestone of a merged flag', async () => {
+      const wrapper = await showGroup(group.milestones)
+
+      const metas = document.querySelectorAll('.milestone-popover-meta')
+      expect(headerDepartment()).toBeNull()
+      expect(metas[0].querySelector('.department-name').textContent).toContain(
+        'Lighting'
+      )
+      expect(metas[1].querySelector('.department-name')).toBeNull()
+      wrapper.unmount()
+    })
+  })
+
+  it('shows the date in the user format, above the milestones', async () => {
     const wrapper = mount(MilestonePopover, {
       global: { mocks: { $t: key => key } },
       attachTo: document.body
@@ -44,12 +81,27 @@ describe('widgets/MilestonePopover', () => {
     wrapper.vm.show(group, document.body)
     await nextTick()
 
-    const items = [...document.querySelectorAll('.milestone-popover-item')]
-    expect(items).toHaveLength(2)
-    expect(items[0].querySelector('.department-name').textContent).toContain(
-      'Lighting'
+    expect(document.querySelector('.milestone-popover-date').textContent).toBe(
+      '02/11/2026'
     )
-    expect(items[1].querySelector('.department-name')).toBeNull()
+    wrapper.unmount()
+  })
+
+  it('puts the type under the name', async () => {
+    const wrapper = mount(MilestonePopover, {
+      global: { mocks: { $t: key => key } },
+      attachTo: document.body
+    })
+
+    wrapper.vm.show(group, document.body)
+    await nextTick()
+
+    const item = document.querySelector('.milestone-popover-item')
+    const meta = item.querySelector('.milestone-popover-meta')
+    expect(item.querySelector('.milestone-popover-name').textContent).toBe(
+      'Animation lock'
+    )
+    expect(meta.textContent).toContain('schedule.milestone.types.approval')
     wrapper.unmount()
   })
 
