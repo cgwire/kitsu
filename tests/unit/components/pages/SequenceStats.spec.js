@@ -78,7 +78,6 @@ const mountPage = async ({ dispatch, getters = {}, query = {} } = {}) => {
   wrapper = shallowMount(SequenceStats, {
     global: {
       plugins: [store, router],
-      mocks: { $t: key => key },
       stubs: { SearchField: false }
     }
   })

@@ -1835,6 +1835,7 @@
       "remaining_tasks": "{name} ma jeszcze {count} zadanie w tej produkcji. Usunięcie typu zadania z produkcji nie skasuje tego zadania. | Pozostałe zadania typu {name} w tej produkcji: {count}. Usunięcie typu zadania z produkcji nie skasuje tych zadań.",
       "remaining_tasks_delete": "Skasuj też to zadanie wraz z komentarzami i podglądami | Skasuj też te zadania ({count}) wraz z komentarzami i podglądami",
       "remaining_tasks_lock": "Wpisz {name}, aby potwierdzić skasowanie",
+      "remaining_tasks_lock_error": "Nazwa się nie zgadza.",
       "remove_error": "Nie udało się usunąć typu zadania. Spróbuj ponownie.",
       "remove_title": "Usuń typ zadania",
       "select_task_type": "Wybierz typ zadania...",

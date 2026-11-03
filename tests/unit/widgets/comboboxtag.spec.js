@@ -1,11 +1,10 @@
-import { flushPromises, mount, shallowMount } from '@vue/test-utils'
+import { flushPromises } from '@vue/test-utils'
 import { h, ref } from 'vue'
 
-import i18n from '@/lib/i18n'
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ComboboxTag from '@/components/widgets/ComboboxTag.vue'
 
-import './setup'
+import { mountWithI18n, shallowMountWithI18n } from '../fixtures/i18n'
 
 describe('ComboboxTag', () => {
   const options = [
@@ -15,12 +14,12 @@ describe('ComboboxTag', () => {
   ]
 
   // The list teleports to the app root: render it in place instead.
-  const inPlace = { plugins: [i18n], stubs: { teleport: true } }
+  const inPlace = { stubs: { teleport: true } }
 
   let wrapper
 
   beforeEach(() => {
-    wrapper = shallowMount(ComboboxTag, {
+    wrapper = shallowMountWithI18n(ComboboxTag, {
       props: { options, modelValue: 'apple,cherry' },
       global: inPlace
     })
@@ -105,7 +104,7 @@ describe('ComboboxTag', () => {
   })
 
   it('shows empty text when no values selected', () => {
-    const w = shallowMount(ComboboxTag, {
+    const w = shallowMountWithI18n(ComboboxTag, {
       props: { options, modelValue: '' },
       global: inPlace
     })
@@ -166,7 +165,7 @@ describe('ComboboxTag', () => {
 
     it('opens the list at its first option', async () => {
       const tags = ['anim', 'cloth', 'crowd', 'fx', 'hair', 'layout', 'rig']
-      const w = shallowMount(ComboboxTag, {
+      const w = shallowMountWithI18n(ComboboxTag, {
         props: {
           options: tags.map(tag => ({ label: tag, value: tag })),
           modelValue: 'fx'
@@ -217,9 +216,8 @@ describe('ComboboxTag', () => {
 
     const mountAt = (comboRect, mountOptions = {}) => {
       mockRects(comboRect)
-      w = mount(ComboboxTag, {
+      w = mountWithI18n(ComboboxTag, {
         props: { options, modelValue: 'apple', shy: true, withMargin: false },
-        global: { plugins: [i18n] },
         ...mountOptions
       })
     }
@@ -298,7 +296,7 @@ describe('ComboboxTag', () => {
         }
       }
       mockRects(roomBelow)
-      w = mount(ModalHost, { global: { plugins: [i18n] } })
+      w = mountWithI18n(ModalHost)
       await w.find('[role="combobox"]').trigger('click')
       await flushPromises()
       list().querySelector('.option-line').click()

@@ -356,15 +356,6 @@ watch(taskTypesForEntity, resetDraggableList, { immediate: true })
 .th-bitrate {
   min-width: 120px;
   white-space: nowrap;
-  // A sticky header cell is its own stacking context: without a z-index, the
-  // inputs of the rows (positioned, later in the page) cover its tooltip.
-  z-index: 2;
-
-  // The tooltip opens over the next columns: narrow, it stays within the tab
-  // on a tablet.
-  :deep(.question-text) {
-    max-width: 320px;
-  }
 }
 
 .th-bitrate-label {

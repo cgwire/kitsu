@@ -1,9 +1,6 @@
-import { shallowMount } from '@vue/test-utils'
-
-import i18n from '@/lib/i18n'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 describe('ComboboxNumber', () => {
   const options = [
@@ -15,9 +12,8 @@ describe('ComboboxNumber', () => {
   let wrapper
 
   beforeEach(() => {
-    wrapper = shallowMount(ComboboxNumber, {
-      props: { options, modelValue: 1 },
-      global: { plugins: [i18n] }
+    wrapper = shallowMountWithI18n(ComboboxNumber, {
+      props: { options, modelValue: 1 }
     })
   })
 
@@ -45,9 +41,8 @@ describe('ComboboxNumber', () => {
   })
 
   it('renders in simple mode when isSimple is true', () => {
-    const w = shallowMount(ComboboxNumber, {
-      props: { options, modelValue: 1, isSimple: true },
-      global: { plugins: [i18n] }
+    const w = shallowMountWithI18n(ComboboxNumber, {
+      props: { options, modelValue: 1, isSimple: true }
     })
     expect(w.find('.field').exists()).toBe(false)
     expect(w.find('.select').exists()).toBe(true)

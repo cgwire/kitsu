@@ -150,7 +150,6 @@ describe('Topbar.vue', () => {
         config: { globalProperties: { $socket: socketMock } },
         plugins: [store, router],
         mocks: {
-          $t: key => key,
           $route: mockRoute({
             path: '/',
             name: 'open-productions',
@@ -187,7 +186,7 @@ describe('Topbar.vue', () => {
       global: {
         config: { globalProperties: { $socket: socketMock } },
         plugins: [clientStore, makeRouter()],
-        mocks: { $t: key => key, $route: mockRoute({ path: '/', name: 'open-productions', params: {}, query: {}, fullPath: '/' }) },
+        mocks: { $route: mockRoute({ path: '/', name: 'open-productions', params: {}, query: {}, fullPath: '/' }) },
         stubs: { GlobalSearchField: true, NotificationBell: true, PeopleAvatar: true, ShortcutModal: true }
       }
     })
@@ -211,7 +210,7 @@ describe('Topbar.vue', () => {
         global: {
           config: { globalProperties: { $socket: socketMock } },
           plugins: [sectionStore, makeRouter()],
-          mocks: { $t: key => key, $route: mockRoute({ path: '/', name: 'open-productions', params: {}, query: {}, fullPath: '/' }) },
+          mocks: { $route: mockRoute({ path: '/', name: 'open-productions', params: {}, query: {}, fullPath: '/' }) },
           stubs: { GlobalSearchField: true, NotificationBell: true, PeopleAvatar: true, ShortcutModal: true }
         }
       })
@@ -389,7 +388,6 @@ describe('Topbar.vue', () => {
           config: { globalProperties: { $socket: socketMock } },
           plugins: [scheduleStore, router],
           mocks: {
-            $t: key => key,
             $route: mockRoute({
               path: `/productions/production-1/episodes/${episodeId}/schedule`,
               name: 'episode-schedule',
@@ -474,7 +472,6 @@ describe('Topbar.vue', () => {
           config: { globalProperties: { $socket: socketMock } },
           plugins: [shotsStore, router],
           mocks: {
-            $t: key => key,
             $route: mockRoute({
               path: `/productions/production-1/episodes/${episodeId}/shots`,
               name: 'episode-shots',
@@ -677,7 +674,7 @@ describe('Topbar.vue', () => {
         global: {
           config: { globalProperties: { $socket: socketMock } },
           plugins: [sectionStore, router],
-          mocks: { $t: key => key, $route: mockRoute(route) },
+          mocks: { $route: mockRoute(route) },
           stubs: {
             TopbarProductionList: true,
             TopbarSectionList: true,
@@ -1418,7 +1415,6 @@ describe('Topbar.vue', () => {
           config: { globalProperties: { $socket: socketMock } },
           plugins: [playlistsStore, router],
           mocks: {
-            $t: key => key,
             $route: mockRoute({
               path: '/productions/production-1/episodes/all/playlists',
               name: 'episode-playlists',

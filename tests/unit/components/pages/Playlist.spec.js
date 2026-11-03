@@ -128,7 +128,6 @@ const mountPage = async ({
     global: {
       plugins: [store],
       config: { globalProperties: { $socket: socket } },
-      mocks: { $t: key => key },
       stubs: { RouterLink: true, ...stubs }
     }
   })

@@ -20,7 +20,6 @@ const mountMain = (user, socket = { connect: vi.fn() }) =>
   mount(Main, {
     global: {
       plugins: [createStore({ getters: { user: () => user } })],
-      mocks: { $t: key => key },
       config: { globalProperties: { $socket: socket } },
       stubs: { XyzTransition: { template: '<div><slot /></div>' }, 'router-view': true }
     }

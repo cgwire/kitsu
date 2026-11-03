@@ -1,4 +1,4 @@
-import { flushPromises, mount } from '@vue/test-utils'
+import { flushPromises } from '@vue/test-utils'
 import { nextTick, reactive } from 'vue'
 import { createStore } from 'vuex'
 
@@ -11,11 +11,9 @@ import {
   startDrag
 } from '../fixtures/sortable'
 
-import i18n from '@/lib/i18n'
-
 import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
 
-import './setup'
+import { mountWithI18n } from '../fixtures/i18n'
 
 describe('TableMetadataSelectorMenu', () => {
   let theme, wrapper
@@ -61,9 +59,9 @@ describe('TableMetadataSelectorMenu', () => {
     const store = createStore({
       getters: { isCurrentUserManager: () => false }
     })
-    wrapper = mount(TableMetadataSelectorMenu, {
+    wrapper = mountWithI18n(TableMetadataSelectorMenu, {
       props: { descriptors, modelValue: {}, namespace },
-      global: { plugins: [i18n, store] }
+      global: { plugins: [store] }
     })
     placeHost(hostTop)
     await wrapper.setProps({ isOpen: true })
@@ -179,14 +177,14 @@ describe('TableMetadataSelectorMenu', () => {
           }
         }
       })
-      wrapper = mount(TableMetadataSelectorMenu, {
+      wrapper = mountWithI18n(TableMetadataSelectorMenu, {
         props: {
           descriptors: shownColumns,
           isOpen: true,
           modelValue: {},
           namespace: 'assets'
         },
-        global: { plugins: [i18n, store] }
+        global: { plugins: [store] }
       })
       await flushPromises()
 

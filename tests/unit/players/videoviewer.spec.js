@@ -39,7 +39,6 @@ const mountViewer = (props = {}) => {
       ...props
     },
     global: {
-      mocks: { $t: key => key },
       plugins: [store]
     }
   })
@@ -322,7 +321,7 @@ describe('players/VideoViewer (canvas pipeline)', () => {
             '<video-viewer ref="viewer" :preview="preview" :fps="25" :nb-frames="100" />',
           data: () => ({ preview: { id: 'preview-1', extension: 'mp4' } })
         },
-        { global: { mocks: { $t: key => key }, plugins: [store] } }
+        { global: { plugins: [store] } }
       )
       expect(parent.vm.$refs.viewer.isBroken).toBe(false)
 

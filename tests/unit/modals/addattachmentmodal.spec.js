@@ -15,7 +15,7 @@ const stubs = {
 const mountModal = (props = {}) =>
   mount(AddAttachmentModal, {
     props: { active: true, ...props },
-    global: { mocks: { $t: key => key }, stubs }
+    global: { stubs }
   })
 
 describe('modals/AddAttachmentModal', () => {

@@ -98,7 +98,6 @@ const mountComponent = async (
     global: {
       config: { errorHandler },
       plugins: [store, router],
-      mocks: { $t: key => key },
       stubs
     }
   })
@@ -168,7 +167,6 @@ const mountWorkflow = async ({ errorHandler, ...options } = {}) => {
     global: {
       config: { errorHandler },
       plugins: [store, router],
-      mocks: { $t: key => key },
       stubs: { draggable: false, ProductionTaskType: false }
     },
     ...options

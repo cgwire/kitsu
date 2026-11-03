@@ -1454,6 +1454,7 @@
       "remaining_tasks": "{name} todavía tiene {count} tarea en esta producción. Al quitar el tipo de tarea, la tarea no se borra. | {name} todavía tiene {count} tareas en esta producción. Al quitar el tipo de tarea, las tareas no se borran.",
       "remaining_tasks_delete": "Borrar también esta tarea, con sus comentarios y vistas previas | Borrar también estas {count} tareas, con sus comentarios y vistas previas",
       "remaining_tasks_lock": "Escriba {name} para confirmar el borrado",
+      "remaining_tasks_lock_error": "El nombre no coincide.",
       "remove_error": "No se ha podido quitar el tipo de tarea. Inténtelo de nuevo.",
       "remove_title": "Quitar el tipo de tarea",
       "select_task_type": "Seleccione un tipo de tarea...",

@@ -103,7 +103,6 @@ const mountPage = async ({
   const wrapper = shallowMount(Concepts, {
     global: {
       plugins: [store, router],
-      mocks: { $t: key => key },
       config: { globalProperties: { $socket: socket } },
       stubs
     }

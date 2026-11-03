@@ -1,10 +1,8 @@
-import { shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 
-import i18n from '@/lib/i18n'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 describe('ComboboxStatus', () => {
   let store, wrapper
@@ -41,13 +39,13 @@ describe('ComboboxStatus', () => {
       }
     })
 
-    wrapper = shallowMount(ComboboxStatus, {
+    wrapper = shallowMountWithI18n(ComboboxStatus, {
       props: {
         taskStatusList,
         modelValue: 'status-2'
       },
       global: {
-        plugins: [i18n, store]
+        plugins: [store]
       }
     })
   })
@@ -82,24 +80,24 @@ describe('ComboboxStatus', () => {
   })
 
   it('shows placeholder when no modelValue and addPlaceholder is true', () => {
-    const w = shallowMount(ComboboxStatus, {
+    const w = shallowMountWithI18n(ComboboxStatus, {
       props: {
         taskStatusList,
         modelValue: '',
         addPlaceholder: true
       },
-      global: { plugins: [i18n, store] }
+      global: { plugins: [store] }
     })
     expect(w.find('.tag').exists()).toBe(true)
   })
 
   it('falls back to first status when modelValue is empty and no placeholder', () => {
-    const w = shallowMount(ComboboxStatus, {
+    const w = shallowMountWithI18n(ComboboxStatus, {
       props: {
         taskStatusList,
         modelValue: ''
       },
-      global: { plugins: [i18n, store] }
+      global: { plugins: [store] }
     })
     expect(w.find('.tag').text()).toBe('TODO')
   })

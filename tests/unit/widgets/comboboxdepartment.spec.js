@@ -1,11 +1,9 @@
-import { shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 import { describe, expect, it } from 'vitest'
 
-import i18n from '@/lib/i18n'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 const departments = [
   { id: 'dep-1', name: 'Animation', color: '#111' },
@@ -25,9 +23,9 @@ const mountCombobox = ({ props = {}, getters = {} } = {}) => {
       ...getters
     }
   })
-  return shallowMount(ComboboxDepartment, {
+  return shallowMountWithI18n(ComboboxDepartment, {
     props: { displayAllAndMyDepartments: true, ...props },
-    global: { plugins: [i18n, store] }
+    global: { plugins: [store] }
   })
 }
 

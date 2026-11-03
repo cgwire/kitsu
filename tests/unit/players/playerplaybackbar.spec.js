@@ -11,7 +11,6 @@ const mountBar = (props = {}) =>
       ...props
     },
     global: {
-      mocks: { $t: key => key },
       stubs: {
         ButtonSimple: true,
         ButtonSound: true,

@@ -1,4 +1,3 @@
-import { shallowMount } from '@vue/test-utils'
 import { RouterLink, createRouter, createWebHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -17,13 +16,11 @@ vi.mock('moment', async () => {
   return { default: wrapped, ...wrapped }
 })
 
-import i18n from '@/lib/i18n'
-
 import Comment from '@/components/widgets/Comment.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -100,7 +97,7 @@ const mountComment = ({
   attachTo,
   urlPrefix = ''
 } = {}) =>
-  shallowMount(Comment, {
+  shallowMountWithI18n(Comment, {
     attachTo,
     props: {
       comment,
@@ -113,7 +110,7 @@ const mountComment = ({
       urlPrefix
     },
     global: {
-      plugins: [i18n, makeStore(storeOptions), router],
+      plugins: [makeStore(storeOptions), router],
       stubs: {
         AttachmentAudioPlayer: true,
         AttachmentVideoPlayer: true,

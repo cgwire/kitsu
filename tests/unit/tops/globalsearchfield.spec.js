@@ -23,7 +23,6 @@ describe('GlobalSearchField', () => {
     wrapper = shallowMount(GlobalSearchField, {
       attachTo: document.body,
       global: {
-        mocks: { $t: key => key },
         plugins: [createStore({ getters: { productionMap: () => new Map() } })],
         stubs: { RouterLink: true }
       }

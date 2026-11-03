@@ -26,7 +26,7 @@ const mountSettings = async (production = {}) => {
   })
   store.dispatch = vi.fn(() => Promise.resolve())
   const wrapper = shallowMount(ProductionVideoSettings, {
-    global: { plugins: [store], stubs: { VideoSettingsForm: false }, mocks: { $t: key => key } }
+    global: { plugins: [store], stubs: { VideoSettingsForm: false } }
   })
   // The form fills on mount.
   await flushPromises()

@@ -69,7 +69,6 @@ const mountSettings = async ({
     },
     global: {
       plugins: [store, router],
-      mocks: { $t: key => key },
       stubs
     }
   })

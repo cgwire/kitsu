@@ -62,7 +62,6 @@ const mountWithAssetTypes = async (assetTypeIds, path = '/settings') => {
   return shallowMount(ProductionSettings, {
     global: {
       plugins: [store, router],
-      mocks: { $t: key => key },
       // The menu and the tabs render through the layout
       stubs: { SettingsLayout: false }
     }
@@ -139,7 +138,6 @@ const mountWithTaskStatuses = async (taskStatusIds, { errorHandler } = {}) => {
     global: {
       config: { errorHandler },
       plugins: [store, router],
-      mocks: { $t: key => key },
       stubs: { draggable: false, SettingsLayout: false }
     }
   })

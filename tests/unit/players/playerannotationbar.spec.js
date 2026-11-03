@@ -6,7 +6,6 @@ const mountBar = (props = {}) =>
   mount(PlayerAnnotationBar, {
     props: { isMovie: true, ...props },
     global: {
-      mocks: { $t: key => key },
       stubs: {
         ButtonSimple: true,
         ColorPicker: true,

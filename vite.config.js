@@ -171,14 +171,19 @@ export default defineConfig({
       reporter: ['text-summary', 'lcov'],
       // Components are exercised through the dev app, not unit tests;
       // thresholds only guard the layers the suite actually covers.
-      include: ['src/lib/**/*.js', 'src/store/**/*.js'],
-      // Floors set just under the measured baseline (2026-07): raise them
+      include: [
+        'src/composables/**/*.js',
+        'src/directives/**/*.js',
+        'src/lib/**/*.js',
+        'src/store/**/*.js'
+      ],
+      // Floors set just under the measured baseline (2026-11): raise them
       // as coverage grows, never lower them.
       thresholds: {
-        lines: 28,
-        functions: 17,
-        branches: 25,
-        statements: 28
+        statements: 61,
+        branches: 59,
+        functions: 49,
+        lines: 61
       }
     }
   }

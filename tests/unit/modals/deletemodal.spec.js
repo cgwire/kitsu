@@ -5,8 +5,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue'
 
 const mountModal = (props = {}) =>
   mount(DeleteModal, {
-    props: { active: true, text: 'Are you sure?', ...props },
-    global: { mocks: { $t: key => key } }
+    props: { active: true, text: 'Are you sure?', ...props }
   })
 
 describe('DeleteModal', () => {
@@ -45,7 +44,6 @@ describe('DeleteModal', () => {
   it('keeps Shift+Tab inside the modal it opened', async () => {
     const wrapper = mount(DeleteModal, {
       props: { active: false, text: 'Are you sure?' },
-      global: { mocks: { $t: key => key } },
       attachTo: document.body
     })
 

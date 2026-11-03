@@ -20,10 +20,10 @@
   </span>
   <!-- url: clickable link -->
   <a
-    :href="rawValue"
+    :href="linkUrl"
     target="_blank"
     rel="noopener noreferrer"
-    v-else-if="descriptor.data_type === 'url' && rawValue"
+    v-else-if="linkUrl"
   >
     {{ rawValue }}
   </a>
@@ -55,6 +55,7 @@ import {
   getDescriptorChecklistValues,
   getMetadataChecklistValues
 } from '@/lib/descriptors'
+import { safeUrl } from '@/lib/render'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
@@ -87,6 +88,11 @@ const checklistValues = computed(() =>
 
 const rawValue = computed(() =>
   getMetadataFieldValue(props.descriptor, props.entity)
+)
+
+// The url field accepts any absolute URL, javascript: included.
+const linkUrl = computed(() =>
+  props.descriptor.data_type === 'url' ? safeUrl(rawValue.value) : null
 )
 
 const person = computed(

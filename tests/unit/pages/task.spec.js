@@ -473,6 +473,36 @@ describe('Task.vue', () => {
       })
       expect(wrapper.text()).not.toContain('Difficulty')
     })
+
+    describe('url', () => {
+      const mountWithUrl = reference =>
+        mountPage({
+          task: buildTask({ data: { reference } }),
+          getterOverrides: {
+            taskMetadataDescriptors: () => [
+              {
+                ...descriptor,
+                name: 'Reference',
+                field_name: 'reference',
+                data_type: 'url'
+              }
+            ]
+          }
+        })
+
+      it('links the url in a new tab', async () => {
+        const { wrapper } = await mountWithUrl('https://example.com/ref')
+        const link = wrapper.find('.info-block a[target="_blank"]')
+        expect(link.attributes('href')).toBe('https://example.com/ref')
+      })
+
+      it('shows an unsafe scheme as text', async () => {
+        const { wrapper } = await mountWithUrl('javascript:alert(1)')
+        const block = wrapper.find('.info-block')
+        expect(block.find('a[target="_blank"]').exists()).toBe(false)
+        expect(block.text()).toContain('javascript:alert(1)')
+      })
+    })
   })
 })
 

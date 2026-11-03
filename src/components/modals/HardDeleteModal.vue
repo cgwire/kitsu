@@ -36,10 +36,11 @@
             }"
             :disabled="isLocked || null"
             role="button"
-            tabindex="0"
-            @click="$emit('confirm', selectionOnly === 'true')"
-            @keydown.enter.prevent="$emit('confirm', selectionOnly === 'true')"
-            @keydown.space.prevent="$emit('confirm', selectionOnly === 'true')"
+            :aria-disabled="isLocked"
+            :tabindex="isLocked ? -1 : 0"
+            @click="confirm"
+            @keydown.enter.prevent="confirm"
+            @keydown.space.prevent="confirm"
           >
             {{ $t('main.confirmation') }}
           </a>
@@ -77,13 +78,13 @@ const { t } = useI18n()
 useModal(toRef(props, 'active'), emit)
 
 // State
-
+// --------------------------------------------------------------------------
 const confirmationName = ref(null)
 const selectionOnly = ref('true')
 const userLockText = ref('')
 
 // Computed
-
+// --------------------------------------------------------------------------
 const selectionOptions = computed(() => [
   { label: t('tasks.for_selection'), value: 'true' },
   { label: t('tasks.for_project'), value: 'false' }
@@ -93,8 +94,19 @@ const isLocked = computed(
   () => props.lockText === 'locked' || props.lockText !== userLockText.value
 )
 
-// Watchers
+// Functions
+// --------------------------------------------------------------------------
 
+// The disabled and loading looks only stop the mouse: Enter and Space still
+// reach the button.
+const confirm = () => {
+  if (!isLocked.value && !props.isLoading) {
+    emit('confirm', selectionOnly.value === 'true')
+  }
+}
+
+// Watchers
+// --------------------------------------------------------------------------
 watch(
   () => props.active,
   isActive => {

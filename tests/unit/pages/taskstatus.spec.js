@@ -62,8 +62,7 @@ const mountPage = async ({ failing = [] } = {}) => {
   const wrapper = shallowMount(TaskStatus, {
     global: {
       config: { errorHandler },
-      plugins: [store, router],
-      mocks: { $t: key => key }
+      plugins: [store, router]
     }
   })
   await flushPromises()

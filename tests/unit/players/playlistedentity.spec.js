@@ -42,7 +42,7 @@ const mountEntity = ({ isClient = false } = {}) => {
   })
   return shallowMount(PlaylistedEntity, {
     props: { entity },
-    global: { plugins: [store], mocks: { $t: key => key } }
+    global: { plugins: [store] }
   })
 }
 

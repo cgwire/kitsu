@@ -39,7 +39,6 @@ const mountRow = ({ production = {}, link = {} } = {}) => {
     },
     global: {
       plugins: [store],
-      mocks: { $t: key => key },
       stubs: { GripVerticalIcon: true, TaskTypeCell: true }
     }
   })

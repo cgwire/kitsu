@@ -34,7 +34,6 @@ describe('TopbarEpisodeList', () => {
     return shallowMount(TopbarEpisodeList, {
       global: {
         plugins: [createStore({ getters: { currentProduction: () => production } })],
-        mocks: { $t: key => key },
         // The episode dropdown stays closed, so router-link never renders,
         // yet Vue still resolves it at the top of the render fn.
         stubs: { RouterLink: true }
@@ -77,7 +76,6 @@ describe('TopbarSectionList', () => {
             }
           })
         ],
-        mocks: { $t: key => key },
         // The section dropdown stays closed, so router-link never renders,
         // yet Vue still resolves it at the top of the render fn.
         stubs: { RouterLink: true }

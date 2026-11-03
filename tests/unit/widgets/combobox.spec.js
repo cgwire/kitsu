@@ -1,9 +1,6 @@
-import { shallowMount } from '@vue/test-utils'
-
-import i18n from '@/lib/i18n'
 import Combobox from '@/components/widgets/Combobox.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 describe('Combobox', () => {
   const options = [
@@ -15,9 +12,8 @@ describe('Combobox', () => {
   let wrapper
 
   beforeEach(() => {
-    wrapper = shallowMount(Combobox, {
-      props: { options, modelValue: 'a' },
-      global: { plugins: [i18n] }
+    wrapper = shallowMountWithI18n(Combobox, {
+      props: { options, modelValue: 'a' }
     })
   })
 
@@ -51,15 +47,14 @@ describe('Combobox', () => {
   })
 
   it('does not read a selected value as the label of another option', async () => {
-    const wrapper2 = shallowMount(Combobox, {
+    const wrapper2 = shallowMountWithI18n(Combobox, {
       props: {
         options: [
           { label: 'a', value: 'b' },
           { label: 'b', value: 'c' }
         ],
         modelValue: 'c'
-      },
-      global: { plugins: [i18n] }
+      }
     })
     const select = wrapper2.find('select')
     select.element.value = 'a'
@@ -97,15 +92,14 @@ describe('Combobox', () => {
   })
 
   it('renders separator hr when option has separator flag', () => {
-    const wrapper2 = shallowMount(Combobox, {
+    const wrapper2 = shallowMountWithI18n(Combobox, {
       props: {
         options: [
           { label: 'A', value: 'a', separator: true },
           { label: 'B', value: 'b' }
         ],
         modelValue: 'a'
-      },
-      global: { plugins: [i18n] }
+      }
     })
     expect(wrapper2.findAll('hr')).toHaveLength(1)
   })

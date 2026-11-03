@@ -4,8 +4,7 @@ import AttachmentAudioPlayer from '@/components/players/viewers/AttachmentAudioP
 
 const mountPlayer = (props = {}) =>
   mount(AttachmentAudioPlayer, {
-    props: { src: 'blob:audio', name: 'note.wav', downloadHref: '/dl/note.wav', ...props },
-    global: { mocks: { $t: key => key } }
+    props: { src: 'blob:audio', name: 'note.wav', downloadHref: '/dl/note.wav', ...props }
   })
 
 describe('players/AttachmentAudioPlayer', () => {

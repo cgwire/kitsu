@@ -41,7 +41,6 @@ const mountViewer = (props = {}) => {
       ...props
     },
     global: {
-      mocks: { $t: key => key },
       plugins: [store]
     }
   })
@@ -207,7 +206,6 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
         name: 'main'
       },
       global: {
-        mocks: { $t: key => key },
         plugins: [store]
       }
     })
@@ -752,7 +750,6 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
           ...props
         },
         global: {
-          mocks: { $t: key => key },
           plugins: [store]
         }
       })

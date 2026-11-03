@@ -1454,6 +1454,7 @@
       "remaining_tasks": "{name} a encore {count} tâche dans cette production. Retirer le type de tâche ne la supprime pas. | {name} a encore {count} tâches dans cette production. Retirer le type de tâche ne les supprime pas.",
       "remaining_tasks_delete": "Supprimer aussi cette tâche, avec ses commentaires et ses previews | Supprimer aussi ces {count} tâches, avec leurs commentaires et leurs previews",
       "remaining_tasks_lock": "Tapez {name} pour confirmer la suppression",
+      "remaining_tasks_lock_error": "Le nom ne correspond pas.",
       "remove_error": "Impossible de retirer le type de tâche. Veuillez réessayer.",
       "remove_title": "Retirer le type de tâche",
       "select_task_type": "Sélectionner un type de tâche...",

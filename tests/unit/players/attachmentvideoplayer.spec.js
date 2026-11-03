@@ -4,8 +4,7 @@ import AttachmentVideoPlayer from '@/components/players/viewers/AttachmentVideoP
 
 const mountPlayer = (props = {}) =>
   mount(AttachmentVideoPlayer, {
-    props: { src: 'blob:video', name: 'clip.mp4', downloadHref: '/dl/clip.mp4', ...props },
-    global: { mocks: { $t: key => key } }
+    props: { src: 'blob:video', name: 'clip.mp4', downloadHref: '/dl/clip.mp4', ...props }
   })
 
 describe('players/AttachmentVideoPlayer', () => {

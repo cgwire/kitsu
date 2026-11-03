@@ -1,18 +1,14 @@
-import { shallowMount } from '@vue/test-utils'
-
-import i18n from '@/lib/i18n'
 import SearchField from '@/components/widgets/SearchField.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 describe('SearchField', () => {
   let wrapper
 
   beforeEach(() => {
-    wrapper = shallowMount(SearchField, {
+    wrapper = shallowMountWithI18n(SearchField, {
       props: {},
       global: {
-        plugins: [i18n],
         directives: {
           focus: () => {}
         }

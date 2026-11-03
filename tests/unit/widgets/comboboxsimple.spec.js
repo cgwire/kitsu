@@ -1,9 +1,6 @@
-import { shallowMount } from '@vue/test-utils'
-
-import i18n from '@/lib/i18n'
 import ComboboxSimple from '@/components/widgets/ComboboxSimple.vue'
 
-import './setup'
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 describe('ComboboxSimple', () => {
   const options = [
@@ -15,9 +12,8 @@ describe('ComboboxSimple', () => {
   let wrapper
 
   beforeEach(() => {
-    wrapper = shallowMount(ComboboxSimple, {
-      props: { options, modelValue: 'week' },
-      global: { plugins: [i18n] }
+    wrapper = shallowMountWithI18n(ComboboxSimple, {
+      props: { options, modelValue: 'week' }
     })
   })
 
@@ -48,9 +44,8 @@ describe('ComboboxSimple', () => {
   })
 
   it('selects first option when modelValue does not match', async () => {
-    const w = shallowMount(ComboboxSimple, {
-      props: { options, modelValue: 'nonexistent' },
-      global: { plugins: [i18n] }
+    const w = shallowMountWithI18n(ComboboxSimple, {
+      props: { options, modelValue: 'nonexistent' }
     })
     await w.vm.$nextTick()
     const choices = w.findAll('.choice')
