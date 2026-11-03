@@ -5,10 +5,6 @@ export default {
     return client.pget('/api/data/status-automations')
   },
 
-  getStatusAutomation(statusAutomationId) {
-    return client.pget(`/api/data/status-automations/${statusAutomationId}`)
-  },
-
   newStatusAutomation(statusAutomation) {
     const data = {
       entity_type: statusAutomation.entityType,

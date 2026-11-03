@@ -2,8 +2,6 @@ import backgroundApi from '@/store/api/backgrounds'
 import { sortByName } from '@/lib/sorting'
 
 import {
-  LOAD_BACKGROUNDS_START,
-  LOAD_BACKGROUNDS_ERROR,
   LOAD_BACKGROUNDS_END,
   EDIT_BACKGROUND_END,
   DELETE_BACKGROUND_END,
@@ -19,7 +17,7 @@ const initialState = {
   backgrounds: []
 }
 
-const state = initialState
+const state = { ...initialState }
 
 const getters = {
   backgrounds: state =>
@@ -29,25 +27,6 @@ const getters = {
 }
 
 const actions = {
-  async loadBackgrounds({ commit }) {
-    commit(LOAD_BACKGROUNDS_START)
-    try {
-      const backgrounds = await backgroundApi.getBackgrounds()
-      commit(LOAD_BACKGROUNDS_END, backgrounds)
-    } catch (err) {
-      commit(LOAD_BACKGROUNDS_ERROR)
-    }
-  },
-
-  async loadBackground({ commit }, backgroundId) {
-    try {
-      const background = await backgroundApi.getBackground(backgroundId)
-      commit(EDIT_BACKGROUND_END, background)
-    } catch (err) {
-      console.error(err)
-    }
-  },
-
   async newBackground({ commit }, { name, is_default, file }) {
     let background = await backgroundApi.newBackground({
       is_default,
@@ -71,16 +50,6 @@ const actions = {
 }
 
 const mutations = {
-  [LOAD_BACKGROUNDS_START](state) {
-    state.backgrounds = []
-    cache.backgroundMap.clear()
-  },
-
-  [LOAD_BACKGROUNDS_ERROR](state) {
-    state.backgrounds = []
-    cache.backgroundMap.clear()
-  },
-
   [LOAD_BACKGROUNDS_END](state, backgrounds) {
     if (!backgrounds) return
     backgrounds.forEach(background => {

@@ -5,10 +5,6 @@ export default {
     return client.pget('/api/data/softwares')
   },
 
-  getSoftwareLicense(softwareLicenseId) {
-    return client.pget(`/api/data/softwares/${softwareLicenseId}`)
-  },
-
   newSoftwareLicense(softwareLicense) {
     const data = {
       name: softwareLicense.name,
