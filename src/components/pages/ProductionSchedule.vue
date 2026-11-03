@@ -597,6 +597,7 @@ import {
   refreshRawDates,
   removeHiddenTaskTypes,
   setTaskTypeVisibility,
+  subItemsOf,
   widenParents
 } from '@/lib/productionSchedule'
 import {
@@ -1392,6 +1393,11 @@ const loadEpisodeRows = async taskTypeElement => {
   }
 }
 
+const loadRootRows = taskTypeElement =>
+  isAllEpisodes.value
+    ? loadEpisodeRows(taskTypeElement)
+    : loadTaskTypeRows(taskTypeElement)
+
 const expandTaskTypeDrillDown = async (
   taskTypeElement,
   refreshScheduleCallBack = null,
@@ -1754,6 +1760,12 @@ const saveTaskChanged = task => {
 }
 
 const onScheduleItemChanged = async item => {
+  if (!item.parentElement && !item.expanded && !subItemsOf(item).length) {
+    const generation = scheduleGeneration
+    await loadRootRows(item)
+    if (isStaleSchedule(generation)) return
+    scheduleRef.value?.applyMoveToLoadedRows(item)
+  }
   const affected = item.type === 'Task' ? [] : movedSubItems(item)
   if (affected.length) {
     pendingParentChange.value = { item, affected }
@@ -2771,7 +2783,6 @@ const exportSchedule = async () => {
   if (exportProgress.value !== null) return
   const generation = scheduleGeneration
   const rows = filteredScheduleItems.value.filter(row => !row.expanded)
-  const loadRows = isAllEpisodes.value ? loadEpisodeRows : loadTaskTypeRows
   exportCancelled = false
   exportProgress.value = 0
   errors.value.exportSchedule = false
@@ -2779,7 +2790,7 @@ const exportSchedule = async () => {
   try {
     for (const [index, row] of rows.entries()) {
       if (exportCancelled || isStaleSchedule(generation)) return
-      await loadRows(row)
+      await loadRootRows(row)
       exportProgress.value = Math.round(((index + 1) / rows.length) * 100)
     }
     if (exportCancelled || isStaleSchedule(generation)) return

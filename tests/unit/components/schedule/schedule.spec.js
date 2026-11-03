@@ -1357,6 +1357,59 @@ describe('Schedule widget - entity rows', () => {
     wrapper.unmount()
   })
 
+  describe('rows loaded after the drop of a collapsed bar', () => {
+    const dropCollapsedBar = async (options = {}) => {
+      const hierarchy = buildEntityHierarchy(0)
+      const [root] = hierarchy
+      root.expanded = false
+      root.endDate = moment('2026-09-30')
+      const wrapper = mountSchedule(
+        { hierarchy, clipChildren: true, multiline: true },
+        { attachTo: document.body }
+      )
+      await dragRootBar(wrapper, 500, options)
+      // loaded from the server: the dates the bar had before its move
+      root.children = [
+        {
+          id: 'row-1',
+          name: 'E01',
+          startDate: moment('2026-08-03'),
+          endDate: moment('2026-08-07'),
+          parentElement: root
+        },
+        {
+          id: 'row-2',
+          name: 'E02',
+          startDate: moment('2026-08-04'),
+          endDate: moment('2026-08-07'),
+          parentElement: root
+        }
+      ]
+      wrapper.vm.applyMoveToLoadedRows(root)
+      return { root, wrapper }
+    }
+
+    it('clips them to the bar, on lines of their own', async () => {
+      const { root, wrapper } = await dropCollapsedBar()
+      const [row] = root.children
+
+      expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
+      expect(row.endDate.format('YYYY-MM-DD')).toBe('2026-08-14')
+      expect(row._dragOrigStartDate.format('YYYY-MM-DD')).toBe('2026-08-03')
+      expect(root.children.map(({ line }) => line)).toEqual([0, 1])
+      wrapper.unmount()
+    })
+
+    it('moves them with the bar on a shift drag', async () => {
+      const { root, wrapper } = await dropCollapsedBar({ shiftKey: true })
+      const [row] = root.children
+
+      expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
+      expect(row.endDate.format('YYYY-MM-DD')).toBe('2026-08-17')
+      wrapper.unmount()
+    })
+  })
+
   it('moves the rows along with the root bar on a shift drag', async () => {
     const hierarchy = buildEntityHierarchy(2)
     const { wrapper } = mountCounted(hierarchy)

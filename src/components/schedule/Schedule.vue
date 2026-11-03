@@ -1698,6 +1698,7 @@ const stampDragOrigin = timeElement => {
   timeElement._dragOrigStartDate = timeElement.startDate.clone()
   timeElement._dragOrigEndDate = timeElement.endDate.clone()
   timeElement._dragOrigEstimation = timeElement.estimation
+  timeElement._dragShifted = isShiftDrag && isChangeDates.value
   stampSubItems(timeElement)
 }
 
@@ -1724,7 +1725,7 @@ const shiftSubItems = (item, shift) => {
 
 const propagateClipToChildren = item => {
   if (!props.clipChildren) return
-  if (isShiftDrag && isChangeDates.value) {
+  if (item._dragShifted) {
     shiftSubItems(item, item.startDate.diff(item._dragOrigStartDate, 'days'))
     return
   }
@@ -1758,6 +1759,14 @@ const propagateClipToChildren = item => {
     // else: child fully inside new bounds — already restored, leave untouched
   })
   if (props.multiline) refreshItemPositionsDuringDrag([item])
+}
+
+// The rows of a collapsed bar load after its drop: they get the move the
+// rows of an unfolded bar got during the drag.
+const applyMoveToLoadedRows = item => {
+  stampSubItems(item)
+  propagateClipToChildren(item)
+  refreshItemPositions(item)
 }
 
 const updateItemEstimation = item => {
@@ -2833,6 +2842,7 @@ provide('scheduleRowHelpers', {
 })
 
 defineExpose({
+  applyMoveToLoadedRows,
   exportData,
   refreshAllItemPositions,
   refreshItemPositions,
