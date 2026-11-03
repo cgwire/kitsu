@@ -63,72 +63,74 @@
         <div class="box" v-if="isEmpty(currentProduction?.task_statuses)">
           {{ $t('settings.production.empty_list') }}
         </div>
-        <table class="datatable" v-else>
-          <thead>
-            <tr>
-              <th class="th-grab"></th>
-              <th class="th-name">{{ $t('task_status.fields.name') }}</th>
-              <th class="th-short-name">
-                {{ $t('task_status.fields.short_name') }}
-              </th>
-              <th class="th-bool">
-                {{ $t('task_status.fields.is_done') }}
-              </th>
-              <th class="th-bool">
-                {{ $t('task_status.fields.is_retake') }}
-              </th>
-              <th class="th-bool">
-                {{ $t('task_status.fields.is_artist_allowed') }}
-              </th>
-              <th class="th-bool">
-                {{ $t('task_status.fields.is_client_allowed') }}
-              </th>
-            </tr>
-          </thead>
-          <!-- A held button must not arm a drag: a reload that shifted
-               the rows before the release made vuedraggable throw. -->
-          <draggable
-            class="datatable-body"
-            filter="button"
-            item-key="id"
-            :prevent-on-filter="false"
-            tag="tbody"
-            v-model="taskStatusItems"
-            @choose="onRowHeld"
-            @end="updateTaskStatusPriority"
-            @start="onRowDragged"
-            @unchoose="onRowReleased"
-          >
-            <template #item="{ element: taskStatus }">
-              <tr class="datatable-row task-status">
-                <td class="grab">
-                  <grip-vertical-icon />
-                </td>
-                <td>
-                  {{ taskStatus.name }}
-                </td>
-                <td class="name">
-                  <validation-tag
-                    :is-static="true"
-                    :task="{ task_status_id: taskStatus.id }"
-                  />
-                </td>
-                <boolean-cell :value="taskStatus.is_done" />
-                <boolean-cell :value="taskStatus.is_retake" />
-                <boolean-cell :value="taskStatus.is_artist_allowed" />
-                <boolean-cell :value="taskStatus.is_client_allowed" />
-                <td>
-                  <button
-                    class="button"
-                    @click="removeTaskStatus(taskStatus.id)"
-                  >
-                    {{ $t('main.remove') }}
-                  </button>
-                </td>
+        <div class="datatable-wrapper" v-else>
+          <table class="datatable">
+            <thead>
+              <tr>
+                <th class="th-grab"></th>
+                <th class="th-name">{{ $t('task_status.fields.name') }}</th>
+                <th class="th-short-name">
+                  {{ $t('task_status.fields.short_name') }}
+                </th>
+                <th class="th-bool">
+                  {{ $t('task_status.fields.is_done') }}
+                </th>
+                <th class="th-bool">
+                  {{ $t('task_status.fields.is_retake') }}
+                </th>
+                <th class="th-bool">
+                  {{ $t('task_status.fields.is_artist_allowed') }}
+                </th>
+                <th class="th-bool">
+                  {{ $t('task_status.fields.is_client_allowed') }}
+                </th>
               </tr>
-            </template>
-          </draggable>
-        </table>
+            </thead>
+            <!-- A held button must not arm a drag: a reload that shifted
+                 the rows before the release made vuedraggable throw. -->
+            <draggable
+              class="datatable-body"
+              filter="button"
+              item-key="id"
+              :prevent-on-filter="false"
+              tag="tbody"
+              v-model="taskStatusItems"
+              @choose="onRowHeld"
+              @end="updateTaskStatusPriority"
+              @start="onRowDragged"
+              @unchoose="onRowReleased"
+            >
+              <template #item="{ element: taskStatus }">
+                <tr class="datatable-row task-status">
+                  <td class="grab">
+                    <grip-vertical-icon />
+                  </td>
+                  <td>
+                    {{ taskStatus.name }}
+                  </td>
+                  <td class="name">
+                    <validation-tag
+                      :is-static="true"
+                      :task="{ task_status_id: taskStatus.id }"
+                    />
+                  </td>
+                  <boolean-cell :value="taskStatus.is_done" />
+                  <boolean-cell :value="taskStatus.is_retake" />
+                  <boolean-cell :value="taskStatus.is_artist_allowed" />
+                  <boolean-cell :value="taskStatus.is_client_allowed" />
+                  <td>
+                    <button
+                      class="button"
+                      @click="removeTaskStatus(taskStatus.id)"
+                    >
+                      {{ $t('main.remove') }}
+                    </button>
+                  </td>
+                </tr>
+              </template>
+            </draggable>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -362,6 +364,11 @@ useHead({
   color: var(--text);
   padding-left: 10px;
   padding-bottom: 5px;
+}
+
+// The block padding is the only space below the table.
+.datatable-wrapper {
+  margin-bottom: 0;
 }
 
 .th-name {

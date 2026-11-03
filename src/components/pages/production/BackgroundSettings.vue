@@ -13,57 +13,59 @@
     <div class="box" v-if="linkedBackgrounds.length === 0">
       {{ $t('settings.production.empty_backgrounds') }}
     </div>
-    <table class="datatable" v-else>
-      <thead class="datatable-head">
-        <tr>
-          <th class="name">{{ $t('backgrounds.fields.name') }}</th>
-          <th class="is-default">
-            {{ $t('backgrounds.fields.is_default') }}
-          </th>
-          <th class="actions"></th>
-        </tr>
-      </thead>
-      <tbody class="datatable-body">
-        <tr
-          class="datatable-row"
-          v-for="background in linkedBackgrounds"
-          :key="background.id"
-        >
-          <td class="name">
-            <span class="flexrow">
-              <a
-                class="thumbnail-wrapper thumbnail-picture entity-thumbnail flexrow-item"
-                :href="background.url"
-                target="_blank"
-                v-if="background.url"
-              >
-                <img
-                  :src="background.thumbnail"
-                  :alt="background.name"
-                  width="100"
-                  height="67"
-                />
-              </a>
-              {{ background.name }}
-            </span>
-          </td>
-          <td class="is-default">
-            <boolean-field
-              class="ml05 mb0"
-              :disabled="isGlobalDefault(background)"
-              :label="$t('backgrounds.fields.is_default')"
-              :model-value="String(isCurrentDefault(background))"
-              @click="value => onSetDefault(background, value === 'true')"
-            />
-          </td>
-          <td>
-            <button class="button" @click="$emit('remove', background.id)">
-              {{ $t('main.remove') }}
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="datatable-wrapper" v-else>
+      <table class="datatable">
+        <thead class="datatable-head">
+          <tr>
+            <th class="name">{{ $t('backgrounds.fields.name') }}</th>
+            <th class="is-default">
+              {{ $t('backgrounds.fields.is_default') }}
+            </th>
+            <th class="actions"></th>
+          </tr>
+        </thead>
+        <tbody class="datatable-body">
+          <tr
+            class="datatable-row"
+            v-for="background in linkedBackgrounds"
+            :key="background.id"
+          >
+            <td class="name">
+              <span class="flexrow">
+                <a
+                  class="thumbnail-wrapper thumbnail-picture entity-thumbnail flexrow-item"
+                  :href="background.url"
+                  target="_blank"
+                  v-if="background.url"
+                >
+                  <img
+                    :src="background.thumbnail"
+                    :alt="background.name"
+                    width="100"
+                    height="67"
+                  />
+                </a>
+                {{ background.name }}
+              </span>
+            </td>
+            <td class="is-default">
+              <boolean-field
+                class="ml05 mb0"
+                :disabled="isGlobalDefault(background)"
+                :label="$t('backgrounds.fields.is_default')"
+                :model-value="String(isCurrentDefault(background))"
+                @click="value => onSetDefault(background, value === 'true')"
+              />
+            </td>
+            <td>
+              <button class="button" @click="$emit('remove', background.id)">
+                {{ $t('main.remove') }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <p class="has-text-centered nb-backgrounds" v-if="linkedBackgrounds.length">
       {{ linkedBackgrounds.length }}
       {{ $t('backgrounds.number', { count: linkedBackgrounds.length }) }}
@@ -144,6 +146,11 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+// The count below keeps its own margin.
+.datatable-wrapper {
+  margin-bottom: 0;
+}
+
 .datatable-body tr:first-child td {
   border-top: 0;
 }
