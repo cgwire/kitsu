@@ -1746,6 +1746,68 @@ describe('Task.vue preview-file:update', () => {
   })
 })
 
+// The page asks the player again once the refresh is back: a text may be
+// typed by then, and reloading the canvas under it ended the typing.
+describe('Task.vue preview-file:annotation-update', () => {
+  const previews = [{ id: 'preview-1', revision: 1, extension: 'mp4' }]
+
+  const emitAnnotationUpdate = async isValidPreviewModification => {
+    const player = {
+      isValidPreviewModification,
+      loadAnnotation: vi.fn(),
+      reloadAnnotations: vi.fn()
+    }
+    const { socket, store } = await mountPage({
+      previews,
+      stubs: {
+        PreviewPlayer: {
+          props: ['fps', 'previews', 'readOnly'],
+          template: '<div />',
+          data: () => ({
+            currentPreview: { id: 'preview-1', task_id: TASK_ID },
+            notSaved: false
+          }),
+          methods: player
+        }
+      }
+    })
+    const [, onAnnotationUpdate] = socket.on.mock.calls.find(
+      ([event]) => event === 'preview-file:annotation-update'
+    )
+    onAnnotationUpdate({
+      preview_file_id: 'preview-1',
+      updated_at: '2026-11-03T10:00:00'
+    })
+    await flushPromises()
+    return { player, store }
+  }
+
+  it('reloads the annotations another user saved', async () => {
+    const { player, store } = await emitAnnotationUpdate(() => true)
+
+    expect(store.dispatch).toHaveBeenCalledWith('refreshPreview', {
+      previewId: 'preview-1',
+      taskId: TASK_ID
+    })
+    expect(player.reloadAnnotations).toHaveBeenCalled()
+    expect(player.loadAnnotation).toHaveBeenCalled()
+  })
+
+  it('keeps the canvas when the player refuses the refreshed update', async () => {
+    const isValid = vi.fn().mockReturnValueOnce(true).mockReturnValue(false)
+    const { player, store } = await emitAnnotationUpdate(isValid)
+
+    expect(store.dispatch).toHaveBeenCalledWith(
+      'refreshPreview',
+      expect.anything()
+    )
+    expect(isValid).toHaveBeenCalledTimes(2)
+    expect(isValid).toHaveBeenLastCalledWith('preview-1', '2026-11-03T10:00:00')
+    expect(player.reloadAnnotations).not.toHaveBeenCalled()
+    expect(player.loadAnnotation).not.toHaveBeenCalled()
+  })
+})
+
 describe('Task.vue failed requests', () => {
   const previews = [{ id: 'preview-1', revision: 1, extension: 'mp4' }]
   // The shallow stub carries none of the player members the page reads.

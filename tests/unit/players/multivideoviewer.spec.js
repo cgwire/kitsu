@@ -475,8 +475,8 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
       const { wrapper, player } = await mountAt30()
       wrapper.vm.play()
       const { cb: tick } = rvfcCallbacks.at(-1)
-      tick(performance.now(), { mediaTime: 18000 / 30 })
       player.currentTime = 17999.4 / 30
+      tick(performance.now(), { mediaTime: 18000 / 30 })
       wrapper.vm.pause()
       expect(Math.floor(player.currentTime * 30)).toBe(18000)
       expect(lastFrame(wrapper)).toBe(18000)

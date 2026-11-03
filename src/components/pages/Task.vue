@@ -1822,7 +1822,12 @@ const onAnnotationUpdate = eventData => {
         taskId: previewPlayerRef.value.currentPreview.task_id
       })
       .then(() => {
-        if (!previewPlayerRef.value.notSaved) {
+        // Asked again: a text may be typed, or a batch sent, by now.
+        const isStillValid = previewPlayerRef.value?.isValidPreviewModification(
+          eventData.preview_file_id,
+          eventData.updated_at
+        )
+        if (isStillValid) {
           taskPreviews.value = getCurrentTaskPreviews()
           nextTick(() => {
             previewPlayerRef.value.reloadAnnotations()

@@ -1700,7 +1700,12 @@ const onRemoteAnnotationUpdate = eventData => {
         taskId: previewPlayer.currentPreview.task_id
       })
       .then(() => {
-        if (!previewPlayer.notSaved) {
+        // Asked again: a text may be typed, or a batch sent, by now.
+        const isStillValid = previewPlayer.isValidPreviewModification(
+          eventData.preview_file_id,
+          eventData.updated_at
+        )
+        if (isStillValid) {
           taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
           // Wait for the refreshed previews prop to propagate to the
           // player before reloading — otherwise reloadAnnotations

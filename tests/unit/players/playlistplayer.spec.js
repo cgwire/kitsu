@@ -75,6 +75,7 @@ const mountPlayer = ({
   isClient = false,
   organisation = {},
   props = {},
+  previewFileMap = new Map(),
   previewFileStatusMap,
   shotMap = new Map(),
   taskMap = new Map(),
@@ -96,7 +97,7 @@ const mountPlayer = ({
       isCurrentUserSupervisor: () => false,
       organisation: () => organisation,
       personMap: () => new Map(),
-      previewFileMap: () => new Map(),
+      previewFileMap: () => previewFileMap,
       previewFileStatusMap: () => previewFileStatusMap,
       productionAssetTaskTypes: () => [],
       productionBackgrounds: () => [],
@@ -2282,6 +2283,81 @@ describe('PlaylistPlayer.vue', () => {
       await resize()
 
       expect([before, anchor.style.width]).toEqual(['800px', '400px'])
+    })
+  })
+
+  // Reloading the canvas under a note being typed ended the typing.
+  describe('annotation updates', () => {
+    const textareas = []
+
+    afterEach(() => {
+      textareas.splice(0).forEach(textarea => textarea.remove())
+    })
+
+    const emitAnnotationUpdate = async ({
+      isEditing = false,
+      isFocused = false
+    } = {}) => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'png' }],
+        previewFileMap: new Map([['preview-1', { id: 'preview-1' }]]),
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await flushPromises()
+      const store = wrapper.vm.$store
+      store.dispatch.mockImplementation(type =>
+        Promise.resolve(
+          type === 'refreshPreview'
+            ? {
+                id: 'preview-1',
+                annotations: [{ time: 0, drawing: { objects: [] } }]
+              }
+            : undefined
+        )
+      )
+      const [, onAnnotationUpdate] = store.$socket.on.mock.calls.find(
+        ([event]) => event === 'preview-file:annotation-update'
+      )
+      // fabric types into a hidden textarea, focused while the note is typed.
+      const hiddenTextarea = document.createElement('textarea')
+      textareas.push(hiddenTextarea)
+      document.body.appendChild(hiddenTextarea)
+      if (isFocused) hiddenTextarea.focus()
+      canvas.getActiveObject.mockReturnValue(
+        isEditing ? { isEditing, hiddenTextarea } : null
+      )
+      canvas.clear.mockClear()
+
+      onAnnotationUpdate({
+        preview_file_id: 'preview-1',
+        updated_at: '2026-11-03T10:00:00'
+      })
+      await flushPromises()
+      return canvas
+    }
+
+    it('reloads the drawings another user saved', async () => {
+      const canvas = await emitAnnotationUpdate()
+
+      expect(canvas.clear).toHaveBeenCalled()
+    })
+
+    it('leaves a note being typed', async () => {
+      const canvas = await emitAnnotationUpdate({
+        isEditing: true,
+        isFocused: true
+      })
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    // fabric keeps a note in editing when the user clicks outside the
+    // canvas, into the comment box for instance.
+    it('reloads under a note left in editing', async () => {
+      const canvas = await emitAnnotationUpdate({ isEditing: true })
+
+      expect(canvas.clear).toHaveBeenCalled()
     })
   })
 

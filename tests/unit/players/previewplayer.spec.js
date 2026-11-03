@@ -1766,7 +1766,16 @@ describe('PreviewPlayer.vue', () => {
         text.text = value
         canvas.fire('text:changed', { target: text })
       }
-      return { player, type }
+      return { canvas, player, text, type }
+    }
+
+    // fabric types into a hidden textarea, focused while the text is typed.
+    const textareas = []
+    const giveTextarea = (text, { isFocused }) => {
+      text.hiddenTextarea = document.createElement('textarea')
+      textareas.push(text.hiddenTextarea)
+      document.body.appendChild(text.hiddenTextarea)
+      if (isFocused) text.hiddenTextarea.focus()
     }
 
     const savedTexts = player =>
@@ -1780,6 +1789,7 @@ describe('PreviewPlayer.vue', () => {
 
     afterEach(() => {
       vi.useRealTimers()
+      textareas.splice(0).forEach(textarea => textarea.remove())
     })
 
     it('saves the text typed right before the player closes', async () => {
@@ -1800,6 +1810,45 @@ describe('PreviewPlayer.vue', () => {
       player.unmount()
 
       expect(savedTexts(player)).toEqual(['Fix hand'])
+    })
+
+    // A reload ended the typing.
+    it('refuses the annotation updates while the text is typed', async () => {
+      const { canvas, player, text } = await mountWithText('Type...')
+      giveTextarea(text, { isFocused: true })
+      const isValid = () =>
+        player.vm.isValidPreviewModification('preview-1', '2026-11-03T10:00:00')
+
+      expect(isValid()).toBe(false)
+
+      canvas.getActiveObject.mockReturnValue(null)
+      expect(isValid()).toBe(true)
+    })
+
+    // A text left for the comment box no longer keeps the reloads away: its
+    // last keystrokes, still waiting for the debounce, must start a save.
+    it('saves the last keystrokes once the text loses the focus', async () => {
+      const { canvas, player, text, type } = await mountWithText('Fix hand')
+      giveTextarea(text, { isFocused: true })
+      canvas.fire('text:editing:entered', { target: text })
+      type('Fix the hand')
+
+      text.hiddenTextarea.blur()
+
+      expect(
+        player.vm.isValidPreviewModification('preview-1', '2026-11-03T10:00:00')
+      ).toBe(false)
+    })
+
+    // fabric keeps a text in editing when the user clicks outside the
+    // canvas, into the comment box for instance.
+    it('takes the annotation updates once the text loses the focus', async () => {
+      const { player, text } = await mountWithText('Fix hand')
+      giveTextarea(text, { isFocused: false })
+
+      expect(
+        player.vm.isValidPreviewModification('preview-1', '2026-11-03T10:00:00')
+      ).toBe(true)
     })
   })
 
