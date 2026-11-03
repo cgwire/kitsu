@@ -1411,6 +1411,7 @@
       "create_error": "Hiba történt a feladat állapotok mentése közben. Biztosan nincs megegyező nevű feladat állapot?",
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból?",
       "delete_error": "Hiba történt a feladat állapot törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nem hivatkozik rá semmilyen adat?",
+      "delete_blocked_by_automations": "Még vannak állapot-automatizálások, amelyek ezt a feladat állapotot használják, az archiváltakat is beleértve. Előbb szerkeszd vagy töröld őket.",
       "edit_title": "Feladat állapot szerkesztése",
       "number": "feladat állapot | feladat állapotok",
       "new_task_status": "Feladat állapot hozzáadása",
@@ -1441,6 +1442,7 @@
     "task_types": {
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból?",
       "delete_error": "Hiba történt a feladat típus törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nem tartozik feladat ehhez a feladat típushoz?",
+      "delete_blocked_by_automations": "Még vannak állapot-automatizálások, amelyek ezt a feladat típust használják, az archiváltakat is beleértve. Előbb szerkeszd vagy töröld őket.",
       "delete_blocked_by_links": "Ezt a feladat típust még használja néhány produkció időbeosztása vagy munkafolyamata. A leválasztás minden produkcióban törli az időbeosztási dátumait.",
       "delete_blocked_by_tasks": "Még vannak feladatok, amelyek ezt a feladat típust használják. Töröld vagy oszd ki újra őket, mielőtt eltávolítod.",
       "delete_force": "Leválasztás és törlés",
@@ -2384,6 +2386,7 @@
       "out_title": "A trigger aktiválódásakor alkalmazott változás",
       "production_description": "Egy automatizálás megváltoztatja egy feladat állapotát vagy a következő feladatot, amikor egy állapotot beállítanak.",
       "run_for_selection": "Állapot-automatizálás futtatása a kijelölt feladatokon:",
+      "save_refused": "Ez az automatizálás ebben a formában nem menthető.",
       "title": "Automatizálások",
       "to_status": "→",
       "wrong_automation": "Ebben a produkcióban minden feltétel olyan feladat típust használ, amely az alkalmazott feladat típus után következik. Ezek állapotváltozásai a végtelen ciklusok elkerülése érdekében nem indítják el ezt az automatizálást: nincs hatása.",

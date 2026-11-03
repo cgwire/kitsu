@@ -21,9 +21,14 @@
         {{ cancelLabel || $t('main.cancel') }}
       </button>
     </p>
-    <p class="error mt1 has-text-left" v-if="isError">
-      {{ errorText }}
-    </p>
+    <div role="alert" v-if="isError">
+      <p class="error mt1 has-text-left">
+        {{ errorText }}
+      </p>
+      <p class="error-details has-text-left" v-if="errorDetails">
+        (<strong>{{ $t('main.technical_details') }}</strong> {{ errorDetails }})
+      </p>
+    </div>
     <p class="success mt1 has-text-left" v-if="isSuccess">
       {{ successText }}
     </p>
@@ -34,6 +39,7 @@
 const props = defineProps({
   cancelLabel: { type: String, default: '' },
   confirmLabel: { type: String, default: '' },
+  errorDetails: { type: String, default: '' },
   errorText: { type: String, default: '' },
   isDisabled: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
@@ -62,6 +68,14 @@ const confirm = () => {
 
 .error {
   margin-top: 1em;
+}
+
+// As in the delete modal.
+.error-details {
+  color: var(--text-alt);
+  font-family: monospace;
+  font-size: 0.85em;
+  margin-top: 0.5em;
 }
 
 .success {

@@ -10,11 +10,13 @@
     <div class="modal-content">
       <div class="box">
         <p class="text">{{ text }}</p>
-        <p class="is-danger has-text-right" v-if="isError">{{ errorText }}</p>
-        <p class="error-details has-text-right" v-if="isError && errorDetails">
-          (<strong>{{ $t('main.technical_details') }}</strong>
-          {{ errorDetails }})
-        </p>
+        <div role="alert" v-if="isError">
+          <p class="is-danger has-text-right">{{ errorText }}</p>
+          <p class="error-details has-text-right" v-if="errorDetails">
+            (<strong>{{ $t('main.technical_details') }}</strong>
+            {{ errorDetails }})
+          </p>
+        </div>
         <p class="has-text-right">
           <a
             :class="{

@@ -1411,6 +1411,7 @@
       "create_error": "儲存此任務狀態時發生錯誤。您確定沒有名稱相似的任務狀態嗎？",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "delete_error": "刪除此任務狀態時發生錯誤。目前可能有資料連結至此任務狀態。您確定沒有任務連結至此任務狀態嗎？",
+      "delete_blocked_by_automations": "仍有狀態自動化（包括已封存的）在使用此任務狀態。請先編輯或刪除這些自動化。",
       "edit_title": "編輯任務狀態",
       "number": "任務狀態 | 任務狀態",
       "new_task_status": "新增任務狀態",
@@ -1441,6 +1442,7 @@
     "task_types": {
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "delete_error": "刪除此任務類型時發生錯誤。目前可能有資料連結至此任務類型。您確定沒有任務連結至此任務類型嗎？",
+      "delete_blocked_by_automations": "仍有狀態自動化（包括已封存的）在使用此任務類型。請先編輯或刪除這些自動化。",
       "delete_blocked_by_links": "此任務類型仍在某些製作項目的時間表或工作流程中使用。解除關聯將刪除其在所有製作項目中的時間表日期。",
       "delete_blocked_by_tasks": "仍有任務在使用此任務類型。請先刪除或重新指派這些任務，再移除它。",
       "delete_force": "解除關聯並刪除",
@@ -2025,6 +2027,7 @@
       "new_status_automation": "新增狀態自動化",
       "production_description": "自動化會在設定某個狀態時變更任務狀態或下一個任務。",
       "run_for_selection": "為選取的任務執行狀態自動化：",
+      "save_refused": "此自動化無法按原樣儲存。",
       "title": "自動化",
       "to_status": "改為",
       "wrong_automation": "在此製作項目中，每個條件使用的任務類型都位於套用的任務類型之後。為避免無限循環，它們的狀態變更不會執行此自動化：它不會有任何效果。",

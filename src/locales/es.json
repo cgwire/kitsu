@@ -1411,6 +1411,7 @@
       "create_error": "Se ha producido un error al guardar este estado de tarea. ¿Está seguro que no hay otro estado de tarea con un nombre similar?",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar este estado de tarea. Es probable que haya datos asociados. ¿Está seguro de que este estado de tarea no tiene ninguna tarea asociada?",
+      "delete_blocked_by_automations": "Todavía hay automatizaciones de estado que usan este estado de tarea, incluidas las archivadas. Modifíquelas o bórrelas primero.",
       "edit_title": "Modificar el estado de la tarea",
       "number": "estado de la tarea | estados de la tarea",
       "new_task_status": "Añadir un estado de tarea",
@@ -1441,6 +1442,7 @@
     "task_types": {
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar este tipo de tarea. Es probable que haya datos asociados. ¿Está seguro de que este tipo de tarea no tiene ninguna tarea asociada?",
+      "delete_blocked_by_automations": "Todavía hay automatizaciones de estado que usan este tipo de tarea, incluidas las archivadas. Modifíquelas o bórrelas primero.",
       "delete_blocked_by_links": "Este tipo de tarea todavía se usa en el calendario o en el flujo de trabajo de algunas producciones. Desvincularlo eliminará sus fechas del calendario en todas las producciones.",
       "delete_blocked_by_tasks": "Todavía hay tareas que usan este tipo de tarea. Bórrelas o reasígnelas antes de quitarlo.",
       "delete_force": "Desvincular y borrar",
@@ -2025,6 +2027,7 @@
       "new_status_automation": "Añadir una automatización de estado",
       "production_description": "Una automatización cambia el estado de una tarea, o la tarea siguiente, cuando se aplica un estado.",
       "run_for_selection": "Ejecutar la automatización de estado para las tareas seleccionadas:",
+      "save_refused": "Esta automatización no se puede guardar tal como está.",
       "title": "Automatizaciones",
       "to_status": "a",
       "wrong_automation": "En esta producción, todas las condiciones usan un tipo de tarea que va después del tipo de tarea aplicado. Sus cambios de estado no ejecutan esta automatización, para evitar ciclos infinitos: no tiene ningún efecto.",

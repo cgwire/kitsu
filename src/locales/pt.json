@@ -1411,6 +1411,7 @@
       "create_error": "Ocorreu um erro ao salvar este status de tarefa. Tem certeza de que não há status de tarefa com nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este status de tarefa. Pode haver dados vinculados a ele. Tem certeza de que este status de tarefa não tem nenhuma tarefa vinculada a ele?",
+      "delete_blocked_by_automations": "Ainda há automações de status que usam este status de tarefa, incluindo as arquivadas. Edite-as ou exclua-as primeiro.",
       "edit_title": "Editar o status da tarefa",
       "number": "status da tarefa | status das tarefas",
       "new_task_status": "Adicionar um status de tarefa",
@@ -1441,6 +1442,7 @@
     "task_types": {
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este tipo de tarefa. Pode haver dados vinculados a ele. Tem certeza de que este tipo de tarefa não possui nenhuma tarefa vinculada a ele?",
+      "delete_blocked_by_automations": "Ainda há automações de status que usam este tipo de tarefa, incluindo as arquivadas. Edite-as ou exclua-as primeiro.",
       "delete_blocked_by_links": "Este tipo de tarefa ainda é usado no cronograma ou no fluxo de trabalho de algumas produções. Desvinculá-lo excluirá suas datas de cronograma em todas as produções.",
       "delete_blocked_by_tasks": "Ainda há tarefas que usam este tipo de tarefa. Exclua-as ou reatribua-as antes de removê-lo.",
       "delete_force": "Desvincular e excluir",
@@ -2025,6 +2027,7 @@
       "new_status_automation": "Adicionar automação de status",
       "production_description": "Uma automação muda o status de uma tarefa, ou a tarefa seguinte, quando um status é definido.",
       "run_for_selection": "Executar automação de status para tarefas selecionadas:",
+      "save_refused": "Esta automação não pode ser salva como está.",
       "title": "Automações",
       "to_status": "para",
       "wrong_automation": "Nesta produção, todas as condições usam um tipo de tarefa que vem depois do tipo de tarefa aplicada. As mudanças de status deles não executam esta automação, para evitar ciclos infinitos: ela não tem efeito.",

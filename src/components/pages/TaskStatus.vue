@@ -47,7 +47,8 @@
       :is-loading="loading.del"
       :is-error="errors.del"
       :text="deleteText"
-      :error-text="$t('task_status.delete_error')"
+      :error-text="deleteErrorText"
+      :error-details="deleteErrorMessage"
       @cancel="modals.del = false"
       @confirm="confirmDeleteTaskStatus"
     />
@@ -79,6 +80,7 @@ const store = useStore()
 // State
 
 const activeTab = ref('active')
+const deleteErrorMessage = ref('')
 const entityTab = ref('entities')
 const taskStatusToDelete = ref(null)
 const taskStatusToEdit = ref({ color: '#000000' })
@@ -126,6 +128,14 @@ const deleteText = computed(() =>
     : ''
 )
 
+// Zou refuses to delete a status a status automation uses, and its message
+// says so.
+const deleteErrorText = computed(() =>
+  deleteErrorMessage.value.includes('status automation')
+    ? t('task_status.delete_blocked_by_automations')
+    : t('task_status.delete_error')
+)
+
 // Functions
 
 // Each status saves on its own: the statuses of a reorder wait for those of
@@ -169,14 +179,20 @@ const confirmEditTaskStatus = async form => {
 }
 
 const confirmDeleteTaskStatus = async () => {
+  if (loading.del) return
+  const status = taskStatusToDelete.value
   loading.del = true
   errors.del = false
   try {
-    await store.dispatch('deleteTaskStatus', taskStatusToDelete.value)
-    modals.del = false
+    await store.dispatch('deleteTaskStatus', status)
+    if (status === taskStatusToDelete.value) modals.del = false
   } catch (err) {
     console.error(err)
-    errors.del = true
+    // A late answer must not land on a modal reopened for another status.
+    if (modals.del && status === taskStatusToDelete.value) {
+      deleteErrorMessage.value = err.body?.message || ''
+      errors.del = true
+    }
   }
   loading.del = false
 }
@@ -226,6 +242,8 @@ const onEditClicked = status => {
 
 const onDeleteClicked = status => {
   taskStatusToDelete.value = status
+  deleteErrorMessage.value = ''
+  errors.del = false
   modals.del = true
 }
 

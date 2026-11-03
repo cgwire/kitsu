@@ -537,6 +537,25 @@ describe('EditStatusAutomationModal', () => {
     expect(form.isGuardChanged).toBe(false)
   })
 
+  it('shows why Zou refuses the automation', async () => {
+    const wrapper = await mountModal(statusAutomation)
+    await wrapper.setProps({ isError: true })
+    expect(wrapper.find('.modal-footer .error').text()).toBe(
+      'Could not save. Please try again.'
+    )
+    expect(wrapper.find('.modal-footer .error-details').exists()).toBe(false)
+
+    await wrapper.setProps({
+      errorDetails: 'Task type Layout appears in two conditions.'
+    })
+    expect(wrapper.find('.modal-footer .error').text()).toBe(
+      'This automation cannot be saved as it is.'
+    )
+    expect(wrapper.find('.modal-footer .error-details').text()).toBe(
+      '(Technical details: Task type Layout appears in two conditions.)'
+    )
+  })
+
   // Older clients wrote "Asset", which Zou reads as "asset".
   it('reads a capitalized entity type', async () => {
     const wrapper = await mountModal({

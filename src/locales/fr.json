@@ -1411,6 +1411,7 @@
       "create_error": "Une erreur est survenue en créant le statut. Êtes-vous sûr qu'il n'y a pas un statut avec un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de ce statut de tâche. Il se peut que des données existantes y soient actuellement liées. Êtes-vous sûr qu'aucune tâche n'est liée à ce statut de tâche ?",
+      "delete_blocked_by_automations": "Des automatisations utilisent encore ce statut de tâche, archivées comprises. Modifiez-les ou supprimez-les d'abord.",
       "edit_title": "Modifier statut",
       "number": "statut de tâche | statuts de tâche",
       "new_task_status": "Ajouter un statut de tâche",
@@ -1441,6 +1442,7 @@
     "task_types": {
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de ce type de tâche. Il se peut que des données existantes soient actuellement liées à ce type de tâche. Êtes-vous sûr qu'aucune tâche n'est liée à ce type de tâche ?",
+      "delete_blocked_by_automations": "Des automatisations utilisent encore ce type de tâche, archivées comprises. Modifiez-les ou supprimez-les d'abord.",
       "delete_blocked_by_links": "Ce type de tâche est encore utilisé dans le planning ou dans le workflow de certaines productions. Le détacher supprimera ses dates de planning dans toutes les productions.",
       "delete_blocked_by_tasks": "Des tâches utilisent encore ce type de tâche. Supprimez-les ou réaffectez-les avant de le retirer.",
       "delete_force": "Détacher et supprimer",
@@ -2025,6 +2027,7 @@
       "new_status_automation": "Ajouter une automatisation",
       "production_description": "Une automatisation change le statut d'une tâche, ou la tâche suivante, quand un statut est appliqué.",
       "run_for_selection": "Lancer l'automatisation pour les tâches sélectionnées :",
+      "save_refused": "Cette automatisation ne peut pas être enregistrée en l'état.",
       "title": "Automatisations",
       "to_status": "sur",
       "wrong_automation": "Dans cette production, chaque condition porte sur un type de tâche qui vient après le type de tâche concerné. Leurs changements de statut ne déclenchent pas cette automatisation, pour éviter les cycles infinis : elle n'a aucun effet.",

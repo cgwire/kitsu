@@ -22,6 +22,7 @@
 
     <edit-status-automation-modal
       :active="modals.edit"
+      :error-details="editErrorMessage"
       :is-loading="loading.edit"
       :is-error="errors.edit"
       :status-automation-to-edit="statusAutomationToEdit"
@@ -69,6 +70,7 @@ const store = useStore()
 // State
 
 const activeTab = ref(route.query.tab || 'active')
+const editErrorMessage = ref('')
 const statusAutomationToDelete = ref(null)
 const statusAutomationToEdit = ref(null)
 const modals = reactive({ edit: false, del: false })
@@ -98,19 +100,29 @@ const statusAutomationsList = computed(() =>
 // Functions
 
 const confirmEditStatusAutomation = form => {
-  const isEdit = !!statusAutomationToEdit.value?.id
-  if (isEdit) form.id = statusAutomationToEdit.value.id
+  const statusAutomation = statusAutomationToEdit.value
+  const isEdit = !!statusAutomation?.id
+  if (isEdit) form.id = statusAutomation.id
 
   loading.edit = true
   errors.edit = false
+  editErrorMessage.value = ''
   store
     .dispatch(isEdit ? 'editStatusAutomation' : 'newStatusAutomation', form)
     .then(() => {
-      modals.edit = false
+      if (statusAutomation === statusAutomationToEdit.value) {
+        modals.edit = false
+      }
     })
     .catch(err => {
       console.error(err)
-      errors.edit = true
+      // A late answer must not land on a modal reopened for another row.
+      if (modals.edit && statusAutomation === statusAutomationToEdit.value) {
+        // A 400 is Zou refusing the automation, with a message saying why.
+        editErrorMessage.value =
+          err?.status === 400 ? err.body?.message || '' : ''
+        errors.edit = true
+      }
     })
     .finally(() => {
       loading.edit = false
@@ -118,16 +130,23 @@ const confirmEditStatusAutomation = form => {
 }
 
 const confirmDeleteStatusAutomation = () => {
+  if (loading.del) return
+  const statusAutomation = statusAutomationToDelete.value
   loading.del = true
   errors.del = false
   store
-    .dispatch('deleteStatusAutomation', statusAutomationToDelete.value)
+    .dispatch('deleteStatusAutomation', statusAutomation)
     .then(() => {
-      modals.del = false
+      if (statusAutomation === statusAutomationToDelete.value) {
+        modals.del = false
+      }
     })
     .catch(err => {
       console.error(err)
-      errors.del = true
+      // A late answer must not land on a modal reopened for another row.
+      if (modals.del && statusAutomation === statusAutomationToDelete.value) {
+        errors.del = true
+      }
     })
     .finally(() => {
       loading.del = false
@@ -174,12 +193,14 @@ const onExportClicked = () => {
 const onNewClicked = () => {
   statusAutomationToEdit.value = {}
   errors.edit = false
+  editErrorMessage.value = ''
   modals.edit = true
 }
 
 const onEditClicked = sa => {
   statusAutomationToEdit.value = sa
   errors.edit = false
+  editErrorMessage.value = ''
   modals.edit = true
 }
 

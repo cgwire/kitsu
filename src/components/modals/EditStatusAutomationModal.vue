@@ -161,7 +161,8 @@
     </form>
 
     <modal-footer
-      :error-text="$t('status_automations.create_error')"
+      :error-details="errorDetails"
+      :error-text="errorText"
       :is-disabled="!isValid"
       :is-error="isError"
       :is-loading="isLoading"
@@ -203,6 +204,8 @@ const store = useStore()
 // --------------------------------------------------------------------------
 const props = defineProps({
   active: { type: Boolean, default: false },
+  // The reason Zou gives for refusing the automation.
+  errorDetails: { type: String, default: '' },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   statusAutomationToEdit: { type: Object, default: () => ({}) }
@@ -332,6 +335,13 @@ const importHelpKey = computed(() =>
 )
 
 const isEditing = computed(() => props.statusAutomationToEdit?.id)
+
+// Trying again does not help with a refusal.
+const errorText = computed(() =>
+  props.errorDetails
+    ? t('status_automations.save_refused')
+    : t('status_automations.create_error')
+)
 
 const title = computed(() =>
   isEditing.value

@@ -1411,6 +1411,7 @@
       "create_error": "Der opstod en fejl under gemning af denne opgavestatus. Er du sikker på, at der ikke allerede findes en opgavestatus med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletning af denne opgavestatus. Der kan være eksisterende data knyttet til den. Er du sikker på, at denne opgavestatus ikke har nogen opgave knyttet til sig?",
+      "delete_blocked_by_automations": "Der er stadig statusautomatiseringer, der bruger denne opgavestatus, også arkiverede. Rediger eller slet dem først.",
       "edit_title": "Rediger opgavestatus",
       "number": "opgavestatus | opgavestatusser",
       "new_task_status": "Tilføj en opgavestatus",
@@ -1441,6 +1442,7 @@
     "task_types": {
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletning af denne opgavetype. Der kan være eksisterende data knyttet til den. Er du sikker på, at denne opgavetype ikke har nogen opgave knyttet til sig?",
+      "delete_blocked_by_automations": "Der er stadig statusautomatiseringer, der bruger denne opgavetype, også arkiverede. Rediger eller slet dem først.",
       "delete_blocked_by_links": "Denne opgavetype bruges stadig i tidsplanen eller i arbejdsgangen for nogle produktioner. Hvis den frakobles, slettes dens tidsplandatoer i alle produktioner.",
       "delete_blocked_by_tasks": "Der er stadig opgaver, der bruger denne opgavetype. Slet eller omfordel dem, før du fjerner den.",
       "delete_force": "Frakobl og slet",
@@ -2025,6 +2027,7 @@
       "new_status_automation": "Tilføj statusautomatisering",
       "production_description": "En automatisering ændrer en opgaves status, eller den næste opgave, når en status sættes.",
       "run_for_selection": "Kør statusautomatisering for valgte opgaver:",
+      "save_refused": "Denne automatisering kan ikke gemmes, som den er.",
       "title": "Automatiseringer",
       "to_status": "til",
       "wrong_automation": "I denne produktion bruger hver betingelse en opgavetype, der kommer efter den anvendte opgavetype. Deres statusændringer kører ikke denne automatisering, for at undgå uendelige cyklusser: den har ingen effekt.",

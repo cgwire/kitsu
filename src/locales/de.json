@@ -1411,6 +1411,7 @@
       "create_error": "Beim Speichern dieses Aufgabenstatus ist ein Fehler aufgetreten. Sind Sie sicher, dass es keinen Aufgabenstatus mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Aufgabenstatus ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Aufgabenstatus keine Aufgabe zugeordnet hat?",
+      "delete_blocked_by_automations": "Es gibt noch Statusautomatisierungen mit diesem Aufgabenstatus, auch archivierte. Bearbeiten oder löschen Sie sie zuerst.",
       "edit_title": "Aufgabenstatus bearbeiten",
       "number": "Aufgabenstatus | Aufgabenstatus",
       "new_task_status": "Hinzufügen eines Aufgabenstatus",
@@ -1441,6 +1442,7 @@
     "task_types": {
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Aufgabentyps ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Aufgabentyp keine Aufgabe hat, die mit ihm verknüpft ist?",
+      "delete_blocked_by_automations": "Es gibt noch Statusautomatisierungen mit diesem Aufgabentyp, auch archivierte. Bearbeiten oder löschen Sie sie zuerst.",
       "delete_blocked_by_links": "Dieser Aufgabentyp wird noch im Zeitplan oder im Workflow einiger Produktionen verwendet. Beim Loslösen werden seine Zeitplandaten in allen Produktionen gelöscht.",
       "delete_blocked_by_tasks": "Es gibt noch Aufgaben mit diesem Aufgabentyp. Löschen Sie sie oder weisen Sie sie neu zu, bevor Sie ihn entfernen.",
       "delete_force": "Loslösen und löschen",
@@ -2025,6 +2027,7 @@
       "new_status_automation": "Statusautomatisierung hinzufügen",
       "production_description": "Eine Automatisierung ändert den Status einer Aufgabe oder die nächste Aufgabe, wenn ein Status gesetzt wird.",
       "run_for_selection": "Führen Sie die Statusautomatisierung für ausgewählte Aufgaben aus:",
+      "save_refused": "Diese Automatisierung kann so nicht gespeichert werden.",
       "title": "Statusautomatisierungen",
       "to_status": "auf",
       "wrong_automation": "In dieser Produktion verwendet jede Bedingung einen Aufgabentyp, der nach dem angewendeten Aufgabentyp kommt. Deren Statusänderungen lösen diese Automatisierung nicht aus, um Endlosschleifen zu vermeiden: Sie hat keine Wirkung.",
