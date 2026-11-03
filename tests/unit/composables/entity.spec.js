@@ -1,13 +1,16 @@
-import { flushPromises, mount } from '@vue/test-utils'
-import { computed, defineComponent, onMounted, ref } from 'vue'
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
+import { computed, defineComponent, nextTick, onMounted, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 // Pre-load the real store to avoid a circular-import race from the modules.
 import '@/lib/auth'
 
 import { useEntity } from '@/composables/entity'
+import { parseSimpleDate } from '@/lib/time'
+
+enableAutoUnmount(afterEach)
 
 const entities = [{ id: 'entity-0' }, { id: 'entity-1' }, { id: 'entity-2' }]
 
@@ -15,7 +18,11 @@ const mountEntity = async ({
   type = 'shot',
   path = '/productions/production-1/episodes/episode-1/shots/entity-1',
   list = { key: 'production-1/episode-1', isLoading: false },
+  entity = entities[1],
+  tasks = [],
   getters = {},
+  actions = {},
+  init = () => {},
   loadList
 } = {}) => {
   const router = createRouter({
@@ -25,6 +32,8 @@ const mountEntity = async ({
         path: '/productions/:production_id/episodes/:episode_id/:section/:id',
         component: { template: '<div />' }
       },
+      // The entity pages name the id of their entity after its type.
+      { path: '/shots/:shot_id', component: { template: '<div />' } },
       { path: '/:path(.*)*', component: { template: '<div />' } }
     ]
   })
@@ -32,7 +41,7 @@ const mountEntity = async ({
   // The shots store records the scope of its last list load, and raises its
   // loading flag meanwhile.
   const store = createStore({
-    state: { list },
+    state: { list, nbSelectedTasks: 0, tasks },
     mutations: {
       LOAD_START: (state, key) => {
         state.list = { key, isLoading: true }
@@ -42,6 +51,14 @@ const mountEntity = async ({
       },
       MARK_PARTIAL: state => {
         state.list = { ...state.list, key: `${state.list.key}#partial` }
+      },
+      SET_NB_SELECTED_TASKS: (state, nbSelectedTasks) => {
+        state.nbSelectedTasks = nbSelectedTasks
+      },
+      UPDATE_TASK: (state, changes) => {
+        state.tasks = state.tasks.map(task =>
+          task.id === changes.id ? { ...task, ...changes } : task
+        )
       }
     },
     getters: {
@@ -52,29 +69,30 @@ const mountEntity = async ({
       isCurrentUserProductionSupervisor: () => false,
       isShotsLoading: state => state.list.isLoading,
       isTVShow: () => true,
-      nbSelectedTasks: () => 0,
+      nbSelectedTasks: state => state.nbSelectedTasks,
       organisation: () => ({}),
       shotsLoadingKey: state => state.list.key,
-      taskMap: () => new Map(),
+      taskMap: state => new Map(state.tasks.map(task => [task.id, task])),
       taskTypeMap: () => new Map(),
       user: () => ({ departments: [] }),
       ...getters
-    }
+    },
+    actions
   })
-  let paths
+  let api
   const Host = defineComponent({
     setup() {
       // As the pages: the entity shows once their init has found it.
       const currentEntity = ref(null)
-      paths = useEntity({
+      api = useEntity({
         type,
         currentEntity,
         entityList: computed(() => entities),
-        init: () => {},
+        init,
         loadList: loadList && (() => loadList(store))
       })
       onMounted(() => {
-        currentEntity.value = entities[1]
+        currentEntity.value = entity
       })
       return () => null
     }
@@ -83,13 +101,59 @@ const mountEntity = async ({
   await flushPromises()
   const neighbor = path => path.value?.params[`${type}_id`] ?? null
   return {
+    api,
+    router,
+    store,
     neighbors: () => [
-      neighbor(paths.previousEntityPath),
-      neighbor(paths.nextEntityPath)
+      neighbor(api.previousEntityPath),
+      neighbor(api.nextEntityPath)
     ],
-    nextEntityPath: () => paths.nextEntityPath.value
+    nextEntityPath: () => api.nextEntityPath.value
   }
 }
+
+const taskTypes = [
+  {
+    id: 'animation',
+    name: 'Animation',
+    color: '#ff0000',
+    department_id: 'anim',
+    priority: 2
+  },
+  {
+    id: 'layout',
+    name: 'Layout',
+    color: '#00ff00',
+    department_id: 'layout',
+    priority: 1
+  }
+]
+
+const taskGetters = (overrides = {}) => ({
+  currentProduction: () => ({
+    id: 'production-1',
+    start_date: '2026-01-05T00:00:00',
+    end_date: '2026-06-30T00:00:00'
+  }),
+  getTaskTypePriority: () => taskTypeId =>
+    taskTypes.find(({ id }) => id === taskTypeId)?.priority,
+  // An estimation of 480 minutes makes one day.
+  organisation: () => ({ hours_by_day: 8 }),
+  taskTypeMap: () =>
+    new Map(taskTypes.map(taskType => [taskType.id, taskType])),
+  ...overrides
+})
+
+const task = (id, fields = {}) => ({ id, task_type_id: 'animation', ...fields })
+
+const withTasks = tasks => ({
+  entity: { id: 'entity-1', tasks: tasks.map(({ id }) => id) },
+  tasks
+})
+
+const day = date => date.format('YYYY-MM-DD')
+
+const span = item => [day(item.startDate), day(item.endDate)]
 
 describe('useEntity', () => {
   describe('previous and next entities', () => {
@@ -186,6 +250,271 @@ describe('useEntity', () => {
         loadList
       })
       expect(loadList).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('tasks', () => {
+    it('lists the known tasks of the entity in task type order', async () => {
+      const { api } = await mountEntity({
+        entity: {
+          id: 'entity-1',
+          tasks: ['animation-task', 'deleted-task', 'layout-task']
+        },
+        tasks: [
+          task('animation-task'),
+          task('layout-task', { task_type_id: 'layout' })
+        ],
+        getters: taskGetters()
+      })
+      expect(api.currentTasks.value.map(({ id }) => id)).toEqual([
+        'layout-task',
+        'animation-task'
+      ])
+    })
+
+    it('selects a task, and unselects it on a second click', async () => {
+      const clearSelectedTasks = vi.fn()
+      const addSelectedTask = vi.fn()
+      const { api } = await mountEntity({
+        actions: { addSelectedTask, clearSelectedTasks }
+      })
+      const animationTask = task('animation-task')
+
+      api.onTaskSelected(animationTask)
+      expect(clearSelectedTasks).toHaveBeenCalledTimes(1)
+      expect(addSelectedTask).toHaveBeenCalledWith(
+        expect.anything(),
+        animationTask
+      )
+      expect(api.currentTask.value).toEqual(animationTask)
+
+      api.onTaskSelected(animationTask)
+      expect(clearSelectedTasks).toHaveBeenCalledTimes(2)
+      expect(addSelectedTask).toHaveBeenCalledTimes(1)
+      expect(api.currentTask.value).toBeNull()
+    })
+
+    it('forgets the task once the action panel clears the selection', async () => {
+      const { api, store } = await mountEntity({
+        actions: { addSelectedTask: () => {}, clearSelectedTasks: () => {} }
+      })
+      api.onTaskSelected(task('animation-task'))
+      store.commit('SET_NB_SELECTED_TASKS', 1)
+      await nextTick()
+      expect(api.currentTask.value).not.toBeNull()
+
+      store.commit('SET_NB_SELECTED_TASKS', 0)
+      await nextTick()
+      expect(api.currentTask.value).toBeNull()
+    })
+  })
+
+  describe('schedule', () => {
+    it('draws a bar for each dated task of a known task type', async () => {
+      const { api } = await mountEntity({
+        ...withTasks([
+          task('planned', {
+            start_date: '2026-03-02',
+            due_date: '2026-03-06',
+            estimation: 960
+          }),
+          task('started', {
+            real_start_date: '2026-03-09',
+            end_date: '2026-03-10'
+          }),
+          // Three days of estimation from a Monday: to the Wednesday.
+          task('estimated', { start_date: '2026-03-16', estimation: 1440 }),
+          // A due date before the start: the bar lasts a day.
+          task('reversed', { start_date: '2026-03-20', due_date: '2026-03-19' }),
+          task('undated', { estimation: 480 }),
+          task('orphan', { start_date: '2026-03-02', task_type_id: 'deleted' })
+        ]),
+        getters: taskGetters()
+      })
+
+      const [root] = api.scheduleItems.value
+      expect(root.children.map(child => [child.id, ...span(child)])).toEqual([
+        ['planned', '2026-03-02', '2026-03-06'],
+        ['started', '2026-03-09', '2026-03-10'],
+        ['estimated', '2026-03-16', '2026-03-18'],
+        ['reversed', '2026-03-20', '2026-03-21']
+      ])
+      expect(root.children[0]).toMatchObject({
+        name: 'Animation',
+        color: '#ff0000',
+        man_days: 960,
+        parentElement: root
+      })
+      expect(span(root)).toEqual(['2026-03-02', '2026-03-21'])
+      expect(root.man_days).toBe(2400)
+      // Two months of margin around the bars.
+      expect(day(api.tasksStartDate.value)).toBe('2026-01-01')
+      expect(day(api.tasksEndDate.value)).toBe('2026-05-20')
+    })
+
+    it('spans the production while no task is dated', async () => {
+      const { api } = await mountEntity({
+        ...withTasks([task('undated')]),
+        getters: taskGetters()
+      })
+      expect(api.scheduleItems.value[0].children).toEqual([])
+      expect(day(api.tasksStartDate.value)).toBe('2026-01-05')
+      expect(day(api.tasksEndDate.value)).toBe('2026-06-30')
+    })
+
+    it.each([
+      ['a manager', { isCurrentUserProductionManager: () => true }, true],
+      [
+        'a supervisor of every department',
+        { isCurrentUserProductionSupervisor: () => true },
+        true
+      ],
+      [
+        'a supervisor of the department of the task',
+        {
+          isCurrentUserProductionSupervisor: () => true,
+          user: () => ({ departments: ['anim'] })
+        },
+        true
+      ],
+      [
+        'a supervisor of another department',
+        {
+          isCurrentUserProductionSupervisor: () => true,
+          user: () => ({ departments: ['layout'] })
+        },
+        false
+      ],
+      ['an artist', {}, false]
+    ])('lets %s move the bars: %s', async (_, roleGetters, editable) => {
+      const { api } = await mountEntity({
+        ...withTasks([task('planned', { start_date: '2026-03-02' })]),
+        getters: taskGetters(roleGetters)
+      })
+      expect(api.scheduleItems.value[0].children[0].editable).toBe(editable)
+    })
+
+    // Every task change in the store rebuilds the bars: a change the bars do
+    // not show keeps them, and the widget is not drawn again.
+    it('keeps the bars while no date or estimation changes', async () => {
+      const { api, store } = await mountEntity({
+        ...withTasks([
+          task('planned', { start_date: '2026-03-02', due_date: '2026-03-06' })
+        ]),
+        getters: taskGetters()
+      })
+      const bars = api.scheduleItems.value
+
+      store.commit('UPDATE_TASK', { id: 'planned', task_status_id: 'wip' })
+      await nextTick()
+      expect(api.scheduleItems.value).toBe(bars)
+
+      store.commit('UPDATE_TASK', { id: 'planned', due_date: '2026-03-13' })
+      await nextTick()
+      expect(api.scheduleItems.value).not.toBe(bars)
+      expect(span(api.scheduleItems.value[0].children[0])).toEqual([
+        '2026-03-02',
+        '2026-03-13'
+      ])
+    })
+
+    describe('a bar change', () => {
+      const bar = fields => ({
+        id: 'planned',
+        startDate: parseSimpleDate('2026-03-02'),
+        endDate: parseSimpleDate('2026-03-04'),
+        parentElement: { daysOff: [] },
+        ...fields
+      })
+
+      const mountSchedule = async updateTask =>
+        (await mountEntity({ actions: { updateTask }, getters: taskGetters() }))
+          .api
+
+      it('saves the dates of the bar', async () => {
+        const updateTask = vi.fn()
+        const api = await mountSchedule(updateTask)
+        const item = bar()
+
+        api.saveTaskScheduleItem(item)
+
+        expect(item.man_days).toBe(0)
+        expect(updateTask).toHaveBeenCalledWith(expect.anything(), {
+          taskId: 'planned',
+          data: {
+            estimation: undefined,
+            start_date: '2026-03-02',
+            due_date: '2026-03-04'
+          }
+        })
+      })
+
+      // Three days of estimation from a Monday, the Tuesday off: to the
+      // Thursday.
+      it('stretches an estimated bar over its business days', async () => {
+        const updateTask = vi.fn()
+        const api = await mountSchedule(updateTask)
+        const item = bar({
+          estimation: 1440,
+          parentElement: { daysOff: [{ date: '2026-03-03' }] }
+        })
+
+        api.saveTaskScheduleItem(item)
+
+        expect(day(item.endDate)).toBe('2026-03-05')
+        expect(item.man_days).toBe(1440)
+        expect(updateTask).toHaveBeenCalledWith(expect.anything(), {
+          taskId: 'planned',
+          data: {
+            estimation: 1440,
+            start_date: '2026-03-02',
+            due_date: '2026-03-05'
+          }
+        })
+      })
+
+      it('saves nothing for a bar without dates', async () => {
+        const updateTask = vi.fn()
+        const api = await mountSchedule(updateTask)
+
+        api.saveTaskScheduleItem(bar({ startDate: null, endDate: null }))
+
+        expect(updateTask).not.toHaveBeenCalled()
+      })
+
+      it('logs a save Zou refuses', async () => {
+        const error = new Error('refused')
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const api = await mountSchedule(() => Promise.reject(error))
+
+        api.saveTaskScheduleItem(bar())
+        await flushPromises()
+
+        expect(consoleError).toHaveBeenCalledWith(error)
+        consoleError.mockRestore()
+      })
+    })
+  })
+
+  describe('route', () => {
+    it('reloads the page for another entity of the URL only', async () => {
+      const init = vi.fn()
+      const { api, router } = await mountEntity({
+        path: '/shots/entity-1',
+        init
+      })
+
+      await router.push('/shots/entity-1?section=schedule')
+      await nextTick()
+      expect(init).not.toHaveBeenCalled()
+      expect(api.currentSection.value).toBe('schedule')
+
+      await router.push('/shots/entity-2')
+      await nextTick()
+      expect(init).toHaveBeenCalledTimes(1)
+      expect(api.currentSection.value).toBe('infos')
     })
   })
 })
