@@ -146,4 +146,18 @@ onMounted(() => nameField.value?.focus())
   letter-spacing: -0.01em;
   margin-bottom: 0.5em;
 }
+
+@media screen and (max-width: 768px) {
+  .identity-card {
+    padding: 2em 1.5em;
+  }
+}
+
+// iOS zooms the page on a field under 16px
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
+  .identity-form :deep(input) {
+    font-size: 16px;
+  }
+}
 </style>

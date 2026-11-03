@@ -51,3 +51,8 @@ export const createFrameRenderer = (canvas, video) =>
 export const supportsVideoFrameCallback = () =>
   typeof HTMLVideoElement !== 'undefined' &&
   'requestVideoFrameCallback' in HTMLVideoElement.prototype
+
+// Firefox sometimes reports a mediaTime up to seconds ahead of the playback,
+// for one tick. The margin leaves room for the normal lag of currentTime.
+export const isPresentationAhead = (mediaTime, currentTime, frameDuration) =>
+  mediaTime - currentTime > Math.max(0.25, 2 * frameDuration)

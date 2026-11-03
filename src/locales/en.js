@@ -1331,6 +1331,7 @@ export default {
       create_new: 'Create a new link',
       expiration: 'Expiration date (optional)',
       can_comment: 'Allow comments',
+      can_download: 'Allow .zip download',
       generate: 'Generate a new link',
       copy: 'Copy link',
       open: 'Open link in a new tab',
@@ -1351,6 +1352,7 @@ export default {
       expires: 'Expires',
       no_expiration: 'No expiration',
       comments_enabled: 'Comments enabled',
+      download_enabled: '.zip download enabled',
       comments_disabled: 'Comments disabled',
       error: 'An error occurred while creating the share link.'
     },

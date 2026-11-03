@@ -191,8 +191,8 @@ import { useStore } from 'vuex'
 
 import { useFullScreenContainer } from '@/composables/fullScreen'
 import { replaceTimeWithTimecode } from '@/lib/render'
-import { DEFAULT_FPS } from '@/lib/video'
 import stringHelpers from '@/lib/string'
+import { DEFAULT_FPS } from '@/lib/video'
 import playlistsApi from '@/store/api/playlists'
 import { LOAD_PEOPLE_END } from '@/store/mutation-types'
 
@@ -1456,6 +1456,21 @@ onMounted(() => {
 
 // Responsive
 
+@media screen and (max-width: 1000px) {
+  .shared-comments-panel {
+    flex-basis: 320px;
+    width: 320px;
+  }
+}
+
+// iOS zooms the page on a field under 16px
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
+  .comment-input {
+    font-size: 16px;
+  }
+}
+
 @media screen and (max-width: 768px) {
   .comments-list {
     padding: 0.4em 0.6em 1em;
@@ -1511,15 +1526,6 @@ onMounted(() => {
 
   .post-form {
     padding: 0.6em;
-  }
-
-  .shared-comments-panel {
-    border-left: 0;
-    flex: 0 0 auto;
-    inset: 0;
-    position: absolute;
-    width: 100%;
-    z-index: 10;
   }
 }
 </style>

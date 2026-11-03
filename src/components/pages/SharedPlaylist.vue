@@ -28,6 +28,7 @@
         :token="token"
         :guest-id="guestId || ''"
         :can-comment="shareLink?.can_comment || false"
+        :can-download="shareLink?.can_download || false"
         @logout="logoutGuest"
       />
     </div>
@@ -40,13 +41,12 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
+import crisp from '@/lib/crisp'
 import {
   TOGGLE_DARK_THEME,
   USER_LOGIN,
   USER_LOGOUT
 } from '@/store/mutation-types'
-
-import crisp from '@/lib/crisp'
 
 import SharedPlaylistIdentityCard from '@/components/pages/SharedPlaylistIdentityCard.vue'
 import SharedPlaylistPlayer from '@/components/players/players/SharedPlaylistPlayer.vue'
@@ -223,7 +223,15 @@ onBeforeUnmount(() => {
   display: flex;
   height: 100%;
   justify-content: center;
+  overflow-y: auto;
+  padding: 1em;
   width: 100%;
+
+  // a margin keeps the top of a card taller than a landscape phone in reach,
+  // which centering would cut off
+  > * {
+    margin: auto;
+  }
 }
 
 .shared-playlist {
