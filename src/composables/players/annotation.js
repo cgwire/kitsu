@@ -1616,6 +1616,9 @@ export const useAnnotation = ({
       clearModifications()
       clearTimeout(annotationToSave)
       notSaved.value = false
+      // The echo carries the time the server stores this batch, which can be
+      // long after the last change: a new text is saved when it loses focus.
+      markLastAnnotationTime()
       emit('annotation-changed', pendingSave)
     }
   }

@@ -1067,6 +1067,28 @@ describe('composables/annotation', () => {
       })
       wrapper.unmount()
     })
+
+    // A new text is saved once its textarea loses the focus, possibly long
+    // after it was added: the echo of that save passed the guard, and the
+    // player reloaded the canvas under the text being typed.
+    it('recognizes the echo of a batch sent long after the last change', () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      try {
+        vi.setSystemTime(new Date('2026-11-03T10:00:00Z'))
+        const { api, wrapper } = mountAnnotation()
+        api.addToAdditions(createSerializableObject())
+
+        vi.setSystemTime(new Date('2026-11-03T10:00:10Z'))
+        api.startAnnotationSaving({ id: 'p-1' }, [])
+        api.endAnnotationSaving()
+
+        // Zou stamps the echo with the time it stored the batch.
+        expect(api.isWriting('2026-11-03T10:00:11')).toBe(true)
+        wrapper.unmount()
+      } finally {
+        vi.useRealTimers()
+      }
+    })
   })
 
   describe('onWindowsClosed', () => {
