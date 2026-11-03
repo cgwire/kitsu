@@ -1819,6 +1819,7 @@ const {
   removeObjectFromCanvas,
   updateObjectInCanvas,
   isWriting,
+  isTypingText,
   getNewAnnotations,
   loadSingleAnnotation,
   loadSingleAnnotationComparison,
@@ -4868,8 +4869,10 @@ const onPreviewFileAnnotationUpdate = eventData => {
       taskId: currentPreview.value.task_id
     })
     .then(preview => {
+      // A reload under a text being typed ends the typing.
       if (
         !notSaved.value &&
+        !isTypingText() &&
         currentPreview.value?.id === eventData.preview_file_id &&
         !isWriting(eventData.updated_at)
       ) {

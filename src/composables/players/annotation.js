@@ -493,6 +493,15 @@ export const useAnnotation = ({
     return lastAnnotationTime.value >= date
   }
 
+  // fabric keeps a text in editing when the user clicks outside the canvas:
+  // only the focus in its textarea tells that the text is being typed.
+  const isTypingText = () => {
+    const text = fabricCanvas.value?.getActiveObject()
+    return Boolean(
+      text?.isEditing && text.hiddenTextarea === document.activeElement
+    )
+  }
+
   // Annotations
 
   // Serialize a selection child with its ABSOLUTE transform: serialize()
@@ -940,6 +949,15 @@ export const useAnnotation = ({
     if (event.target?.canvas === fabricCanvas.value) onObjectModified(event)
   }, 400)
 
+  // A text left for the comment box no longer keeps the reloads away (see
+  // isTypingText): its last keystrokes start their save as it loses the
+  // focus, before a reload can drop them.
+  const onTextEditingEntered = ({ target }) => {
+    target.hiddenTextarea?.addEventListener('blur', () =>
+      onTextChangedDebounced.flush()
+    )
+  }
+
   const onWindowsClosed = event => {
     if (notSaved.value) {
       const confirmationMessage = 'Your annotations are not saved yet.'
@@ -1222,6 +1240,7 @@ export const useAnnotation = ({
   const configureCanvas = () => {
     fabricCanvas.value.off('object:moved', onObjectModified)
     fabricCanvas.value.off('text:changed', onObjectModified)
+    fabricCanvas.value.off('text:editing:entered', onTextEditingEntered)
     fabricCanvas.value.off('object:modified', onObjectModified)
     fabricCanvas.value.off('object:added', onObjectAdded)
     fabricCanvas.value.off('erasing:end', onErasingEnd)
@@ -1233,6 +1252,7 @@ export const useAnnotation = ({
     fabricCanvas.value.on('object:moved', onObjectModified)
     fabricCanvas.value.on('object:modified', onObjectModified)
     fabricCanvas.value.on('text:changed', onTextChangedDebounced)
+    fabricCanvas.value.on('text:editing:entered', onTextEditingEntered)
     fabricCanvas.value.on('object:added', onObjectAdded)
     fabricCanvas.value.on('erasing:end', onErasingEnd)
     fabricCanvas.value.on('mouse:down', initializeMouseDrawing)
@@ -1831,6 +1851,7 @@ export const useAnnotation = ({
     addToUpdatesSerializedObject,
     clearModifications,
     isWriting,
+    isTypingText,
 
     // Annotations
     getNewAnnotations,

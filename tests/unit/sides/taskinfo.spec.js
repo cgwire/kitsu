@@ -1710,6 +1710,73 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  // The panel asks the player again once the refresh is back: a text may be
+  // typed by then, and reloading the canvas under it ended the typing.
+  describe('preview-file:annotation-update', () => {
+    const previews = [
+      { id: 'preview-1', revision: 1, extension: 'mp4', previews: ['p-1'] }
+    ]
+
+    const emitAnnotationUpdate = async isValidPreviewModification => {
+      const player = {
+        isValidPreviewModification,
+        loadAnnotation: vi.fn(),
+        reloadAnnotations: vi.fn()
+      }
+      const { socket, store } = await mountPanel({
+        previews,
+        stubs: {
+          PreviewPlayer: {
+            props: ['canComment', 'fps', 'previews', 'readOnly'],
+            template: '<div />',
+            data: () => ({
+              currentPreview: { id: 'preview-1', task_id: TASK_ID },
+              notSaved: false
+            }),
+            methods: { focus: () => {}, setCurrentFrame: () => {}, ...player }
+          }
+        }
+      })
+      const [, onRemoteAnnotationUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'preview-file:annotation-update'
+      )
+      onRemoteAnnotationUpdate({
+        preview_file_id: 'preview-1',
+        updated_at: '2026-11-03T10:00:00'
+      })
+      await flushPromises()
+      return { player, store }
+    }
+
+    it('reloads the annotations another user saved', async () => {
+      const { player, store } = await emitAnnotationUpdate(() => true)
+
+      expect(store.dispatch).toHaveBeenCalledWith('refreshPreview', {
+        previewId: 'preview-1',
+        taskId: TASK_ID
+      })
+      expect(player.reloadAnnotations).toHaveBeenCalled()
+      expect(player.loadAnnotation).toHaveBeenCalled()
+    })
+
+    it('keeps the canvas when the player refuses the refreshed update', async () => {
+      const isValid = vi.fn().mockReturnValueOnce(true).mockReturnValue(false)
+      const { player, store } = await emitAnnotationUpdate(isValid)
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        'refreshPreview',
+        expect.anything()
+      )
+      expect(isValid).toHaveBeenCalledTimes(2)
+      expect(isValid).toHaveBeenLastCalledWith(
+        'preview-1',
+        '2026-11-03T10:00:00'
+      )
+      expect(player.reloadAnnotations).not.toHaveBeenCalled()
+      expect(player.loadAnnotation).not.toHaveBeenCalled()
+    })
+  })
+
   describe('full screen', () => {
     const previews = [
       { id: 'preview-1', revision: 1, extension: 'png', previews: ['p-1'] }

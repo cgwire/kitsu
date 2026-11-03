@@ -754,6 +754,7 @@ const {
   isShapeMode,
   isEraserModeOn,
   isWriting,
+  isTypingText,
   getNewAnnotations,
   loadSingleAnnotation,
   loadSingleAnnotationComparison,
@@ -2396,9 +2397,11 @@ const onRevisionPreviewDropped = ({ previousIndex, newIndex }) => {
   })
 }
 
+// A reload under a text being typed ends the typing.
 const isValidPreviewModification = (previewId, updatedAt) => {
   return (
     !notSaved.value &&
+    !isTypingText() &&
     currentPreview.value &&
     previewId === currentPreview.value.id &&
     !isWriting(updatedAt)
