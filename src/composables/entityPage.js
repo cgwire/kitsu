@@ -304,12 +304,6 @@ export const useEntityPage = ({
     }
   }
 
-  const removeSearchQuery = searchQuery => {
-    store
-      .dispatch(`remove${entityTypeName}Search`, searchQuery)
-      .catch(console.error)
-  }
-
   // Scroll and scope
   // --------------------------------------------------------------------------
 
@@ -869,7 +863,6 @@ export const useEntityPage = ({
     onRestoreClicked,
     openEditModal,
     onSearchChange,
-    removeSearchQuery,
     renderImport,
     resetImport,
     saveScrollPosition,

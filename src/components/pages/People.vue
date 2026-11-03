@@ -59,7 +59,6 @@
       <search-query-list
         :queries="peopleSearchQueries"
         type="people"
-        @remove-search="removeSearchQuery"
         v-if="!isPeopleLoading"
       />
     </div>
@@ -476,10 +475,6 @@ const saveSearchQuery = async searchQuery => {
   } finally {
     loading.savingSearch = false
   }
-}
-
-const removeSearchQuery = searchQuery => {
-  store.dispatch('removePeopleSearch', searchQuery).catch(console.error)
 }
 
 // Unset filters stay out of the URL: the router drops undefined values.

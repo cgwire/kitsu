@@ -89,11 +89,7 @@
             class="query-list collapsible"
             v-show="!isActiveTab('productivity')"
           >
-            <search-query-list
-              :queries="todoSearchQueries"
-              type="todo"
-              @remove-search="removeSearchQuery"
-            />
+            <search-query-list :queries="todoSearchQueries" type="todo" />
           </div>
         </div>
 
@@ -637,14 +633,6 @@ const saveSearchQuery = async searchQuery => {
     console.error(error)
   }
   loading.savingSearch = false
-}
-
-const removeSearchQuery = async searchQuery => {
-  try {
-    await store.dispatch('removeTodoSearch', searchQuery)
-  } catch (error) {
-    console.error(error)
-  }
 }
 
 const setTodoListScrollPosition = position =>

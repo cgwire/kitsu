@@ -119,7 +119,6 @@
               <search-query-list
                 :queries="personTaskSearchQueries"
                 type="person"
-                @remove-search="removeSearchQuery"
               />
             </div>
           </div>
@@ -881,12 +880,6 @@ const saveSearchQuery = searchQuery => {
     .finally(() => {
       loading.savingSearch = false
     })
-}
-
-const removeSearchQuery = searchQuery => {
-  store.dispatch('removePersonTasksSearch', searchQuery).catch(err => {
-    if (err) console.error(err)
-  })
 }
 
 const setPersonTasksScrollPosition = position =>

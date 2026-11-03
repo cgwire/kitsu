@@ -323,7 +323,6 @@
             :queries="breakdownSearchQueries"
             type="breakdown"
             :production-id="currentProduction?.id"
-            @remove-search="removeSearchQuery"
           />
         </div>
 
@@ -1398,10 +1397,6 @@ const getCsvEntries = () =>
 
 const exportViewToCsv = () => {
   csv.buildCsvFile(getCsvFileName(), [getCsvFileHeaders(), ...getCsvEntries()])
-}
-
-const removeSearchQuery = searchQuery => {
-  store.dispatch('removeBreakdownSearch', searchQuery).catch(console.error)
 }
 
 const saveSearchQuery = async searchQuery => {

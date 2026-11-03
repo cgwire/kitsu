@@ -89,7 +89,6 @@
               :queries="shotSearchQueries"
               type="shot"
               :production-id="currentProduction?.id"
-              @remove-search="removeSearchQuery"
               v-if="!isShotsLoading && !initialLoading"
             />
           </div>
@@ -489,7 +488,6 @@ const {
   onSearchChange,
   openEditModal: onEditClicked,
   parsedCSV,
-  removeSearchQuery,
   renderColumns,
   renderImport,
   resetImport,

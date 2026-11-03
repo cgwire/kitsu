@@ -271,7 +271,6 @@
             :queries="searchQueries"
             type="taskType"
             :production-id="currentProduction?.id"
-            @remove-search="removeSearchQuery"
           />
         </div>
 
@@ -1207,10 +1206,6 @@ const saveSearchQuery = searchQuery => {
     .finally(() => {
       loading.savingSearch = false
     })
-}
-
-const removeSearchQuery = searchQuery => {
-  store.dispatch('removeTaskSearch', searchQuery).catch(console.error)
 }
 
 const updateUrlParams = () => {

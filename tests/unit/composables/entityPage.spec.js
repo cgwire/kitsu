@@ -157,7 +157,8 @@ describe('useEntityPage', () => {
       expect(page.loading.savingSearch).toBe(false)
     })
 
-    it('logs a search Zou refuses to save or to remove', async () => {
+    // The search list removes its searches itself.
+    it('logs a search Zou refuses to save', async () => {
       const error = new Error('refused')
       const consoleError = vi
         .spyOn(console, 'error')
@@ -166,13 +167,9 @@ describe('useEntityPage', () => {
       store.dispatch.mockImplementation(() => Promise.reject(error))
 
       await page.saveSearchQuery('mood=happy')
-      page.removeSearchQuery({ id: 'search-1' })
       await flushPromises()
 
-      expect(dispatched(store, 'removeShotSearch')).toEqual([
-        ['removeShotSearch', { id: 'search-1' }]
-      ])
-      expect(consoleError.mock.calls).toEqual([[error], [error]])
+      expect(consoleError.mock.calls).toEqual([[error]])
       expect(page.loading.savingSearch).toBe(false)
       consoleError.mockRestore()
     })

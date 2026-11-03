@@ -177,6 +177,7 @@
       is-danger
       :is-loading="loading.remove"
       :is-error="errors.remove"
+      :error-text="removeErrorText"
       :text="removeText"
       @cancel="modals.remove = false"
       @confirm="removeSearch"
@@ -228,6 +229,13 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
 import EditSearchFilterGroupModal from '@/components/modals/EditSearchFilterGroupModal.vue'
 
+// The lists whose search removal action is not remove<Type>Search.
+const REMOVE_SEARCH_ACTIONS = {
+  person: 'removePersonTasksSearch',
+  sequenceStat: 'removeSequenceSearch',
+  taskType: 'removeTaskSearch'
+}
+
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -258,8 +266,6 @@ const props = defineProps({
     default: null
   }
 })
-
-const emit = defineEmits(['remove-search'])
 
 const groupToEdit = ref({})
 const groupToRemove = ref({})
@@ -356,6 +362,12 @@ const removeText = computed(() => {
   }
 })
 
+const removeErrorText = computed(() =>
+  searchQueryToRemove.value.id
+    ? t('main.remove_search_query_error')
+    : t('main.remove_search_filter_group_error')
+)
+
 const setQueryPaths = () => {
   props.queries.forEach(query => {
     queryPaths.value[query.id] = queryRoute(query)
@@ -430,32 +442,35 @@ const confirmEditSearch = async searchFilter => {
 const confirmRemoveSearch = searchQuery => {
   searchQueryToRemove.value = searchQuery
   groupToRemove.value = {}
+  errors.remove = false
   modals.remove = true
-}
-
-const removeSearch = () => {
-  if (searchQueryToRemove.value.id) {
-    emit('remove-search', searchQueryToRemove.value)
-  } else {
-    removeGroup()
-  }
-  modals.remove = false
-  searchQueryToRemove.value = {}
-  groupToRemove.value = {}
 }
 
 const confirmRemoveGroup = filterGroup => {
   groupToRemove.value = filterGroup
   searchQueryToRemove.value = {}
+  errors.remove = false
   modals.remove = true
 }
 
-const removeGroup = async () => {
+// The confirmation stays open until the removal ends, with its error when it
+// fails.
+const removeSearch = async () => {
+  const type = stringHelpers.capitalize(props.type)
+  loading.remove = true
+  errors.remove = false
   try {
-    await store.dispatch(
-      `remove${stringHelpers.capitalize(props.type)}SearchFilterGroup`,
-      groupToRemove.value
-    )
+    if (searchQueryToRemove.value.id) {
+      await store.dispatch(
+        REMOVE_SEARCH_ACTIONS[props.type] || `remove${type}Search`,
+        searchQueryToRemove.value
+      )
+    } else {
+      await store.dispatch(
+        `remove${type}SearchFilterGroup`,
+        groupToRemove.value
+      )
+    }
     modals.remove = false
   } catch (err) {
     console.error(err)

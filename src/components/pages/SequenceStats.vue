@@ -56,7 +56,6 @@
         :queries="sequenceSearchQueries"
         type="sequenceStat"
         :production-id="currentProduction?.id"
-        @remove-search="removeSearchQuery"
       />
     </div>
 
@@ -210,10 +209,6 @@ const saveSearchQuery = async searchQuery => {
     console.error(err)
   }
   isSavingSearch.value = false
-}
-
-const removeSearchQuery = searchQuery => {
-  store.dispatch('removeSequenceSearch', searchQuery).catch(console.error)
 }
 
 const exportStatisticsToCsv = () => {
