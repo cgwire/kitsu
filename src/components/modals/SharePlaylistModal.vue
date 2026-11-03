@@ -158,38 +158,38 @@
           />
         </div>
         <div class="create-card" v-else>
-          <h3 class="create-card-title">
+          <h3 class="subtitle">
             {{ $t('playlists.share_modal.create_new') }}
           </h3>
           <div class="create-form">
-            <div class="field">
-              <checkbox
-                :toggle="true"
-                :label="$t('playlists.share_modal.can_comment')"
-                v-model="canComment"
-              />
-            </div>
-            <div class="field">
-              <label class="label">
-                {{ $t('playlists.share_modal.expiration') }}
-              </label>
-              <date-field
-                can-delete
-                is-dark
-                :min-date="tomorrow"
-                v-model="expirationDate"
-              />
-            </div>
+            <date-field
+              can-delete
+              :label="$t('playlists.share_modal.expiration')"
+              :min-date="tomorrow"
+              v-model="expirationDate"
+            />
+            <checkbox
+              :toggle="true"
+              :label="$t('playlists.share_modal.can_comment')"
+              v-model="canComment"
+            />
             <div class="form-actions">
+              <p class="create-error" v-if="errors.create">
+                {{ $t('playlists.share_modal.error') }}
+              </p>
               <button-simple
+                is-primary
                 :is-loading="loading.create"
                 :text="$t('playlists.share_modal.generate')"
                 @click="createLink"
               />
+              <button
+                class="button is-link cancel-button"
+                @click="hideCreateForm"
+              >
+                {{ $t('main.cancel') }}
+              </button>
             </div>
-            <p class="create-error" v-if="errors.create">
-              {{ $t('playlists.share_modal.error') }}
-            </p>
           </div>
         </div>
       </div>
@@ -209,6 +209,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { CopyIcon, ExternalLinkIcon, SendIcon, XIcon } from 'lucide-vue-next'
+import moment from 'moment-timezone'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 
@@ -244,6 +245,7 @@ const confirmingRevoke = ref(null)
 const isCreateFormVisible = ref(false)
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const DEFAULT_EXPIRATION_DAYS = 30
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const personMap = computed(() => store.getters.personMap)
@@ -373,6 +375,7 @@ const loadLinks = async () => {
 
 const showCreateForm = () => {
   errors.create = false
+  expirationDate.value = moment().add(DEFAULT_EXPIRATION_DAYS, 'days').toDate()
   isCreateFormVisible.value = true
 }
 
@@ -531,49 +534,43 @@ onMounted(() => {
   background: var(--background-alt);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 1.25em 1em 1em;
+  margin: 0 auto;
+  max-width: 340px;
+  padding: 1em;
+  text-align: center;
+
+  .subtitle {
+    margin-bottom: 1em;
+  }
 }
 
 .dark .create-card {
   background: var(--background);
 }
 
-.create-card-title {
-  color: var(--text);
-  font-size: 1.1em;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  margin: 0 0 1.25em;
-  text-align: center;
-  text-transform: uppercase;
-}
-
 .create-form {
-  align-items: center;
   display: flex;
   flex-direction: column;
   gap: 1em;
 
-  .field {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4em;
-    margin-bottom: 0;
-    text-align: center;
+  :deep(.label) {
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 0.4em;
+    margin-top: 0.75em;
   }
 
-  .field .label {
-    margin: 0;
+  :deep(.dp--input) {
+    text-align: center;
   }
 }
 
 .form-actions {
   align-items: center;
   display: flex;
+  flex-direction: column;
   gap: 0.6em;
-  justify-content: center;
-  margin-top: 0.5em;
+  margin-top: 0.75em;
 }
 
 .revoke-confirm {
@@ -597,8 +594,7 @@ onMounted(() => {
 .create-error {
   color: $red;
   font-size: 0.85em;
-  margin: 0.75em 0 0;
-  text-align: right;
+  margin: 0;
 }
 
 .close-row {
