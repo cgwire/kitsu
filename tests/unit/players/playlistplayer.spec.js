@@ -144,6 +144,7 @@ const mountPlayer = ({
               'setVolume'
             ],
             {
+              getCurrentFrame: () => 0,
               getCurrentTime: () => 0,
               getCurrentTimeRaw: () => 0,
               getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
@@ -1198,6 +1199,39 @@ describe('PlaylistPlayer.vue', () => {
     expect(comparisonViewer.props('entities')).toEqual([])
   })
 
+  // Firefox paints no frame for a second seek right after a first one: the
+  // comparison movie, paused on its own frame then sent to the frame of the
+  // main one, stayed a frame or two ahead.
+  it('pauses the comparison movie on the frame of the main one', async () => {
+    wrapper = mountPlayer({
+      entities: [comparedEntity('shot-1')],
+      taskTypeMap: comparedTaskTypeMap
+    })
+    await flushPromises()
+    wrapper
+      .findComponent({ name: 'PlayerComparisonBar' })
+      .vm.$emit('compare-clicked')
+    await flushPromises()
+    const playPause = () =>
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { code: 'Space', key: ' ' })
+      )
+    const main = wrapper.findComponent({ ref: 'raw-player' }).vm
+    main.isPlaying = true
+    playPause()
+    await flushPromises()
+    const comparison = wrapper.findComponent({ ref: 'raw-player-comparison' }).vm
+    main.getCurrentFrame = () => 627
+    comparison.pause = vi.fn()
+    comparison.setCurrentTimeRaw = vi.fn()
+
+    playPause()
+    await flushPromises()
+
+    expect(comparison.pause).toHaveBeenCalledWith(627)
+    expect(comparison.setCurrentTimeRaw).not.toHaveBeenCalled()
+  })
+
   describe('comparison movie of a picture', () => {
     const openComparison = async entities => {
       wrapper = mountPlayer({ entities, taskTypeMap: comparedTaskTypeMap })
@@ -1986,32 +2020,74 @@ describe('PlaylistPlayer.vue', () => {
       expect(rawPlayer.setCurrentTimeRaw).not.toHaveBeenCalledWith(frame / 25)
     })
 
-    // A pause moves the movie to the next frame boundary: past the last
-    // frame, that is the very end of the movie, where no drawing is found.
-    it('shows the drawing of the last frame once paused on it', async () => {
+    // A drawing is saved on frame * frameDuration, 0.0333 at 30 fps, which
+    // runs 0.001 s a frame behind the movie time: 50 s in, a step showed
+    // the drawing of 2 frames before.
+    it.each(['ArrowRight', 'ArrowLeft'])(
+      'shows the drawing of the frame reached on %s far into a movie',
+      async key => {
+        const canvas = await mountShowing({
+          ...movie,
+          fps: '30',
+          preview_file_duration: 60,
+          preview_file_annotations: [
+            drawingAt(1498 * 0.0333, 'before'),
+            drawingAt(1500 * 0.0333, 'reached')
+          ]
+        })
+        const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+        const step = () => rawPlayer.$emit('frame-update', 1500)
+        rawPlayer.goNextFrame = step
+        rawPlayer.goPreviousFrame = step
+        rawPlayer.getCurrentTime = () => 1500 / 30 + 0.001
+        canvas.add.mockClear()
+
+        await press(key)
+
+        expect(drawnIds(canvas)).toEqual(['reached'])
+      }
+    )
+
+    const togglePlayback = () =>
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { code: 'Space', key: ' ' })
+      )
+
+    // The viewer pauses on the frame on screen and sends it: the movie
+    // time can still read the frame before.
+    it('shows the drawing of the frame the movie pauses on', async () => {
       const canvas = await mountShowing(movie)
       const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
-      let time = 0
-      rawPlayer.getCurrentTime = () => time
-      rawPlayer.getCurrentTimeRaw = () => time
-      rawPlayer.setCurrentTimeRaw = value => {
-        time = value
-      }
+      rawPlayer.getCurrentTime = () => 2.69
+      rawPlayer.getCurrentTimeRaw = () => 2.69
+      rawPlayer.pause = () => rawPlayer.$emit('frame-update', 68)
       rawPlayer.isPlaying = true
-      const togglePlayback = () =>
-        window.dispatchEvent(
-          new KeyboardEvent('keydown', { code: 'Space', key: ' ' })
-        )
       togglePlayback()
       await flushPromises()
-      // Inside the last frame, from 2.72 to 2.76 s.
-      time = 2.74
       canvas.add.mockClear()
 
       togglePlayback()
       await flushPromises()
 
       expect(drawnIds(canvas)).toEqual(['last'])
+    })
+
+    // A second seek, to the next frame boundary, landed after the one of
+    // the viewer: the picture moved off the frame on the counter.
+    it('leaves the pause of the movie to its viewer', async () => {
+      await mountShowing(movie)
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      rawPlayer.pause = vi.fn()
+      rawPlayer.setCurrentTimeRaw = vi.fn()
+      rawPlayer.isPlaying = true
+      togglePlayback()
+      await flushPromises()
+
+      togglePlayback()
+      await flushPromises()
+
+      expect(rawPlayer.pause).toHaveBeenCalled()
+      expect(rawPlayer.setCurrentTimeRaw).not.toHaveBeenCalled()
     })
 
     // As in the preview player: loading the drawing would pause the movie.
