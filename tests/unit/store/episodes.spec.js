@@ -7,10 +7,17 @@ import { createStore } from 'vuex'
 // Importing the episodes module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
-vi.mock('@/store/api/shots', () => ({ default: { getEpisodes: vi.fn() } }))
+vi.mock('@/store/api/shots', async importOriginal => {
+  const { default: shotsApi } = await importOriginal()
+  return { default: { ...shotsApi, getEpisodes: vi.fn() } }
+})
+vi.mock('@/store/api/client', () => ({
+  default: { pdel: vi.fn(), pget: vi.fn(), ppost: vi.fn(), pput: vi.fn() }
+}))
 
 import shotsApi from '@/store/api/shots'
 import episodesStore from '@/store/modules/episodes'
+import client from '@/store/api/client'
 
 describe('Episodes store', () => {
   describe('LOAD_EPISODES_END with no episodes', () => {
@@ -699,5 +706,453 @@ describe('Episodes store, retake stats', () => {
     })
     expect(state.episodeValidationColumns).toEqual(['layout', 'anim'])
     expect(state.episodeRetakeStats).toEqual({})
+  })
+})
+
+describe('Episodes store, through a store', () => {
+  const production = { id: 'p1', name: 'Caminandes', descriptors: [] }
+
+  const buildStore = async (getters = {}, actions = {}) => {
+    vi.resetModules()
+    const { default: module } = await import('@/store/modules/episodes')
+    const store = createStore({
+      modules: { episodes: module },
+      getters: {
+        currentProduction: () => production,
+        people: () => [],
+        productionEpisodeTaskTypeIds: () => [],
+        taskMap: () => new Map(),
+        taskStatus: () => [],
+        taskStatusMap: () => new Map(),
+        taskTypeMap: () => new Map(),
+        ...getters
+      },
+      actions
+    })
+    return { module, store }
+  }
+
+  const loadEpisodes = (store, episodes) =>
+    store.commit('LOAD_EPISODES_END', { episodes, routeEpisodeId: null })
+
+  const names = list => list.map(({ name }) => name)
+
+  beforeEach(() => {
+    Object.values(client).forEach(fn => fn.mockReset())
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  test('shows the resolution column once an episode gets one', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: {} }])
+    client.pput.mockResolvedValueOnce({})
+
+    await store.dispatch('editEpisode', {
+      id: 'ep1',
+      name: 'E01',
+      data: { resolution: '1920x1080' }
+    })
+
+    expect(store.getters.isEpisodeResolution).toBe(true)
+  })
+  test('locks an edited episode until a while after its save', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: { fps: '24' } }])
+    let endSave
+    client.pput.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          endSave = resolve
+        })
+    )
+    const form = { id: 'ep1', name: 'E01 bis', data: { resolution: '' } }
+
+    const saving = store.dispatch('editEpisode', form)
+
+    const episode = store.getters.episodeMap.get('ep1')
+    expect(client.pput).toHaveBeenCalledWith('/api/data/entities/ep1', {
+      name: 'E01 bis',
+      description: undefined,
+      status: undefined,
+      data: { resolution: '' }
+    })
+    expect(episode).toMatchObject({
+      lock: 1,
+      name: 'E01 bis',
+      data: { fps: '24', resolution: '' }
+    })
+    expect(names(store.getters.displayedEpisodes)).toEqual(['E01 bis'])
+    endSave({})
+    await saving
+    expect(episode.lock).toBe(1)
+    vi.advanceTimersByTime(2000)
+    expect(episode.lock).toBe(0)
+  })
+
+  test('deletes an episode from every list', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [
+      { id: 'ep1', name: 'E01' },
+      { id: 'ep2', name: 'E02' }
+    ])
+    client.pdel.mockResolvedValueOnce()
+    const episode = { id: 'ep1', name: 'E01' }
+
+    expect(await store.dispatch('deleteEpisode', episode)).toBe(episode)
+
+    expect(client.pdel).toHaveBeenCalledWith(
+      '/api/data/episodes/ep1?force=true'
+    )
+    expect(names(store.getters.episodes)).toEqual(['E02'])
+    expect(names(store.getters.displayedEpisodes)).toEqual(['E02'])
+    expect(store.getters.displayedEpisodesLength).toBe(1)
+    expect(store.getters.episodeMap.has('ep1')).toBe(false)
+  })
+
+  test('creates an episode at its place in the lists', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [
+      { id: 'ep1', name: 'E01' },
+      { id: 'ep3', name: 'E03' }
+    ])
+    client.ppost.mockResolvedValueOnce({
+      id: 'ep2',
+      name: 'E02',
+      project_id: 'p1'
+    })
+
+    const episode = await store.dispatch('newEpisode', {
+      name: 'E02',
+      project_id: 'p1'
+    })
+
+    expect(client.ppost).toHaveBeenCalledWith(
+      '/api/data/projects/p1/episodes',
+      { name: 'E02', description: '', status: 'running', data: {} }
+    )
+    expect(episode).toMatchObject({
+      id: 'ep2',
+      production_id: 'p1',
+      tasks: [],
+      data: {}
+    })
+    expect(names(store.getters.episodes)).toEqual(['E01', 'E02', 'E03'])
+    expect(names(store.getters.displayedEpisodes)).toEqual([
+      'E01',
+      'E02',
+      'E03'
+    ])
+    expect(store.getters.episodeMap.get('ep2')).toBe(episode)
+  })
+
+  test('refuses an episode name already taken', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [{ id: 'ep1', name: 'E01' }])
+
+    await expect(store.dispatch('newEpisode', { name: 'E01' })).rejects.toThrow(
+      'Episode already exists'
+    )
+    expect(client.ppost).not.toHaveBeenCalled()
+  })
+
+  test('creates the tasks of the episode task types', async () => {
+    const createEntityTasks = vi.fn()
+    const { store } = await buildStore(
+      { productionEpisodeTaskTypeIds: () => ['tt-1'] },
+      { createEntityTasks }
+    )
+    loadEpisodes(store, [])
+    client.ppost.mockResolvedValueOnce({
+      id: 'ep2',
+      name: 'E02',
+      project_id: 'p1'
+    })
+
+    const episode = await store.dispatch('newEpisode', {
+      name: 'E02',
+      project_id: 'p1'
+    })
+
+    expect(createEntityTasks).toHaveBeenCalledWith(expect.anything(), {
+      entityId: 'ep2',
+      taskTypeIds: ['tt-1']
+    })
+    expect(episode.id).toBe('ep2')
+  })
+
+  test('saves an episode search once, then removes it', async () => {
+    const { store } = await buildStore()
+    client.ppost.mockResolvedValueOnce({ id: 'f1', name: 'wip' })
+
+    await store.dispatch('saveEpisodeSearch', 'wip')
+    await store.dispatch('saveEpisodeSearch', 'wip')
+
+    expect(client.ppost).toHaveBeenCalledTimes(1)
+    expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
+      list_type: 'episode',
+      name: 'wip',
+      query: 'wip',
+      entity_type: 'Episode',
+      project_id: 'p1'
+    })
+    expect(names(store.getters.episodeSearchQueries)).toEqual(['wip'])
+
+    client.pdel.mockResolvedValueOnce()
+    await store.dispatch('removeEpisodeSearch', { id: 'f1', name: 'wip' })
+
+    expect(client.pdel).toHaveBeenCalledWith('/api/data/user/filters/f1')
+    expect(store.getters.episodeSearchQueries).toEqual([])
+  })
+
+  test('keeps the saved episode searches sorted', async () => {
+    const { store } = await buildStore()
+    client.ppost
+      .mockResolvedValueOnce({ id: 'f1', name: 'wip' })
+      .mockResolvedValueOnce({ id: 'f2', name: 'done' })
+
+    await store.dispatch('saveEpisodeSearch', 'wip')
+    await store.dispatch('saveEpisodeSearch', 'done')
+
+    expect(names(store.getters.episodeSearchQueries)).toEqual(['done', 'wip'])
+  })
+
+  test('picks the current episode', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [
+      { id: 'ep1', name: 'E01' },
+      { id: 'ep2', name: 'E02' }
+    ])
+
+    await store.dispatch('setCurrentEpisode', 'ep2')
+    expect(store.getters.currentEpisode.name).toBe('E02')
+
+    await store.dispatch('setCurrentEpisode', 'all')
+    expect(store.getters.currentEpisode).toEqual({ id: 'all' })
+
+    await store.dispatch('setCurrentEpisode', null)
+    expect(store.getters.currentEpisode).toEqual({ id: 'all' })
+  })
+
+  test('sorts the episodes by a descriptor, then back by name', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [
+      { id: 'ep1', name: 'E01', data: { difficulty: '1' } },
+      { id: 'ep2', name: 'E02', data: { difficulty: '3' } },
+      { id: 'ep3', name: 'E03', data: { difficulty: '2' } }
+    ])
+    const sortInfo = {
+      type: 'metadata',
+      column: 'difficulty',
+      data_type: 'number',
+      ascending: false
+    }
+
+    await store.dispatch('changeEpisodeSort', sortInfo)
+    expect(store.getters.episodeSorting).toEqual([sortInfo])
+    expect(names(store.getters.displayedEpisodes)).toEqual([
+      'E02',
+      'E03',
+      'E01'
+    ])
+
+    await store.dispatch('changeEpisodeSort', null)
+    expect(store.getters.episodeSorting).toEqual([])
+    expect(names(store.getters.displayedEpisodes)).toEqual([
+      'E01',
+      'E02',
+      'E03'
+    ])
+  })
+
+  test('loads the episode stats and their task type columns', async () => {
+    const taskTypeMap = new Map([
+      ['tt-anim', { id: 'tt-anim', name: 'Animation', priority: 2 }],
+      ['tt-layout', { id: 'tt-layout', name: 'Layout', priority: 1 }]
+    ])
+    const { store } = await buildStore({ taskTypeMap: () => taskTypeMap })
+    const episodeStats = {
+      all: {
+        all: { name: 'All' },
+        'tt-anim': { done: 1 },
+        'tt-layout': { done: 2 }
+      },
+      ep1: { 'tt-anim': { done: 1 } }
+    }
+    client.pget.mockResolvedValueOnce(episodeStats)
+
+    expect(await store.dispatch('loadEpisodeStats', 'p1')).toBe(episodeStats)
+
+    expect(client.pget).toHaveBeenCalledWith(
+      '/api/data/projects/p1/episodes/stats'
+    )
+    expect(store.getters.episodeStats).toEqual(episodeStats)
+    expect(store.getters.episodeValidationColumns).toEqual([
+      'tt-layout',
+      'tt-anim'
+    ])
+  })
+
+  test('reloads the stats of a TV show', async () => {
+    const { store } = await buildStore({ isTVShow: () => true })
+    client.pget.mockResolvedValueOnce({})
+
+    await store.dispatch('resetEpisodeStats')
+
+    expect(client.pget).toHaveBeenCalledWith(
+      '/api/data/projects/p1/episodes/stats'
+    )
+  })
+
+  test('tracks the selected task cells', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [
+      { id: 'ep1', name: 'E01' },
+      { id: 'ep2', name: 'E02' }
+    ])
+    store.state.episodes.episodeValidationColumns = ['tt-1', 'tt-2']
+    const grid = () => [...store.getters.episodeSelectionGrid].sort()
+
+    store.commit('ADD_SELECTED_TASK', { x: 0, y: 1 })
+    store.commit('ADD_SELECTED_TASKS', [
+      { x: 1, y: 0 },
+      { x: 1, y: 1 }
+    ])
+    expect(grid()).toEqual(['0-1', '1-0', '1-1'])
+
+    store.commit('REMOVE_SELECTED_TASK', { x: 0, y: 1 })
+    store.commit('REMOVE_SELECTED_TASK', {
+      task: { column: { id: 'tt-2' }, entity: { id: 'ep2' } }
+    })
+    expect(grid()).toEqual(['1-0'])
+
+    store.commit('CLEAR_SELECTED_TASKS')
+    expect(grid()).toEqual([])
+  })
+
+  test('adds a created task to its episode row', async () => {
+    const taskTypeMap = new Map([
+      ['tt-1', { id: 'tt-1', name: 'Layout', priority: 1 }]
+    ])
+    const taskStatusMap = new Map([
+      ['ts-1', { id: 'ts-1', name: 'Todo', short_name: 'todo' }]
+    ])
+    const { store } = await buildStore()
+    loadEpisodes(store, [{ id: 'ep1', name: 'E01' }])
+    // An edit leaves a copy of the episode in the displayed list.
+    store.commit('EDIT_EPISODE_END', { id: 'ep1', name: 'E01', data: {} })
+
+    store.commit('NEW_TASK_END', {
+      task: {
+        id: 't1',
+        entity_id: 'ep1',
+        task_type_id: 'tt-1',
+        task_status_id: 'ts-1'
+      },
+      taskTypeMap,
+      taskStatusMap,
+      production
+    })
+
+    const episode = store.getters.episodeMap.get('ep1')
+    expect(episode.tasks).toEqual(['t1'])
+    expect(episode.validations.get('tt-1')).toBe('t1')
+    expect(store.getters.episodeValidationColumns).toEqual(['tt-1'])
+    expect(store.getters.episodeFilledColumns['tt-1']).toBe(true)
+    expect(store.getters.displayedEpisodes[0].validations.get('tt-1')).toBe(
+      't1'
+    )
+  })
+
+  test('renames a descriptor field in the episode data', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: { level: 'hard' } }])
+    const rename = entityType =>
+      store.commit('UPDATE_METADATA_DESCRIPTOR_END', {
+        descriptor: { entity_type: entityType, field_name: 'difficulty' },
+        previousDescriptorFieldName: 'level'
+      })
+
+    rename('Shot')
+    expect(store.getters.episodeMap.get('ep1').data).toEqual({ level: 'hard' })
+
+    rename('Episode')
+    expect(store.getters.episodeMap.get('ep1').data).toEqual({
+      difficulty: 'hard'
+    })
+  })
+
+  test('keeps the scroll position and clears the selected episodes', async () => {
+    const { store } = await buildStore()
+    store.state.episodes.selectedEpisodes.set('ep1', { id: 'ep1' })
+
+    store.commit('SET_EPISODE_LIST_SCROLL_POSITION', 120)
+    await store.dispatch('clearSelectedEpisodes')
+
+    expect(store.getters.episodeListScrollPosition).toBe(120)
+    expect(store.state.episodes.selectedEpisodes.size).toBe(0)
+  })
+
+  test('groups the episode options by status', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [
+      { id: 'ep1', name: 'E01', status: 'complete' },
+      { id: 'ep2', name: 'E02', status: 'running' },
+      { id: 'ep3', name: 'E03', status: 'unknown' },
+      { id: 'ep4', name: 'E04', status: 'canceled' }
+    ])
+
+    expect(store.getters.isEpisodeListLoaded).toBe(true)
+    expect(names(store.getters.runningEpisodes)).toEqual(['E02', 'E03'])
+    expect(store.getters.episodeOptionGroups).toEqual([
+      {
+        name: 'running',
+        episodeList: [
+          { label: 'E02', value: 'ep2' },
+          { label: 'E03', value: 'ep3' }
+        ]
+      },
+      { name: 'complete', episodeList: [{ label: 'E01', value: 'ep1' }] },
+      { name: 'canceled', episodeList: [{ label: 'E04', value: 'ep4' }] }
+    ])
+  })
+
+  test('deletes the tasks of a type, of the selection only', async () => {
+    const deleteAllTasks = vi.fn()
+    const { store } = await buildStore({}, { deleteAllTasks })
+    loadEpisodes(store, [
+      { id: 'ep1', name: 'E01', validations: new Map([['tt-1', 't1']]) },
+      { id: 'ep2', name: 'E02', validations: new Map() }
+    ])
+
+    await store.dispatch('deleteAllEpisodeTasks', {
+      projectId: 'p1',
+      taskTypeId: 'tt-1',
+      selectionOnly: true
+    })
+    await store.dispatch('deleteAllEpisodeTasks', {
+      projectId: 'p1',
+      taskTypeId: 'tt-1'
+    })
+
+    expect(deleteAllTasks.mock.calls.map(([, payload]) => payload)).toEqual([
+      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: ['t1'] },
+      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: [] }
+    ])
+  })
+
+  test('loads the episodes of another production', async () => {
+    const { store } = await buildStore()
+    const other = { id: 'p2' }
+    shotsApi.getEpisodes.mockResolvedValueOnce([{ id: 'ep9' }])
+
+    expect(await store.dispatch('loadProductionEpisodes', other)).toEqual([
+      { id: 'ep9' }
+    ])
+    expect(shotsApi.getEpisodes).toHaveBeenCalledWith(other)
+    expect(store.getters.episodes).toEqual([])
   })
 })

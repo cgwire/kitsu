@@ -301,7 +301,6 @@ const cache = {
 
 const initialState = {
   assetValidationColumns: [],
-  nbValidationColumns: 0,
 
   filteredAssets: [],
   displayedAssets: [],
@@ -348,8 +347,6 @@ const state = {
 const getters = {
   assetMap: state => cache.assetMap,
   assetSearchText: state => state.assetSearchText,
-  assetSearchQueries: state => state.assetSearchQueries,
-  assetSearchFilterGroups: state => state.assetSearchFilterGroups,
   assetSelectionGrid: state => state.assetSelectionGrid,
   assetValidationColumns: state => state.assetValidationColumns,
 
@@ -359,10 +356,6 @@ const getters = {
 
   displayedAssets: state => state.displayedAssets,
   displayedAssetsCount: state => state.displayedAssetsCount,
-  displayedAssetsLength: state => state.displayedAssetsLength,
-  displayedAssetsTimeSpent: state => state.displayedAssetsTimeSpent,
-  displayedAssetsEstimation: state => state.displayedAssetsEstimation,
-  assetFilledColumns: state => state.assetFilledColumns,
 
   usedAssetTypes: state => state.assetTypes,
   assetTypeStats: state => state.assetTypeStats,
@@ -391,7 +384,6 @@ const getters = {
 
   selectedAssets: state => state.selectedAssets,
 
-  sharedAssets: state => state.sharedAssets,
   unsharedAssets: state => state.unsharedAssets,
 
   displayedSharedAssets: state => state.displayedSharedAssets,
@@ -400,10 +392,6 @@ const getters = {
       state.displayedSharedAssets,
       'asset_type_name'
     )
-  },
-
-  sharedAssetsByType: state => {
-    return groupEntitiesByParents(state.sharedAssets, 'asset_type_name')
   }
 }
 
@@ -538,10 +526,6 @@ const actions = {
       })
     cache.assetsLoadingPromise = loadingPromise
     return loadingPromise
-  },
-
-  getAsset({ commit, state, rootGetters }, assetId) {
-    return assetsApi.getAsset(assetId)
   },
 
   // Reloads an asset after a remote change. A socket event passes
@@ -1096,7 +1080,6 @@ const mutations = {
 
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
-    state.nbValidationColumns = state.assetValidationColumns.length
 
     state.displayedAssets = displayedAssets
     helpers.setListStats(state, cache.assets)
