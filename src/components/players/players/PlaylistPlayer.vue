@@ -80,12 +80,15 @@
         @leave-room="leaveRoom"
         v-if="isValidRoomId(playlist) && !isFullMode"
       />
+      <!-- During a load, the playlist is still the one shown before, or an
+           empty one: these buttons would act on it. -->
       <button-simple
         class="playlist-button topbar-button flexrow-item full-button"
         icon="bell"
         :text="$t('playlists.notify_clients')"
         @click="onNotifyClientsClicked"
-        v-if="!isLoading && isCurrentUserManager && playlist.for_client"
+        :disabled="isLoading"
+        v-if="isCurrentUserManager && playlist.for_client"
       />
       <button-simple
         class="playlist-button topbar-button flexrow-item full-button"
@@ -93,7 +96,8 @@
         icon="link"
         :text="$t('playlists.share')"
         @click="modals.share = true"
-        v-if="!isLoading && isCurrentUserManager"
+        :disabled="isLoading"
+        v-if="isCurrentUserManager"
       />
 
       <template v-if="isAllowToEdit">
@@ -102,20 +106,22 @@
           icon="plus"
           :text="addEntitiesText"
           @click="onAddEntitiesClicked"
-          :active="isAddingEntity || isFullMode"
-          v-if="!isLoading"
+          :active="!isLoading && (isAddingEntity || isFullMode)"
+          :disabled="isLoading"
         />
         <button-simple
           @click="$emit('edit-clicked')"
           class="edit-button playlist-button flexrow-item"
           :title="$t('playlists.actions.edit')"
           icon="edit"
+          :disabled="isLoading"
         />
         <button-simple
           @click="showDeleteModal"
           class="delete-button playlist-button flexrow-item"
           :title="$t('playlists.actions.delete')"
           icon="trash"
+          :disabled="isLoading"
         />
       </template>
     </div>

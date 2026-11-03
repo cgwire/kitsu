@@ -1931,6 +1931,93 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  describe('header buttons', () => {
+    const clientPlaylist = { ...playlist, for_client: true }
+
+    // undefined when absent, else whether it is disabled.
+    const isDisabled = isTarget =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button =>
+            button.element.closest('.playlist-header') && isTarget(button)
+        )
+        ?.props('disabled')
+
+    const readHeaderButtons = () => ({
+      notify: isDisabled(button => button.props('icon') === 'bell'),
+      share: isDisabled(button => button.props('icon') === 'link'),
+      add: isDisabled(button => button.props('icon') === 'plus'),
+      edit: isDisabled(button => button.classes('edit-button')),
+      delete: isDisabled(button => button.classes('delete-button'))
+    })
+
+    const isAddPressed = () =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button =>
+            button.element.closest('.playlist-header') &&
+            button.props('icon') === 'plus'
+        )
+        .props('active')
+
+    it('enables them once the playlist is loaded', async () => {
+      wrapper = mountPlayer({ playlistProp: clientPlaylist })
+      await flushPromises()
+      expect(readHeaderButtons()).toEqual({
+        notify: false,
+        share: false,
+        add: false,
+        edit: false,
+        delete: false
+      })
+    })
+
+    // During the load, the page still passes the playlist shown before, or
+    // an empty one: the trash sent DELETE /api/data/playlists/undefined.
+    it('disables them while a playlist loads', async () => {
+      wrapper = mountPlayer({
+        playlistProp: clientPlaylist,
+        props: { isLoading: true }
+      })
+      await flushPromises()
+      expect(readHeaderButtons()).toEqual({
+        notify: true,
+        share: true,
+        add: true,
+        edit: true,
+        delete: true
+      })
+    })
+
+    // The empty playlist of the Sentry event. The page opens the addition
+    // panel for a playlist without entries: the add button must not look
+    // pressed.
+    it('disables them over the empty playlist of a load', async () => {
+      wrapper = mountPlayer({
+        playlistProp: { name: '' },
+        entities: [],
+        props: { isAddingEntity: true, isLoading: true }
+      })
+      await flushPromises()
+      expect(readHeaderButtons()).toEqual({
+        notify: undefined,
+        share: true,
+        add: true,
+        edit: true,
+        delete: true
+      })
+      expect(isAddPressed()).toBe(false)
+    })
+
+    it('shows the add button pressed while its panel is open', async () => {
+      wrapper = mountPlayer({ props: { isAddingEntity: true } })
+      await flushPromises()
+      expect(isAddPressed()).toBe(true)
+    })
+  })
+
   // The trim belongs to the shot, not to a revision: an end handle left at
   // the clip end must not pin the length of the revision on screen, or a
   // longer revision would stop at that length.
