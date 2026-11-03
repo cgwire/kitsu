@@ -55,7 +55,7 @@
       rel="noopener"
       v-if="zipUrl"
     >
-      <download-icon class="icon" :size="16" />
+      <download-icon class="icon" :size="16" :stroke-width="1.5" />
       <span class="zip-download-label">
         {{ $t('playlists.download_zip') }}
       </span>
@@ -233,7 +233,7 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
     display: flex;
     flex-shrink: 0;
     font-size: 0.85em;
-    gap: 0.4em;
+    gap: 0.6em;
     padding: 0.45em 0.55em;
     transition: all 0.2s ease;
 
