@@ -1,0 +1,2 @@
+import{t as e}from"./createLucideIcon-CMt3gcNM.js";var t=e(`list-restart`,[[`path`,{d:`M21 5H3`,key:`1fi0y6`}],[`path`,{d:`M7 12H3`,key:`13ou7f`}],[`path`,{d:`M7 19H3`,key:`wbqt3n`}],[`path`,{d:`M12 18a5 5 0 0 0 9-3 4.5 4.5 0 0 0-4.5-4.5c-1.33 0-2.54.54-3.41 1.41L11 14`,key:`qth677`}],[`path`,{d:`M11 10v4h4`,key:`172dkj`}]]),n=e(`user-check`,[[`path`,{d:`m16 11 2 2 4-4`,key:`9rsbq5`}],[`path`,{d:`M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2`,key:`1yyitq`}],[`circle`,{cx:`9`,cy:`7`,r:`4`,key:`nufk8`}]]);export{t as n,n as t};
+//# sourceMappingURL=user-check-DQE-y0nx.js.map

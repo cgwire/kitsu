@@ -1,0 +1,2 @@
+var e=(e,t,n,r=4)=>{let i=Math.max(8,Math.min(e.left,n.width-t.width-8)),a=Math.max(e.bottom+r,8),o=Math.min(e.top-r,n.height-8),s=n.height-8-a,c=o-8,l=s>=t.height||c<t.height&&s>=c,u=l?s:c,d=l?{top:`${a}px`}:{bottom:`${n.height-o}px`};return{isBelow:l,room:u,style:{left:`${i}px`,width:`${t.width}px`,...d,maxHeight:`${u}px`}}},t=(t,n,r,i)=>e(t,n,r,i).style;export{t as n,e as t};
+//# sourceMappingURL=popup-Dv2gzvJZ.js.map
