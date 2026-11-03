@@ -915,6 +915,33 @@ export const useAnnotation = ({
     saveAnnotationsCb()
   }
 
+  // fabric moves an object wherever the pointer goes: dropped past the edge
+  // of the canvas, it was out of sight and out of reach. A move keeps the
+  // object inside, or no further out than it started (a stroke drawn past
+  // the edge), and an object larger than the canvas keeps covering it.
+  const keepObjectInCanvas = ({ target, transform }) => {
+    const shift = (edge, size, length, startEdge) => {
+      const room = length - size
+      const lowest = Math.min(0, room, startEdge)
+      const highest = Math.max(0, room, startEdge)
+      return Math.min(Math.max(edge, lowest), highest) - edge
+    }
+    target.setCoords()
+    const box = target.getBoundingRect()
+    // A move only translates the object: its box where the move started.
+    const startLeft = box.left + transform.original.left - target.left
+    const startTop = box.top + transform.original.top - target.top
+    target.set({
+      left:
+        target.left +
+        shift(box.left, box.width, fabricCanvas.value.getWidth(), startLeft),
+      top:
+        target.top +
+        shift(box.top, box.height, fabricCanvas.value.getHeight(), startTop)
+    })
+    target.setCoords()
+  }
+
   const onObjectModified = event => {
     // fabric fires object:modified from Canvas.clear() when an IText still
     // in editing gets discarded (exitEditing on a changed text). That
@@ -1238,6 +1265,7 @@ export const useAnnotation = ({
   })
 
   const configureCanvas = () => {
+    fabricCanvas.value.off('object:moving', keepObjectInCanvas)
     fabricCanvas.value.off('object:moved', onObjectModified)
     fabricCanvas.value.off('text:changed', onObjectModified)
     fabricCanvas.value.off('text:editing:entered', onTextEditingEntered)
@@ -1249,6 +1277,7 @@ export const useAnnotation = ({
     fabricCanvas.value.off('mouse:move', updateMousePressure)
     fabricCanvas.value.off('mouse:up', endDrawing)
     fabricCanvas.value.off('mouse:up', onCanvasReleasedCb)
+    fabricCanvas.value.on('object:moving', keepObjectInCanvas)
     fabricCanvas.value.on('object:moved', onObjectModified)
     fabricCanvas.value.on('object:modified', onObjectModified)
     fabricCanvas.value.on('text:changed', onTextChangedDebounced)

@@ -1,8 +1,8 @@
 import { mount } from '@vue/test-utils'
 import { computed, defineComponent, ref, unref } from 'vue'
 
-import { Canvas, IText, Point, Text } from 'fabric'
-import { PSStroke, PSPoint } from 'fabricjs-psbrush'
+import { ActiveSelection, Canvas, IText, Point, Rect, Text } from 'fabric'
+import { PSBrush, PSStroke, PSPoint } from 'fabricjs-psbrush'
 
 import { useAnnotation } from '@/composables/players/annotation'
 import { Eraser, EraserBrush } from '@/lib/players/eraserbrush'
@@ -70,27 +70,39 @@ describe('PSStroke dimensions', () => {
   })
 })
 
-describe('IText drag', () => {
-  const pointer = (type, x, y) =>
-    new PointerEvent(type, {
-      bubbles: true,
-      cancelable: true,
-      clientX: x,
-      clientY: y,
-      pointerId: 1,
-      pointerType: 'mouse',
-      isPrimary: true
-    })
+// A real fabric canvas, on pointer events and with the pressure brush of
+// AnnotationCanvas.
+const createFabricCanvas = () => {
+  const element = document.createElement('canvas')
+  document.body.appendChild(element)
+  const canvas = new Canvas(element, {
+    width: 400,
+    height: 300,
+    enablePointerEvents: true
+  })
+  canvas.freeDrawingBrush = new PSBrush(canvas)
+  const destroy = () => {
+    canvas.dispose()
+    element.remove()
+  }
+  return { canvas, destroy }
+}
 
+const pointer = (type, x, y) =>
+  new PointerEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    clientX: x,
+    clientY: y,
+    pointerId: 1,
+    pointerType: 'mouse',
+    isPrimary: true
+  })
+
+describe('IText drag', () => {
   // A canvas reload during such a drag made fabric throw at its end.
   it('starts no drag from the selected words of a text being typed', () => {
-    const element = document.createElement('canvas')
-    document.body.appendChild(element)
-    const canvas = new Canvas(element, {
-      width: 400,
-      height: 300,
-      enablePointerEvents: true
-    })
+    const { canvas, destroy } = createFabricCanvas()
     const text = new IText('Type...', { left: 100, top: 100 })
     canvas.add(text)
     canvas.setActiveObject(text)
@@ -118,8 +130,7 @@ describe('IText drag', () => {
     expect(drag.defaultPrevented).toBe(true)
     expect(onDragStart).not.toHaveBeenCalled()
     text.exitEditing()
-    canvas.dispose()
-    element.remove()
+    destroy()
   })
 })
 
@@ -878,6 +889,90 @@ describe('composables/annotation', () => {
       api.redoLastAction()
       expect(canvas._objects).toEqual([obj])
       wrapper.unmount()
+    })
+  })
+
+  describe('moving an object', () => {
+    const drag = (canvas, from, to) => {
+      canvas.upperCanvasEl.dispatchEvent(pointer('pointerdown', from.x, from.y))
+      canvas.upperCanvasEl.dispatchEvent(pointer('pointermove', to.x, to.y))
+      canvas.upperCanvasEl.dispatchEvent(pointer('pointerup', to.x, to.y))
+    }
+
+    // Dropped past the edge, an object could never be seen or grabbed again.
+    it('stops a note at the edge of the canvas', () => {
+      const { canvas, destroy } = createFabricCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const note = new IText('Fix the hand', { left: 100, top: 100 })
+      canvas.add(note)
+      const start = note.getCenterPoint()
+
+      drag(canvas, start, { x: start.x + 1000, y: start.y - 1000 })
+
+      const box = note.getBoundingRect()
+      expect(box.left + box.width).toBeCloseTo(400)
+      expect(box.top).toBeCloseTo(0)
+      const [saved] = api.updates.value[0].drawing.objects
+      expect(saved.left).toBeCloseTo(note.left)
+      expect(saved.top).toBeCloseTo(note.top)
+      wrapper.unmount()
+      destroy()
+    })
+
+    it('keeps an object larger than the canvas over it', () => {
+      const { canvas, destroy } = createFabricCanvas()
+      const { wrapper } = mountAnnotation({ canvas })
+      const shape = new Rect({ left: -50, top: -50, width: 500, height: 400 })
+      canvas.add(shape)
+      const start = shape.getCenterPoint()
+
+      drag(canvas, start, { x: start.x + 1000, y: start.y })
+
+      const box = shape.getBoundingRect()
+      expect(box.left).toBeCloseTo(0)
+      expect(box.top).toBeCloseTo(-50)
+      wrapper.unmount()
+      destroy()
+    })
+
+    // A stroke drawn past the edge jumped back inside on its first move.
+    it('moves an object drawn past the edge no further out', () => {
+      const { canvas, destroy } = createFabricCanvas()
+      const { wrapper } = mountAnnotation({ canvas })
+      const shape = new Rect({ left: 350, top: 100, width: 100, height: 50 })
+      canvas.add(shape)
+
+      drag(canvas, { x: 370, y: 125 }, { x: 360, y: 125 })
+      expect(shape.getBoundingRect().left).toBeCloseTo(340)
+
+      drag(canvas, { x: 360, y: 125 }, { x: 460, y: 125 })
+      expect(shape.getBoundingRect().left).toBeCloseTo(340)
+      wrapper.unmount()
+      destroy()
+    })
+
+    it('stops a selection of several objects at the edge', () => {
+      const { canvas, destroy } = createFabricCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const notes = [
+        new IText('Hand', { left: 100, top: 100 }),
+        new IText('Face', { left: 200, top: 150 })
+      ]
+      canvas.add(...notes)
+      canvas.setActiveObject(new ActiveSelection(notes, { canvas }))
+      const start = canvas.getActiveObject().getCenterPoint()
+
+      drag(canvas, start, { x: start.x, y: start.y + 1000 })
+      canvas.discardActiveObject()
+
+      const box = notes[1].getBoundingRect()
+      expect(box.top + box.height).toBeCloseTo(300)
+      const saved = api.updates.value[0].drawing.objects
+      notes.forEach(note => {
+        expect(saved.find(o => o.id === note.id).top).toBeCloseTo(note.top)
+      })
+      wrapper.unmount()
+      destroy()
     })
   })
 
