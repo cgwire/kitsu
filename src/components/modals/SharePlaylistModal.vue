@@ -733,4 +733,41 @@ onMounted(() => {
     color: $red;
   }
 }
+
+@media screen and (max-width: 768px) {
+  .share-content {
+    min-width: 0;
+  }
+
+  .share-link-row {
+    flex-wrap: wrap;
+
+    .input {
+      flex: 1 0 100%;
+      margin: 0 0 0.4em;
+    }
+
+    .copy-button,
+    .open-button,
+    .invite-button,
+    .revoke-button {
+      flex: 1 1 0;
+      min-height: 44px;
+    }
+  }
+
+  .invite-actions,
+  .revoke-confirm,
+  .share-link-info {
+    flex-wrap: wrap;
+  }
+
+  // iOS zooms the page on a field under 16px
+  .create-form :deep(.dp--input),
+  .invite-multiselect :deep(.multiselect__input),
+  .invite-section .textarea,
+  .share-link-row .input {
+    font-size: 16px;
+  }
+}
 </style>
