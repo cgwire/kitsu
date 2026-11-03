@@ -212,14 +212,13 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useStore } from 'vuex'
-
 import { CopyIcon, ExternalLinkIcon, SendIcon, XIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
+import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
 import { formatDisplayDate, formatSimpleDate } from '@/lib/time'
@@ -230,9 +229,15 @@ import Checkbox from '@/components/widgets/Checkbox.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
+const DEFAULT_EXPIRATION_DAYS = 30
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 const { t } = useI18n()
 const { tomorrow, dateFormat } = useTime()
 const store = useStore()
+
+// Props / Emits
+// --------------------------------------------------------------------------
 
 const props = defineProps({
   active: { type: Boolean, default: false },
@@ -240,6 +245,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['cancel', 'links-updated'])
+
+// State
+// --------------------------------------------------------------------------
 
 const shareLinks = ref([])
 const expirationDate = ref(null)
@@ -253,8 +261,8 @@ const inviteState = reactive({})
 const confirmingRevoke = ref(null)
 const isCreateFormVisible = ref(false)
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const DEFAULT_EXPIRATION_DAYS = 30
+// Computed
+// --------------------------------------------------------------------------
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const personMap = computed(() => store.getters.personMap)
@@ -272,6 +280,9 @@ const recipientOptions = computed(() => {
     }))
     .sort((a, b) => a.label.localeCompare(b.label))
 })
+
+// Functions
+// --------------------------------------------------------------------------
 
 const ensureInviteState = token => {
   if (!inviteState[token]) {
@@ -391,7 +402,6 @@ const showCreateForm = () => {
 const hideCreateForm = () => {
   isCreateFormVisible.value = false
   errors.create = false
-  expirationDate.value = null
   canComment.value = true
   canDownload.value = false
 }
@@ -445,6 +455,9 @@ const formatDate = dateStr => {
   if (!dateStr) return ''
   return formatDisplayDate(dateStr, dateFormat.value)
 }
+
+// Lifecycle
+// --------------------------------------------------------------------------
 
 onMounted(() => {
   loadLinks()
@@ -719,9 +732,5 @@ onMounted(() => {
   &.error {
     color: $red;
   }
-}
-
-.error {
-  color: $red;
 }
 </style>

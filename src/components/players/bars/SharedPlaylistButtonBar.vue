@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ 'playlist-footer': true, flexrow: true, phone }">
+  <div class="playlist-footer flexrow" :class="{ phone }">
     <div class="flexrow flexrow-item" v-if="isMovie || isSound || isPicture">
       <button-simple
         class="playlist-button flexrow-item"

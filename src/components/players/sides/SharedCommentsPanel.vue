@@ -191,8 +191,8 @@ import { useStore } from 'vuex'
 
 import { useFullScreenContainer } from '@/composables/fullScreen'
 import { replaceTimeWithTimecode } from '@/lib/render'
-import { DEFAULT_FPS } from '@/lib/video'
 import stringHelpers from '@/lib/string'
+import { DEFAULT_FPS } from '@/lib/video'
 import playlistsApi from '@/store/api/playlists'
 import { LOAD_PEOPLE_END } from '@/store/mutation-types'
 

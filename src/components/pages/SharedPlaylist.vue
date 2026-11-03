@@ -41,13 +41,12 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
+import crisp from '@/lib/crisp'
 import {
   TOGGLE_DARK_THEME,
   USER_LOGIN,
   USER_LOGOUT
 } from '@/store/mutation-types'
-
-import crisp from '@/lib/crisp'
 
 import SharedPlaylistIdentityCard from '@/components/pages/SharedPlaylistIdentityCard.vue'
 import SharedPlaylistPlayer from '@/components/players/players/SharedPlaylistPlayer.vue'

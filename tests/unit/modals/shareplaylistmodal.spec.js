@@ -17,25 +17,28 @@ const i18n = createI18n({
   fallbackWarn: false
 })
 
-const openInvite = async sendPlaylistShareInvitations => {
+const mountModal = async (actions, stubs = {}) => {
   const store = createStore({
     getters: {
       currentProduction: () => ({ id: 'production-1', team: [] }),
       personMap: () => new Map()
     },
-    actions: {
-      loadPlaylistShareLinks: () =>
-        Promise.resolve([
-          { id: 'link-1', token: 'token-1', can_comment: true }
-        ]),
-      sendPlaylistShareInvitations
-    }
+    actions
   })
   const wrapper = mount(SharePlaylistModal, {
     props: { active: true, playlist: { id: 'playlist-1' } },
-    global: { plugins: [store, i18n] }
+    global: { plugins: [store, i18n], stubs }
   })
   await flushPromises()
+  return wrapper
+}
+
+const openInvite = async sendPlaylistShareInvitations => {
+  const wrapper = await mountModal({
+    loadPlaylistShareLinks: () =>
+      Promise.resolve([{ id: 'link-1', token: 'token-1', can_comment: true }]),
+    sendPlaylistShareInvitations
+  })
   await wrapper.find('.invite-button').trigger('click')
   return wrapper
 }
@@ -43,21 +46,13 @@ const openInvite = async sendPlaylistShareInvitations => {
 const sendButton = wrapper => wrapper.find('.invite-actions button')
 
 const openCreateForm = async (createPlaylistShareLink = () => {}) => {
-  const store = createStore({
-    getters: {
-      currentProduction: () => ({ id: 'production-1', team: [] }),
-      personMap: () => new Map()
-    },
-    actions: {
+  const wrapper = await mountModal(
+    {
       createPlaylistShareLink,
       loadPlaylistShareLinks: () => Promise.resolve([])
-    }
-  })
-  const wrapper = mount(SharePlaylistModal, {
-    props: { active: true, playlist: { id: 'playlist-1' } },
-    global: { plugins: [store, i18n], stubs: { DateField: true } }
-  })
-  await flushPromises()
+    },
+    { DateField: true }
+  )
   await wrapper.find('.add-row button').trigger('click')
   return wrapper
 }

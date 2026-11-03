@@ -1,8 +1,7 @@
 <template>
   <div
+    class="shared-player playlist-player"
     :class="{
-      'shared-player': true,
-      'playlist-player': true,
       'bars-hidden': isOnlyMediaShown,
       phone: isPhone,
       'phone-full-screen': isPhoneFullScreen,
@@ -301,9 +300,17 @@ import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
 import SoundViewer from '@/components/players/viewers/SoundViewer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
+// A finger that moved further was panning, not tapping.
+const TAP_TOLERANCE = 10
+
 const store = useStore()
+const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
+  usePanzoomSync()
+const { isPhone, isPhoneLandscape } = usePhoneLayout()
+const { isMuted, isPlaying, isRepeating } = usePlayerTransport()
 
 // Props / Emits
+// --------------------------------------------------------------------------
 
 const props = defineProps({
   canComment: { type: Boolean, default: false },
@@ -318,10 +325,7 @@ const props = defineProps({
 const emit = defineEmits(['logout'])
 
 // State
-
-const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
-  usePanzoomSync()
-const { isPhone, isPhoneLandscape } = usePhoneLayout()
+// --------------------------------------------------------------------------
 
 const annotationOverlay = ref(null)
 const container = ref(null)
@@ -339,7 +343,6 @@ const isEntitiesHidden = ref(isPhoneLandscape.value)
 const isFullScreen = ref(false)
 const isPhoneFullScreen = ref(false)
 const isPhoneFullScreenBarsShown = ref(false)
-const { isMuted, isPlaying, isRepeating } = usePlayerTransport()
 const maxDuration = ref(0)
 const movieDimensions = ref({ width: 0, height: 0 })
 const picturePlayer = ref(null)
@@ -354,7 +357,7 @@ const videoProgressRef = ref(null)
 const volume = ref(100)
 
 // Tracks whether the very first entity has been auto-loaded after mount.
-// Plain `let` (not ref) — only used by the watchers below.
+// Plain `let`, not a ref: only used by the watchers below.
 let firstEntityLoaded = false
 
 // requestAnimationFrame id for the picture playback timer (null when idle).
@@ -363,7 +366,13 @@ let picturePlayFrame = null
 // Frame of its slot clicked on the playlist bar for a sound not decoded yet.
 let pendingSoundFrame = null
 
+let mediaPointerStart = null
+let panelsBeforePhoneFullScreen = null
+let pictureResizeObserver = null
+let playerResizeTimeout = null
+
 // Computed
+// --------------------------------------------------------------------------
 
 // Drawing needs the pencil and the undo at hand.
 const isOnlyMediaShown = computed(
@@ -481,14 +490,14 @@ const downloadUrl = computed(() => {
   return `/api/pictures/originals/preview-files/${currentPreview.value.id}/download`
 })
 
-const zipUrl = computed(() =>
-  props.canDownload ? `/api/shared/playlists/${props.token}/download/zip` : ''
-)
-
 const downloadFileName = computed(() => {
   const entityName = currentEntity.value?.name || 'preview'
   return extension.value ? `${entityName}.${extension.value}` : entityName
 })
+
+const zipUrl = computed(() =>
+  props.canDownload ? `/api/shared/playlists/${props.token}/download/zip` : ''
+)
 
 const modelUrl = computed(() => {
   if (!currentPreview.value) return ''
@@ -590,7 +599,8 @@ const entityListForProgress = computed(
   () => playlistFrameData.value.entitiesWithStart
 )
 
-// Functions — playback
+// Functions: playback
+// --------------------------------------------------------------------------
 
 const play = () => {
   isPlaying.value = true
@@ -724,7 +734,8 @@ const selectEntity = index => {
 const previousEntity = () => selectEntity(playingEntityIndex.value - 1)
 const nextEntity = () => selectEntity(playingEntityIndex.value + 1)
 
-// Functions — sub-previews & zoom
+// Functions: sub-previews & zoom
+// --------------------------------------------------------------------------
 
 // A frame clicked on a sound not decoded yet is no frame of another file.
 const onPreviousPreviewClicked = () => {
@@ -812,14 +823,14 @@ const loadFirstEntity = () => {
   }
 }
 
-// Functions — fullscreen / sound
+// Functions: fullscreen / sound
+// --------------------------------------------------------------------------
 
 const isDocumentFullScreen = () =>
   Boolean(document.fullscreenElement || document.webkitIsFullScreen)
 
 // iPhones cannot put an element full screen: phones fill the page with the
 // media instead, and get their panels back on the way out.
-let panelsBeforePhoneFullScreen = null
 const togglePhoneFullScreen = () => {
   if (isPhoneFullScreen.value) {
     isCommentsHidden.value = panelsBeforePhoneFullScreen.isCommentsHidden
@@ -838,10 +849,7 @@ const togglePhoneFullScreen = () => {
 }
 
 // Captured: the pan/zoom of the media keeps these events for itself, and no
-// click follows a touch. A finger that moved was panning, not tapping.
-const TAP_TOLERANCE = 10
-let mediaPointerStart = null
-
+// click follows a touch.
 const onMediaPointerDown = event => {
   mediaPointerStart = { x: event.clientX, y: event.clientY }
 }
@@ -874,7 +882,8 @@ const onFullScreenChange = () => {
   isFullScreen.value = isDocumentFullScreen()
 }
 
-// Functions — player events
+// Functions: player events
+// --------------------------------------------------------------------------
 
 const onEntityChange = index => {
   playingEntityIndex.value = index
@@ -1038,7 +1047,8 @@ const onStatusChanged = ({ taskStatusId, color }) => {
   entity.task_status_color = color
 }
 
-// Functions — entity strip
+// Functions: entity strip
+// --------------------------------------------------------------------------
 
 const onEntitiesWheel = event => {
   if (playlistedEntities.value) {
@@ -1066,7 +1076,6 @@ const scrollPlayingEntityIntoView = () => {
 // Tell the embedded video player its container size has changed: dispatch
 // a resize synchronously so flex layout recomputes, then let the DOM paint
 // before asking the raw player to re-measure.
-let playerResizeTimeout = null
 const triggerPlayerResize = () => {
   window.dispatchEvent(new Event('resize'))
   clearTimeout(playerResizeTimeout)
@@ -1081,7 +1090,8 @@ const updatePictureHeight = () => {
   if (el?.clientHeight) pictureHeight.value = el.clientHeight
 }
 
-// Functions — keyboard
+// Functions: keyboard
+// --------------------------------------------------------------------------
 
 const onKeyDown = event => {
   if (['INPUT', 'TEXTAREA'].includes(event.target.tagName)) return
@@ -1143,6 +1153,7 @@ const onKeyDown = event => {
 }
 
 // Watchers
+// --------------------------------------------------------------------------
 
 watchEffect(() => {
   if (!firstEntityLoaded && entityList.value.length > 0 && rawPlayer.value) {
@@ -1197,8 +1208,7 @@ watch(
 )
 
 // Lifecycle
-
-let pictureResizeObserver = null
+// --------------------------------------------------------------------------
 
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown, false)
