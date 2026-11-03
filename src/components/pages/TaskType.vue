@@ -453,7 +453,12 @@ import {
   getTaskFilters
 } from '@/lib/filtering'
 import { buildSupervisorTaskIndex, indexSearch } from '@/lib/indexing'
-import { getPersonPath, pluralizeEntityType } from '@/lib/path'
+import {
+  episodifyRoute,
+  getPersonPath,
+  getProductionSchedulePath,
+  pluralizeEntityType
+} from '@/lib/path'
 import preferences from '@/lib/preferences'
 import { sortByMetadata, sortByName, sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
@@ -891,13 +896,12 @@ const title = computed(() => {
 const backPath = computed(() => {
   let pathRoute
   if (isActiveTab('schedule')) {
-    pathRoute = {
-      name: 'schedule',
-      params: {
-        production_id: currentProduction.value.id
-      },
-      query: { search: '' }
-    }
+    // Without its episode, the production schedule of a TV show has no
+    // episode selector.
+    pathRoute = episodifyRoute(
+      getProductionSchedulePath(currentProduction.value.id),
+      isTVShow.value ? (currentEpisode.value?.id ?? 'all') : null
+    )
   } else {
     const pathsByEntity = {
       Shot: store.getters.shotsPath,
