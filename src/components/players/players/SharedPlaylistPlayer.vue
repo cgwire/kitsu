@@ -47,7 +47,7 @@
             @max-duration-update="onMaxDurationUpdate"
             @panzoom-changed="onPanzoomChanged"
             @panzoom-ready="onPanzoomReady"
-            @play-failed="onMoviePlayFailed"
+            @play-failed="onMediaPlayFailed"
             @play-next="onPlayNext"
             @video-loaded="onVideoLoaded"
             v-show="isMovie && !loading"
@@ -75,7 +75,7 @@
             :volume="volume"
             @duration-changed="onSoundDurationChanged"
             @play-ended="onPlayNext"
-            @play-failed="onSoundPlayFailed"
+            @play-failed="onMediaPlayFailed"
             @time-update="onSoundTimeUpdate"
             v-if="isSound && !loading"
           />
@@ -620,7 +620,7 @@ const togglePlay = () => (isPlaying.value ? pause() : play())
 
 // Picture playback: the picture viewer (not MultiVideoViewer, which is
 // movie-only) shows the image, and a timer advances the playlist after the
-// image's frame budget elapses — mirroring the studio player's playPicture.
+// image's frame budget elapses, mirroring the studio player's playPicture.
 // Matches playlistFrameData so a picture is shown for the same span the
 // playlist-progress bar allots to it.
 const pictureFrameCount = () =>
@@ -996,13 +996,9 @@ const onPlayNext = () => {
   advancePlaylist()
 }
 
-// A sound that cannot be read keeps its slot like a picture, then the
+// A media that cannot be read keeps its slot like a picture, then the
 // playlist moves on.
-const onSoundPlayFailed = () => {
-  if (isPlaying.value) playPicture()
-}
-
-const onMoviePlayFailed = () => {
+const onMediaPlayFailed = () => {
   if (isPlaying.value) playPicture()
 }
 
@@ -1115,7 +1111,7 @@ const onKeyDown = event => {
   }
 
   // Entity navigation reuses isAltLetter (shared with usePreviewShortcuts)
-  // so Alt+J/K match identically here. Arrows below stay event.code-only —
+  // so Alt+J/K match identically here. Arrows below stay event.code-only:
   // no letter glyph to worry about.
   if (isAltLetter(event, 'KeyJ', 'j')) {
     stop()

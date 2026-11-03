@@ -206,12 +206,11 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
-// Composables
-
 const { t } = useI18n()
 const store = useStore()
 
 // Props / Emits
+// --------------------------------------------------------------------------
 
 const props = defineProps({
   token: { type: String, required: true },
@@ -224,14 +223,8 @@ const props = defineProps({
 
 const emit = defineEmits(['status-changed', 'time-code-clicked'])
 
-const attachmentNamePrefix = computed(() =>
-  stringHelpers.attachmentNamePrefix(
-    props.entity?.name,
-    props.entity?.preview_file_task_type?.name
-  )
-)
-
 // State
+// --------------------------------------------------------------------------
 
 const checklistItems = ref([])
 const commentText = ref('')
@@ -257,6 +250,14 @@ const postError = ref('')
 const modals = reactive({ edit: false, delete: false, attachment: false })
 
 // Computed
+// --------------------------------------------------------------------------
+
+const attachmentNamePrefix = computed(() =>
+  stringHelpers.attachmentNamePrefix(
+    props.entity?.name,
+    props.entity?.preview_file_task_type?.name
+  )
+)
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const fps = computed(
@@ -283,7 +284,8 @@ const taskComments = computed(() =>
     .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
 )
 
-// Functions — helpers
+// Functions: helpers
+// --------------------------------------------------------------------------
 
 // The store keeps initials for the people of the link (see
 // populatePersonMap): the comment widgets get their picture from the link.
@@ -367,7 +369,8 @@ const populatePersonMap = () => {
   }
 }
 
-// Functions — load
+// Functions: load
+// --------------------------------------------------------------------------
 
 const loadContext = async () => {
   const data = await playlistsApi.loadSharedPlaylistContext(props.token)
@@ -392,20 +395,42 @@ const refresh = async () => {
   loading.value = false
 }
 
-// Functions — submit
+// Functions: submit
+// --------------------------------------------------------------------------
+
+const buildAttachmentsForm = forms => {
+  const formData = new FormData()
+  formData.append('guest_id', props.guestId)
+  forms.forEach((form, index) => {
+    formData.append(`file-${index}`, form.get('file'))
+  })
+  return formData
+}
+
+// Reflect the new status colour on the surrounding entity so the playlist
+// progress bar repaints without waiting for a refetch.
+const emitStatusChanged = (status, taskStatusId) => {
+  if (status?.color) {
+    emit('status-changed', {
+      taskStatusId: status.id || taskStatusId,
+      color: status.color
+    })
+  }
+}
+
+const replaceComment = saved => {
+  comments.value = comments.value.map(c =>
+    c.id === saved.id ? { ...c, ...saved } : c
+  )
+}
 
 const uploadAttachments = async commentId => {
   if (pendingAttachments.value.length === 0) return null
-  const formData = new FormData()
-  formData.append('guest_id', props.guestId)
-  pendingAttachments.value.forEach((form, index) => {
-    formData.append(`file-${index}`, form.get('file'))
-  })
   try {
     return await playlistsApi.postSharedPlaylistCommentAttachments(
       props.token,
       commentId,
-      formData
+      buildAttachmentsForm(pendingAttachments.value)
     )
   } catch {
     return null
@@ -435,17 +460,11 @@ const submitComment = async () => {
     // Comment widget treats them as a client author and renders the
     // name + avatar without waiting for a page reload.
     populatePersonMap()
-    // Reflect the new status colour on the surrounding entity so the
-    // playlist progress bar repaints without waiting for a refetch.
-    const status =
+    emitStatusChanged(
       comment.task_status ||
-      store.getters.taskStatusMap.get(selectedStatusId.value)
-    if (status?.color) {
-      emit('status-changed', {
-        taskStatusId: status.id || selectedStatusId.value,
-        color: status.color
-      })
-    }
+        store.getters.taskStatusMap.get(selectedStatusId.value),
+      selectedStatusId.value
+    )
     commentText.value = ''
     checklistItems.value = []
     pendingAttachments.value = []
@@ -456,7 +475,8 @@ const submitComment = async () => {
   submitting.value = false
 }
 
-// Functions — edit / delete
+// Functions: edit / delete
+// --------------------------------------------------------------------------
 
 const onEditComment = comment => {
   commentToEdit.value = comment
@@ -487,15 +507,10 @@ const confirmEditComment = async updatedComment => {
       )
     }
     if (newAttachmentFiles.length > 0) {
-      const formData = new FormData()
-      formData.append('guest_id', props.guestId)
-      newAttachmentFiles.forEach((attachment, index) => {
-        formData.append(`file-${index}`, attachment.get('file'))
-      })
       await playlistsApi.postSharedPlaylistCommentAttachments(
         props.token,
         commentId,
-        formData
+        buildAttachmentsForm(newAttachmentFiles)
       )
     }
     const saved = await playlistsApi.editSharedPlaylistComment(
@@ -508,17 +523,12 @@ const confirmEditComment = async updatedComment => {
         task_status_id: updatedComment.task_status_id
       }
     )
-    comments.value = comments.value.map(c =>
-      c.id === saved.id ? { ...c, ...saved } : c
+    replaceComment(saved)
+    emitStatusChanged(
+      saved.task_status ||
+        store.getters.taskStatusMap.get(saved.task_status_id),
+      saved.task_status_id
     )
-    const status =
-      saved.task_status || store.getters.taskStatusMap.get(saved.task_status_id)
-    if (status?.color) {
-      emit('status-changed', {
-        taskStatusId: status.id || saved.task_status_id,
-        color: status.color
-      })
-    }
     modals.edit = false
   } catch {
     editError.value = true
@@ -544,7 +554,8 @@ const confirmDeleteComment = async () => {
   isDeleting.value = false
 }
 
-// Functions — checklist
+// Functions: checklist
+// --------------------------------------------------------------------------
 
 const addChecklistItem = () => {
   checklistItems.value.push({
@@ -584,15 +595,14 @@ const onChecklistUpdated = async updated => {
         task_status_id: existing.task_status_id
       }
     )
-    comments.value = comments.value.map(c =>
-      c.id === saved.id ? { ...c, ...saved } : c
-    )
+    replaceComment(saved)
   } catch {
     existing.checklist = previous
   }
 }
 
-// Functions — text input
+// Functions: text input
+// --------------------------------------------------------------------------
 
 const onTextareaKeydown = event => {
   if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
@@ -631,7 +641,8 @@ const insertFrameMention = () => {
   insertAtCursor(rendered + ' ')
 }
 
-// Functions — attachments
+// Functions: attachments
+// --------------------------------------------------------------------------
 
 const openAttachmentPicker = () => {
   modals.attachment = true
@@ -648,7 +659,8 @@ const removePendingAttachment = index => {
   pendingAttachments.value.splice(index, 1)
 }
 
-// Functions — time code
+// Functions: time code
+// --------------------------------------------------------------------------
 
 const onCommentTimeCodeClicked = data => {
   emit('time-code-clicked', data)
@@ -662,6 +674,7 @@ const onChecklistTimeCodeClicked = ({ frame, revision }) => {
 }
 
 // Watchers
+// --------------------------------------------------------------------------
 
 watch(
   () => props.token,
@@ -678,6 +691,7 @@ watch(
 )
 
 // Lifecycle
+// --------------------------------------------------------------------------
 
 onMounted(() => {
   if (props.token) refresh()

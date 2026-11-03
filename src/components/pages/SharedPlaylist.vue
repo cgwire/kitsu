@@ -58,6 +58,9 @@ const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
 
+// State
+// --------------------------------------------------------------------------
+
 const loading = ref(true)
 const loadingPlayer = ref(false)
 const error = ref(false)
@@ -67,6 +70,9 @@ const playlistEntities = ref([])
 const guestId = ref(null)
 const guestName = ref('')
 const identityError = ref('')
+
+// Computed
+// --------------------------------------------------------------------------
 
 const token = computed(() => route.params.token)
 
@@ -78,21 +84,26 @@ const needsIdentity = computed(
   () => shareLink.value?.can_comment && !guestId.value
 )
 
-watch(guestName, () => {
-  identityError.value = ''
-})
+// Functions
+// --------------------------------------------------------------------------
 
-const loginAsGuest = guest => {
-  if (!guest) return
+const loginAsClient = user => {
   store.commit(USER_LOGIN, {
-    id: guest.id,
-    first_name: guest.first_name || 'Guest',
-    last_name: guest.last_name || '',
-    email: guest.email || '',
     role: 'client',
     is_guest: true,
     has_avatar: false,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+    ...user
+  })
+}
+
+const loginAsGuest = guest => {
+  if (!guest) return
+  loginAsClient({
+    id: guest.id,
+    first_name: guest.first_name || 'Guest',
+    last_name: guest.last_name || '',
+    email: guest.email || '',
     locale: guest.locale
   })
 }
@@ -100,14 +111,7 @@ const loginAsGuest = guest => {
 // A link closed to comments asks for no name, but its comments still render
 // for the client role, as they do for a guest.
 const loginAsViewer = () => {
-  store.commit(USER_LOGIN, {
-    first_name: '',
-    last_name: '',
-    role: 'client',
-    is_guest: true,
-    has_avatar: false,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-  })
+  loginAsClient({ first_name: '', last_name: '' })
 }
 
 const restoreStoredGuest = async () => {
@@ -178,6 +182,16 @@ const logoutGuest = () => {
   guestName.value = ''
   store.commit(USER_LOGOUT)
 }
+
+// Watchers
+// --------------------------------------------------------------------------
+
+watch(guestName, () => {
+  identityError.value = ''
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
 
 onMounted(() => {
   store.commit(TOGGLE_DARK_THEME, true)

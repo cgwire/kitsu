@@ -32,24 +32,36 @@ import { onMounted, useTemplateRef } from 'vue'
 
 import TextField from '@/components/widgets/TextField.vue'
 
+// Props / Emits
+// --------------------------------------------------------------------------
+
 defineProps({
   errorMessage: { type: String, default: '' },
   playlistName: { type: String, required: true }
 })
 
-const nameField = useTemplateRef('nameField')
+const emit = defineEmits(['submit'])
 
 const guestName = defineModel('guestName', {
   type: String,
   default: ''
 })
 
-const emit = defineEmits(['submit'])
+// State
+// --------------------------------------------------------------------------
+
+const nameField = useTemplateRef('nameField')
+
+// Functions
+// --------------------------------------------------------------------------
 
 const onSubmit = () => {
   if (!guestName.value) return
   emit('submit')
 }
+
+// Lifecycle
+// --------------------------------------------------------------------------
 
 onMounted(() => nameField.value?.focus())
 </script>
