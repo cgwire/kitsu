@@ -66,6 +66,13 @@ const withMethods = (names, values = {}) => ({
   }
 })
 
+// The task type button lives in the extra-controls slot of the bar, which
+// the default stub does not render.
+const PlaybackBarWithSlot = {
+  name: 'PlayerPlaybackBar',
+  template: '<div><slot name="extra-controls" /></div>'
+}
+
 // Without previewFileStatusMap, the store keeps no preview status.
 const mountPlayer = ({
   playlistProp = playlist,
@@ -2019,11 +2026,6 @@ describe('PlaylistPlayer.vue', () => {
   })
 
   describe('footer actions', () => {
-    // The task type button lives in the extra-controls slot of the bar.
-    const PlaybackBarWithSlot = {
-      name: 'PlayerPlaybackBar',
-      template: '<div><slot name="extra-controls" /></div>'
-    }
     const mountFooter = (props = {}) =>
       mountPlayer({ props, stubs: { PlayerPlaybackBar: PlaybackBarWithSlot } })
 
@@ -2678,7 +2680,10 @@ describe('PlaylistPlayer.vue', () => {
       )
 
     it('keeps the task type change and the download menu from a client', async () => {
-      wrapper = mountPlayer({ isClient: true })
+      wrapper = mountPlayer({
+        isClient: true,
+        stubs: { PlayerPlaybackBar: PlaybackBarWithSlot }
+      })
       await flushPromises()
       expect(
         wrapper.find('[title="playlists.actions.change_task_type"]').exists()
