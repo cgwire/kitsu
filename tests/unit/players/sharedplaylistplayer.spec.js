@@ -115,6 +115,18 @@ const mountPlayer = ({
 }
 
 describe('players/SharedPlaylistPlayer', () => {
+  it('hands the zip url to the header on a link allowing downloads', async () => {
+    const wrapper = mountPlayer()
+    const header = wrapper.findComponent(SharedPlaylistHeader)
+    expect(header.props('zipUrl')).toBe('')
+
+    await wrapper.setProps({ canDownload: true })
+    expect(header.props('zipUrl')).toBe(
+      '/api/shared/playlists/token/download/zip'
+    )
+    wrapper.unmount()
+  })
+
   beforeAll(() => {
     vi.stubGlobal(
       'ResizeObserver',

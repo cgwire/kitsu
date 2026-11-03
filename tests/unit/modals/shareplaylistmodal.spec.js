@@ -122,4 +122,25 @@ describe('modals/SharePlaylistModal', () => {
       '2026-12-03'
     )
   })
+
+  it('keeps the zip download off unless it is asked for', async () => {
+    const createPlaylistShareLink = vi.fn()
+    const wrapper = await openCreateForm(createPlaylistShareLink)
+
+    await wrapper.find('.form-actions .is-primary').trigger('click')
+    await flushPromises()
+    expect(createPlaylistShareLink.mock.calls[0][1].data.can_download).toBe(
+      false
+    )
+
+    await wrapper.find('.add-row button').trigger('click')
+    wrapper
+      .findAllComponents(Checkbox)[1]
+      .vm.$emit('update:model-value', true)
+    await wrapper.find('.form-actions .is-primary').trigger('click')
+    await flushPromises()
+    expect(createPlaylistShareLink.mock.calls[1][1].data.can_download).toBe(
+      true
+    )
+  })
 })

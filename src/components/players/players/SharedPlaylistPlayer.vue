@@ -18,6 +18,7 @@
       :playing-entity-index="playingEntityIndex"
       :playlist-name="playlistName"
       :project-name="projectName"
+      :zip-url="zipUrl"
       @logout="emit('logout')"
       @next-entity="nextEntity"
       @previous-entity="previousEntity"
@@ -306,6 +307,7 @@ const store = useStore()
 
 const props = defineProps({
   canComment: { type: Boolean, default: false },
+  canDownload: { type: Boolean, default: false },
   entities: { type: Array, default: () => [] },
   guestId: { type: String, default: '' },
   loading: { type: Boolean, default: false },
@@ -478,6 +480,10 @@ const downloadUrl = computed(() => {
   }
   return `/api/pictures/originals/preview-files/${currentPreview.value.id}/download`
 })
+
+const zipUrl = computed(() =>
+  props.canDownload ? `/api/shared/playlists/${props.token}/download/zip` : ''
+)
 
 const downloadFileName = computed(() => {
   const entityName = currentEntity.value?.name || 'preview'

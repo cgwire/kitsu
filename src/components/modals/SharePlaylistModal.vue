@@ -93,6 +93,9 @@
                   : $t('playlists.share_modal.comments_disabled')
               }}
             </span>
+            <span class="info-tag" v-if="link.can_download">
+              {{ $t('playlists.share_modal.download_enabled') }}
+            </span>
           </div>
           <div class="invite-section" v-if="openInviteToken === link.token">
             <label class="label">
@@ -173,6 +176,11 @@
               :label="$t('playlists.share_modal.can_comment')"
               v-model="canComment"
             />
+            <checkbox
+              :toggle="true"
+              :label="$t('playlists.share_modal.can_download')"
+              v-model="canDownload"
+            />
             <div class="form-actions">
               <p class="create-error" v-if="errors.create">
                 {{ $t('playlists.share_modal.error') }}
@@ -236,6 +244,7 @@ const emit = defineEmits(['cancel', 'links-updated'])
 const shareLinks = ref([])
 const expirationDate = ref(null)
 const canComment = ref(true)
+const canDownload = ref(false)
 const loading = reactive({ links: false, create: false })
 const errors = reactive({ create: false })
 
@@ -384,6 +393,7 @@ const hideCreateForm = () => {
   errors.create = false
   expirationDate.value = null
   canComment.value = true
+  canDownload.value = false
 }
 
 const createLink = async () => {
@@ -397,7 +407,8 @@ const createLink = async () => {
       playlistId: props.playlist.id,
       data: {
         expiration_date: expDate,
-        can_comment: canComment.value
+        can_comment: canComment.value,
+        can_download: canDownload.value
       }
     })
     await loadLinks()

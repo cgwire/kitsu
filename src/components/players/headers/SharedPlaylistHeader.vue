@@ -46,6 +46,21 @@
 
     <div class="filler"></div>
 
+    <!-- Zou builds the zip while it answers: a new tab shows the wait -->
+    <a
+      class="zip-download flexrow-item"
+      :href="zipUrl"
+      :title="$t('playlists.download_zip')"
+      target="_blank"
+      rel="noopener"
+      v-if="zipUrl"
+    >
+      <download-icon class="icon" :size="16" />
+      <span class="zip-download-label">
+        {{ $t('playlists.download_zip') }}
+      </span>
+    </a>
+
     <span
       class="flexrow-item guest-name"
       :title="guestDisplayName"
@@ -65,7 +80,7 @@
 </template>
 
 <script setup>
-import { LogOutIcon } from 'lucide-vue-next'
+import { DownloadIcon, LogOutIcon } from 'lucide-vue-next'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
@@ -76,7 +91,8 @@ defineProps({
   guestId: { type: String, default: '' },
   playingEntityIndex: { type: Number, default: 0 },
   playlistName: { type: String, default: '' },
-  projectName: { type: String, default: '' }
+  projectName: { type: String, default: '' },
+  zipUrl: { type: String, default: '' }
 })
 
 defineEmits(['logout', 'next-entity', 'previous-entity'])
@@ -208,6 +224,25 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
     text-transform: uppercase;
     white-space: nowrap;
   }
+
+  .zip-download {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: rgba(244, 245, 250, 0.6);
+    display: flex;
+    flex-shrink: 0;
+    font-size: 0.85em;
+    gap: 0.4em;
+    padding: 0.45em 0.55em;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: #f4f5fa;
+    }
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -216,7 +251,8 @@ defineEmits(['logout', 'next-entity', 'previous-entity'])
     .entity-nav,
     .guest-name,
     .header-separator,
-    .project-name {
+    .project-name,
+    .zip-download-label {
       display: none;
     }
 

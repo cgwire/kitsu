@@ -28,6 +28,7 @@
         :token="token"
         :guest-id="guestId || ''"
         :can-comment="shareLink?.can_comment || false"
+        :can-download="shareLink?.can_download || false"
         @logout="logoutGuest"
       />
     </div>
