@@ -524,9 +524,13 @@ const actions = {
     ) {
       return Promise.reject(new Error('Sequence already exists'))
     }
+    // The caller may pick the task types itself, none included (schedule
+    // creation); otherwise every production sequence task type is created.
+    const chosenTaskTypeIds = sequence.taskTypeIds
     return shotsApi.newSequence(sequence).then(sequence => {
       commit(NEW_SEQUENCE_END, { sequence, episodeMap })
-      const taskTypeIds = rootGetters.productionSequenceTaskTypeIds
+      const taskTypeIds =
+        chosenTaskTypeIds || rootGetters.productionSequenceTaskTypeIds
       // An empty list means "all valid task types" server-side: skip the call.
       if (taskTypeIds.length === 0) return sequence
       return dispatch('createEntityTasks', {

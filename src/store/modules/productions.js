@@ -130,6 +130,8 @@ const helpers = {
   }
 }
 
+const isTrackedTaskType = taskType => taskType.for_entity !== 'Untracked'
+
 const productionEntityTaskTypeIds = entityType => (state, getters) => {
   return getters.productionTaskTypes
     .filter(taskType => taskType.for_entity === entityType)
@@ -350,14 +352,16 @@ const getters = {
     )
   },
 
+  // The untracked task types plan work the schedule alone shows: the
+  // playlists, the stats and the filters have nothing to do with them.
   productionTaskTypes: (state, getters, rootState) => {
     if (helpers.isEmptyArray(state.currentProduction, 'task_types')) {
-      return rootState.taskTypes.taskTypes
+      return rootState.taskTypes.taskTypes.filter(isTrackedTaskType)
     } else {
       return sortByName(
         state.currentProduction.task_types
           .map(id => taskTypesCache.taskTypeMap.get(id))
-          .filter(Boolean)
+          .filter(taskType => taskType && isTrackedTaskType(taskType))
       )
     }
   },
@@ -365,12 +369,12 @@ const getters = {
   getProductionTaskTypes: (state, getters, rootState) => id => {
     const production = state.productionMap.get(id)
     if (helpers.isEmptyArray(production, 'task_types')) {
-      return rootState.taskTypes.taskTypes
+      return rootState.taskTypes.taskTypes.filter(isTrackedTaskType)
     } else {
       return sortByName(
         production.task_types
           .map(id => taskTypesCache.taskTypeMap.get(id))
-          .filter(Boolean)
+          .filter(taskType => taskType && isTrackedTaskType(taskType))
       )
     }
   },

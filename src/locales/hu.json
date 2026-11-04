@@ -1501,6 +1501,36 @@
       "assign_no_fit": "{count} feladat nem fért bele a dátumtartományba. | {count} feladat nem fért bele a dátumtartományba.",
       "batch_schedule": "Feladatok csoportos ütemezése",
       "confirm_move_children": "A sáv mozgatása {count} alelem dátumait is módosítja. Folytatja? | A sáv mozgatása {count} alelem dátumait is módosítja. Folytatja?",
+      "create_task": {
+        "asset_type": "Asset típusa",
+        "button": "Feladat létrehozása",
+        "color": "Szín",
+        "department": "Részleg",
+        "description": "Leírás",
+        "due_date": "Határidő (nem kötelező)",
+        "error": "Hiba történt a feladatok létrehozása közben. Próbáld újra.",
+        "kind": "Létrehozás",
+        "kinds": {
+          "asset": "Új asset",
+          "edit": "Új vágás",
+          "shot": "Új snitt",
+          "untracked": "Nem követett elem (csak ütemterv)"
+        },
+        "link": "Kapcsolódik ehhez",
+        "link_episode": "{name} epizód",
+        "link_none": "A teljes produkció",
+        "name": "Név",
+        "new_sequence": "Új szekvencia…",
+        "new_sequence_name": "Szekvencia neve",
+        "no_task_types": "A produkciónak nincs feladattípusa ehhez az elemfajtához. Adj hozzá egyet a produkció beállításaiban.",
+        "sequence": "Szekvencia",
+        "shot": "Snitt",
+        "shot_none": "A teljes szekvencia",
+        "start_date": "Kezdő dátum",
+        "task_types": "Létrehozandó feladattípusok",
+        "title": "Feladatok létrehozása az ütemtervben",
+        "untracked_hint": "A nem követett elem csak az ütemtervben jelenik meg, az assetek, snittek vagy vágások listájában nem. Később, ha már léteznek, kapcsold egy szekvenciához vagy snitthez."
+      },
       "create_version": "Időbeosztás-verzió létrehozása",
       "daily_quota": "Feladat személyenként és naponta",
       "daily_quota_estimated": "Minden feladatnak van becslése: a dátumok azt követik, {quota} személyenként és naponta. A beírt érték minden feladatra érvényes, a becsültekre is.",
@@ -1566,6 +1596,9 @@
       "title": "Időbeosztás",
       "title_main": "Fő időbeosztás",
       "today": "Ma",
+      "untracked": {
+        "title": "Nem követett"
+      },
       "version": "Verzió",
       "versions": {
         "canceled": "törölve",

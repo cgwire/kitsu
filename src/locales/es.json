@@ -1501,6 +1501,36 @@
       "assign_no_fit": "{count} tarea no cupo en el rango de fechas. | {count} tareas no cupieron en el rango de fechas.",
       "batch_schedule": "Planificar tareas por lotes",
       "confirm_move_children": "Mover esta barra también cambia las fechas de {count} subelemento. ¿Continuar? | Mover esta barra también cambia las fechas de {count} subelementos. ¿Continuar?",
+      "create_task": {
+        "asset_type": "Tipo de asset",
+        "button": "Crear tarea",
+        "color": "Color",
+        "department": "Departamento",
+        "description": "Descripción",
+        "due_date": "Fecha de entrega (opcional)",
+        "error": "Se produjo un error al crear las tareas. Inténtalo de nuevo.",
+        "kind": "Crear",
+        "kinds": {
+          "asset": "Un nuevo asset",
+          "edit": "Un nuevo montaje",
+          "shot": "Un nuevo plano",
+          "untracked": "Un elemento sin seguimiento (solo planificación)"
+        },
+        "link": "Vinculado a",
+        "link_episode": "Episodio {name}",
+        "link_none": "Toda la producción",
+        "name": "Nombre",
+        "new_sequence": "Nueva secuencia…",
+        "new_sequence_name": "Nombre de la secuencia",
+        "no_task_types": "La producción no tiene ningún tipo de tarea para este tipo de elemento. Añade uno en los ajustes de la producción.",
+        "sequence": "Secuencia",
+        "shot": "Plano",
+        "shot_none": "Toda la secuencia",
+        "start_date": "Fecha de inicio",
+        "task_types": "Tipos de tarea a crear",
+        "title": "Crear tareas en la planificación",
+        "untracked_hint": "Un elemento sin seguimiento solo aparece en la planificación, no en las listas de assets, planos o montajes. Vincúlalo más tarde a una secuencia o un plano, cuando existan."
+      },
       "create_version": "Crear versión del calendario",
       "daily_quota": "Tareas por persona y día",
       "daily_quota_estimated": "Todas las tareas tienen una estimación: las fechas la siguen, {quota} por persona y día. Un valor escrito se aplica a todas las tareas, estimaciones incluidas.",
@@ -1566,6 +1596,9 @@
       "title": "Calendario",
       "title_main": "Calendario principal",
       "today": "Hoy",
+      "untracked": {
+        "title": "Sin seguimiento"
+      },
       "version": "Versión",
       "versions": {
         "reference": "Previsión de referencia",
