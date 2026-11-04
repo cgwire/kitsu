@@ -1,6 +1,6 @@
 <template>
   <div :class="{ field: withMargin }">
-    <label class="label" v-if="label.length > 0">
+    <label class="label" :id="labelId" v-if="label.length > 0">
       {{ label }}
     </label>
     <div class="task-type-combo" :class="{ disabled, shy }">
@@ -8,6 +8,7 @@
         class="flexrow selector"
         ref="triggerRef"
         role="combobox"
+        :aria-labelledby="label.length > 0 ? labelId : undefined"
         :tabindex="disabled ? -1 : 0"
         aria-haspopup="listbox"
         :aria-expanded="showTaskTypeList"
@@ -54,7 +55,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
@@ -108,6 +109,8 @@ const props = defineProps({
 
 const emit = defineEmits(['change', 'update:model-value'])
 
+// The label names the combobox: a <label for> cannot point to a div.
+const labelId = useId()
 const showTaskTypeList = ref(false)
 const tooltipPosition = ref({ top: 0, left: 0 })
 

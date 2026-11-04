@@ -1,6 +1,6 @@
 <template>
   <div class="field task-status-set-field">
-    <label class="label" v-if="label">{{ label }}</label>
+    <label class="label" :id="labelId" v-if="label">{{ label }}</label>
     <div class="statuses" ref="statusesRef">
       <span
         class="tag task-status"
@@ -24,6 +24,7 @@
       <combobox-status
         class="add-status"
         add-placeholder
+        :aria-labelledby="label ? labelId : ''"
         :open-top="openTop"
         :task-status-list="remainingTaskStatuses"
         :with-margin="false"
@@ -35,7 +36,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, ref, useId } from 'vue'
 import { useStore } from 'vuex'
 
 import { useTaskStatusStyle } from '@/composables/taskStatus'
@@ -60,6 +61,8 @@ const emit = defineEmits(['update:model-value'])
 
 // State
 // --------------------------------------------------------------------------
+// The field label names its picker.
+const labelId = useId()
 const statusesRef = ref(null)
 
 // Computed

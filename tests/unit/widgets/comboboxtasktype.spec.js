@@ -55,6 +55,22 @@ describe('ComboboxTaskType', () => {
     expect(findTeleportedList().getAttribute('role')).toBe('listbox')
   })
 
+  it('names the combobox by its label', () => {
+    const labeled = shallowMountWithI18n(ComboboxTaskType, {
+      props: { label: 'Task Type', taskTypeList, modelValue: 'tt-2' },
+      global: { plugins: [store], stubs: { teleport: false } }
+    })
+    const labelId = labeled.find('label').attributes('id')
+    expect(labelId).toBeTruthy()
+    expect(
+      labeled.find('[role="combobox"]').attributes('aria-labelledby')
+    ).toBe(labelId)
+    expect(
+      wrapper.find('[role="combobox"]').attributes('aria-labelledby')
+    ).toBeUndefined()
+    labeled.unmount()
+  })
+
   it('opens and selects a task type via keyboard', async () => {
     const trigger = wrapper.find('.flexrow.selector')
     await trigger.trigger('keydown', { key: 'ArrowDown' })

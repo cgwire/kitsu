@@ -71,6 +71,20 @@ describe('TaskStatusSetField', () => {
     expect(combobox.props('taskStatusList')).toEqual([na, wip])
   })
 
+  it('names its picker by its label', () => {
+    const wrapper = mountField({ label: 'Task Status', modelValue: [] })
+    const labelId = wrapper.find('label').attributes('id')
+    expect(labelId).toBeTruthy()
+    expect(wrapper.findComponent(ComboboxStatus).props('ariaLabelledby')).toBe(
+      labelId
+    )
+    expect(
+      mountField({ modelValue: [] })
+        .findComponent(ComboboxStatus)
+        .props('ariaLabelledby')
+    ).toBe('')
+  })
+
   it('adds a status', () => {
     const wrapper = mountField({ modelValue: [done.id] })
     wrapper.findComponent(ComboboxStatus).vm.$emit('update:model-value', na.id)
