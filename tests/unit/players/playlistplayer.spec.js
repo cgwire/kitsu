@@ -245,6 +245,17 @@ describe('PlaylistPlayer.vue', () => {
       vi.useRealTimers()
     })
 
+    // The next file of the shot, then the next shot
+    const nextShot = async () => {
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      await flushPromises()
+    }
+
     it.each([
       [
         'video',
@@ -307,6 +318,40 @@ describe('PlaylistPlayer.vue', () => {
       }
     )
 
+    // The keyboard still moves the player under the attachment dialog.
+    it('stops the video snapshots once the player moves to another shot', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      // jsdom draws and encodes nothing
+      const snapshotCanvas = document.createElement('canvas')
+      snapshotCanvas.toBlob = callback => callback(new Blob())
+      vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        clearRect: () => {},
+        drawImage: () => {}
+      })
+      const annotations = [1, 2].map(time => ({
+        time,
+        drawing: { objects: [] }
+      }))
+      const movie = id => ({
+        ...entity,
+        id,
+        preview_file_id: `${id}-movie`,
+        preview_file_extension: 'mp4',
+        preview_file_annotations: annotations
+      })
+      wrapper = mountPlayer({ entities: [movie('shot-1'), movie('shot-2')] })
+      await flushPromises()
+
+      const snapshots = wrapper.vm.extractAnnotationSnapshots()
+      await vi.advanceTimersByTimeAsync(550)
+      await nextShot()
+      await vi.advanceTimersByTimeAsync(1500)
+
+      expect(wrapper.vm.playingEntityIndex).toBe(1)
+      await expect(snapshots).resolves.toEqual([])
+    })
+
     // A picture loads once shown, and the next one of a revision can take
     // longer than the snapshot of the previous one: a picture still loading
     // makes a snapshot without the picture, or a 0x0 one that drawImage
@@ -316,7 +361,7 @@ describe('PlaylistPlayer.vue', () => {
       let snapshotCanvas = null
       let unavailable = null
 
-      const mountRevision = async () => {
+      const mountRevision = async (otherShots = []) => {
         vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
         // jsdom encodes nothing
         snapshotCanvas = document.createElement('canvas')
@@ -333,7 +378,8 @@ describe('PlaylistPlayer.vue', () => {
               preview_file_previews: [
                 { id: 'preview-1b', extension: 'png', revision: 1 }
               ]
-            }
+            },
+            ...otherShots
           ],
           stubs: {
             // Its picture has a size before the whole file is in.
@@ -435,6 +481,75 @@ describe('PlaylistPlayer.vue', () => {
           wrapper.findComponent({ ref: 'picture-player' }).props('currentPreview')
             .id
         ).toBe('preview-1')
+      })
+
+      // The keyboard still moves the player under the attachment dialog.
+      it('stops once the player moves to another shot, and leaves it there', async () => {
+        await mountRevision([
+          {
+            ...entity,
+            id: 'shot-2',
+            preview_file_id: 'preview-2',
+            preview_file_extension: 'png',
+            preview_file_revision: 1,
+            preview_file_previews: [
+              { id: 'preview-2b', extension: 'png', revision: 1 }
+            ]
+          }
+        ])
+        // The user is on the second file of the first shot.
+        await nextShot()
+        expect(wrapper.vm.currentPreviewIndex).toBe(1)
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+        await nextShot()
+        await vi.advanceTimersByTimeAsync(1500)
+
+        expect(isDone).toBe(true)
+        await done
+        await expect(snapshots).resolves.toEqual([])
+        // The other shot opens on its first file, as without the snapshots.
+        expect(wrapper.vm.playingEntityIndex).toBe(1)
+        expect(wrapper.vm.currentPreviewIndex).toBe(0)
+      })
+
+      // Encoding a big picture takes a while.
+      it('drops the snapshots when the player moves during the last encoding', async () => {
+        await mountRevision([
+          {
+            ...entity,
+            id: 'shot-2',
+            preview_file_id: 'preview-2',
+            preview_file_extension: 'png',
+            preview_file_revision: 1
+          }
+        ])
+        loaded.add('preview-1b')
+        let encoded = 0
+        let encodeLast = null
+        snapshotCanvas.toBlob = callback => {
+          encoded += 1
+          if (encoded === 2) {
+            encodeLast = () => callback(new Blob())
+          } else {
+            callback(new Blob())
+          }
+        }
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        await vi.advanceTimersByTimeAsync(1500)
+        expect(encodeLast).not.toBeNull()
+        await nextShot()
+        encodeLast()
+        await vi.advanceTimersByTimeAsync(1000)
+
+        await expect(snapshots).resolves.toEqual([])
       })
     })
   })

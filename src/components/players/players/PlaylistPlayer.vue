@@ -3752,19 +3752,36 @@ const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
   const sorted = annotations.value.sort((a, b) => a.time - b.time)
   const files = []
   const revision = currentPreview.value?.revision
+  // The user can move the player to another file meanwhile: its frames do
+  // not go with these annotations.
+  const previewId = currentPreview.value?.id
+  const isMoved = () => currentPreview.value?.id !== previewId
   for (const ann of sorted) {
-    const canvas = document.getElementById('annotation-snapshot')
-    const frame = Math.round(
-      roundToFrame(ann.time, fps.value) / frameDuration.value
-    )
-    if (!(await extractVideoFrame(canvas, frame))) return []
-    await copyAnnotationCanvas(canvas, ann)
-    if (withLabel) drawSnapshotTitle(canvas, snapshotTitle({ revision, frame }))
-    files.push(
-      await getFileFromCanvas(canvas, snapshotFilename({ revision, frame }))
-    )
+    if (!isMoved()) {
+      const canvas = document.getElementById('annotation-snapshot')
+      const frame = Math.round(
+        roundToFrame(ann.time, fps.value) / frameDuration.value
+      )
+      if (!(await extractVideoFrame(canvas, frame))) return []
+      await copyAnnotationCanvas(canvas, ann)
+      if (withLabel) {
+        drawSnapshotTitle(canvas, snapshotTitle({ revision, frame }))
+      }
+      files.push(
+        await getFileFromCanvas(canvas, snapshotFilename({ revision, frame }))
+      )
+    }
   }
   if (!rawPlayer.value) return []
+  if (isMoved()) {
+    // The player stays where the user moved it, without the drawing the
+    // loop may have left on the live canvas.
+    nextTick(() => {
+      clearCanvas()
+      reloadCurrentAnnotation()
+    })
+    return []
+  }
   rawPlayer.value.setCurrentFrame(cur - 1)
   nextTick(() => {
     clearCanvas()
@@ -3781,16 +3798,21 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   const entity = currentEntity.value
   if (!entity) return []
   const savedIndex = currentPreviewIndex.value
+  // The file the snapshots have the player show: the user can move the
+  // player to another one meanwhile.
+  const shown = { id: currentPreview.value?.id }
   try {
-    return await snapshotPicturePreviews(entity, { withLabel })
+    return await snapshotPicturePreviews(entity, shown, { withLabel })
   } finally {
     // Back to the file of the user, even after a failed snapshot. A closed
-    // player has nothing left to show.
-    if (picturePlayer.value) await showPreviewFile(savedIndex)
+    // player has nothing left to show, and one the user moved stays there.
+    if (picturePlayer.value && currentPreview.value?.id === shown.id) {
+      await showPreviewFile(savedIndex)
+    }
   }
 }
 
-const snapshotPicturePreviews = async (entity, { withLabel }) => {
+const snapshotPicturePreviews = async (entity, shown, { withLabel }) => {
   const picturePreviews = [
     {
       id: entity.preview_file_id,
@@ -3802,18 +3824,23 @@ const snapshotPicturePreviews = async (entity, { withLabel }) => {
   ]
     .map((preview, index) => ({ preview, index }))
     .filter(({ preview }) => isPicturePreview(preview.extension))
+  // Another file on screen: the user moved the player, the snapshots stop.
+  const isMoved = () => currentPreview.value?.id !== shown.id
 
   const files = []
   let fileIndex = 1
   for (const { preview, index } of picturePreviews) {
+    if (isMoved()) return []
     if (currentPreviewIndex.value !== index) {
       currentPreviewIndex.value = index
     }
+    shown.id = preview.id
     // The viewer takes the new file at the next render: read before it,
     // the state is still the one of the previous picture.
     await nextTick()
     const isInTime = await waitForPicture(
       () =>
+        isMoved() ||
         !picturePlayer.value ||
         picturePlayer.value.isPictureReady() ||
         picturePlayer.value.isPictureUnavailable()
@@ -3825,8 +3852,8 @@ const snapshotPicturePreviews = async (entity, { withLabel }) => {
     // then capture an empty canvas and the resulting PNG would come out
     // without any annotation.
     await new Promise(resolve => setTimeout(resolve, 500))
-    // Closed meanwhile, like in extractVideoFrame
-    if (!picturePlayer.value) return []
+    // Closed meanwhile, like in extractVideoFrame, or moved
+    if (!picturePlayer.value || isMoved()) return []
     // Leave out a picture that cannot load or is still loading: its snapshot
     // would be 0x0, which drawImage refuses, or without the picture. Leave out
     // one that came in after its 10 s too: it did not get the time above to
@@ -3850,7 +3877,8 @@ const snapshotPicturePreviews = async (entity, { withLabel }) => {
     }
     fileIndex++
   }
-  return files
+  // Moved during the encoding of the last picture
+  return isMoved() ? [] : files
 }
 
 const showPreviewFile = async index => {

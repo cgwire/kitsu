@@ -1726,6 +1726,54 @@ describe('PreviewPlayer.vue', () => {
     }
     )
 
+    // The user can move the player to another task or revision meanwhile.
+    it('stops the video snapshots once the player shows another file', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      // jsdom draws and encodes nothing
+      const snapshotCanvas = document.createElement('canvas')
+      snapshotCanvas.toBlob = callback => callback(new Blob())
+      vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        drawImage: () => {}
+      })
+      const canvas = {
+        ...createFakeCanvas(),
+        getWidth: () => 800,
+        toCanvasElement: () => document.createElement('canvas')
+      }
+      const annotations = [1, 2].map(time => ({
+        time,
+        drawing: { objects: [] }
+      }))
+      wrapper = mountPlayer({
+        props: { previews: [{ ...moviePreview, annotations }] },
+        stubs: {
+          AnnotationCanvas: annotationCanvasStub(canvas),
+          // Read once another movie is in
+          PreviewViewer: {
+            name: 'PreviewViewer',
+            template: '<div />',
+            methods: {
+              ...viewer,
+              getNaturalDimensions: () => ({ width: 1920, height: 1080 })
+            }
+          }
+        }
+      })
+      await nextTick()
+
+      const snapshots = wrapper.vm.extractAnnotationSnapshots()
+      await vi.advanceTimersByTimeAsync(550)
+      expect(viewer.extractFrame).toHaveBeenCalledTimes(1)
+      await wrapper.setProps({
+        previews: [{ ...moviePreview, id: 'preview-3', revision: 2, annotations }]
+      })
+      await vi.advanceTimersByTimeAsync(1200)
+
+      await expect(snapshots).resolves.toEqual([])
+      expect(viewer.extractFrame).toHaveBeenCalledTimes(1)
+    })
+
     // A picture loads once shown, and the next one of a revision can take
     // longer than the snapshot of the previous one: a picture still loading
     // makes a 0x0 snapshot that drawImage refuses, even once its size is
@@ -1842,6 +1890,58 @@ describe('PreviewPlayer.vue', () => {
         expect(
           wrapper.findComponent({ ref: 'preview-viewer' }).props('preview').id
         ).toBe(preview.id)
+      })
+
+      // The user can move the player to another task or revision meanwhile.
+      it('stops once the player shows other files, and leaves it there', async () => {
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+        await wrapper.setProps({
+          previews: [
+            { ...preview, id: 'preview-3', revision: 2 },
+            { ...preview, id: 'preview-3b', revision: 2 }
+          ]
+        })
+        await vi.advanceTimersByTimeAsync(1500)
+
+        expect(isDone).toBe(true)
+        await done
+        await expect(snapshots).resolves.toEqual([])
+        expect(extracted).toEqual([preview.id])
+        // The player kept the file index, not sent back to the first file
+        expect(
+          wrapper.findComponent({ ref: 'preview-viewer' }).props('preview').id
+        ).toBe('preview-3b')
+      })
+
+      // Encoding a big picture takes a while.
+      it('drops the snapshots when the player moves during the last encoding', async () => {
+        loaded.add(nextPicture.id)
+        let encodeLast = null
+        snapshotCanvas.toBlob = callback => {
+          if (extracted.length === 2) {
+            encodeLast = () => callback(new Blob())
+          } else {
+            callback(new Blob())
+          }
+        }
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        await vi.advanceTimersByTimeAsync(1500)
+        expect(encodeLast).not.toBeNull()
+        await wrapper.setProps({
+          previews: [{ ...preview, id: 'preview-3', revision: 2 }]
+        })
+        encodeLast()
+        await vi.advanceTimersByTimeAsync(1000)
+
+        await expect(snapshots).resolves.toEqual([])
       })
     })
   })
