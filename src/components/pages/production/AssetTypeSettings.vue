@@ -31,6 +31,7 @@
                     <combobox-task-type-options
                       :hidden="getHiddenTaskTypeIds(assetType.id)"
                       :task-types="taskTypes"
+                      teleported
                       @update:hidden="onHiddenChanged(assetType.id, $event)"
                     />
                   </span>

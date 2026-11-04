@@ -17,12 +17,31 @@ describe('ComboboxOptions', () => {
         title: 'Display options',
         options,
         modelValue: { showInfos: true }
-      }
+      },
+      global: { stubs: { teleport: false } }
     })
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
+  })
+
+  it('teleports the list out of its container when asked', async () => {
+    const target = document.createElement('div')
+    target.id = 'theme-popups'
+    document.body.appendChild(target)
+    const teleported = shallowMount(ComboboxOptions, {
+      props: { options, teleported: true },
+      global: { stubs: { teleport: false } }
+    })
+    await teleported.find('.flexrow').trigger('click')
+    await flushPromises()
+    const list = target.querySelector('.select-input')
+    expect(list).not.toBeNull()
+    expect(list.style.top).not.toBe('')
+    expect(teleported.find('.select-input').exists()).toBe(false)
+    teleported.unmount()
+    target.remove()
   })
 
   it('exposes combobox/listbox ARIA roles with multiselectable', async () => {
@@ -42,7 +61,8 @@ describe('ComboboxOptions', () => {
         option: `<template #option="{ option }">
           <b class="custom">{{ option.value }}</b>
         </template>`
-      }
+      },
+      global: { stubs: { teleport: false } }
     })
     await wrapper.find('.flexrow').trigger('click')
     const line = wrapper.find('.option-line')

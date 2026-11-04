@@ -3,6 +3,7 @@
     :hidden="hidden"
     :label="label"
     :options="options"
+    :teleported="teleported"
     @update:hidden="$emit('update:hidden', $event)"
   >
     <template #option="{ option }">
@@ -24,7 +25,8 @@ import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 const props = defineProps({
   hidden: { type: Array, default: () => [] },
   label: { type: String, default: '' },
-  taskTypes: { type: Array, default: () => [] }
+  taskTypes: { type: Array, default: () => [] },
+  teleported: { type: Boolean, default: false }
 })
 
 defineEmits(['update:hidden'])
