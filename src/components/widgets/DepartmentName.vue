@@ -30,7 +30,8 @@ defineProps({
 
 <style lang="scss" scoped>
 .department-name {
-  display: inline-block;
+  align-items: center;
+  display: inline-flex;
   color: var(--text);
   padding: 0.2em 0.6em;
   white-space: nowrap;

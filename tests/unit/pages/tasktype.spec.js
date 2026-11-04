@@ -1303,4 +1303,63 @@ describe('TaskType page', () => {
       })
     })
   })
+
+  describe('back link of the schedule tab', () => {
+    const routes = [
+      ...taskTypeRoutes,
+      {
+        name: 'schedule',
+        path: '/productions/:production_id/schedule',
+        component: Page
+      },
+      {
+        name: 'episode-schedule',
+        path: '/productions/:production_id/episodes/:episode_id/schedule',
+        component: Page
+      }
+    ]
+    let wrapper
+
+    afterEach(() => {
+      wrapper.unmount()
+      vi.useRealTimers()
+    })
+
+    const backPathOf = async (getters, path) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const mounted = await mountPage({ getters, path, routes })
+      wrapper = mounted.wrapper
+      const link = wrapper
+        .findAllComponents({ name: 'RouterLink' })
+        .find(routerLink => routerLink.classes('back-link'))
+      return mounted.router.resolve(link.props('to')).path
+    }
+
+    it('goes back to the schedule of the current episode', async () => {
+      const path = await backPathOf(
+        {
+          currentEpisode: () => ({ id: 'episode-1' }),
+          isTVShow: () => true
+        },
+        '/productions/production-1/episodes/episode-1/assets/task-types/task-type-1/schedule'
+      )
+      expect(path).toBe('/productions/production-1/episodes/episode-1/schedule')
+    })
+
+    it('goes back to all the episodes when none is set', async () => {
+      const path = await backPathOf(
+        { isTVShow: () => true },
+        '/productions/production-1/assets/task-types/task-type-1/schedule'
+      )
+      expect(path).toBe('/productions/production-1/episodes/all/schedule')
+    })
+
+    it('stays out of the episodes on a production without them', async () => {
+      const path = await backPathOf(
+        {},
+        '/productions/production-1/assets/task-types/task-type-1/schedule'
+      )
+      expect(path).toBe('/productions/production-1/schedule')
+    })
+  })
 })

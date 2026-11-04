@@ -890,8 +890,8 @@ let lastEndDate = null
 // assignee, so assignees[0] is not necessarily the person being reassigned
 let dragSourcePersonId = null
 
-// shift held on the mousedown: the rows of a root bar move with it instead
-// of being clipped to its new bounds
+// shift held on the mousedown: the rows of a root bar are clipped to its new
+// bounds and the tasks of a row stay in place, instead of moving with the bar
 let isShiftDrag = false
 
 // person row each dragged bar last hopped to during the drag: once the bar
@@ -1698,6 +1698,7 @@ const stampDragOrigin = timeElement => {
   timeElement._dragOrigStartDate = timeElement.startDate.clone()
   timeElement._dragOrigEndDate = timeElement.endDate.clone()
   timeElement._dragOrigEstimation = timeElement.estimation
+  timeElement._dragShifted = !isShiftDrag && isChangeDates.value
   stampSubItems(timeElement)
 }
 
@@ -1710,7 +1711,7 @@ const stampSubItems = item => {
   })
 }
 
-// Shift held: everything under the bar moves by the same whole days,
+// Moved without shift: everything under the bar moves by the same whole days,
 // recomputed from the stamped origin so a back-drag never drifts (a
 // millisecond shift would also drift a day across a DST change).
 const shiftSubItems = (item, shift) => {
@@ -1724,7 +1725,7 @@ const shiftSubItems = (item, shift) => {
 
 const propagateClipToChildren = item => {
   if (!props.clipChildren) return
-  if (isShiftDrag && isChangeDates.value) {
+  if (item._dragShifted) {
     shiftSubItems(item, item.startDate.diff(item._dragOrigStartDate, 'days'))
     return
   }
@@ -1757,6 +1758,15 @@ const propagateClipToChildren = item => {
     }
     // else: child fully inside new bounds — already restored, leave untouched
   })
+  if (props.multiline) refreshItemPositionsDuringDrag([item])
+}
+
+// The rows of a collapsed bar load after its drop: they get the move the
+// rows of an unfolded bar got during the drag.
+const applyMoveToLoadedRows = item => {
+  stampSubItems(item)
+  propagateClipToChildren(item)
+  refreshItemPositions(item)
 }
 
 const updateItemEstimation = item => {
@@ -2033,7 +2043,8 @@ const stopBrowsing = event => {
       // on moving or resizing selected items
       selection.value.forEach(item => {
         emit('item-changed', item)
-        refreshItemPositions(item.parentElement)
+        // a root bar has no parent: its clip changed the lines of its rows
+        refreshItemPositions(item.parentElement ?? item)
         refreshManDays(item.parentElement)
       })
       // clear selection after moving a single item
@@ -2831,6 +2842,7 @@ provide('scheduleRowHelpers', {
 })
 
 defineExpose({
+  applyMoveToLoadedRows,
   exportData,
   refreshAllItemPositions,
   refreshItemPositions,

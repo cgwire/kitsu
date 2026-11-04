@@ -236,6 +236,7 @@ const mountPage = async ({
     props: { hierarchy: { type: Array, default: () => [] } },
     template: '<div />',
     methods: {
+      applyMoveToLoadedRows: vi.fn(),
       exportData: vi.fn(),
       refreshItemPositions: vi.fn(),
       resetSelection: vi.fn(),
@@ -1046,6 +1047,76 @@ describe('ProductionSchedule page', () => {
   // The view of an episode drew the task type bars of the production, so
   // the dates planned for the episode in the all-episodes view never
   // showed there, and a move from the episode view changed the production.
+  // A collapsed bar holds no row yet: moved as it is, its episodes stayed
+  // out of the new dates with nothing asked, unlike the same move unfolded.
+  describe('moving a collapsed task type bar', () => {
+    const episodeRow = {
+      id: 'row-e01',
+      object_id: 'episode-1',
+      task_type_id: 'task-type-modeling',
+      name: 'E01',
+      start_date: '2026-02-02',
+      end_date: '2026-02-06'
+    }
+    const mountAllEpisodes = () =>
+      mountPage({
+        getters: {
+          currentEpisode: () => ({ id: 'all', name: 'All' }),
+          isTVShow: () => true
+        },
+        actions: {
+          loadEpisodeScheduleItems: vi.fn(() => [{ ...episodeRow }])
+        }
+      })
+
+    it('applies the move to the rows it loads and asks first', async () => {
+      const { scheduleWidget, storeActions, wrapper } = await mountAllEpisodes()
+      const [bar] = rowsOf(wrapper)
+      bar.task_type_id = episodeRow.task_type_id
+      scheduleWidget.methods.applyMoveToLoadedRows.mockImplementationOnce(
+        item => {
+          const [row] = item.children
+          row._dragOrigStartDate = row.startDate.clone()
+          row._dragOrigEndDate = row.endDate.clone()
+          row.startDate = row.startDate.clone().add(1, 'days')
+        }
+      )
+
+      await changeItem(wrapper, bar)
+
+      expect(scheduleWidget.methods.applyMoveToLoadedRows).toHaveBeenCalledWith(
+        bar
+      )
+      expect(wrapper.findComponent(ConfirmModal).props('text')).toContain(
+        '"count":1'
+      )
+      expect(storeActions.saveScheduleItem).not.toHaveBeenCalled()
+    })
+
+    it('saves right away when no row falls out of the new dates', async () => {
+      const { scheduleWidget, storeActions, wrapper } = await mountAllEpisodes()
+      const [bar] = rowsOf(wrapper)
+      scheduleWidget.methods.applyMoveToLoadedRows.mockClear()
+
+      await changeItem(wrapper, bar)
+
+      expect(scheduleWidget.methods.applyMoveToLoadedRows).toHaveBeenCalledOnce()
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
+      expect(payloadsOf(storeActions.saveScheduleItem)).toEqual([bar])
+    })
+
+    it('reloads nothing for an unfolded bar', async () => {
+      const { storeActions, wrapper } = await mountAllEpisodes()
+      const [bar] = rowsOf(wrapper)
+      bar.expanded = true
+      storeActions.loadEpisodeScheduleItems.mockClear()
+
+      await changeItem(wrapper, bar)
+
+      expect(storeActions.loadEpisodeScheduleItems).not.toHaveBeenCalled()
+    })
+  })
+
   describe('episode view', () => {
     const episode = { id: 'episode-3', name: 'E03' }
     const episodeRowOf = taskType => ({
@@ -1211,9 +1282,9 @@ describe('ProductionSchedule page', () => {
       )
     })
 
-    // A shift drag moves the tasks under a bar: the widget stamps where
+    // A drag moves the tasks under a bar: the widget stamps where
     // each one started from, the page asks before saving them all.
-    it('asks before saving the tasks a shift-dragged row carried along', async () => {
+    it('asks before saving the tasks a dragged row carried along', async () => {
       const { storeActions, wrapper } = await mountPage()
       const taskTypeBar = rowsOf(wrapper)[0]
       const movedBar = buildBar('2026-02-11', '2026-02-20')
