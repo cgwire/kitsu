@@ -1282,9 +1282,9 @@ describe('ProductionSchedule page', () => {
       )
     })
 
-    // A shift drag moves the tasks under a bar: the widget stamps where
+    // A drag moves the tasks under a bar: the widget stamps where
     // each one started from, the page asks before saving them all.
-    it('asks before saving the tasks a shift-dragged row carried along', async () => {
+    it('asks before saving the tasks a dragged row carried along', async () => {
       const { storeActions, wrapper } = await mountPage()
       const taskTypeBar = rowsOf(wrapper)[0]
       const movedBar = buildBar('2026-02-11', '2026-02-20')

@@ -1030,7 +1030,7 @@ describe('Schedule widget - dragging an entity bar over its task rows', () => {
   })
 })
 
-describe('Schedule widget - shift drag with tasks', () => {
+describe('Schedule widget - drag with tasks', () => {
   let rafSpy
 
   beforeEach(() => {
@@ -1049,8 +1049,8 @@ describe('Schedule widget - shift drag with tasks', () => {
   const fmt = date => date.format('YYYY-MM-DD')
 
   // zoom level 1 is 20px a day: a 200px drag is 10 days
-  const shiftDrag = async (wrapper, bar) => {
-    await bar.trigger('mousedown', { clientX: 300, shiftKey: true })
+  const dragBar = async (bar, options = {}) => {
+    await bar.trigger('mousedown', { clientX: 300, ...options })
     document.dispatchEvent(
       new MouseEvent('mousemove', { bubbles: true, clientX: 500 })
     )
@@ -1074,7 +1074,7 @@ describe('Schedule widget - shift drag with tasks', () => {
         ({ element }) =>
           !element.closest('.root-element') && !element.closest('.subchild')
       )
-    await shiftDrag(wrapper, bar)
+    await dragBar(bar)
 
     expect(fmt(row.startDate)).toBe('2026-08-13')
     expect([fmt(task.startDate), fmt(task.endDate)]).toEqual([
@@ -1087,7 +1087,29 @@ describe('Schedule widget - shift drag with tasks', () => {
     wrapper.unmount()
   })
 
-  it('moves the tasks of every selected row on a shift drag', async () => {
+  it('leaves the tasks in place on a shift drag', async () => {
+    const hierarchy = buildSubchildrenHierarchy(1)
+    const [root] = hierarchy
+    const [row] = root.children
+    const [task] = row.children.get('person-1')
+    const taskDates = [fmt(task.startDate), fmt(task.endDate)]
+    row.endDate = moment('2026-09-30')
+    const wrapper = mountSubchildren(hierarchy)
+
+    const bar = wrapper
+      .findAll('.timebar-center')
+      .find(
+        ({ element }) =>
+          !element.closest('.root-element') && !element.closest('.subchild')
+      )
+    await dragBar(bar, { shiftKey: true })
+
+    expect(fmt(row.startDate)).toBe('2026-08-13')
+    expect([fmt(task.startDate), fmt(task.endDate)]).toEqual(taskDates)
+    wrapper.unmount()
+  })
+
+  it('moves the tasks of every selected row', async () => {
     const hierarchy = buildSubchildrenHierarchy(2)
     const [root] = hierarchy
     const [first, second] = root.children
@@ -1109,8 +1131,7 @@ describe('Schedule widget - shift drag with tasks', () => {
     await nextTick()
     await secondBar.trigger('mousedown', {
       clientX: 300,
-      ctrlKey: true,
-      shiftKey: true
+      ctrlKey: true
     })
     document.dispatchEvent(
       new MouseEvent('mousemove', { bubbles: true, clientX: 500 })
@@ -1136,7 +1157,7 @@ describe('Schedule widget - shift drag with tasks', () => {
     root.endDate = moment('2026-09-30')
     const wrapper = mountSubchildren(hierarchy)
 
-    await shiftDrag(wrapper, wrapper.find('.root-element .timebar-center'))
+    await dragBar(wrapper.find('.root-element .timebar-center'))
 
     expect(fmt(root.startDate)).toBe('2026-08-13')
     expect(fmt(first.startDate)).toBe('2026-08-13')
@@ -1318,14 +1339,14 @@ describe('Schedule widget - entity rows', () => {
     await nextTick()
   }
 
-  it('clips the rows to the moved root bar', async () => {
+  it('clips the rows to the root bar moved on a shift drag', async () => {
     const hierarchy = buildEntityHierarchy(1)
     const { wrapper } = mountCounted(hierarchy)
     const [root] = hierarchy
     const [row] = root.children
     root.endDate = moment('2026-09-30')
 
-    await dragRootBar(wrapper, 500)
+    await dragRootBar(wrapper, 500, { shiftKey: true })
 
     expect(root.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
     expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
@@ -1346,7 +1367,7 @@ describe('Schedule widget - entity rows', () => {
     wrapper.vm.refreshAllItemPositions()
     expect(root.children.map(row => row.line)).toEqual([0, 0, 0])
 
-    await dragRootBar(wrapper, 800)
+    await dragRootBar(wrapper, 800, { shiftKey: true })
 
     root.children.forEach(row => {
       expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-28')
@@ -1389,8 +1410,8 @@ describe('Schedule widget - entity rows', () => {
       return { root, wrapper }
     }
 
-    it('clips them to the bar, on lines of their own', async () => {
-      const { root, wrapper } = await dropCollapsedBar()
+    it('clips them to the bar on a shift drag, on lines of their own', async () => {
+      const { root, wrapper } = await dropCollapsedBar({ shiftKey: true })
       const [row] = root.children
 
       expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
@@ -1400,8 +1421,8 @@ describe('Schedule widget - entity rows', () => {
       wrapper.unmount()
     })
 
-    it('moves them with the bar on a shift drag', async () => {
-      const { root, wrapper } = await dropCollapsedBar({ shiftKey: true })
+    it('moves them with the bar', async () => {
+      const { root, wrapper } = await dropCollapsedBar()
       const [row] = root.children
 
       expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
@@ -1410,14 +1431,14 @@ describe('Schedule widget - entity rows', () => {
     })
   })
 
-  it('moves the rows along with the root bar on a shift drag', async () => {
+  it('moves the rows along with the root bar', async () => {
     const hierarchy = buildEntityHierarchy(2)
     const { wrapper } = mountCounted(hierarchy)
     const [root] = hierarchy
     const [first, second] = root.children
     root.endDate = moment('2026-09-30')
 
-    await dragRootBar(wrapper, 500, { shiftKey: true })
+    await dragRootBar(wrapper, 500)
 
     expect(root.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
     expect(first.startDate.format('YYYY-MM-DD')).toBe('2026-08-20')
@@ -1440,7 +1461,7 @@ describe('Schedule widget - entity rows', () => {
     )
 
     // the week zoom is 20px a week
-    await dragRootBar(wrapper, 320, { shiftKey: true })
+    await dragRootBar(wrapper, 320)
 
     expect(root.startDate.format('YYYY-MM-DD')).toBe('2026-08-10')
     expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-17')
