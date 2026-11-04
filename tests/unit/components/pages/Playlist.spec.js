@@ -1574,23 +1574,93 @@ describe('Playlist page, addition during a reload', () => {
     expect(wrapper.findAll('.addition-shot')).toHaveLength(0)
   })
 
+  // Back to the second playlist, then Forward before the bulk addition
+  // ends: the load of the navigation reads the playlist before it.
   it('keeps the entries added in bulk before a reload answered', async () => {
-    const { actions, zou, player, savedNext, addSequence, closePanel } =
-      await openWithZou()
+    const { actions, zou, player, savedNext, addSequence } = await openWithZou()
     const releaseBulk = gateNextCall(actions.addEntitiesToPlaylist)
     await addSequence()
-    const releaseReload = gateNextCall(actions.loadPlaylist)
-    const readAtClose = copy(zou.get('pl-1'))
-
-    await closePanel()
-    zou.get('pl-1').shots.push(entry('s3'), entry('s4'))
-    releaseBulk(copy(zou.get('pl-1')))
+    openPlaylistOf('pl-2')
     await flushPromises()
-    releaseReload(readAtClose)
+    const releaseForward = gateNextCall(actions.loadPlaylist)
+    const readAtForward = copy(zou.get('pl-1'))
+    openPlaylistOf('pl-1')
+    await flushPromises()
+
+    zou.get('pl-1').shots.push(entry('s3'), entry('s4'))
+    releaseBulk()
+    await flushPromises()
+    releaseForward(readAtForward)
     await flushPromises()
 
     expect(savedNext()).toEqual(['s1', 's3', 's4'])
     expect(player.props('isLoading')).toBe(false)
+  })
+
+  // The playlist shown lacks the new entries until it loads again: a change
+  // saved meanwhile, such as a removal, would save it without them.
+  it('disables the playlist changes during a bulk addition', async () => {
+    const { wrapper, actions, zou, player, savedNext, addSequence } =
+      await openWithZou()
+    const releaseBulk = gateNextCall(actions.addEntitiesToPlaylist)
+
+    await addSequence()
+    await flushPromises()
+    expect(wrapper.findAll('.addition-shot')).toHaveLength(0)
+    expect(player.props('isLoading')).toBe(true)
+    zou.get('pl-1').shots.push(entry('s3'), entry('s4'))
+    releaseBulk()
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3', 's4'])
+    expect(player.props('isLoading')).toBe(false)
+  })
+
+  it('gives the playlist back after a bulk addition that failed', async () => {
+    const failure = new Error('down')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper, player, addSequence } = await openWithZou({
+      addEntitiesToPlaylist: vi.fn(() => Promise.reject(failure))
+    })
+
+    await addSequence()
+    await flushPromises()
+
+    expect(player.props('isLoading')).toBe(false)
+    expect(wrapper.findAll('.addition-shot')).toHaveLength(2)
+    expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+
+  // Back, then Forward: the second playlist still shows under the address of
+  // the first one, and must stay disabled until that load answers.
+  it('keeps loading a playlist opened again during a bulk addition that failed', async () => {
+    const failure = new Error('down')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { actions, zou, player, addSequence } = await openWithZou()
+    let failBulk
+    actions.addEntitiesToPlaylist.mockImplementationOnce(
+      () =>
+        new Promise((resolve, reject) => {
+          failBulk = reject
+        })
+    )
+    await addSequence()
+    openPlaylistOf('pl-2')
+    await flushPromises()
+    const releaseForward = gateNextCall(actions.loadPlaylist)
+    openPlaylistOf('pl-1')
+    await flushPromises()
+
+    failBulk(failure)
+    await flushPromises()
+    expect(player.props('playlist').id).toBe('pl-2')
+    expect(player.props('isLoading')).toBe(true)
+    releaseForward(copy(zou.get('pl-1')))
+    await flushPromises()
+
+    expect(player.props('playlist').id).toBe('pl-1')
+    expect(player.props('isLoading')).toBe(false)
+    expect(consoleError).toHaveBeenCalledWith(failure)
   })
 
   // The playlist shown lacks the new entries until that reload answers: an

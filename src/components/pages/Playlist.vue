@@ -1229,6 +1229,10 @@ const addEntities = async entities => {
   entities.forEach(entity => {
     entityLoading[entity.id] = true
   })
+  // The playlist shown lacks the entries until it loads again: a change
+  // saved meanwhile would erase them.
+  loading.playlist = true
+  const load = playlistLoadCount
   try {
     await store.dispatch('addEntitiesToPlaylist', {
       playlist,
@@ -1241,6 +1245,8 @@ const addEntities = async entities => {
     }
   } catch (err) {
     console.error(err)
+    // A load started meanwhile ends the loading state once it answers.
+    if (load === playlistLoadCount) loading.playlist = false
   } finally {
     entities.forEach(entity => {
       entityLoading[entity.id] = false
