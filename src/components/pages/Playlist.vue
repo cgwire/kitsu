@@ -1409,7 +1409,10 @@ const runEditPlaylist = async form => {
       }
     })
     modals.isEditDisplayed = false
-    Object.assign(currentPlaylist.value, playlist)
+    // Another playlist may have opened during the save.
+    if (currentPlaylist.value.id === form.id) {
+      Object.assign(currentPlaylist.value, playlist)
+    }
   } catch (err) {
     errors.editPlaylist = true
   } finally {
@@ -1702,6 +1705,21 @@ watch(
   () => route.fullPath,
   () => setCurrentPlaylist()
 )
+
+// Another playlist closes the form editing the playlist shown, which would
+// save its values on the other one. A creation form does not depend on it.
+watch(
+  () => route.params.playlist_id,
+  () => {
+    if (modals.isEditDisplayed && playlistToEdit.value.id) hideEditModal()
+  }
+)
+
+// The build filter fills the search field of the addition panel: it closes
+// once the field is gone.
+watch(searchFieldRef, field => {
+  if (!field) modals.isBuildFilterDisplayed = false
+})
 
 watch(currentPlaylist, () => {
   if (currentPlaylist.value.shots) {

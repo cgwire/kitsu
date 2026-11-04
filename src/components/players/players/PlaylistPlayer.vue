@@ -2144,6 +2144,12 @@ const hideDeleteModal = () => {
   modals.value.delete = false
 }
 
+const closeModals = () => {
+  Object.keys(modals.value).forEach(modal => {
+    modals.value[modal] = false
+  })
+}
+
 const showTaskTypeModal = () => {
   modals.value.taskType = true
 }
@@ -5023,9 +5029,14 @@ watch(framesSeenOfPicture, () => {
 watch(
   () => props.isLoading,
   () => {
-    // The download menu belongs to the playlist shown before the load.
-    if (props.isLoading) isDlButtonsHidden.value = true
-    else resetHeight()
+    // The download menu and the modals belong to the playlist shown before
+    // the load.
+    if (props.isLoading) {
+      isDlButtonsHidden.value = true
+      closeModals()
+    } else {
+      resetHeight()
+    }
   }
 )
 

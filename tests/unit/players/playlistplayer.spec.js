@@ -2093,6 +2093,41 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // The browser history opens another playlist under an open modal.
+  describe('modals', () => {
+    const isOpen = name => {
+      const modal = wrapper.findComponent({ name })
+      return modal.exists() && modal.props('active')
+    }
+
+    it.each([
+      ['DeleteModal', button => button.classes('delete-button')],
+      ['SharePlaylistModal', button => button.props('icon') === 'link'],
+      ['NotifyClientModal', button => button.props('icon') === 'bell'],
+      [
+        'SelectTaskTypeModal',
+        button =>
+          button.attributes('title') === 'playlists.actions.change_task_type'
+      ]
+    ])('closes the %s when a load starts', async (name, isOpener) => {
+      wrapper = mountPlayer({
+        playlistProp: { ...playlist, for_client: true },
+        stubs: { PlayerPlaybackBar: PlaybackBarWithSlot }
+      })
+      await flushPromises()
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(isOpener)
+        .vm.$emit('click')
+      await flushPromises()
+      expect(isOpen(name)).toBe(true)
+
+      await wrapper.setProps({ isLoading: true })
+
+      expect(isOpen(name)).toBe(false)
+    })
+  })
+
   // Ctrl or Cmd+Shift+Left/Right moves the entry played.
   describe('reorder shortcut', () => {
     const entities = ['shot-1', 'shot-2', 'shot-3'].map((id, index) => ({

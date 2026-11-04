@@ -1195,6 +1195,198 @@ describe('Playlist page, entity dropped on the player', () => {
   })
 })
 
+// The browser history opens another playlist under an open modal.
+describe('Playlist page, modals and navigation', () => {
+  const stored = new Map([
+    ['pl-1', { id: 'pl-1', name: 'A', project_id: 'p1', shots: [{ id: 's1' }] }],
+    ['pl-2', { id: 'pl-2', name: 'B', project_id: 'p1', shots: [{ id: 's2' }] }]
+  ])
+
+  // Each load answers a new object, as the API does. The edit modal sits in
+  // a teleport, disabled out of full screen.
+  const openFirstPlaylist = async (actions = {}) => {
+    const page = await openPlaylist(stored.get('pl-1'), {
+      state: { playlists: [...stored.values()] },
+      getters: { playlistMap: () => stored },
+      actions: {
+        loadPlaylist: vi.fn((context, { id }) =>
+          Promise.resolve({ ...stored.get(id) })
+        ),
+        editPlaylist: vi.fn((context, { data }) =>
+          Promise.resolve({ ...stored.get(data.id), name: data.name })
+        ),
+        ...actions
+      },
+      stubs: {
+        teleport: false,
+        PlaylistPlayer: {
+          name: 'PlaylistPlayer',
+          props: PlaylistPlayer.props,
+          template: '<div />',
+          methods: { scrollToRight: () => {} }
+        }
+      }
+    })
+    await flushPromises()
+    const player = page.wrapper.findComponent({ name: 'PlaylistPlayer' })
+    const modal = name => page.wrapper.findComponent({ name })
+    return { ...page, player, modal }
+  }
+
+  const editFirstPlaylist = async ({ player, modal }) => {
+    player.vm.$emit('edit-clicked')
+    await nextTick()
+    expect(modal('EditPlaylistModal').props('active')).toBe(true)
+  }
+
+  const openSecondPlaylist = () =>
+    Object.assign(routeHolder.route, {
+      params: { playlist_id: 'pl-2' },
+      fullPath: '/pl-2'
+    })
+
+  const openBuildFilter = async ({ wrapper, modal }) => {
+    wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(
+        button => button.attributes('title') === 'entities.build_filter.title'
+      )
+      .vm.$emit('click')
+    await nextTick()
+    expect(modal('BuildFilterModal').props('active')).toBe(true)
+  }
+
+  it('closes the edit modal when another playlist opens', async () => {
+    const page = await openFirstPlaylist()
+    await editFirstPlaylist(page)
+
+    openSecondPlaylist()
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(false)
+  })
+
+  // Its search field goes with the addition panel, hidden during the load
+  // and once the other playlist shows its entries.
+  it('closes the build filter when another playlist opens', async () => {
+    const page = await openFirstPlaylist()
+    page.player.vm.$emit('show-add-entities')
+    await flushPromises()
+    await openBuildFilter(page)
+    const release = gateNextCall(page.actions.loadPlaylist)
+
+    openSecondPlaylist()
+    await flushPromises()
+    expect(page.modal('BuildFilterModal').props('active')).toBe(false)
+    release({ ...stored.get('pl-2') })
+    await flushPromises()
+
+    expect(page.modal('BuildFilterModal').props('active')).toBe(false)
+  })
+
+  // The history can open a playlist that the list has not loaded: the page
+  // then shows no playlist, without any load.
+  it('closes the build filter when the playlist opened is not in the list', async () => {
+    const page = await openFirstPlaylist()
+    page.player.vm.$emit('show-add-entities')
+    await flushPromises()
+    await openBuildFilter(page)
+
+    Object.assign(routeHolder.route, {
+      params: { playlist_id: 'pl-9' },
+      fullPath: '/pl-9'
+    })
+    await flushPromises()
+
+    expect(page.wrapper.find('.addition-header').exists()).toBe(false)
+    expect(page.modal('BuildFilterModal').props('active')).toBe(false)
+  })
+
+  // The bulk addition reloads the playlist, whose entries close the panel.
+  it('closes the build filter when a bulk addition closes the panel', async () => {
+    const pending = gatedAction()
+    const page = await openFirstPlaylist({ getPendingShots: pending.fn })
+    page.player.vm.$emit('show-add-entities')
+    await flushPromises()
+    await page.wrapper
+      .findAll('button')
+      .find(button => button.text() === 'playlists.build_weekly')
+      .trigger('click')
+    await openBuildFilter(page)
+
+    pending.release([{ id: 's9', name: 'SH900' }])
+    await flushPromises()
+
+    expect(page.wrapper.find('.addition-header').exists()).toBe(false)
+    expect(page.modal('BuildFilterModal').props('active')).toBe(false)
+  })
+
+  // A new playlist does not depend on the playlist shown.
+  it('keeps the creation form open when another playlist opens', async () => {
+    const page = await openFirstPlaylist()
+    await page.wrapper
+      .findAll('button')
+      .find(button => button.text() === 'playlists.new_playlist')
+      .trigger('click')
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(true)
+
+    openSecondPlaylist()
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(true)
+  })
+
+  // The player closes its own modals when a load starts.
+  it('shows the player the load of another playlist', async () => {
+    const page = await openFirstPlaylist()
+    const release = gateNextCall(page.actions.loadPlaylist)
+
+    openSecondPlaylist()
+    await flushPromises()
+    expect(page.player.props('isLoading')).toBe(true)
+
+    release({ ...stored.get('pl-2') })
+    await flushPromises()
+    expect(page.player.props('isLoading')).toBe(false)
+  })
+
+  it('shows the answer of an edit', async () => {
+    const page = await openFirstPlaylist()
+    await editFirstPlaylist(page)
+
+    page
+      .modal('EditPlaylistModal')
+      .vm.$emit('confirm', { name: 'A2', for_client: false })
+    await flushPromises()
+
+    expect(page.player.props('playlist')).toMatchObject({
+      id: 'pl-1',
+      name: 'A2'
+    })
+  })
+
+  // The save answers once the other playlist is loaded.
+  it('keeps the answer of an edit to the playlist edited', async () => {
+    const save = gatedAction()
+    const page = await openFirstPlaylist({ editPlaylist: save.fn })
+    await editFirstPlaylist(page)
+    page
+      .modal('EditPlaylistModal')
+      .vm.$emit('confirm', { name: 'A2', for_client: false })
+    await flushPromises()
+
+    openSecondPlaylist()
+    await flushPromises()
+    save.release({ ...stored.get('pl-1'), name: 'A2' })
+    await flushPromises()
+
+    expect(page.player.props('playlist')).toMatchObject({
+      id: 'pl-2',
+      name: 'B'
+    })
+  })
+})
+
 describe('Playlist page, unreadable playlist', () => {
   // Playlist events reach every member of the production. A client can no
   // longer read a playlist made internal: its refetch resolves to null, and
