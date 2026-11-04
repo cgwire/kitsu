@@ -1938,6 +1938,48 @@ describe('Task.vue annotation snapshots', () => {
 
     expect(errorHandler).not.toHaveBeenCalled()
   })
+
+  // The snapshot buttons spin while the player takes the snapshots.
+  it('stops the snapshot loading when the snapshots fail', async () => {
+    const failure = new Error('drawImage failed')
+    const hideAnnotationLoading = vi.fn()
+    const setAnnotationSnapshots = vi.fn()
+    const { wrapper } = await mountPage({
+      previews: [{ id: 'preview-1', revision: 1, extension: 'png' }],
+      getterOverrides: { isCurrentUserProductionManager: () => true },
+      stubs: {
+        AddComment: {
+          template: '<div />',
+          methods: {
+            focus: () => {},
+            hideAnnotationLoading,
+            reset: () => {},
+            setAnnotationSnapshots,
+            showAnnotationLoading: () => {}
+          }
+        },
+        PreviewPlayer: {
+          props: ['fps', 'previews', 'readOnly'],
+          template: '<div />',
+          methods: {
+            extractAnnotationSnapshots: () => Promise.reject(failure)
+          }
+        }
+      }
+    })
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+    wrapper
+      .findComponent(AddComment)
+      .vm.$emit('annotation-snapshots-requested')
+    await flushPromises()
+
+    expect(hideAnnotationLoading).toHaveBeenCalledTimes(1)
+    expect(setAnnotationSnapshots).not.toHaveBeenCalled()
+    // Still reported, as a Vue error
+    expect(errorHandler.mock.calls[0][0]).toBe(failure)
+  })
 })
 
 describe('Task.vue full screen', () => {

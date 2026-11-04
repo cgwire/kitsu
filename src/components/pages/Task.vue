@@ -1626,13 +1626,16 @@ const onAnnotationChanged = async ({
 
 const extractAnnotationSnapshots = async (withLabel = false) => {
   addCommentRef.value.showAnnotationLoading(withLabel ? 'label' : 'standard')
-  const files = await previewPlayerRef.value.extractAnnotationSnapshots({
-    withLabel
-  })
-  // The page may have been left during the extraction.
-  addCommentRef.value?.setAnnotationSnapshots(files)
-  addCommentRef.value?.hideAnnotationLoading()
-  return files
+  try {
+    const files = await previewPlayerRef.value.extractAnnotationSnapshots({
+      withLabel
+    })
+    // The page may have been left during the extraction.
+    addCommentRef.value?.setAnnotationSnapshots(files)
+    return files
+  } finally {
+    addCommentRef.value?.hideAnnotationLoading()
+  }
 }
 
 const timeCodeClicked = ({ versionRevision, frame }) => {
