@@ -64,7 +64,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import colors from '@/lib/colors'
-import { getProductionSchedulePath } from '@/lib/path'
+import { episodifyRoute, getProductionSchedulePath } from '@/lib/path'
 import {
   getEndDateFromString,
   getFirstStartDate,
@@ -128,7 +128,11 @@ const convertScheduleItems = items =>
     toScheduleItem(item, {
       avatar: item.type === 'Project',
       color: item.color || colors.fromString(item.name, true),
-      route: getProductionSchedulePath(item.id)
+      // Without an episode, the schedule of a TV show has no episode selector.
+      route: episodifyRoute(
+        getProductionSchedulePath(item.id),
+        item.production_type === 'tvshow' ? 'all' : null
+      )
     })
   )
 
