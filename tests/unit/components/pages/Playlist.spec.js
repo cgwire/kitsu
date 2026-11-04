@@ -1350,6 +1350,44 @@ describe('Playlist page, modals and navigation', () => {
     expect(page.player.props('isLoading')).toBe(false)
   })
 
+  // The history can open a playlist missing from the list during the load
+  // of another one, which then answers for no playlist shown: the page
+  // keeps the recent playlists instead of the player.
+  it('ignores a load that answers once a playlist missing from the list opened', async () => {
+    const page = await openFirstPlaylist()
+    const release = gateNextCall(page.actions.loadPlaylist)
+    openSecondPlaylist()
+    await flushPromises()
+
+    Object.assign(routeHolder.route, {
+      params: { playlist_id: 'pl-9' },
+      fullPath: '/pl-9'
+    })
+    await flushPromises()
+    release({ ...stored.get('pl-2') })
+    await flushPromises()
+
+    expect(
+      page.wrapper.findComponent({ name: 'PlaylistPlayer' }).exists()
+    ).toBe(false)
+  })
+
+  it('ignores the share links count of a playlist left before it answered', async () => {
+    const loadPlaylistShareLinks = vi.fn((context, id) =>
+      Promise.resolve(id === 'pl-2' ? [{}, {}, {}] : [])
+    )
+    const releaseFirst = gateNextCall(loadPlaylistShareLinks)
+    const page = await openFirstPlaylist({ loadPlaylistShareLinks })
+
+    openSecondPlaylist()
+    await flushPromises()
+    expect(page.player.props('initialShareLinksCount')).toBe(3)
+    releaseFirst([])
+    await flushPromises()
+
+    expect(page.player.props('initialShareLinksCount')).toBe(3)
+  })
+
   it('shows the answer of an edit', async () => {
     const page = await openFirstPlaylist()
     await editFirstPlaylist(page)
@@ -1384,6 +1422,267 @@ describe('Playlist page, modals and navigation', () => {
       id: 'pl-2',
       name: 'B'
     })
+  })
+})
+
+// Closing the panel after an addition reloads the playlist. A reload that
+// runs during an addition can read the playlist before the addition is
+// saved, like a server far away.
+describe('Playlist page, addition during a reload', () => {
+  const shot = (id, name) => ({
+    id,
+    name,
+    sequence_id: 'sq-1',
+    sequence_name: 'SQ01'
+  })
+  const shots = [shot('s1', 'SH100'), shot('s3', 'SH300'), shot('s4', 'SH400')]
+  const entry = id => ({ id, preview_files: {} })
+  const copy = playlist => ({
+    ...playlist,
+    shots: playlist.shots.map(({ id }) => entry(id))
+  })
+
+  // Zou keeps the entries of each playlist, and each load answers what it
+  // keeps at the call. The store adds an entry to the playlist it is given,
+  // then saves that playlist whole.
+  const openWithZou = async (actions = {}) => {
+    shots.forEach(entity => shotStore.cache.shotMap.set(entity.id, entity))
+    const zou = new Map([
+      ['pl-1', { id: 'pl-1', name: 'A', project_id: 'p1', shots: [entry('s1')] }],
+      ['pl-2', { id: 'pl-2', name: 'B', project_id: 'p1', shots: [] }]
+    ])
+    const list = new Map([...zou].map(([id, playlist]) => [id, copy(playlist)]))
+    const page = await openPlaylist(list.get('pl-1'), {
+      state: { playlists: [...list.values()] },
+      getters: {
+        displayedShotsBySequence: () => [shots.slice(1)],
+        playlistMap: () => list
+      },
+      actions: {
+        loadEntityPreviewFiles: vi.fn(() => Promise.resolve([])),
+        loadPlaylist: vi.fn((context, { id }) =>
+          Promise.resolve(copy(zou.get(id)))
+        ),
+        pushEntityToPlaylist: vi.fn((context, { playlist, entity }) => {
+          playlist.shots.push(entry(entity.id))
+          zou.set(playlist.id, copy(playlist))
+          return Promise.resolve({ ...entity, preview_file_id: 'pf-new' })
+        }),
+        loadPlaylistShareLinks: vi.fn((context, id) =>
+          Promise.resolve(id === 'pl-2' ? [{}, {}, {}] : [])
+        ),
+        ...actions
+      },
+      stubs: {
+        PlaylistPlayer: {
+          name: 'PlaylistPlayer',
+          props: ['playlist', 'entities', 'isLoading', 'initialShareLinksCount'],
+          template: '<div />',
+          methods: { onEntityDropped: () => {}, scrollToRight: () => {} }
+        }
+      }
+    })
+    await flushPromises()
+    const player = page.wrapper.findComponent({ name: 'PlaylistPlayer' })
+    player.vm.$emit('show-add-entities')
+    await flushPromises()
+    // What the next whole save of the playlist shown sends.
+    const savedNext = () => player.props('playlist').shots.map(({ id }) => id)
+    const addShot = name =>
+      page.wrapper
+        .findAll('.addition-shot')
+        .find(entity => entity.text().includes(name))
+        .trigger('click')
+    const addSequence = () =>
+      page.wrapper
+        .findAll('button')
+        .find(button => button.text() === 'playlists.add_sequence')
+        .trigger('click')
+    const closePanel = () =>
+      page.wrapper.find('.addition-header .close-button').trigger('click')
+    return { ...page, zou, player, savedNext, addShot, addSequence, closePanel }
+  }
+
+  const openPlaylistOf = id =>
+    Object.assign(routeHolder.route, {
+      params: { playlist_id: id },
+      fullPath: `/${id}`
+    })
+
+  afterEach(() => {
+    shots.forEach(entity => shotStore.cache.shotMap.delete(entity.id))
+  })
+
+  it('adds an entry to the playlist shown without a reload', async () => {
+    const { actions, player, savedNext, addShot } = await openWithZou()
+
+    await addShot('SH300')
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3'])
+    expect(player.props('entities').map(({ id }) => id)).toEqual(['s1', 's3'])
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps an entry added while a reload ran', async () => {
+    const { actions, savedNext, addShot, closePanel } = await openWithZou()
+    const releasePreviews = gateNextCall(actions.loadEntityPreviewFiles)
+    await addShot('SH300')
+
+    await closePanel()
+    await flushPromises()
+    expect(savedNext()).toEqual(['s1'])
+    releasePreviews([])
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3'])
+  })
+
+  it('keeps an entry added before a reload answered', async () => {
+    const page = await openWithZou()
+    const { actions, zou, player, savedNext, addShot, closePanel } = page
+    const releasePreviews = gateNextCall(actions.loadEntityPreviewFiles)
+    await addShot('SH300')
+    const releaseReload = gateNextCall(actions.loadPlaylist)
+    const readAtClose = copy(zou.get('pl-1'))
+
+    await closePanel()
+    releasePreviews([])
+    await flushPromises()
+    releaseReload(readAtClose)
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3'])
+    expect(player.props('isLoading')).toBe(false)
+  })
+
+  // An entity added meanwhile would go to the empty playlist shown during
+  // the reload, or to the playlist the reload replaces.
+  it('hides the entities to add while the playlist reloads', async () => {
+    const page = await openWithZou()
+    const { wrapper, actions, zou, addShot, closePanel } = page
+    await addShot('SH300')
+    await flushPromises()
+    const releaseReload = gateNextCall(actions.loadPlaylist)
+
+    await closePanel()
+    await flushPromises()
+    expect(wrapper.findAll('.addition-shot')).toHaveLength(0)
+    releaseReload(copy(zou.get('pl-1')))
+    await flushPromises()
+
+    expect(wrapper.findAll('.addition-shot')).toHaveLength(0)
+  })
+
+  it('keeps the entries added in bulk before a reload answered', async () => {
+    const { actions, zou, player, savedNext, addSequence, closePanel } =
+      await openWithZou()
+    const releaseBulk = gateNextCall(actions.addEntitiesToPlaylist)
+    await addSequence()
+    const releaseReload = gateNextCall(actions.loadPlaylist)
+    const readAtClose = copy(zou.get('pl-1'))
+
+    await closePanel()
+    zou.get('pl-1').shots.push(entry('s3'), entry('s4'))
+    releaseBulk(copy(zou.get('pl-1')))
+    await flushPromises()
+    releaseReload(readAtClose)
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3', 's4'])
+    expect(player.props('isLoading')).toBe(false)
+  })
+
+  // The playlist shown lacks the new entries until that reload answers: an
+  // entity added meanwhile would save it without them.
+  it('hides the entities to add while a bulk addition reloads the playlist', async () => {
+    const { wrapper, actions, zou, player, savedNext, addSequence } =
+      await openWithZou()
+    const releaseReload = gateNextCall(actions.loadPlaylist)
+
+    await addSequence()
+    await flushPromises()
+    expect(wrapper.findAll('.addition-shot')).toHaveLength(0)
+    expect(player.props('isLoading')).toBe(true)
+    zou.get('pl-1').shots.push(entry('s3'), entry('s4'))
+    releaseReload(copy(zou.get('pl-1')))
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3', 's4'])
+    expect(player.props('isLoading')).toBe(false)
+  })
+
+  // The store saves nothing for an entity already in the playlist without a
+  // preview of its own.
+  it('reloads nothing after an addition that saved nothing', async () => {
+    const { actions, addShot, closePanel } = await openWithZou({
+      pushEntityToPlaylist: vi.fn(() => Promise.resolve(null))
+    })
+    const releasePreviews = gateNextCall(actions.loadEntityPreviewFiles)
+    await addShot('SH300')
+
+    await closePanel()
+    await flushPromises()
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+    releasePreviews([])
+    await flushPromises()
+
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+  })
+
+  // Back to the second playlist, then Forward before the bulk addition
+  // ends: its load replaces the one of the navigation.
+  it('shows the share links of the playlist loaded after a bulk addition', async () => {
+    const { actions, zou, player, addSequence } = await openWithZou()
+    const releaseBulk = gateNextCall(actions.addEntitiesToPlaylist)
+    await addSequence()
+    openPlaylistOf('pl-2')
+    await flushPromises()
+    expect(player.props('initialShareLinksCount')).toBe(3)
+    const releaseForward = gateNextCall(actions.loadPlaylist)
+    openPlaylistOf('pl-1')
+    await flushPromises()
+
+    zou.get('pl-1').shots.push(entry('s3'), entry('s4'))
+    releaseBulk(copy(zou.get('pl-1')))
+    await flushPromises()
+    releaseForward(copy(zou.get('pl-1')))
+    await flushPromises()
+
+    expect(player.props('playlist').id).toBe('pl-1')
+    expect(player.props('initialShareLinksCount')).toBe(0)
+  })
+
+  it('adds nothing to another playlist opened during an addition', async () => {
+    const { actions, zou, savedNext, addShot } = await openWithZou()
+    const releasePreviews = gateNextCall(actions.loadEntityPreviewFiles)
+    await addShot('SH300')
+
+    openPlaylistOf('pl-2')
+    await flushPromises()
+    releasePreviews([])
+    await flushPromises()
+
+    expect(savedNext()).toEqual([])
+    expect(zou.get('pl-1').shots.map(({ id }) => id)).toEqual(['s1', 's3'])
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+  })
+
+  // A reload of the playlist left would never show, and keep the player
+  // loading.
+  it('shows another playlist opened during a bulk addition', async () => {
+    const { actions, player, addSequence } = await openWithZou()
+    const releaseBulk = gateNextCall(actions.addEntitiesToPlaylist)
+    await addSequence()
+    openPlaylistOf('pl-2')
+    await flushPromises()
+
+    releaseBulk()
+    await flushPromises()
+
+    expect(player.props('playlist').id).toBe('pl-2')
+    expect(player.props('isLoading')).toBe(false)
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
   })
 })
 

@@ -327,7 +327,9 @@
         <div
           class="addition-section"
           v-if="
-            (isCurrentUserManager || isCurrentUserSupervisor) && isAddingEntity
+            (isCurrentUserManager || isCurrentUserSupervisor) &&
+            isAddingEntity &&
+            !loading.playlist
           "
           @scroll.passive="onBodyScroll"
         >
@@ -633,6 +635,7 @@ let isSilent = false
 let isSilentMore = false
 let isUnmounted = false
 let page = 1
+let playlistLoadCount = 0
 let servedScope = null
 let silentOperationCount = 0
 
@@ -918,11 +921,16 @@ const loadEpisodesData = async () => {
 
 const loadShareLinksCount = async playlistId => {
   if (!isCurrentUserManager.value || !playlistId) return
+  let count
   try {
     const links = await store.dispatch('loadPlaylistShareLinks', playlistId)
-    currentShareLinksCount.value = links.length
+    count = links.length
   } catch {
-    currentShareLinksCount.value = 0
+    count = 0
+  }
+  // Another playlist may show by then, with a count of its own.
+  if (currentPlaylist.value.id === playlistId) {
+    currentShareLinksCount.value = count
   }
 }
 
@@ -1094,18 +1102,27 @@ const convertEntityToPlaylistFormat = entityInfo => {
   return playlistEntity
 }
 
+// Loads the playlist shown and shows the answer with its share links count,
+// unless another playlist opened or a later load of this one started
+// meanwhile. A load can answer after a later one, with an older state.
+const showLoadedPlaylist = async playlist => {
+  loading.playlist = true
+  const load = ++playlistLoadCount
+  const loadedPlaylist = await store.dispatch('loadPlaylist', playlist)
+  if (load !== playlistLoadCount || route.params.playlist_id !== playlist.id) {
+    return null
+  }
+  currentPlaylist.value = loadedPlaylist
+  rebuildCurrentEntities()
+  loading.playlist = false
+  loadShareLinksCount(loadedPlaylist.id)
+  return loadedPlaylist
+}
+
 const setCurrentPlaylist = async () => {
-  const playlistId = route.params.playlist_id
-  const playlist = playlistMap.value.get(playlistId)
+  const playlist = playlistMap.value.get(route.params.playlist_id)
   if (playlist) {
-    loading.playlist = true
-    const loadedPlaylist = await store.dispatch('loadPlaylist', playlist)
-    // Another playlist opened during the load: its own load shows it.
-    if (route.params.playlist_id !== playlistId) return
-    currentPlaylist.value = loadedPlaylist
-    rebuildCurrentEntities()
-    loading.playlist = false
-    loadShareLinksCount(loadedPlaylist.id)
+    await showLoadedPlaylist(playlist)
   } else {
     loading.playlist = false
     currentPlaylist.value = { name: '' }
@@ -1139,7 +1156,13 @@ const addEntity = async (entity, playlist) => {
 }
 
 const addToPlayerPlaylist = (entity, playlist) => {
-  if (playlist.id !== currentPlaylist.value.id) return
+  if (!entity) return
+  if (playlist !== currentPlaylist.value) {
+    // The playlist shown was replaced during the addition. A reload of this
+    // one may have read it before the addition was saved: load it again.
+    if (route.params.playlist_id === playlist.id) setCurrentPlaylist()
+    return
+  }
   const playlistEntity = convertEntityToPlaylistFormat(entity)
   if (!playlistEntity) return
   currentEntitiesList.value.push(playlistEntity)
@@ -1211,12 +1234,10 @@ const addEntities = async entities => {
       playlist,
       entityIds: entities.map(entity => entity.id)
     })
-    if (playlist.id === currentPlaylist.value.id) {
-      const loadedPlaylist = await store.dispatch('loadPlaylist', playlist)
-      if (route.params.playlist_id !== playlist.id) return
-      currentPlaylist.value = loadedPlaylist
-      rebuildCurrentEntities()
-      scrollPlayerToRight()
+    // Zou added the entries: load the playlist again while it is open, even
+    // when a reload replaced it meanwhile, which may have read it before.
+    if (route.params.playlist_id === playlist.id) {
+      if (await showLoadedPlaylist(playlist)) scrollPlayerToRight()
     }
   } catch (err) {
     console.error(err)
