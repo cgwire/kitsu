@@ -51,6 +51,19 @@ describe('StatusAutomationItem', () => {
     expect(conditions.props('statusAutomation')).toEqual(statusAutomation)
   })
 
+  // Zou reads a row naming an asset type, which only a direct API write
+  // stores, as an asset one.
+  it('names the entity type, or the asset type a row names', () => {
+    expect(
+      mountItem({ statusAutomation }).find('.entity-type').text()
+    ).toBe('Shot')
+    expect(
+      mountItem({ statusAutomation: { ...statusAutomation, entity_type: 'Props' } })
+        .find('.entity-type')
+        .text()
+    ).toBe('Props')
+  })
+
   // Two automations that differ by their guard only must look apart.
   it('shows the statuses the applied task has to be in', () => {
     const wrapper = mountItem({ statusAutomation })

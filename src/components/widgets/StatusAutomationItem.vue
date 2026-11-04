@@ -55,13 +55,13 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useTaskStatusStyle } from '@/composables/taskStatus'
-import { getGuardStatusIds } from '@/lib/statusautomations'
+import { getEntityTypeName, getGuardStatusIds } from '@/lib/statusautomations'
 
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
 import StatusAutomationConditions from '@/components/widgets/StatusAutomationConditions.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const store = useStore()
 const { backgroundColor, color } = useTaskStatusStyle()
 
@@ -83,10 +83,9 @@ const guardStatuses = computed(() =>
     : []
 )
 
-const entityType = computed(() => {
-  const et = props.statusAutomation.entity_type
-  return t(`status_automations.entity_types.${et.toLowerCase()}`)
-})
+const entityType = computed(() =>
+  getEntityTypeName(props.statusAutomation.entity_type, { t, te })
+)
 </script>
 
 <style lang="scss" scoped>

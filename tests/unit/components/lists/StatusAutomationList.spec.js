@@ -64,6 +64,21 @@ describe('StatusAutomationList', () => {
     expect(conditions.props('withPriorityWarnings')).toBe(false)
   })
 
+  // Zou reads a row naming an asset type, which only a direct API write
+  // stores, as an asset one.
+  it('names the entity type of each row', () => {
+    const wrapper = mountList({
+      entries: [
+        statusAutomation,
+        { ...statusAutomation, id: 'automation-2', entity_type: 'Asset' },
+        { ...statusAutomation, id: 'automation-3', entity_type: 'Props' }
+      ]
+    })
+    expect(wrapper.findAll('td.entity-type').map(cell => cell.text())).toEqual(
+      ['Shot', 'Asset', 'Props']
+    )
+  })
+
   // The admin page and the templates have no meaningful current production.
   it('warns about the priorities only when asked to', () => {
     expect(mountList().findComponent(AlertTriangleIcon).exists()).toBe(false)

@@ -143,7 +143,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useTaskStatusStyle } from '@/composables/taskStatus'
-import { getGuardStatusIds } from '@/lib/statusautomations'
+import { getEntityTypeName, getGuardStatusIds } from '@/lib/statusautomations'
 
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
@@ -151,7 +151,7 @@ import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 import StatusAutomationConditions from '@/components/widgets/StatusAutomationConditions.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const store = useStore()
 const { backgroundColor, color } = useTaskStatusStyle()
 
@@ -180,9 +180,7 @@ const isStatusAutomationDisabled = computed(
 const statusAutomations = computed(() =>
   props.entries.map(statusAutomation => ({
     ...statusAutomation,
-    entityType: t(
-      `status_automations.entity_types.${statusAutomation.entity_type.toLowerCase()}`
-    )
+    entityType: getEntityTypeName(statusAutomation.entity_type, { t, te })
   }))
 )
 
