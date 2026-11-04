@@ -1051,6 +1051,25 @@ describe('Productions store', () => {
       )
     })
 
+    test('removing a task type or asset type updates the workflows', () => {
+      const state = {
+        currentProduction: {
+          asset_types: ['props', 'chars'],
+          task_types: ['shading', 'rigging'],
+          asset_type_workflows: {
+            props: ['shading', 'rigging'],
+            chars: ['shading']
+          }
+        }
+      }
+      store.mutations[PRODUCTION_REMOVE_TASK_TYPE](state, 'shading')
+      expect(state.currentProduction.asset_type_workflows).toEqual({
+        props: ['rigging']
+      })
+      store.mutations[PRODUCTION_REMOVE_ASSET_TYPE](state, 'props')
+      expect(state.currentProduction.asset_type_workflows).toEqual({})
+    })
+
     test('removeTaskTypeFromProduction', () => {
       const mockCommit = vi.fn()
       const state = {

@@ -1280,6 +1280,9 @@ const mutations = {
 
   [PRODUCTION_REMOVE_ASSET_TYPE](state, assetTypeId) {
     removeFromIdList(state.currentProduction, 'asset_types', assetTypeId)
+    const workflows = { ...state.currentProduction.asset_type_workflows }
+    delete workflows[assetTypeId]
+    state.currentProduction.asset_type_workflows = workflows
   },
 
   [PRODUCTION_SET_ASSET_TYPE_WORKFLOW](state, { assetTypeId, taskTypeIds }) {
@@ -1345,6 +1348,12 @@ const mutations = {
 
   [PRODUCTION_REMOVE_TASK_TYPE](state, taskTypeId) {
     removeFromIdList(state.currentProduction, 'task_types', taskTypeId)
+    // Zou drops it from the workflows too, and an emptied one no longer exists.
+    state.currentProduction.asset_type_workflows = Object.fromEntries(
+      Object.entries(state.currentProduction.asset_type_workflows || {})
+        .map(([id, workflow]) => [id, workflow.filter(t => t !== taskTypeId)])
+        .filter(([, workflow]) => workflow.length)
+    )
   },
 
   [PRODUCTION_ADD_STATUS_AUTOMATION](state, statusAutomationId) {
