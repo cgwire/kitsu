@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { DOMWrapper, enableAutoUnmount, mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
 vi.mock('vuex', () => ({
@@ -14,6 +14,10 @@ vi.mock('vuex', () => ({
 }))
 
 import MilestonePopover from '@/components/widgets/MilestonePopover.vue'
+
+// A failed assertion skips the end of its test: a popover left on the body
+// would fail the next tests too.
+enableAutoUnmount(afterEach)
 
 const group = {
   date: '2026-11-02',
@@ -46,21 +50,19 @@ describe('widgets/MilestonePopover', () => {
       })
       wrapper.vm.show({ ...group, milestones }, document.body)
       await nextTick()
-      return wrapper
     }
 
     it('sits next to the date for a single milestone', async () => {
-      const wrapper = await showGroup([group.milestones[0]])
+      await showGroup([group.milestones[0]])
 
       expect(headerDepartment().textContent).toContain('Lighting')
       expect(
         document.querySelector('.milestone-popover-meta .department-name')
       ).toBeNull()
-      wrapper.unmount()
     })
 
     it('sits on the line of each milestone of a merged flag', async () => {
-      const wrapper = await showGroup(group.milestones)
+      await showGroup(group.milestones)
 
       const metas = document.querySelectorAll('.milestone-popover-meta')
       expect(headerDepartment()).toBeNull()
@@ -68,7 +70,6 @@ describe('widgets/MilestonePopover', () => {
         'Lighting'
       )
       expect(metas[1].querySelector('.department-name')).toBeNull()
-      wrapper.unmount()
     })
   })
 
@@ -84,7 +85,6 @@ describe('widgets/MilestonePopover', () => {
     expect(document.querySelector('.milestone-popover-date').textContent).toBe(
       '02/11/2026'
     )
-    wrapper.unmount()
   })
 
   it('puts the type under the name', async () => {
@@ -102,7 +102,6 @@ describe('widgets/MilestonePopover', () => {
       'Animation lock'
     )
     expect(meta.textContent).toContain('schedule.milestone.types.approval')
-    wrapper.unmount()
   })
 
   describe('keyboard', () => {
@@ -123,10 +122,12 @@ describe('widgets/MilestonePopover', () => {
       await nextTick()
       return wrapper
     }
-    const press = async (element, key) => {
-      element.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
-      await nextTick()
-    }
+    // Vue skips a listener when the event is no newer than the listener, to
+    // the millisecond: a bare dispatchEvent() fired in the millisecond of the
+    // render loses the Escape listener of the popover, above the item that
+    // stamps the event. trigger() stamps it 1 ms ahead.
+    const press = (element, key) =>
+      new DOMWrapper(element).trigger('keydown', { key })
 
     beforeEach(() => {
       flag = document.createElement('div')
@@ -135,22 +136,21 @@ describe('widgets/MilestonePopover', () => {
     })
 
     afterEach(() => {
+      vi.useRealTimers()
       flag.remove()
     })
 
     it('moves the focus to the first milestone on request', async () => {
-      const wrapper = await mountPopover()
+      await mountPopover()
 
       expect(document.activeElement).toBe(items()[0])
-      wrapper.unmount()
     })
 
     it('keeps the focus where it is by default', async () => {
       flag.focus()
-      const wrapper = await mountPopover({ moveFocus: false })
+      await mountPopover({ moveFocus: false })
 
       expect(document.activeElement).toBe(flag)
-      wrapper.unmount()
     })
 
     it.each(['Enter', ' '])('edits the milestone on "%s"', async key => {
@@ -159,64 +159,56 @@ describe('widgets/MilestonePopover', () => {
       await press(items()[1], key)
 
       expect(wrapper.emitted('edit')).toEqual([[group.milestones[1]]])
-      wrapper.unmount()
     })
 
     it('gives the focus back to the flag before editing', async () => {
       let focusedOnEdit = null
-      const wrapper = await mountPopover({
+      await mountPopover({
         onEdit: () => (focusedOnEdit = document.activeElement)
       })
 
       await press(items()[0], 'Enter')
 
       expect(focusedOnEdit).toBe(flag)
-      wrapper.unmount()
     })
 
     it('closes on Escape and gives the focus back to the flag', async () => {
-      const wrapper = await mountPopover()
+      await mountPopover()
 
       await press(items()[0], 'Escape')
 
       expect(items()).toHaveLength(0)
       expect(document.activeElement).toBe(flag)
-      wrapper.unmount()
     })
 
     it('closes once the focus leaves it', async () => {
       vi.useFakeTimers()
-      const wrapper = await mountPopover()
+      await mountPopover()
 
       items()[0].blur()
       vi.advanceTimersByTime(200)
       await nextTick()
 
       expect(items()).toHaveLength(0)
-      wrapper.unmount()
-      vi.useRealTimers()
     })
 
     it('stays open while the focus moves between milestones', async () => {
       vi.useFakeTimers()
-      const wrapper = await mountPopover()
+      await mountPopover()
 
       items()[1].focus()
       vi.advanceTimersByTime(200)
       await nextTick()
 
       expect(items()).toHaveLength(2)
-      wrapper.unmount()
-      vi.useRealTimers()
     })
 
     it('leaves the milestones out of the Tab order when read-only', async () => {
-      const wrapper = await mountPopover({ canEdit: false })
+      await mountPopover({ canEdit: false })
 
       expect(items()[0].getAttribute('tabindex')).toBeNull()
       expect(items()[0].getAttribute('role')).toBeNull()
       expect(document.activeElement).not.toBe(items()[0])
-      wrapper.unmount()
     })
   })
 })
