@@ -248,9 +248,12 @@
         <asset-type-settings
           :asset-types="templateAssetTypes"
           :all-asset-types="allAssetTypes"
+          :task-types="templateAssetTaskTypes"
+          :workflows="templateWorkflows"
           @add="addAssetType"
           @import-items="importAssetTypes"
           @remove="removeAssetType"
+          @update-workflow="updateAssetTypeWorkflow"
         />
       </div>
     </div>
@@ -488,6 +491,14 @@ const allTaskTypes = computed(() => {
 })
 const allTaskStatuses = computed(() => store.getters.taskStatus || [])
 const allAssetTypes = computed(() => store.getters.assetTypes || [])
+const templateAssetTaskTypes = computed(() =>
+  templateTaskTypes.value.filter(({ for_entity }) => for_entity === 'Asset')
+)
+const templateWorkflows = computed(() =>
+  Object.fromEntries(
+    templateAssetTypes.value.map(({ id, workflow }) => [id, workflow])
+  )
+)
 const allAutomations = computed(() => store.getters.statusAutomations || [])
 const allBackgrounds = computed(() => store.getters.backgrounds || [])
 const departmentMap = computed(() => store.getters.departmentMap || new Map())
@@ -702,6 +713,9 @@ const addAssetType = assetTypeId =>
 
 const removeAssetType = assetTypeId =>
   updateTemplate('removeAssetTypeFromTemplate', { assetTypeId })
+
+const updateAssetTypeWorkflow = payload =>
+  updateTemplate('setTemplateAssetTypeWorkflow', payload).catch(console.error)
 
 const importLinks = async ({ ids, done }, action, key) => {
   try {

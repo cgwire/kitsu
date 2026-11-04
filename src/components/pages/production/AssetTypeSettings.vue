@@ -30,7 +30,7 @@
                   <span class="workflow-combo">
                     <combobox-task-type-options
                       :hidden="getHiddenTaskTypeIds(assetType.id)"
-                      :task-types="sortedProductionTaskTypes"
+                      :task-types="taskTypes"
                       @update:hidden="onHiddenChanged(assetType.id, $event)"
                     />
                   </span>
@@ -48,10 +48,7 @@
                 </div>
               </td>
               <td class="origin">
-                <div
-                  class="origin-content"
-                  v-if="hasProductionWorkflow(assetType.id)"
-                >
+                <div class="origin-content" v-if="hasOwnWorkflow(assetType.id)">
                   <span class="tag">
                     {{ $t('asset_types.workflow_production') }}
                   </span>
@@ -95,7 +92,7 @@
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
-import { sortByName, sortTaskTypes } from '@/lib/sorting'
+import { sortByName } from '@/lib/sorting'
 
 import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOptions.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
@@ -107,10 +104,14 @@ const store = useStore()
 // --------------------------------------------------------------------------
 const props = defineProps({
   assetTypes: { type: Array, default: () => [] },
-  allAssetTypes: { type: Array, default: () => [] }
+  allAssetTypes: { type: Array, default: () => [] },
+  // The asset task types of the production or template, in display order.
+  taskTypes: { type: Array, default: () => [] },
+  // The workflows of the production or template, by asset type id.
+  workflows: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits(['add', 'import-items', 'remove'])
+const emit = defineEmits(['add', 'import-items', 'remove', 'update-workflow'])
 
 // State
 // --------------------------------------------------------------------------
@@ -124,49 +125,38 @@ const remainingAssetTypes = computed(() =>
   sortByName(props.allAssetTypes.filter(at => !linkedIds.value.has(at.id)))
 )
 
-const currentProduction = computed(() => store.getters.currentProduction)
-const productionTaskTypes = computed(
-  () => store.getters.productionAssetTaskTypes
-)
-const sortedProductionTaskTypes = computed(() =>
-  sortTaskTypes(productionTaskTypes.value, currentProduction.value)
-)
-
 // Functions
 // --------------------------------------------------------------------------
+const hasOwnWorkflow = assetTypeId =>
+  Boolean(props.workflows[assetTypeId]?.length)
+
 const getWorkflow = assetTypeId =>
-  store.getters.getAssetTypeWorkflow(assetTypeId)
+  hasOwnWorkflow(assetTypeId)
+    ? props.workflows[assetTypeId]
+    : store.getters.assetTypeMap.get(assetTypeId)?.task_types || []
 
-const hasProductionWorkflow = assetTypeId =>
-  Boolean(currentProduction.value?.asset_type_workflows?.[assetTypeId]?.length)
-
-// Zou accepts only the task types of the production: the ones a studio
-// workflow lists outside of it are neither shown nor sent back.
+// Zou accepts only the task types of the production or template: the ones a
+// studio workflow lists outside of it are neither shown nor sent back.
 const getTaskTypes = assetTypeId => {
   const workflow = getWorkflow(assetTypeId)
-  return sortTaskTypes(
-    productionTaskTypes.value.filter(({ id }) => workflow.includes(id)),
-    currentProduction.value
-  )
+  return props.taskTypes.filter(({ id }) => workflow.includes(id))
 }
 
 // An empty workflow accepts all the task types: none of them is hidden.
 const getHiddenTaskTypeIds = assetTypeId => {
   if (!getWorkflow(assetTypeId).length) return []
   const shownIds = getTaskTypes(assetTypeId).map(({ id }) => id)
-  return productionTaskTypes.value
+  return props.taskTypes
     .map(({ id }) => id)
     .filter(id => !shownIds.includes(id))
 }
 
 const saveWorkflow = (assetTypeId, taskTypeIds) =>
-  store
-    .dispatch('setAssetTypeWorkflow', { assetTypeId, taskTypeIds })
-    .catch(console.error)
+  emit('update-workflow', { assetTypeId, taskTypeIds })
 
 // Hiding them all saves an empty list: back to the studio workflow.
 const onHiddenChanged = (assetTypeId, hiddenIds) => {
-  const taskTypeIds = productionTaskTypes.value
+  const taskTypeIds = props.taskTypes
     .map(({ id }) => id)
     .filter(id => !hiddenIds.includes(id))
   saveWorkflow(assetTypeId, taskTypeIds)
