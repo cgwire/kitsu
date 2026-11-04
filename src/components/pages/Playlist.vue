@@ -1281,13 +1281,35 @@ const onPreviewChanged = ({ entity, previewFileId, previousPreviewFileId }) =>
     previousPreviewFileId
   })
 
-const onOrderChange = info =>
-  withSilent(() =>
+// Puts the `after` entry right after the `before` one, as the store does
+// with the saved order.
+const moveEntry = (entries, { before, after }) => {
+  const indexOf = ({ entity_id, preview_file_id }) =>
+    entries.findIndex(
+      entry =>
+        entry.id === entity_id && entry.preview_file_id === preview_file_id
+    )
+  const from = indexOf(after)
+  let to = indexOf(before)
+  if (from < 0 || to < 0) return
+  const [entry] = entries.splice(from, 1)
+  if (from > to) to++
+  entries.splice(to, 0, entry)
+}
+
+// The strip has moved already. The list handed to the player moves too: an
+// addition or a removal hands it back, and the strip would show the order of
+// the load again. It moves in place: a new list resets the player, paused at
+// the start of the entry played, in the whole review room.
+const onOrderChange = info => {
+  moveEntry(currentEntitiesList.value, info)
+  return withSilent(() =>
     store.dispatch('changePlaylistOrder', {
       playlist: currentPlaylist.value,
       info
     })
   )
+}
 
 const onAnnotationChanged = async ({
   preview,

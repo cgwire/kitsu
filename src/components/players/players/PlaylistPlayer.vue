@@ -4158,45 +4158,34 @@ const onEntityDropped = info => {
   }
 }
 
-// Read the reorder payload BEFORE moving: moveSelectedEntity empties
-// entityList synchronously (restored on nextTick), so any index read
-// after the call lands on an empty array. During a load, the entries are
-// still those of the playlist shown before.
+const toOrderEntry = entity => ({
+  entity_id: entity.id,
+  preview_file_id: entity.preview_file_id
+})
+
+// The page saves a move by putting the `after` entry right after the
+// `before` one, which cannot take the last entry to the start. The shortcut
+// stops at both ends instead of wrapping around, the first entry too, so
+// that both directions behave alike. During a load, the entries are still
+// those of the playlist shown before.
 const moveSelectedEntityToLeft = () => {
-  if (props.isLoading || entityList.value.length < 2) return
-  const toMoveIndex = playingEntityIndex.value
-  const targetIndex = previousEntityIndex.value
-  const entityToMove = currentEntity.value
-  const info = {
-    before: {
-      entity_id: entityList.value[targetIndex].id,
-      preview_file_id: entityList.value[targetIndex].preview_file_id
-    },
-    after: {
-      entity_id: entityList.value[toMoveIndex].id,
-      preview_file_id: entityList.value[toMoveIndex].preview_file_id
-    }
-  }
-  moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
+  const index = playingEntityIndex.value
+  const previous = entityList.value[index - 1]
+  const played = entityList.value[index]
+  if (props.isLoading || !previous || !played) return
+  // The previous entry goes right after the one played.
+  const info = { before: toOrderEntry(played), after: toOrderEntry(previous) }
+  moveSelectedEntity(played, index, index - 1)
   emit('order-change', info)
 }
 
 const moveSelectedEntityToRight = () => {
-  if (props.isLoading || entityList.value.length < 2) return
-  const toMoveIndex = playingEntityIndex.value
-  const targetIndex = nextEntityIndex.value
-  const entityToMove = currentEntity.value
-  const info = {
-    before: {
-      entity_id: entityList.value[toMoveIndex].id,
-      preview_file_id: entityList.value[toMoveIndex].preview_file_id
-    },
-    after: {
-      entity_id: entityList.value[targetIndex].id,
-      preview_file_id: entityList.value[targetIndex].preview_file_id
-    }
-  }
-  moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
+  const index = playingEntityIndex.value
+  const played = entityList.value[index]
+  const next = entityList.value[index + 1]
+  if (props.isLoading || !played || !next) return
+  const info = { before: toOrderEntry(next), after: toOrderEntry(played) }
+  moveSelectedEntity(played, index, index + 1)
   emit('order-change', info)
 }
 

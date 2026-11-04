@@ -23,6 +23,7 @@ vi.mock('wavesurfer.js', () => ({ default: waveSurfer }))
 import '@/lib/auth'
 import { useModal } from '@/composables/modal'
 import clipboard from '@/lib/clipboard'
+import playlistStore from '@/store/modules/playlists'
 
 import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
 
@@ -2094,12 +2095,13 @@ describe('PlaylistPlayer.vue', () => {
 
   // Ctrl or Cmd+Shift+Left/Right moves the entry played.
   describe('reorder shortcut', () => {
-    const entities = [
-      { ...entity, id: 'shot-1', preview_file_id: 'preview-1' },
-      { ...entity, id: 'shot-2', preview_file_id: 'preview-2' }
-    ]
+    const entities = ['shot-1', 'shot-2', 'shot-3'].map((id, index) => ({
+      ...entity,
+      id,
+      preview_file_id: `preview-${index + 1}`
+    }))
 
-    const press = code =>
+    const press = async code => {
       window.dispatchEvent(
         new KeyboardEvent('keydown', {
           code,
@@ -2108,25 +2110,78 @@ describe('PlaylistPlayer.vue', () => {
           shiftKey: true
         })
       )
+      await flushPromises()
+    }
 
-    it.each(['ArrowLeft', 'ArrowRight'])(
-      'moves the entry on %s once the playlist is loaded',
-      async code => {
-        wrapper = mountPlayer({ entities })
-        await flushPromises()
-        press(code)
-        expect(wrapper.emitted('order-change')).toHaveLength(1)
+    const strip = () => wrapper.findAllComponents({ name: 'PlaylistedEntity' })
+    const stripIds = () => strip().map(entry => entry.props('entity').id)
+
+    // The page saves each move on the order it saved before, by putting
+    // the `after` entry right after the `before` one.
+    const savedIds = () => {
+      const saved = {
+        shots: entities.map(({ id, preview_file_id }) => ({
+          entity_id: id,
+          preview_file_id
+        }))
       }
-    )
+      wrapper.emitted('order-change').forEach(([info]) =>
+        playlistStore.mutations.CHANGE_PLAYLIST_ORDER(
+          {},
+          { playlist: saved, info }
+        )
+      )
+      return saved.shots.map(shot => shot.entity_id)
+    }
+
+    it('saves the moves the strip shows', async () => {
+      wrapper = mountPlayer({ entities })
+      await flushPromises()
+
+      await press('ArrowRight')
+      expect(stripIds()).toEqual(['shot-2', 'shot-1', 'shot-3'])
+      expect(savedIds()).toEqual(stripIds())
+
+      await press('ArrowRight')
+      expect(stripIds()).toEqual(['shot-2', 'shot-3', 'shot-1'])
+      expect(savedIds()).toEqual(stripIds())
+
+      await press('ArrowLeft')
+      expect(stripIds()).toEqual(['shot-2', 'shot-1', 'shot-3'])
+      expect(savedIds()).toEqual(stripIds())
+    })
+
+    // The shortcut wraps at neither end: one put-after pair cannot take the
+    // last entry to the start, and the first entry stops too, so that both
+    // directions behave alike.
+    it('stops at the ends of the playlist', async () => {
+      wrapper = mountPlayer({ entities })
+      await flushPromises()
+
+      await press('ArrowLeft')
+      expect(wrapper.emitted('order-change')).toBeUndefined()
+
+      await press('ArrowRight')
+      await press('ArrowRight')
+      await press('ArrowRight')
+      expect(wrapper.emitted('order-change')).toHaveLength(2)
+      expect(stripIds()).toEqual(['shot-2', 'shot-3', 'shot-1'])
+    })
 
     // During the load, the entries are still those of the playlist shown
     // before: the page saved its order.
     it.each(['ArrowLeft', 'ArrowRight'])(
       'ignores %s while a playlist loads',
       async code => {
-        wrapper = mountPlayer({ entities, props: { isLoading: true } })
+        wrapper = mountPlayer({ entities })
         await flushPromises()
-        press(code)
+        // The middle entry, which can move either way.
+        strip()[1].vm.$emit('play-click', 1)
+        await flushPromises()
+        expect(strip()[1].props('isPlaying')).toBe(true)
+        await wrapper.setProps({ isLoading: true })
+
+        await press(code)
         expect(wrapper.emitted('order-change')).toBeUndefined()
       }
     )

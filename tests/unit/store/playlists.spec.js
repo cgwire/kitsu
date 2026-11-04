@@ -141,6 +141,104 @@ describe('Playlists store', () => {
       expect(ends.map(([, playlist]) => playlist.id)).toEqual(['playlist-b'])
     })
 
+    describe('changePlaylistOrder', () => {
+      const entry = id => ({ entity_id: id, preview_file_id: `preview-${id}` })
+      const order = shots => shots.map(shot => shot.entity_id)
+      const settle = () => new Promise(resolve => setTimeout(resolve))
+
+      // Zou answers the saves when the test lands them, and keeps for each
+      // playlist the order of the save it stores last.
+      const mockZou = () => {
+        const zou = { inFlight: [], sent: [], stored: {} }
+        vi.spyOn(playlistsApi, 'updatePlaylist').mockImplementation(
+          ({ id, shots }) =>
+            new Promise(resolve => {
+              const sent = order(shots)
+              zou.sent.push(sent)
+              zou.inFlight.push(() => {
+                zou.stored[id] = sent
+                resolve({ id })
+              })
+            })
+        )
+        zou.landAll = async (pick = saves => saves) => {
+          while (zou.inFlight.length) {
+            pick(zou.inFlight.splice(0)).forEach(land => land())
+            await settle()
+          }
+        }
+        return zou
+      }
+
+      const openPlaylist = id => {
+        const playlist = { id, shots: ['shot-1', 'shot-2', 'shot-3'].map(entry) }
+        const state = { playlists: [], playlistMap: new Map() }
+        const context = {
+          commit: (type, payload) => store.mutations[type](state, payload),
+          rootGetters: { isCurrentUserClient: false }
+        }
+        context.dispatch = (type, payload) =>
+          store.actions[type](context, payload)
+        // Each move is a keydown or a drop of its own.
+        const move = async (before, after) => {
+          store.actions.changePlaylistOrder(context, {
+            playlist,
+            info: { before: entry(before), after: entry(after) }
+          })
+          await settle()
+        }
+        return { playlist, move }
+      }
+
+      // Each move saves the whole order, and Zou keeps the save it stores
+      // last, not always the last one sent.
+      test('keeps the last move when the saves land out of order', async () => {
+        const zou = mockZou()
+        const { playlist, move } = openPlaylist('playlist-1')
+
+        await move('shot-2', 'shot-1')
+        await move('shot-1', 'shot-2')
+        // From the last sent to the first.
+        await zou.landAll(saves => saves.reverse())
+
+        expect(order(playlist.shots)).toEqual(['shot-1', 'shot-2', 'shot-3'])
+        expect(zou.stored['playlist-1']).toEqual(['shot-1', 'shot-2', 'shot-3'])
+      })
+
+      // Holding the shortcut moves the entry at each key repeat.
+      test('sends one save for the moves made while one runs', async () => {
+        const zou = mockZou()
+        const { move } = openPlaylist('playlist-2')
+
+        await move('shot-2', 'shot-1')
+        await move('shot-3', 'shot-1')
+        await move('shot-1', 'shot-2')
+        await zou.landAll()
+
+        expect(zou.sent).toEqual([
+          ['shot-2', 'shot-1', 'shot-3'],
+          ['shot-3', 'shot-1', 'shot-2']
+        ])
+      })
+
+      // A save waiting in one playlist stays when another playlist moves.
+      test('keeps the saves of each playlist apart', async () => {
+        const zou = mockZou()
+        const first = openPlaylist('playlist-3')
+        const second = openPlaylist('playlist-4')
+
+        await first.move('shot-2', 'shot-1')
+        await first.move('shot-3', 'shot-1')
+        await second.move('shot-2', 'shot-1')
+        await zou.landAll()
+
+        expect(zou.stored).toEqual({
+          'playlist-3': ['shot-2', 'shot-3', 'shot-1'],
+          'playlist-4': ['shot-2', 'shot-1', 'shot-3']
+        })
+      })
+    })
+
     test('loadPlaylists forwards the entity type filter of the all pseudo-episode', async () => {
       const getPlaylists = vi
         .spyOn(playlistsApi, 'getPlaylists')

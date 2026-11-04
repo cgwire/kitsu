@@ -846,6 +846,80 @@ describe('Playlist page, displayed playlist', () => {
   })
 })
 
+describe('Playlist page, reorder', () => {
+  const ids = ['s1', 's2', 's3']
+
+  const openEntries = async () => {
+    ids.forEach(id =>
+      shotStore.cache.shotMap.set(id, { id, name: id, sequence_name: 'SQ01' })
+    )
+    const { wrapper } = await openPlaylist(
+      {
+        shots: ids.map((id, index) => ({
+          id,
+          entity_id: id,
+          preview_file_id: `pf-${index + 1}`,
+          preview_files: {}
+        }))
+      },
+      { actions: { changePlaylistOrder: vi.fn(() => Promise.resolve()) } }
+    )
+    await flushPromises()
+    const player = wrapper.findComponent(PlaylistPlayer)
+    return {
+      player,
+      entityIds: () => player.props('entities').map(entity => entity.id)
+    }
+  }
+
+  afterEach(() => ids.forEach(id => shotStore.cache.shotMap.delete(id)))
+
+  // The strip and the saved order move together. The list the page hands
+  // the player has to move too: an addition or a removal hands it back, and
+  // the strip would show the order of the load again. It moves in place: a
+  // new list resets the player, in the whole review room.
+  it('moves the entries it hands the player', async () => {
+    const { player, entityIds } = await openEntries()
+    const entities = player.props('entities')
+    expect(entityIds()).toEqual(['s1', 's2', 's3'])
+
+    // s1 goes right after s2.
+    player.vm.$emit('order-change', {
+      before: { entity_id: 's2', preview_file_id: 'pf-2' },
+      after: { entity_id: 's1', preview_file_id: 'pf-1' }
+    })
+    await flushPromises()
+
+    expect(entityIds()).toEqual(['s2', 's1', 's3'])
+
+    // s3 goes right after s2, to the left.
+    player.vm.$emit('order-change', {
+      before: { entity_id: 's2', preview_file_id: 'pf-2' },
+      after: { entity_id: 's3', preview_file_id: 'pf-3' }
+    })
+    await flushPromises()
+
+    expect(entityIds()).toEqual(['s2', 's3', 's1'])
+    expect(player.props('entities')).toBe(entities)
+  })
+
+  // A missing entry has no position: a splice at -1 would move another one.
+  const known = { entity_id: 's2', preview_file_id: 'pf-2' }
+  const missing = { entity_id: 's9', preview_file_id: 'pf-9' }
+
+  it.each([
+    ['moved', { before: known, after: missing }],
+    ['reference', { before: missing, after: known }]
+  ])('keeps the entries in place when the %s entry is missing', async (_, info) => {
+    const { player, entityIds } = await openEntries()
+
+    player.vm.$emit('order-change', info)
+    await flushPromises()
+
+    expect(entityIds()).toEqual(['s1', 's2', 's3'])
+  })
+})
+
 describe('Playlist page, silent lock', () => {
   // The playlist:update events are ignored while the page saves. A failed
   // save must release the lock, or the page stays deaf to every update.
