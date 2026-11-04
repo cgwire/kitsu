@@ -838,6 +838,7 @@
       "documentation": "Dokumentacja",
       "drop_files_here": "Upuść pliki tutaj",
       "edit": "Edytuj",
+      "edit_deleted_error": "Nie udało się zapisać „{name}”: w międzyczasie został usunięty.",
       "edit_mode_on": "Przełącz tryb edycji",
       "empty_comment": "Pusty komentarz",
       "empty_schedule": "Brak zadań lub nie mają one dat rozpoczęcia.",

@@ -125,6 +125,7 @@
       :is-loading="loading.edit"
       :is-loading-stay="loading.stay"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :is-success="success.edit"
       :asset-to-edit="assetToEdit"
       @confirm="confirmEditAsset"
@@ -267,6 +268,7 @@ import {
   useEntityPage
 } from '@/composables/entityPage'
 import { getExportDescriptors } from '@/lib/descriptors'
+import { isNotFound } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
 import AssetList from '@/components/lists/AssetList.vue'
@@ -532,6 +534,7 @@ const saveAsset = async (form, { stay = false } = {}) => {
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   } finally {
     loading[loadingKey] = false
     loading.edit = false

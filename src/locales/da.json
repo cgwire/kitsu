@@ -444,6 +444,7 @@
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "documentation": "Dokumentation",
       "edit": "Rediger",
+      "edit_deleted_error": "\"{name}\" kunne ikke gemmes: den blev slettet i mellemtiden.",
       "empty_comment": "Tom kommentar",
       "end_date": "Slutdato",
       "files_selected": "{count} fil markeret | {count} filer markeret",

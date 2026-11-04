@@ -633,7 +633,11 @@ const actions = {
     }
     const assetTypeMap = assetTypeStore.cache.assetTypeMap
     commit(LOCK_ASSET, data)
-    commit(EDIT_ASSET_END, { newAsset: data, assetTypeMap })
+    // EDIT_ASSET_END lists the assets it does not find, the new ones: the
+    // partial form of an asset deleted in another session must not enter.
+    if (cache.assetMap.has(data.id)) {
+      commit(EDIT_ASSET_END, { newAsset: data, assetTypeMap })
+    }
     return assetsApi.updateAsset(data).finally(() => {
       setTimeout(() => {
         commit(UNLOCK_ASSET, data)

@@ -21,6 +21,7 @@ vi.mock('@/store/api/client', () => ({
 }))
 
 import assetsStore from '@/store/modules/assets'
+import assetTypesStore from '@/store/modules/assettypes'
 import assetsApi from '@/store/api/assets'
 import client from '@/store/api/client'
 import entitiesApi from '@/store/api/entities'
@@ -2368,6 +2369,29 @@ describe('Assets store, list workflow', () => {
       ).rejects.toThrow('Asset already exists')
 
       expect(client.pput).not.toHaveBeenCalled()
+    })
+
+    // Deleted for good from another session while its modal was open.
+    test('saves an asset gone from the list without listing it again', async () => {
+      vi.useFakeTimers()
+      // editAsset reads the asset types of their store, as in the app.
+      assetTypesStore.cache.assetTypeMap.set(characters.id, characters)
+      onTestFinished(() => assetTypesStore.cache.assetTypeMap.clear())
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock'), buildAsset('a2', 'Tree')])
+      store.commit('REMOVE_ASSET', { id: 'a2' })
+      client.pput.mockRejectedValueOnce(new Error('Entity not found'))
+
+      await expect(
+        store.dispatch('editAsset', newAssetForm('Tree v2', { id: 'a2' }))
+      ).rejects.toThrow('Entity not found')
+
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/entities/a2',
+        expect.objectContaining({ name: 'Tree v2' })
+      )
+      expect(names(store.getters.displayedAssets)).toEqual(['Rock'])
+      expect(store.getters.assetMap.has('a2')).toBe(false)
     })
   })
 

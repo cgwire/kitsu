@@ -164,6 +164,7 @@
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :episode-to-edit="episodeToEdit"
       @cancel="modals.isNewDisplayed = false"
       @confirm="confirmEditEpisode"
@@ -197,7 +198,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useEntityPage } from '@/composables/entityPage'
-import { logRequestFailure } from '@/lib/errors'
+import { isNotFound, logRequestFailure } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
 import EpisodeList from '@/components/lists/EpisodeList.vue'
@@ -358,6 +359,7 @@ const confirmEditEpisode = async form => {
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   } finally {
     loading.edit = false
   }

@@ -339,6 +339,7 @@
       :active="modals.edit"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :episode-to-edit="currentEpisode"
       @cancel="modals.edit = false"
       @confirm="confirmEditEpisode"
@@ -372,6 +373,7 @@ import { useStore } from 'vuex'
 
 import { useCastingView } from '@/composables/castingView'
 import { useEntity } from '@/composables/entity'
+import { isNotFound } from '@/lib/errors'
 import { episodifyRoute } from '@/lib/path'
 import episodeStore from '@/store/modules/episodes'
 
@@ -416,7 +418,7 @@ const currentEpisode = ref(null)
 const playlistEntityIds = ref(null)
 const scheduleWidget = ref(null)
 const casting = reactive({ isLoading: false, isError: false })
-const errors = reactive({ edit: false })
+const errors = reactive({ edit: false, editDeleted: false })
 const loading = reactive({ edit: false })
 const modals = reactive({ edit: false })
 
@@ -549,6 +551,7 @@ const confirmEditEpisode = async form => {
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   }
   loading.edit = false
 }

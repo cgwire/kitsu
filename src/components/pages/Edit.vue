@@ -195,6 +195,7 @@
       :active="modals.edit"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :edit-to-edit="currentEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditEdit"
@@ -218,6 +219,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { isListOfPageLoaded, useEntity } from '@/composables/entity'
+import { isNotFound } from '@/lib/errors'
 import { getEntitiesPath } from '@/lib/path'
 import editStore from '@/store/modules/edits'
 
@@ -252,7 +254,7 @@ const clientAccess = computed(() => store.getters.clientAccess)
 // --------------------------------------------------------------------------
 const currentEdit = ref(null)
 const scheduleWidget = ref(null)
-const errors = reactive({ edit: false })
+const errors = reactive({ edit: false, editDeleted: false })
 const loading = reactive({ edit: false })
 const modals = reactive({ edit: false })
 
@@ -337,6 +339,7 @@ const confirmEditEdit = async form => {
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   }
   loading.edit = false
 }

@@ -814,6 +814,24 @@ describe('Episodes store, through a store', () => {
     expect(episode.lock).toBe(0)
   })
 
+  // Deleted in another session while its modal was open, for instance.
+  test('saves the edit of an episode missing from the loaded list', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: {} }])
+    client.pput.mockResolvedValueOnce({})
+    const form = { id: 'ep9', name: 'E09', data: {} }
+
+    await store.dispatch('editEpisode', form)
+
+    expect(client.pput).toHaveBeenCalledWith('/api/data/entities/ep9', {
+      name: 'E09',
+      description: undefined,
+      status: undefined,
+      data: {}
+    })
+    expect(names(store.getters.displayedEpisodes)).toEqual(['E01'])
+  })
+
   test('deletes an episode from every list', async () => {
     const { store } = await buildStore()
     loadEpisodes(store, [

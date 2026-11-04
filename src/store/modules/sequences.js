@@ -799,17 +799,19 @@ const mutations = {
 
   [EDIT_SEQUENCE_END](state, newSequence) {
     const sequence = cache.sequenceMap.get(newSequence.id)
-    if (sequence) {
-      const copyNewSequence = { ...newSequence }
-      copyNewSequence.data = { ...sequence.data, ...newSequence.data }
-      Object.assign(sequence, copyNewSequence)
-      state.displayedSequences = state.displayedSequences.map(stateSequence => {
-        if (stateSequence.id === newSequence.id) {
-          return { ...sequence }
-        }
-        return stateSequence
-      })
-    }
+    // Outside the loaded list, the sequence is left alone and its update
+    // still goes out.
+    if (!sequence) return
+
+    const copyNewSequence = { ...newSequence }
+    copyNewSequence.data = { ...sequence.data, ...newSequence.data }
+    Object.assign(sequence, copyNewSequence)
+    state.displayedSequences = state.displayedSequences.map(stateSequence => {
+      if (stateSequence.id === newSequence.id) {
+        return { ...sequence }
+      }
+      return stateSequence
+    })
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
     if (sequence.description && !state.isSequenceDescription) {
       state.isSequenceDescription = true

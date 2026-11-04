@@ -152,6 +152,7 @@
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :shot-to-edit="shotToEdit"
       @cancel="modals.isNewDisplayed = false"
       @confirm="confirmEditShot"
@@ -316,6 +317,7 @@ import {
   useEntityPage
 } from '@/composables/entityPage'
 import { getExportDescriptors } from '@/lib/descriptors'
+import { isNotFound } from '@/lib/errors'
 import shotStore from '@/store/modules/shots'
 
 /* eslint-disable no-unused-vars */
@@ -624,6 +626,7 @@ const confirmEditShot = async form => {
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   } finally {
     loading.edit = false
   }

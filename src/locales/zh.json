@@ -444,6 +444,7 @@
       "delete_text": "您确定要从您的数据库移除{name}吗？",
       "documentation": "文档",
       "edit": "编辑",
+      "edit_deleted_error": "无法保存“{name}”：它已在此期间被删除。",
       "empty_comment": "空评论",
       "end_date": "结束日期",
       "files_selected": "已选择 {count} 个文件 | 已选择 {count} 个文件",

@@ -445,6 +445,7 @@
       "disable_desktop_notifications": "Disattiva le notifiche desktop",
       "documentation": "Documentazione",
       "edit": "Modifica",
+      "edit_deleted_error": "Impossibile salvare \"{name}\": nel frattempo è stato eliminato.",
       "empty_comment": "Commento vuoto",
       "enable_desktop_notifications": "Attiva le notifiche desktop",
       "end_date": "Data di fine",

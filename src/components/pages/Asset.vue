@@ -505,6 +505,7 @@
       :active="modals.edit"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :asset-to-edit="currentAsset"
       @cancel="modals.edit = false"
       @confirm="confirmEditAsset"
@@ -538,6 +539,7 @@ import { useStore } from 'vuex'
 
 import { useCastingView } from '@/composables/castingView'
 import { isListOfPageLoaded, useEntity } from '@/composables/entity'
+import { isNotFound } from '@/lib/errors'
 import { sortByName } from '@/lib/sorting'
 import assetStore from '@/store/modules/assets'
 
@@ -589,7 +591,7 @@ const localTasks = ref([])
 const playlist = ref(null)
 const scheduleWidget = ref(null)
 const castIn = reactive({ isLoading: false, isError: false })
-const errors = reactive({ edit: false })
+const errors = reactive({ edit: false, editDeleted: false })
 const loading = reactive({ edit: false })
 const modals = reactive({ edit: false })
 
@@ -789,14 +791,17 @@ const confirmEditAsset = async form => {
   loading.edit = true
   errors.edit = false
   const request = store.dispatch('editAsset', data)
-  // editAsset commits optimistically, so the cache already holds the new values.
-  currentAsset.value = { ...assetStore.cache.assetMap.get(data.id) }
+  // editAsset commits optimistically, so the cache already holds the new
+  // values. An asset deleted in another session is no longer there.
+  const asset = assetStore.cache.assetMap.get(data.id)
+  if (asset) currentAsset.value = { ...asset }
   try {
     await request
     modals.edit = false
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   }
   loading.edit = false
 }

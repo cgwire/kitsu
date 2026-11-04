@@ -121,6 +121,7 @@
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :edit-to-edit="editToEdit"
       @cancel="modals.isNewDisplayed = false"
       @confirm="confirmEditEdit"
@@ -268,6 +269,7 @@ import {
   useEntityPage
 } from '@/composables/entityPage'
 import { getExportDescriptors } from '@/lib/descriptors'
+import { isNotFound } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
 import EditList from '@/components/lists/EditList.vue'
@@ -499,6 +501,7 @@ const confirmEditEdit = async form => {
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   } finally {
     loading.edit = false
   }

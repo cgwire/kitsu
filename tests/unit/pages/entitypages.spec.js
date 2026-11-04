@@ -263,8 +263,68 @@ describe.each(pages)(
       expect(modal().props('active')).toBe(true)
       expect(modal().props('isError')).toBe(false)
     })
+
+    // Zou answers 404 for an entity deleted meanwhile in another session.
+    test('tells the modal a save on an entity deleted meanwhile', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      entityMap.set('entity-1', { id: 'entity-1', name: 'E01', tasks: [] })
+      let failure = Object.assign(new Error('Not Found'), { status: 404 })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [editAction]: () => Promise.reject(failure)
+      })
+      const editButton = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'edit')
+      const modal = () => wrapper.findComponent(editModal)
+
+      await editButton.vm.$emit('click')
+      await modal().vm.$emit('confirm', { name: 'E02' })
+      await flushPromises()
+      expect(modal().props('isError')).toBe(true)
+      expect(modal().props('isDeleted')).toBe(true)
+
+      failure = new Error('taken')
+      await modal().vm.$emit('confirm', { name: 'E02' })
+      await flushPromises()
+      expect(modal().props('isError')).toBe(true)
+      expect(modal().props('isDeleted')).toBe(false)
+    })
   }
 )
+
+// Deleted for good from another session while its modal was open, the asset
+// is no longer in the cache, and the store keeps it out.
+describe('Asset page, edit of an asset deleted elsewhere', () => {
+  afterEach(() => {
+    assetStore.cache.assetMap.clear()
+    vi.restoreAllMocks()
+  })
+
+  test('keeps showing the asset while the save fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    assetStore.cache.assetMap.set('entity-1', {
+      id: 'entity-1',
+      name: 'Tree',
+      asset_type_name: 'Props',
+      tasks: []
+    })
+    const { wrapper } = await mountPage(Asset, 'asset_id', production, {
+      editAsset: () => Promise.reject(new Error('Entity not found'))
+    })
+    assetStore.cache.assetMap.delete('entity-1')
+    const editButton = wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'edit')
+    const modal = () => wrapper.findComponent(EditAssetModal)
+
+    await editButton.vm.$emit('click')
+    await modal().vm.$emit('confirm', { name: 'Tree v2' })
+    await flushPromises()
+
+    expect(wrapper.find('.entity-title').text()).toBe('Props / Tree')
+    expect(modal().props('isError')).toBe(true)
+  })
+})
 
 // The pages whose arrows walk a list of the store, which may be the one of
 // another episode: an entity loaded by id, a list loaded elsewhere.

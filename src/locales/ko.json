@@ -444,6 +444,7 @@
       "delete_text": "데이터베이스에서 {name}을(를) 정말로 제거하시겠습니까?",
       "documentation": "문서",
       "edit": "수정",
+      "edit_deleted_error": "\"{name}\"을(를) 저장할 수 없습니다. 그 사이에 삭제되었습니다.",
       "empty_comment": "빈 댓글",
       "end_date": "종료일",
       "files_selected": "파일 {count}개 선택됨 | 파일 {count}개 선택됨",

@@ -444,6 +444,7 @@
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "documentation": "Documentación",
       "edit": "Editar",
+      "edit_deleted_error": "No se ha podido guardar \"{name}\": se ha eliminado mientras tanto.",
       "empty_comment": "Sin comentario",
       "end_date": "Fecha de finalización",
       "files_selected": "{count} archivo seleccionado | {count} archivos seleccionados",

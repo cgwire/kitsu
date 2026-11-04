@@ -872,6 +872,7 @@ export default {
     documentation: 'Documentation',
     drop_files_here: 'Drop files here',
     edit: 'Edit',
+    edit_deleted_error: '"{name}" could not be saved: it was deleted in the meantime.',
     edit_mode_on: 'Toggle edit mode',
     empty_comment: 'Empty comment',
     empty_schedule: 'There are no tasks or they don\'t have start dates.',

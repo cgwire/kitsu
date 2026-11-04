@@ -76,7 +76,11 @@
     </form>
 
     <modal-footer
-      :error-text="$t('shots.edit_fail')"
+      :error-text="
+        isDeleted && shotToEdit?.id
+          ? $t('main.edit_deleted_error', { name: shotToEdit.name })
+          : $t('shots.edit_fail')
+      "
       :is-loading="isLoading"
       :is-error="isError"
       @confirm="confirmClicked"
@@ -104,6 +108,7 @@ const store = useStore()
 
 const props = defineProps({
   active: { type: Boolean, default: false },
+  isDeleted: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   shotToEdit: { type: Object, default: () => ({}) }

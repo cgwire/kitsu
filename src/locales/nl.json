@@ -444,6 +444,7 @@
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "documentation": "Documentatie",
       "edit": "Aanpassen",
+      "edit_deleted_error": "\"{name}\" kon niet worden opgeslagen: het is in de tussentijd verwijderd.",
       "empty_comment": "Lege opmerking",
       "end_date": "Einddatum",
       "files_selected": "{count} bestand geselecteerd | {count} bestanden geselecteerd",

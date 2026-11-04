@@ -762,19 +762,21 @@ const mutations = {
 
   [EDIT_EPISODE_END](state, newEpisode) {
     const episode = cache.episodeMap.get(newEpisode.id)
+    // Outside the loaded list, the episode is left alone and its update
+    // still goes out.
+    if (!episode) return
+
     const episodeFromMain = state.episodes.find(e => e.id === newEpisode.id)
-    if (episode) {
-      const copyNewEpisode = { ...newEpisode }
-      copyNewEpisode.data = { ...episode.data, ...newEpisode.data }
-      Object.assign(episode, copyNewEpisode)
-      Object.assign(episodeFromMain, copyNewEpisode)
-      state.displayedEpisodes = state.displayedEpisodes.map(stateEpisode => {
-        if (stateEpisode.id === newEpisode.id) {
-          return { ...episode }
-        }
-        return stateEpisode
-      })
-    }
+    const copyNewEpisode = { ...newEpisode }
+    copyNewEpisode.data = { ...episode.data, ...newEpisode.data }
+    Object.assign(episode, copyNewEpisode)
+    Object.assign(episodeFromMain, copyNewEpisode)
+    state.displayedEpisodes = state.displayedEpisodes.map(stateEpisode => {
+      if (stateEpisode.id === newEpisode.id) {
+        return { ...episode }
+      }
+      return stateEpisode
+    })
     cache.episodeIndex = buildEpisodeIndex(state.episodes)
     if (episode.description && !state.isEpisodeDescription) {
       state.isEpisodeDescription = true

@@ -444,6 +444,7 @@
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "documentation": "文件",
       "edit": "編輯",
+      "edit_deleted_error": "無法儲存「{name}」：它已在這段期間被刪除。",
       "empty_comment": "空評論",
       "end_date": "結束日期",
       "files_selected": "已選取 {count} 個檔案 | 已選取 {count} 個檔案",

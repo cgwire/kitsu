@@ -444,6 +444,7 @@
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "documentation": "Dokumentation",
       "edit": "Bearbeiten",
+      "edit_deleted_error": "„{name}“ konnte nicht gespeichert werden: es wurde inzwischen gelöscht.",
       "empty_comment": "Leerer Kommentar",
       "end_date": "Enddatum",
       "files_selected": "{count} Datei ausgewählt | {count} Dateien ausgewählt",

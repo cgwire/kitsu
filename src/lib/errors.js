@@ -15,6 +15,10 @@ export const logRequestFailure = err => {
   console.error(err)
 }
 
+// Zou answers 404 to a change on an entity deleted in the meantime, from
+// another session for instance.
+export const isNotFound = err => err?.status === 404
+
 const errors = {
   backToLogin() {
     if (window.location.pathname !== '/login') {

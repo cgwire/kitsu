@@ -444,6 +444,7 @@
       "delete_text": "{name} をデータベースから削除してもよろしいですか？",
       "documentation": "ドキュメント",
       "edit": "編集",
+      "edit_deleted_error": "「{name}」を保存できませんでした。その間に削除されました。",
       "empty_comment": "コメントが空です",
       "end_date": "終了日",
       "files_selected": "{count} 個のファイルを選択済み | {count} 個のファイルを選択済み",

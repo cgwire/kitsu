@@ -445,6 +445,7 @@
       "disable_desktop_notifications": "Désactiver les notifications de bureau",
       "documentation": "Documentation",
       "edit": "Modifier",
+      "edit_deleted_error": "\"{name}\" n'a pas pu être enregistré : il a été supprimé entre-temps.",
       "empty_comment": "Commentaire vide",
       "enable_desktop_notifications": "Activer les notifications de bureau",
       "end_date": "Date de fin",

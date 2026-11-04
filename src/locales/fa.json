@@ -444,6 +444,7 @@
       "delete_text": "آیا مطمئن هستید که می‌خواهید {name} را از پایگاه داده خود حذف کنید؟",
       "documentation": "مستندات",
       "edit": "ویرایش",
+      "edit_deleted_error": "\"{name}\" ذخیره نشد: در این میان حذف شده است.",
       "empty_comment": "نظر خالی",
       "end_date": "تاریخ پایان",
       "files_selected": "{count} فایل انتخاب شده | {count} فایل انتخاب شده",

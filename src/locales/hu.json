@@ -444,6 +444,7 @@
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból?",
       "documentation": "Dokumentáció",
       "edit": "Szerkesztés",
+      "edit_deleted_error": "A(z) \"{name}\" mentése nem sikerült: időközben törölték.",
       "empty_comment": "Üres hozzászólás",
       "end_date": "Befejező dátum",
       "files_selected": "{count} fájl kijelölve | {count} fájl kijelölve",

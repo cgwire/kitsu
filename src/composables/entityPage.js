@@ -97,6 +97,7 @@ const ERRORS = {
   deleteAllTasks: false,
   deleteMetadata: false,
   edit: false,
+  editDeleted: false,
   importing: false,
   importingError: null,
   restore: false

@@ -323,6 +323,7 @@
       :active="modals.edit"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :sequence-to-edit="currentSequence"
       @cancel="modals.edit = false"
       @confirm="confirmEditSequence"
@@ -356,6 +357,7 @@ import { useStore } from 'vuex'
 
 import { useCastingView } from '@/composables/castingView'
 import { isListOfPageLoaded, useEntity } from '@/composables/entity'
+import { isNotFound } from '@/lib/errors'
 import { episodifyRoute, getEntitiesPath } from '@/lib/path'
 import sequenceStore from '@/store/modules/sequences'
 
@@ -399,7 +401,7 @@ const currentSequence = ref(null)
 const playlistEntityIds = ref(null)
 const scheduleWidget = ref(null)
 const casting = reactive({ isLoading: false, isError: false })
-const errors = reactive({ edit: false })
+const errors = reactive({ edit: false, editDeleted: false })
 const loading = reactive({ edit: false })
 const modals = reactive({ edit: false })
 
@@ -560,6 +562,7 @@ const confirmEditSequence = async form => {
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   }
   loading.edit = false
 }
