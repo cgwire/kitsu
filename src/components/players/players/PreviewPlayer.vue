@@ -1983,6 +1983,16 @@ const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
 // reuse the live extract/composite pipeline.
 const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   const savedIndex = currentIndex.value
+  try {
+    return await snapshotPicturePreviews({ withLabel })
+  } finally {
+    // Back to the file of the user, even after a failed snapshot. A closed
+    // player has nothing left to show.
+    if (previewViewer.value) await showPreviewFile(savedIndex)
+  }
+}
+
+const snapshotPicturePreviews = async ({ withLabel }) => {
   const picturePreviews = props.previews
     .map((preview, index) => ({ preview, index: index + 1 }))
     .filter(({ preview }) => isPicturePreview(preview.extension))
@@ -2031,8 +2041,12 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
       )
     }
   }
-  if (currentIndex.value !== savedIndex) {
-    currentIndex.value = savedIndex
+  return files
+}
+
+const showPreviewFile = async index => {
+  if (currentIndex.value !== index) {
+    currentIndex.value = index
     await new Promise(resolve => setTimeout(resolve, 500))
   }
   // Repaint the current preview's annotation rather than leaving the
@@ -2042,7 +2056,6 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
     clearCanvas()
     loadAnnotation()
   })
-  return files
 }
 
 // Concepts

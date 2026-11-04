@@ -3780,6 +3780,17 @@ const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
 const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   const entity = currentEntity.value
   if (!entity) return []
+  const savedIndex = currentPreviewIndex.value
+  try {
+    return await snapshotPicturePreviews(entity, { withLabel })
+  } finally {
+    // Back to the file of the user, even after a failed snapshot. A closed
+    // player has nothing left to show.
+    if (picturePlayer.value) await showPreviewFile(savedIndex)
+  }
+}
+
+const snapshotPicturePreviews = async (entity, { withLabel }) => {
   const picturePreviews = [
     {
       id: entity.preview_file_id,
@@ -3792,7 +3803,6 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
     .map((preview, index) => ({ preview, index }))
     .filter(({ preview }) => isPicturePreview(preview.extension))
 
-  const savedIndex = currentPreviewIndex.value
   const files = []
   let fileIndex = 1
   for (const { preview, index } of picturePreviews) {
@@ -3840,12 +3850,15 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
     }
     fileIndex++
   }
-  if (currentPreviewIndex.value !== savedIndex) {
-    currentPreviewIndex.value = savedIndex
+  return files
+}
+
+const showPreviewFile = async index => {
+  if (currentPreviewIndex.value !== index) {
+    currentPreviewIndex.value = index
     await new Promise(resolve => setTimeout(resolve, 500))
   }
   nextTick(() => reloadCurrentAnnotation())
-  return files
 }
 
 const getFileFromCanvas = (canvas, filename) => {

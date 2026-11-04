@@ -313,12 +313,13 @@ describe('PlaylistPlayer.vue', () => {
     // refuses, even once its size is known.
     describe('of a revision with several pictures', () => {
       let loaded = null
+      let snapshotCanvas = null
       let unavailable = null
 
       const mountRevision = async () => {
         vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
         // jsdom encodes nothing
-        const snapshotCanvas = document.createElement('canvas')
+        snapshotCanvas = document.createElement('canvas')
         snapshotCanvas.toBlob = callback => callback(new Blob())
         vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
         loaded = new Set(['preview-1'])
@@ -413,6 +414,27 @@ describe('PlaylistPlayer.vue', () => {
         expect(isDone).toBe(true)
         await done
         await expect(snapshots).resolves.toHaveLength(1)
+      })
+
+      it('goes back to the file of the user when a snapshot fails', async () => {
+        await mountRevision()
+        loaded.add('preview-1b')
+        const error = new Error('encoding failed')
+        let encoded = 0
+        snapshotCanvas.toBlob = callback => {
+          encoded += 1
+          if (encoded > 1) throw error
+          callback(new Blob())
+        }
+
+        const failure = wrapper.vm.extractAnnotationSnapshots().catch(e => e)
+        await vi.advanceTimersByTimeAsync(3000)
+
+        expect(await failure).toBe(error)
+        expect(
+          wrapper.findComponent({ ref: 'picture-player' }).props('currentPreview')
+            .id
+        ).toBe('preview-1')
       })
     })
   })

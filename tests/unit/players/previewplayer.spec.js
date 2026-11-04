@@ -1734,12 +1734,13 @@ describe('PreviewPlayer.vue', () => {
       const nextPicture = { ...preview, id: 'preview-1b' }
       let extracted = []
       let loaded = null
+      let snapshotCanvas = null
       let unavailable = null
 
       beforeEach(async () => {
         vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
         // jsdom draws and encodes nothing
-        const snapshotCanvas = document.createElement('canvas')
+        snapshotCanvas = document.createElement('canvas')
         snapshotCanvas.toBlob = callback => callback(new Blob())
         vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
         vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
@@ -1822,6 +1823,25 @@ describe('PreviewPlayer.vue', () => {
         await done
         await expect(snapshots).resolves.toHaveLength(1)
         expect(extracted).toEqual([preview.id])
+      })
+
+      it('goes back to the file of the user when a snapshot fails', async () => {
+        loaded.add(nextPicture.id)
+        const error = new Error('encoding failed')
+        let encoded = 0
+        snapshotCanvas.toBlob = callback => {
+          encoded += 1
+          if (encoded > 1) throw error
+          callback(new Blob())
+        }
+
+        const failure = wrapper.vm.extractAnnotationSnapshots().catch(e => e)
+        await vi.advanceTimersByTimeAsync(3000)
+
+        expect(await failure).toBe(error)
+        expect(
+          wrapper.findComponent({ ref: 'preview-viewer' }).props('preview').id
+        ).toBe(preview.id)
       })
     })
   })
