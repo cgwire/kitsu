@@ -12,7 +12,8 @@ import {
   arrayMove,
   populateTask,
   removeModelFromList,
-  setTasksEntityPreview
+  setTasksEntityPreview,
+  trackEdit
 } from '@/lib/models'
 import { isLatestTaskComment } from '@/lib/comments'
 import errors from '@/lib/errors'
@@ -570,16 +571,22 @@ const actions = {
   },
 
   updateTask({ commit, state }, { taskId, data }) {
-    const task = state.taskMap.get(taskId)
-    // Capture the overwritten fields so a failed save can be rolled back.
-    const previousData = task
-      ? Object.fromEntries(Object.keys(data).map(key => [key, task[key]]))
-      : null
-    commit(EDIT_TASK_DATES, { taskId, data })
-    return tasksApi.updateTask(taskId, data).catch(err => {
-      if (previousData) commit(EDIT_TASK_DATES, { taskId, data: previousData })
-      throw err
-    })
+    const trackedEdit = trackEdit(
+      () => state.taskMap.get(taskId),
+      () => commit(EDIT_TASK_DATES, { taskId, data })
+    )
+    return tasksApi.updateTask(taskId, data).then(
+      result => {
+        trackedEdit.keep()
+        return result
+      },
+      err => {
+        // A save Zou refuses puts back the values the changes replaced.
+        const undoEdit = trackedEdit.undo()
+        if (undoEdit) commit(EDIT_TASK_DATES, { taskId, data: undoEdit })
+        throw err
+      }
+    )
   },
 
   editTaskComment({ commit }, { taskId, comment }) {

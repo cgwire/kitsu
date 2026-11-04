@@ -21,9 +21,9 @@ describe('useCellSave', () => {
   let route
   let scope
 
-  const setup = () => {
+  const setup = options => {
     scope = effectScope()
-    return scope.run(() => useCellSave(entry => entry.name))
+    return scope.run(() => useCellSave(entry => entry.name, options))
   }
   const refuse = () => Promise.reject(buildRefusal())
   const accept = () => Promise.resolve()
@@ -40,7 +40,7 @@ describe('useCellSave', () => {
 
   beforeEach(() => {
     const path = '/productions/production-1/shots'
-    route = reactive({ path, fullPath: path })
+    route = reactive({ path, fullPath: path, query: {} })
     useRoute.mockReturnValue(route)
     vi.spyOn(console, 'error').mockImplementation(() => {})
   })
@@ -64,6 +64,25 @@ describe('useCellSave', () => {
 
     expect(cellSaveErrorText.value).toBe('main.cell_save_error {"name":"SH010"}')
     expect(console.error).toHaveBeenCalledWith(refusal)
+  })
+
+  test('tells an entity deleted meanwhile', async () => {
+    const { cellSaveErrorText, saveCell } = setup()
+
+    await saveCell(shot1, () => Promise.reject(buildRefusal(404)))
+
+    expect(cellSaveErrorText.value).toBe(
+      'main.edit_deleted_error {"name":"SH010"}'
+    )
+  })
+
+  // A row of tasks names the entity of its task, which may still stand.
+  test('tells a task deleted meanwhile as any refusal', async () => {
+    const { cellSaveErrorText, saveCell } = setup({ rowsAreTasks: true })
+
+    await saveCell(shot1, () => Promise.reject(buildRefusal(404)))
+
+    expect(cellSaveErrorText.value).toBe('main.cell_save_error {"name":"SH010"}')
   })
 
   // Read as a refusal, a bug would blame Zou and never reach Sentry.
@@ -161,12 +180,26 @@ describe('useCellSave', () => {
     expect(cellSaveErrorText.value).toBe('')
   })
 
-  // A search or a selected task only write the query of the URL.
-  test('keeps the message when only the URL query changes', async () => {
+  // Person and My Checks only write these filters in the query of the URL.
+  test.each(['productionId', 'project_id', 'episode_id'])(
+    'clears the message when the %s filter changes',
+    async name => {
+      const { cellSaveErrorText, saveCell } = setup()
+
+      await saveCell(shot1, refuse)
+      route.query = { [name]: 'id-2' }
+      await nextTick()
+
+      expect(cellSaveErrorText.value).toBe('')
+    }
+  )
+
+  test('keeps the message when a search or a selected task changes the URL query', async () => {
     const { cellSaveErrorText, saveCell } = setup()
 
     await saveCell(shot1, refuse)
-    route.fullPath = `${route.path}?search=SH010`
+    route.query = { search: 'SH010', task_id: 'task-1' }
+    route.fullPath = `${route.path}?search=SH010&task_id=task-1`
     await nextTick()
 
     expect(cellSaveErrorText.value).toBe('main.cell_save_error {"name":"SH010"}')

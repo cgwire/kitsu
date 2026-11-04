@@ -13,12 +13,18 @@ export const getEntityName = entity =>
 /*
  * Saves the cells of the rows of a list, which have no modal to tell a
  * refusal: cellSaveErrorText does, until a later change goes through or the
- * URL path changes. The store has put the former value back. Anything but a
- * refused request is a bug, left unhandled for Sentry.
+ * list moves to another URL path, production, or episode. The store has put
+ * the former value back. Anything but a refused request is a bug, left
+ * unhandled for Sentry.
  *
  * getName(entry): the name the row shows, for the message.
+ * rowsAreTasks: a row names the entity of its task, which may outlive a task
+ * deleted meanwhile, so a 404 reads as any refusal.
  */
-export const useCellSave = (getName = getEntityName) => {
+export const useCellSave = (
+  getName = getEntityName,
+  { rowsAreTasks = false } = {}
+) => {
   const { t } = useI18n()
   const route = useRoute()
 
@@ -51,7 +57,7 @@ export const useCellSave = (getName = getEntityName) => {
       const refusal = {
         id: entry.id,
         name: getName(entry),
-        isDeleted: isNotFound(err),
+        isDeleted: !rowsAreTasks && isNotFound(err),
         change: saveChange
       }
       refusedCellSaves.value = [
@@ -69,10 +75,16 @@ export const useCellSave = (getName = getEntityName) => {
     return true
   }
 
-  // A page stays mounted when the topbar changes production or episode: the
-  // refusals are about rows it no longer shows.
+  // A change of production or episode keeps the list mounted: the topbar
+  // keeps the page, and on Person and My Checks it only writes the query. The
+  // message is about the former list, even when one of its rows stays shown.
   watch(
-    () => route.path,
+    [
+      () => route.path,
+      () => route.query.productionId,
+      () => route.query.project_id,
+      () => route.query.episode_id
+    ],
     () => {
       refusedCellSaves.value = []
     }

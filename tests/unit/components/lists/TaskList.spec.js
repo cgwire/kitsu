@@ -1,10 +1,12 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
 import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
+import { buildRefusal } from '../../fixtures/refusal'
 import { trackTaskSelection } from '../../fixtures/task-selection'
 
+import MetadataInput from '@/components/cells/MetadataInput.vue'
 import TaskList from '@/components/lists/TaskList.vue'
 import assetStore from '@/store/modules/assets'
 import editStore from '@/store/modules/edits'
@@ -16,11 +18,15 @@ vi.mock('@/store', () => ({ default: {} }))
 
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
-  useI18n: () => ({ t: key => key })
+  // The parameters of a message show in its text.
+  useI18n: () => ({
+    t: (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key)
+  })
 }))
 
 vi.mock('vue-router', async importOriginal => ({
   ...(await importOriginal()),
+  useRoute: () => ({ path: '/', query: {} }),
   useRouter: () => ({ resolve: () => ({ href: '/tasks/task-1' }) })
 }))
 
@@ -533,5 +539,133 @@ describe('lists/TaskList', () => {
         ])
       }
     )
+  })
+})
+
+// The cells of a selected row save at once, with no modal to tell a refusal:
+// the list gives the message the task type page shows above it.
+describe('lists/TaskList, cell save', () => {
+  // The entity stores give each task the name of its entity.
+  const tree = { ...task, entity_name: 'Props / Tree' }
+  const rock = {
+    ...task,
+    id: 'task-2',
+    entity: { id: 'asset-2' },
+    entity_name: 'Props / Rock'
+  }
+  const descriptor = {
+    id: 'descriptor-1',
+    field_name: 'note',
+    name: 'Note',
+    data_type: 'string',
+    choices: [],
+    departments: []
+  }
+
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const mountEditableList = updateTask =>
+    mountList(undefined, {
+      getters: {
+        isCurrentUserProductionManager: () => true,
+        taskMap: () =>
+          new Map([
+            [tree.id, tree],
+            [rock.id, rock]
+          ])
+      },
+      actions: { updateTask },
+      props: {
+        disabledDates: {},
+        metadataDescriptors: [descriptor],
+        tasks: [tree, rock]
+      }
+    })
+  const message = wrapper =>
+    wrapper.vm.$.exposed?.cellSaveErrorText?.value || null
+  const typeEstimation = async (wrapper, value) => {
+    await wrapper.find('tbody td.estimation input').setValue(value)
+    await flushPromises()
+  }
+
+  test('tells a cell save Zou refuses', async () => {
+    const error = buildRefusal(400)
+    const wrapper = mountEditableList(() => Promise.reject(error))
+    await wrapper.find('tbody td.name').trigger('click')
+
+    await typeEstimation(wrapper, '1')
+
+    expect(message(wrapper)).toBe(
+      'main.cell_save_error {"name":"Props / Tree"}'
+    )
+    expect(console.error).toHaveBeenCalledWith(error)
+
+    wrapper.unmount()
+  })
+
+  test('tells a metadata cell save Zou refuses', async () => {
+    const wrapper = mountEditableList(() => Promise.reject(buildRefusal(400)))
+
+    wrapper
+      .findComponent(MetadataInput)
+      .vm.$emit('metadata-changed', { entry: tree, descriptor, value: 'x' })
+    await flushPromises()
+
+    expect(message(wrapper)).toBe(
+      'main.cell_save_error {"name":"Props / Tree"}'
+    )
+
+    wrapper.unmount()
+  })
+
+  test('tells the refusal of several tasks at once', async () => {
+    const wrapper = mountEditableList(() => Promise.reject(buildRefusal(400)))
+    const names = wrapper.findAll('tbody td.name')
+    await names[0].trigger('click')
+    await names[1].trigger('click', { ctrlKey: true })
+
+    await typeEstimation(wrapper, '1')
+
+    expect(message(wrapper)).toBe('main.cells_save_error')
+
+    wrapper.unmount()
+  })
+
+  // Its row names the entity of the task, which may still stand.
+  test('tells a task deleted meanwhile as any refusal', async () => {
+    const wrapper = mountEditableList(() => Promise.reject(buildRefusal(404)))
+    await wrapper.find('tbody td.name').trigger('click')
+
+    await typeEstimation(wrapper, '1')
+
+    expect(message(wrapper)).toBe(
+      'main.cell_save_error {"name":"Props / Tree"}'
+    )
+
+    wrapper.unmount()
+  })
+
+  test('clears the message once a cell save goes through', async () => {
+    const updateTask = vi
+      .fn()
+      .mockImplementationOnce(() => Promise.reject(buildRefusal(400)))
+      .mockImplementationOnce(() => Promise.resolve())
+    const wrapper = mountEditableList(updateTask)
+    await wrapper.find('tbody td.name').trigger('click')
+    await typeEstimation(wrapper, '1')
+    expect(message(wrapper)).not.toBeNull()
+
+    await typeEstimation(wrapper, '2')
+
+    expect(updateTask).toHaveBeenCalledTimes(2)
+    expect(message(wrapper)).toBeNull()
+
+    wrapper.unmount()
   })
 })

@@ -446,6 +446,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useCellSave } from '@/composables/cellSave'
 import { getEntityMap } from '@/composables/entity'
 import { useFormat } from '@/composables/format'
 import { useGrabList } from '@/composables/grabList'
@@ -488,6 +489,9 @@ const { t } = useI18n()
 const router = useRouter()
 const store = useStore()
 const { formatDuration, formatDisplayDate, organisation } = useFormat()
+const { cellSaveErrorText, saveCell } = useCellSave(task => task.entity_name, {
+  rowsAreTasks: true
+})
 
 // Props / Emits
 const props = defineProps({
@@ -749,7 +753,7 @@ const applyToSelection = buildData => {
     if (!task) return
     const data = buildData(task)
     if (data && isTaskChanged(task, data)) {
-      store.dispatch('updateTask', { taskId, data }).catch(console.error)
+      saveCell(task, () => store.dispatch('updateTask', { taskId, data }))
     }
   })
 }
@@ -992,14 +996,13 @@ const onClickOutsideMenu = event => {
   menuEl.classList.add('hidden')
 }
 
-const onMetadataChanged = ({ entry, descriptor, value }) => {
-  store
-    .dispatch('updateTask', {
+const onMetadataChanged = ({ entry, descriptor, value }) =>
+  saveCell(entry, () =>
+    store.dispatch('updateTask', {
       taskId: entry.id,
       data: { data: { [descriptor.field_name]: value } }
     })
-    .catch(console.error)
-}
+  )
 
 const getTableData = () => {
   const labelKeys = exportLabelKeys.value
@@ -1083,7 +1086,10 @@ onBeforeUnmount(() => {
   window.removeEventListener('mousedown', onClickOutsideMenu)
 })
 
+// The task type page shows the message of a refused cell save above the
+// list: the list sets the schedule beside its rows.
 defineExpose({
+  cellSaveErrorText,
   getTableData,
   resetSelection,
   selectTask,
