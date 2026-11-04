@@ -1025,6 +1025,176 @@ describe('Playlist page, silent lock', () => {
   })
 })
 
+// An entity dropped from the addition panel on the player: the page adds it,
+// then replays the drop on the player to move the new entry where it was
+// dropped.
+describe('Playlist page, entity dropped on the player', () => {
+  const dropped = { id: 'sh-new', name: 'SH900', sequence_name: 'SQ01' }
+  const drop = () => ({
+    before: { entity_id: 's1', preview_file_id: 'pf-1' },
+    after: { entity_id: 'sh-new', preview_file_id: '' }
+  })
+
+  // Each load answers a new object, as the API does.
+  const openDropTarget = async ({
+    onEntityDropped,
+    loadEntityPreviewFiles = vi.fn(() => Promise.resolve([])),
+    getters = {}
+  }) => {
+    shotStore.cache.shotMap.set(dropped.id, dropped)
+    const stored = new Map([
+      ['pl-1', { id: 'pl-1', name: 'A', project_id: 'p1', shots: [{ id: 's1' }] }],
+      ['pl-2', { id: 'pl-2', name: 'B', project_id: 'p1', shots: [{ id: 's2' }] }]
+    ])
+    const page = await openPlaylist(stored.get('pl-1'), {
+      state: { playlists: [...stored.values()] },
+      getters: { playlistMap: () => stored, ...getters },
+      actions: {
+        loadEntityPreviewFiles,
+        loadPlaylist: vi.fn((context, { id }) =>
+          Promise.resolve({ ...stored.get(id) })
+        ),
+        pushEntityToPlaylist: vi.fn((context, { entity }) =>
+          Promise.resolve({ ...entity, preview_file_id: 'pf-new' })
+        ),
+        refreshPlaylist: vi.fn(() => Promise.resolve({ id: 'pl-1' }))
+      },
+      stubs: {
+        PlaylistPlayer: {
+          name: 'PlaylistPlayer',
+          template: '<div />',
+          methods: { onEntityDropped, scrollToRight: () => {} }
+        }
+      }
+    })
+    await flushPromises()
+    const dropOnPlayer = () =>
+      page.wrapper
+        .findComponent({ name: 'PlaylistPlayer' })
+        .vm.$emit('new-entity-dropped', drop())
+    return { ...page, dropOnPlayer }
+  }
+
+  afterEach(() => shotStore.cache.shotMap.delete(dropped.id))
+
+  it('moves the new entry where it was dropped', async () => {
+    const onEntityDropped = vi.fn()
+    const { dropOnPlayer } = await openDropTarget({ onEntityDropped })
+
+    dropOnPlayer()
+    await flushPromises()
+
+    expect(onEntityDropped).toHaveBeenCalledWith({
+      before: { entity_id: 's1', preview_file_id: 'pf-1' },
+      after: { entity_id: 'sh-new', preview_file_id: 'pf-new' }
+    })
+  })
+
+  // The strip is no longer the one of the drop: a strip loaded meanwhile may
+  // lack the new entry, and the player would drop it again, on the playlist
+  // shown.
+  it.each([
+    [
+      'another playlist loaded',
+      () =>
+        Object.assign(routeHolder.route, {
+          params: { playlist_id: 'pl-2' },
+          fullPath: '/pl-2'
+        })
+    ],
+    ['a reload of this one ended', wrapper => changeSort(wrapper, 'name')]
+  ])('leaves the drop once %s', async (_, replace) => {
+    const onEntityDropped = vi.fn()
+    const previews = gatedAction()
+    const { wrapper, actions, dropOnPlayer } = await openDropTarget({
+      onEntityDropped,
+      loadEntityPreviewFiles: previews.fn
+    })
+
+    dropOnPlayer()
+    await flushPromises()
+    replace(wrapper)
+    await flushPromises()
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+    previews.release([])
+    await flushPromises()
+
+    expect(onEntityDropped).not.toHaveBeenCalled()
+  })
+
+  // Closing the panel after an addition reloads the playlist: the strip of
+  // the drop is gone, and the page shows an empty playlist until the load
+  // ends.
+  it('leaves the drop once a reload of this one started', async () => {
+    const added = { id: 'sh-added', name: 'SH400', sequence_name: 'SQ01' }
+    const onEntityDropped = vi.fn()
+    const loadEntityPreviewFiles = vi.fn(() => Promise.resolve([]))
+    const { wrapper, actions, dropOnPlayer } = await openDropTarget({
+      onEntityDropped,
+      loadEntityPreviewFiles,
+      getters: { displayedShotsBySequence: () => [[added]] }
+    })
+    wrapper
+      .findComponent({ name: 'PlaylistPlayer' })
+      .vm.$emit('show-add-entities')
+    await nextTick()
+    await wrapper.find('.addition-shot').trigger('click')
+    await flushPromises()
+
+    const releasePreviews = gateNextCall(loadEntityPreviewFiles)
+    dropOnPlayer()
+    await flushPromises()
+    gateNextCall(actions.loadPlaylist)
+    await wrapper.find('.addition-header .close-button').trigger('click')
+    await flushPromises()
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+    releasePreviews([])
+    await flushPromises()
+
+    expect(onEntityDropped).not.toHaveBeenCalled()
+  })
+
+  // The player would not find the entry either and drop it again: the page
+  // retried the addition for as long as it failed.
+  it('leaves the drop when the addition failed', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failure = new Error('Request has been terminated')
+    const onEntityDropped = vi.fn()
+    const { dropOnPlayer } = await openDropTarget({
+      onEntityDropped,
+      loadEntityPreviewFiles: vi.fn(() => Promise.reject(failure))
+    })
+
+    dropOnPlayer()
+    await flushPromises()
+
+    expect(onEntityDropped).not.toHaveBeenCalled()
+    expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+
+  it('listens to the updates again after a replay that throws', async () => {
+    const bug = new TypeError('Cannot read properties of null')
+    const { wrapper, actions, socket, dropOnPlayer } = await openDropTarget({
+      onEntityDropped: () => {
+        throw bug
+      }
+    })
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+    const onPlaylistUpdate = socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:update'
+    )[1]
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    dropOnPlayer()
+    await vi.advanceTimersByTimeAsync(2100)
+    onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
+
+    expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
+    expect(errorHandler.mock.calls.map(([error]) => error)).toEqual([bug])
+  })
+})
+
 describe('Playlist page, unreadable playlist', () => {
   // Playlist events reach every member of the production. A client can no
   // longer read a playlist made internal: its refetch resolves to null, and

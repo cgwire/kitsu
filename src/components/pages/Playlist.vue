@@ -1155,22 +1155,26 @@ const addEntityToPlaylist = async entity => {
   playlistPlayerRef.value?.scrollToRight()
 }
 
-const onNewEntityDropped = async info => {
-  setSilent()
-  const entity = getCachedEntity(info.after.entity_id)
-  if (entity && !currentEntitiesMap.value[entity.id]) {
-    const addedEntity = await addEntity(entity, currentPlaylist.value)
-    // The preview file id is only resolved when the entity is added, so
-    // the dragged payload can't carry it. Patch it in before replaying
-    // the drop so findEntity can locate the newly added entity and move
-    // it to the drop position instead of leaving it at the end.
-    if (addedEntity) {
+const onNewEntityDropped = info =>
+  withSilent(async () => {
+    const playlist = currentPlaylist.value
+    const entity = getCachedEntity(info.after.entity_id)
+    if (entity && !currentEntitiesMap.value[entity.id]) {
+      const addedEntity = await addEntity(entity, playlist)
+      // A failed addition leaves nothing to move: the player would not find
+      // the entry and drop it again.
+      if (!addedEntity) return
+      // The playlist shown was replaced meanwhile, by another one or by a
+      // reload: the strip is no longer the one the entity was dropped on.
+      if (currentPlaylist.value !== playlist) return
+      // The preview file id is only resolved when the entity is added, so
+      // the dragged payload can't carry it. Patch it in before replaying
+      // the drop so findEntity can locate the newly added entity and move
+      // it to the drop position instead of leaving it at the end.
       info.after.preview_file_id = addedEntity.preview_file_id
+      playlistPlayerRef.value?.onEntityDropped(info)
     }
-    playlistPlayerRef.value?.onEntityDropped(info)
-  }
-  clearSilent()
-}
+  })
 
 const removeEntity = ({ entity, previewFileId }) => {
   currentEntitiesList.value = currentEntitiesList.value.filter(
