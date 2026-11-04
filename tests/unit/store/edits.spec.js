@@ -1150,6 +1150,35 @@ describe('Edits store, through a store', () => {
       }
     })
 
+    // The list and the pages show an edit before Zou answers.
+    test('puts back what an edit Zou refuses changed', async () => {
+      vi.useFakeTimers()
+      try {
+        const store = buildStore()
+        load(store, [buildEdit('e1', 'E01', { data: { fps: '24' } })])
+        client.pput.mockRejectedValueOnce(new Error('Bad Request'))
+
+        await expect(
+          store.dispatch('editEdit', {
+            id: 'e1',
+            name: 'E02',
+            description: 'Cut',
+            data: { fps: '25' }
+          })
+        ).rejects.toThrow('Bad Request')
+
+        expect(store.getters.editMap.get('e1')).toMatchObject({
+          name: 'E01',
+          description: '',
+          data: { fps: '24' }
+        })
+        expect(names(store.getters.displayedEdits)).toEqual(['E01'])
+        vi.advanceTimersByTime(2000)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
     test('counts the locks of an edit', () => {
       const store = buildStore()
       load(store, [buildEdit('e1', 'E01')])

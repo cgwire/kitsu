@@ -790,13 +790,24 @@ const confirmEditAsset = async form => {
   const data = { ...form, id: currentAsset.value.id }
   loading.edit = true
   errors.edit = false
-  const request = store.dispatch('editAsset', data)
-  // editAsset commits optimistically, so the cache already holds the new
-  // values. An asset deleted in another session is no longer there.
-  const asset = assetStore.cache.assetMap.get(data.id)
-  if (asset) currentAsset.value = { ...asset }
   try {
-    await request
+    await store.dispatch('editAsset', data)
+    // The store writes the changes into its cached asset out of sight of Vue: a
+    // copy shows them, unless the page moved on to another asset. Not after a
+    // refusal: the modal, open on the error, would reset what was typed.
+    const asset = assetStore.cache.assetMap.get(data.id)
+    if (asset && currentAsset.value?.id === data.id) {
+      // The casting loads onto the asset shown, not onto the cached one.
+      const { castIn, castInShotsBySequence, casting, castingAssetsByType } =
+        currentAsset.value
+      currentAsset.value = {
+        ...asset,
+        castIn,
+        castInShotsBySequence,
+        casting,
+        castingAssetsByType
+      }
+    }
     modals.edit = false
   } catch (err) {
     console.error(err)

@@ -2393,6 +2393,66 @@ describe('Assets store, list workflow', () => {
       expect(names(store.getters.displayedAssets)).toEqual(['Rock'])
       expect(store.getters.assetMap.has('a2')).toBe(false)
     })
+
+    // The list and the pages show an edit before Zou answers.
+    test('puts back what an edit Zou refuses changed', async () => {
+      vi.useFakeTimers()
+      // editAsset reads the asset types of their store, as in the app.
+      assetTypeMap.forEach(type =>
+        assetTypesStore.cache.assetTypeMap.set(type.id, type)
+      )
+      onTestFinished(() => assetTypesStore.cache.assetTypeMap.clear())
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock', { data: { mood: 'calm' } })])
+      const rock = store.getters.assetMap.get('a1')
+      client.pput.mockRejectedValueOnce(new Error('Bad Request'))
+
+      await expect(
+        store.dispatch('editAsset', {
+          id: 'a1',
+          name: 'Boulder',
+          description: 'Big',
+          data: { mood: 'angry', size: 'XL' },
+          entity_type_id: props.id
+        })
+      ).rejects.toThrow('Bad Request')
+
+      expect(rock).toMatchObject({
+        name: 'Rock',
+        description: '',
+        asset_type_name: 'Characters',
+        data: { mood: 'calm' }
+      })
+      expect(rock.data.size).toBeUndefined()
+      expect(store.getters.displayedAssets[0]).toMatchObject({
+        name: 'Rock',
+        asset_type_name: 'Characters'
+      })
+    })
+
+    // A text cell of the list saves the asset at each keystroke.
+    test('puts back the value typed over by saves Zou refuses in turn', async () => {
+      vi.useFakeTimers()
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock')])
+      const rock = store.getters.assetMap.get('a1')
+      const refusals = []
+      client.pput.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            refusals.push(reject)
+          })
+      )
+
+      const saves = ['B', 'Bi', 'Big'].map(description =>
+        store.dispatch('editAsset', { id: 'a1', description }).catch(err => err)
+      )
+      refusals.forEach(refuse => refuse(new Error('Bad Request')))
+      await Promise.all(saves)
+
+      expect(rock.description).toBe('')
+      expect(store.getters.displayedAssets[0].description).toBe('')
+    })
   })
 
   // The rows read the assets of the displayed list: a row that missed the

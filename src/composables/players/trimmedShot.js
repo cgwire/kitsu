@@ -37,9 +37,9 @@ export const useTrimmedShot = ({ entityType, store, task }) => {
     const previousData = entity && savedData.get(entity)
     if (entity) savedData.set(entity, data)
     return store.dispatch('editShot', { id: shot.id, data }).catch(err => {
-      // The store keeps the optimistic edit of a cached shot: only the
-      // payload memory is ours to roll back, and only while this save is
-      // still its latest write.
+      // The store puts a cached shot back itself: only the payload memory
+      // of a shot out of its cache is ours to roll back, and only while this
+      // save is still its latest write.
       if (entity && savedData.get(entity) === data) {
         if (previousData) {
           savedData.set(entity, previousData)

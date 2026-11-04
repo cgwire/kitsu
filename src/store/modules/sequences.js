@@ -14,7 +14,7 @@ import {
 } from '@/lib/sorting'
 import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
-import { getFilledColumns, removeModelFromList } from '@/lib/models'
+import { getFilledColumns, removeModelFromList, trackEdit } from '@/lib/models'
 import { computeStats, countEntities } from '@/lib/stats'
 import {
   ADD_SEQUENCE,
@@ -502,12 +502,29 @@ const actions = {
 
   editSequence({ commit, state }, data) {
     commit(LOCK_SEQUENCE, data)
-    commit(EDIT_SEQUENCE_END, data)
-    return shotsApi.updateSequence(data).finally(() => {
-      setTimeout(() => {
-        commit(UNLOCK_SEQUENCE, data)
-      }, 2000)
-    })
+    const trackedEdit = trackEdit(
+      () => cache.sequenceMap.get(data.id),
+      () => commit(EDIT_SEQUENCE_END, data)
+    )
+    return shotsApi
+      .updateSequence(data)
+      .then(
+        result => {
+          trackedEdit.keep()
+          return result
+        },
+        err => {
+          // A save Zou refuses puts back the values the changes replaced.
+          const undoEdit = trackedEdit.undo()
+          if (undoEdit) commit(EDIT_SEQUENCE_END, undoEdit)
+          throw err
+        }
+      )
+      .finally(() => {
+        setTimeout(() => {
+          commit(UNLOCK_SEQUENCE, data)
+        }, 2000)
+      })
   },
 
   deleteSequence({ commit, state }, sequence) {

@@ -832,6 +832,28 @@ describe('Episodes store, through a store', () => {
     expect(names(store.getters.displayedEpisodes)).toEqual(['E01'])
   })
 
+  // The list and the pages show an edit before Zou answers.
+  test('puts back what an edit Zou refuses changed', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: { fps: '24' } }])
+    client.pput.mockRejectedValueOnce(new Error('Bad Request'))
+
+    await expect(
+      store.dispatch('editEpisode', {
+        id: 'ep1',
+        name: 'E01 bis',
+        data: { fps: '25' }
+      })
+    ).rejects.toThrow('Bad Request')
+
+    expect(store.getters.episodeMap.get('ep1')).toMatchObject({
+      name: 'E01',
+      data: { fps: '24' }
+    })
+    expect(names(store.getters.displayedEpisodes)).toEqual(['E01'])
+    expect(names(store.getters.episodes)).toEqual(['E01'])
+  })
+
   test('deletes an episode from every list', async () => {
     const { store } = await buildStore()
     loadEpisodes(store, [

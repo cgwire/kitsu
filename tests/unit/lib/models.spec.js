@@ -9,6 +9,7 @@ import {
   populateTask,
   remove,
   setTasksEntityPreview,
+  trackEdit,
   updateModelFromList,
   removeModelFromList
 } from '@/lib/models'
@@ -236,5 +237,127 @@ describe('lib/helpers', () => {
 
     expect(remove([attachment, other, twin], attachment)).toEqual([other, twin])
     expect(remove([other], attachment)).toEqual([other])
+  })
+})
+
+// The stores show an edit before Zou answers: a refused save is undone.
+describe('trackEdit', () => {
+  const buildShot = () => ({
+    id: 'shot-1',
+    name: 'SH01',
+    description: '',
+    nb_frames: 24,
+    lock: 1,
+    data: { fps: 24 }
+  })
+
+  // As the edit mutations of the stores do.
+  const commitEdit = (shot, { data, ...fields }) => {
+    Object.assign(shot, fields)
+    if (data) shot.data = { ...shot.data, ...data }
+  }
+
+  it('gives back what the edit changed', () => {
+    const shot = buildShot()
+
+    const edit = trackEdit(
+      () => shot,
+      () =>
+        commitEdit(shot, {
+          name: 'SH02',
+          description: 'Wide',
+          nb_frames: 24,
+          data: { fps: 25, frame_in: 1 }
+        })
+    )
+
+    expect(shot).toMatchObject({ name: 'SH02', data: { fps: 25, frame_in: 1 } })
+    expect(edit.undo()).toEqual({
+      id: 'shot-1',
+      name: 'SH01',
+      description: '',
+      data: { fps: 24, frame_in: undefined }
+    })
+  })
+
+  it('leaves out a field changed again since', () => {
+    const shot = buildShot()
+    const edit = trackEdit(
+      () => shot,
+      () => commitEdit(shot, { name: 'SH02', description: 'Wide' })
+    )
+
+    shot.description = 'Close'
+
+    expect(edit.undo()).toEqual({ id: 'shot-1', name: 'SH01' })
+  })
+
+  it('gives nothing once every change was changed again', () => {
+    const shot = buildShot()
+    const edit = trackEdit(
+      () => shot,
+      () => commitEdit(shot, { data: { fps: 25 } })
+    )
+
+    commitEdit(shot, { data: { fps: 30 } })
+
+    expect(edit.undo()).toBeNull()
+  })
+
+  // Typed in a cell, each character is an edit with its own request.
+  it('gives back the first value once edits of a field are refused in turn', () => {
+    const shot = buildShot()
+    const edits = ['W', 'Wi', 'Wid'].map(description =>
+      trackEdit(
+        () => shot,
+        () => commitEdit(shot, { description })
+      )
+    )
+
+    expect(edits[0].undo()).toBeNull()
+    expect(edits[1].undo()).toBeNull()
+    expect(edits[2].undo()).toEqual({ id: 'shot-1', description: '' })
+  })
+
+  it('gives back a saved value to the edits refused after it', () => {
+    const shot = buildShot()
+    const edits = ['W', 'Wi', 'Wid'].map(description =>
+      trackEdit(
+        () => shot,
+        () => commitEdit(shot, { description })
+      )
+    )
+
+    expect(edits[0].undo()).toBeNull()
+    edits[1].keep()
+
+    expect(edits[2].undo()).toEqual({ id: 'shot-1', description: 'Wi' })
+  })
+
+  it('gives nothing for an entity the cache no longer holds', () => {
+    const shot = buildShot()
+    let cached = shot
+    const replaced = trackEdit(
+      () => cached,
+      () => commitEdit(shot, { name: 'SH02' })
+    )
+    const removed = trackEdit(
+      () => cached,
+      () => commitEdit(shot, { name: 'SH03' })
+    )
+
+    cached = { ...buildShot(), name: 'SH03' }
+    expect(replaced.undo()).toBeNull()
+    cached = undefined
+    expect(removed.undo()).toBeNull()
+  })
+
+  it('applies the edit of an entity out of the cache, with nothing to undo', () => {
+    const applyEdit = vi.fn()
+
+    const edit = trackEdit(() => undefined, applyEdit)
+
+    expect(applyEdit).toHaveBeenCalledTimes(1)
+    expect(edit.undo()).toBeNull()
   })
 })

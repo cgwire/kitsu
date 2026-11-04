@@ -292,6 +292,282 @@ describe.each(pages)(
   }
 )
 
+describe.each(pages)(
+  '$name page, saved edit',
+  ({ editAction, editModal, entityMap, entityParam, listAction, page }) => {
+    afterEach(() => {
+      entityMap.clear()
+    })
+
+    test('shows the new name', async () => {
+      entityMap.set('entity-1', {
+        id: 'entity-1',
+        name: 'E01',
+        asset_type_name: 'Props',
+        sequence_name: 'SQ01',
+        tasks: []
+      })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        // As the store does, the edit goes into the cached entity at once,
+        // out of sight of Vue.
+        [editAction]: (context, data) => {
+          Object.assign(entityMap.get(data.id), data)
+          return Promise.resolve()
+        }
+      })
+      const editButton = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'edit')
+
+      await editButton.vm.$emit('click')
+      await wrapper.findComponent(editModal).vm.$emit('confirm', { name: 'E02' })
+      await flushPromises()
+
+      expect(wrapper.find('.entity-title').text()).toContain('E02')
+    })
+
+    // Another session deleted it: the save went through, the cache lost it.
+    test('keeps showing the entity the cache lost during the save', async () => {
+      entityMap.set('entity-1', {
+        id: 'entity-1',
+        name: 'E01',
+        asset_type_name: 'Props',
+        sequence_name: 'SQ01',
+        tasks: []
+      })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [editAction]: (context, data) => {
+          entityMap.delete(data.id)
+          return Promise.resolve()
+        }
+      })
+      const editButton = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'edit')
+
+      await editButton.vm.$emit('click')
+      await wrapper.findComponent(editModal).vm.$emit('confirm', { name: 'E02' })
+      await flushPromises()
+
+      expect(wrapper.find('.entity-title').text()).toContain('E01')
+    })
+
+    // The page stays mounted from an entity of its route to the next one.
+    test('keeps showing the entity opened during the save', async () => {
+      // With its validations, a sequence needs no list load to show.
+      const buildEntity = (id, name) => ({
+        id,
+        name,
+        asset_type_name: 'Props',
+        sequence_name: 'SQ01',
+        tasks: [],
+        validations: new Map()
+      })
+      entityMap.set('entity-1', buildEntity('entity-1', 'E01'))
+      entityMap.set('entity-2', buildEntity('entity-2', 'F01'))
+      let endSave
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [editAction]: (context, data) => {
+          Object.assign(entityMap.get(data.id), data)
+          return new Promise(resolve => {
+            endSave = resolve
+          })
+        },
+        // The list a page loads for another entity shows the one of the
+        // route again: kept loading, it leaves the page as the save did.
+        ...(listAction ? { [listAction]: () => new Promise(() => {}) } : {})
+      })
+      const editButton = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'edit')
+
+      await editButton.vm.$emit('click')
+      await wrapper.findComponent(editModal).vm.$emit('confirm', { name: 'E02' })
+      routeHolder.route.params = {
+        ...routeHolder.route.params,
+        [entityParam]: 'entity-2'
+      }
+      await flushPromises()
+      expect(wrapper.find('.entity-title').text()).toContain('F01')
+
+      endSave()
+      await flushPromises()
+
+      expect(wrapper.find('.entity-title').text()).toContain('F01')
+    })
+  }
+)
+
+// The casting loads onto the entity the page shows, a copy of the cached one
+// once a save went through: the next save must not bring the old one back.
+describe.each(
+  [
+    {
+      name: 'Asset',
+      castingAction: 'loadAssetCasting',
+      field: 'castingAssetsByType'
+    },
+    {
+      name: 'Asset',
+      castingAction: 'loadAssetCastIn',
+      field: 'castInShotsBySequence'
+    },
+    {
+      name: 'Episode',
+      castingAction: 'loadEpisodeCasting',
+      field: 'castingAssetsByType'
+    },
+    {
+      name: 'Shot',
+      castingAction: 'loadShotCasting',
+      field: 'castingAssetsByType'
+    }
+  ].map(casting => ({
+    ...pages.find(({ name }) => name === casting.name),
+    ...casting
+  }))
+)(
+  '$name page, $field after a save',
+  ({
+    castingAction,
+    editAction,
+    editModal,
+    entityMap,
+    entityParam,
+    field,
+    page
+  }) => {
+    afterEach(() => {
+      entityMap.clear()
+    })
+
+    test('keeps out the entry removed between two saves', async () => {
+      const rock = {
+        asset_id: 'asset-1',
+        name: 'Rock',
+        sequence_name: 'SQ01',
+        shot_id: 'shot-1'
+      }
+      const tree = {
+        asset_id: 'asset-2',
+        name: 'Tree',
+        sequence_name: 'SQ01',
+        shot_id: 'shot-2'
+      }
+      let casting = [rock, tree]
+      entityMap.set('entity-1', {
+        id: 'entity-1',
+        name: 'E01',
+        sequence_name: 'SQ01',
+        tasks: []
+      })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [editAction]: (context, data) => {
+          Object.assign(entityMap.get(data.id), data)
+          return Promise.resolve()
+        },
+        [castingAction]: (context, entity) => {
+          entity[field] = [casting]
+          return Promise.resolve()
+        },
+        uncastAsset: () => {
+          casting = [rock]
+          return Promise.resolve()
+        }
+      })
+      const buttons = icon =>
+        wrapper
+          .findAllComponents(ButtonSimple)
+          .filter(button => button.props('icon') === icon)
+      const save = async () => {
+        await buttons('edit')[0].vm.$emit('click')
+        await wrapper.findComponent(editModal).vm.$emit('confirm', { name: 'E02' })
+        await flushPromises()
+      }
+
+      await save()
+      await buttons('remove')[1].vm.$emit('click', new Event('click'))
+      await flushPromises()
+      expect(buttons('remove')).toHaveLength(1)
+
+      await save()
+
+      expect(buttons('remove')).toHaveLength(1)
+    })
+  }
+)
+
+describe.each(pages)(
+  '$name page, refused edit',
+  ({ editAction, editModal, entityMap, entityParam, page }) => {
+    afterEach(() => {
+      entityMap.clear()
+      vi.restoreAllMocks()
+    })
+
+    test('shows the entity the store put back', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      entityMap.set('entity-1', {
+        id: 'entity-1',
+        name: 'E01',
+        asset_type_name: 'Props',
+        sequence_name: 'SQ01',
+        tasks: []
+      })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        // As the store does: the edit goes into the cached entity at once,
+        // and out of it once Zou refuses the save.
+        [editAction]: (context, data) => {
+          const entity = entityMap.get(data.id)
+          const { name } = entity
+          Object.assign(entity, data)
+          return Promise.reject(new Error('Bad Request')).catch(err => {
+            entity.name = name
+            throw err
+          })
+        }
+      })
+      const editButton = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'edit')
+
+      await editButton.vm.$emit('click')
+      await wrapper.findComponent(editModal).vm.$emit('confirm', { name: 'E02' })
+      await flushPromises()
+
+      expect(wrapper.find('.entity-title').text()).toContain('E01')
+      expect(console.error).toHaveBeenCalledWith(new Error('Bad Request'))
+    })
+
+    // The modal stays open on the error, and resets its form for a new
+    // entity: what was typed would go.
+    test('leaves its modal the entity it edits', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      entityMap.set('entity-1', { id: 'entity-1', name: 'E01', tasks: [] })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [editAction]: () => Promise.reject(new Error('Bad Request'))
+      })
+      const editButton = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'edit')
+      const modal = () => wrapper.findComponent(editModal)
+      const editedEntity = () =>
+        Object.entries(modal().props()).find(([key]) =>
+          key.endsWith('ToEdit')
+        )[1]
+
+      await editButton.vm.$emit('click')
+      const entity = editedEntity()
+      await modal().vm.$emit('confirm', { name: 'E02' })
+      await flushPromises()
+
+      expect(modal().props('isError')).toBe(true)
+      expect(editedEntity()).toBe(entity)
+      expect(console.error).toHaveBeenCalledWith(new Error('Bad Request'))
+    })
+  }
+)
+
 // Deleted for good from another session while its modal was open, the asset
 // is no longer in the cache, and the store keeps it out.
 describe('Asset page, edit of an asset deleted elsewhere', () => {

@@ -331,10 +331,18 @@ const showEditModal = () => {
 }
 
 const confirmEditEdit = async form => {
+  const data = { ...form, id: currentEdit.value.id }
   loading.edit = true
   errors.edit = false
   try {
-    await store.dispatch('editEdit', { ...form, id: currentEdit.value.id })
+    await store.dispatch('editEdit', data)
+    // The store writes the changes into its cached edit out of sight of Vue: a
+    // copy shows them, unless the page moved on to another edit. Not after a
+    // refusal: the modal, open on the error, would reset what was typed.
+    const edit = editStore.cache.editMap.get(data.id)
+    if (edit && currentEdit.value?.id === data.id) {
+      currentEdit.value = { ...edit }
+    }
     modals.edit = false
   } catch (err) {
     console.error(err)

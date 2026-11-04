@@ -1175,6 +1175,29 @@ describe('Sequences store, through a store', () => {
     expect(names(store.getters.displayedSequences)).toEqual(['SQ01'])
   })
 
+  // The list and the pages show an edit before Zou answers.
+  test('puts back what an edit Zou refuses changed', async () => {
+    const { store } = await buildStore()
+    loadSequences(store, [buildSequence('sq1', 'SQ01')])
+    const sequence = store.getters.sequenceMap.get('sq1')
+    sequence.data = { fps: '24' }
+    client.pput.mockRejectedValueOnce(new Error('Bad Request'))
+    const form = {
+      id: 'sq1',
+      name: 'SQ01 bis',
+      description: 'Intro',
+      data: { fps: '25' }
+    }
+
+    await expect(store.dispatch('editSequence', form)).rejects.toThrow(
+      'Bad Request'
+    )
+
+    expect(sequence).toMatchObject({ name: 'SQ01', data: { fps: '24' } })
+    expect(sequence.description).toBeUndefined()
+    expect(names(store.getters.displayedSequences)).toEqual(['SQ01'])
+  })
+
   test('creates a sequence at its place in the list', async () => {
     const { store } = await buildStore()
     loadSequences(store, [

@@ -619,6 +619,15 @@ const confirmEditShot = async form => {
   errors.edit = false
   try {
     await store.dispatch('editShot', data)
+    // The store writes the changes into its cached shot out of sight of Vue: a
+    // copy shows them, unless the page moved on to another shot. Not after a
+    // refusal: the modal, open on the error, would reset what was typed.
+    const shot = shotStore.cache.shotMap.get(data.id)
+    if (shot && currentShot.value?.id === data.id) {
+      // The casting loads onto the shot shown, not onto the cached one.
+      const { casting, castingAssetsByType } = currentShot.value
+      currentShot.value = { ...shot, casting, castingAssetsByType }
+    }
     modals.edit = false
   } catch (err) {
     console.error(err)
