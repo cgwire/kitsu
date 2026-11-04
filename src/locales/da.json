@@ -430,6 +430,8 @@
       "all_assets": "Alle assets",
       "admin": "Admin",
       "cancel": "Annuller",
+      "cell_save_error": "\"{name}\" kunne ikke gemmes: den tidligere værdi er gendannet. Genindlæs venligst siden og prøv igen.",
+      "cells_save_error": "Nogle ændringer kunne ikke gemmes: de tidligere værdier er gendannet. Genindlæs venligst siden og prøv igen.",
       "clear_selection": "Ryd nuværende markering",
       "close": "Luk",
       "confirmation": "Bekræft",

@@ -7,7 +7,12 @@ import { createStore } from 'vuex'
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+// Keys with their parameters, as the $t of the templates below.
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key)
+  })
+}))
 // The route follows the pushes of the page, as the router would: the page
 // watches the search of the URL it writes itself.
 const routeHolder = vi.hoisted(() => ({ route: null }))
@@ -35,8 +40,11 @@ import EditAssetModal from '@/components/modals/EditAssetModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Breakdown from '@/components/pages/Breakdown.vue'
+import ShotLine from '@/components/pages/breakdown/ShotLine.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 
 import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
+import { buildRefusal } from '../../fixtures/refusal'
 
 const production = { id: 'p1', production_type: 'tvshow' }
 
@@ -1143,5 +1151,264 @@ describe('Breakdown page, asset column scroll', () => {
 
     expect(errorHandler).not.toHaveBeenCalled()
     expect(displayMoreAssets).not.toHaveBeenCalled()
+  })
+})
+
+// A cell of a line saves its entity at once, without a modal to tell a
+// failure.
+describe('Breakdown page, cell save', () => {
+  const shot = { id: 'shot-a', name: 'SH01', sequence_name: 'SEQ01', data: {} }
+  const otherShot = {
+    id: 'shot-b',
+    name: 'SH02',
+    sequence_name: 'SEQ01',
+    data: {}
+  }
+
+  const mountShots = editShot =>
+    mountPage({
+      state: { isTVShow: false, currentEpisode: null },
+      getters: { castingSequenceShots: () => [shot, otherShot] },
+      actions: { editShot }
+    })
+  const line = (wrapper, index = 0) =>
+    wrapper.findAllComponents(ShotLine)[index]
+  const changeField = (wrapper, index = 0) =>
+    line(wrapper, index).vm.$emit('field-changed', {
+      entry: [shot, otherShot][index],
+      fieldName: 'description',
+      value: 'Wide'
+    })
+  const message = wrapper => wrapper.findComponent(ErrorText)
+
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  test('tells a cell save Zou refuses', async () => {
+    const { wrapper } = mountShots(() => Promise.reject(buildRefusal()))
+    await flushPromises()
+
+    changeField(wrapper)
+    await flushPromises()
+
+    expect(message(wrapper).props('text')).toBe(
+      'main.cell_save_error {"name":"SEQ01 / SH01"}'
+    )
+    expect(console.error).toHaveBeenCalledWith(buildRefusal())
+  })
+
+  test('tells a metadata cell save Zou refuses', async () => {
+    const { wrapper } = mountShots(() => Promise.reject(buildRefusal()))
+    await flushPromises()
+
+    line(wrapper).vm.$emit('metadata-changed', {
+      entry: shot,
+      descriptor: { field_name: 'mood' },
+      value: 'calm'
+    })
+    await flushPromises()
+
+    expect(message(wrapper).props('text')).toBe(
+      'main.cell_save_error {"name":"SEQ01 / SH01"}'
+    )
+  })
+
+  test('tells a cell save on an entity deleted meanwhile', async () => {
+    const { wrapper } = mountShots(() => Promise.reject(buildRefusal(404)))
+    await flushPromises()
+
+    changeField(wrapper)
+    await flushPromises()
+
+    expect(message(wrapper).props('text')).toBe(
+      'main.edit_deleted_error {"name":"SEQ01 / SH01"}'
+    )
+  })
+
+  test('tells the refusal of several lines at once', async () => {
+    const { wrapper } = mountShots(() => Promise.reject(buildRefusal()))
+    await flushPromises()
+
+    changeField(wrapper, 0)
+    changeField(wrapper, 1)
+    await flushPromises()
+
+    expect(message(wrapper).props('text')).toBe('main.cells_save_error')
+  })
+
+  test('clears the message once a cell save goes through', async () => {
+    let isRefused = true
+    const { wrapper } = mountShots(() =>
+      isRefused ? Promise.reject(buildRefusal()) : Promise.resolve({})
+    )
+    await flushPromises()
+    changeField(wrapper)
+    await flushPromises()
+    expect(message(wrapper).exists()).toBe(true)
+
+    isRefused = false
+    changeField(wrapper)
+    await flushPromises()
+
+    expect(message(wrapper).exists()).toBe(false)
+  })
+
+  test('tells the refusal of an asset line, with its asset type', async () => {
+    const asset = { id: 'asset-a', name: 'Rock', full_name: 'Props / Rock' }
+    const editAsset = vi.fn(() => Promise.reject(buildRefusal()))
+    const { wrapper } = mountPage({
+      state: {
+        currentProduction: { id: 'p1', production_type: 'assets' },
+        currentEpisode: null,
+        isTVShow: false
+      },
+      getters: { castingAssetTypeAssets: () => [asset] },
+      actions: { editAsset }
+    })
+    await flushPromises()
+
+    line(wrapper).vm.$emit('field-changed', {
+      entry: asset,
+      fieldName: 'description',
+      value: 'Big'
+    })
+    await flushPromises()
+
+    expect(editAsset).toHaveBeenCalledWith(expect.anything(), {
+      id: 'asset-a',
+      description: 'Big'
+    })
+    expect(message(wrapper).props('text')).toBe(
+      'main.cell_save_error {"name":"Props / Rock"}'
+    )
+  })
+
+  test('tells the refusal of an episode line', async () => {
+    const episode = { id: 'ep-1', name: 'E01', data: {} }
+    const editEpisode = vi.fn(() => Promise.reject(buildRefusal()))
+    const { wrapper } = mountPage({
+      state: { currentEpisode: { id: 'all' } },
+      getters: { castingEpisodes: () => [episode] },
+      actions: { editEpisode }
+    })
+    await flushPromises()
+
+    line(wrapper).vm.$emit('field-changed', {
+      entry: episode,
+      fieldName: 'description',
+      value: 'Pilot'
+    })
+    await flushPromises()
+
+    expect(editEpisode).toHaveBeenCalledWith(expect.anything(), {
+      id: 'ep-1',
+      description: 'Pilot'
+    })
+    expect(message(wrapper).props('text')).toBe(
+      'main.cell_save_error {"name":"E01"}'
+    )
+  })
+
+  describe('of a line drawn by the page', () => {
+    // The store writes the edit into its cached shot, and puts the former
+    // value back on a refusal, both out of sight of Vue.
+    const mountLine = isRefused => {
+      const standbyShot = { ...shot, is_casting_standby: false }
+      return mountPage({
+        state: { isTVShow: false, currentEpisode: null },
+        getters: {
+          castingSequenceShots: () => [standbyShot],
+          isCurrentUserProductionSupervisor: () => false,
+          isShowInfosBreakdown: () => true,
+          user: () => ({ departments: [] })
+        },
+        actions: {
+          editShot: (context, data) => {
+            standbyShot.is_casting_standby = data.is_casting_standby
+            if (!isRefused) return Promise.resolve({})
+            standbyShot.is_casting_standby = false
+            return Promise.reject(buildRefusal())
+          }
+        },
+        stubs: { ShotLine: false }
+      })
+    }
+    const checkbox = wrapper => wrapper.find('.standby-column input')
+    const check = async wrapper => {
+      checkbox(wrapper).element.checked = true
+      await checkbox(wrapper).trigger('input')
+      await flushPromises()
+    }
+
+    test('shows the value the store put back', async () => {
+      const { wrapper } = mountLine(true)
+      await flushPromises()
+
+      await check(wrapper)
+
+      expect(checkbox(wrapper).element.checked).toBe(false)
+    })
+
+    // Drawn again, the line would lose the focus of the cell typed in.
+    test('keeps the line of a save that goes through', async () => {
+      const { wrapper } = mountLine(false)
+      await flushPromises()
+      const input = checkbox(wrapper).element
+
+      await check(wrapper)
+
+      expect(checkbox(wrapper).element).toBe(input)
+      expect(input.checked).toBe(true)
+    })
+
+    // Saved at each keystroke, a field can lose a save while typed in: the
+    // rest of the typing would go nowhere.
+    test('gives the field typed in its focus back', async () => {
+      const { wrapper } = mountPage({
+        state: { isTVShow: false, currentEpisode: null },
+        getters: {
+          castingSequenceShots: () => [{ ...shot, description: 'Wide' }],
+          isCurrentUserProductionSupervisor: () => false,
+          isShowInfosBreakdown: () => true,
+          user: () => ({ departments: [] })
+        },
+        actions: { editShot: () => Promise.reject(buildRefusal()) },
+        stubs: { ShotLine: false }
+      })
+      await flushPromises()
+      // Only a field of the document takes the focus.
+      document.body.appendChild(wrapper.element)
+      const field = () => wrapper.find('.description-column textarea')
+      field().element.focus()
+      field().element.value = 'Wider'
+      field().element.setSelectionRange(3, 3)
+
+      await field().trigger('input')
+      await flushPromises()
+
+      expect(document.activeElement).toBe(field().element)
+      expect(field().element.selectionStart).toBe(3)
+      expect(console.error).toHaveBeenCalledWith(buildRefusal())
+      wrapper.unmount()
+    })
+
+    // It holds no text: only its focus comes back.
+    test('gives a check box its focus back', async () => {
+      const { wrapper } = mountLine(true)
+      await flushPromises()
+      document.body.appendChild(wrapper.element)
+      checkbox(wrapper).element.focus()
+
+      await check(wrapper)
+
+      expect(document.activeElement).toBe(checkbox(wrapper).element)
+      expect(console.error).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
   })
 })

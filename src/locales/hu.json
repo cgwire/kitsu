@@ -430,6 +430,8 @@
       "all_assets": "Minden asset",
       "admin": "Admin",
       "cancel": "Mégsem",
+      "cell_save_error": "A(z) \"{name}\" mentése nem sikerült: az előző érték visszaállt. Kérlek töltsd újra az oldalt és próbáld újra.",
+      "cells_save_error": "Néhány módosítás mentése nem sikerült: az előző értékek visszaálltak. Kérlek töltsd újra az oldalt és próbáld újra.",
       "clear_selection": "Kijelölés megszüntetése",
       "close": "Bezárás",
       "confirmation": "Megerősítés",

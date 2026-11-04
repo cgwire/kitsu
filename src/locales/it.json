@@ -430,6 +430,8 @@
       "all_assets": "Tutti gli asset",
       "admin": "Admin",
       "cancel": "Annulla",
+      "cell_save_error": "Impossibile salvare \"{name}\": è stato ripristinato il valore precedente. Ricarica la pagina e riprova.",
+      "cells_save_error": "Impossibile salvare alcune modifiche: sono stati ripristinati i valori precedenti. Ricarica la pagina e riprova.",
       "clear_selection": "Rimuovi la selezione corrente",
       "close": "Chiudi",
       "confirmation": "Conferma",

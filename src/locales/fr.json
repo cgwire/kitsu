@@ -430,6 +430,8 @@
       "all_assets": "Tous les assets",
       "admin": "Admin",
       "cancel": "Annuler",
+      "cell_save_error": "\"{name}\" n'a pas pu être enregistré : la valeur précédente est revenue. Veuillez recharger la page et réessayer.",
+      "cells_save_error": "Certaines modifications n'ont pas pu être enregistrées : les valeurs précédentes sont revenues. Veuillez recharger la page et réessayer.",
       "clear_selection": "Effacer la sélection",
       "close": "Fermer",
       "confirmation": "Confirmer",

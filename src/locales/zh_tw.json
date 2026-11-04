@@ -430,6 +430,8 @@
       "all_assets": "所有資產",
       "admin": "管理員",
       "cancel": "取消",
+      "cell_save_error": "無法儲存「{name}」：已還原為先前的值。請重新載入頁面並再試一次。",
+      "cells_save_error": "部分變更無法儲存：已還原為先前的值。請重新載入頁面並再試一次。",
       "clear_selection": "清除目前所選",
       "close": "關閉",
       "confirmation": "確認",

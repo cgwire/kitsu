@@ -808,6 +808,8 @@
       "back": "Wstecz",
       "before": "Przed",
       "cancel": "Anuluj",
+      "cell_save_error": "Nie udało się zapisać „{name}”: przywrócono poprzednią wartość. Odśwież stronę i spróbuj ponownie.",
+      "cells_save_error": "Nie udało się zapisać niektórych zmian: przywrócono poprzednie wartości. Odśwież stronę i spróbuj ponownie.",
       "clear_selection": "Wyczyść bieżące zaznaczenie",
       "clear_sorting": "Wyczyść bieżące sortowanie",
       "close": "Zamknij",

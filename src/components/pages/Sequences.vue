@@ -51,6 +51,7 @@
               v-if="!isLoading && !initialLoading && !isLoadingError"
             />
           </div>
+          <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
         </div>
 
         <sorting-info
@@ -214,6 +215,7 @@ import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import SortingInfo from '@/components/widgets/SortingInfo.vue'
@@ -293,6 +295,7 @@ const reset = () => {
 
 const {
   applySearchFromUrl,
+  cellSaveErrorText,
   clearSearchAndScroll,
   closeMetadataModal,
   confirmAddMetadata,
@@ -329,6 +332,7 @@ const {
   onMetadataChanged,
   onSearchChange,
   openEditModal: onEditClicked,
+  saveCell,
   saveScrollPosition,
   saveSearchQuery,
   selectableDepartments,
@@ -385,8 +389,10 @@ const confirmEditSequence = async form => {
 }
 
 const onFieldChanged = async ({ entry, fieldName, value }) => {
-  await store.dispatch('editSequence', { id: entry.id, [fieldName]: value })
-  applySearchFromUrl(false)
+  const isSaved = await saveCell(entry, () =>
+    store.dispatch('editSequence', { id: entry.id, [fieldName]: value })
+  )
+  if (isSaved) applySearchFromUrl(false)
 }
 
 // Watchers

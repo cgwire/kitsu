@@ -430,6 +430,8 @@
       "all_assets": "所有资产",
       "admin": "管理员",
       "cancel": "取消",
+      "cell_save_error": "无法保存“{name}”：已恢复为之前的值。请重新加载页面并重试。",
+      "cells_save_error": "部分更改无法保存：已恢复为之前的值。请重新加载页面并重试。",
       "clear_selection": "清除当前所选",
       "close": "关闭",
       "confirmation": "确认",

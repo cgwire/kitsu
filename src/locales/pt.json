@@ -430,6 +430,8 @@
       "all_assets": "Todos os assets",
       "admin": "Admin",
       "cancel": "Cancelar",
+      "cell_save_error": "Não foi possível salvar \"{name}\": o valor anterior foi restaurado. Recarregue a página e tente novamente.",
+      "cells_save_error": "Não foi possível salvar algumas alterações: os valores anteriores foram restaurados. Recarregue a página e tente novamente.",
       "clear_selection": "Limpar seleção",
       "close": "Fechar",
       "confirmation": "Confirmar",
