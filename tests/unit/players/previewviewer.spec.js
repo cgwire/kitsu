@@ -57,6 +57,49 @@ describe('PreviewViewer', () => {
     ])
   })
 
+  // The snapshots read it after switching to another file.
+  it('tells whether its picture is ready', () => {
+    let isReady = false
+    const wrapper = shallowMount(PreviewViewer, {
+      props: { preview: { id: 'preview-1', extension: 'png', status: 'ready' } },
+      global: {
+        stubs: {
+          PictureViewer: {
+            name: 'PictureViewer',
+            template: '<div />',
+            methods: { isPictureReady: () => isReady }
+          }
+        }
+      }
+    })
+    expect(wrapper.vm.isPictureReady()).toBe(false)
+
+    isReady = true
+
+    expect(wrapper.vm.isPictureReady()).toBe(true)
+  })
+
+  it('tells whether its picture cannot load', () => {
+    let isUnavailable = false
+    const wrapper = shallowMount(PreviewViewer, {
+      props: { preview: { id: 'preview-1', extension: 'png', status: 'ready' } },
+      global: {
+        stubs: {
+          PictureViewer: {
+            name: 'PictureViewer',
+            template: '<div />',
+            methods: { isPictureUnavailable: () => isUnavailable }
+          }
+        }
+      }
+    })
+    expect(wrapper.vm.isPictureUnavailable()).toBe(false)
+
+    isUnavailable = true
+
+    expect(wrapper.vm.isPictureUnavailable()).toBe(true)
+  })
+
   // The player shows the time of a sound under their own names: the movie
   // events size the frames and the progress bar of a movie.
   it('forwards the time and the duration of a sound apart', () => {

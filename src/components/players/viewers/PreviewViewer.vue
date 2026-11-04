@@ -379,6 +379,11 @@ const getNaturalDimensions = () => {
   }
 }
 
+const isPictureReady = () => Boolean(pictureViewer.value?.isPictureReady())
+
+const isPictureUnavailable = () =>
+  Boolean(pictureViewer.value?.isPictureUnavailable())
+
 const getDimensions = () => {
   const dimensions = { width: 0, height: 0 }
   if (container.value) {
@@ -529,6 +534,8 @@ defineExpose({
   get3DAnimations,
   getNaturalDimensions,
   getDimensions,
+  isPictureReady,
+  isPictureUnavailable,
   resize,
   setCurrentFrame,
   setCurrentTimeRaw: setCurrentTimeRawValue,

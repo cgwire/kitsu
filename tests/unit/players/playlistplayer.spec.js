@@ -306,6 +306,115 @@ describe('PlaylistPlayer.vue', () => {
         await expect(snapshots).resolves.toEqual([])
       }
     )
+
+    // A picture loads once shown, and the next one of a revision can take
+    // longer than the snapshot of the previous one: a picture still loading
+    // makes a snapshot without the picture, or a 0x0 one that drawImage
+    // refuses, even once its size is known.
+    describe('of a revision with several pictures', () => {
+      let loaded = null
+      let unavailable = null
+
+      const mountRevision = async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        // jsdom encodes nothing
+        const snapshotCanvas = document.createElement('canvas')
+        snapshotCanvas.toBlob = callback => callback(new Blob())
+        vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+        loaded = new Set(['preview-1'])
+        unavailable = new Set()
+        wrapper = mountPlayer({
+          entities: [
+            {
+              ...entity,
+              preview_file_extension: 'png',
+              preview_file_revision: 1,
+              preview_file_previews: [
+                { id: 'preview-1b', extension: 'png', revision: 1 }
+              ]
+            }
+          ],
+          stubs: {
+            // Its picture has a size before the whole file is in.
+            MultiPictureViewer: {
+              ...withMethods(['resetPanZoom', 'resumePanZoom', 'setPanZoom'], {
+                getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
+                getPictureElement: () => null
+              }),
+              props: {
+                currentPreview: { type: Object, default: null },
+                previews: { type: Array, default: () => [] }
+              },
+              setup: props => ({
+                isPictureReady: () => loaded.has(props.currentPreview?.id),
+                isPictureUnavailable: () =>
+                  unavailable.has(props.currentPreview?.id)
+              })
+            }
+          }
+        })
+        await flushPromises()
+      }
+
+      it('waits for the next picture to load', async () => {
+        await mountRevision()
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+        expect(isDone).toBe(false)
+
+        loaded.add('preview-1b')
+        await vi.advanceTimersByTimeAsync(1500)
+        await done
+
+        await expect(snapshots).resolves.toHaveLength(2)
+      })
+
+      it('leaves out a picture that does not load', async () => {
+        await mountRevision()
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        // A picture gets 10 s to load.
+        await vi.advanceTimersByTimeAsync(12000)
+
+        await expect(snapshots).resolves.toHaveLength(1)
+      })
+
+      // The live canvas gets 500 ms to settle once the picture is in: a picture
+      // that comes in after its 10 s would get less.
+      it('leaves out a picture that comes in after its 10 s', async () => {
+        await mountRevision()
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        await vi.advanceTimersByTimeAsync(10700)
+        loaded.add('preview-1b')
+        await vi.advanceTimersByTimeAsync(2000)
+
+        await expect(snapshots).resolves.toHaveLength(1)
+      })
+
+      it('does not wait for a picture that cannot load', async () => {
+        await mountRevision()
+        unavailable.add('preview-1b')
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+
+        expect(isDone).toBe(true)
+        await done
+        await expect(snapshots).resolves.toHaveLength(1)
+      })
+    })
   })
 
   // The waveform loads 100 ms after it is set up for the movie on screen:

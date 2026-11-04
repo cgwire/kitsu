@@ -502,7 +502,8 @@ import {
   isMoviePreview,
   isPicturePreview,
   isSoundPreview,
-  isTransparentPicturePreview
+  isTransparentPicturePreview,
+  waitForPicture
 } from '@/lib/preview'
 import {
   DEFAULT_FPS,
@@ -1978,8 +1979,8 @@ const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
 
 // Picture revisions can hold several preview files. Walk them all and
 // emit one PNG per picture preview, with that preview's annotations
-// composited on top. Briefly switches the displayed preview file in
-// order to reuse the live extract/composite pipeline.
+// composited on top. Switches the displayed preview file in turn to
+// reuse the live extract/composite pipeline.
 const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   const savedIndex = currentIndex.value
   const picturePreviews = props.previews
@@ -1991,31 +1992,44 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
     if (currentIndex.value !== index) {
       currentIndex.value = index
     }
-    // Always wait for the picture to load and the live canvas to
-    // settle before compositing. Iteration #1 often skips the index
-    // switch (the user is already on the main preview), but the chain
-    // is async (image load -> resetPlayerPositions -> AnnotationCanvas
-    // resized -> reloadAnnotations) and composite would otherwise
-    // capture an empty live canvas, producing a PNG without any
+    // The viewer takes the new file at the next render: read before it,
+    // the state is still the one of the previous picture.
+    await nextTick()
+    const isInTime = await waitForPicture(
+      () =>
+        !previewViewer.value ||
+        previewViewer.value.isPictureReady() ||
+        previewViewer.value.isPictureUnavailable()
+    )
+    // Then let the live canvas settle before compositing. Iteration #1
+    // often skips the index switch (the user is already on the main
+    // preview), but the chain is async (image load -> resetPlayerPositions
+    // -> AnnotationCanvas resized -> reloadAnnotations) and composite would
+    // otherwise capture an empty live canvas, producing a PNG without any
     // annotation.
     await new Promise(resolve => setTimeout(resolve, 500))
     // Closed meanwhile, like in extractVideoFrame
     if (!previewViewer.value) return []
-    const canvas = document.getElementById('annotation-snapshot')
-    previewViewer.value.extractPicture(canvas)
-    await compositeLiveAnnotationsOntoCanvas(canvas)
-    if (withLabel) {
-      drawSnapshotTitle(
-        canvas,
-        snapshotTitle({ revision: preview.revision, index })
+    // Leave out a picture that cannot load or is still loading: its snapshot
+    // would be 0x0, which drawImage refuses. Leave out one that came in after
+    // its 10 s too: it did not get the time above to settle.
+    if (isInTime && previewViewer.value.isPictureReady()) {
+      const canvas = document.getElementById('annotation-snapshot')
+      previewViewer.value.extractPicture(canvas)
+      await compositeLiveAnnotationsOntoCanvas(canvas)
+      if (withLabel) {
+        drawSnapshotTitle(
+          canvas,
+          snapshotTitle({ revision: preview.revision, index })
+        )
+      }
+      files.push(
+        await getFileFromCanvas(
+          canvas,
+          snapshotFilename({ revision: preview.revision, index })
+        )
       )
     }
-    files.push(
-      await getFileFromCanvas(
-        canvas,
-        snapshotFilename({ revision: preview.revision, index })
-      )
-    )
   }
   if (currentIndex.value !== savedIndex) {
     currentIndex.value = savedIndex

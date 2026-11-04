@@ -1725,6 +1725,105 @@ describe('PreviewPlayer.vue', () => {
       await expect(snapshots).resolves.toEqual([])
     }
     )
+
+    // A picture loads once shown, and the next one of a revision can take
+    // longer than the snapshot of the previous one: a picture still loading
+    // makes a 0x0 snapshot that drawImage refuses, even once its size is
+    // known.
+    describe('of a revision with several pictures', () => {
+      const nextPicture = { ...preview, id: 'preview-1b' }
+      let extracted = []
+      let loaded = null
+      let unavailable = null
+
+      beforeEach(async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        // jsdom draws and encodes nothing
+        const snapshotCanvas = document.createElement('canvas')
+        snapshotCanvas.toBlob = callback => callback(new Blob())
+        vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+        vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+          drawImage: () => {}
+        })
+        extracted = []
+        loaded = new Set([preview.id])
+        unavailable = new Set()
+        wrapper = mountPlayer({
+          props: { previews: [preview, nextPicture] },
+          stubs: {
+            AnnotationCanvas: annotationCanvasStub({
+              ...createFakeCanvas(),
+              getWidth: () => 800,
+              toCanvasElement: () => document.createElement('canvas')
+            }),
+            // Its picture has a size before the whole file is in.
+            PreviewViewer: {
+              name: 'PreviewViewer',
+              template: '<div />',
+              props: { preview: { type: Object, default: null } },
+              methods: viewer,
+              setup: props => ({
+                extractPicture: () => extracted.push(props.preview.id),
+                getNaturalDimensions: () => ({ width: 800, height: 600 }),
+                isPictureReady: () => loaded.has(props.preview?.id),
+                isPictureUnavailable: () => unavailable.has(props.preview?.id)
+              })
+            }
+          }
+        })
+        await nextTick()
+      })
+
+      it('waits for the next picture to load', async () => {
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        await vi.advanceTimersByTimeAsync(2000)
+        expect(extracted).toEqual([preview.id])
+
+        loaded.add(nextPicture.id)
+        await vi.advanceTimersByTimeAsync(1500)
+
+        expect(extracted).toEqual([preview.id, nextPicture.id])
+        await expect(snapshots).resolves.toHaveLength(2)
+      })
+
+      it('leaves out a picture that does not load', async () => {
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        // A picture gets 10 s to load.
+        await vi.advanceTimersByTimeAsync(12000)
+
+        await expect(snapshots).resolves.toHaveLength(1)
+        expect(extracted).toEqual([preview.id])
+      })
+
+      // The live canvas gets 500 ms to settle once the picture is in: a picture
+      // that comes in after its 10 s would get less.
+      it('leaves out a picture that comes in after its 10 s', async () => {
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        await vi.advanceTimersByTimeAsync(10700)
+        loaded.add(nextPicture.id)
+        await vi.advanceTimersByTimeAsync(2000)
+
+        await expect(snapshots).resolves.toHaveLength(1)
+        expect(extracted).toEqual([preview.id])
+      })
+
+      it('does not wait for a picture that cannot load', async () => {
+        unavailable.add(nextPicture.id)
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+
+        expect(isDone).toBe(true)
+        await done
+        await expect(snapshots).resolves.toHaveLength(1)
+        expect(extracted).toEqual([preview.id])
+      })
+    })
   })
 
   // fabric disposes a text still in editing without the object:modified of

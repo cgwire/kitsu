@@ -137,3 +137,23 @@ export const drawSnapshotTitle = (canvas, text) => {
   context.fillText(text, padding, canvas.height - stripHeight / 2)
   context.restore()
 }
+
+// A picture shown for a snapshot loads asynchronously. Resolves to true once
+// isSettled() is true, or to false after 10 s.
+export const waitForPicture = isSettled =>
+  new Promise(resolve => {
+    let poll = null
+    const deadline = setTimeout(() => {
+      clearTimeout(poll)
+      resolve(isSettled())
+    }, 10000)
+    const check = () => {
+      if (isSettled()) {
+        clearTimeout(deadline)
+        resolve(true)
+      } else {
+        poll = setTimeout(check, 50)
+      }
+    }
+    check()
+  })

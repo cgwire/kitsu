@@ -141,6 +141,15 @@ const isVisibleImageReady = () => {
   return !!(img && img.complete && img.naturalWidth > 0)
 }
 
+// The snapshots skip a picture that will not come: Zou could not build it or
+// still builds it, or the browser could not fetch or decode it. A broken
+// <img> is complete with no size, like one with no src between two files.
+const isPictureUnavailable = () => {
+  if (!isAvailable.value) return true
+  const img = visibleImage.value
+  return Boolean(img?.getAttribute('src') && img.complete && !img.naturalWidth)
+}
+
 const getNaturalDimensions = () => {
   // Measure the variant actually displayed: `big` consumers show the
   // original through pictureBig, and measuring the hidden preview-sized
@@ -492,6 +501,9 @@ defineExpose({
   getDimensions,
   getNaturalDimensions,
   getPictureElement,
+  // An engine can give the size of a picture before the whole file is in.
+  isPictureReady: isVisibleImageReady,
+  isPictureUnavailable,
   panBy,
   pausePanZoom,
   resetPanZoom,
