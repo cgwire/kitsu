@@ -1726,6 +1726,46 @@ describe('PreviewPlayer.vue', () => {
     }
     )
 
+    // Its snapshots would land in the closed dialog.
+    it('stops the video snapshots once the attachment dialog closes', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      // jsdom draws and encodes nothing
+      const snapshotCanvas = document.createElement('canvas')
+      snapshotCanvas.toBlob = callback => callback(new Blob())
+      vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        drawImage: () => {}
+      })
+      const canvas = {
+        ...createFakeCanvas(),
+        getWidth: () => 800,
+        toCanvasElement: () => document.createElement('canvas')
+      }
+      const annotations = [1, 2].map(time => ({
+        time,
+        drawing: { objects: [] }
+      }))
+      wrapper = mountPlayer({
+        props: { previews: [{ ...moviePreview, annotations }] },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      const controller = new AbortController()
+
+      const snapshots = wrapper.vm.extractAnnotationSnapshots({
+        signal: controller.signal
+      })
+      await vi.advanceTimersByTimeAsync(550)
+      expect(viewer.extractFrame).toHaveBeenCalledTimes(1)
+      controller.abort()
+      await vi.advanceTimersByTimeAsync(1200)
+
+      await expect(snapshots).resolves.toEqual([])
+      expect(viewer.extractFrame).toHaveBeenCalledTimes(1)
+      // Back on the frame of the user
+      expect(viewer.setCurrentFrame).toHaveBeenLastCalledWith(0)
+    })
+
     // The user can move the player to another task or revision meanwhile.
     it('stops the video snapshots once the player shows another file', async () => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
@@ -1892,6 +1932,30 @@ describe('PreviewPlayer.vue', () => {
         ).toBe(preview.id)
       })
 
+      // Its snapshots would land in the closed dialog.
+      it('stops once the attachment dialog closes, back on the first file', async () => {
+        const controller = new AbortController()
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots({
+          signal: controller.signal
+        })
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+        controller.abort()
+        await vi.advanceTimersByTimeAsync(1500)
+
+        expect(isDone).toBe(true)
+        await done
+        await expect(snapshots).resolves.toEqual([])
+        expect(
+          wrapper.findComponent({ ref: 'preview-viewer' }).props('preview').id
+        ).toBe(preview.id)
+      })
+
       // The user can move the player to another task or revision meanwhile.
       it('stops once the player shows other files, and leaves it there', async () => {
         let isDone = false
@@ -1921,6 +1985,30 @@ describe('PreviewPlayer.vue', () => {
       })
 
       // Encoding a big picture takes a while.
+      it('drops the snapshots when the dialog closes during the last encoding', async () => {
+        loaded.add(nextPicture.id)
+        const controller = new AbortController()
+        let encodeLast = null
+        snapshotCanvas.toBlob = callback => {
+          if (extracted.length === 2) {
+            encodeLast = () => callback(new Blob())
+          } else {
+            callback(new Blob())
+          }
+        }
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots({
+          signal: controller.signal
+        })
+        await vi.advanceTimersByTimeAsync(1500)
+        expect(encodeLast).not.toBeNull()
+        controller.abort()
+        encodeLast()
+        await vi.advanceTimersByTimeAsync(1000)
+
+        await expect(snapshots).resolves.toEqual([])
+      })
+
       it('drops the snapshots when the player moves during the last encoding', async () => {
         loaded.add(nextPicture.id)
         let encodeLast = null

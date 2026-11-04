@@ -907,7 +907,12 @@ const addCommentAttachment = forms => {
   attachments.value = attachments.value.concat(forms)
 }
 
+// Closing the attachment dialog stops the snapshots being taken: they would
+// land in the closed dialog, which empties itself when it opens again.
+let snapshotsController = null
+
 const onCloseCommentAttachment = () => {
+  snapshotsController?.abort()
   modals.addCommentAttachment = false
 }
 
@@ -962,11 +967,15 @@ const setAnnotationSnapshots = files => {
   getAttachmentModal().addFiles(files)
 }
 
+// Returns the signal that stops the snapshots.
 const showAnnotationLoading = (kind = 'standard') => {
+  snapshotsController = new AbortController()
   getAttachmentModal().showAnnotationLoading(kind)
+  return snapshotsController.signal
 }
 
 const hideAnnotationLoading = () => {
+  snapshotsController = null
   getAttachmentModal().hideAnnotationLoading()
 }
 
@@ -1022,6 +1031,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('paste', onPaste, false)
+  snapshotsController?.abort()
 })
 
 watch(

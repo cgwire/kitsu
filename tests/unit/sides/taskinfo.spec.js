@@ -1915,6 +1915,42 @@ describe('TaskInfo.vue', () => {
       expect(errorHandler).not.toHaveBeenCalled()
     })
 
+    // Closing the attachment dialog aborts its signal: the player stops.
+    it('lets the attachment dialog stop the snapshots', async () => {
+      const { signal } = new AbortController()
+      const extractAnnotationSnapshots = vi.fn(() => Promise.resolve([]))
+      const { wrapper } = await mountPanel({
+        previews,
+        getterOverrides: {
+          currentUserRoleForProduction: () => () => 'manager'
+        },
+        stubs: {
+          AddComment: {
+            template: '<div />',
+            methods: {
+              hideAnnotationLoading: () => {},
+              setAnnotationSnapshots: () => {},
+              showAnnotationLoading: () => signal
+            }
+          },
+          PreviewPlayer: {
+            ...PlayerStub,
+            methods: { ...PlayerStub.methods, extractAnnotationSnapshots }
+          }
+        }
+      })
+
+      wrapper
+        .findComponent(AddComment)
+        .vm.$emit('annotation-snapshots-with-label-requested')
+      await flushPromises()
+
+      expect(extractAnnotationSnapshots).toHaveBeenCalledWith({
+        withLabel: true,
+        signal
+      })
+    })
+
     // The snapshot buttons spin while the player takes the snapshots.
     it('stops the snapshot loading when the snapshots fail', async () => {
       const failure = new Error('drawImage failed')

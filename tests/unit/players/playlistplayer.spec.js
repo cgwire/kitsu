@@ -318,6 +318,42 @@ describe('PlaylistPlayer.vue', () => {
       }
     )
 
+    // Its snapshots would land in the closed dialog.
+    it('stops the video snapshots once the attachment dialog closes', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      // jsdom draws and encodes nothing
+      const snapshotCanvas = document.createElement('canvas')
+      snapshotCanvas.toBlob = callback => callback(new Blob())
+      vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        clearRect: () => {},
+        drawImage: () => {}
+      })
+      wrapper = mountPlayer({
+        entities: [
+          {
+            ...entity,
+            preview_file_extension: 'mp4',
+            preview_file_annotations: [1, 2].map(time => ({
+              time,
+              drawing: { objects: [] }
+            }))
+          }
+        ]
+      })
+      await flushPromises()
+      const controller = new AbortController()
+
+      const snapshots = wrapper.vm.extractAnnotationSnapshots({
+        signal: controller.signal
+      })
+      await vi.advanceTimersByTimeAsync(550)
+      controller.abort()
+      await vi.advanceTimersByTimeAsync(1500)
+
+      await expect(snapshots).resolves.toEqual([])
+    })
+
     // The keyboard still moves the player under the attachment dialog.
     it('stops the video snapshots once the player moves to another shot', async () => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
@@ -483,6 +519,29 @@ describe('PlaylistPlayer.vue', () => {
         ).toBe('preview-1')
       })
 
+      // Its snapshots would land in the closed dialog.
+      it('stops once the attachment dialog closes, back on the first file', async () => {
+        await mountRevision()
+        const controller = new AbortController()
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots({
+          signal: controller.signal
+        })
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+        controller.abort()
+        await vi.advanceTimersByTimeAsync(1500)
+
+        expect(isDone).toBe(true)
+        await done
+        await expect(snapshots).resolves.toEqual([])
+        expect(wrapper.vm.currentPreviewIndex).toBe(0)
+      })
+
       // The keyboard still moves the player under the attachment dialog.
       it('stops once the player moves to another shot, and leaves it there', async () => {
         await mountRevision([
@@ -520,6 +579,33 @@ describe('PlaylistPlayer.vue', () => {
       })
 
       // Encoding a big picture takes a while.
+      it('drops the snapshots when the dialog closes during the last encoding', async () => {
+        await mountRevision()
+        loaded.add('preview-1b')
+        const controller = new AbortController()
+        let encoded = 0
+        let encodeLast = null
+        snapshotCanvas.toBlob = callback => {
+          encoded += 1
+          if (encoded === 2) {
+            encodeLast = () => callback(new Blob())
+          } else {
+            callback(new Blob())
+          }
+        }
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots({
+          signal: controller.signal
+        })
+        await vi.advanceTimersByTimeAsync(1500)
+        expect(encodeLast).not.toBeNull()
+        controller.abort()
+        encodeLast()
+        await vi.advanceTimersByTimeAsync(1000)
+
+        await expect(snapshots).resolves.toEqual([])
+      })
+
       it('drops the snapshots when the player moves during the last encoding', async () => {
         await mountRevision([
           {

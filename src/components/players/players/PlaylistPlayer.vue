@@ -3719,11 +3719,15 @@ const extractPicture = canvas => {
   context.drawImage(image, 0, 0, canvas.width, canvas.height)
 }
 
-const extractAnnotationSnapshots = async ({ withLabel = false } = {}) => {
+// signal: aborted once the attachment dialog closes or goes away
+const extractAnnotationSnapshots = async ({
+  withLabel = false,
+  signal
+} = {}) => {
   if (isCurrentPreviewPicture.value) {
-    return extractPicturePreviewSnapshots({ withLabel })
+    return extractPicturePreviewSnapshots({ withLabel, signal })
   }
-  return extractVideoAnnotationSnapshots({ withLabel })
+  return extractVideoAnnotationSnapshots({ withLabel, signal })
 }
 
 const snapshotIdentity = ({ revision, frame, index } = {}) => ({
@@ -3743,7 +3747,10 @@ const snapshotTitle = identity =>
 
 // Video preview: one PNG per annotation, each captured at the
 // annotation's frame with its drawing composited on top.
-const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
+const extractVideoAnnotationSnapshots = async ({
+  withLabel = false,
+  signal
+} = {}) => {
   const cur = currentFrame.value
   // The loop below repaints the live canvas annotation by annotation, so
   // grab the one being displayed now: currentTimeRaw has drifted by the
@@ -3757,7 +3764,8 @@ const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
   const previewId = currentPreview.value?.id
   const isMoved = () => currentPreview.value?.id !== previewId
   for (const ann of sorted) {
-    if (!isMoved()) {
+    // Stopped once the user closes the dialog or moves the player
+    if (!signal?.aborted && !isMoved()) {
       const canvas = document.getElementById('annotation-snapshot')
       const frame = Math.round(
         roundToFrame(ann.time, fps.value) / frameDuration.value
@@ -3787,14 +3795,17 @@ const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
     clearCanvas()
     if (displayedAnnotation) loadSingleAnnotation(displayedAnnotation)
   })
-  return files
+  return signal?.aborted ? [] : files
 }
 
 // Picture revisions can hold several preview files (main + extras).
 // Walk them all and emit one PNG per picture preview, with that
 // preview's annotations composited on top. Switches the displayed
 // picture in turn to reuse the live extract/composite pipeline.
-const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
+const extractPicturePreviewSnapshots = async ({
+  withLabel = false,
+  signal
+} = {}) => {
   const entity = currentEntity.value
   if (!entity) return []
   const savedIndex = currentPreviewIndex.value
@@ -3802,7 +3813,7 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   // player to another one meanwhile.
   const shown = { id: currentPreview.value?.id }
   try {
-    return await snapshotPicturePreviews(entity, shown, { withLabel })
+    return await snapshotPicturePreviews(entity, shown, { withLabel, signal })
   } finally {
     // Back to the file of the user, even after a failed snapshot. A closed
     // player has nothing left to show, and one the user moved stays there.
@@ -3812,7 +3823,11 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   }
 }
 
-const snapshotPicturePreviews = async (entity, shown, { withLabel }) => {
+const snapshotPicturePreviews = async (
+  entity,
+  shown,
+  { withLabel, signal }
+) => {
   const picturePreviews = [
     {
       id: entity.preview_file_id,
@@ -3824,13 +3839,15 @@ const snapshotPicturePreviews = async (entity, shown, { withLabel }) => {
   ]
     .map((preview, index) => ({ preview, index }))
     .filter(({ preview }) => isPicturePreview(preview.extension))
-  // Another file on screen: the user moved the player, the snapshots stop.
-  const isMoved = () => currentPreview.value?.id !== shown.id
+  // The snapshots stop once the user closes the dialog, or moves the player
+  // to another file.
+  const isLeft = () =>
+    Boolean(signal?.aborted) || currentPreview.value?.id !== shown.id
 
   const files = []
   let fileIndex = 1
   for (const { preview, index } of picturePreviews) {
-    if (isMoved()) return []
+    if (isLeft()) return []
     if (currentPreviewIndex.value !== index) {
       currentPreviewIndex.value = index
     }
@@ -3840,7 +3857,7 @@ const snapshotPicturePreviews = async (entity, shown, { withLabel }) => {
     await nextTick()
     const isInTime = await waitForPicture(
       () =>
-        isMoved() ||
+        isLeft() ||
         !picturePlayer.value ||
         picturePlayer.value.isPictureReady() ||
         picturePlayer.value.isPictureUnavailable()
@@ -3852,8 +3869,8 @@ const snapshotPicturePreviews = async (entity, shown, { withLabel }) => {
     // then capture an empty canvas and the resulting PNG would come out
     // without any annotation.
     await new Promise(resolve => setTimeout(resolve, 500))
-    // Closed meanwhile, like in extractVideoFrame, or moved
-    if (!picturePlayer.value || isMoved()) return []
+    // Closed meanwhile, like in extractVideoFrame, or left
+    if (!picturePlayer.value || isLeft()) return []
     // Leave out a picture that cannot load or is still loading: its snapshot
     // would be 0x0, which drawImage refuses, or without the picture. Leave out
     // one that came in after its 10 s too: it did not get the time above to
@@ -3877,8 +3894,8 @@ const snapshotPicturePreviews = async (entity, shown, { withLabel }) => {
     }
     fileIndex++
   }
-  // Moved during the encoding of the last picture
-  return isMoved() ? [] : files
+  // Left during the encoding of the last picture
+  return isLeft() ? [] : files
 }
 
 const showPreviewFile = async index => {

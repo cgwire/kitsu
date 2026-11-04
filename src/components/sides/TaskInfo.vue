@@ -1417,9 +1417,15 @@ const onFrameUpdated = frame => {
 
 const extractAnnotationSnapshots = async (withLabel = false) => {
   const previewPlayer = previewPlayerRef.value || props.player
-  addCommentRef.value.showAnnotationLoading(withLabel ? 'label' : 'standard')
+  // The attachment dialog stops the snapshots when it closes.
+  const signal = addCommentRef.value.showAnnotationLoading(
+    withLabel ? 'label' : 'standard'
+  )
   try {
-    const files = await previewPlayer.extractAnnotationSnapshots({ withLabel })
+    const files = await previewPlayer.extractAnnotationSnapshots({
+      withLabel,
+      signal
+    })
     // The panel may have closed during the extraction.
     addCommentRef.value?.setAnnotationSnapshots(files)
     return files

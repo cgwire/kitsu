@@ -1625,10 +1625,14 @@ const onAnnotationChanged = async ({
 }
 
 const extractAnnotationSnapshots = async (withLabel = false) => {
-  addCommentRef.value.showAnnotationLoading(withLabel ? 'label' : 'standard')
+  // The attachment dialog stops the snapshots when it closes.
+  const signal = addCommentRef.value.showAnnotationLoading(
+    withLabel ? 'label' : 'standard'
+  )
   try {
     const files = await previewPlayerRef.value.extractAnnotationSnapshots({
-      withLabel
+      withLabel,
+      signal
     })
     // The page may have been left during the extraction.
     addCommentRef.value?.setAnnotationSnapshots(files)
