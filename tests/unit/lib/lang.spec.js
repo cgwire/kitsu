@@ -80,11 +80,12 @@ describe('lang', () => {
 describe('startup language', () => {
   afterEach(async () => {
     vi.restoreAllMocks()
-    vi.useRealTimers()
-    localStorage.removeItem('locale')
+    vi.unstubAllGlobals()
     await lang.setLocale('en_US')
     localStorage.removeItem('locale')
   })
+
+  beforeEach(() => localStorage.removeItem('locale'))
 
   test('setLocale remembers the language for the next visit', async () => {
     await lang.setLocale('fr_FR')
@@ -108,12 +109,57 @@ describe('startup language', () => {
   })
 
   test('starts in English without any remembered language', async () => {
+    vi.stubGlobal('navigator', { languages: [] })
     await lang.setLocale('fr_FR')
     localStorage.removeItem('locale')
 
     await lang.applyStartupLocale()
 
     expect(i18n.global.locale.value).toBe('en')
+  })
+
+  describe('browser languages', () => {
+    const startWith = async languages => {
+      vi.stubGlobal('navigator', { languages })
+      await lang.applyStartupLocale()
+      return localeCode.value
+    }
+
+    test.each([
+      [['fr-FR'], 'fr'],
+      [['fr-CA'], 'fr'],
+      [['de'], 'de'],
+      [['pt-PT'], 'pt'],
+      [['zh-CN'], 'zh-cn'],
+      [['zh'], 'zh-cn'],
+      [['zh-SG'], 'zh-cn'],
+      [['zh-Hans-HK'], 'zh-cn'],
+      [['zh-TW'], 'zh-tw'],
+      [['zh-HK'], 'zh-tw'],
+      [['zh-MO'], 'zh-tw'],
+      [['zh-Hant'], 'zh-tw']
+    ])('starts from %j in %s', async (languages, expected) => {
+      expect(await startWith(languages)).toBe(expected)
+    })
+
+    test('takes the first language Kitsu has', async () => {
+      expect(await startWith(['sv-SE', 'nb', 'ja-JP', 'fr-FR'])).toBe('ja')
+    })
+
+    test('starts in English for languages Kitsu does not have', async () => {
+      expect(await startWith(['sv-SE', 'nb'])).toBe('en')
+    })
+
+    test('prefers the language remembered in this browser', async () => {
+      localStorage.setItem('locale', 'de_DE')
+      expect(await startWith(['fr-FR'])).toBe('de')
+    })
+
+    // Only a language applied on purpose follows the visitor around.
+    test('does not remember the language of the browser', async () => {
+      await startWith(['fr-FR'])
+      expect(localStorage.getItem('locale')).toBeNull()
+    })
   })
 
   // The app mounts once this promise settles: a throw would keep it from ever

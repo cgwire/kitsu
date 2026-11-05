@@ -35,6 +35,9 @@ const LOCALE_MAP = {
 
 const LOCALE_PREFERENCE = 'locale'
 
+// A language tag naming its script overrides its region.
+const TRADITIONAL_CHINESE_REGIONS = ['hk', 'mo', 'tw']
+
 // A stalled translation chunk must not leave the page blank: past this delay
 // the app starts in English and flips once the chunk lands.
 const STARTUP_LOCALE_TIMEOUT = 1000
@@ -78,6 +81,21 @@ let displayedCode = 'en'
 const getRememberedLocale = () =>
   localPreferences.getPreference(LOCALE_PREFERENCE)
 
+const isTraditionalChinese = subtags =>
+  subtags.includes('hant') ||
+  (!subtags.includes('hans') &&
+    subtags.some(subtag => TRADITIONAL_CHINESE_REGIONS.includes(subtag)))
+
+const toLocale = languageTag => {
+  const [language, ...subtags] = languageTag.toLowerCase().split('-')
+  if (language === 'zh') {
+    return isTraditionalChinese(subtags) ? 'zh_Hant_TW' : 'zh_Hans_CN'
+  }
+  return languages.find(({ value }) => value.startsWith(`${language}_`))?.value
+}
+
+const getBrowserLocale = () => navigator.languages.map(toLocale).find(Boolean)
+
 const applyLocale = async locale => {
   const fallback = locale?.substring(0, 2) || 'en'
   const { language, code } = LOCALE_MAP[locale] || {
@@ -118,14 +136,15 @@ export default {
   },
 
   /**
-   * Start in the last language used in this browser: nothing else applies one
-   * before the guards know the user, and the pages without a guard never do.
-   * Async so that nothing here can keep the app from mounting.
+   * Start in the last language used in this browser, else in the first of its
+   * languages Kitsu has: nothing else applies one before the guards know the
+   * user, and the pages without a guard never do. Async so that nothing here
+   * can keep the app from mounting.
    */
   async applyStartupLocale() {
     // Not a Promise.race: it would swallow a chunk failing past the delay.
     await new Promise(resolve => {
-      applyLocale(getRememberedLocale()).finally(resolve)
+      applyLocale(getRememberedLocale() || getBrowserLocale()).finally(resolve)
       setTimeout(resolve, STARTUP_LOCALE_TIMEOUT)
     })
   }
