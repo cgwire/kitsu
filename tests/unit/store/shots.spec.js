@@ -784,6 +784,32 @@ describe('Shots store, NEW_SHOT_END', () => {
     expect(shotsStore.cache.shots.map(({ id }) => id)).toEqual(['shot-1'])
     expect(state.displayedShots.map(({ id }) => id)).toEqual(['shot-1'])
   })
+
+  // A created shot has no time yet: the footer hides totals that are no
+  // numbers.
+  test('keeps the time totals of the list', () => {
+    sequenceStore.cache.sequenceMap.set('sq-1', { id: 'sq-1', name: 'SQ01' })
+    const listedShot = {
+      id: 'shot-1',
+      name: 'SH01',
+      sequence_name: 'SQ01',
+      nb_frames: 24,
+      timeSpent: 240,
+      estimation: 480
+    }
+    shotsStore.cache.shots = [listedShot]
+    shotsStore.cache.shotMap = new Map([[listedShot.id, listedShot]])
+    shotsStore.cache.shotIndex = {}
+    const state = { displayedShots: [listedShot], shotSearchText: '' }
+
+    shotsStore.mutations.NEW_SHOT_END(state, {
+      shot: { id: 'shot-2', name: 'SH02', parent_id: 'sq-1', nb_frames: 0 },
+      episodeMap: new Map()
+    })
+
+    expect(state.displayedShotsTimeSpent).toBe(240)
+    expect(state.displayedShotsEstimation).toBe(480)
+  })
 })
 
 // A frame in of 0 is a value: the edit must reveal the Frame In column, as

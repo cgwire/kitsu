@@ -1162,6 +1162,8 @@ const mutations = {
     shot.tasks = []
     shot.validations = new Map()
     shot.data = {}
+    shot.timeSpent = 0
+    shot.estimation = 0
 
     // zou emits shot:new before this response lands, so the socket handler
     // may already have inserted the shot through ADD_SHOT: merge into that

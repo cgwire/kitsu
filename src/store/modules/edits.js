@@ -805,6 +805,8 @@ const mutations = {
     edit.tasks = []
     edit.validations = new Map()
     edit.data = {}
+    edit.timeSpent = 0
+    edit.estimation = 0
 
     // zou emits edit:new before this response lands, so the socket handler
     // may already have inserted the edit through ADD_EDIT: merge into that
