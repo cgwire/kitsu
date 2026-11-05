@@ -11,15 +11,29 @@ const h = vi.hoisted(() => ({ load: null }))
 vi.mock('@/locales', async importOriginal => ({
   ...(await importOriginal()),
   localeLoaders: Object.fromEntries(
-    ['da', 'de', 'es', 'fr', 'it', 'ja', 'ko', 'nl', 'pl', 'pt'].map(language => [
-      language,
-      () => h.load(language)
-    ])
+    [
+      'da',
+      'de',
+      'es',
+      'fa',
+      'fr',
+      'hu',
+      'it',
+      'ja',
+      'ko',
+      'nl',
+      'pl',
+      'pt',
+      'ru',
+      'zh',
+      'zh_tw'
+    ].map(language => [language, () => h.load(language)])
   )
 }))
 
 import i18n from '@/lib/i18n'
 import lang, { localeCode } from '@/lib/lang'
+import pickedLocale from '@/lib/picked-locale'
 
 const messages = { default: { default: { main: { cancel: 'Translated' } } } }
 const failure = new Error('Failed to fetch dynamically imported module')
@@ -161,5 +175,80 @@ describe('language chunks out of order', () => {
     await newer
 
     expect(getLanguages()).toEqual({ messages: 'pt', code: 'pt', dates: 'pt' })
+  })
+})
+
+// The list goes back to the language on screen: the login must not write
+// another one.
+describe('language picked before login, chunks', () => {
+  afterEach(async () => {
+    pickedLocale.clear()
+    await lang.setLocale('en_US')
+    localStorage.removeItem('locale')
+  })
+
+  test('is there for a login that does not wait for its chunk', async () => {
+    const chunks = loadOnDemand()
+
+    const pick = lang.pickLocale('zh_Hans_CN')
+
+    expect(pickedLocale.get()).toBe('zh_Hans_CN')
+    chunks.zh.land()
+    await pick
+  })
+
+  // The guard of the login took it, and the user can set another language
+  // in the profile afterwards.
+  test('does not come back once the login took it', async () => {
+    const chunks = loadOnDemand()
+    const pick = lang.pickLocale('zh_Hant_TW')
+    pickedLocale.clear()
+
+    chunks.zh_tw.land()
+    await pick
+
+    expect(pickedLocale.get()).toBeNull()
+  })
+
+  test('is no pick when its chunk fails', async () => {
+    h.load = () => Promise.reject(failure)
+
+    await expect(lang.pickLocale('es_ES')).rejects.toBe(failure)
+
+    expect(pickedLocale.get()).toBeNull()
+  })
+
+  test('leaves the pick on screen when the next chunk fails', async () => {
+    h.load = () => Promise.resolve(messages)
+    await lang.pickLocale('fa_IR')
+    h.load = () => Promise.reject(failure)
+
+    await expect(lang.pickLocale('es_ES')).rejects.toBe(failure)
+
+    expect(pickedLocale.get()).toBe('fa_IR')
+  })
+
+  test('leaves the last pick in place when an older chunk fails', async () => {
+    const chunks = loadOnDemand()
+    const older = lang.pickLocale('da_DK')
+    await lang.pickLocale('en_US')
+
+    chunks.da.fail(failure)
+    await expect(older).rejects.toBe(failure)
+
+    expect(pickedLocale.get()).toBe('en_US')
+  })
+
+  test('leaves the last pick in place when an older chunk lands', async () => {
+    const chunks = loadOnDemand()
+    const older = lang.pickLocale('hu_HU')
+    const newer = lang.pickLocale('ru_RU')
+
+    chunks.ru.land()
+    await newer
+    chunks.hu.land()
+    await older
+
+    expect(pickedLocale.get()).toBe('ru_RU')
   })
 })

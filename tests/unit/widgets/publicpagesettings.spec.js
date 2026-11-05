@@ -3,6 +3,7 @@ import { createStore } from 'vuex'
 
 import i18n, { loadLocaleMessages } from '@/lib/i18n'
 import lang, { languages } from '@/lib/lang'
+import pickedLocale from '@/lib/picked-locale'
 import { localeLoaders } from '@/locales'
 
 import PublicPageSettings from '@/components/widgets/PublicPageSettings.vue'
@@ -113,6 +114,16 @@ describe('widgets/PublicPageSettings', () => {
 
       expect(errorHandler.mock.calls[0][0]).toBe(failure)
       expect(wrapper.find('select').element.value).toBe('en_US')
+    })
+
+    test('keeps the language picked for the login', async () => {
+      await loadLocaleMessages('fr')
+      wrapper = mountSettings()
+
+      await wrapper.find('select').setValue('fr_FR')
+      await flushPromises()
+
+      expect(pickedLocale.get()).toBe('fr_FR')
     })
   })
 

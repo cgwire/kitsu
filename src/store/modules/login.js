@@ -10,6 +10,7 @@ import {
   USER_LOGOUT
 } from '@/store/mutation-types'
 import auth from '@/lib/auth'
+import pickedLocale from '@/lib/picked-locale'
 import { coerceTwoFactorPayload } from '@/lib/webauthn'
 
 const initialState = {
@@ -76,6 +77,7 @@ const actions = {
     try {
       await auth.logout()
     } finally {
+      pickedLocale.clear()
       commit(RESET_ALL)
       reloadWhenOnline(dispatch)
     }
@@ -86,6 +88,7 @@ const actions = {
   // network is down.
   logoutLocal({ commit, dispatch }) {
     this.$socket.disconnect()
+    pickedLocale.clear()
     commit(USER_LOGOUT)
     commit(RESET_ALL)
     reloadWhenOnline(dispatch)

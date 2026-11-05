@@ -19,6 +19,7 @@ import 'moment/locale/zh-cn'
 import 'moment/locale/zh-tw'
 
 import i18n, { loadLocaleMessages } from '@/lib/i18n'
+import pickedLocale from '@/lib/picked-locale'
 import localPreferences from '@/lib/preferences'
 
 // The dates sent to the API are formatted with moment, and Zou rejects the
@@ -136,18 +137,20 @@ const applyLocale = async locale => {
   }
 }
 
+/**
+ * Set the locale for the application (vue-i18n + moment.js) and remember it
+ * for the pages shown before the user is known. Translation chunks load on
+ * demand, so the vue-i18n locale flips once the messages are registered;
+ * the returned promise resolves at that point.
+ * @param {string} locale
+ */
+const setLocale = locale => {
+  if (locale) localPreferences.setPreference(LOCALE_PREFERENCE, locale)
+  return applyLocale(locale)
+}
+
 export default {
-  /**
-   * Set the locale for the application (vue-i18n + moment.js) and remember it
-   * for the pages shown before the user is known. Translation chunks load on
-   * demand, so the vue-i18n locale flips once the messages are registered;
-   * the returned promise resolves at that point.
-   * @param {string} locale
-   */
-  setLocale(locale) {
-    if (locale) localPreferences.setPreference(LOCALE_PREFERENCE, locale)
-    return applyLocale(locale)
-  },
+  setLocale,
 
   /**
    * Start in the last language used in this browser, else in the first of its
@@ -177,5 +180,26 @@ export default {
     if (!locale) return
     localPreferences.setPreference(STUDIO_LOCALE_PREFERENCE, locale)
     if (!getVisitorLocale()) await applyLocale(locale)
+  },
+
+  /**
+   * Set the locale a visitor picked by hand, which waits for the login to
+   * reach the profile. A failed chunk cancels it: the login must not write a
+   * language the page went back from.
+   * @param {string} locale
+   */
+  async pickLocale(locale) {
+    const previousPick = pickedLocale.get()
+    pickedLocale.set(locale)
+    try {
+      await setLocale(locale)
+    } catch (err) {
+      if (pickedLocale.get() === locale) pickedLocale.set(previousPick)
+      throw err
+    }
+  },
+
+  isSameLanguage(locale, otherLocale) {
+    return parseLocale(locale).language === parseLocale(otherLocale).language
   }
 }

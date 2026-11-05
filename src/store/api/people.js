@@ -125,6 +125,10 @@ export default {
     return client.pput(`/api/data/persons/${person.id}`, data)
   },
 
+  updatePersonLocale(personId, locale) {
+    return client.pput(`/api/data/persons/${personId}`, { locale })
+  },
+
   deletePerson(person) {
     return client.pdel(`/api/data/persons/${person.id}?force=true`)
   },

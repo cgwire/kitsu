@@ -198,6 +198,17 @@ describe('store/api endpoints', () => {
     })
   })
 
+  // The rest of the profile stays as it is: updatePerson would send false for
+  // every notification left out.
+  describe('people updatePersonLocale', () => {
+    test('sends the language alone', () => {
+      peopleApi.updatePersonLocale('person-1', 'fr_FR')
+      expect(client.pput).toHaveBeenCalledWith('/api/data/persons/person-1', {
+        locale: 'fr_FR'
+      })
+    })
+  })
+
   // The end field of the day-off form can be cleared: the day off then ends
   // on its start day
   describe('people day offs', () => {

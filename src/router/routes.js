@@ -4,6 +4,7 @@ import auth from '@/lib/auth'
 import errors from '@/lib/errors'
 import init from '@/lib/init'
 import lang from '@/lib/lang'
+import pickedLocale from '@/lib/picked-locale'
 import sentry from '@/lib/sentry'
 import timezone from '@/lib/timezone'
 
@@ -92,6 +93,31 @@ const Timesheets = () => import('@/components/pages/Timesheets.vue')
 const Todos = () => import('@/components/pages/Todos.vue')
 const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 
+// A language picked before login is a choice for the account, made once. It
+// only waits for the end of a 2FA setup, as Zou refuses it to such a session:
+// kept any longer, it would land in the next profile of the tab, or over a
+// language set later in the profile. Zou refuses it to a preview account for
+// good, as any other write.
+const savePickedLocale = async () => {
+  const locale = pickedLocale.get()
+  if (!locale) return
+  const { user } = userStore.state
+  if (!user.preview_project_id && !lang.isSameLanguage(locale, user.locale)) {
+    try {
+      await store.dispatch('saveUserLocale', locale)
+    } catch (err) {
+      if (err.body?.two_factor_authentication_required) return
+      errors.logRequestFailure(err)
+    }
+  }
+  pickedLocale.clear()
+}
+
+const applyUserLocale = async () => {
+  await savePickedLocale()
+  lang.setLocale(userStore.state.user.locale)
+}
+
 // The route state still holds the previous page during a navigation: the
 // role is read on the target one.
 const isTargetClient = to =>
@@ -169,7 +195,7 @@ export const routes = [
       if (ssoRedirect) return ssoRedirect
 
       timezone.setTimezone()
-      lang.setLocale(userStore.state.user.locale)
+      await applyUserLocale()
       sentry.setContext(peopleStore.state.organisation, userStore.state.user)
 
       if (store.state.productions.openProductions.length === 0) {
@@ -202,7 +228,7 @@ export const routes = [
       if (redirect) return redirect
 
       timezone.setTimezone()
-      lang.setLocale(userStore.state.user.locale)
+      await applyUserLocale()
       sentry.setContext(peopleStore.state.organisation, userStore.state.user)
 
       if (taskTypeStore.state.taskTypes.length === 0) {
@@ -1017,7 +1043,7 @@ export const routes = [
     beforeEnter: async (to, from) => {
       const redirect = await auth.requireAuth(to, from)
       if (redirect) return redirect
-      lang.setLocale(userStore.state.user.locale)
+      await applyUserLocale()
       store.commit('DATA_LOADING_END')
     }
   },

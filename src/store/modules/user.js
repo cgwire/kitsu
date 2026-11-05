@@ -286,6 +286,11 @@ const getters = {
 }
 
 const actions = {
+  async saveUserLocale({ commit, state }, locale) {
+    await peopleApi.updatePersonLocale(state.user.id, locale)
+    commit(USER_SAVE_PROFILE_SUCCESS, { id: state.user.id, locale })
+  },
+
   saveProfile({ commit, state }, payload) {
     commit(USER_SAVE_PROFILE_LOADING)
     return peopleApi

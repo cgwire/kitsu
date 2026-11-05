@@ -62,7 +62,7 @@ const isDarkTheme = computed(() => store.getters.isDarkTheme)
 // Functions
 // --------------------------------------------------------------------------
 
-const onLanguageChange = event => lang.setLocale(event.target.value)
+const onLanguageChange = event => lang.pickLocale(event.target.value)
 
 const toggleDarkTheme = () => store.dispatch('toggleDarkTheme')
 </script>

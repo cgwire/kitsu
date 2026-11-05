@@ -4,6 +4,7 @@ import moment from 'moment-timezone'
 import { vi } from 'vitest'
 
 import lang, { languages, localeCode } from '@/lib/lang'
+import pickedLocale from '@/lib/picked-locale'
 import timezone from '@/lib/timezone'
 
 import i18n from '@/lib/i18n'
@@ -239,6 +240,52 @@ describe('startup language', () => {
     })
 
     await expect(lang.applyStartupLocale()).rejects.toBe(failure)
+  })
+})
+
+describe('language picked before login', () => {
+  afterEach(async () => {
+    sessionStorage.clear()
+    await lang.setLocale('en_US')
+    localStorage.removeItem('locale')
+  })
+
+  test('applies the language and keeps it for the login', async () => {
+    await lang.pickLocale('fr_FR')
+
+    expect(i18n.global.locale.value).toBe('fr')
+    expect(localStorage.getItem('locale')).toBe('fr_FR')
+    expect(pickedLocale.get()).toBe('fr_FR')
+  })
+
+  // The tab that picked it logs in. Another one, or a later visit on a shared
+  // workstation, must not write it to a profile.
+  test('keeps it to this tab', async () => {
+    await lang.pickLocale('fr_FR')
+    expect(sessionStorage.getItem('picked-locale')).toBe('fr_FR')
+    expect(localStorage.getItem('picked-locale')).toBeNull()
+  })
+
+  test('applying a language is not picking it', async () => {
+    await lang.setLocale('fr_FR')
+    expect(pickedLocale.get()).toBeNull()
+  })
+
+  test('forgets it once cleared', async () => {
+    await lang.pickLocale('fr_FR')
+    pickedLocale.clear()
+    expect(pickedLocale.get()).toBeNull()
+  })
+
+  test.each([
+    ['fr_FR', 'fr_FR', true],
+    ['fr_FR', 'fr_CA', true],
+    ['en_US', 'en_GB', true],
+    ['zh_Hans_CN', 'zh_Hant_TW', false],
+    ['fr_FR', 'de_DE', false],
+    ['fr_FR', null, false]
+  ])('compares %s and %s', (locale, otherLocale, expected) => {
+    expect(lang.isSameLanguage(locale, otherLocale)).toBe(expected)
   })
 })
 

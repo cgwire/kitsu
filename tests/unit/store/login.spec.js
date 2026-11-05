@@ -8,6 +8,7 @@ vi.mock('@/lib/auth', () => ({
 }))
 
 import auth from '@/lib/auth'
+import pickedLocale from '@/lib/picked-locale'
 import loginStore from '@/store/modules/login'
 
 describe('Login store', () => {
@@ -122,6 +123,42 @@ describe('Login store', () => {
       expect(commit).toHaveBeenCalledWith('USER_LOGOUT')
       expect(commit).toHaveBeenCalledWith('RESET_ALL')
       expect(page.location.reload).toHaveBeenCalled()
+    })
+
+    // It would land in the next profile of the tab.
+    describe('language picked before login', () => {
+      beforeEach(() => {
+        pickedLocale.set('fr_FR')
+      })
+
+      afterEach(() => {
+        pickedLocale.clear()
+      })
+
+      test('goes with the logout', async () => {
+        auth.logout.mockResolvedValue()
+
+        await loginStore.actions.logout.call(store, { commit: vi.fn() })
+
+        expect(pickedLocale.get()).toBeNull()
+      })
+
+      test('goes even when the logout request fails', async () => {
+        const failure = new Error('Request has been terminated')
+        auth.logout.mockRejectedValue(failure)
+
+        await expect(
+          loginStore.actions.logout.call(store, { commit: vi.fn() })
+        ).rejects.toBe(failure)
+
+        expect(pickedLocale.get()).toBeNull()
+      })
+
+      test('goes with the logout of another tab', () => {
+        loginStore.actions.logoutLocal.call(store, { commit: vi.fn() })
+
+        expect(pickedLocale.get()).toBeNull()
+      })
     })
 
     // Offline, the reload would show the error page of the browser, and the
