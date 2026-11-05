@@ -2316,7 +2316,7 @@ describe('Assets store, list workflow', () => {
 
       expect(rootActions.deleteAllTasks.mock.calls.map(([, p]) => p)).toEqual([
         { ...payload, taskIds: ['t1'] },
-        { ...payload, taskIds: [] }
+        { ...payload, taskIds: undefined }
       ])
     })
 

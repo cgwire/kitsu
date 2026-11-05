@@ -858,7 +858,7 @@ const actions = {
   },
 
   deleteAllAssetTasks({ dispatch }, { projectId, taskTypeId, selectionOnly }) {
-    let taskIds = []
+    let taskIds
     if (selectionOnly) {
       taskIds = cache.result
         .filter(asset => asset.validations.get(taskTypeId))

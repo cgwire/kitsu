@@ -1161,7 +1161,7 @@ describe('Episodes store, through a store', () => {
 
     expect(deleteAllTasks.mock.calls.map(([, payload]) => payload)).toEqual([
       { projectId: 'p1', taskTypeId: 'tt-1', taskIds: ['t1'] },
-      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: [] }
+      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: undefined }
     ])
   })
 

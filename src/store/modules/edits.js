@@ -569,7 +569,7 @@ const actions = {
   },
 
   deleteAllEditTasks({ dispatch }, { projectId, taskTypeId, selectionOnly }) {
-    let taskIds = []
+    let taskIds
     if (selectionOnly) {
       taskIds = cache.result
         .filter(edit => edit.validations.get(taskTypeId))

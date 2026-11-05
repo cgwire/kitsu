@@ -815,7 +815,7 @@ const actions = {
   },
 
   deleteAllShotTasks({ dispatch }, { projectId, taskTypeId, selectionOnly }) {
-    let taskIds = []
+    let taskIds
     if (selectionOnly) {
       taskIds = cache.result
         .filter(shot => shot.validations.get(taskTypeId))

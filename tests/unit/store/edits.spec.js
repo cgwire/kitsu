@@ -1684,7 +1684,7 @@ describe('Edits store, through a store', () => {
         rootActions.deleteAllTasks.mock.calls.map(([, args]) => args)
       ).toEqual([
         { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: ['t1'] },
-        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: [] }
+        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: undefined }
       ])
     })
 
