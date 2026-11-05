@@ -14,6 +14,7 @@ vi.mock('vue-router', () => ({
 import '@/lib/auth'
 import errors from '@/lib/errors'
 import editStore from '@/store/modules/edits'
+import episodeStore from '@/store/modules/episodes'
 import playlistStore from '@/store/modules/playlists'
 import sequenceStore from '@/store/modules/sequences'
 import shotStore from '@/store/modules/shots'
@@ -65,6 +66,12 @@ const mountPage = async ({
     loadPlaylistShareLinks: vi.fn(() => Promise.resolve([])),
     loadPlaylists: resolved(),
     loadShots: resolved(),
+    resetSequences: vi.fn(),
+    setAssetSearch: vi.fn(),
+    setEditSearch: vi.fn(),
+    setEpisodeSearch: vi.fn(),
+    setSequenceSearch: vi.fn(),
+    setShotSearch: vi.fn(),
     ...actions
   }
   const fromState = name => state => state[name]
@@ -93,7 +100,9 @@ const mountPage = async ({
       displayedSequences: () => [],
       displayedShots: () => [],
       displayedShotsBySequence: () => [],
+      editSearchText: () => '',
       editsLoadingKey: fromState('editsLoadingKey'),
+      episodeSearchText: () => '',
       isAssetsLoading: () => false,
       isCurrentUserClient: () => false,
       isCurrentUserProductionManager: () => true,
@@ -106,6 +115,7 @@ const mountPage = async ({
       playlists: fromState('playlists'),
       playlistsPath: () => ({ name: 'playlists' }),
       productionTaskTypes: () => [],
+      sequenceSearchText: () => '',
       shotSearchText: () => '',
       shotsLoadingKey: fromState('shotsLoadingKey'),
       taskMap: () => new Map(),
@@ -128,7 +138,8 @@ const mountPage = async ({
     global: {
       plugins: [store],
       config: { globalProperties: { $socket: socket } },
-      stubs: { RouterLink: true, ...stubs }
+      directives: { focus: () => {} },
+      stubs: { RouterLink: true, SearchField: false, ...stubs }
     }
   })
   mountedWrapper = wrapper
@@ -806,15 +817,211 @@ describe('Playlist page, addition buttons', () => {
   })
 })
 
+describe('Playlist page, search of the addition panel', () => {
+  const searchText = wrapper => wrapper.find('.search-input').element.value
+  const searches = {
+    assetSearchText: () => 'asset search',
+    editSearchText: () => 'edit search',
+    episodeSearchText: () => 'episode search',
+    sequenceSearchText: () => 'sequence search',
+    shotSearchText: () => 'shot search'
+  }
+  const addSelectionButton = wrapper =>
+    wrapper
+      .findAll('button')
+      .find(button => button.text() === 'playlists.add_selection')
+
+  // The field goes with the panel, while the store keeps the text.
+  it.each([
+    ['shot', 'shot search'],
+    ['asset', 'asset search'],
+    ['sequence', 'sequence search'],
+    ['edit', 'edit search'],
+    ['episode', 'episode search']
+  ])('shows the search of the %s entities', async (forEntity, search) => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: forEntity },
+      { getters: searches }
+    )
+    await flushPromises()
+
+    expect(searchText(wrapper)).toBe(search)
+  })
+
+  // A load of a list drops its filter and keeps the text.
+  it.each([
+    ['shot', 'setShotSearch', 'shot search'],
+    ['asset', 'setAssetSearch', 'asset search'],
+    ['sequence', 'setSequenceSearch', 'sequence search'],
+    ['edit', 'setEditSearch', 'edit search'],
+    ['episode', 'setEpisodeSearch', 'episode search']
+  ])(
+    'applies the search of the %s entities again',
+    async (forEntity, action, search) => {
+      const { actions } = await openPlaylist(
+        { for_entity: forEntity },
+        { getters: searches }
+      )
+      await flushPromises()
+
+      expect(actions[action]).toHaveBeenCalledTimes(1)
+      expect(lastPayload(actions[action])).toBe(search)
+    }
+  )
+
+  it('applies no search when the store has none', async () => {
+    const { actions } = await openPlaylist()
+    await flushPromises()
+
+    expect(actions.setShotSearch).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['edit', 'setEditSearch'],
+    ['episode', 'setEpisodeSearch']
+  ])('filters the %s entities with the field', async (forEntity, action) => {
+    const { wrapper, actions } = await openPlaylist({ for_entity: forEntity })
+    await flushPromises()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', 'typed')
+
+    expect(lastPayload(actions[action])).toBe('typed')
+    expect(actions.setShotSearch).not.toHaveBeenCalled()
+  })
+
+  it('offers no selection for the search of another type', async () => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'sequence' },
+      { getters: { shotSearchText: () => 'shot search' } }
+    )
+    await flushPromises()
+
+    expect(addSelectionButton(wrapper)).toBeUndefined()
+  })
+
+  // The panel hides the canceled entities.
+  it.each([
+    ['shot', 'shotSearchText', 'displayedShots'],
+    ['asset', 'assetSearchText', 'displayedAssets'],
+    ['sequence', 'sequenceSearchText', 'displayedSequences'],
+    ['edit', 'editSearchText', 'displayedEdits'],
+    ['episode', 'episodeSearchText', 'displayedEpisodes']
+  ])('adds the %s entities of the search', async (forEntity, search, list) => {
+    const { wrapper, actions } = await openPlaylist(
+      { for_entity: forEntity },
+      {
+        getters: {
+          [list]: () => [
+            { id: 'kept', name: 'Kept' },
+            { id: 'gone', name: 'Gone', canceled: true }
+          ],
+          [search]: () => 'search'
+        },
+        stubs: {
+          PlaylistPlayer: {
+            template: '<div />',
+            methods: { scrollToRight: () => {} }
+          }
+        }
+      }
+    )
+    await flushPromises()
+
+    await addSelectionButton(wrapper).trigger('click')
+    await flushPromises()
+
+    expect(lastPayload(actions.addEntitiesToPlaylist).entityIds).toEqual([
+      'kept'
+    ])
+  })
+
+  it.each([
+    ['shot', 'displayMoreShots'],
+    ['asset', 'displayMoreAssets']
+  ])(
+    'shows one more page of %s entities for a typed search only',
+    async (forEntity, action) => {
+      const { wrapper, actions } = await openPlaylist(
+        { for_entity: forEntity },
+        { getters: searches }
+      )
+      await flushPromises()
+      expect(actions[action]).not.toHaveBeenCalled()
+
+      wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', 'typed')
+
+      expect(actions[action]).toHaveBeenCalledTimes(1)
+    }
+  )
+
+  it('shows one more page for the search of the build filter', async () => {
+    const { wrapper, actions } = await openPlaylist()
+    await flushPromises()
+
+    wrapper
+      .findComponent({ name: 'BuildFilterModal' })
+      .vm.$emit('confirm', 'filter search')
+
+    expect(lastPayload(actions.setShotSearch)).toBe('filter search')
+    expect(actions.displayMoreShots).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the search when the panel opens again', async () => {
+    const { wrapper } = await openPlaylist({}, { getters: searches })
+    await flushPromises()
+
+    await wrapper.find('.addition-header .close-button').trigger('click')
+    expect(wrapper.find('.search-input').exists()).toBe(false)
+    wrapper.findComponent(PlaylistPlayer).vm.$emit('show-add-entities')
+    await flushPromises()
+
+    expect(searchText(wrapper)).toBe('shot search')
+  })
+
+  it('shows the search after a bulk addition that failed', async () => {
+    const failure = new Error('down')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await openPlaylist(
+      {},
+      {
+        getters: searches,
+        actions: {
+          addEntitiesToPlaylist: vi.fn(() => Promise.reject(failure)),
+          getPendingShots: vi.fn(() =>
+            Promise.resolve([{ id: 's9', name: 'SH900' }])
+          )
+        }
+      }
+    )
+    await flushPromises()
+
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'playlists.build_weekly')
+      .trigger('click')
+    await flushPromises()
+
+    expect(searchText(wrapper)).toBe('shot search')
+    expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+})
+
 describe('Playlist page, task status of the entities to add', () => {
   const edit = {
     id: 'e1',
     name: 'Edit',
     validations: new Map([['tt-1', 'task-1']])
   }
+  const episode = { id: 'ep-1', name: 'E01' }
 
-  beforeEach(() => editStore.cache.editMap.set(edit.id, edit))
-  afterEach(() => editStore.cache.editMap.delete(edit.id))
+  beforeEach(() => {
+    editStore.cache.editMap.set(edit.id, edit)
+    episodeStore.cache.episodeMap.set(episode.id, episode)
+  })
+  afterEach(() => {
+    editStore.cache.editMap.delete(edit.id)
+    episodeStore.cache.episodeMap.delete(episode.id)
+  })
 
   it('shows the status of an edit for the task type of the playlist', async () => {
     const { wrapper } = await openPlaylist(
@@ -832,6 +1039,17 @@ describe('Playlist page, task status of the entities to add', () => {
 
     expect(wrapper.find('span[title="Done"]').exists()).toBe(true)
   })
+
+  // The panel lists the episodes of the topbar, loaded without their tasks.
+  it('shows an episode loaded without its tasks', async () => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'episode', task_type_id: 'tt-1' },
+      { state: { displayedEpisodes: [episode] } }
+    )
+    await flushPromises()
+
+    expect(wrapper.find('.addition-shot').text()).toContain('E01')
+  })
 })
 
 describe('Playlist page, displayed playlist', () => {
@@ -843,6 +1061,80 @@ describe('Playlist page, displayed playlist', () => {
     changeSort(wrapper, 'name')
     await flushPromises()
     expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('Playlist page, reorder', () => {
+  const ids = ['s1', 's2', 's3']
+
+  const openEntries = async () => {
+    ids.forEach(id =>
+      shotStore.cache.shotMap.set(id, { id, name: id, sequence_name: 'SQ01' })
+    )
+    const { wrapper } = await openPlaylist(
+      {
+        shots: ids.map((id, index) => ({
+          id,
+          entity_id: id,
+          preview_file_id: `pf-${index + 1}`,
+          preview_files: {}
+        }))
+      },
+      { actions: { changePlaylistOrder: vi.fn(() => Promise.resolve()) } }
+    )
+    await flushPromises()
+    const player = wrapper.findComponent(PlaylistPlayer)
+    return {
+      player,
+      entityIds: () => player.props('entities').map(entity => entity.id)
+    }
+  }
+
+  afterEach(() => ids.forEach(id => shotStore.cache.shotMap.delete(id)))
+
+  // The strip and the saved order move together. The list the page hands
+  // the player has to move too: an addition or a removal hands it back, and
+  // the strip would show the order of the load again. It moves in place: a
+  // new list resets the player, in the whole review room.
+  it('moves the entries it hands the player', async () => {
+    const { player, entityIds } = await openEntries()
+    const entities = player.props('entities')
+    expect(entityIds()).toEqual(['s1', 's2', 's3'])
+
+    // s1 goes right after s2.
+    player.vm.$emit('order-change', {
+      before: { entity_id: 's2', preview_file_id: 'pf-2' },
+      after: { entity_id: 's1', preview_file_id: 'pf-1' }
+    })
+    await flushPromises()
+
+    expect(entityIds()).toEqual(['s2', 's1', 's3'])
+
+    // s3 goes right after s2, to the left.
+    player.vm.$emit('order-change', {
+      before: { entity_id: 's2', preview_file_id: 'pf-2' },
+      after: { entity_id: 's3', preview_file_id: 'pf-3' }
+    })
+    await flushPromises()
+
+    expect(entityIds()).toEqual(['s2', 's3', 's1'])
+    expect(player.props('entities')).toBe(entities)
+  })
+
+  // A missing entry has no position: a splice at -1 would move another one.
+  const known = { entity_id: 's2', preview_file_id: 'pf-2' }
+  const missing = { entity_id: 's9', preview_file_id: 'pf-9' }
+
+  it.each([
+    ['moved', { before: known, after: missing }],
+    ['reference', { before: missing, after: known }]
+  ])('keeps the entries in place when the %s entry is missing', async (_, info) => {
+    const { player, entityIds } = await openEntries()
+
+    player.vm.$emit('order-change', info)
+    await flushPromises()
+
+    expect(entityIds()).toEqual(['s1', 's2', 's3'])
   })
 })
 
@@ -879,6 +1171,806 @@ describe('Playlist page, silent lock', () => {
     onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
 
     expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
+  })
+
+  // The lock lasts as long as the save: the reload of an update received
+  // meanwhile would bring back the order the save replaces.
+  it('ignores the updates until a reorder is saved', async () => {
+    const { fn: changePlaylistOrder, release } = gatedAction()
+    const { wrapper, actions, socket } = await openPlaylist(
+      { shots: [{ id: 's1' }] },
+      {
+        actions: {
+          changePlaylistOrder,
+          refreshPlaylist: vi.fn(() => Promise.resolve({ id: 'pl-1' }))
+        }
+      }
+    )
+    await flushPromises()
+    const onPlaylistUpdate = socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:update'
+    )[1]
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    wrapper.findComponent(PlaylistPlayer).vm.$emit('order-change', {
+      before: { entity_id: 's1', preview_file_id: 'pf-1' },
+      after: { entity_id: 's2', preview_file_id: 'pf-2' }
+    })
+    await vi.advanceTimersByTimeAsync(2100)
+    onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
+
+    expect(actions.refreshPlaylist).not.toHaveBeenCalled()
+
+    release()
+    await vi.advanceTimersByTimeAsync(2100)
+    onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
+
+    expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
+  })
+
+  // On an empty playlist, the store throws before it saves. The error still
+  // goes to the app error handler, which reports it.
+  it('listens to the updates again after a reorder that throws', async () => {
+    const bug = new TypeError('Cannot read properties of undefined')
+    const { wrapper, actions, socket } = await openPlaylist(
+      { shots: [{ id: 's1' }] },
+      {
+        actions: {
+          changePlaylistOrder: vi.fn(() => {
+            throw bug
+          }),
+          refreshPlaylist: vi.fn(() => Promise.resolve({ id: 'pl-1' }))
+        }
+      }
+    )
+    await flushPromises()
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+    const onPlaylistUpdate = socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:update'
+    )[1]
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    wrapper.findComponent(PlaylistPlayer).vm.$emit('order-change', {
+      before: { entity_id: 's1', preview_file_id: 'pf-1' },
+      after: { entity_id: 's2', preview_file_id: 'pf-2' }
+    })
+    await vi.advanceTimersByTimeAsync(2100)
+    onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
+
+    expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
+    expect(errorHandler.mock.calls.map(([error]) => error)).toEqual([bug])
+  })
+})
+
+// An entity dropped from the addition panel on the player: the page adds it,
+// then replays the drop on the player to move the new entry where it was
+// dropped.
+describe('Playlist page, entity dropped on the player', () => {
+  const dropped = { id: 'sh-new', name: 'SH900', sequence_name: 'SQ01' }
+  const drop = () => ({
+    before: { entity_id: 's1', preview_file_id: 'pf-1' },
+    after: { entity_id: 'sh-new', preview_file_id: '' }
+  })
+
+  // Each load answers a new object, as the API does.
+  const openDropTarget = async ({
+    onEntityDropped,
+    loadEntityPreviewFiles = vi.fn(() => Promise.resolve([])),
+    getters = {}
+  }) => {
+    shotStore.cache.shotMap.set(dropped.id, dropped)
+    const stored = new Map([
+      ['pl-1', { id: 'pl-1', name: 'A', project_id: 'p1', shots: [{ id: 's1' }] }],
+      ['pl-2', { id: 'pl-2', name: 'B', project_id: 'p1', shots: [{ id: 's2' }] }]
+    ])
+    const page = await openPlaylist(stored.get('pl-1'), {
+      state: { playlists: [...stored.values()] },
+      getters: { playlistMap: () => stored, ...getters },
+      actions: {
+        loadEntityPreviewFiles,
+        loadPlaylist: vi.fn((context, { id }) =>
+          Promise.resolve({ ...stored.get(id) })
+        ),
+        pushEntityToPlaylist: vi.fn((context, { entity }) =>
+          Promise.resolve({ ...entity, preview_file_id: 'pf-new' })
+        ),
+        refreshPlaylist: vi.fn(() => Promise.resolve({ id: 'pl-1' }))
+      },
+      stubs: {
+        PlaylistPlayer: {
+          name: 'PlaylistPlayer',
+          template: '<div />',
+          methods: { onEntityDropped, scrollToRight: () => {} }
+        }
+      }
+    })
+    await flushPromises()
+    const dropOnPlayer = () =>
+      page.wrapper
+        .findComponent({ name: 'PlaylistPlayer' })
+        .vm.$emit('new-entity-dropped', drop())
+    return { ...page, dropOnPlayer }
+  }
+
+  afterEach(() => shotStore.cache.shotMap.delete(dropped.id))
+
+  it('moves the new entry where it was dropped', async () => {
+    const onEntityDropped = vi.fn()
+    const { dropOnPlayer } = await openDropTarget({ onEntityDropped })
+
+    dropOnPlayer()
+    await flushPromises()
+
+    expect(onEntityDropped).toHaveBeenCalledWith({
+      before: { entity_id: 's1', preview_file_id: 'pf-1' },
+      after: { entity_id: 'sh-new', preview_file_id: 'pf-new' }
+    })
+  })
+
+  // The strip is no longer the one of the drop: a strip loaded meanwhile may
+  // lack the new entry, and the player would drop it again, on the playlist
+  // shown.
+  it.each([
+    [
+      'another playlist loaded',
+      () =>
+        Object.assign(routeHolder.route, {
+          params: { playlist_id: 'pl-2' },
+          fullPath: '/pl-2'
+        })
+    ],
+    ['a reload of this one ended', wrapper => changeSort(wrapper, 'name')]
+  ])('leaves the drop once %s', async (_, replace) => {
+    const onEntityDropped = vi.fn()
+    const previews = gatedAction()
+    const { wrapper, actions, dropOnPlayer } = await openDropTarget({
+      onEntityDropped,
+      loadEntityPreviewFiles: previews.fn
+    })
+
+    dropOnPlayer()
+    await flushPromises()
+    replace(wrapper)
+    await flushPromises()
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+    previews.release([])
+    await flushPromises()
+
+    expect(onEntityDropped).not.toHaveBeenCalled()
+  })
+
+  // Closing the panel after an addition reloads the playlist: the strip of
+  // the drop is gone, and the page shows an empty playlist until the load
+  // ends.
+  it('leaves the drop once a reload of this one started', async () => {
+    const added = { id: 'sh-added', name: 'SH400', sequence_name: 'SQ01' }
+    const onEntityDropped = vi.fn()
+    const loadEntityPreviewFiles = vi.fn(() => Promise.resolve([]))
+    const { wrapper, actions, dropOnPlayer } = await openDropTarget({
+      onEntityDropped,
+      loadEntityPreviewFiles,
+      getters: { displayedShotsBySequence: () => [[added]] }
+    })
+    wrapper
+      .findComponent({ name: 'PlaylistPlayer' })
+      .vm.$emit('show-add-entities')
+    await nextTick()
+    await wrapper.find('.addition-shot').trigger('click')
+    await flushPromises()
+
+    const releasePreviews = gateNextCall(loadEntityPreviewFiles)
+    dropOnPlayer()
+    await flushPromises()
+    gateNextCall(actions.loadPlaylist)
+    await wrapper.find('.addition-header .close-button').trigger('click')
+    await flushPromises()
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+    releasePreviews([])
+    await flushPromises()
+
+    expect(onEntityDropped).not.toHaveBeenCalled()
+  })
+
+  // The player would not find the entry either and drop it again: the page
+  // retried the addition for as long as it failed.
+  it('leaves the drop when the addition failed', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failure = new Error('Request has been terminated')
+    const onEntityDropped = vi.fn()
+    const { dropOnPlayer } = await openDropTarget({
+      onEntityDropped,
+      loadEntityPreviewFiles: vi.fn(() => Promise.reject(failure))
+    })
+
+    dropOnPlayer()
+    await flushPromises()
+
+    expect(onEntityDropped).not.toHaveBeenCalled()
+    expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+
+  it('listens to the updates again after a replay that throws', async () => {
+    const bug = new TypeError('Cannot read properties of null')
+    const { wrapper, actions, socket, dropOnPlayer } = await openDropTarget({
+      onEntityDropped: () => {
+        throw bug
+      }
+    })
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+    const onPlaylistUpdate = socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:update'
+    )[1]
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    dropOnPlayer()
+    await vi.advanceTimersByTimeAsync(2100)
+    onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
+
+    expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
+    expect(errorHandler.mock.calls.map(([error]) => error)).toEqual([bug])
+  })
+})
+
+// The browser history opens another playlist under an open modal.
+describe('Playlist page, modals and navigation', () => {
+  const stored = new Map([
+    ['pl-1', { id: 'pl-1', name: 'A', project_id: 'p1', shots: [{ id: 's1' }] }],
+    ['pl-2', { id: 'pl-2', name: 'B', project_id: 'p1', shots: [{ id: 's2' }] }]
+  ])
+
+  // Each load answers a new object, as the API does. The edit modal sits in
+  // a teleport, disabled out of full screen.
+  const openFirstPlaylist = async (actions = {}) => {
+    const page = await openPlaylist(stored.get('pl-1'), {
+      state: { playlists: [...stored.values()] },
+      getters: { playlistMap: () => stored },
+      actions: {
+        loadPlaylist: vi.fn((context, { id }) =>
+          Promise.resolve({ ...stored.get(id) })
+        ),
+        editPlaylist: vi.fn((context, { data }) =>
+          Promise.resolve({ ...stored.get(data.id), name: data.name })
+        ),
+        ...actions
+      },
+      stubs: {
+        teleport: false,
+        PlaylistPlayer: {
+          name: 'PlaylistPlayer',
+          props: PlaylistPlayer.props,
+          template: '<div />',
+          methods: { scrollToRight: () => {} }
+        }
+      }
+    })
+    await flushPromises()
+    const player = page.wrapper.findComponent({ name: 'PlaylistPlayer' })
+    const modal = name => page.wrapper.findComponent({ name })
+    return { ...page, player, modal }
+  }
+
+  const editFirstPlaylist = async ({ player, modal }) => {
+    player.vm.$emit('edit-clicked')
+    await nextTick()
+    expect(modal('EditPlaylistModal').props('active')).toBe(true)
+  }
+
+  const openSecondPlaylist = () =>
+    Object.assign(routeHolder.route, {
+      params: { playlist_id: 'pl-2' },
+      fullPath: '/pl-2'
+    })
+
+  const openBuildFilter = async ({ wrapper, modal }) => {
+    wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(
+        button => button.attributes('title') === 'entities.build_filter.title'
+      )
+      .vm.$emit('click')
+    await nextTick()
+    expect(modal('BuildFilterModal').props('active')).toBe(true)
+  }
+
+  it('closes the edit modal when another playlist opens', async () => {
+    const page = await openFirstPlaylist()
+    await editFirstPlaylist(page)
+
+    openSecondPlaylist()
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(false)
+  })
+
+  // Its search field goes with the addition panel, hidden during the load
+  // and once the other playlist shows its entries.
+  it('closes the build filter when another playlist opens', async () => {
+    const page = await openFirstPlaylist()
+    page.player.vm.$emit('show-add-entities')
+    await flushPromises()
+    await openBuildFilter(page)
+    const release = gateNextCall(page.actions.loadPlaylist)
+
+    openSecondPlaylist()
+    await flushPromises()
+    expect(page.modal('BuildFilterModal').props('active')).toBe(false)
+    release({ ...stored.get('pl-2') })
+    await flushPromises()
+
+    expect(page.modal('BuildFilterModal').props('active')).toBe(false)
+  })
+
+  // The history can open a playlist that the list has not loaded: the page
+  // then shows no playlist, without any load.
+  it('closes the build filter when the playlist opened is not in the list', async () => {
+    const page = await openFirstPlaylist()
+    page.player.vm.$emit('show-add-entities')
+    await flushPromises()
+    await openBuildFilter(page)
+
+    Object.assign(routeHolder.route, {
+      params: { playlist_id: 'pl-9' },
+      fullPath: '/pl-9'
+    })
+    await flushPromises()
+
+    expect(page.wrapper.find('.addition-header').exists()).toBe(false)
+    expect(page.modal('BuildFilterModal').props('active')).toBe(false)
+  })
+
+  // The bulk addition reloads the playlist, whose entries close the panel.
+  it('closes the build filter when a bulk addition closes the panel', async () => {
+    const pending = gatedAction()
+    const page = await openFirstPlaylist({ getPendingShots: pending.fn })
+    page.player.vm.$emit('show-add-entities')
+    await flushPromises()
+    await page.wrapper
+      .findAll('button')
+      .find(button => button.text() === 'playlists.build_weekly')
+      .trigger('click')
+    await openBuildFilter(page)
+
+    pending.release([{ id: 's9', name: 'SH900' }])
+    await flushPromises()
+
+    expect(page.wrapper.find('.addition-header').exists()).toBe(false)
+    expect(page.modal('BuildFilterModal').props('active')).toBe(false)
+  })
+
+  // A new playlist does not depend on the playlist shown.
+  it('keeps the creation form open when another playlist opens', async () => {
+    const page = await openFirstPlaylist()
+    await page.wrapper
+      .findAll('button')
+      .find(button => button.text() === 'playlists.new_playlist')
+      .trigger('click')
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(true)
+
+    openSecondPlaylist()
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(true)
+  })
+
+  // The player closes its own modals when a load starts.
+  it('shows the player the load of another playlist', async () => {
+    const page = await openFirstPlaylist()
+    const release = gateNextCall(page.actions.loadPlaylist)
+
+    openSecondPlaylist()
+    await flushPromises()
+    expect(page.player.props('isLoading')).toBe(true)
+
+    release({ ...stored.get('pl-2') })
+    await flushPromises()
+    expect(page.player.props('isLoading')).toBe(false)
+  })
+
+  // The history can open a playlist missing from the list during the load
+  // of another one, which then answers for no playlist shown: the page
+  // keeps the recent playlists instead of the player.
+  it('ignores a load that answers once a playlist missing from the list opened', async () => {
+    const page = await openFirstPlaylist()
+    const release = gateNextCall(page.actions.loadPlaylist)
+    openSecondPlaylist()
+    await flushPromises()
+
+    Object.assign(routeHolder.route, {
+      params: { playlist_id: 'pl-9' },
+      fullPath: '/pl-9'
+    })
+    await flushPromises()
+    release({ ...stored.get('pl-2') })
+    await flushPromises()
+
+    expect(
+      page.wrapper.findComponent({ name: 'PlaylistPlayer' }).exists()
+    ).toBe(false)
+  })
+
+  it('ignores the share links count of a playlist left before it answered', async () => {
+    const loadPlaylistShareLinks = vi.fn((context, id) =>
+      Promise.resolve(id === 'pl-2' ? [{}, {}, {}] : [])
+    )
+    const releaseFirst = gateNextCall(loadPlaylistShareLinks)
+    const page = await openFirstPlaylist({ loadPlaylistShareLinks })
+
+    openSecondPlaylist()
+    await flushPromises()
+    expect(page.player.props('initialShareLinksCount')).toBe(3)
+    releaseFirst([])
+    await flushPromises()
+
+    expect(page.player.props('initialShareLinksCount')).toBe(3)
+  })
+
+  it('shows the answer of an edit', async () => {
+    const page = await openFirstPlaylist()
+    await editFirstPlaylist(page)
+
+    page
+      .modal('EditPlaylistModal')
+      .vm.$emit('confirm', { name: 'A2', for_client: false })
+    await flushPromises()
+
+    expect(page.player.props('playlist')).toMatchObject({
+      id: 'pl-1',
+      name: 'A2'
+    })
+  })
+
+  // The save answers once the other playlist is loaded.
+  it('keeps the answer of an edit to the playlist edited', async () => {
+    const save = gatedAction()
+    const page = await openFirstPlaylist({ editPlaylist: save.fn })
+    await editFirstPlaylist(page)
+    page
+      .modal('EditPlaylistModal')
+      .vm.$emit('confirm', { name: 'A2', for_client: false })
+    await flushPromises()
+
+    openSecondPlaylist()
+    await flushPromises()
+    save.release({ ...stored.get('pl-1'), name: 'A2' })
+    await flushPromises()
+
+    expect(page.player.props('playlist')).toMatchObject({
+      id: 'pl-2',
+      name: 'B'
+    })
+  })
+})
+
+// Closing the panel after an addition reloads the playlist. A reload that
+// runs during an addition can read the playlist before the addition is
+// saved, like a server far away.
+describe('Playlist page, addition during a reload', () => {
+  const shot = (id, name) => ({
+    id,
+    name,
+    sequence_id: 'sq-1',
+    sequence_name: 'SQ01'
+  })
+  const shots = [shot('s1', 'SH100'), shot('s3', 'SH300'), shot('s4', 'SH400')]
+  const entry = id => ({ id, preview_files: {} })
+  const copy = playlist => ({
+    ...playlist,
+    shots: playlist.shots.map(({ id }) => entry(id))
+  })
+
+  // Zou keeps the entries of each playlist, and each load answers what it
+  // keeps at the call. The store adds an entry to the playlist it is given,
+  // then saves that playlist whole.
+  const openWithZou = async (actions = {}) => {
+    shots.forEach(entity => shotStore.cache.shotMap.set(entity.id, entity))
+    const zou = new Map([
+      ['pl-1', { id: 'pl-1', name: 'A', project_id: 'p1', shots: [entry('s1')] }],
+      ['pl-2', { id: 'pl-2', name: 'B', project_id: 'p1', shots: [] }]
+    ])
+    const list = new Map([...zou].map(([id, playlist]) => [id, copy(playlist)]))
+    const page = await openPlaylist(list.get('pl-1'), {
+      state: { playlists: [...list.values()] },
+      getters: {
+        displayedShotsBySequence: () => [shots.slice(1)],
+        playlistMap: () => list
+      },
+      actions: {
+        loadEntityPreviewFiles: vi.fn(() => Promise.resolve([])),
+        loadPlaylist: vi.fn((context, { id }) =>
+          Promise.resolve(copy(zou.get(id)))
+        ),
+        pushEntityToPlaylist: vi.fn((context, { playlist, entity }) => {
+          playlist.shots.push(entry(entity.id))
+          zou.set(playlist.id, copy(playlist))
+          return Promise.resolve({ ...entity, preview_file_id: 'pf-new' })
+        }),
+        loadPlaylistShareLinks: vi.fn((context, id) =>
+          Promise.resolve(id === 'pl-2' ? [{}, {}, {}] : [])
+        ),
+        ...actions
+      },
+      stubs: {
+        PlaylistPlayer: {
+          name: 'PlaylistPlayer',
+          props: ['playlist', 'entities', 'isLoading', 'initialShareLinksCount'],
+          template: '<div />',
+          methods: { onEntityDropped: () => {}, scrollToRight: () => {} }
+        }
+      }
+    })
+    await flushPromises()
+    const player = page.wrapper.findComponent({ name: 'PlaylistPlayer' })
+    player.vm.$emit('show-add-entities')
+    await flushPromises()
+    // What the next whole save of the playlist shown sends.
+    const savedNext = () => player.props('playlist').shots.map(({ id }) => id)
+    const addShot = name =>
+      page.wrapper
+        .findAll('.addition-shot')
+        .find(entity => entity.text().includes(name))
+        .trigger('click')
+    const addSequence = () =>
+      page.wrapper
+        .findAll('button')
+        .find(button => button.text() === 'playlists.add_sequence')
+        .trigger('click')
+    const closePanel = () =>
+      page.wrapper.find('.addition-header .close-button').trigger('click')
+    return { ...page, zou, player, savedNext, addShot, addSequence, closePanel }
+  }
+
+  const openPlaylistOf = id =>
+    Object.assign(routeHolder.route, {
+      params: { playlist_id: id },
+      fullPath: `/${id}`
+    })
+
+  afterEach(() => {
+    shots.forEach(entity => shotStore.cache.shotMap.delete(entity.id))
+  })
+
+  it('adds an entry to the playlist shown without a reload', async () => {
+    const { actions, player, savedNext, addShot } = await openWithZou()
+
+    await addShot('SH300')
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3'])
+    expect(player.props('entities').map(({ id }) => id)).toEqual(['s1', 's3'])
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps an entry added while a reload ran', async () => {
+    const { actions, savedNext, addShot, closePanel } = await openWithZou()
+    const releasePreviews = gateNextCall(actions.loadEntityPreviewFiles)
+    await addShot('SH300')
+
+    await closePanel()
+    await flushPromises()
+    expect(savedNext()).toEqual(['s1'])
+    releasePreviews([])
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3'])
+  })
+
+  it('keeps an entry added before a reload answered', async () => {
+    const page = await openWithZou()
+    const { actions, zou, player, savedNext, addShot, closePanel } = page
+    const releasePreviews = gateNextCall(actions.loadEntityPreviewFiles)
+    await addShot('SH300')
+    const releaseReload = gateNextCall(actions.loadPlaylist)
+    const readAtClose = copy(zou.get('pl-1'))
+
+    await closePanel()
+    releasePreviews([])
+    await flushPromises()
+    releaseReload(readAtClose)
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3'])
+    expect(player.props('isLoading')).toBe(false)
+  })
+
+  // An entity added meanwhile would go to the empty playlist shown during
+  // the reload, or to the playlist the reload replaces.
+  it('hides the entities to add while the playlist reloads', async () => {
+    const page = await openWithZou()
+    const { wrapper, actions, zou, addShot, closePanel } = page
+    await addShot('SH300')
+    await flushPromises()
+    const releaseReload = gateNextCall(actions.loadPlaylist)
+
+    await closePanel()
+    await flushPromises()
+    expect(wrapper.findAll('.addition-shot')).toHaveLength(0)
+    releaseReload(copy(zou.get('pl-1')))
+    await flushPromises()
+
+    expect(wrapper.findAll('.addition-shot')).toHaveLength(0)
+  })
+
+  // Back to the second playlist, then Forward before the bulk addition
+  // ends: the load of the navigation reads the playlist before it.
+  it('keeps the entries added in bulk before a reload answered', async () => {
+    const { actions, zou, player, savedNext, addSequence } = await openWithZou()
+    const releaseBulk = gateNextCall(actions.addEntitiesToPlaylist)
+    await addSequence()
+    openPlaylistOf('pl-2')
+    await flushPromises()
+    const releaseForward = gateNextCall(actions.loadPlaylist)
+    const readAtForward = copy(zou.get('pl-1'))
+    openPlaylistOf('pl-1')
+    await flushPromises()
+
+    zou.get('pl-1').shots.push(entry('s3'), entry('s4'))
+    releaseBulk()
+    await flushPromises()
+    releaseForward(readAtForward)
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3', 's4'])
+    expect(player.props('isLoading')).toBe(false)
+  })
+
+  // The playlist shown lacks the new entries until it loads again: a change
+  // saved meanwhile, such as a removal, would save it without them.
+  it('disables the playlist changes during a bulk addition', async () => {
+    const { wrapper, actions, zou, player, savedNext, addSequence } =
+      await openWithZou()
+    const releaseBulk = gateNextCall(actions.addEntitiesToPlaylist)
+
+    await addSequence()
+    await flushPromises()
+    expect(wrapper.findAll('.addition-shot')).toHaveLength(0)
+    expect(player.props('isLoading')).toBe(true)
+    zou.get('pl-1').shots.push(entry('s3'), entry('s4'))
+    releaseBulk()
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3', 's4'])
+    expect(player.props('isLoading')).toBe(false)
+  })
+
+  it('gives the playlist back after a bulk addition that failed', async () => {
+    const failure = new Error('down')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper, player, addSequence } = await openWithZou({
+      addEntitiesToPlaylist: vi.fn(() => Promise.reject(failure))
+    })
+
+    await addSequence()
+    await flushPromises()
+
+    expect(player.props('isLoading')).toBe(false)
+    expect(wrapper.findAll('.addition-shot')).toHaveLength(2)
+    expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+
+  // Back, then Forward: the second playlist still shows under the address of
+  // the first one, and must stay disabled until that load answers.
+  it('keeps loading a playlist opened again during a bulk addition that failed', async () => {
+    const failure = new Error('down')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { actions, zou, player, addSequence } = await openWithZou()
+    let failBulk
+    actions.addEntitiesToPlaylist.mockImplementationOnce(
+      () =>
+        new Promise((resolve, reject) => {
+          failBulk = reject
+        })
+    )
+    await addSequence()
+    openPlaylistOf('pl-2')
+    await flushPromises()
+    const releaseForward = gateNextCall(actions.loadPlaylist)
+    openPlaylistOf('pl-1')
+    await flushPromises()
+
+    failBulk(failure)
+    await flushPromises()
+    expect(player.props('playlist').id).toBe('pl-2')
+    expect(player.props('isLoading')).toBe(true)
+    releaseForward(copy(zou.get('pl-1')))
+    await flushPromises()
+
+    expect(player.props('playlist').id).toBe('pl-1')
+    expect(player.props('isLoading')).toBe(false)
+    expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+
+  // The playlist shown lacks the new entries until that reload answers: an
+  // entity added meanwhile would save it without them.
+  it('hides the entities to add while a bulk addition reloads the playlist', async () => {
+    const { wrapper, actions, zou, player, savedNext, addSequence } =
+      await openWithZou()
+    const releaseReload = gateNextCall(actions.loadPlaylist)
+
+    await addSequence()
+    await flushPromises()
+    expect(wrapper.findAll('.addition-shot')).toHaveLength(0)
+    expect(player.props('isLoading')).toBe(true)
+    zou.get('pl-1').shots.push(entry('s3'), entry('s4'))
+    releaseReload(copy(zou.get('pl-1')))
+    await flushPromises()
+
+    expect(savedNext()).toEqual(['s1', 's3', 's4'])
+    expect(player.props('isLoading')).toBe(false)
+  })
+
+  // The store saves nothing for an entity already in the playlist without a
+  // preview of its own.
+  it('reloads nothing after an addition that saved nothing', async () => {
+    const { actions, addShot, closePanel } = await openWithZou({
+      pushEntityToPlaylist: vi.fn(() => Promise.resolve(null))
+    })
+    const releasePreviews = gateNextCall(actions.loadEntityPreviewFiles)
+    await addShot('SH300')
+
+    await closePanel()
+    await flushPromises()
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+    releasePreviews([])
+    await flushPromises()
+
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+  })
+
+  // Back to the second playlist, then Forward before the bulk addition
+  // ends: its load replaces the one of the navigation.
+  it('shows the share links of the playlist loaded after a bulk addition', async () => {
+    const { actions, zou, player, addSequence } = await openWithZou()
+    const releaseBulk = gateNextCall(actions.addEntitiesToPlaylist)
+    await addSequence()
+    openPlaylistOf('pl-2')
+    await flushPromises()
+    expect(player.props('initialShareLinksCount')).toBe(3)
+    const releaseForward = gateNextCall(actions.loadPlaylist)
+    openPlaylistOf('pl-1')
+    await flushPromises()
+
+    zou.get('pl-1').shots.push(entry('s3'), entry('s4'))
+    releaseBulk(copy(zou.get('pl-1')))
+    await flushPromises()
+    releaseForward(copy(zou.get('pl-1')))
+    await flushPromises()
+
+    expect(player.props('playlist').id).toBe('pl-1')
+    expect(player.props('initialShareLinksCount')).toBe(0)
+  })
+
+  it('adds nothing to another playlist opened during an addition', async () => {
+    const { actions, zou, savedNext, addShot } = await openWithZou()
+    const releasePreviews = gateNextCall(actions.loadEntityPreviewFiles)
+    await addShot('SH300')
+
+    openPlaylistOf('pl-2')
+    await flushPromises()
+    releasePreviews([])
+    await flushPromises()
+
+    expect(savedNext()).toEqual([])
+    expect(zou.get('pl-1').shots.map(({ id }) => id)).toEqual(['s1', 's3'])
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+  })
+
+  // A reload of the playlist left would never show, and keep the player
+  // loading.
+  it('shows another playlist opened during a bulk addition', async () => {
+    const { actions, player, addSequence } = await openWithZou()
+    const releaseBulk = gateNextCall(actions.addEntitiesToPlaylist)
+    await addSequence()
+    openPlaylistOf('pl-2')
+    await flushPromises()
+
+    releaseBulk()
+    await flushPromises()
+
+    expect(player.props('playlist').id).toBe('pl-2')
+    expect(player.props('isLoading')).toBe(false)
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
   })
 })
 

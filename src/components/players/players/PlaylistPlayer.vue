@@ -80,12 +80,15 @@
         @leave-room="leaveRoom"
         v-if="isValidRoomId(playlist) && !isFullMode"
       />
+      <!-- During a load, the playlist is still the one shown before, or an
+           empty one: these buttons would act on it. -->
       <button-simple
         class="playlist-button topbar-button flexrow-item full-button"
         icon="bell"
         :text="$t('playlists.notify_clients')"
         @click="onNotifyClientsClicked"
-        v-if="!isLoading && isCurrentUserManager && playlist.for_client"
+        :disabled="isLoading"
+        v-if="isCurrentUserManager && playlist.for_client"
       />
       <button-simple
         class="playlist-button topbar-button flexrow-item full-button"
@@ -93,7 +96,8 @@
         icon="link"
         :text="$t('playlists.share')"
         @click="modals.share = true"
-        v-if="!isLoading && isCurrentUserManager"
+        :disabled="isLoading"
+        v-if="isCurrentUserManager"
       />
 
       <template v-if="isAllowToEdit">
@@ -102,20 +106,22 @@
           icon="plus"
           :text="addEntitiesText"
           @click="onAddEntitiesClicked"
-          :active="isAddingEntity || isFullMode"
-          v-if="!isLoading"
+          :active="!isLoading && (isAddingEntity || isFullMode)"
+          :disabled="isLoading"
         />
         <button-simple
           @click="$emit('edit-clicked')"
           class="edit-button playlist-button flexrow-item"
           :title="$t('playlists.actions.edit')"
           icon="edit"
+          :disabled="isLoading"
         />
         <button-simple
           @click="showDeleteModal"
           class="delete-button playlist-button flexrow-item"
           :title="$t('playlists.actions.delete')"
           icon="trash"
+          :disabled="isLoading"
         />
       </template>
     </div>
@@ -636,6 +642,7 @@
             :title="$t('playlists.actions.change_task_type')"
             icon="check"
             @click="showTaskTypeModal"
+            :disabled="isLoading"
             v-if="!tempMode && !isFullMode && !isCurrentUserClient"
           />
         </template>
@@ -787,9 +794,7 @@
             :class="{
               'dl-button': true,
               'mp4-button': true,
-              disabled:
-                !(isCurrentUserManager || isCurrentUserSupervisor) ||
-                isJobRunning,
+              disabled: isBuildDisabled,
               hidden: isDlButtonsHidden
             }"
             @click="onBuildClicked"
@@ -800,9 +805,7 @@
             :class="{
               'dl-button': true,
               'mp4-2-button': true,
-              disabled:
-                !(isCurrentUserManager || isCurrentUserSupervisor) ||
-                isJobRunning,
+              disabled: isBuildDisabled,
               hidden: isDlButtonsHidden
             }"
             @click="onBuildFullClicked"
@@ -858,6 +861,7 @@
           class="playlist-button"
           :title="$t('playlists.actions.download')"
           icon="download"
+          :disabled="isLoading"
           @click="toggleDlButtons"
           v-if="!isCurrentUserArtist && !isCurrentUserClient"
         />
@@ -1667,6 +1671,14 @@ const isJobRunning = computed(
       .length !== 0
 )
 
+// During a load, the footer still belongs to the playlist shown before.
+const isBuildDisabled = computed(
+  () =>
+    !(isCurrentUserManager.value || isCurrentUserSupervisor.value) ||
+    isJobRunning.value ||
+    props.isLoading
+)
+
 const csvDlPath = computed(
   () => `/api/export/csv/playlists/${props.playlist?.id}`
 )
@@ -2130,6 +2142,12 @@ const showDeleteModal = () => {
 
 const hideDeleteModal = () => {
   modals.value.delete = false
+}
+
+const closeModals = () => {
+  Object.keys(modals.value).forEach(modal => {
+    modals.value[modal] = false
+  })
 }
 
 const showTaskTypeModal = () => {
@@ -4146,44 +4164,34 @@ const onEntityDropped = info => {
   }
 }
 
-// Read the reorder payload BEFORE moving: moveSelectedEntity empties
-// entityList synchronously (restored on nextTick), so any index read
-// after the call lands on an empty array.
+const toOrderEntry = entity => ({
+  entity_id: entity.id,
+  preview_file_id: entity.preview_file_id
+})
+
+// The page saves a move by putting the `after` entry right after the
+// `before` one, which cannot take the last entry to the start. The shortcut
+// stops at both ends instead of wrapping around, the first entry too, so
+// that both directions behave alike. During a load, the entries are still
+// those of the playlist shown before.
 const moveSelectedEntityToLeft = () => {
-  if (entityList.value.length < 2) return
-  const toMoveIndex = playingEntityIndex.value
-  const targetIndex = previousEntityIndex.value
-  const entityToMove = currentEntity.value
-  const info = {
-    before: {
-      entity_id: entityList.value[targetIndex].id,
-      preview_file_id: entityList.value[targetIndex].preview_file_id
-    },
-    after: {
-      entity_id: entityList.value[toMoveIndex].id,
-      preview_file_id: entityList.value[toMoveIndex].preview_file_id
-    }
-  }
-  moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
+  const index = playingEntityIndex.value
+  const previous = entityList.value[index - 1]
+  const played = entityList.value[index]
+  if (props.isLoading || !previous || !played) return
+  // The previous entry goes right after the one played.
+  const info = { before: toOrderEntry(played), after: toOrderEntry(previous) }
+  moveSelectedEntity(played, index, index - 1)
   emit('order-change', info)
 }
 
 const moveSelectedEntityToRight = () => {
-  if (entityList.value.length < 2) return
-  const toMoveIndex = playingEntityIndex.value
-  const targetIndex = nextEntityIndex.value
-  const entityToMove = currentEntity.value
-  const info = {
-    before: {
-      entity_id: entityList.value[toMoveIndex].id,
-      preview_file_id: entityList.value[toMoveIndex].preview_file_id
-    },
-    after: {
-      entity_id: entityList.value[targetIndex].id,
-      preview_file_id: entityList.value[targetIndex].preview_file_id
-    }
-  }
-  moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
+  const index = playingEntityIndex.value
+  const played = entityList.value[index]
+  const next = entityList.value[index + 1]
+  if (props.isLoading || !played || !next) return
+  const info = { before: toOrderEntry(next), after: toOrderEntry(played) }
+  moveSelectedEntity(played, index, index + 1)
   emit('order-change', info)
 }
 
@@ -4349,11 +4357,7 @@ const onBuildClicked = () => runBuild(false)
 const onBuildFullClicked = () => runBuild(true)
 
 const runBuild = (full = false) => {
-  if (
-    (isCurrentUserManager.value || isCurrentUserSupervisor.value) &&
-    !isJobRunning.value &&
-    !isBuildLaunched.value
-  ) {
+  if (!isBuildDisabled.value && !isBuildLaunched.value) {
     isBuildLaunched.value = true
     store
       .dispatch('runPlaylistBuild', { playlist: props.playlist, full })
@@ -5025,7 +5029,14 @@ watch(framesSeenOfPicture, () => {
 watch(
   () => props.isLoading,
   () => {
-    if (!props.isLoading) resetHeight()
+    // The download menu and the modals belong to the playlist shown before
+    // the load.
+    if (props.isLoading) {
+      isDlButtonsHidden.value = true
+      closeModals()
+    } else {
+      resetHeight()
+    }
   }
 )
 

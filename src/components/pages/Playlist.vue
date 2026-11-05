@@ -327,7 +327,9 @@
         <div
           class="addition-section"
           v-if="
-            (isCurrentUserManager || isCurrentUserSupervisor) && isAddingEntity
+            (isCurrentUserManager || isCurrentUserSupervisor) &&
+            isAddingEntity &&
+            !loading.playlist
           "
           @scroll.passive="onBodyScroll"
         >
@@ -633,6 +635,7 @@ let isSilent = false
 let isSilentMore = false
 let isUnmounted = false
 let page = 1
+let playlistLoadCount = 0
 let servedScope = null
 let silentOperationCount = 0
 
@@ -654,7 +657,9 @@ const displayedShots = computed(() => store.getters.displayedShots)
 const displayedShotsBySequence = computed(
   () => store.getters.displayedShotsBySequence
 )
+const editSearchText = computed(() => store.getters.editSearchText)
 const editsLoadingKey = computed(() => store.getters.editsLoadingKey)
+const episodeSearchText = computed(() => store.getters.episodeSearchText)
 const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
@@ -671,6 +676,7 @@ const playlistMap = computed(() => store.getters.playlistMap)
 const playlists = computed(() => store.getters.playlists)
 const playlistsPath = computed(() => store.getters.playlistsPath)
 const productionTaskTypes = computed(() => store.getters.productionTaskTypes)
+const sequenceSearchText = computed(() => store.getters.sequenceSearchText)
 const shotSearchText = computed(() => store.getters.shotSearchText)
 const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
 const taskMap = computed(() => store.getters.taskMap)
@@ -729,11 +735,15 @@ const flatAdditionEntities = computed(() => {
   return entities?.filter(entity => !entity.canceled)
 })
 
-const isAddSearchVisible = computed(
-  () =>
-    (isAssetPlaylist.value && assetSearchText.value) ||
-    (!isAssetPlaylist.value && shotSearchText.value)
-)
+const additionSearchText = computed(() => {
+  if (isAssetPlaylist.value) return assetSearchText.value
+  if (isSequencePlaylist.value) return sequenceSearchText.value
+  if (isEditPlaylist.value) return editSearchText.value
+  if (isEpisodePlaylist.value) return episodeSearchText.value
+  return shotSearchText.value
+})
+
+const isAddSearchVisible = computed(() => Boolean(additionSearchText.value))
 
 const addEntitiesText = computed(() => {
   if (isAssetPlaylist.value) return t('playlists.add_assets')
@@ -836,7 +846,7 @@ const playlistElementStyle = playlist => {
 
 const getTaskStatus = entity => {
   if (!getCachedEntity(entity.id)) return {}
-  const taskId = entity.validations.get(currentPlaylist.value.task_type_id)
+  const taskId = entity.validations?.get(currentPlaylist.value.task_type_id)
   const task = taskMap.value.get(taskId)
   return task ? taskStatusMap.value.get(task.task_status_id) : {}
 }
@@ -918,11 +928,16 @@ const loadEpisodesData = async () => {
 
 const loadShareLinksCount = async playlistId => {
   if (!isCurrentUserManager.value || !playlistId) return
+  let count
   try {
     const links = await store.dispatch('loadPlaylistShareLinks', playlistId)
-    currentShareLinksCount.value = links.length
+    count = links.length
   } catch {
-    currentShareLinksCount.value = 0
+    count = 0
+  }
+  // Another playlist may show by then, with a count of its own.
+  if (currentPlaylist.value.id === playlistId) {
+    currentShareLinksCount.value = count
   }
 }
 
@@ -1094,18 +1109,27 @@ const convertEntityToPlaylistFormat = entityInfo => {
   return playlistEntity
 }
 
+// Loads the playlist shown and shows the answer with its share links count,
+// unless another playlist opened or a later load of this one started
+// meanwhile. A load can answer after a later one, with an older state.
+const showLoadedPlaylist = async playlist => {
+  loading.playlist = true
+  const load = ++playlistLoadCount
+  const loadedPlaylist = await store.dispatch('loadPlaylist', playlist)
+  if (load !== playlistLoadCount || route.params.playlist_id !== playlist.id) {
+    return null
+  }
+  currentPlaylist.value = loadedPlaylist
+  rebuildCurrentEntities()
+  loading.playlist = false
+  loadShareLinksCount(loadedPlaylist.id)
+  return loadedPlaylist
+}
+
 const setCurrentPlaylist = async () => {
-  const playlistId = route.params.playlist_id
-  const playlist = playlistMap.value.get(playlistId)
+  const playlist = playlistMap.value.get(route.params.playlist_id)
   if (playlist) {
-    loading.playlist = true
-    const loadedPlaylist = await store.dispatch('loadPlaylist', playlist)
-    // Another playlist opened during the load: its own load shows it.
-    if (route.params.playlist_id !== playlistId) return
-    currentPlaylist.value = loadedPlaylist
-    rebuildCurrentEntities()
-    loading.playlist = false
-    loadShareLinksCount(loadedPlaylist.id)
+    await showLoadedPlaylist(playlist)
   } else {
     loading.playlist = false
     currentPlaylist.value = { name: '' }
@@ -1139,7 +1163,13 @@ const addEntity = async (entity, playlist) => {
 }
 
 const addToPlayerPlaylist = (entity, playlist) => {
-  if (playlist.id !== currentPlaylist.value.id) return
+  if (!entity) return
+  if (playlist !== currentPlaylist.value) {
+    // The playlist shown was replaced during the addition. A reload of this
+    // one may have read it before the addition was saved: load it again.
+    if (route.params.playlist_id === playlist.id) setCurrentPlaylist()
+    return
+  }
   const playlistEntity = convertEntityToPlaylistFormat(entity)
   if (!playlistEntity) return
   currentEntitiesList.value.push(playlistEntity)
@@ -1155,22 +1185,26 @@ const addEntityToPlaylist = async entity => {
   playlistPlayerRef.value?.scrollToRight()
 }
 
-const onNewEntityDropped = async info => {
-  setSilent()
-  const entity = getCachedEntity(info.after.entity_id)
-  if (entity && !currentEntitiesMap.value[entity.id]) {
-    const addedEntity = await addEntity(entity, currentPlaylist.value)
-    // The preview file id is only resolved when the entity is added, so
-    // the dragged payload can't carry it. Patch it in before replaying
-    // the drop so findEntity can locate the newly added entity and move
-    // it to the drop position instead of leaving it at the end.
-    if (addedEntity) {
+const onNewEntityDropped = info =>
+  withSilent(async () => {
+    const playlist = currentPlaylist.value
+    const entity = getCachedEntity(info.after.entity_id)
+    if (entity && !currentEntitiesMap.value[entity.id]) {
+      const addedEntity = await addEntity(entity, playlist)
+      // A failed addition leaves nothing to move: the player would not find
+      // the entry and drop it again.
+      if (!addedEntity) return
+      // The playlist shown was replaced meanwhile, by another one or by a
+      // reload: the strip is no longer the one the entity was dropped on.
+      if (currentPlaylist.value !== playlist) return
+      // The preview file id is only resolved when the entity is added, so
+      // the dragged payload can't carry it. Patch it in before replaying
+      // the drop so findEntity can locate the newly added entity and move
+      // it to the drop position instead of leaving it at the end.
       info.after.preview_file_id = addedEntity.preview_file_id
+      playlistPlayerRef.value?.onEntityDropped(info)
     }
-    playlistPlayerRef.value?.onEntityDropped(info)
-  }
-  clearSilent()
-}
+  })
 
 const removeEntity = ({ entity, previewFileId }) => {
   currentEntitiesList.value = currentEntitiesList.value.filter(
@@ -1202,20 +1236,24 @@ const addEntities = async entities => {
   entities.forEach(entity => {
     entityLoading[entity.id] = true
   })
+  // The playlist shown lacks the entries until it loads again: a change
+  // saved meanwhile would erase them.
+  loading.playlist = true
+  const load = playlistLoadCount
   try {
     await store.dispatch('addEntitiesToPlaylist', {
       playlist,
       entityIds: entities.map(entity => entity.id)
     })
-    if (playlist.id === currentPlaylist.value.id) {
-      const loadedPlaylist = await store.dispatch('loadPlaylist', playlist)
-      if (route.params.playlist_id !== playlist.id) return
-      currentPlaylist.value = loadedPlaylist
-      rebuildCurrentEntities()
-      scrollPlayerToRight()
+    // Zou added the entries: load the playlist again while it is open, even
+    // when a reload replaced it meanwhile, which may have read it before.
+    if (route.params.playlist_id === playlist.id) {
+      if (await showLoadedPlaylist(playlist)) scrollPlayerToRight()
     }
   } catch (err) {
     console.error(err)
+    // A load started meanwhile ends the loading state once it answers.
+    if (load === playlistLoadCount) loading.playlist = false
   } finally {
     entities.forEach(entity => {
       entityLoading[entity.id] = false
@@ -1243,9 +1281,12 @@ const getPendingEntities = async isDaily => {
 const addCurrentSelection = () => {
   let entities = displayedShots.value
   if (isAssetPlaylist.value) entities = displayedAssets.value
+  else if (isSequencePlaylist.value) entities = displayedSequences.value
   else if (isEditPlaylist.value) entities = displayedEdits.value
   else if (isEpisodePlaylist.value) entities = displayedEpisodes.value
-  return withSilent(() => addEntities(entities))
+  return withSilent(() =>
+    addEntities(entities.filter(entity => !entity.canceled))
+  )
 }
 
 const addSequence = sequenceShots => {
@@ -1281,13 +1322,34 @@ const onPreviewChanged = ({ entity, previewFileId, previousPreviewFileId }) =>
     previousPreviewFileId
   })
 
+// Puts the `after` entry right after the `before` one, as the store does
+// with the saved order.
+const moveEntry = (entries, { before, after }) => {
+  const indexOf = ({ entity_id, preview_file_id }) =>
+    entries.findIndex(
+      entry =>
+        entry.id === entity_id && entry.preview_file_id === preview_file_id
+    )
+  const from = indexOf(after)
+  let to = indexOf(before)
+  if (from < 0 || to < 0) return
+  const [entry] = entries.splice(from, 1)
+  if (from > to) to++
+  entries.splice(to, 0, entry)
+}
+
+// The strip has moved already. The list handed to the player moves too: an
+// addition or a removal hands it back, and the strip would show the order of
+// the load again. It moves in place: a new list resets the player, paused at
+// the start of the entry played, in the whole review room.
 const onOrderChange = info => {
-  setSilent()
-  store.dispatch('changePlaylistOrder', {
-    playlist: currentPlaylist.value,
-    info
-  })
-  clearSilent()
+  moveEntry(currentEntitiesList.value, info)
+  return withSilent(() =>
+    store.dispatch('changePlaylistOrder', {
+      playlist: currentPlaylist.value,
+      info
+    })
+  )
 }
 
 const onAnnotationChanged = async ({
@@ -1320,17 +1382,21 @@ const confirmBuildFilter = query => {
   onSearchChange(query)
 }
 
-const onSearchChange = searchQuery => {
+const onSearchChange = (searchQuery, isNewSearch = true) => {
   const query = searchQuery.length > 1 ? searchQuery : ''
   if (isAssetPlaylist.value) {
     store.dispatch('setAssetSearch', query)
-    if (query) store.dispatch('displayMoreAssets')
+    if (query && isNewSearch) store.dispatch('displayMoreAssets')
   } else if (isSequencePlaylist.value) {
     store.dispatch('setSequenceSearch', query)
     if (query) store.dispatch('resetSequences')
+  } else if (isEditPlaylist.value) {
+    store.dispatch('setEditSearch', query)
+  } else if (isEpisodePlaylist.value) {
+    store.dispatch('setEpisodeSearch', query)
   } else {
     store.dispatch('setShotSearch', query)
-    if (query) store.dispatch('displayMoreShots')
+    if (query && isNewSearch) store.dispatch('displayMoreShots')
   }
 }
 
@@ -1384,7 +1450,10 @@ const runEditPlaylist = async form => {
       }
     })
     modals.isEditDisplayed = false
-    Object.assign(currentPlaylist.value, playlist)
+    // Another playlist may have opened during the save.
+    if (currentPlaylist.value.id === form.id) {
+      Object.assign(currentPlaylist.value, playlist)
+    }
   } catch (err) {
     errors.editPlaylist = true
   } finally {
@@ -1677,6 +1746,28 @@ watch(
   () => route.fullPath,
   () => setCurrentPlaylist()
 )
+
+// Another playlist closes the form editing the playlist shown, which would
+// save its values on the other one. A creation form does not depend on it.
+watch(
+  () => route.params.playlist_id,
+  () => {
+    if (modals.isEditDisplayed && playlistToEdit.value.id) hideEditModal()
+  }
+)
+
+// The search field goes with the addition panel, while the store keeps its
+// text, and a load of a list can drop its filter: a new field shows the
+// search and applies it again, without a further page of entities. The build
+// filter fills the field: it closes once the field is gone.
+watch(searchFieldRef, field => {
+  if (!field) {
+    modals.isBuildFilterDisplayed = false
+    return
+  }
+  field.setValue(additionSearchText.value)
+  if (additionSearchText.value) onSearchChange(additionSearchText.value, false)
+})
 
 watch(currentPlaylist, () => {
   if (currentPlaylist.value.shots) {

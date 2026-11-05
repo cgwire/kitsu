@@ -14,7 +14,7 @@ import {
   sortTaskNames,
   sortTaskTypes,
   sortTasks,
-  sortValidationColumns, sortComments, sortRevisionPreviewFiles, sortAssetResult, sortShotResult
+  sortValidationColumns, sortComments, sortRevisionPreviewFiles, sortAssetResult, sortEpisodeResult, sortShotResult
 } from '@/lib/sorting'
 
 const taskTypeMap = new Map(Object.entries({
@@ -780,6 +780,23 @@ describe('lib/sorting', () => {
     expect(resultsTaskTypes[3].id).toEqual(3)
     expect(resultsTaskTypes[4].id).toEqual(1)
     expect(resultsTaskTypes[5].id).toEqual(2)
+  })
+
+  // The plain list of the episodes comes without their tasks.
+  it('sortEpisodeResult by task type on entries without tasks', () => {
+    const episodes = [
+      { id: 'ep-1', name: 'E01', canceled: false },
+      { id: 'ep-2', name: 'E02', canceled: false }
+    ]
+
+    const results = sortEpisodeResult(
+      episodes,
+      [{ type: 'task_type', column: 'valid' }],
+      taskTypeMap,
+      new Map()
+    )
+
+    expect(results).toHaveLength(2)
   })
 
   it('sortByPersonName', () => {

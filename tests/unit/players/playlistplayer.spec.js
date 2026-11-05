@@ -23,6 +23,7 @@ vi.mock('wavesurfer.js', () => ({ default: waveSurfer }))
 import '@/lib/auth'
 import { useModal } from '@/composables/modal'
 import clipboard from '@/lib/clipboard'
+import playlistStore from '@/store/modules/playlists'
 
 import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
 
@@ -65,6 +66,13 @@ const withMethods = (names, values = {}) => ({
     ...values
   }
 })
+
+// The task type button lives in the extra-controls slot of the bar, which
+// the default stub does not render.
+const PlaybackBarWithSlot = {
+  name: 'PlayerPlaybackBar',
+  template: '<div><slot name="extra-controls" /></div>'
+}
 
 // Without previewFileStatusMap, the store keeps no preview status.
 const mountPlayer = ({
@@ -1931,6 +1939,289 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  describe('header buttons', () => {
+    const clientPlaylist = { ...playlist, for_client: true }
+
+    // undefined when absent, else whether it is disabled.
+    const isDisabled = isTarget =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button =>
+            button.element.closest('.playlist-header') && isTarget(button)
+        )
+        ?.props('disabled')
+
+    const readHeaderButtons = () => ({
+      notify: isDisabled(button => button.props('icon') === 'bell'),
+      share: isDisabled(button => button.props('icon') === 'link'),
+      add: isDisabled(button => button.props('icon') === 'plus'),
+      edit: isDisabled(button => button.classes('edit-button')),
+      delete: isDisabled(button => button.classes('delete-button'))
+    })
+
+    const isAddPressed = () =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button =>
+            button.element.closest('.playlist-header') &&
+            button.props('icon') === 'plus'
+        )
+        .props('active')
+
+    it('enables them once the playlist is loaded', async () => {
+      wrapper = mountPlayer({ playlistProp: clientPlaylist })
+      await flushPromises()
+      expect(readHeaderButtons()).toEqual({
+        notify: false,
+        share: false,
+        add: false,
+        edit: false,
+        delete: false
+      })
+    })
+
+    // During the load, the page still passes the playlist shown before, or
+    // an empty one: the trash sent DELETE /api/data/playlists/undefined.
+    it('disables them while a playlist loads', async () => {
+      wrapper = mountPlayer({
+        playlistProp: clientPlaylist,
+        props: { isLoading: true }
+      })
+      await flushPromises()
+      expect(readHeaderButtons()).toEqual({
+        notify: true,
+        share: true,
+        add: true,
+        edit: true,
+        delete: true
+      })
+    })
+
+    // The empty playlist of the Sentry event. The page opens the addition
+    // panel for a playlist without entries: the add button must not look
+    // pressed.
+    it('disables them over the empty playlist of a load', async () => {
+      wrapper = mountPlayer({
+        playlistProp: { name: '' },
+        entities: [],
+        props: { isAddingEntity: true, isLoading: true }
+      })
+      await flushPromises()
+      expect(readHeaderButtons()).toEqual({
+        notify: undefined,
+        share: true,
+        add: true,
+        edit: true,
+        delete: true
+      })
+      expect(isAddPressed()).toBe(false)
+    })
+
+    it('shows the add button pressed while its panel is open', async () => {
+      wrapper = mountPlayer({ props: { isAddingEntity: true } })
+      await flushPromises()
+      expect(isAddPressed()).toBe(true)
+    })
+  })
+
+  describe('footer actions', () => {
+    const mountFooter = (props = {}) =>
+      mountPlayer({ props, stubs: { PlayerPlaybackBar: PlaybackBarWithSlot } })
+
+    const footerButton = title =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('title') === title)
+    const readFooterActions = () => ({
+      taskType: footerButton('playlists.actions.change_task_type')?.props(
+        'disabled'
+      ),
+      downloadMenu: footerButton('playlists.actions.download')?.props(
+        'disabled'
+      ),
+      builds: wrapper
+        .findAll('.mp4-button, .mp4-2-button')
+        .map(build => build.classes('disabled'))
+    })
+    const builds = () =>
+      wrapper.vm.$store.dispatch.mock.calls.filter(
+        ([action]) => action === 'runPlaylistBuild'
+      )
+
+    it('enables the task type change, the download menu and the builds once loaded', async () => {
+      wrapper = mountFooter()
+      await flushPromises()
+      expect(readFooterActions()).toEqual({
+        taskType: false,
+        downloadMenu: false,
+        builds: [false, false]
+      })
+      await wrapper.get('.mp4-button').trigger('click')
+      expect(builds()).toEqual([
+        ['runPlaylistBuild', { playlist, full: false }]
+      ])
+    })
+
+    // During the load, the footer still belongs to the playlist shown before.
+    it('disables them while a playlist loads', async () => {
+      wrapper = mountFooter({ isLoading: true })
+      await flushPromises()
+      expect(readFooterActions()).toEqual({
+        taskType: true,
+        downloadMenu: true,
+        builds: [true, true]
+      })
+      await wrapper.get('.mp4-button').trigger('click')
+      await wrapper.get('.mp4-2-button').trigger('click')
+      expect(builds()).toEqual([])
+    })
+
+    // The menu only closes through its button, disabled during the load.
+    it('closes the download menu when a load starts', async () => {
+      wrapper = mountFooter()
+      await flushPromises()
+      const isMenuOpen = () => !wrapper.get('.build-options').classes('hidden')
+      footerButton('playlists.actions.download').vm.$emit('click')
+      await flushPromises()
+      expect(isMenuOpen()).toBe(true)
+
+      await wrapper.setProps({ isLoading: true })
+
+      expect(isMenuOpen()).toBe(false)
+    })
+  })
+
+  // The browser history opens another playlist under an open modal.
+  describe('modals', () => {
+    const isOpen = name => {
+      const modal = wrapper.findComponent({ name })
+      return modal.exists() && modal.props('active')
+    }
+
+    it.each([
+      ['DeleteModal', button => button.classes('delete-button')],
+      ['SharePlaylistModal', button => button.props('icon') === 'link'],
+      ['NotifyClientModal', button => button.props('icon') === 'bell'],
+      [
+        'SelectTaskTypeModal',
+        button =>
+          button.attributes('title') === 'playlists.actions.change_task_type'
+      ]
+    ])('closes the %s when a load starts', async (name, isOpener) => {
+      wrapper = mountPlayer({
+        playlistProp: { ...playlist, for_client: true },
+        stubs: { PlayerPlaybackBar: PlaybackBarWithSlot }
+      })
+      await flushPromises()
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(isOpener)
+        .vm.$emit('click')
+      await flushPromises()
+      expect(isOpen(name)).toBe(true)
+
+      await wrapper.setProps({ isLoading: true })
+
+      expect(isOpen(name)).toBe(false)
+    })
+  })
+
+  // Ctrl or Cmd+Shift+Left/Right moves the entry played.
+  describe('reorder shortcut', () => {
+    const entities = ['shot-1', 'shot-2', 'shot-3'].map((id, index) => ({
+      ...entity,
+      id,
+      preview_file_id: `preview-${index + 1}`
+    }))
+
+    const press = async code => {
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          code,
+          key: code,
+          ctrlKey: true,
+          shiftKey: true
+        })
+      )
+      await flushPromises()
+    }
+
+    const strip = () => wrapper.findAllComponents({ name: 'PlaylistedEntity' })
+    const stripIds = () => strip().map(entry => entry.props('entity').id)
+
+    // The page saves each move on the order it saved before, by putting
+    // the `after` entry right after the `before` one.
+    const savedIds = () => {
+      const saved = {
+        shots: entities.map(({ id, preview_file_id }) => ({
+          entity_id: id,
+          preview_file_id
+        }))
+      }
+      wrapper.emitted('order-change').forEach(([info]) =>
+        playlistStore.mutations.CHANGE_PLAYLIST_ORDER(
+          {},
+          { playlist: saved, info }
+        )
+      )
+      return saved.shots.map(shot => shot.entity_id)
+    }
+
+    it('saves the moves the strip shows', async () => {
+      wrapper = mountPlayer({ entities })
+      await flushPromises()
+
+      await press('ArrowRight')
+      expect(stripIds()).toEqual(['shot-2', 'shot-1', 'shot-3'])
+      expect(savedIds()).toEqual(stripIds())
+
+      await press('ArrowRight')
+      expect(stripIds()).toEqual(['shot-2', 'shot-3', 'shot-1'])
+      expect(savedIds()).toEqual(stripIds())
+
+      await press('ArrowLeft')
+      expect(stripIds()).toEqual(['shot-2', 'shot-1', 'shot-3'])
+      expect(savedIds()).toEqual(stripIds())
+    })
+
+    // The shortcut wraps at neither end: one put-after pair cannot take the
+    // last entry to the start, and the first entry stops too, so that both
+    // directions behave alike.
+    it('stops at the ends of the playlist', async () => {
+      wrapper = mountPlayer({ entities })
+      await flushPromises()
+
+      await press('ArrowLeft')
+      expect(wrapper.emitted('order-change')).toBeUndefined()
+
+      await press('ArrowRight')
+      await press('ArrowRight')
+      await press('ArrowRight')
+      expect(wrapper.emitted('order-change')).toHaveLength(2)
+      expect(stripIds()).toEqual(['shot-2', 'shot-3', 'shot-1'])
+    })
+
+    // During the load, the entries are still those of the playlist shown
+    // before: the page saved its order.
+    it.each(['ArrowLeft', 'ArrowRight'])(
+      'ignores %s while a playlist loads',
+      async code => {
+        wrapper = mountPlayer({ entities })
+        await flushPromises()
+        // The middle entry, which can move either way.
+        strip()[1].vm.$emit('play-click', 1)
+        await flushPromises()
+        expect(strip()[1].props('isPlaying')).toBe(true)
+        await wrapper.setProps({ isLoading: true })
+
+        await press(code)
+        expect(wrapper.emitted('order-change')).toBeUndefined()
+      }
+    )
+  })
+
   // The trim belongs to the shot, not to a revision: an end handle left at
   // the clip end must not pin the length of the revision on screen, or a
   // longer revision would stop at that length.
@@ -2479,7 +2770,10 @@ describe('PlaylistPlayer.vue', () => {
       )
 
     it('keeps the task type change and the download menu from a client', async () => {
-      wrapper = mountPlayer({ isClient: true })
+      wrapper = mountPlayer({
+        isClient: true,
+        stubs: { PlayerPlaybackBar: PlaybackBarWithSlot }
+      })
       await flushPromises()
       expect(
         wrapper.find('[title="playlists.actions.change_task_type"]').exists()
