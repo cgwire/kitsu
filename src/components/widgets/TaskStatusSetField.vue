@@ -2,25 +2,31 @@
   <div class="field task-status-set-field">
     <label class="label" :id="labelId" v-if="label">{{ label }}</label>
     <div class="statuses" ref="statusesRef">
-      <span
-        class="tag task-status"
+      <template
         :key="taskStatus.id"
-        :style="{
-          background: backgroundColor(taskStatus),
-          color: color(taskStatus)
-        }"
         v-for="(taskStatus, index) in selectedTaskStatuses"
       >
-        {{ taskStatus.short_name }}
-        <button
-          type="button"
-          class="delete is-small remove-status"
-          :aria-label="
-            $t('task_status.remove_status', { name: taskStatus.name })
-          "
-          @click="removeTaskStatus(taskStatus.id, index)"
-        ></button>
-      </span>
+        <span class="connector" v-if="index > 0">
+          {{ $t('status_automations.connectors.or') }}
+        </span>
+        <span
+          class="tag task-status"
+          :style="{
+            background: backgroundColor(taskStatus),
+            color: color(taskStatus)
+          }"
+        >
+          {{ taskStatus.short_name }}
+          <button
+            type="button"
+            class="delete is-small remove-status"
+            :aria-label="
+              $t('task_status.remove_status', { name: taskStatus.name })
+            "
+            @click="removeTaskStatus(taskStatus.id, index)"
+          ></button>
+        </span>
+      </template>
       <combobox-status
         class="add-status"
         add-placeholder
@@ -111,11 +117,20 @@ const removeTaskStatus = (taskStatusId, index) => {
 </script>
 
 <style lang="scss" scoped>
+// As the comboboxes next to it, so that the labels of a row line up.
+.field .label {
+  padding-top: 5px;
+}
+
 .statuses {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4em;
+}
+
+.connector {
+  font-size: 0.85em;
 }
 
 .task-status {

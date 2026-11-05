@@ -3,6 +3,7 @@ import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
 import EditStatusAutomationModal from '@/components/modals/EditStatusAutomationModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
@@ -283,6 +284,67 @@ describe('EditStatusAutomationModal', () => {
         'modelValue'
       )
     ).toBe('task-type-animation')
+  })
+
+  it('groups the trigger and the applied change in two blocks', async () => {
+    const wrapper = await mountModal(statusAutomation)
+    const blocks = wrapper.findAll('.automation-block')
+    expect(blocks.map(block => block.find('.subtitle').text())).toEqual([
+      'Trigger conditions',
+      'The change that will be applied on trigger firing'
+    ])
+    expect(blocks[0].find('button.add-condition').exists()).toBe(true)
+
+    const contains = (block, label) =>
+      block.element.contains(findField(wrapper, ComboboxBoolean, label).element)
+    expect(contains(blocks[1], 'Import Last Revision')).toBe(true)
+    expect(contains(blocks[1], 'Archived')).toBe(false)
+  })
+
+  it('draws an arrow from the trigger to the applied change', async () => {
+    const wrapper = await mountModal(statusAutomation)
+    expect(
+      wrapper
+        .find('.automation-block + .blocks-arrow + .automation-block')
+        .exists()
+    ).toBe(true)
+  })
+
+  it('asks for the entity type in the trigger block', async () => {
+    const wrapper = await mountModal(null)
+    const field = findField(wrapper, Combobox, 'Entity Type')
+    expect(
+      wrapper.find('.automation-block').element.contains(field.element)
+    ).toBe(true)
+  })
+
+  it('shows the entity type of an edited row with its label', async () => {
+    const wrapper = await mountModal(statusAutomation)
+    const field = wrapper.find('.automation-block .entity-type-field')
+    expect(field.find('label').text()).toBe('Entity Type')
+    expect(field.find('.entity-type-name').text()).toBe('Shot')
+  })
+
+  // The fields of the next conditions keep theirs for screen readers.
+  it('shows the labels of the first condition only', async () => {
+    const wrapper = await mountModal(statusAutomation)
+    await wrapper.find('button.add-condition').trigger('click')
+
+    const rows = wrapper.findAll('.condition')
+    expect(rows.map(row => row.classes('is-following'))).toEqual([false, true])
+    expect(conditionTaskTypes(wrapper)).toHaveLength(2)
+    expect(conditionStatuses(wrapper)).toHaveLength(2)
+  })
+
+  it('removes a condition with a minus, as the filter modal does', async () => {
+    const wrapper = await mountModal(multiConditionAutomation)
+    const buttons = wrapper
+      .findAllComponents(ButtonSimple)
+      .filter(button => button.classes('remove-condition'))
+    expect(buttons.map(button => button.props('icon'))).toEqual([
+      'minus',
+      'minus'
+    ])
   })
 
   it('shows the operator from the second condition on', async () => {

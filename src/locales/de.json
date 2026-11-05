@@ -2020,7 +2020,6 @@
       "delete_text": "Sind Sie sicher, dass Sie diese Statusautomatisierung aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieser Statusautomatisierung ist ein Fehler aufgetreten. Sie ist möglicherweise mit einer Produktion oder einer Produktionsvorlage verknüpft. In diesem Fall müssen Sie sie zuerst aus jeder Produktion und jeder Vorlage entfernen.",
       "edit_title": "Eine Statusautomatisierung bearbeiten",
-      "entity_title": "Vom Auslöser betroffener Entitätstyp",
       "number": "Statusautomatisierung | Statusautomatisierungen",
       "in_title": "Auslösende Bedingungen",
       "out_title": "Die Änderung, die beim Auslösen des Triggers angewendet wird",

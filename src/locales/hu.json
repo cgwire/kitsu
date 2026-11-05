@@ -2356,7 +2356,6 @@
       "delete_error": "Hiba történt az állapot-automatizálás törlésekor. Lehet, hogy egy produkcióhoz vagy egy produkció-sablonhoz kapcsolódik. Ebben az esetben először el kell távolítanod minden produkcióból és sablonból.",
       "delete_text": "Biztosan eltávolítod ezt az állapot-automatizálást az adatbázisodból?",
       "edit_title": "Állapot-automatizálás szerkesztése",
-      "entity_title": "A trigger által érintett elem típusa",
       "entity_types": {
         "asset": "Asset",
         "shot": "Shot",

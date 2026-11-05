@@ -391,7 +391,6 @@
       "delete_text": "Czy na pewno chcesz usunąć tę automatyzację statusu z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tej automatyzacji statusu. Może być powiązana z produkcją lub szablonem produkcji. W takim przypadku musisz najpierw usunąć ją z każdej produkcji i każdego szablonu.",
       "edit_title": "Edytuj automatyzację statusu",
-      "entity_title": "Typ obiektu, którego dotyczy wyzwalacz",
       "number": "automatyzacja statusu | automatyzacji statusu",
       "in_title": "Warunki wyzwalające",
       "out_title": "Zmiana, która zostanie zastosowana po zadziałaniu wyzwalacza",

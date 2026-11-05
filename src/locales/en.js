@@ -406,7 +406,6 @@ export default {
     delete_text: 'Are you sure you want to remove this status automation from your database?',
     delete_error: 'An error occurred while deleting this status automation. It may be linked to a production or a production template. If so, you must remove it from every production and template first.',
     edit_title: 'Edit a status automation',
-    entity_title: 'Entity type affected by the trigger',
     guard_only_condition_and: 'In this production, {taskType} comes after the applied task type: its status changes do not run this automation, but the condition must still be met.',
     guard_only_condition_or: 'In this production, {taskType} comes after the applied task type: this condition is ignored.',
     number: 'status automation | status automations',

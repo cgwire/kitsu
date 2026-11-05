@@ -1,158 +1,171 @@
 <template>
   <base-modal :active="active" :title="title" @cancel="$emit('cancel')">
     <form @submit.prevent>
-      <h3 class="subtitle">
-        {{ $t('status_automations.entity_title') }}
-      </h3>
-      <combobox
-        :label="$t('status_automations.fields.entity_type')"
-        :model-value="form.entityType"
-        :options="entityTypeOptions"
-        locale-key-prefix="status_automations.entity_types."
-        @enter="confirmClicked"
-        @update:model-value="onEntityTypeChanged"
-        v-if="!isEditing"
-      />
-      <span class="entity-type-name" v-else>
-        {{ entityTypeName }}
-      </span>
+      <section class="automation-block">
+        <h2 class="subtitle">{{ $t('status_automations.in_title') }}</h2>
 
-      <h2 class="subtitle">{{ $t('status_automations.in_title') }}</h2>
+        <div class="trigger-fields">
+          <combobox
+            class="entity-type-field"
+            :label="$t('status_automations.fields.entity_type')"
+            :model-value="form.entityType"
+            :options="entityTypeOptions"
+            locale-key-prefix="status_automations.entity_types."
+            @enter="confirmClicked"
+            @update:model-value="onEntityTypeChanged"
+            v-if="!isEditing"
+          />
+          <div class="field entity-type-field" v-else>
+            <label class="label">
+              {{ $t('status_automations.fields.entity_type') }}
+            </label>
+            <span class="entity-type-name">
+              {{ entityTypeName }}
+            </span>
+          </div>
 
-      <div class="operator-line flexrow" v-if="form.conditions.length > 1">
-        <span class="flexrow-item">
-          {{ $t('status_automations.trigger_when') }}
-        </span>
-        <combobox
-          class="flexrow-item operator"
-          :aria-label="$t('status_automations.trigger_when')"
-          :options="operatorOptions"
-          :with-margin="false"
-          locale-key-prefix="status_automations.operators."
-          v-model="form.operator"
-        />
-      </div>
+          <div class="operator-line flexrow" v-if="form.conditions.length > 1">
+            <span class="flexrow-item">
+              {{ $t('status_automations.trigger_when') }}
+            </span>
+            <combobox
+              class="flexrow-item operator"
+              :aria-label="$t('status_automations.trigger_when')"
+              :options="operatorOptions"
+              :with-margin="false"
+              locale-key-prefix="status_automations.operators."
+              v-model="form.operator"
+            />
+          </div>
+        </div>
 
-      <template
-        :key="condition.key"
-        v-for="(condition, index) in form.conditions"
-      >
-        <p class="condition-connector" v-if="index > 0">
-          {{ $t(`status_automations.connectors.${form.operator}`) }}
-        </p>
-        <div
-          class="condition flexrow"
-          :ref="element => setConditionRef(condition.key, element)"
+        <template
+          :key="condition.key"
+          v-for="(condition, index) in form.conditions"
         >
+          <p class="condition-connector" v-if="index > 0">
+            {{ $t(`status_automations.connectors.${form.operator}`) }}
+          </p>
+          <div
+            class="condition flexrow"
+            :class="{ 'is-following': index > 0 }"
+            :ref="element => setConditionRef(condition.key, element)"
+          >
+            <combobox-task-type
+              class="flexrow-item"
+              :label="$t('status_automations.fields.in_task_type')"
+              :task-type-list="getConditionTaskTypes(condition)"
+              v-model="condition.taskTypeId"
+            />
+            <task-status-set-field
+              class="flexrow-item"
+              :label="$t('status_automations.fields.in_task_status')"
+              :task-status-list="taskStatusList"
+              v-model="condition.taskStatusIds"
+            />
+            <button-simple
+              class="flexrow-item remove-condition"
+              icon="minus"
+              :aria-label="getRemoveLabel(condition)"
+              :disabled="form.conditions.length === 1"
+              :title="getRemoveLabel(condition)"
+              type="button"
+              @click="removeCondition(index)"
+            />
+          </div>
+          <p
+            class="error condition-error"
+            role="alert"
+            v-if="conditionErrors[index]"
+          >
+            {{ $t(conditionErrors[index]) }}
+          </p>
+        </template>
+
+        <button
+          type="button"
+          class="button add-condition"
+          ref="addConditionButton"
+          :disabled="!nextConditionTaskType"
+          @click="addCondition"
+        >
+          {{ $t('status_automations.add_condition') }}
+        </button>
+        <p class="help" v-if="form.conditions.length > 1">
+          {{ $t(`status_automations.help.${form.operator}`) }}
+        </p>
+        <p class="help">
+          {{ $t('status_automations.help.new_comments_only') }}
+        </p>
+      </section>
+
+      <arrow-down-icon class="blocks-arrow" :size="24" />
+
+      <section class="automation-block">
+        <h2 class="subtitle">{{ $t('status_automations.out_title') }}</h2>
+
+        <div class="flexrow">
+          <combobox
+            class="flexrow-item margin-fix"
+            :label="$t('status_automations.fields.out_field_type')"
+            :model-value="form.outFieldType"
+            :options="fieldTypeOptions"
+            locale-key-prefix="status_automations.field_types."
+            @enter="confirmClicked"
+            @update:model-value="onOutFieldTypeChanged"
+            v-if="!isEditing && form.entityType === 'asset'"
+          />
+          <span
+            class="flexrow-item"
+            v-if="isEditing && form.outFieldType === 'ready_for'"
+          >
+            {{ $t('status_automations.field_types.ready_for') }}
+          </span>
+
           <combobox-task-type
             class="flexrow-item"
-            :label="$t('status_automations.fields.in_task_type')"
-            :task-type-list="getConditionTaskTypes(condition)"
-            v-model="condition.taskTypeId"
+            :label="$t('status_automations.fields.out_task_type')"
+            :task-type-list="outTaskTypeList"
+            :open-top="true"
+            v-model="form.outTaskTypeId"
           />
-          <task-status-set-field
+
+          <combobox-status
             class="flexrow-item"
-            :label="$t('status_automations.fields.in_task_status')"
+            :label="$t('status_automations.fields.out_task_status')"
             :task-status-list="taskStatusList"
-            v-model="condition.taskStatusIds"
+            :open-top="true"
+            v-model="form.outTaskStatusId"
+            v-if="form.outFieldType === 'status'"
           />
-          <button
-            type="button"
-            class="button flexrow-item remove-condition"
-            :aria-label="getRemoveLabel(condition)"
-            :disabled="form.conditions.length === 1"
-            :title="getRemoveLabel(condition)"
-            @click="removeCondition(index)"
-          >
-            <x-icon :size="16" />
-          </button>
         </div>
-        <p
-          class="error condition-error"
-          role="alert"
-          v-if="conditionErrors[index]"
-        >
-          {{ $t(conditionErrors[index]) }}
-        </p>
-      </template>
 
-      <button
-        type="button"
-        class="button add-condition"
-        ref="addConditionButton"
-        :disabled="!nextConditionTaskType"
-        @click="addCondition"
-      >
-        {{ $t('status_automations.add_condition') }}
-      </button>
-      <p class="help" v-if="form.conditions.length > 1">
-        {{ $t(`status_automations.help.${form.operator}`) }}
-      </p>
-      <p class="help">
-        {{ $t('status_automations.help.new_comments_only') }}
-      </p>
+        <template v-if="form.outFieldType === 'status'">
+          <task-status-set-field
+            class="field-with-help"
+            :label="$t('status_automations.fields.out_only_if_task_status_ids')"
+            :open-top="true"
+            :task-status-list="taskStatusList"
+            v-model="form.outOnlyIfTaskStatusIds"
+          />
+          <p class="help">
+            {{ $t('status_automations.help.out_only_if') }}
+          </p>
+        </template>
 
-      <h2 class="subtitle">{{ $t('status_automations.out_title') }}</h2>
-
-      <div class="flexrow">
-        <combobox
-          class="flexrow-item margin-fix"
-          :label="$t('status_automations.fields.out_field_type')"
-          :model-value="form.outFieldType"
-          :options="fieldTypeOptions"
-          locale-key-prefix="status_automations.field_types."
+        <combobox-boolean
+          class="mt1 field-with-help"
+          :label="$t('status_automations.fields.import_last_revision')"
           @enter="confirmClicked"
-          @update:model-value="onOutFieldTypeChanged"
-          v-if="!isEditing && form.entityType === 'asset'"
+          v-model="form.importLastRevision"
         />
-        <span
-          class="flexrow-item"
-          v-if="isEditing && form.outFieldType === 'ready_for'"
-        >
-          {{ $t('status_automations.field_types.ready_for') }}
-        </span>
-
-        <combobox-task-type
-          class="flexrow-item"
-          :label="$t('status_automations.fields.out_task_type')"
-          :task-type-list="outTaskTypeList"
-          :open-top="true"
-          v-model="form.outTaskTypeId"
-        />
-
-        <combobox-status
-          class="flexrow-item"
-          :label="$t('status_automations.fields.out_task_status')"
-          :task-status-list="taskStatusList"
-          :open-top="true"
-          v-model="form.outTaskStatusId"
-          v-if="form.outFieldType === 'status'"
-        />
-      </div>
-
-      <template v-if="form.outFieldType === 'status'">
-        <task-status-set-field
-          :label="$t('status_automations.fields.out_only_if_task_status_ids')"
-          :open-top="true"
-          :task-status-list="taskStatusList"
-          v-model="form.outOnlyIfTaskStatusIds"
-        />
-        <p class="help">
-          {{ $t('status_automations.help.out_only_if') }}
+        <p class="help" v-if="isImportHelpShown">
+          {{ $t(importHelpKey) }}
         </p>
-      </template>
+      </section>
 
       <combobox-boolean
         class="mt1"
-        :label="$t('status_automations.fields.import_last_revision')"
-        @enter="confirmClicked"
-        v-model="form.importLastRevision"
-      />
-      <p class="help" v-if="isImportHelpShown">
-        {{ $t(importHelpKey) }}
-      </p>
-
-      <combobox-boolean
         :label="$t('main.archived')"
         @enter="confirmClicked"
         v-model="form.archived"
@@ -173,7 +186,7 @@
 </template>
 
 <script setup>
-import { XIcon } from 'lucide-vue-next'
+import { ArrowDownIcon } from 'lucide-vue-next'
 import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
@@ -191,6 +204,7 @@ import {
 
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
@@ -506,18 +520,63 @@ watch(
 
 .subtitle {
   font-size: 1.4em;
-  margin-top: 2em;
-  margin-bottom: 0.5em;
+  margin-top: 0;
+  margin-bottom: 1em;
   text-transform: none;
+}
+
+// The look of the settings blocks (.tab .section in SettingsLayout). No overflow
+// here: the comboboxes open past the block. The negative margins keep the
+// fields as wide as the rest of the form.
+.automation-block {
+  background: var(--background-block);
+  border: 1px solid var(--border);
+  border-radius: 1em;
+  box-shadow: 0 0 6px var(--box-shadow);
+  margin: 0 -1em;
+  padding: 1em;
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+.blocks-arrow {
+  color: var(--text-alt);
+  display: block;
+  margin: 0.5em auto;
+}
+
+// The fields of these rows line up whatever the length of their labels.
+.trigger-fields {
+  align-items: center;
+  display: grid;
+  gap: 1em;
+  grid-template-columns: max-content 1fr;
+  margin-bottom: 1em;
+}
+
+.entity-type-field,
+.operator-line {
+  display: contents;
+}
+
+.entity-type-field :deep(.label) {
+  margin-bottom: 0;
+}
+
+.operator-line > .flexrow-item {
+  margin-right: 0;
+}
+
+.entity-type-name,
+.entity-type-field :deep(select) {
+  font-weight: 600;
 }
 
 .entity-type-name {
   font-size: 1.2em;
   text-transform: capitalize;
-}
-
-.operator-line {
-  margin-bottom: 0.5em;
 }
 
 // Top aligned: the statuses of a row can wrap over two lines.
@@ -530,13 +589,43 @@ watch(
 }
 
 .remove-condition {
-  margin-top: 1.9em;
+  margin-left: auto;
+  margin-top: 2.33em;
+}
+
+// The labels of the first condition stand for the next ones, which keep theirs
+// for screen readers.
+.condition.is-following {
+  :deep(.label) {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .remove-condition {
+    margin-top: 0.4em;
+  }
 }
 
 .condition-connector {
-  color: var(--text-alt);
-  font-size: 0.9em;
-  margin: 0.4em 0;
+  align-items: center;
+  display: flex;
+  font-weight: 500;
+  gap: 0.8em;
+  letter-spacing: 1px;
+  margin: 0.8em 0;
+  text-transform: uppercase;
+
+  &::after {
+    background: var(--border-alt);
+    content: '';
+    flex: 1;
+    height: 1px;
+  }
 }
 
 .condition-error {
@@ -544,6 +633,7 @@ watch(
 }
 
 .add-condition {
+  margin-left: 0;
   margin-top: 1em;
 }
 
@@ -552,10 +642,27 @@ watch(
   margin-top: 0.5em;
 }
 
+.add-condition + .help {
+  margin-top: 1.75em;
+}
+
+.field-with-help {
+  margin-bottom: 0;
+}
+
+.field-with-help + .help:not(:last-child) {
+  margin-bottom: 2.5em;
+}
+
 @media screen and (max-width: 768px) {
   .subtitle {
     font-size: 1.15em;
-    margin-top: 1.25em;
+  }
+
+  .automation-block {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0.8em;
   }
 
   .flexrow {
@@ -571,6 +678,10 @@ watch(
 
   .flexrow :deep(.field) {
     margin-bottom: 0.4em;
+  }
+
+  .remove-condition {
+    margin-top: 0.4em;
   }
 
   .margin-fix {

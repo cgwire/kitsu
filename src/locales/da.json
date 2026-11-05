@@ -2020,7 +2020,6 @@
       "delete_text": "Er du sikker på, at du vil fjerne denne statusautomatisering fra din database?",
       "delete_error": "Der opstod en fejl under sletning af denne statusautomatisering. Den kan være knyttet til en produktion eller en produktionsskabelon. Hvis det er tilfældet, skal du først fjerne den fra alle produktioner og skabeloner.",
       "edit_title": "Rediger en statusautomatisering",
-      "entity_title": "Enhedstype påvirket af triggeren",
       "number": "statusautomatisering | statusautomatiseringer",
       "in_title": "Udløsende betingelser",
       "out_title": "Ændringen, der vil blive anvendt ved udløsning af triggeren",

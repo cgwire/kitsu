@@ -100,8 +100,10 @@ const entityType = computed(() =>
 }
 
 .entity-type {
+  // A single word cannot wrap: a row short of room would squeeze it instead.
+  flex-shrink: 0;
   text-transform: capitalize;
-  min-width: 40px;
+  min-width: 65px;
 }
 
 .conditions {
@@ -114,10 +116,6 @@ const entityType = computed(() =>
 
 .trigger-type {
   min-width: 160px;
-}
-
-.guard {
-  white-space: nowrap;
 }
 
 .guard .tag {

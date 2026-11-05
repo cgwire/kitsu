@@ -64,6 +64,18 @@ describe('TaskStatusSetField', () => {
     expect(tags(wrapper)).toEqual(['done', 'ok'])
   })
 
+  // The statuses are alternatives: a task needs only one of them.
+  it('joins the chosen statuses with "or"', () => {
+    const wrapper = mountField({ modelValue: [done.id, na.id, wip.id] })
+    const parts = wrapper.findAll('.statuses > *').map(part => part.text())
+    expect(parts).toEqual(['done', 'or', 'na', 'or', 'wip'])
+  })
+
+  it('shows no connector for a single status', () => {
+    const wrapper = mountField({ modelValue: [done.id] })
+    expect(wrapper.find('.connector').exists()).toBe(false)
+  })
+
   it('offers the statuses not chosen yet', () => {
     const wrapper = mountField({ modelValue: [done.id] })
     const combobox = wrapper.findComponent(ComboboxStatus)

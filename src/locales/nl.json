@@ -2020,7 +2020,6 @@
       "delete_text": "Weet je zeker dat je deze statusautomatisering uit je database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze statusautomatisering. Ze is misschien gekoppeld aan een productie of een productiesjabloon. In dat geval moet je ze eerst uit alle producties en sjablonen verwijderen.",
       "edit_title": "Bewerk een statusautomatisering",
-      "entity_title": "Entiteitstype waarop de trigger betrekking heeft",
       "number": "statusautomatisering | statusautomatiseringen",
       "in_title": "Triggervoorwaarden",
       "out_title": "De wijziging die wordt toegepast bij activatie van de trigger",

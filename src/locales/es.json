@@ -2020,7 +2020,6 @@
       "delete_text": "¿Está seguro de que desea eliminar esta automatización de estado de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar esta automatización de estado. Es posible que esté vinculada a una producción o a una plantilla de producción. En ese caso, primero deberá eliminarla de cada producción y de cada plantilla.",
       "edit_title": "Modificar una automatización de estado",
-      "entity_title": "Tipo de entidad afectada por el activador",
       "number": "automatización de estado | automatizaciones de estado",
       "in_title": "Condiciones de activación",
       "out_title": "El cambio que se aplicará al activarse el activador",

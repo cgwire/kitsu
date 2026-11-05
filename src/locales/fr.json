@@ -2020,7 +2020,6 @@
       "delete_text": "Êtes-vous sûr de vouloir supprimer cette automatisation de votre base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de cette automatisation. Il est possible qu'elle soit liée à une production ou à un modèle de production. Si c'est le cas, vous devez d'abord la retirer de chaque production et de chaque modèle.",
       "edit_title": "Modifier une automatisation",
-      "entity_title": "Type d'entité concerné par le déclencheur",
       "number": "automatisation | automatisations",
       "in_title": "Conditions de déclenchement",
       "out_title": "Le changement sera appliqué quand le déclencheur s'activera",
