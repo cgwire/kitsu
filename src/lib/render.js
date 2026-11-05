@@ -130,7 +130,7 @@ export const renderMarkdown = (input, options = {}) => {
 
 /**
  * Encode HTML entities in JavaScript
- * example task name: "Light & Render" => "Light &amp; Render"
+ * example attribute value: "/tasks?a=1&b=2" => "/tasks?a=1&amp;b=2"
  * @param {string} str - string to encode
  * @returns {string} - encoded string
  */
