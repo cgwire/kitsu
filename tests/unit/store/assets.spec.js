@@ -24,6 +24,7 @@ import assetsStore from '@/store/modules/assets'
 import assetsApi from '@/store/api/assets'
 import client from '@/store/api/client'
 import entitiesApi from '@/store/api/entities'
+import assetTypeStore from '@/store/modules/assettypes'
 import episodeStore from '@/store/modules/episodes'
 import productionsStore from '@/store/modules/productions'
 import tasksStore from '@/store/modules/tasks'
@@ -1717,6 +1718,14 @@ describe('Assets store, list workflow', () => {
           getters: assetsStore.getters,
           actions: assetsStore.actions,
           mutations: assetsStore.mutations
+        },
+        productions: {
+          state: productionsStore.state,
+          getters: {
+            getAssetTypeWorkflow: productionsStore.getters.getAssetTypeWorkflow,
+            isInAssetTypeWorkflow:
+              productionsStore.getters.isInAssetTypeWorkflow
+          }
         }
       },
       getters: {
@@ -1796,6 +1805,9 @@ describe('Assets store, list workflow', () => {
   beforeEach(() => {
     Object.values(client).forEach(fn => fn.mockReset())
     Object.assign(assetsStore.state, buildState())
+    assetTypeMap.forEach(assetType =>
+      assetTypeStore.cache.assetTypeMap.set(assetType.id, assetType)
+    )
     taskStatusMap.forEach(status =>
       taskStatusStore.cache.taskStatusMap.set(status.id, status)
     )
@@ -1808,6 +1820,7 @@ describe('Assets store, list workflow', () => {
     vi.useRealTimers()
     vi.restoreAllMocks()
     taskMap.clear()
+    assetTypeStore.cache.assetTypeMap.clear()
     taskStatusStore.cache.taskStatusMap.clear()
     episodeStore.cache.episodeMap.clear()
     productionsStore.state.currentProduction = null
