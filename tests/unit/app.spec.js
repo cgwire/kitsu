@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import auth from '@/lib/auth'
 import errors from '@/lib/errors'
 import i18n, { loadLocaleMessages } from '@/lib/i18n'
+import lang from '@/lib/lang'
 
 import App from '@/App.vue'
 import MetadataTextarea from '@/components/cells/MetadataTextarea.vue'
@@ -1142,6 +1143,20 @@ describe('App', () => {
       })
 
       expect(i18n.global.locale.value).toBe('fr')
+    })
+  })
+
+  describe('page language', () => {
+    afterEach(() => lang.setLocale('en_US'))
+
+    it('declares the language in use', async () => {
+      await mountApp({})
+      expect(document.documentElement.lang).toBe('en')
+
+      await lang.setLocale('zh_Hant_TW')
+      await flushPromises()
+
+      expect(document.documentElement.lang).toBe('zh-tw')
     })
   })
 

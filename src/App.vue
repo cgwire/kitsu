@@ -35,6 +35,7 @@ import crisp from '@/lib/crisp'
 import { isNewShotInLoadedScope } from '@/lib/episodes'
 import errors from '@/lib/errors'
 import i18n from '@/lib/i18n'
+import { localeCode } from '@/lib/lang'
 import { getProductionRole } from '@/lib/people'
 import localPreferences from '@/lib/preferences'
 import { isPreviewFileStatus } from '@/lib/preview'
@@ -729,6 +730,14 @@ watch(
     const background = isDarkTheme.value ? '#36393F' : '#FFF'
     document.documentElement.style.background = background
     document.body.style.background = background
+  },
+  { immediate: true }
+)
+
+watch(
+  localeCode,
+  () => {
+    document.documentElement.lang = localeCode.value
   },
   { immediate: true }
 )
