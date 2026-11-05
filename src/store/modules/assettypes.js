@@ -1,7 +1,5 @@
 import assetTypesApi from '@/store/api/assettypes'
 import {
-  LOAD_ASSET_TYPES_START,
-  LOAD_ASSET_TYPES_ERROR,
   LOAD_ASSET_TYPES_END,
   EDIT_ASSET_TYPE_END,
   DELETE_ASSET_TYPE_END,
@@ -26,12 +24,7 @@ const getters = {
 
   getAssetType: state => id => {
     return state.assetTypes.find(assetType => assetType.id === id)
-  },
-
-  getAssetTypeOptions: state =>
-    state.assetTypes.map(type => {
-      return { label: type.name, value: type.id }
-    })
+  }
 }
 
 const actions = {
@@ -57,19 +50,7 @@ const actions = {
 }
 
 const mutations = {
-  [LOAD_ASSET_TYPES_START](state) {
-    state.isAssetTypesLoading = true
-    state.isAssetTypesLoadingError = false
-  },
-
-  [LOAD_ASSET_TYPES_ERROR](state) {
-    state.isAssetTypesLoading = false
-    state.isAssetTypesLoadingError = true
-  },
-
   [LOAD_ASSET_TYPES_END](state, assetTypes) {
-    state.isAssetTypesLoading = false
-    state.isAssetTypesLoadingError = false
     state.assetTypes = sortByName(assetTypes)
     cache.assetTypeMap.clear()
     state.assetTypes.forEach(assetType => {

@@ -48,7 +48,6 @@
               :queries="sequenceSearchQueries"
               type="sequence"
               :production-id="currentProduction?.id"
-              @remove-search="removeSearchQuery"
               v-if="!isLoading && !initialLoading && !isLoadingError"
             />
           </div>
@@ -329,7 +328,6 @@ const {
   onMetadataChanged,
   onSearchChange,
   openEditModal: onEditClicked,
-  removeSearchQuery,
   saveScrollPosition,
   saveSearchQuery,
   selectableDepartments,

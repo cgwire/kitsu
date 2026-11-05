@@ -261,10 +261,6 @@ export default {
     return client.pget(`/api/data/persons/${personId}/done-tasks`)
   },
 
-  getUserSearchFilterGroups() {
-    return client.pget('/api/data/user/filter-groups')
-  },
-
   createFilterGroup(
     listType,
     name,
@@ -373,11 +369,6 @@ export default {
     return client.pget(
       `/api/data/projects/${projectId}/day-offs?start_date=${startDate}&end_date=${endDate}`
     )
-  },
-
-  getDayOff(personId, date) {
-    // Date is a string with following format: YYYYY-MM-DD.
-    return client.pget(`/api/data/persons/${personId}/day-offs/${date}`)
   },
 
   createDayOff(personId, startDate, endDate, description) {

@@ -24,7 +24,7 @@ export const coerceToArrayBuffer = input => {
 
   // error if none of the above worked
   if (!(input instanceof ArrayBuffer)) {
-    throw new TypeError("could not coerce '" + name + "' to ArrayBuffer")
+    throw new TypeError('could not coerce to ArrayBuffer')
   }
 
   return input

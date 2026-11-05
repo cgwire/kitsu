@@ -993,7 +993,6 @@ export const useEntityList = ({
     shiftKeyPressed,
     stickedColumns,
 
-    displayedValidationColumns,
     isEmptyTask,
     nonStickedDisplayedValidationColumns,
     nonStickedVisibleMetadataDescriptors,

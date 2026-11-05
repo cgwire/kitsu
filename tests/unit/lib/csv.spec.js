@@ -5,10 +5,13 @@ import { vi } from 'vitest'
 // Some lib imports transitively pull the root store; stub it so no Vuex
 // store is built.
 vi.mock('@/store', () => ({ default: {} }))
+// The browser download is where an export leaves the app.
+vi.mock('@/lib/download', () => ({ downloadBlob: vi.fn() }))
 
 import moment from 'moment'
 
 import csv from '@/lib/csv'
+import { downloadBlob } from '@/lib/download'
 
 import { GoneFileReader, TextFileReader } from '../fixtures/file-reader'
 
@@ -370,6 +373,276 @@ describe('lib/csv', () => {
         ['SEQ01', 'SH001']
       ]
       expect(csv.getNewEntityNames(shortCsv, [0, 5], {})).toEqual(['SEQ01'])
+    })
+  })
+  describe('buildCsvFile', () => {
+    afterEach(() => vi.clearAllMocks())
+
+    test('downloads the entries as a CSV file named after the export', async () => {
+      const content = csv.buildCsvFile('timesheet_day_2026', [
+        ['Person', '1'],
+        ['Alice', 8]
+      ])
+
+      expect(content).toBe('"Person";"1"\n"Alice";"8"')
+      const [blob, filename] = downloadBlob.mock.lastCall
+      expect(filename).toBe('timesheet_day_2026.csv')
+      expect(blob.type).toBe('text/csv;charset=utf-8')
+      expect(await blob.text()).toBe(content)
+    })
+  })
+
+  describe('period exports', () => {
+    const people = [
+      { id: 'person-1', full_name: 'Alice' },
+      { id: 'person-2', full_name: 'Bob' }
+    ]
+    const months = count => Array.from({ length: count }, (_, i) => i + 1)
+    let lines
+
+    beforeEach(() => {
+      // Today is Tuesday 2026-11-03, in ISO week 45.
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date(2026, 10, 3, 12))
+      // The file is built for real, into the mock of @/lib/download: its
+      // rows are read on their way.
+      const { buildCsvFile } = csv
+      vi.spyOn(csv, 'buildCsvFile').mockImplementation((name, entries) => {
+        lines = entries
+        return buildCsvFile(name, entries)
+      })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+      vi.restoreAllMocks()
+    })
+
+    describe('generateTimesheet', () => {
+      const exportTimesheet = options =>
+        csv.generateTimesheet({
+          name: 'timesheet',
+          people,
+          unit: 'hour',
+          organisation: { hours_by_day: 8 },
+          todayYear: 2026,
+          todayMonth: 11,
+          timesheet: {},
+          ...options
+        })
+
+      test('gives each day of a past month its date', () => {
+        exportTimesheet({
+          detailLevel: 'day',
+          year: 2026,
+          month: 2,
+          timesheet: { 1: { 'person-1': 480 }, 28: { 'person-1': 90 } }
+        })
+
+        expect(lines[0]).toHaveLength(29)
+        expect(lines[0].slice(0, 3)).toEqual([
+          'Person',
+          '2026-02-01',
+          '2026-02-02'
+        ])
+        expect(lines[0][28]).toBe('2026-02-28')
+        expect(lines[1].slice(0, 3)).toEqual(['Alice', 8, '-'])
+        expect(lines[1][28]).toBe(1.5)
+        expect(lines[2]).toEqual(['Bob', ...Array(28).fill('-')])
+      })
+
+      test('stops the current month at today', () => {
+        exportTimesheet({ detailLevel: 'day', year: 2026, month: 11 })
+
+        expect(lines[0]).toEqual([
+          'Person',
+          '2026-11-01',
+          '2026-11-02',
+          '2026-11-03'
+        ])
+      })
+
+      test('stops the months and the weeks of the current year at today', () => {
+        exportTimesheet({ detailLevel: 'month', year: 2026 })
+        expect(lines[0]).toEqual(['Person', ...months(11)])
+
+        exportTimesheet({ detailLevel: 'week', year: 2026 })
+        expect(lines[0]).toEqual(['Person', ...months(45)])
+      })
+
+      test('lists every month and ISO week of a past year', () => {
+        exportTimesheet({ detailLevel: 'month', year: 2025 })
+        expect(lines[0]).toEqual(['Person', ...months(12)])
+
+        exportTimesheet({ detailLevel: 'week', year: 2020 })
+        expect(lines[0]).toEqual(['Person', ...months(53)])
+      })
+
+      test('gives the year level a column per year of the timesheet', () => {
+        exportTimesheet({
+          detailLevel: 'year',
+          timesheet: { 2025: { 'person-1': 600 }, 2026: { 'person-2': 120 } }
+        })
+
+        expect(lines).toEqual([
+          ['Person', '2025', '2026'],
+          ['Alice', 10, '-'],
+          ['Bob', '-', 2]
+        ])
+      })
+
+      test('converts the time to days, or to whole units of the daily rate', () => {
+        exportTimesheet({
+          detailLevel: 'year',
+          unit: 'day',
+          timesheet: { 2026: { 'person-1': 720 } }
+        })
+        expect(lines[1]).toEqual(['Alice', 1.5])
+
+        exportTimesheet({
+          detailLevel: 'year',
+          unit: 'salary',
+          dailyRates: { 'person-1': 300 },
+          timesheet: { 2026: { 'person-1': 450 } }
+        })
+        expect(lines[1]).toEqual(['Alice', 281])
+      })
+    })
+
+    describe('generateQuotas', () => {
+      const quotas = {
+        'person-1': {
+          day: { count: { '2026-02-01': 3, '2026-02-10': 1.256 } },
+          week: { count: { '2025-3': 2 } },
+          month: { count: { '2025-03': 12 } }
+        }
+      }
+      const exportQuotas = (detailLevel, year, month) =>
+        csv.generateQuotas(
+          'quotas',
+          quotas,
+          people,
+          'count',
+          detailLevel,
+          2026,
+          11,
+          year,
+          month,
+          1
+        )
+
+      test('reads the quota of each day of the month, to two decimals', () => {
+        exportQuotas('day', 2026, 2)
+
+        expect(lines[0]).toHaveLength(29)
+        expect(lines[1].slice(0, 3)).toEqual(['Alice', 3, '-'])
+        expect(lines[1][10]).toBe(1.26)
+        expect(lines[2]).toEqual(['Bob', ...Array(28).fill('-')])
+      })
+
+      test('reads the quotas of the weeks and the months of a year', () => {
+        exportQuotas('week', 2025)
+        expect(lines[0]).toHaveLength(53)
+        expect(lines[1].slice(0, 4)).toEqual(['Alice', '-', '-', 2])
+
+        exportQuotas('month', 2025)
+        expect(lines[1]).toEqual(['Alice', '-', '-', 12, ...Array(9).fill('-')])
+      })
+    })
+  })
+
+  describe('stat reports', () => {
+    const taskTypeMap = new Map([
+      ['tt-anim', { id: 'tt-anim', name: 'Animation', priority: 2 }],
+      ['tt-layout', { id: 'tt-layout', name: 'Layout', priority: 1 }]
+    ])
+    const entryMap = new Map([
+      ['ep-1', { name: 'E01' }],
+      ['ep-2', { name: 'E02' }]
+    ])
+    let lines
+
+    beforeEach(() => {
+      // The file is built for real, into the mock of @/lib/download: its
+      // rows are read on their way.
+      const { buildCsvFile } = csv
+      vi.spyOn(csv, 'buildCsvFile').mockImplementation((name, entries) => {
+        lines = entries
+        return buildCsvFile(name, entries)
+      })
+    })
+
+    afterEach(() => vi.restoreAllMocks())
+
+    test('exports the retakes as they come, without the max retake count', () => {
+      const bucket = count => ({ count, frames: count * 10, drawings: 0 })
+      const retakeStats = (retake, done, other) => ({
+        max_retake_count: 2,
+        retake: bucket(retake),
+        done: bucket(done),
+        other: bucket(other)
+      })
+      const episodeStats = {
+        all: retakeStats(3, 5, 2),
+        'tt-anim': retakeStats(2, 3, 1),
+        'tt-layout': retakeStats(1, 2, 1)
+      }
+
+      csv.generateRetakeStatReports(
+        'retakes',
+        { all: episodeStats, 'ep-1': episodeStats },
+        taskTypeMap,
+        new Map(),
+        entryMap,
+        'count',
+        {}
+      )
+
+      const episodeLines = name => [
+        [name, 'retake', 3, '30.00%', 1, '25.00%', 2, '33.33%'],
+        [name, 'done', 5, '50.00%', 2, '50.00%', 3, '50.00%'],
+        [name, 'other', 2, '20.00%', 1, '25.00%', 1, '16.67%'],
+        ['']
+      ]
+      expect(lines).toEqual([
+        ['Name', '', 'All', '', 'Layout', '', 'Animation', ''],
+        ...episodeLines('All'),
+        ...episodeLines('E01')
+      ])
+    })
+
+    test('sorts the statuses by name and leaves blank a task type an entry lacks', () => {
+      const taskStatusMap = new Map([
+        ['wip', { name: 'WIP' }],
+        ['done', { name: 'Done' }]
+      ])
+      const stats = (wip, done) => ({
+        wip: { count: wip, frames: 0 },
+        done: { count: done, frames: 0 }
+      })
+
+      csv.generateStatReports(
+        'stats',
+        {
+          all: { all: stats(1, 3), 'tt-anim': stats(1, 1), 'tt-layout': stats(0, 2) },
+          'ep-2': { all: stats(1, 1), 'tt-anim': stats(1, 1) }
+        },
+        taskTypeMap,
+        taskStatusMap,
+        entryMap,
+        'count',
+        {}
+      )
+
+      expect(lines).toEqual([
+        ['Name', '', 'All', '', 'Layout', '', 'Animation', ''],
+        ['All', 'Done', 3, '75.00%', 2, '100.00%', 1, '50.00%'],
+        ['All', 'WIP', 1, '25.00%', '0', '0.00%', 1, '50.00%'],
+        [''],
+        ['E02', 'Done', 1, '50.00%', '', '', 1, '50.00%'],
+        ['E02', 'WIP', 1, '50.00%', '', '', 1, '50.00%'],
+        ['']
+      ])
     })
   })
 })

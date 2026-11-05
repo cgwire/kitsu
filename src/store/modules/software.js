@@ -7,10 +7,6 @@ import {
 } from '@/store/mutation-types'
 import { sortByName } from '@/lib/sorting'
 
-const cache = {
-  softwareLicenseMap: new Map()
-}
-
 const initialState = {
   softwareLicenses: []
 }
@@ -22,72 +18,44 @@ const getters = {
     state.softwareLicenses.filter(license => !license.archived),
   archivedSoftwareLicenses: state =>
     state.softwareLicenses.filter(license => license.archived),
-  softwareLicenseMap: () => cache.softwareLicenseMap,
 
   getSoftwareLicense: state => id => {
     return state.softwareLicenses.find(
       softwareLicense => softwareLicense.id === id
     )
-  },
-
-  getSoftwareLicenseOptions: state =>
-    state.softwareLicenses.map(license => {
-      return { label: license.name, value: license.id }
-    })
+  }
 }
 
 const actions = {
-  loadSoftwareLicenses({ commit }) {
-    softwareLicensesApi.getSoftwareLicenses().then(softwareLicenses => {
-      commit(LOAD_SOFTWARE_LICENSES_END, softwareLicenses)
-      Promise.resolve(softwareLicenses)
-    })
+  async loadSoftwareLicenses({ commit }) {
+    const softwareLicenses = await softwareLicensesApi.getSoftwareLicenses()
+    commit(LOAD_SOFTWARE_LICENSES_END, softwareLicenses)
+    return softwareLicenses
   },
 
-  loadSoftwareLicense({ commit }, softwareLicenseId) {
-    softwareLicensesApi
-      .getSoftwareLicense(softwareLicenseId)
-      .then(softwareLicense => {
-        commit(EDIT_SOFTWARE_LICENSE_END, softwareLicense)
-        Promise.resolve(softwareLicense)
-      })
+  async newSoftwareLicense({ commit }, data) {
+    const softwareLicense = await softwareLicensesApi.newSoftwareLicense(data)
+    commit(EDIT_SOFTWARE_LICENSE_END, softwareLicense)
+    return softwareLicense
   },
 
-  newSoftwareLicense({ commit }, data) {
-    return softwareLicensesApi
-      .newSoftwareLicense(data)
-      .then(softwareLicense => {
-        commit(EDIT_SOFTWARE_LICENSE_END, softwareLicense)
-        Promise.resolve(softwareLicense)
-      })
+  async editSoftwareLicense({ commit }, data) {
+    const softwareLicense =
+      await softwareLicensesApi.updateSoftwareLicense(data)
+    commit(EDIT_SOFTWARE_LICENSE_END, softwareLicense)
+    return softwareLicense
   },
 
-  editSoftwareLicense({ commit }, data) {
-    return softwareLicensesApi
-      .updateSoftwareLicense(data)
-      .then(softwareLicense => {
-        commit(EDIT_SOFTWARE_LICENSE_END, softwareLicense)
-        Promise.resolve(softwareLicense)
-      })
-  },
-
-  deleteSoftwareLicense({ commit }, softwareLicense) {
-    return softwareLicensesApi
-      .deleteSoftwareLicense(softwareLicense)
-      .then(() => {
-        commit(DELETE_SOFTWARE_LICENSE_END, softwareLicense)
-        Promise.resolve(softwareLicense)
-      })
+  async deleteSoftwareLicense({ commit }, softwareLicense) {
+    await softwareLicensesApi.deleteSoftwareLicense(softwareLicense)
+    commit(DELETE_SOFTWARE_LICENSE_END, softwareLicense)
+    return softwareLicense
   }
 }
 
 const mutations = {
   [LOAD_SOFTWARE_LICENSES_END](state, softwareLicenses) {
     state.softwareLicenses = sortByName(softwareLicenses)
-    cache.softwareLicenseMap.clear()
-    state.softwareLicenses.forEach(softwareLicense => {
-      cache.softwareLicenseMap.set(softwareLicense.id, softwareLicense)
-    })
   },
 
   [EDIT_SOFTWARE_LICENSE_END](state, newSoftwareLicense) {
@@ -99,7 +67,6 @@ const mutations = {
       Object.assign(softwareLicense, newSoftwareLicense)
     } else {
       state.softwareLicenses.push(newSoftwareLicense)
-      cache.softwareLicenseMap.set(newSoftwareLicense.id, newSoftwareLicense)
     }
     state.softwareLicenses = sortByName(state.softwareLicenses)
   },
@@ -111,12 +78,10 @@ const mutations = {
     if (softwareLicenseToDeleteIndex >= 0) {
       state.softwareLicenses.splice(softwareLicenseToDeleteIndex, 1)
     }
-    cache.softwareLicenseMap.delete(softwareLicenseToDelete.id)
   },
 
   [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
-    cache.softwareLicenseMap.clear()
   }
 }
 
@@ -124,6 +89,5 @@ export default {
   state,
   getters,
   actions,
-  mutations,
-  cache
+  mutations
 }

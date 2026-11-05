@@ -312,6 +312,86 @@ describe('User store', () => {
       expect(state.projectRoles).toEqual({})
     })
 
+    // The asset list rebuilds its saved searches from the asset ones.
+    test('SAVE_ASSET_SEARCH_END records the search among the asset ones', () => {
+      const searchQuery = { id: 'filter-1', name: 'props', list_type: 'asset' }
+      const state = { userFilters: {} }
+
+      store.mutations.SAVE_ASSET_SEARCH_END(state, {
+        searchQuery,
+        production: { id: 'production-1' }
+      })
+
+      expect(state.userFilters).toEqual({
+        asset: { 'production-1': [searchQuery] }
+      })
+    })
+
+    // The Assets page lists the asset searches and groups of the user store.
+    test('REMOVE_ASSET_SEARCH_END drops the search from the asset ones', () => {
+      const kept = { id: 'filter-1', name: 'props' }
+      const removed = { id: 'filter-2', name: 'chars' }
+      const state = {
+        userFilters: { asset: { 'production-1': [kept, removed] } }
+      }
+      const production = { id: 'production-1' }
+
+      store.mutations.REMOVE_ASSET_SEARCH_END(state, {
+        searchQuery: { id: 'filter-9', name: 'other' },
+        production
+      })
+      store.mutations.REMOVE_ASSET_SEARCH_END(state, {
+        searchQuery: removed,
+        production
+      })
+
+      expect(state.userFilters.asset['production-1']).toEqual([kept])
+    })
+
+    test('records then drops an asset filter group among the asset ones', () => {
+      const group = { id: 'group-1', name: 'Mine' }
+      const state = { userFilterGroups: {} }
+      const production = { id: 'production-1' }
+
+      store.mutations.SAVE_ASSET_SEARCH_FILTER_GROUP_END(state, {
+        filterGroup: group,
+        production
+      })
+      store.mutations.SAVE_ASSET_SEARCH_FILTER_GROUP_END(state, {
+        filterGroup: group,
+        production
+      })
+      expect(state.userFilterGroups).toEqual({
+        asset: { 'production-1': [group] }
+      })
+
+      store.mutations.REMOVE_ASSET_SEARCH_FILTER_GROUP_END(state, {
+        filterGroup: group,
+        production
+      })
+      expect(state.userFilterGroups.asset['production-1']).toEqual([])
+    })
+
+    // A group can come before the first search of its production, while
+    // another production has searches of the same list.
+    test('UPDATE_USER_FILTER_GROUP updates a group of a production without searches', () => {
+      const search = { id: 'filter-1', name: 'wip', is_shared: false }
+      const group = { id: 'group-1', name: 'Mine', is_shared: false }
+      const state = {
+        userFilters: { shot: { 'production-2': [search] } },
+        userFilterGroups: { shot: { 'production-1': [group] } }
+      }
+
+      store.mutations.UPDATE_USER_FILTER_GROUP(state, {
+        id: 'group-1',
+        name: 'Ours',
+        is_shared: true
+      })
+
+      expect(group).toMatchObject({ name: 'Ours', is_shared: true })
+      expect(search.is_shared).toBe(false)
+    })
+
     // NEW_TASK_COMMENT_END no longer rebuilds cache.doneIndex. That rebuild
     // is dead only because the done list comes from its own fetch: the same
     // task sits in both lists as two distinct objects, so commenting the todo

@@ -8,9 +8,21 @@ import { createStore } from 'vuex'
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
 
+vi.mock('@/store/api/client', () => ({
+  default: {
+    pdel: vi.fn(),
+    pget: vi.fn(),
+    ppost: vi.fn(),
+    pput: vi.fn()
+  }
+}))
+
 import sequencesStore from '@/store/modules/sequences'
 import shotsApi from '@/store/api/shots'
 import shotsStore from '@/store/modules/shots'
+import client from '@/store/api/client'
+import userStore from '@/store/modules/user'
+import { LOAD_SEQUENCES_END } from '@/store/mutation-types'
 
 describe('Sequences store, all-episodes pseudo-episode', () => {
   const production = { id: 'p-all' }
@@ -147,7 +159,7 @@ describe('Sequences store, all-episodes pseudo-episode', () => {
       expect(payload.loadingKey).toEqual('p-all/ep-a')
     })
 
-    test('serves the recorded scope through a getter and drops it on clear', () => {
+    test('serves the recorded scope through a getter', () => {
       const state = {}
       sequencesStore.mutations.SET_SEQUENCES_WITH_TASKS(state, {
         episodeMap: new Map(),
@@ -163,9 +175,6 @@ describe('Sequences store, all-episodes pseudo-episode', () => {
       expect(sequencesStore.getters.sequencesLoadingKey(state)).toEqual(
         'p-all/ep-a'
       )
-
-      sequencesStore.mutations.CLEAR_SEQUENCES(state)
-      expect(state.sequencesLoadingKey).toBeNull()
     })
 
     // A production switch clears the sequences through CLEAR_SHOTS: the
@@ -780,6 +789,27 @@ describe('Sequences store, DELETE_TASK_END', () => {
     expect(sequence.tasks).toEqual(['t2'])
     expect([...sequence.validations]).toEqual([['tt2', 't2']])
   })
+
+  test('keeps the tasks of a sequence when a task it does not list is deleted', () => {
+    sequencesStore.cache.sequenceMap.set('se-full', {
+      id: 'se-full',
+      tasks: ['t1', 't2'],
+      validations: new Map([
+        ['tt1', 't1'],
+        ['tt2', 't2']
+      ])
+    })
+
+    sequencesStore.mutations.DELETE_TASK_END(
+      {},
+      { id: 't9', entity_id: 'se-full', task_type_id: 'tt3' }
+    )
+
+    expect(sequencesStore.cache.sequenceMap.get('se-full').tasks).toEqual([
+      't1',
+      't2'
+    ])
+  })
 })
 
 // The search reads the index of the cached list: every change of that list
@@ -945,5 +975,448 @@ describe('Sequences store, production switch', () => {
     store.commit('SET_CURRENT_PRODUCTION', 'production-2')
 
     expect(store.getters.sequenceSearchText).toBe('')
+  })
+})
+
+describe('Sequences store, saved searches', () => {
+  const production = { id: 'p1' }
+  const names = list => list.map(({ name }) => name)
+
+  const buildStore = () =>
+    createStore({
+      modules: { sequences: sequencesStore, user: userStore },
+      getters: { currentProduction: () => production }
+    })
+
+  const reloadSequences = store =>
+    store.commit(LOAD_SEQUENCES_END, {
+      sequences: [],
+      episodeMap: new Map(),
+      production,
+      userFilters: store.getters.userFilters
+    })
+
+  beforeEach(() => {
+    Object.values(client).forEach(fn => fn.mockReset())
+    userStore.state.userFilters = {}
+    sequencesStore.state.sequenceSearchQueries = []
+  })
+
+  // The list reload takes its searches from the user filters: the first
+  // search saved in a production must land there too.
+  test('keeps the first search of a production across a reload', async () => {
+    const store = buildStore()
+    reloadSequences(store)
+    client.ppost.mockResolvedValueOnce({ id: 'f1', name: 'wip' })
+
+    await store.dispatch('saveSequenceSearch', 'wip')
+
+    expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
+      list_type: 'sequence',
+      name: 'wip',
+      query: 'wip',
+      entity_type: 'Sequence',
+      project_id: 'p1'
+    })
+    expect(names(store.getters.sequenceSearchQueries)).toEqual(['wip'])
+    reloadSequences(store)
+    expect(names(store.getters.sequenceSearchQueries)).toEqual(['wip'])
+  })
+})
+
+describe('Sequences store, through a store', () => {
+  const production = { id: 'p1', name: 'Caminandes', descriptors: [] }
+  const taskTypeMap = new Map([
+    ['tt-1', { id: 'tt-1', name: 'Layout', priority: 1 }]
+  ])
+  const taskStatusMap = new Map([
+    ['ts-1', { id: 'ts-1', name: 'Todo', short_name: 'todo' }]
+  ])
+
+  const buildStore = async (getters = {}, actions = {}) => {
+    vi.resetModules()
+    const { default: module } = await import('@/store/modules/sequences')
+    const store = createStore({
+      modules: { sequences: module },
+      getters: {
+        currentProduction: () => production,
+        episodeMap: () => new Map(),
+        isTVShow: () => false,
+        people: () => [],
+        productionSequenceTaskTypeIds: () => [],
+        taskMap: () => new Map(),
+        taskStatus: () => [],
+        taskStatusMap: () => taskStatusMap,
+        taskTypeMap: () => taskTypeMap,
+        ...getters
+      },
+      actions
+    })
+    return { module, store }
+  }
+
+  const buildSequence = (id, name, duration = 0) => ({
+    id,
+    name,
+    data: {},
+    tasks: [
+      {
+        id: `task-${id}`,
+        task_type_id: 'tt-1',
+        task_status_id: 'ts-1',
+        duration,
+        estimation: 0,
+        assignees: []
+      }
+    ]
+  })
+
+  const loadSequences = (store, sequences) =>
+    store.commit('SET_SEQUENCES_WITH_TASKS', {
+      episodeMap: new Map(),
+      userFilters: {},
+      personMap: new Map(),
+      production,
+      sequences,
+      taskMap: new Map(),
+      taskTypeMap,
+      taskStatusMap
+    })
+
+  beforeEach(() => {
+    Object.values(client).forEach(fn => fn.mockReset())
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  test('updates the list totals once a sequence is deleted', async () => {
+    const { store } = await buildStore()
+    loadSequences(store, [
+      buildSequence('sq1', 'SQ01', 60),
+      buildSequence('sq2', 'SQ02', 30)
+    ])
+    client.pdel.mockResolvedValueOnce()
+
+    await store.dispatch('deleteSequence', { id: 'sq1' })
+
+    expect(client.pdel).toHaveBeenCalledWith(
+      '/api/data/sequences/sq1?force=true'
+    )
+    expect(store.getters.displayedSequencesLength).toBe(1)
+    expect(store.getters.displayedSequencesTimeSpent).toBe(30)
+  })
+  // A sequence added live carries no totals yet.
+  test('keeps the list totals with a sequence added live', async () => {
+    const { store } = await buildStore()
+    loadSequences(store, [
+      buildSequence('sq1', 'SQ01', 60),
+      buildSequence('sq2', 'SQ02', 30)
+    ])
+    store.commit('ADD_SEQUENCE', {
+      sequence: { id: 'sq3', name: 'SQ03', data: {} },
+      episodeMap: new Map()
+    })
+    client.pdel.mockResolvedValueOnce()
+
+    await store.dispatch('deleteSequence', { id: 'sq1' })
+
+    expect(store.getters.displayedSequencesLength).toBe(2)
+    expect(store.getters.displayedSequencesTimeSpent).toBe(30)
+    expect(store.getters.displayedSequencesEstimation).toBe(0)
+  })
+
+  const names = list => list.map(({ name }) => name)
+
+  test('locks an edited sequence until a while after its save', async () => {
+    const { store } = await buildStore()
+    loadSequences(store, [buildSequence('sq1', 'SQ01')])
+    store.getters.sequenceMap.get('sq1').data = { fps: '24' }
+    client.pput.mockResolvedValueOnce({})
+    const form = { id: 'sq1', name: 'SQ01 bis', description: 'Intro', data: {} }
+
+    const saving = store.dispatch('editSequence', form)
+
+    const sequence = store.getters.sequenceMap.get('sq1')
+    expect(sequence).toMatchObject({
+      lock: 1,
+      name: 'SQ01 bis',
+      data: { fps: '24' }
+    })
+    expect(names(store.getters.displayedSequences)).toEqual(['SQ01 bis'])
+    expect(store.getters.isSequenceDescription).toBe(true)
+    await saving
+    expect(client.pput).toHaveBeenCalledWith('/api/data/entities/sq1', {
+      name: 'SQ01 bis',
+      description: 'Intro',
+      data: {}
+    })
+    expect(sequence.lock).toBe(1)
+    vi.advanceTimersByTime(2000)
+    expect(sequence.lock).toBe(0)
+  })
+
+  test('creates a sequence at its place in the list', async () => {
+    const { store } = await buildStore()
+    loadSequences(store, [
+      buildSequence('sq1', 'SQ01'),
+      buildSequence('sq3', 'SQ03')
+    ])
+    client.ppost.mockResolvedValueOnce({
+      id: 'sq2',
+      name: 'SQ02',
+      project_id: 'p1'
+    })
+
+    const sequence = await store.dispatch('newSequence', {
+      name: 'SQ02',
+      project_id: 'p1',
+      description: '',
+      data: {}
+    })
+
+    expect(client.ppost).toHaveBeenCalledWith(
+      '/api/data/projects/p1/sequences',
+      {
+        name: 'SQ02',
+        episode_id: undefined,
+        description: '',
+        data: {}
+      }
+    )
+    expect(sequence).toMatchObject({
+      id: 'sq2',
+      production_id: 'p1',
+      tasks: []
+    })
+    expect(names(store.getters.displayedSequences)).toEqual([
+      'SQ01',
+      'SQ02',
+      'SQ03'
+    ])
+    expect(store.getters.displayedSequencesLength).toBe(3)
+  })
+
+  test('refuses a sequence name already taken in its episode', async () => {
+    const { store } = await buildStore({ isTVShow: () => true })
+    loadSequences(store, [
+      { ...buildSequence('sq1', 'SQ01'), episode_id: 'e1' }
+    ])
+    client.ppost.mockResolvedValue({
+      id: 'sq2',
+      name: 'SQ01',
+      project_id: 'p1'
+    })
+
+    await expect(
+      store.dispatch('newSequence', { name: 'SQ01', episode_id: 'e1' })
+    ).rejects.toThrow('Sequence already exists')
+    await store.dispatch('newSequence', { name: 'SQ01', episode_id: 'e2' })
+
+    expect(client.ppost).toHaveBeenCalledTimes(1)
+  })
+
+  test('creates the tasks of the sequence task types', async () => {
+    const createEntityTasks = vi.fn()
+    const { store } = await buildStore(
+      { productionSequenceTaskTypeIds: () => ['tt-1'] },
+      { createEntityTasks }
+    )
+    loadSequences(store, [])
+    client.ppost.mockResolvedValueOnce({ id: 'sq2', name: 'SQ02' })
+
+    await store.dispatch('newSequence', { name: 'SQ02', project_id: 'p1' })
+
+    expect(createEntityTasks).toHaveBeenCalledWith(expect.anything(), {
+      entityId: 'sq2',
+      taskTypeIds: ['tt-1']
+    })
+  })
+
+  test('removes a saved sequence search', async () => {
+    const { store } = await buildStore()
+    store.state.sequences.sequenceSearchQueries = [
+      { id: 'f1', name: 'done' },
+      { id: 'f2', name: 'wip' }
+    ]
+    client.pdel.mockResolvedValueOnce()
+
+    await store.dispatch('removeSequenceSearch', { id: 'f1', name: 'done' })
+
+    expect(client.pdel).toHaveBeenCalledWith('/api/data/user/filters/f1')
+    expect(names(store.getters.sequenceSearchQueries)).toEqual(['wip'])
+  })
+
+  test('searches the sequences, then sorts them by a descriptor', async () => {
+    const { store } = await buildStore()
+    const sequences = [
+      buildSequence('sq1', 'SQ01'),
+      buildSequence('sq2', 'SQ02'),
+      buildSequence('sq3', 'SQ03')
+    ]
+    sequences.forEach((sequence, index) => {
+      sequence.data = { difficulty: String([1, 3, 2][index]) }
+    })
+    loadSequences(store, sequences)
+
+    await store.dispatch('setSequenceSearch', 'SQ02')
+    expect(names(store.getters.displayedSequences)).toEqual(['SQ02'])
+    expect(store.getters.sequenceSearchText).toBe('SQ02')
+
+    await store.dispatch('setSequenceSearch', '')
+    const sortInfo = {
+      type: 'metadata',
+      column: 'difficulty',
+      data_type: 'number',
+      ascending: false
+    }
+    await store.dispatch('changeSequenceSort', sortInfo)
+    expect(store.getters.sequenceSorting).toEqual([sortInfo])
+    expect(names(store.getters.displayedSequences)).toEqual([
+      'SQ02',
+      'SQ03',
+      'SQ01'
+    ])
+
+    await store.dispatch('changeSequenceSort', null)
+    expect(store.getters.sequenceSorting).toEqual([])
+    expect(names(store.getters.displayedSequences)).toEqual([
+      'SQ01',
+      'SQ02',
+      'SQ03'
+    ])
+  })
+
+  test('narrows the sequences of the stats page to a search', async () => {
+    const { store } = await buildStore()
+    loadSequences(store, [
+      buildSequence('sq1', 'SQ01'),
+      buildSequence('sq2', 'SQ02')
+    ])
+
+    await store.dispatch('setSequenceStatsSearch', 'SQ01')
+
+    expect(names(store.getters.displayedSequences)).toEqual(['SQ01'])
+    expect(store.getters.displayedSequencesLength).toBe(1)
+    expect(store.getters.sequenceSearchText).toBe('SQ01')
+  })
+
+  test('counts the shots of a search in the sequence stats', async () => {
+    const descriptors = [
+      { id: 'd1', name: 'Mood', field_name: 'mood', entity_type: 'Shot' }
+    ]
+    const { store } = await buildStore({
+      currentProduction: () => ({ ...production, descriptors })
+    })
+    const { default: shotStore } = await import('@/store/modules/shots')
+    shotStore.cache.shots = [
+      { id: 's1', sequence_id: 'sq1', tasks: [], data: { mood: 'calm' } },
+      { id: 's2', sequence_id: 'sq1', tasks: [], data: { mood: 'dark' } },
+      { id: 's3', sequence_id: 'sq2', tasks: [], data: { mood: 'calm' } }
+    ]
+
+    store.dispatch('setSequenceStatsSearch', 'mood=calm')
+    store.dispatch('computeSequenceStats')
+
+    expect(store.getters.sequenceShotCounts).toEqual({ sq1: 1, sq2: 1 })
+    shotStore.cache.shots = []
+  })
+
+  test('tracks the selected task cells', async () => {
+    const { store } = await buildStore()
+    loadSequences(store, [
+      buildSequence('sq1', 'SQ01'),
+      buildSequence('sq2', 'SQ02')
+    ])
+    store.state.sequences.sequenceValidationColumns = ['tt-1', 'tt-2']
+    const grid = () => [...store.getters.sequenceSelectionGrid].sort()
+
+    store.commit('ADD_SELECTED_TASK', { x: 0, y: 1 })
+    store.commit('ADD_SELECTED_TASKS', [
+      { x: 1, y: 0 },
+      { x: 1, y: 1 }
+    ])
+    expect(grid()).toEqual(['0-1', '1-0', '1-1'])
+
+    store.commit('REMOVE_SELECTED_TASK', { x: 0, y: 1 })
+    store.commit('REMOVE_SELECTED_TASK', {
+      task: { column: { id: 'tt-2' }, entity: { id: 'sq2' } }
+    })
+    expect(grid()).toEqual(['1-0'])
+
+    store.commit('CLEAR_SELECTED_TASKS')
+    expect(grid()).toEqual([])
+  })
+
+  test('renames a descriptor field in the sequence data', async () => {
+    const { store } = await buildStore()
+    loadSequences(store, [buildSequence('sq1', 'SQ01')])
+    store.getters.sequenceMap.get('sq1').data = { level: 'hard' }
+    const rename = entityType =>
+      store.commit('UPDATE_METADATA_DESCRIPTOR_END', {
+        descriptor: { entity_type: entityType, field_name: 'difficulty' },
+        previousDescriptorFieldName: 'level'
+      })
+
+    rename('Shot')
+    expect(store.getters.sequenceMap.get('sq1').data).toEqual({
+      level: 'hard'
+    })
+
+    rename('Sequence')
+    expect(store.getters.sequenceMap.get('sq1').data).toEqual({
+      difficulty: 'hard'
+    })
+  })
+
+  test('keeps the scroll position and clears the selected sequences', async () => {
+    const { store } = await buildStore()
+    store.state.sequences.selectedSequences.set('sq1', { id: 'sq1' })
+
+    store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 120)
+    await store.dispatch('clearSelectedSequences')
+
+    expect(store.getters.sequenceListScrollPosition).toBe(120)
+    expect(store.state.sequences.selectedSequences.size).toBe(0)
+  })
+
+  test('deletes the tasks of a type, of the selection only', async () => {
+    const deleteAllTasks = vi.fn()
+    const { store } = await buildStore({}, { deleteAllTasks })
+    loadSequences(store, [
+      buildSequence('sq1', 'SQ01'),
+      { ...buildSequence('sq2', 'SQ02'), tasks: [] }
+    ])
+
+    await store.dispatch('deleteAllSequenceTasks', {
+      projectId: 'p1',
+      taskTypeId: 'tt-1',
+      selectionOnly: true
+    })
+    await store.dispatch('deleteAllSequenceTasks', {
+      projectId: 'p1',
+      taskTypeId: 'tt-1'
+    })
+
+    expect(deleteAllTasks.mock.calls.map(([, payload]) => payload)).toEqual([
+      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: ['task-sq1'] },
+      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: [] }
+    ])
+  })
+
+  test('shows the last search result again', async () => {
+    const { store } = await buildStore()
+    loadSequences(store, [
+      buildSequence('sq1', 'SQ01'),
+      buildSequence('sq2', 'SQ02')
+    ])
+    await store.dispatch('setSequenceSearch', 'SQ01')
+    store.state.sequences.displayedSequences = []
+
+    await store.dispatch('resetSequences')
+
+    expect(names(store.getters.displayedSequences)).toEqual(['SQ01'])
   })
 })

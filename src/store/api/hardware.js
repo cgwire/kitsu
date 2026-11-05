@@ -5,10 +5,6 @@ export default {
     return client.pget('/api/data/hardware-items')
   },
 
-  getHardwareItem(hardwareItemId) {
-    return client.pget(`/api/data/hardware-items/${hardwareItemId}`)
-  },
-
   newHardwareItem(hardwareItem) {
     const data = {
       name: hardwareItem.name,

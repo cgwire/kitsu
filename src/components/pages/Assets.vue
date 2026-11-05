@@ -70,7 +70,6 @@
               :queries="productionAssetSearchQueries"
               type="asset"
               :production-id="currentProduction?.id"
-              @remove-search="removeSearchQuery"
             />
           </div>
         </div>
@@ -443,7 +442,6 @@ const {
   onSearchChange,
   openEditModal: onEditClicked,
   parsedCSV,
-  removeSearchQuery,
   renderColumns,
   renderImport,
   resetImport,

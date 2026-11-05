@@ -83,7 +83,9 @@ const mutations = {
     const customActionToDeleteIndex = state.customActions.findIndex(
       customAction => customAction.id === customActionToDelete.id
     )
-    state.customActions.splice(customActionToDeleteIndex, 1)
+    if (customActionToDeleteIndex >= 0) {
+      state.customActions.splice(customActionToDeleteIndex, 1)
+    }
   },
 
   [RESET_ALL](state) {

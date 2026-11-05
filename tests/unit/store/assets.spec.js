@@ -1,14 +1,32 @@
 // @vitest-environment node
 
 import { vi } from 'vitest'
+import { computed } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the assets module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
 
+vi.mock('@/store/api/client', () => ({
+  default: {
+    getModel: vi.fn(),
+    pdel: vi.fn(),
+    pget: vi.fn(),
+    pgetNdjson: vi.fn(),
+    ppost: vi.fn(),
+    ppostImport: vi.fn(),
+    pput: vi.fn()
+  }
+}))
+
 import assetsStore from '@/store/modules/assets'
 import assetsApi from '@/store/api/assets'
+import client from '@/store/api/client'
 import entitiesApi from '@/store/api/entities'
+import episodeStore from '@/store/modules/episodes'
+import productionsStore from '@/store/modules/productions'
+import tasksStore from '@/store/modules/tasks'
 import taskStatusStore from '@/store/modules/taskstatus'
 import { buildAssetIndex } from '@/lib/indexing'
 import { PAGE_SIZE } from '@/lib/pagination'
@@ -1399,6 +1417,1095 @@ describe('Assets store, UPDATE_ASSET', () => {
     expect(state.displayedAssets[0]).toMatchObject({
       name: 'new',
       tasks: ['t1']
+    })
+  })
+})
+
+describe('Assets store, through a store', () => {
+  const buildStore = async (getters = {}) => {
+    vi.resetModules()
+    const { default: module } = await import('@/store/modules/assets')
+    const store = createStore({
+      modules: { assets: module },
+      getters: {
+        assetTypeMap: () => new Map([['at-1', { id: 'at-1', name: 'Props' }]]),
+        productionMap: () =>
+          new Map([['p1', { id: 'p1', name: 'Caminandes' }]]),
+        ...getters
+      }
+    })
+    return { module, store }
+  }
+
+  const names = list => list.map(({ name }) => name)
+
+  const cacheAssets = (module, assets) => {
+    assets.forEach(asset => module.cache.assetMap.set(asset.id, asset))
+    module.cache.result = assets
+  }
+
+  beforeEach(() => {
+    Object.values(client).forEach(fn => fn.mockReset())
+  })
+
+  test('cancels a deleted asset that has tasks', async () => {
+    const { module, store } = await buildStore()
+    const tree = { id: 'a1', name: 'Tree', tasks: ['t1'] }
+    const rock = { id: 'a2', name: 'Rock', tasks: ['t2'] }
+    cacheAssets(module, [tree, rock])
+    client.pdel.mockResolvedValueOnce()
+
+    await store.dispatch('deleteAsset', { id: 'a1' })
+
+    expect(client.pdel).toHaveBeenCalledWith('/api/data/assets/a1')
+    expect(tree.canceled).toBe(true)
+    expect(store.state.assets.displayedAssetsLength).toBe(1)
+  })
+
+  test('restores a canceled asset', async () => {
+    const { module, store } = await buildStore()
+    const tree = { id: 'a1', name: 'Tree', tasks: [], canceled: true }
+    cacheAssets(module, [tree, { id: 'a2', name: 'Rock', tasks: [] }])
+    client.pput.mockResolvedValueOnce({})
+
+    const asset = await store.dispatch('restoreAsset', { id: 'a1' })
+
+    expect(asset).toEqual({ id: 'a1' })
+    expect(client.pput).toHaveBeenCalledWith('/api/data/entities/a1', {
+      canceled: false
+    })
+    expect(tree.canceled).toBe(false)
+    expect(store.state.assets.displayedAssetsLength).toBe(2)
+  })
+
+  test('shares the assets of an asset type, then unshares them', async () => {
+    const { store } = await buildStore()
+    client.ppost.mockResolvedValue({})
+
+    await store.dispatch('shareAssets', {
+      production: { id: 'p1' },
+      assetType: { id: 'at-1' },
+      assetIds: ['a1']
+    })
+    await store.dispatch('unshareAssets', { assetIds: ['a1'] })
+
+    expect(client.ppost.mock.calls).toEqual([
+      [
+        '/api/actions/projects/p1/asset-types/at-1/assets/share/',
+        { asset_ids: ['a1'], is_shared: true }
+      ],
+      ['/api/actions/assets/share/', { asset_ids: ['a1'], is_shared: false }]
+    ])
+  })
+
+  test('loads the shared assets, then searches them', async () => {
+    const { store } = await buildStore()
+    client.pget.mockResolvedValueOnce([
+      { id: 'a1', name: 'Tree', project_id: 'p1', entity_type_id: 'at-1' },
+      { id: 'a2', name: 'Bush', project_id: 'p1', entity_type_id: 'at-1' }
+    ])
+
+    await store.dispatch('loadSharedAssets', { production: { id: 'p1' } })
+
+    expect(client.pget).toHaveBeenCalledWith(
+      '/api/data/assets?is_shared=true&project_id=p1'
+    )
+    const shared = store.getters.displayedSharedAssets
+    expect(shared.map(({ full_name }) => full_name)).toEqual([
+      'Props / Bush',
+      'Props / Tree'
+    ])
+    expect(shared[0].production.name).toBe('Caminandes')
+    expect(store.getters.displayedSharedAssetsByType.map(names)).toEqual([
+      ['Bush', 'Tree']
+    ])
+
+    await store.dispatch('setSharedAssetSearch', 'tree')
+    expect(names(store.getters.displayedSharedAssets)).toEqual(['Tree'])
+  })
+
+  test('loads the assets a production does not share', async () => {
+    const { store } = await buildStore()
+    client.pget.mockResolvedValueOnce([
+      { id: 'a3', name: 'Rock', project_id: 'p1', entity_type_id: 'at-1' }
+    ])
+
+    await store.dispatch('loadUnsharedAssets', { production: { id: 'p1' } })
+
+    expect(client.pget).toHaveBeenCalledWith(
+      '/api/data/assets?is_shared=false&project_id=p1'
+    )
+    expect(store.getters.unsharedAssets).toMatchObject([
+      { name: 'Rock', asset_type_name: 'Props', full_name: 'Props / Rock' }
+    ])
+  })
+
+  test('reports a failed shared asset load', async () => {
+    const { store } = await buildStore()
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    client.pget.mockRejectedValue(new Error('Server error'))
+
+    await expect(
+      store.dispatch('loadSharedAssets', { production: { id: 'p1' } })
+    ).rejects.toThrow('Server error')
+    await expect(
+      store.dispatch('loadUnsharedAssets', { production: { id: 'p1' } })
+    ).rejects.toThrow('Server error')
+
+    expect(consoleError).toHaveBeenCalledTimes(2)
+    consoleError.mockRestore()
+  })
+
+  test('selects assets, then clears the selection', async () => {
+    const { store } = await buildStore()
+    const tree = { id: 'a1', name: 'Tree' }
+    store.state.assets.assetSelectionGrid.add('0-0')
+
+    await store.dispatch('setAssetSelection', { asset: tree, selected: true })
+    expect([...store.getters.selectedAssets.keys()]).toEqual(['a1'])
+    expect(store.getters.assetSelectionGrid.size).toBe(0)
+
+    await store.dispatch('setAssetSelection', { asset: tree, selected: false })
+    expect(store.getters.selectedAssets.size).toBe(0)
+
+    await store.dispatch('setAssetSelection', { asset: tree, selected: true })
+    await store.dispatch('clearSelectedAssets')
+    expect(store.getters.selectedAssets.size).toBe(0)
+  })
+
+  test('keeps the selected CSV file until the import ends', async () => {
+    const { store } = await buildStore()
+    const formData = { file: 'assets.csv' }
+
+    store.commit('ASSET_CSV_FILE_SELECTED', formData)
+    expect(store.getters.assetsCsvFormData).toEqual(formData)
+
+    store.commit('IMPORT_ASSETS_START')
+    store.commit('IMPORT_ASSETS_END')
+    expect(store.getters.assetsCsvFormData).toBeNull()
+  })
+
+  test('locks an asset once per pending save', async () => {
+    const { module, store } = await buildStore()
+    const tree = { id: 'a1', name: 'Tree' }
+    cacheAssets(module, [tree])
+
+    store.commit('LOCK_ASSET', { id: 'a1' })
+    store.commit('LOCK_ASSET', { id: 'a1' })
+    expect(tree.lock).toBe(2)
+
+    store.commit('UNLOCK_ASSET', { id: 'a1' })
+    expect(tree.lock).toBe(1)
+    store.commit('UNLOCK_ASSET', { id: 'a1' })
+    store.commit('UNLOCK_ASSET', { id: 'a1' })
+    expect(tree.lock).toBe(0)
+  })
+
+  test('keeps the scroll position of the list', async () => {
+    const { store } = await buildStore()
+
+    store.commit('SET_ASSET_LIST_SCROLL_POSITION', 240)
+
+    expect(store.getters.assetListScrollPosition).toBe(240)
+  })
+})
+
+describe('Assets store, list workflow', () => {
+  const production = { id: 'p1', name: 'Caminandes', descriptors: [] }
+  const characters = {
+    id: 'at-char',
+    name: 'Characters',
+    task_types: ['tt-model']
+  }
+  const props = { id: 'at-prop', name: 'Props', task_types: [] }
+  const assetTypeMap = new Map([
+    [characters.id, characters],
+    [props.id, props]
+  ])
+  const taskTypeMap = new Map([
+    ['tt-model', { id: 'tt-model', name: 'Modeling', priority: 1 }],
+    ['tt-rig', { id: 'tt-rig', name: 'Rigging', priority: 2 }]
+  ])
+  const todo = { id: 'ts-todo', short_name: 'todo', color: '#ccc' }
+  const feedback = {
+    id: 'ts-wfa',
+    short_name: 'wfa',
+    color: '#f00',
+    is_feedback_request: true
+  }
+  const taskStatusMap = new Map([
+    [todo.id, todo],
+    [feedback.id, feedback]
+  ])
+  const personMap = new Map([
+    ['person-1', { id: 'person-1', full_name: 'John Doe' }]
+  ])
+  const propsType = {
+    asset_type_id: props.id,
+    asset_type_name: props.name,
+    entity_type_id: props.id
+  }
+  // The store and its helpers read the task map of the tasks store.
+  const taskMap = tasksStore.state.taskMap
+
+  let rootActions
+  let userFilters
+  let userFilterGroups
+
+  const buildState = () => ({
+    assetValidationColumns: [],
+    filteredAssets: [],
+    displayedAssets: [],
+    displayedAssetsCount: 0,
+    displayedAssetsLength: 0,
+    displayedAssetsTimeSpent: 0,
+    displayedAssetsEstimation: 0,
+    assetFilledColumns: {},
+    assetSearchText: '',
+    assetSelectionGrid: new Set(),
+    assetSearchQueries: [],
+    assetSearchFilterGroups: [],
+    assetSorting: [],
+    assetTypeStats: {},
+    assetTypeAssetCounts: {},
+    assetTypes: [],
+    isAssetsLoading: false,
+    isAssetsLoadingError: false,
+    assetsLoadingKey: null,
+    isAssetDescription: false,
+    isAssetEstimation: false,
+    isAssetResolution: false,
+    isAssetTime: false,
+    assetsCsvFormData: null,
+    assetCreated: '',
+    personTasks: [],
+    assetListScrollPosition: 0,
+    selectedAssets: new Map(),
+    displayedSharedAssets: [],
+    sharedAssets: [],
+    sharedAssetSearchText: '',
+    unsharedAssets: []
+  })
+
+  const buildStore = ({
+    assetTaskTypeIds = ['tt-model', 'tt-rig'],
+    isTVShow = false
+  } = {}) =>
+    createStore({
+      modules: {
+        assets: {
+          // The actions read the module state directly, as in the app.
+          state: assetsStore.state,
+          getters: assetsStore.getters,
+          actions: assetsStore.actions,
+          mutations: assetsStore.mutations
+        }
+      },
+      getters: {
+        assetTypeMap: () => assetTypeMap,
+        currentEpisode: () => null,
+        currentProduction: () => production,
+        episodes: () => [],
+        isTVShow: () => isTVShow,
+        organisation: () => ({ hours_by_day: 8 }),
+        people: () => [],
+        personMap: () => personMap,
+        productionAssetTaskTypeIds: () => assetTaskTypeIds,
+        taskMap: () => taskMap,
+        taskStatus: () => [...taskStatusMap.values()],
+        taskStatusMap: () => taskStatusMap,
+        taskTypeMap: () => taskTypeMap,
+        userFilterGroups: () => userFilterGroups,
+        userFilters: () => userFilters
+      },
+      actions: rootActions
+    })
+
+  const buildTask = (id, taskTypeId, fields = {}) => ({
+    id,
+    task_type_id: taskTypeId,
+    task_status_id: todo.id,
+    duration: 0,
+    estimation: 0,
+    assignees: [],
+    ...fields
+  })
+
+  const buildAsset = (id, name, fields = {}) => ({
+    id,
+    name,
+    asset_type_id: characters.id,
+    asset_type_name: characters.name,
+    entity_type_id: characters.id,
+    project_id: production.id,
+    description: '',
+    data: {},
+    tasks: [],
+    ...fields
+  })
+
+  // What Zou answers to a creation: the entity, without tasks.
+  const newAssetPayload = (id, name, fields = {}) => {
+    const asset = buildAsset(id, name, fields)
+    delete asset.tasks
+    return asset
+  }
+
+  const newAssetForm = (name, fields = {}) => ({
+    name,
+    description: '',
+    data: {},
+    is_shared: false,
+    source_id: 'null',
+    project_id: production.id,
+    entity_type_id: characters.id,
+    ...fields
+  })
+
+  const load = (store, assets) =>
+    store.commit('LOAD_ASSETS_END', {
+      production,
+      assets,
+      userFilters,
+      userFilterGroups,
+      personMap,
+      taskMap,
+      taskTypeMap
+    })
+
+  const names = list => list.map(({ name }) => name)
+
+  beforeEach(() => {
+    Object.values(client).forEach(fn => fn.mockReset())
+    Object.assign(assetsStore.state, buildState())
+    taskStatusMap.forEach(status =>
+      taskStatusStore.cache.taskStatusMap.set(status.id, status)
+    )
+    rootActions = { createEntityTasks: vi.fn(), deleteAllTasks: vi.fn() }
+    userFilters = {}
+    userFilterGroups = {}
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+    taskMap.clear()
+    taskStatusStore.cache.taskStatusMap.clear()
+    episodeStore.cache.episodeMap.clear()
+    productionsStore.state.currentProduction = null
+    Object.assign(assetsStore.cache, {
+      assets: [],
+      assetIndex: {},
+      assetsLoadingPromise: null,
+      result: [],
+      sharedAssetIndex: {}
+    })
+    assetsStore.cache.assetMap.clear()
+    assetsStore.cache.removedAssetIds.clear()
+  })
+
+  describe('list load', () => {
+    test('computes the totals, flags, and columns of the assets', () => {
+      userFilters = { asset: { p1: [{ id: 'f1', name: 'props' }] } }
+      userFilterGroups = { asset: { p1: [{ id: 'g1', name: 'Mine' }] } }
+      const store = buildStore()
+
+      load(store, [
+        buildAsset('a2', 'Tree', {
+          ...propsType,
+          canceled: true,
+          tasks: [buildTask('t2', 'tt-rig', { duration: 30 })]
+        }),
+        buildAsset('a1', 'Rock', {
+          tasks: [
+            buildTask('t1', 'tt-model', { duration: 60, estimation: 120 })
+          ]
+        }),
+        buildAsset('a3', 'Bush', {
+          ...propsType,
+          description: 'Green',
+          data: { resolution: '2048x858' }
+        })
+      ])
+
+      expect(names(store.getters.displayedAssets)).toEqual([
+        'Rock',
+        'Bush',
+        'Tree'
+      ])
+      expect(store.getters.displayedAssetsByType.map(names)).toEqual([
+        ['Rock'],
+        ['Bush', 'Tree']
+      ])
+      expect(store.getters.assetsByType.map(names)).toEqual([
+        ['Rock'],
+        ['Bush']
+      ])
+      expect(store.getters.displayedAssetsCount).toBe(3)
+      expect(store.state.assets.displayedAssetsLength).toBe(2)
+      expect(store.getters.isAssetTime).toBe(true)
+      expect(store.getters.isAssetEstimation).toBe(true)
+      expect(store.getters.isAssetDescription).toBe(true)
+      expect(store.getters.isAssetResolution).toBe(true)
+      expect(store.getters.assetValidationColumns).toEqual([
+        'tt-model',
+        'tt-rig'
+      ])
+      expect(store.getters.assetMap.get('a1').tasks).toEqual(['t1'])
+      expect(store.getters.isAssetsLoading).toBe(false)
+      expect(store.getters.isAssetsLoadingError).toBe(false)
+      expect(store.getters.assetSearchText).toBe('')
+      expect(store.state.assets.assetSearchQueries).toEqual([
+        { id: 'f1', name: 'props' }
+      ])
+      expect(store.state.assets.assetSearchFilterGroups).toEqual([
+        { id: 'g1', name: 'Mine' }
+      ])
+    })
+
+    test('loads the assets with the shared assets of the other productions', async () => {
+      const store = buildStore()
+      client.pgetNdjson.mockResolvedValueOnce([buildAsset('a1', 'Rock')])
+      client.pget.mockResolvedValueOnce([
+        buildAsset('a1', 'Rock'),
+        buildAsset('a9', 'Lamp', { project_id: 'p2' })
+      ])
+
+      await store.dispatch('loadAssets')
+
+      expect(client.pgetNdjson).toHaveBeenCalledWith(
+        '/api/data/assets/with-tasks?project_id=p1'
+      )
+      expect(client.pget).toHaveBeenCalledWith(
+        '/api/data/projects/p1/assets/shared-used'
+      )
+      // The shared assets come after the own ones of their type.
+      expect(names(store.getters.displayedAssets)).toEqual(['Rock', 'Lamp'])
+      expect(store.getters.assetMap.get('a9').shared).toBe(true)
+      expect(store.getters.assetMap.get('a1').shared).toBeUndefined()
+    })
+
+    test('shows the first page, then the next one', () => {
+      const store = buildStore()
+      load(
+        store,
+        Array.from({ length: PAGE_SIZE + 5 }, (_, index) =>
+          buildAsset(`a${index}`, `A${String(index).padStart(3, '0')}`)
+        )
+      )
+      expect(store.getters.displayedAssets).toHaveLength(PAGE_SIZE)
+
+      store.dispatch('displayMoreAssets')
+
+      expect(store.getters.displayedAssets).toHaveLength(PAGE_SIZE + 5)
+    })
+
+    test('counts the assets and their task statuses by asset type', () => {
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', { tasks: [buildTask('t1', 'tt-model')] }),
+        buildAsset('a2', 'Tree', {
+          ...propsType,
+          tasks: [buildTask('t2', 'tt-model', { task_status_id: 'ts-wfa' })]
+        }),
+        buildAsset('a3', 'Bush', { ...propsType, canceled: true })
+      ])
+
+      store.dispatch('computeAssetTypeStats')
+
+      const stats = store.getters.assetTypeStats
+      expect(stats['at-char']['tt-model']['ts-todo'].count).toBe(1)
+      expect(stats['at-prop']['tt-model']['ts-wfa'].count).toBe(1)
+      expect(stats.all.all['ts-wfa']).toMatchObject({ name: 'wfa', count: 1 })
+      expect(store.getters.assetTypeAssetCounts).toEqual({
+        'at-char': 1,
+        'at-prop': 1
+      })
+    })
+
+    test('marks the list of a scope partial once', () => {
+      const store = buildStore()
+
+      store.state.assets.assetsLoadingKey = 'p1/'
+      store.commit('MARK_ASSETS_PARTIAL')
+      store.commit('MARK_ASSETS_PARTIAL')
+      expect(store.getters.assetsLoadingKey).toBe('p1/#partial')
+
+      store.state.assets.assetsLoadingKey = 'p1/all#shared'
+      store.commit('MARK_ASSETS_PARTIAL')
+      expect(store.getters.assetsLoadingKey).toBe('p1/all#shared')
+    })
+
+    test('adds an asset loaded by id with its tasks', async () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock')])
+      client.getModel.mockResolvedValueOnce(
+        buildAsset('a5', 'Lamp', {
+          tasks: [buildTask('t5', 'tt-model', { entity_id: 'a5' })]
+        })
+      )
+
+      await store.dispatch('loadAsset', 'a5')
+
+      expect(client.getModel).toHaveBeenCalledWith('assets', 'a5', true)
+      expect(store.getters.assetMap.get('a5').tasks).toEqual(['t5'])
+      expect(taskMap.get('t5').entity_name).toBe('Characters / Lamp')
+    })
+  })
+
+  describe('creation and edition', () => {
+    test('creates an asset, then the tasks its type takes', async () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock')])
+      client.ppost.mockResolvedValueOnce(newAssetPayload('a3', 'Hero'))
+      rootActions.createEntityTasks.mockResolvedValueOnce([])
+
+      const asset = await store.dispatch('newAsset', newAssetForm('Hero'))
+
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/data/projects/p1/asset-types/at-char/assets/new',
+        { name: 'Hero', description: '', data: {}, is_shared: false }
+      )
+      // Modeling only: the Characters workflow leaves Rigging out.
+      expect(rootActions.createEntityTasks).toHaveBeenCalledWith(
+        expect.anything(),
+        { entityId: 'a3', taskTypeIds: ['tt-model'] }
+      )
+      expect(asset.id).toBe('a3')
+      expect(store.getters.assetCreated).toBe('Hero')
+      expect(names(store.getters.displayedAssets)).toEqual(['Hero', 'Rock'])
+    })
+
+    test('lists the tasks created with a new asset', async () => {
+      // As the tasks store does once the tasks are created.
+      rootActions.createEntityTasks = ({ commit }, { entityId, taskTypeIds }) =>
+        taskTypeIds.map(taskTypeId => {
+          const task = buildTask(`t-${taskTypeId}`, taskTypeId, {
+            entity_id: entityId
+          })
+          commit('NEW_TASK_END', { task })
+          return task
+        })
+      const store = buildStore()
+      client.ppost.mockResolvedValueOnce(newAssetPayload('a3', 'Hero'))
+
+      await store.dispatch('newAsset', newAssetForm('Hero'))
+
+      expect(store.getters.assetMap.get('a3').tasks).toEqual(['t-tt-model'])
+    })
+
+    test('creates no task for a production without asset task types', async () => {
+      const store = buildStore({ assetTaskTypeIds: [] })
+      client.ppost.mockResolvedValueOnce(
+        newAssetPayload('a4', 'Chair', propsType)
+      )
+
+      const asset = await store.dispatch(
+        'newAsset',
+        newAssetForm('Chair', { entity_type_id: props.id })
+      )
+
+      expect(asset.id).toBe('a4')
+      expect(rootActions.createEntityTasks).not.toHaveBeenCalled()
+      expect(store.getters.assetMap.get('a4').asset_type_name).toBe('Props')
+    })
+
+    test('refuses an asset named like a listed one', async () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock')])
+
+      await expect(
+        store.dispatch('newAsset', newAssetForm('Rock'))
+      ).rejects.toThrow('Asset already exists')
+
+      expect(client.ppost).not.toHaveBeenCalled()
+    })
+
+    test('keeps a new asset whose tasks fail to be created', async () => {
+      const store = buildStore()
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      client.ppost.mockResolvedValueOnce(newAssetPayload('a3', 'Hero'))
+      rootActions.createEntityTasks.mockRejectedValueOnce(
+        new Error('Server error')
+      )
+
+      await store.dispatch('newAsset', newAssetForm('Hero'))
+
+      expect(consoleError).toHaveBeenCalledWith(new Error('Server error'))
+      expect(names(store.getters.displayedAssets)).toEqual(['Hero'])
+    })
+
+    test('edits an asset, merges its data, and unlocks it after the save', async () => {
+      vi.useFakeTimers()
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', {
+          data: { mood: 'calm', resolution: '2048x858' }
+        })
+      ])
+      const rock = store.getters.assetMap.get('a1')
+      client.pput.mockResolvedValueOnce({})
+
+      const saving = store.dispatch('editAsset', {
+        id: 'a1',
+        name: 'Boulder',
+        description: 'Big',
+        data: { mood: 'angry' },
+        entity_type_id: characters.id,
+        project_id: production.id
+      })
+      expect(rock.lock).toBe(1)
+      await saving
+
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/entities/a1',
+        expect.objectContaining({ name: 'Boulder', description: 'Big' })
+      )
+      expect(rock).toMatchObject({
+        name: 'Boulder',
+        description: 'Big',
+        data: { mood: 'angry', resolution: '2048x858' }
+      })
+      expect(store.getters.displayedAssets[0].name).toBe('Boulder')
+      vi.advanceTimersByTime(2000)
+      expect(rock.lock).toBe(0)
+    })
+
+    test('refuses to give an asset the name of another one', async () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock'), buildAsset('a2', 'Tree')])
+
+      await expect(
+        store.dispatch('editAsset', { id: 'a2', name: 'Rock' })
+      ).rejects.toThrow('Asset already exists')
+
+      expect(client.pput).not.toHaveBeenCalled()
+    })
+  })
+
+  // The rows read the assets of the displayed list: a row that missed the
+  // change kept the look and the buttons of an active asset.
+  describe('cancel and restore', () => {
+    test('shows a canceled asset as canceled in its row, then restored', async () => {
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', {
+          canceled: false,
+          tasks: [buildTask('t1', 'tt-model')]
+        }),
+        buildAsset('a2', 'Tree', {
+          canceled: false,
+          tasks: [buildTask('t2', 'tt-model')]
+        })
+      ])
+      // A row keeps the entry it renders.
+      const row = store.getters.displayedAssets[1]
+      const isCanceled = computed(() => row.canceled)
+      expect(isCanceled.value).toBe(false)
+      client.pdel.mockResolvedValueOnce()
+      client.pput.mockResolvedValueOnce({})
+
+      await store.dispatch('deleteAsset', { id: 'a2' })
+      expect(isCanceled.value).toBe(true)
+
+      await store.dispatch('restoreAsset', { id: 'a2' })
+      expect(isCanceled.value).toBe(false)
+    })
+
+    // A save leaves a copy of the asset in the displayed list.
+    test('shows an asset saved then canceled as canceled', async () => {
+      vi.useFakeTimers()
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', {
+          canceled: false,
+          tasks: [buildTask('t1', 'tt-model')]
+        })
+      ])
+      client.pput.mockResolvedValueOnce({})
+      client.pdel.mockResolvedValueOnce()
+
+      await store.dispatch('editAsset', { id: 'a1', name: 'Boulder' })
+      await store.dispatch('deleteAsset', { id: 'a1' })
+
+      expect(store.getters.displayedAssets[0]).toMatchObject({
+        name: 'Boulder',
+        canceled: true
+      })
+    })
+
+    test('shows the canceled assets of a deleted selection as canceled', async () => {
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', {
+          canceled: false,
+          tasks: [buildTask('t1', 'tt-model')]
+        })
+      ])
+      // A row keeps the entry it renders.
+      const row = store.getters.displayedAssets[0]
+      const isCanceled = computed(() => row.canceled)
+      expect(isCanceled.value).toBe(false)
+      store.dispatch('setAssetSelection', {
+        asset: store.getters.displayedAssets[0],
+        selected: true
+      })
+      client.ppost.mockResolvedValueOnce({})
+
+      await store.dispatch('deleteSelectedAssets')
+
+      expect(isCanceled.value).toBe(true)
+    })
+  })
+
+  describe('tasks', () => {
+    test('adds created tasks to the task columns of their assets', () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock')])
+
+      store.commit('CREATE_TASKS_END', {
+        tasks: [
+          buildTask('t1', 'tt-model', { entity_id: 'a1' }),
+          null,
+          buildTask('t2', 'tt-model', { entity_id: 'a9' })
+        ]
+      })
+
+      const rock = store.getters.assetMap.get('a1')
+      expect(rock.validations.get('tt-model')).toBe('t1')
+      expect(store.getters.displayedAssets[0].validations.get('tt-model')).toBe(
+        't1'
+      )
+    })
+
+    test('adds the column of a new task type', () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock')])
+
+      store.commit('NEW_TASK_END', {
+        task: buildTask('t1', 'tt-rig', { entity_id: 'a1' })
+      })
+
+      expect(store.getters.assetValidationColumns).toEqual(['tt-rig'])
+      expect(store.state.assets.assetFilledColumns['tt-rig']).toBe(true)
+      expect(store.getters.displayedAssets[0].validations.get('tt-rig')).toBe(
+        't1'
+      )
+    })
+
+    // The asset page lists the tasks of an asset through their ids.
+    test('lists the new tasks of an asset by their ids', () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock'), buildAsset('a2', 'Tree')])
+
+      store.commit('NEW_TASK_END', {
+        task: buildTask('t1', 'tt-model', { entity_id: 'a1' })
+      })
+      store.commit('CREATE_TASKS_END', {
+        tasks: [buildTask('t2', 'tt-rig', { entity_id: 'a2' })]
+      })
+
+      expect(store.getters.assetMap.get('a1').tasks).toEqual(['t1'])
+      expect(store.getters.assetMap.get('a2').tasks).toEqual(['t2'])
+    })
+
+    test('drops a deleted task from its asset', () => {
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', {
+          tasks: [buildTask('t1', 'tt-model'), buildTask('t2', 'tt-rig')]
+        })
+      ])
+
+      store.commit('DELETE_TASK_END', {
+        id: 't1',
+        entity_id: 'a1',
+        task_type_id: 'tt-model'
+      })
+
+      expect(store.getters.displayedAssets[0].tasks).toEqual(['t2'])
+    })
+
+    test('keeps the tasks of an asset when a task it does not list is deleted', () => {
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', {
+          tasks: [buildTask('t1', 'tt-model'), buildTask('t2', 'tt-rig')]
+        })
+      ])
+
+      store.commit('DELETE_TASK_END', {
+        id: 't9',
+        entity_id: 'a1',
+        task_type_id: 'tt-fx'
+      })
+
+      expect(store.getters.displayedAssets[0].tasks).toEqual(['t1', 't2'])
+    })
+
+    test('sums the time spent and estimation of an asset when a task reloads', () => {
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', {
+          tasks: [
+            buildTask('t1', 'tt-model', { duration: 60 }),
+            buildTask('t2', 'tt-rig')
+          ]
+        })
+      ])
+      const rock = store.getters.assetMap.get('a1')
+      rock.tasks.push('t-gone')
+      taskMap.get('t1').duration = 90
+      taskMap.get('t2').estimation = 30
+
+      store.commit('LOAD_TASK_END', { id: 't1', entity_id: 'a1' })
+      store.commit('LOAD_TASK_END', { id: 't9', entity_id: 'a9' })
+
+      expect(rock).toMatchObject({ timeSpent: 90, estimation: 30 })
+    })
+
+    test('deletes the tasks of a task type for the listed assets only', async () => {
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', { tasks: [buildTask('t1', 'tt-model')] }),
+        buildAsset('a2', 'Tree', { tasks: [buildTask('t2', 'tt-rig')] })
+      ])
+      const payload = { projectId: 'p1', taskTypeId: 'tt-model' }
+
+      await store.dispatch('deleteAllAssetTasks', {
+        ...payload,
+        selectionOnly: true
+      })
+      await store.dispatch('deleteAllAssetTasks', {
+        ...payload,
+        selectionOnly: false
+      })
+
+      expect(rootActions.deleteAllTasks.mock.calls.map(([, p]) => p)).toEqual([
+        { ...payload, taskIds: ['t1'] },
+        { ...payload, taskIds: [] }
+      ])
+    })
+
+    test('lists the assets with a task waiting for feedback', async () => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2026-11-04T12:00:00'))
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', {
+          tasks: [
+            buildTask('t1', 'tt-model', {
+              task_status_id: feedback.id,
+              last_comment_date: '2026-11-04T09:00:00'
+            })
+          ]
+        }),
+        buildAsset('a2', 'Tree', {
+          tasks: [
+            buildTask('t2', 'tt-model', {
+              task_status_id: feedback.id,
+              last_comment_date: '2026-10-20T09:00:00'
+            })
+          ]
+        }),
+        buildAsset('a3', 'Bush', { tasks: [buildTask('t3', 'tt-model')] })
+      ])
+
+      expect(names(await store.dispatch('getPendingAssets'))).toEqual([
+        'Rock',
+        'Tree'
+      ])
+      // The daily list keeps the requests of the last day.
+      expect(names(await store.dispatch('getPendingAssets', true))).toEqual([
+        'Rock'
+      ])
+    })
+
+    test('unselects a task cell from its asset and task type', () => {
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', { tasks: [buildTask('t1', 'tt-model')] }),
+        buildAsset('a2', 'Tree', { tasks: [buildTask('t2', 'tt-model')] })
+      ])
+      store.state.assets.assetSelectionGrid.add('0-0')
+      store.state.assets.assetSelectionGrid.add('1-0')
+
+      store.commit('REMOVE_SELECTED_TASK', {
+        task: { column: { id: 'tt-model' }, entity: { id: 'a2' } }
+      })
+      expect([...store.getters.assetSelectionGrid]).toEqual(['0-0'])
+
+      store.commit('REMOVE_SELECTED_TASK', { x: 0, y: 0 })
+      expect(store.getters.assetSelectionGrid.size).toBe(0)
+    })
+  })
+
+  describe('search, sort, and saved searches', () => {
+    test('filters the list on a search', () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock'), buildAsset('a2', 'Tree')])
+
+      store.dispatch('setAssetSearch', 'rock')
+
+      expect(names(store.getters.displayedAssets)).toEqual(['Rock'])
+      expect(store.getters.assetSearchText).toBe('rock')
+    })
+
+    test('sorts the list on a field, then back to the name order', () => {
+      const store = buildStore()
+      load(store, [
+        buildAsset('a1', 'Rock', { description: 'b' }),
+        buildAsset('a2', 'Tree', { description: 'a' })
+      ])
+      const sortInfo = { column: 'description', type: 'field', name: 'Desc' }
+
+      store.dispatch('changeAssetSort', sortInfo)
+      expect(store.getters.assetSorting).toEqual([sortInfo])
+      expect(names(store.getters.displayedAssets)).toEqual(['Tree', 'Rock'])
+
+      store.dispatch('changeAssetSort', null)
+      expect(store.getters.assetSorting).toEqual([])
+      expect(names(store.getters.displayedAssets)).toEqual(['Rock', 'Tree'])
+    })
+
+    test('saves a search once, then removes it', async () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock')])
+      const filter = { id: 'f1', name: 'props', search_query: 'props' }
+      client.ppost.mockResolvedValueOnce(filter)
+      client.pdel.mockResolvedValue()
+
+      await store.dispatch('saveAssetSearch', 'props')
+      await store.dispatch('saveAssetSearch', 'props')
+
+      expect(client.ppost).toHaveBeenCalledTimes(1)
+      expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
+        list_type: 'asset',
+        name: 'props',
+        query: 'props',
+        entity_type: null,
+        project_id: 'p1'
+      })
+      expect(store.state.assets.assetSearchQueries).toEqual([filter])
+
+      await store.dispatch('removeAssetSearch', { id: 'f9', name: 'other' })
+      expect(store.state.assets.assetSearchQueries).toEqual([filter])
+
+      await store.dispatch('removeAssetSearch', filter)
+      expect(client.pdel).toHaveBeenLastCalledWith('/api/data/user/filters/f1')
+      expect(store.state.assets.assetSearchQueries).toEqual([])
+    })
+
+    test('saves a filter group once, then removes it', async () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock')])
+      const group = { id: 'g1', name: 'Mine', color: '#f00' }
+      client.ppost.mockResolvedValueOnce(group)
+      client.pdel.mockResolvedValue()
+
+      await store.dispatch('saveAssetSearchFilterGroup', {
+        name: 'Mine',
+        color: '#f00',
+        is_shared: false,
+        department_id: null
+      })
+      await store.dispatch('saveAssetSearchFilterGroup', { name: 'Mine' })
+
+      expect(client.ppost).toHaveBeenCalledTimes(1)
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/data/user/filter-groups',
+        {
+          list_type: 'asset',
+          name: 'Mine',
+          color: '#f00',
+          is_shared: false,
+          project_id: 'p1',
+          department_id: null
+        }
+      )
+      expect(store.state.assets.assetSearchFilterGroups).toEqual([group])
+
+      await store.dispatch('removeAssetSearchFilterGroup', {
+        id: 'g9',
+        name: 'Other'
+      })
+      expect(store.state.assets.assetSearchFilterGroups).toEqual([group])
+
+      await store.dispatch('removeAssetSearchFilterGroup', group)
+      expect(client.pdel).toHaveBeenLastCalledWith(
+        '/api/data/user/filter-groups/g1'
+      )
+      expect(store.state.assets.assetSearchFilterGroups).toEqual([])
+    })
+  })
+
+  describe('import, export, and descriptors', () => {
+    test('exports the status and the assignees of each task column', async () => {
+      episodeStore.cache.episodeMap.set('ep-1', { id: 'ep-1', name: 'E01' })
+      const store = buildStore({ isTVShow: true })
+      load(store, [
+        buildAsset('a1', 'Rock', {
+          episode_id: 'ep-1',
+          tasks: [
+            buildTask('t1', 'tt-model', {
+              assignees: ['person-1', 'person-gone']
+            })
+          ]
+        }),
+        buildAsset('a2', 'Tree', { tasks: [buildTask('t2', 'tt-rig')] })
+      ])
+
+      const lines = await store.dispatch('getAssetsCsvLines')
+
+      expect(lines).toEqual([
+        ['E01', 'Characters', 'Rock', '', '', 'todo', 'John Doe', '', ''],
+        ['MP', 'Characters', 'Tree', '', '', '', '', 'todo', '']
+      ])
+    })
+
+    test('imports the selected CSV file, then forgets it', async () => {
+      productionsStore.state.currentProduction = production
+      const store = buildStore()
+      const formData = { file: 'assets.csv' }
+      client.ppostImport.mockResolvedValueOnce({})
+
+      store.commit('ASSET_CSV_FILE_SELECTED', formData)
+      await store.dispatch('uploadAssetFile', true)
+
+      expect(client.ppostImport).toHaveBeenCalledWith(
+        '/api/import/csv/projects/p1/assets?update=true',
+        formData
+      )
+      expect(store.getters.assetsCsvFormData).toBeNull()
+    })
+
+    test('moves the data of a renamed asset descriptor to its new field', () => {
+      const store = buildStore()
+      load(store, [buildAsset('a1', 'Rock', { data: { mood: 'calm' } })])
+      const rename = entityType => ({
+        descriptor: { entity_type: entityType, field_name: 'tone' },
+        previousDescriptorFieldName: 'mood'
+      })
+
+      store.commit('UPDATE_METADATA_DESCRIPTOR_END', rename('Shot'))
+      expect(store.getters.assetMap.get('a1').data).toEqual({ mood: 'calm' })
+
+      store.commit('UPDATE_METADATA_DESCRIPTOR_END', rename('Asset'))
+      expect(store.getters.assetMap.get('a1').data).toEqual({ tone: 'calm' })
+    })
+
+    test('sorts the task columns by task type priority', () => {
+      const store = buildStore()
+      store.state.assets.assetValidationColumns = ['tt-rig', 'tt-model']
+
+      store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap)
+
+      expect(store.getters.assetValidationColumns).toEqual([
+        'tt-model',
+        'tt-rig'
+      ])
     })
   })
 })

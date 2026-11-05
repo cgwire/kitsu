@@ -31,4 +31,11 @@ describe('colors', () => {
     expect(colors.fromString('123456')).toEqual('#f0ee75')
     expect(colors.fromString('Jhon Doe')).toEqual('#9e75f0')
   })
+
+  test('lightenColor', () => {
+    expect(colors.lightenColor('#336699').hex()).toEqual('#4785C2')
+    expect(colors.lightenColor('#336699', 0.5).hex()).toEqual('#6699CC')
+    expect(`${colors.lightenColor('#336699')}`).toEqual('hsl(210, 50%, 52%)')
+    expect(colors.lightenColor('#336699')).toBe(colors.lightenColor('#336699'))
+  })
 })

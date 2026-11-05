@@ -22,7 +22,6 @@ import {
   CLEAR_EDITS,
   CLEAR_SHOTS,
   LOAD_BACKGROUNDS_END,
-  LOAD_BACKGROUNDS_START,
   LOAD_OPEN_PRODUCTIONS_END,
   LOAD_PRODUCTION_STATUS_END,
   LOAD_PRODUCTION_STATUS_ERROR,
@@ -1746,7 +1745,7 @@ describe('Productions store, production backgrounds', () => {
         }
       }
     })
-    vuexStore.commit(LOAD_BACKGROUNDS_START)
+    backgroundStore.cache.backgroundMap.clear()
     vuexStore.commit(LOAD_OPEN_PRODUCTIONS_END, [
       {
         id: 'production-1',

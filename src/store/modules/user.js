@@ -59,10 +59,29 @@ import {
   SET_TASK_LAST_COMMENT,
   SET_TODO_LIST_SCROLL_POSITION,
   SAVE_ASSET_SEARCH_END,
+  REMOVE_ASSET_SEARCH_END,
+  SAVE_ASSET_SEARCH_FILTER_GROUP_END,
+  REMOVE_ASSET_SEARCH_FILTER_GROUP_END,
   SAVE_SHOT_SEARCH_END,
+  REMOVE_SHOT_SEARCH_END,
+  SAVE_SHOT_SEARCH_FILTER_GROUP_END,
+  REMOVE_SHOT_SEARCH_FILTER_GROUP_END,
   SAVE_EDIT_SEARCH_END,
+  REMOVE_EDIT_SEARCH_END,
   SAVE_SEQUENCE_SEARCH_END,
+  REMOVE_SEQUENCE_SEARCH,
+  ADD_EPISODE_SEARCH,
+  REMOVE_EPISODE_SEARCH,
   SAVE_BREAKDOWN_SEARCH_END,
+  REMOVE_BREAKDOWN_SEARCH_END,
+  SAVE_BREAKDOWN_SEARCH_FILTER_GROUP_END,
+  REMOVE_BREAKDOWN_SEARCH_FILTER_GROUP_END,
+  SAVE_TASK_SEARCH_END,
+  REMOVE_TASK_SEARCH_END,
+  SAVE_PEOPLE_SEARCH_END,
+  REMOVE_PEOPLE_SEARCH_END,
+  SAVE_PERSON_TASKS_SEARCH_END,
+  REMOVE_PERSON_TASKS_SEARCH_END,
   LOAD_PRODUCTION_STATUS_END,
   LOAD_BACKGROUNDS_END,
   LOAD_DEPARTMENTS_END,
@@ -107,6 +126,27 @@ const preferNextTwoFactor = (user, method) => {
   if (user.preferred_two_factor_authentication !== method) return
   user.preferred_two_factor_authentication =
     TWO_FACTOR_FALLBACKS[method].find(next => user[`${next}_enabled`]) ?? null
+}
+
+// The lists take their saved searches and groups from userFilters and
+// userFilterGroups when they load, and keep an array of their own while their
+// production has none there: what they save or remove must land here too, or
+// their next load undoes it.
+const addToFilters = (filters, listType, key, entry) => {
+  if (!filters[listType]) filters[listType] = {}
+  if (!filters[listType][key]) filters[listType][key] = []
+  const entries = filters[listType][key]
+  if (!entries.includes(entry)) {
+    entries.push(entry)
+    sortByName(entries)
+  }
+}
+
+const removeFromFilters = (filters, listType, entry) => {
+  Object.values(filters[listType] || {}).forEach(entries => {
+    const index = entries.findIndex(({ id }) => id === entry.id)
+    if (index >= 0) entries.splice(index, 1)
+  })
 }
 
 const initialState = {
@@ -747,6 +787,7 @@ const mutations = {
   [SAVE_TODO_SEARCH_END](state, { searchQuery }) {
     state.todoSearchQueries.push(searchQuery)
     state.todoSearchQueries = sortByName(state.todoSearchQueries)
+    addToFilters(state.userFilters, 'todos', 'all', searchQuery)
   },
 
   [REMOVE_TODO_SEARCH_END](state, { searchQuery }) {
@@ -756,6 +797,7 @@ const mutations = {
     if (queryIndex >= 0) {
       state.todoSearchQueries.splice(queryIndex, 1)
     }
+    removeFromFilters(state.userFilters, 'todos', searchQuery)
   },
 
   [ADD_SELECTED_TASK](state, validationInfo) {
@@ -818,8 +860,9 @@ const mutations = {
         )
         if (filterGroup) {
           Object.assign(filterGroup, userFilterGroup)
-          // update the shared status of filters in group
-          state.userFilters?.[typeName]?.[projectId].forEach(filter => {
+          // update the shared status of filters in group: a production can
+          // hold a group before any search of its list
+          state.userFilters?.[typeName]?.[projectId]?.forEach(filter => {
             if (filter.search_filter_group_id === userFilterGroup.id) {
               filter.is_shared = userFilterGroup.is_shared
             }
@@ -856,77 +899,104 @@ const mutations = {
 
   [SAVE_ASSET_SEARCH_END](state, { searchQuery, production }) {
     if (production) {
-      if (!state.userFilters.task) state.userFilters.task = {}
-      if (!state.userFilters.task[production.id]) {
-        state.userFilters.task[production.id] = []
-      }
-      if (!state.userFilters.task[production.id].includes(searchQuery)) {
-        state.userFilters.task[production.id].push(searchQuery)
-        state.userFilters.task[production.id] = sortByName(
-          state.userFilters.task[production.id]
-        )
-      }
+      addToFilters(state.userFilters, 'asset', production.id, searchQuery)
     }
+  },
+
+  [REMOVE_ASSET_SEARCH_END](state, { searchQuery }) {
+    removeFromFilters(state.userFilters, 'asset', searchQuery)
+  },
+
+  [SAVE_ASSET_SEARCH_FILTER_GROUP_END](state, { filterGroup, production }) {
+    addToFilters(state.userFilterGroups, 'asset', production.id, filterGroup)
+  },
+
+  [REMOVE_ASSET_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    removeFromFilters(state.userFilterGroups, 'asset', filterGroup)
   },
 
   [SAVE_SHOT_SEARCH_END](state, { searchQuery, production }) {
-    if (!state.userFilters.shot) {
-      state.userFilters.shot = {}
-    }
-    if (!state.userFilters.shot[production.id]) {
-      state.userFilters.shot[production.id] = []
-    }
-    if (!state.userFilters.shot[production.id].includes(searchQuery)) {
-      state.userFilters.shot[production.id].push(searchQuery)
-      state.userFilters.shot[production.id] = sortByName(
-        state.userFilters.shot[production.id]
-      )
-    }
+    addToFilters(state.userFilters, 'shot', production.id, searchQuery)
+  },
+
+  [REMOVE_SHOT_SEARCH_END](state, { searchQuery }) {
+    removeFromFilters(state.userFilters, 'shot', searchQuery)
+  },
+
+  [SAVE_SHOT_SEARCH_FILTER_GROUP_END](state, { filterGroup, production }) {
+    addToFilters(state.userFilterGroups, 'shot', production.id, filterGroup)
+  },
+
+  [REMOVE_SHOT_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    removeFromFilters(state.userFilterGroups, 'shot', filterGroup)
   },
 
   [SAVE_EDIT_SEARCH_END](state, { searchQuery, production }) {
-    if (!state.userFilters.edit) {
-      state.userFilters.edit = {}
-    }
-    if (!state.userFilters.edit[production.id]) {
-      state.userFilters.edit[production.id] = []
-    }
-    if (!state.userFilters.edit[production.id].includes(searchQuery)) {
-      state.userFilters.edit[production.id].push(searchQuery)
-      state.userFilters.edit[production.id] = sortByName(
-        state.userFilters.edit[production.id]
-      )
-    }
+    addToFilters(state.userFilters, 'edit', production.id, searchQuery)
+  },
+
+  [REMOVE_EDIT_SEARCH_END](state, { searchQuery }) {
+    removeFromFilters(state.userFilters, 'edit', searchQuery)
   },
 
   [SAVE_SEQUENCE_SEARCH_END](state, { searchQuery, production }) {
-    if (!state.userFilters.sequence) {
-      state.userFilters.sequence = {}
-    }
-    if (!state.userFilters.sequence[production.id]) {
-      state.userFilters.sequence[production.id] = []
-    }
-    if (!state.userFilters.sequence[production.id].includes(searchQuery)) {
-      state.userFilters.sequence[production.id].push(searchQuery)
-      state.userFilters.sequence[production.id] = sortByName(
-        state.userFilters.sequence[production.id]
-      )
-    }
+    addToFilters(state.userFilters, 'sequence', production.id, searchQuery)
+  },
+
+  [REMOVE_SEQUENCE_SEARCH](state, searchQuery) {
+    removeFromFilters(state.userFilters, 'sequence', searchQuery)
+  },
+
+  // The episodes store commits the bare search, which carries its production.
+  [ADD_EPISODE_SEARCH](state, searchQuery) {
+    const productionId = searchQuery.project_id
+    addToFilters(state.userFilters, 'episode', productionId, searchQuery)
+  },
+
+  [REMOVE_EPISODE_SEARCH](state, searchQuery) {
+    removeFromFilters(state.userFilters, 'episode', searchQuery)
   },
 
   [SAVE_BREAKDOWN_SEARCH_END](state, { searchQuery, production }) {
-    if (!state.userFilters.breakdown) {
-      state.userFilters.breakdown = {}
-    }
-    if (!state.userFilters.breakdown[production.id]) {
-      state.userFilters.breakdown[production.id] = []
-    }
-    if (!state.userFilters.breakdown[production.id].includes(searchQuery)) {
-      state.userFilters.breakdown[production.id].push(searchQuery)
-      state.userFilters.breakdown[production.id] = sortByName(
-        state.userFilters.breakdown[production.id]
-      )
-    }
+    addToFilters(state.userFilters, 'breakdown', production.id, searchQuery)
+  },
+
+  [REMOVE_BREAKDOWN_SEARCH_END](state, { searchQuery }) {
+    removeFromFilters(state.userFilters, 'breakdown', searchQuery)
+  },
+
+  [SAVE_BREAKDOWN_SEARCH_FILTER_GROUP_END](state, { filterGroup, production }) {
+    const productionId = production.id
+    addToFilters(state.userFilterGroups, 'breakdown', productionId, filterGroup)
+  },
+
+  [REMOVE_BREAKDOWN_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    removeFromFilters(state.userFilterGroups, 'breakdown', filterGroup)
+  },
+
+  [SAVE_TASK_SEARCH_END](state, { searchQuery, production }) {
+    addToFilters(state.userFilters, 'task', production.id, searchQuery)
+  },
+
+  [REMOVE_TASK_SEARCH_END](state, { searchQuery }) {
+    removeFromFilters(state.userFilters, 'task', searchQuery)
+  },
+
+  // Zou files the searches made outside of a production under "all".
+  [SAVE_PEOPLE_SEARCH_END](state, { searchQuery }) {
+    addToFilters(state.userFilters, 'people', 'all', searchQuery)
+  },
+
+  [REMOVE_PEOPLE_SEARCH_END](state, { searchQuery }) {
+    removeFromFilters(state.userFilters, 'people', searchQuery)
+  },
+
+  [SAVE_PERSON_TASKS_SEARCH_END](state, { searchQuery }) {
+    addToFilters(state.userFilters, 'persontasks', 'all', searchQuery)
+  },
+
+  [REMOVE_PERSON_TASKS_SEARCH_END](state, { searchQuery }) {
+    removeFromFilters(state.userFilters, 'persontasks', searchQuery)
   },
 
   [LOAD_PLUGINS_END](state, plugins = []) {

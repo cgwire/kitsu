@@ -9,15 +9,20 @@ vi.mock('@/store', () => ({
   }
 }))
 vi.mock('superagent', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
+vi.mock('@/store/api/client', () => ({
+  default: { ppost: vi.fn(), pput: vi.fn() }
+}))
 
 import superagent from 'superagent'
 
 import auth from '@/lib/auth'
 import store from '@/store'
+import client from '@/store/api/client'
 import {
   DATA_LOADING_START,
   DATA_LOADING_END,
-  USER_LOGIN_FAIL
+  USER_LOGIN_FAIL,
+  USER_LOGOUT
 } from '@/store/mutation-types.js'
 
 describe('auth', () => {
@@ -118,6 +123,69 @@ describe('auth', () => {
       await auth.logIn({ email: 'user@studio.com', password: 'secret' })
 
       expect(auth.popSSORedirect()).toBeUndefined()
+    })
+  })
+
+  describe('logout', () => {
+    const messages = []
+    class FakeChannel {
+      postMessage(message) {
+        messages.push(message)
+      }
+    }
+
+    beforeEach(() => {
+      messages.length = 0
+      vi.stubGlobal('BroadcastChannel', FakeChannel)
+      vi.stubGlobal('window', { BroadcastChannel: FakeChannel })
+    })
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+    })
+
+    test('ends the session and tells the other tabs', async () => {
+      superagent.get.mockResolvedValue({})
+
+      await auth.logout()
+
+      expect(superagent.get).toHaveBeenCalledWith('/api/auth/logout')
+      expect(store.commit.mock.calls).toEqual([[USER_LOGOUT]])
+      expect(messages).toEqual(['logout'])
+    })
+
+    test('ends the session even when the server does not answer', async () => {
+      const error = new Error('offline')
+      superagent.get.mockRejectedValue(error)
+
+      await expect(auth.logout()).rejects.toBe(error)
+
+      expect(store.commit.mock.calls).toEqual([[USER_LOGOUT]])
+      expect(messages).toEqual(['logout'])
+    })
+  })
+
+  describe('password reset', () => {
+    test('asks for the reset email of an address', () => {
+      auth.resetPassword('jane@studio.com')
+      expect(client.ppost).toHaveBeenCalledWith('/api/auth/reset-password', {
+        email: 'jane@studio.com'
+      })
+    })
+
+    test('sends the new password with the token of the email', () => {
+      auth.resetChangePassword(
+        'jane@studio.com',
+        'token-1',
+        'n3w-secret',
+        'n3w-secret'
+      )
+      expect(client.pput).toHaveBeenCalledWith('/api/auth/reset-password', {
+        email: 'jane@studio.com',
+        token: 'token-1',
+        password: 'n3w-secret',
+        password2: 'n3w-secret'
+      })
     })
   })
 })

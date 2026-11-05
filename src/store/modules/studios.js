@@ -56,6 +56,7 @@ const actions = {
 const mutations = {
   [LOAD_STUDIOS_END](state, studios) {
     state.studios = sortByName(studios)
+    cache.studioMap.clear()
     studios.forEach(studio => {
       cache.studioMap.set(studio.id, studio)
     })

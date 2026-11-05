@@ -68,7 +68,6 @@
               :queries="editSearchQueries"
               type="edit"
               :production-id="currentProduction?.id"
-              @remove-search="removeSearchQuery"
               v-if="!isEditsLoading && !initialLoading"
             />
           </div>
@@ -412,7 +411,6 @@ const {
   onRestoreClicked,
   openEditModal: onEditClicked,
   parsedCSV,
-  removeSearchQuery,
   renderColumns,
   renderImport,
   resetImport,

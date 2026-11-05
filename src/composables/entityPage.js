@@ -304,12 +304,6 @@ export const useEntityPage = ({
     }
   }
 
-  const removeSearchQuery = searchQuery => {
-    store
-      .dispatch(`remove${entityTypeName}Search`, searchQuery)
-      .catch(console.error)
-  }
-
   // Scroll and scope
   // --------------------------------------------------------------------------
 
@@ -819,16 +813,12 @@ export const useEntityPage = ({
     displaySettings,
     entityToDelete,
     entityToEdit,
-    entityToRestore,
-    entityTypeName,
     errors,
-    keepTaskPanelOpen,
     loading,
     modals,
     parsedCSV,
     selectedDepartment,
     success,
-    taskTypeForTaskDeletion,
 
     deleteAllTasksText,
     deleteText,
@@ -873,8 +863,6 @@ export const useEntityPage = ({
     onRestoreClicked,
     openEditModal,
     onSearchChange,
-    onSelectedDepartmentChanged,
-    removeSearchQuery,
     renderImport,
     resetImport,
     saveScrollPosition,

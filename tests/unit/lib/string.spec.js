@@ -66,4 +66,56 @@ describe('lib/string', () => {
     )
     expect(stringHelpers.attachmentNamePrefix('', null)).toEqual('')
   })
+
+  it('snakeToCamel and snakeToPascal turn an icon name into a component name', () => {
+    expect(stringHelpers.snakeToCamel('chevron-down')).toEqual('chevronDown')
+    expect(stringHelpers.snakeToPascal('arrow-left-circle')).toEqual(
+      'ArrowLeftCircle'
+    )
+    expect(stringHelpers.snakeToPascal('x')).toEqual('X')
+  })
+
+  describe('insertInTextArea', () => {
+    const buildTextarea = (value, selectionStart, selectionEnd) => ({
+      value,
+      selectionStart,
+      selectionEnd,
+      focus: vi.fn(),
+      setSelectionRange: vi.fn()
+    })
+
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('inserts the text at the cursor, then puts the cursor after it', () => {
+      const textarea = buildTextarea('Hello world', 5, 5)
+
+      expect(stringHelpers.insertInTextArea(textarea, ',')).toEqual(
+        'Hello, world'
+      )
+      expect(textarea.setSelectionRange).not.toHaveBeenCalled()
+      vi.runAllTimers()
+      expect(textarea.setSelectionRange).toHaveBeenCalledWith(6, 6)
+      expect(textarea.focus).toHaveBeenCalled()
+    })
+
+    it('replaces the selected text', () => {
+      const textarea = buildTextarea('Hello world', 6, 11)
+
+      expect(stringHelpers.insertInTextArea(textarea, 'there')).toEqual(
+        'Hello there'
+      )
+      vi.runAllTimers()
+      expect(textarea.setSelectionRange).toHaveBeenCalledWith(11, 11)
+    })
+
+    it('does nothing without a text area', () => {
+      expect(stringHelpers.insertInTextArea(null, ',')).toBeUndefined()
+    })
+  })
 })

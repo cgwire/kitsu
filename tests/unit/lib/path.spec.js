@@ -2,6 +2,7 @@
 
 import {
   episodifyRoute,
+  getAttachmentThumbnailPath,
   getEntityPath,
   getPlaylistPath,
   getProductionSchedulePath,
@@ -456,5 +457,11 @@ describe('path', () => {
         production_id: 2
       }
     })
+  })
+
+  test('getAttachmentThumbnailPath', () => {
+    expect(
+      getAttachmentThumbnailPath({ id: 'attachment-1', name: 'ref.png' })
+    ).toEqual('/api/pictures/thumbnails/attachment-files/attachment-1.png')
   })
 })

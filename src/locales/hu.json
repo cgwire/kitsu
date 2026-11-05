@@ -635,7 +635,9 @@
       "people": "Emberek",
       "remaining": "Hátralévő",
       "remove_search_filter_group": "Biztosan eltávolítod a(z) \"{name}\" keresési szűrőcsoportot?",
+      "remove_search_filter_group_error": "Hiba történt a keresési szűrőcsoport eltávolításakor.",
       "remove_search_query": "Biztosan eltávolítod a(z) \"{name}\" keresőkifejezést?",
+      "remove_search_query_error": "Hiba történt a keresőkifejezés eltávolításakor.",
       "reply": "Válasz",
       "search": {
         "no_filter": "A kereséshez válassz ki legalább egy szűrőt",

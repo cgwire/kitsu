@@ -7,10 +7,6 @@ import {
 } from '@/store/mutation-types'
 import { sortByName } from '@/lib/sorting'
 
-const cache = {
-  hardwareItemMap: new Map()
-}
-
 const initialState = {
   hardwareItems: []
 }
@@ -22,62 +18,41 @@ const getters = {
     state.hardwareItems.filter(hardwareItem => !hardwareItem.archived),
   archivedHardwareItems: state =>
     state.hardwareItems.filter(hardwareItem => hardwareItem.archived),
-  hardwareItemMap: () => cache.hardwareItemMap,
 
   getHardwareItem: state => id => {
     return state.hardwareItems.find(hardwareItem => hardwareItem.id === id)
-  },
-
-  getHardwareItemOptions: state =>
-    state.hardwareItems.map(hardwareItem => {
-      return { label: hardwareItem.name, value: hardwareItem.id }
-    })
+  }
 }
 
 const actions = {
-  loadHardwareItems({ commit }) {
-    hardwareItemsApi.getHardwareItems().then(hardwareItems => {
-      commit(LOAD_HARDWARE_ITEMS_END, hardwareItems)
-      Promise.resolve(hardwareItems)
-    })
+  async loadHardwareItems({ commit }) {
+    const hardwareItems = await hardwareItemsApi.getHardwareItems()
+    commit(LOAD_HARDWARE_ITEMS_END, hardwareItems)
+    return hardwareItems
   },
 
-  loadHardwareItem({ commit }, hardwareItemId) {
-    hardwareItemsApi.getHardwareItem(hardwareItemId).then(hardwareItem => {
-      commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
-      Promise.resolve(hardwareItem)
-    })
+  async newHardwareItem({ commit }, data) {
+    const hardwareItem = await hardwareItemsApi.newHardwareItem(data)
+    commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
+    return hardwareItem
   },
 
-  newHardwareItem({ commit }, data) {
-    return hardwareItemsApi.newHardwareItem(data).then(hardwareItem => {
-      commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
-      Promise.resolve(hardwareItem)
-    })
+  async editHardwareItem({ commit }, data) {
+    const hardwareItem = await hardwareItemsApi.updateHardwareItem(data)
+    commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
+    return hardwareItem
   },
 
-  editHardwareItem({ commit }, data) {
-    return hardwareItemsApi.updateHardwareItem(data).then(hardwareItem => {
-      commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
-      Promise.resolve(hardwareItem)
-    })
-  },
-
-  deleteHardwareItem({ commit }, hardwareItem) {
-    return hardwareItemsApi.deleteHardwareItem(hardwareItem).then(() => {
-      commit(DELETE_HARDWARE_ITEM_END, hardwareItem)
-      Promise.resolve(hardwareItem)
-    })
+  async deleteHardwareItem({ commit }, hardwareItem) {
+    await hardwareItemsApi.deleteHardwareItem(hardwareItem)
+    commit(DELETE_HARDWARE_ITEM_END, hardwareItem)
+    return hardwareItem
   }
 }
 
 const mutations = {
   [LOAD_HARDWARE_ITEMS_END](state, hardwareItems) {
     state.hardwareItems = sortByName(hardwareItems)
-    cache.hardwareItemMap.clear()
-    state.hardwareItems.forEach(hardwareItem => {
-      cache.hardwareItemMap.set(hardwareItem.id, hardwareItem)
-    })
   },
 
   [EDIT_HARDWARE_ITEM_END](state, newHardwareItem) {
@@ -87,7 +62,6 @@ const mutations = {
       Object.assign(hardwareItem, newHardwareItem)
     } else {
       state.hardwareItems.push(newHardwareItem)
-      cache.hardwareItemMap.set(newHardwareItem.id, newHardwareItem)
     }
     state.hardwareItems = sortByName(state.hardwareItems)
   },
@@ -99,12 +73,10 @@ const mutations = {
     if (hardwareItemToDeleteIndex >= 0) {
       state.hardwareItems.splice(hardwareItemToDeleteIndex, 1)
     }
-    cache.hardwareItemMap.delete(hardwareItemToDelete.id)
   },
 
   [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
-    cache.hardwareItemMap.clear()
   }
 }
 
@@ -112,6 +84,5 @@ export default {
   state,
   getters,
   actions,
-  mutations,
-  cache
+  mutations
 }

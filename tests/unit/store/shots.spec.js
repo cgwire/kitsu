@@ -2,16 +2,59 @@
 
 import { vi } from 'vitest'
 import { computed, reactive } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the shots module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
+vi.mock('@/store/api/client', () => ({
+  default: {
+    getModel: vi.fn(),
+    pdel: vi.fn(),
+    pget: vi.fn(),
+    ppost: vi.fn(),
+    ppostImport: vi.fn(),
+    pput: vi.fn()
+  }
+}))
 
 import shotsStore from '@/store/modules/shots'
+import client from '@/store/api/client'
 import entitiesApi from '@/store/api/entities'
 import shotsApi from '@/store/api/shots'
+import episodeStore from '@/store/modules/episodes'
 import sequenceStore from '@/store/modules/sequences'
+import tasksStore from '@/store/modules/tasks'
+import taskStatusStore from '@/store/modules/taskstatus'
 import { buildShotIndex } from '@/lib/indexing'
+import { PAGE_SIZE } from '@/lib/pagination'
+import {
+  ADD_SHOT,
+  ADD_SELECTED_TASK,
+  ADD_SELECTED_TASKS,
+  CLEAR_SELECTED_TASKS,
+  CREATE_TASKS_END,
+  DELETE_TASK_END,
+  IMPORT_SHOTS_END,
+  LOAD_SHOTS_END,
+  LOAD_TASK_END,
+  LOCK_SHOT,
+  NEW_TASK_END,
+  REMOVE_SELECTED_TASK,
+  REMOVE_SHOT_SEARCH_END,
+  REMOVE_SHOT_SEARCH_FILTER_GROUP_END,
+  RESET_ALL,
+  SAVE_SHOT_SEARCH_END,
+  SAVE_SHOT_SEARCH_FILTER_GROUP_END,
+  SET_CURRENT_PRODUCTION,
+  SET_PREVIEW,
+  SET_SHOT_LIST_SCROLL_POSITION,
+  SET_SHOT_SELECTION,
+  SHOT_CSV_FILE_SELECTED,
+  SORT_VALIDATION_COLUMNS,
+  UNLOCK_SHOT,
+  UPDATE_METADATA_DESCRIPTOR_END
+} from '@/store/mutation-types'
 
 describe('Shots store', () => {
   describe('loading flag lifecycle', () => {
@@ -1038,4 +1081,1101 @@ describe('Shots store, list totals', () => {
       })
     }
   )
+})
+
+describe('Shots store, through a store', () => {
+  const production = { id: 'p1', name: 'Agent 327' }
+  const taskTypeMap = new Map([
+    ['tt-anim', { id: 'tt-anim', name: 'Animation', priority: 2 }],
+    ['tt-layout', { id: 'tt-layout', name: 'Layout', priority: 1 }]
+  ])
+  const sequenceMap = new Map([
+    ['sq1', { id: 'sq1', name: 'SQ01', parent_id: 'ep1' }],
+    ['sq2', { id: 'sq2', name: 'SQ02', parent_id: 'ep1' }]
+  ])
+  const episodeMap = new Map([['ep1', { id: 'ep1', name: 'E01' }]])
+
+  let taskMap
+  let rootActions
+
+  const buildState = () => ({
+    shotSearchText: '',
+    shotSearchQueries: [],
+    shotSearchFilterGroups: [],
+    shotSorting: [],
+    isFps: false,
+    isFrames: false,
+    isFrameIn: false,
+    isFrameOut: false,
+    isMaxRetakes: false,
+    isResolution: false,
+    isShotDescription: false,
+    isShotEstimation: false,
+    isShotTime: false,
+    displayedShots: [],
+    displayedShotsCount: 0,
+    displayedShotsLength: 0,
+    displayedShotsTimeSpent: 0,
+    displayedShotsEstimation: 0,
+    displayedShotsFrames: 0,
+    displayedShotsDrawings: 0,
+    shotFilledColumns: {},
+    shotSelectionGrid: new Set(),
+    isShotsLoading: false,
+    isShotsLoadingError: false,
+    shotsLoadingKey: null,
+    shotsCsvFormData: null,
+    shotListScrollPosition: 0,
+    shotValidationColumns: [],
+    selectedShots: new Map()
+  })
+
+  const buildStore = ({
+    isTVShow = false,
+    currentEpisode = null,
+    shotTaskTypeIds = []
+  } = {}) =>
+    createStore({
+      modules: {
+        shots: {
+          // The actions read the module state directly, as in the app.
+          state: shotsStore.state,
+          getters: shotsStore.getters,
+          actions: shotsStore.actions,
+          mutations: shotsStore.mutations
+        }
+      },
+      getters: {
+        currentEpisode: () => currentEpisode,
+        currentProduction: () => production,
+        isTVShow: () => isTVShow,
+        people: () => [],
+        personMap: () => new Map(),
+        productionShotTaskTypeIds: () => shotTaskTypeIds,
+        taskMap: () => taskMap,
+        taskStatus: () => [],
+        taskStatusMap: () => new Map(),
+        taskTypeMap: () => taskTypeMap
+      },
+      actions: rootActions
+    })
+
+  const buildTask = (id, taskTypeId, fields = {}) => ({
+    id,
+    task_type_id: taskTypeId,
+    task_status_id: 'ts-wip',
+    duration: 0,
+    estimation: 0,
+    assignees: [],
+    ...fields
+  })
+
+  const buildShot = (id, name, fields = {}) => ({
+    id,
+    name,
+    sequence_id: 'sq1',
+    episode_id: 'ep1',
+    description: '',
+    data: {},
+    tasks: [],
+    nb_frames: 0,
+    ...fields
+  })
+
+  const load = (store, shots, userFilters = {}, userFilterGroups = {}) =>
+    store.commit(LOAD_SHOTS_END, {
+      production,
+      shots,
+      userFilters,
+      userFilterGroups,
+      taskMap,
+      taskTypeMap,
+      personMap: new Map(),
+      episodeMap,
+      sequenceMap
+    })
+
+  const names = list => list.map(({ name }) => name)
+
+  beforeEach(() => {
+    Object.values(client).forEach(fn => fn.mockReset())
+    Object.assign(shotsStore.state, buildState())
+    taskMap = new Map()
+    rootActions = {
+      createEntityTasks: vi.fn(),
+      deleteAllTasks: vi.fn()
+    }
+  })
+
+  afterEach(() => {
+    shotsStore.cache.removedShotIds.clear()
+    shotsStore.cache.shotMap.clear()
+    shotsStore.cache.shots = []
+    shotsStore.cache.result = []
+    shotsStore.cache.shotIndex = {}
+  })
+
+  describe('list load', () => {
+    test('computes the totals, flags, and columns of the shots', () => {
+      const store = buildStore()
+
+      load(
+        store,
+        [
+          buildShot('s2', 'SH020', {
+            sequence_id: 'sq2',
+            nb_frames: 48,
+            data: { frame_in: 0, fps: 24, resolution: '1920x1080' },
+            tasks: [buildTask('t3', 'tt-layout', { duration: 30 })]
+          }),
+          buildShot('s1', 'SH010', {
+            description: 'Opening',
+            nb_frames: 24,
+            nb_drawings: 2,
+            data: { frame_out: 24, max_retakes: 3 },
+            tasks: [
+              buildTask('t1', 'tt-anim', {
+                duration: 60,
+                estimation: 120,
+                nb_drawings: 5
+              }),
+              buildTask('t2', 'tt-layout', { estimation: 60 })
+            ]
+          }),
+          buildShot('s3', 'SH030', {
+            canceled: true,
+            nb_frames: 100,
+            tasks: [buildTask('t4', 'tt-anim', { duration: 500 })]
+          })
+        ],
+        { shot: { p1: [{ id: 'f1', name: 'wip' }] } },
+        { shot: { p1: [{ id: 'g1', name: 'Layout' }] } }
+      )
+
+      expect(names(store.getters.displayedShots)).toEqual([
+        'SH010',
+        'SH020',
+        'SH030'
+      ])
+      expect(store.getters.displayedShotsCount).toBe(3)
+      expect(store.getters.displayedShotsLength).toBe(2)
+      expect(store.getters.displayedShotsTimeSpent).toBe(90)
+      expect(store.getters.displayedShotsEstimation).toBe(180)
+      expect(store.getters.displayedShotsFrames).toBe(72)
+      expect(store.getters.displayedShotsDrawings).toBe(7)
+      expect(store.getters.isFps).toBe(true)
+      expect(store.getters.isFrames).toBe(true)
+      expect(store.getters.isFrameIn).toBe(true)
+      expect(store.getters.isFrameOut).toBe(true)
+      expect(store.getters.isResolution).toBe(true)
+      expect(store.getters.isMaxRetakes).toBe(true)
+      expect(store.getters.isShotDescription).toBe(true)
+      expect(store.getters.isShotTime).toBe(true)
+      expect(store.getters.isShotEstimation).toBe(true)
+      expect(store.getters.shotValidationColumns).toEqual([
+        'tt-layout',
+        'tt-anim'
+      ])
+      expect(store.getters.shotSearchQueries).toEqual([
+        { id: 'f1', name: 'wip' }
+      ])
+      expect(store.getters.shotSearchFilterGroups).toEqual([
+        { id: 'g1', name: 'Layout' }
+      ])
+      expect(store.getters.isShotsLoading).toBe(false)
+      expect(store.getters.isShotsLoadingError).toBe(false)
+      expect(store.getters.shotMap.get('s1')).toMatchObject({
+        sequence_name: 'SQ01',
+        episode_name: 'E01',
+        full_name: 'E01 / SQ01 / SH010',
+        tasks: ['t1', 't2']
+      })
+      expect(taskMap.get('t1')).toMatchObject({
+        entity_name: 'E01 / SQ01 / SH010',
+        entity_type_name: 'Shot',
+        episode_id: 'ep1',
+        project_id: 'p1'
+      })
+      expect(
+        store.getters.displayedShotsBySequence.map(shots => names(shots))
+      ).toEqual([['SH010'], ['SH020'], ['SH030']])
+    })
+
+    test('shows the first page, then the next one', () => {
+      const store = buildStore()
+      load(
+        store,
+        Array.from({ length: PAGE_SIZE + 3 }, (_, index) =>
+          buildShot(`s${index}`, `SH${String(index).padStart(4, '0')}`)
+        )
+      )
+      expect(store.getters.displayedShots).toHaveLength(PAGE_SIZE)
+
+      store.dispatch('displayMoreShots')
+
+      expect(store.getters.displayedShots).toHaveLength(PAGE_SIZE + 3)
+    })
+
+    test('lists the shots waiting for a feedback', async () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', { tasks: [buildTask('t1', 'tt-anim')] }),
+        buildShot('s2', 'SH020', { tasks: [buildTask('t2', 'tt-anim')] }),
+        buildShot('s3', 'SH030', { tasks: [buildTask('t3', 'tt-anim')] })
+      ])
+      const previousTaskMap = tasksStore.state.taskMap
+      const now = new Date()
+      const lastWeek = new Date(now.getTime() - 7 * 24 * 3600 * 1000)
+      tasksStore.state.taskMap = new Map([
+        ['t1', { id: 't1', task_status_id: 'ts-wfa', last_comment_date: now }],
+        [
+          't2',
+          { id: 't2', task_status_id: 'ts-wfa', last_comment_date: lastWeek }
+        ],
+        ['t3', { id: 't3', task_status_id: 'ts-wip', last_comment_date: now }]
+      ])
+      taskStatusStore.cache.taskStatusMap.set('ts-wfa', {
+        id: 'ts-wfa',
+        is_feedback_request: true
+      })
+      taskStatusStore.cache.taskStatusMap.set('ts-wip', { id: 'ts-wip' })
+      try {
+        const shots = await store.dispatch('getPendingShots')
+        const daily = await store.dispatch('getPendingShots', true)
+
+        expect(names(shots)).toEqual(['SH010', 'SH020'])
+        expect(names(daily)).toEqual(['SH010'])
+      } finally {
+        tasksStore.state.taskMap = previousTaskMap
+        taskStatusStore.cache.taskStatusMap.delete('ts-wfa')
+        taskStatusStore.cache.taskStatusMap.delete('ts-wip')
+      }
+    })
+  })
+
+  describe('search and sort', () => {
+    test('filters the list on a search, then clears it on a production switch', () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s2', 'SH020')])
+
+      store.dispatch('setShotSearch', 'sh020')
+
+      expect(names(store.getters.displayedShots)).toEqual(['SH020'])
+      expect(store.getters.shotSearchText).toBe('sh020')
+
+      store.commit(SET_CURRENT_PRODUCTION, production)
+      expect(store.getters.shotSearchText).toBe('')
+    })
+
+    test('keeps the search when the sort changes', () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010'),
+        buildShot('s2', 'SH020', { sequence_id: 'sq2' }),
+        buildShot('s3', 'SH030', { sequence_id: 'sq2' })
+      ])
+      store.dispatch('setShotSearch', 'sq02')
+
+      store.dispatch('changeShotSort', null)
+
+      expect(store.getters.shotSorting).toEqual([])
+      expect(names(store.getters.displayedShots)).toEqual(['SH020', 'SH030'])
+    })
+
+    test('saves a search once, then removes it', async () => {
+      const store = buildStore()
+      load(store, [])
+      client.ppost.mockResolvedValueOnce({ id: 'f2', name: 'layout' })
+      client.pdel.mockResolvedValueOnce()
+
+      await store.dispatch('saveShotSearch', 'layout')
+      await store.dispatch('saveShotSearch', 'layout')
+
+      expect(client.ppost).toHaveBeenCalledTimes(1)
+      expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
+        list_type: 'shot',
+        name: 'layout',
+        query: 'layout',
+        entity_type: null,
+        project_id: 'p1'
+      })
+      expect(names(store.getters.shotSearchQueries)).toEqual(['layout'])
+
+      await store.dispatch('removeShotSearch', { id: 'f2', name: 'layout' })
+
+      expect(client.pdel).toHaveBeenCalledWith('/api/data/user/filters/f2')
+      expect(store.getters.shotSearchQueries).toEqual([])
+    })
+
+    test('saves a filter group once, then removes it', async () => {
+      const store = buildStore()
+      load(store, [])
+      const group = {
+        name: 'Layout',
+        color: '#ff0000',
+        is_shared: false,
+        department_id: null
+      }
+      client.ppost.mockResolvedValueOnce({ id: 'g2', ...group })
+      client.pdel.mockResolvedValueOnce()
+
+      await store.dispatch('saveShotSearchFilterGroup', group)
+      await store.dispatch('saveShotSearchFilterGroup', group)
+
+      expect(client.ppost).toHaveBeenCalledTimes(1)
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/data/user/filter-groups',
+        {
+          list_type: 'shot',
+          name: 'Layout',
+          color: '#ff0000',
+          is_shared: false,
+          project_id: 'p1',
+          department_id: null
+        }
+      )
+      expect(names(store.getters.shotSearchFilterGroups)).toEqual(['Layout'])
+
+      await store.dispatch('removeShotSearchFilterGroup', {
+        id: 'g2',
+        name: 'Layout'
+      })
+
+      expect(client.pdel).toHaveBeenCalledWith(
+        '/api/data/user/filter-groups/g2'
+      )
+      expect(store.getters.shotSearchFilterGroups).toEqual([])
+    })
+
+    test('keeps the saved searches and groups sorted, once each', () => {
+      const store = buildStore()
+      load(store, [])
+      const group = { name: 'Lighting' }
+
+      store.commit(SAVE_SHOT_SEARCH_END, { searchQuery: { name: 'wip' } })
+      store.commit(SAVE_SHOT_SEARCH_END, { searchQuery: { name: 'done' } })
+      store.commit(REMOVE_SHOT_SEARCH_END, { searchQuery: { name: 'other' } })
+      store.commit(SAVE_SHOT_SEARCH_FILTER_GROUP_END, {
+        filterGroup: { name: 'Layout' }
+      })
+      store.commit(SAVE_SHOT_SEARCH_FILTER_GROUP_END, { filterGroup: group })
+      store.commit(SAVE_SHOT_SEARCH_FILTER_GROUP_END, { filterGroup: group })
+      store.commit(REMOVE_SHOT_SEARCH_FILTER_GROUP_END, {
+        filterGroup: { name: 'other' }
+      })
+
+      expect(names(store.getters.shotSearchQueries)).toEqual(['done', 'wip'])
+      expect(names(store.getters.shotSearchFilterGroups)).toEqual([
+        'Layout',
+        'Lighting'
+      ])
+    })
+
+    test('sorts the validation columns by task type priority', () => {
+      const store = buildStore()
+      load(store, [])
+      shotsStore.state.shotValidationColumns = ['tt-anim', 'tt-layout']
+
+      store.commit(SORT_VALIDATION_COLUMNS, taskTypeMap)
+
+      expect(store.getters.shotValidationColumns).toEqual([
+        'tt-layout',
+        'tt-anim'
+      ])
+    })
+  })
+
+  describe('shot changes', () => {
+    test('creates a shot and its tasks', async () => {
+      const store = buildStore({ shotTaskTypeIds: ['tt-anim'] })
+      load(store, [buildShot('s1', 'SH010')])
+      sequenceStore.cache.sequenceMap.set('sq1', sequenceMap.get('sq1'))
+      episodeStore.cache.episodeMap.set('ep1', episodeMap.get('ep1'))
+      client.ppost.mockResolvedValueOnce({
+        id: 's2',
+        name: 'SH020',
+        parent_id: 'sq1',
+        project_id: 'p1'
+      })
+
+      try {
+        const shot = await store.dispatch('newShot', {
+          name: 'SH020',
+          description: 'Wide',
+          sequence_id: 'sq1',
+          project_id: 'p1'
+        })
+
+        expect(client.ppost).toHaveBeenCalledWith(
+          '/api/data/projects/p1/shots',
+          { name: 'SH020', description: 'Wide', sequence_id: 'sq1' }
+        )
+        expect(shot).toMatchObject({
+          sequence_name: 'SQ01',
+          episode_name: 'E01'
+        })
+        expect(names(store.getters.displayedShots)).toEqual(['SH010', 'SH020'])
+        expect(rootActions.createEntityTasks).toHaveBeenCalledWith(
+          expect.anything(),
+          { entityId: 's2', taskTypeIds: ['tt-anim'] }
+        )
+      } finally {
+        sequenceStore.cache.sequenceMap.delete('sq1')
+        episodeStore.cache.episodeMap.delete('ep1')
+      }
+    })
+
+    test('cancels a shot with tasks, deletes one without, restores one', async () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', { tasks: [buildTask('t1', 'tt-anim')] }),
+        buildShot('s2', 'SH020'),
+        buildShot('s3', 'SH030')
+      ])
+      client.pdel.mockResolvedValue()
+      client.pput.mockResolvedValueOnce({ id: 's1', canceled: false })
+
+      await store.dispatch('deleteShot', { id: 's1' })
+      expect(store.getters.displayedShotsLength).toBe(2)
+      await store.dispatch('deleteShot', { id: 's2' })
+      expect(client.pdel).toHaveBeenNthCalledWith(1, '/api/data/shots/s1')
+      expect(client.pdel).toHaveBeenNthCalledWith(2, '/api/data/shots/s2')
+      expect(store.getters.shotMap.get('s1').canceled).toBe(true)
+      expect(store.getters.shotMap.has('s2')).toBe(false)
+      expect(names(store.getters.displayedShots)).toEqual(['SH010', 'SH030'])
+
+      const shot = await store.dispatch('restoreShot', { id: 's1' })
+      expect(client.pput).toHaveBeenCalledWith('/api/data/entities/s1', {
+        canceled: false
+      })
+      expect(shot).toEqual({ id: 's1', canceled: false })
+      expect(store.getters.shotMap.get('s1').canceled).toBe(false)
+      expect(store.getters.displayedShotsLength).toBe(2)
+    })
+
+    // The rows read the shots of the displayed list: a row that missed the
+    // change kept the buttons of an active shot.
+    test('shows a canceled shot as canceled in its row, then restored', async () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', {
+          canceled: false,
+          tasks: [buildTask('t1', 'tt-anim')]
+        }),
+        buildShot('s2', 'SH020', {
+          canceled: false,
+          tasks: [buildTask('t2', 'tt-anim')]
+        })
+      ])
+      // A row keeps the entry it renders.
+      const row = store.getters.displayedShots[1]
+      const isCanceled = computed(() => row.canceled)
+      expect(isCanceled.value).toBe(false)
+      client.pdel.mockResolvedValue()
+      client.pput.mockResolvedValueOnce({ id: 's2', canceled: false })
+
+      await store.dispatch('deleteShot', { id: 's2' })
+      expect(isCanceled.value).toBe(true)
+
+      await store.dispatch('restoreShot', { id: 's2' })
+      expect(isCanceled.value).toBe(false)
+    })
+
+    test('shows the canceled shots of a deleted selection as canceled', async () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', {
+          canceled: false,
+          tasks: [buildTask('t1', 'tt-anim')]
+        })
+      ])
+      // A row keeps the entry it renders.
+      const row = store.getters.displayedShots[0]
+      const isCanceled = computed(() => row.canceled)
+      expect(isCanceled.value).toBe(false)
+      store.dispatch('setShotSelection', {
+        shot: store.getters.displayedShots[0],
+        selected: true
+      })
+      client.ppost.mockResolvedValueOnce({})
+
+      await store.dispatch('deleteSelectedShots')
+
+      expect(isCanceled.value).toBe(true)
+    })
+
+    // The footer shows the active shots, and the list hides once empty.
+    test('counts a deleted shot out of the list', async () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s2', 'SH020')])
+      client.pdel.mockResolvedValue()
+
+      await store.dispatch('deleteShot', { id: 's1' })
+      expect(store.getters.displayedShotsCount).toBe(1)
+      expect(store.getters.displayedShotsLength).toBe(1)
+
+      await store.dispatch('deleteShot', { id: 's2' })
+      expect(store.getters.displayedShotsCount).toBe(0)
+      expect(store.getters.displayedShotsLength).toBe(0)
+    })
+
+    test('counts the deleted selection out of the list', async () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s2', 'SH020')])
+      store.getters.displayedShots.forEach(shot =>
+        store.dispatch('setShotSelection', { shot, selected: true })
+      )
+      client.ppost.mockResolvedValueOnce({})
+
+      await store.dispatch('deleteSelectedShots')
+
+      expect(store.getters.displayedShotsCount).toBe(0)
+      expect(store.getters.displayedShotsLength).toBe(0)
+    })
+
+    const createShot = async (store, id, name) => {
+      sequenceStore.cache.sequenceMap.set('sq1', sequenceMap.get('sq1'))
+      episodeStore.cache.episodeMap.set('ep1', episodeMap.get('ep1'))
+      client.ppost.mockResolvedValueOnce(
+        buildShot(id, name, { parent_id: 'sq1', project_id: 'p1' })
+      )
+      try {
+        await store.dispatch('newShot', { name, project_id: 'p1' })
+      } finally {
+        sequenceStore.cache.sequenceMap.delete('sq1')
+        episodeStore.cache.episodeMap.delete('ep1')
+      }
+    }
+
+    // What a socket event brings, as a colleague's creation or ahead of the
+    // answer to the user's own.
+    const addShotLive = (store, id, name) =>
+      store.commit(ADD_SHOT, {
+        taskStatusMap: new Map(),
+        taskTypeMap,
+        taskMap,
+        persons: [],
+        personMap: new Map(),
+        production,
+        shot: buildShot(id, name, {
+          sequence_name: 'SQ01',
+          episode_name: 'E01'
+        })
+      })
+
+    // A deletion parts the search result from the list. The next recount reads
+    // the result: what a creation adds has to reach it.
+    test('counts a shot created after a deletion', async () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s2', 'SH020')])
+      client.pdel.mockResolvedValue()
+      await store.dispatch('deleteShot', { id: 's1' })
+      await createShot(store, 's3', 'SH030')
+
+      await store.dispatch('deleteShot', { id: 's2' })
+
+      expect(names(store.getters.displayedShots)).toEqual(['SH030'])
+      expect(store.getters.displayedShotsCount).toBe(1)
+      expect(store.getters.displayedShotsLength).toBe(1)
+    })
+
+    test('counts a shot created under a search', async () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s2', 'SH020')])
+      store.dispatch('setShotSearch', 'sh010')
+      await createShot(store, 's3', 'SH030')
+      expect(names(store.getters.displayedShots)).toEqual(['SH010', 'SH030'])
+      client.pdel.mockResolvedValue()
+
+      await store.dispatch('deleteShot', { id: 's1' })
+
+      expect(names(store.getters.displayedShots)).toEqual(['SH030'])
+      expect(store.getters.displayedShotsCount).toBe(1)
+      expect(store.getters.displayedShotsLength).toBe(1)
+    })
+
+    test('keeps the order of a search once a shot is created', async () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s3', 'SH030')])
+      store.dispatch('setShotSearch', 'sq01')
+
+      await createShot(store, 's2', 'SH020')
+
+      expect(names(store.getters.displayedShots)).toEqual([
+        'SH010',
+        'SH020',
+        'SH030'
+      ])
+    })
+
+    test('shows a created shot the socket added first against the search', async () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s2', 'SH020')])
+      store.dispatch('setShotSearch', 'sh010')
+      addShotLive(store, 's3', 'SH030')
+
+      await createShot(store, 's3', 'SH030')
+
+      expect(names(store.getters.displayedShots)).toEqual(['SH010', 'SH030'])
+    })
+
+    test('keeps a shot the socket added first in the order of a search', async () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s3', 'SH030')])
+      store.dispatch('setShotSearch', 'sq01')
+      addShotLive(store, 's2', 'SH020')
+
+      await createShot(store, 's2', 'SH020')
+
+      expect(names(store.getters.displayedShots)).toEqual([
+        'SH010',
+        'SH020',
+        'SH030'
+      ])
+    })
+
+    // With no search, the list shows every shot once one is created.
+    test('shows a shot added live along with a created one', async () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s2', 'SH020')])
+      client.pdel.mockResolvedValue()
+      await store.dispatch('deleteShot', { id: 's1' })
+      addShotLive(store, 's9', 'SH090')
+
+      await createShot(store, 's3', 'SH030')
+
+      expect(names(store.getters.displayedShots)).toEqual([
+        'SH020',
+        'SH030',
+        'SH090'
+      ])
+      expect(store.getters.displayedShotsCount).toBe(3)
+    })
+
+    // "For current list and filters" reads the search result.
+    test('keeps the tasks out of a search once a shot is created', async () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', { tasks: [buildTask('t1', 'tt-anim')] }),
+        buildShot('s2', 'SH020', { tasks: [buildTask('t2', 'tt-anim')] })
+      ])
+      store.dispatch('setShotSearch', 'sh010')
+      await createShot(store, 's3', 'SH030')
+
+      await store.dispatch('deleteAllShotTasks', {
+        projectId: 'p1',
+        taskTypeId: 'tt-anim',
+        selectionOnly: true
+      })
+
+      expect(rootActions.deleteAllTasks).toHaveBeenCalledWith(
+        expect.anything(),
+        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: ['t1'] }
+      )
+    })
+
+    test('deletes a canceled shot for good', async () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010', { canceled: true })])
+      client.pdel.mockResolvedValueOnce()
+
+      await store.dispatch('deleteShot', { id: 's1', canceled: true })
+
+      expect(client.pdel).toHaveBeenCalledWith('/api/data/shots/s1?force=true')
+    })
+
+    test('counts the locks of a shot', () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010')])
+
+      store.commit(LOCK_SHOT, { id: 's1' })
+      store.commit(LOCK_SHOT, { id: 's1' })
+      store.commit(UNLOCK_SHOT, { id: 's1' })
+      expect(store.getters.shotMap.get('s1').lock).toBe(1)
+
+      store.commit(UNLOCK_SHOT, { id: 's1' })
+      store.commit(UNLOCK_SHOT, { id: 's1' })
+      expect(store.getters.shotMap.get('s1').lock).toBe(0)
+    })
+
+    test('renames the data key of a renamed shot descriptor only', () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010', { data: { look: 'warm' } })])
+
+      store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
+        descriptor: { entity_type: 'Edit', field_name: 'style' },
+        previousDescriptorFieldName: 'look'
+      })
+      expect(store.getters.shotMap.get('s1').data).toEqual({ look: 'warm' })
+
+      store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
+        descriptor: { entity_type: 'Shot', field_name: 'style' },
+        previousDescriptorFieldName: 'look'
+      })
+      expect(store.getters.shotMap.get('s1').data).toEqual({ style: 'warm' })
+    })
+
+    test('loads the history of a shot', async () => {
+      const store = buildStore()
+      client.pget.mockResolvedValueOnce([{ id: 'v1' }])
+
+      const history = await store.dispatch('loadShotHistory', 's1')
+
+      expect(client.pget).toHaveBeenCalledWith('/api/data/shots/s1/versions')
+      expect(history).toEqual([{ id: 'v1' }])
+    })
+
+    test.each([
+      [
+        { personId: 'u1' },
+        '/api/data/projects/p1/quotas/persons/u1?detail=week&count_mode=weighted'
+      ],
+      [
+        { taskTypeId: 'tt-anim' },
+        '/api/data/projects/p1/quotas/tt-anim?detail=week&count_mode=weighted'
+      ]
+    ])('computes the quotas of %o', async (target, path) => {
+      const store = buildStore()
+      client.pget.mockResolvedValueOnce({})
+
+      await store.dispatch('computeQuota', {
+        ...target,
+        detailLevel: 'week',
+        computeMode: 'weighted'
+      })
+
+      expect(client.pget).toHaveBeenCalledWith(path)
+    })
+
+    test('sets the frames of the shots from the previews of a task type', async () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s2', 'SH020')])
+      client.ppost.mockResolvedValueOnce([{ id: 's2', nb_frames: 96 }])
+
+      const shots = await store.dispatch('setNbFramesFromTaskTypePreviews', {
+        taskTypeId: 'tt-anim',
+        productionId: 'p1',
+        episodeId: 'ep1'
+      })
+
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/actions/projects/p1/task-types/tt-anim/set-shot-nb-frames' +
+          '?episode_id=ep1'
+      )
+      expect(shots).toEqual([{ id: 's2', nb_frames: 96 }])
+      expect(store.getters.shotMap.get('s2').nb_frames).toBe(96)
+    })
+  })
+
+  describe('imports', () => {
+    test('imports a CSV file of shots', async () => {
+      const store = buildStore()
+      const formData = { file: 'shots.csv' }
+      store.commit(SHOT_CSV_FILE_SELECTED, formData)
+      expect(store.getters.shotsCsvFormData).toEqual(formData)
+      client.ppostImport.mockResolvedValueOnce({})
+
+      await store.dispatch('uploadShotFile', true)
+
+      expect(client.ppostImport).toHaveBeenCalledWith(
+        '/api/import/csv/projects/p1/shots?update=true',
+        formData
+      )
+      expect(store.getters.shotsCsvFormData).toBe(null)
+    })
+
+    test('clears the file of an import', () => {
+      const store = buildStore()
+      store.commit(SHOT_CSV_FILE_SELECTED, { file: 'shots.csv' })
+
+      store.commit(IMPORT_SHOTS_END)
+
+      expect(store.getters.shotsCsvFormData).toBe(null)
+    })
+
+    test('creates shots in bulk through a CSV import', async () => {
+      const store = buildStore({ isTVShow: true })
+      client.ppostImport.mockResolvedValueOnce({})
+
+      await store.dispatch('bulkCreateShots', {
+        shotNames: ['SH010', 'SH"020'],
+        sequenceName: 'SQ01',
+        episodeName: 'E01'
+      })
+
+      const [path, formData] = client.ppostImport.mock.calls[0]
+      expect(path).toBe('/api/import/csv/projects/p1/shots')
+      expect(await formData.get('file').text()).toBe(
+        'Episode,Sequence,Name\n"E01","SQ01","SH010"\n"E01","SQ01","SH""020"'
+      )
+    })
+
+    test('creates shots in bulk without episodes outside TV shows', async () => {
+      const store = buildStore()
+      client.ppostImport.mockResolvedValueOnce({})
+
+      await store.dispatch('bulkCreateShots', {
+        shotNames: ['SH010'],
+        sequenceName: 'SQ01'
+      })
+
+      const [, formData] = client.ppostImport.mock.calls[0]
+      expect(await formData.get('file').text()).toBe(
+        'Sequence,Name\n"SQ01","SH010"'
+      )
+    })
+
+    test.each([
+      [true, '/api/import/otio/projects/p1/episodes/ep1'],
+      [false, '/api/import/otio/projects/p1']
+    ])('imports an EDL file, TV show %s', async (isTVShow, path) => {
+      const store = buildStore({ isTVShow, currentEpisode: { id: 'ep1' } })
+      const edlFile = new Blob(['TITLE: cut'])
+      client.ppostImport.mockResolvedValueOnce({})
+
+      await store.dispatch('uploadEdlFile', {
+        edl_file: edlFile,
+        namingConvention: '${project}_${sequence}-${shot}',
+        matchCase: true
+      })
+
+      const [sentPath, formData] = client.ppostImport.mock.calls[0]
+      expect(sentPath).toBe(path)
+      expect(formData.get('naming_convention')).toBe(
+        '${project}_${sequence}-${shot}'
+      )
+      expect(formData.get('match_case')).toBe('true')
+      expect(await formData.get('file').text()).toBe('TITLE: cut')
+    })
+  })
+
+  describe('tasks', () => {
+    test('adds created tasks to their shots', () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010')])
+
+      store.commit(CREATE_TASKS_END, {
+        tasks: [
+          buildTask('t1', 'tt-anim', { entity_id: 's1' }),
+          null,
+          buildTask('t2', 'tt-anim', { entity_id: 's9' })
+        ]
+      })
+
+      const shot = store.getters.shotMap.get('s1')
+      expect(shot.tasks).toEqual(['t1'])
+      expect(shot.validations.get('tt-anim')).toBe('t1')
+      expect(store.getters.displayedShots[0].validations.get('tt-anim')).toBe(
+        't1'
+      )
+    })
+
+    test('adds a new task and the column of its task type', () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010')])
+
+      store.commit(NEW_TASK_END, {
+        task: buildTask('t1', 'tt-anim', { entity_id: 's1' })
+      })
+
+      expect(store.getters.shotValidationColumns).toEqual(['tt-anim'])
+      expect(store.getters.shotFilledColumns['tt-anim']).toBe(true)
+      expect(store.getters.shotMap.get('s1').tasks).toEqual(['t1'])
+      expect(store.getters.displayedShots[0].validations.get('tt-anim')).toBe(
+        't1'
+      )
+    })
+
+    test('drops a deleted task from its shot', () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', {
+          tasks: [buildTask('t1', 'tt-anim'), buildTask('t2', 'tt-layout')]
+        })
+      ])
+
+      store.commit(DELETE_TASK_END, {
+        id: 't1',
+        entity_id: 's1',
+        task_type_id: 'tt-anim'
+      })
+
+      const shot = store.getters.displayedShots[0]
+      expect(shot.tasks).toEqual(['t2'])
+      expect([...shot.validations.keys()]).toEqual(['tt-layout'])
+    })
+
+    test('keeps the tasks of a shot when a task it does not list is deleted', () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', {
+          tasks: [buildTask('t1', 'tt-anim'), buildTask('t2', 'tt-layout')]
+        })
+      ])
+
+      store.commit(DELETE_TASK_END, {
+        id: 't9',
+        entity_id: 's1',
+        task_type_id: 'tt-fx'
+      })
+
+      expect(store.getters.displayedShots[0].tasks).toEqual(['t1', 't2'])
+    })
+
+    test('sums the time of the tasks of a shot again', () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', {
+          tasks: [buildTask('t1', 'tt-anim'), buildTask('t2', 'tt-layout')]
+        })
+      ])
+      const previousTaskMap = tasksStore.state.taskMap
+      tasksStore.state.taskMap = new Map([
+        ['t1', { id: 't1', duration: 60, estimation: 30 }],
+        ['t2', { id: 't2', duration: 15 }]
+      ])
+      try {
+        store.commit(LOAD_TASK_END, { id: 't1', entity_id: 's1' })
+      } finally {
+        tasksStore.state.taskMap = previousTaskMap
+      }
+
+      expect(store.getters.shotMap.get('s1')).toMatchObject({
+        timeSpent: 75,
+        estimation: 30
+      })
+    })
+
+    test('deletes the tasks of a task type, of the selection only', () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', { tasks: [buildTask('t1', 'tt-anim')] }),
+        buildShot('s2', 'SH020', { tasks: [buildTask('t2', 'tt-layout')] })
+      ])
+
+      store.dispatch('deleteAllShotTasks', {
+        projectId: 'p1',
+        taskTypeId: 'tt-anim',
+        selectionOnly: true
+      })
+      store.dispatch('deleteAllShotTasks', {
+        projectId: 'p1',
+        taskTypeId: 'tt-anim',
+        selectionOnly: false
+      })
+
+      expect(
+        rootActions.deleteAllTasks.mock.calls.map(([, args]) => args)
+      ).toEqual([
+        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: ['t1'] },
+        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: [] }
+      ])
+    })
+
+    test('shows the new preview of a shot and of its tasks', () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', { tasks: [buildTask('t1', 'tt-anim')] })
+      ])
+
+      store.commit(SET_PREVIEW, {
+        entityId: 's1',
+        previewId: 'preview-2',
+        taskMap
+      })
+
+      expect(store.getters.displayedShots[0].preview_file_id).toBe('preview-2')
+      expect(taskMap.get('t1').entity.preview_file_id).toBe('preview-2')
+    })
+  })
+
+  describe('selection', () => {
+    test('selects the cells of tasks, then unselects one', () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', { tasks: [buildTask('t1', 'tt-anim')] })
+      ])
+      store.commit(SET_SHOT_SELECTION, {
+        shot: store.getters.shotMap.get('s1'),
+        selected: true
+      })
+
+      store.commit(ADD_SELECTED_TASK, { x: 0, y: 0 })
+      expect(store.getters.selectedShots.size).toBe(0)
+      store.commit(SET_SHOT_SELECTION, {
+        shot: store.getters.shotMap.get('s1'),
+        selected: true
+      })
+      store.commit(ADD_SELECTED_TASKS, [
+        { x: 0, y: 0 },
+        { x: 0, y: 1 },
+        { x: 1, y: 0 }
+      ])
+      expect([...store.getters.shotSelectionGrid]).toEqual([
+        '0-0',
+        '0-1',
+        '1-0'
+      ])
+      expect(store.getters.selectedShots.size).toBe(0)
+
+      store.commit(REMOVE_SELECTED_TASK, {
+        task: { entity: { id: 's1' }, column: { id: 'tt-anim' } }
+      })
+      expect([...store.getters.shotSelectionGrid]).toEqual(['0-1', '1-0'])
+    })
+
+    test('clears the selected cells once tasks are selected', () => {
+      const store = buildStore()
+      store.commit(ADD_SELECTED_TASK, { x: 0, y: 0 })
+      const previousCount = tasksStore.state.nbSelectedValidations
+
+      store.commit(CLEAR_SELECTED_TASKS)
+      expect(store.getters.shotSelectionGrid.size).toBe(1)
+
+      tasksStore.state.nbSelectedValidations = 1
+      try {
+        store.commit(CLEAR_SELECTED_TASKS)
+      } finally {
+        tasksStore.state.nbSelectedValidations = previousCount
+      }
+      expect(store.getters.shotSelectionGrid.size).toBe(0)
+    })
+
+    test('selects shots, then unselects them', () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010'), buildShot('s2', 'SH020')])
+      store.commit(ADD_SELECTED_TASK, { x: 0, y: 0 })
+      const [first, second] = store.getters.displayedShots
+
+      store.dispatch('setShotSelection', { shot: first, selected: true })
+      store.dispatch('setShotSelection', { shot: second, selected: true })
+      expect([...store.getters.selectedShots.keys()]).toEqual(['s1', 's2'])
+      expect(store.getters.shotSelectionGrid.size).toBe(0)
+
+      store.dispatch('setShotSelection', { shot: first, selected: false })
+      expect([...store.getters.selectedShots.keys()]).toEqual(['s2'])
+
+      store.dispatch('clearSelectedShots')
+      expect(store.getters.selectedShots.size).toBe(0)
+    })
+  })
+
+  test('keeps the scroll position of the list', () => {
+    const store = buildStore()
+
+    store.commit(SET_SHOT_LIST_SCROLL_POSITION, 240)
+
+    expect(store.getters.shotListScrollPosition).toBe(240)
+  })
+
+  test('empties the list on RESET_ALL', () => {
+    const store = buildStore()
+    load(store, [buildShot('s1', 'SH010')])
+
+    store.commit(RESET_ALL)
+
+    expect(shotsStore.cache.shots).toEqual([])
+    expect(shotsStore.cache.result).toEqual([])
+    expect(store.getters.displayedShots).toEqual([])
+  })
 })

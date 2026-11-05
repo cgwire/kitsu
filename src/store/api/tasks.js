@@ -34,10 +34,6 @@ export default {
     return client.pput(`/api/data/tasks/${taskId}`, data)
   },
 
-  getTaskSubscribed(taskId) {
-    return client.pget(`/api/data/user/tasks/${taskId}/subscribed`)
-  },
-
   subscribeToTask(taskId) {
     return client.ppost(`/api/actions/user/tasks/${taskId}/subscribe`, {})
   },
@@ -60,10 +56,6 @@ export default {
 
   getTaskComments(taskId) {
     return client.pget(`/api/data/tasks/${taskId}/comments`)
-  },
-
-  getTaskPreviews(taskId) {
-    return client.pget(`/api/data/tasks/${taskId}/previews`)
   },
 
   commentTask(data) {
@@ -182,10 +174,6 @@ export default {
     return client.ppost(`/api/data/entities/${entityId}/tasks`, {
       task_type_ids: taskTypeIds
     })
-  },
-
-  deleteTask(task) {
-    return client.pdel(`/api/data/tasks/${task.id}?force=true`)
   },
 
   deleteAllTasks(projectId, taskTypeId, taskIds) {

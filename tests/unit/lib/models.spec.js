@@ -7,6 +7,7 @@ import {
   getFilledColumns,
   groupEntitiesByParents,
   populateTask,
+  remove,
   setTasksEntityPreview,
   updateModelFromList,
   removeModelFromList
@@ -226,5 +227,14 @@ describe('lib/helpers', () => {
         'old'
       ])
     })
+  })
+
+  it('remove drops the given object, not the ones equal to it', () => {
+    const attachment = { id: 'attachment-1', name: 'notes.pdf' }
+    const twin = { id: 'attachment-1', name: 'notes.pdf' }
+    const other = { id: 'attachment-2', name: 'ref.png' }
+
+    expect(remove([attachment, other, twin], attachment)).toEqual([other, twin])
+    expect(remove([other], attachment)).toEqual([other])
   })
 })

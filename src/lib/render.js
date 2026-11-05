@@ -62,7 +62,7 @@ export const renderComment = (
     for (const personId of mentions) {
       const person = personMap.get(personId)
       if (!person) continue
-      const fullName = encodeHtmlEntities(person.full_name)
+      const fullName = encodeHtmlText(person.full_name)
       replacements.set(
         `@${fullName}`,
         `<a class="mention" href="/people/${person.id}">@${fullName}</a>`
@@ -74,7 +74,7 @@ export const renderComment = (
     for (const departmentId of departmentMentions) {
       const department = departmentMap.get(departmentId)
       if (!department) continue
-      const departmentName = encodeHtmlEntities(department.name)
+      const departmentName = encodeHtmlText(department.name)
       const departmentColor = encodeHtmlEntities(department.color)
       replacements.set(
         `@${departmentName}`,
@@ -85,7 +85,7 @@ export const renderComment = (
 
   if (taskTypes) {
     taskTypes.forEach(taskType => {
-      const task_name = encodeHtmlEntities(taskType.name)
+      const task_name = encodeHtmlText(taskType.name)
       if (taskType.url && isSafeHref(taskType.url)) {
         replacements.set(
           `#${task_name}`,
@@ -130,7 +130,7 @@ export const renderMarkdown = (input, options = {}) => {
 
 /**
  * Encode HTML entities in JavaScript
- * example task name: "Light & Render" => "Light &amp; Render"
+ * example attribute value: "/tasks?a=1&b=2" => "/tasks?a=1&amp;b=2"
  * @param {string} str - string to encode
  * @returns {string} - encoded string
  */
@@ -144,6 +144,21 @@ const encodeHtmlEntities = str => {
         '>': '&gt;',
         "'": '&#39;',
         '"': '&quot;'
+      })[tag]
+  )
+}
+
+// The text of a mention as the sanitized comment holds it: sanitize-html
+// writes quotes and apostrophes back raw, so encoding them too would miss
+// the mentions of a name like O'Brien.
+const encodeHtmlText = str => {
+  return str.replace(
+    /[&<>]/g,
+    tag =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;'
       })[tag]
   )
 }

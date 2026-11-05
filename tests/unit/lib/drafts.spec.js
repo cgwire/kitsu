@@ -13,6 +13,7 @@ describe('drafts', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     localStorage.clear()
+    drafts.setUserScope()
   })
 
   it('sets and gets a task draft with text and checklist', () => {
@@ -98,5 +99,17 @@ describe('drafts', () => {
     expect(() => drafts.clearTaskDraft('task-6')).not.toThrow()
     expect(removeItem).toHaveBeenCalled()
     expect(warn).toHaveBeenCalledWith('Failed to clear draft:', expect.any(Error))
+  })
+
+  it('keeps the drafts of each user apart', () => {
+    drafts.setUserScope('user-1')
+    drafts.setTaskDraft('task-7', 'for my eyes only')
+    expect(localStorage.getItem('draft-user-1-task-7')).not.toBeNull()
+
+    drafts.setUserScope('user-2')
+    expect(drafts.getTaskDraft('task-7')).toBeNull()
+
+    drafts.setUserScope('user-1')
+    expect(drafts.getTaskDraft('task-7').text).toEqual('for my eyes only')
   })
 })

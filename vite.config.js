@@ -180,10 +180,10 @@ export default defineConfig({
       // Floors set just under the measured baseline (2026-11): raise them
       // as coverage grows, never lower them.
       thresholds: {
-        statements: 61,
-        branches: 59,
-        functions: 49,
-        lines: 61
+        statements: 77,
+        branches: 73,
+        functions: 70,
+        lines: 78
       }
     }
   }

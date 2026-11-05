@@ -2,17 +2,61 @@
 
 import { vi } from 'vitest'
 import { computed, reactive } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the edits module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
-// Keep the loads in flight without hitting the network.
-vi.mock('@/store/api/edits', () => ({
-  default: { getEdits: vi.fn(() => new Promise(() => {})) }
+vi.mock('@/store/api/client', () => ({
+  default: {
+    getModel: vi.fn(),
+    pdel: vi.fn(),
+    pget: vi.fn(),
+    ppost: vi.fn(),
+    ppostImport: vi.fn(),
+    pput: vi.fn()
+  }
 }))
+// Keep the loads in flight without hitting the network.
+vi.mock('@/store/api/edits', async importOriginal => {
+  const { default: editsApi } = await importOriginal()
+  return {
+    default: { ...editsApi, getEdits: vi.fn(() => new Promise(() => {})) }
+  }
+})
 
 import editsStore from '@/store/modules/edits'
 import editsApi from '@/store/api/edits'
+import client from '@/store/api/client'
+import tasksStore from '@/store/modules/tasks'
+import { PAGE_SIZE } from '@/lib/pagination'
+import {
+  ADD_EDIT,
+  ADD_SELECTED_TASK,
+  ADD_SELECTED_TASKS,
+  CLEAR_SELECTED_TASKS,
+  CREATE_TASKS_END,
+  DELETE_TASK_END,
+  EDIT_CSV_FILE_SELECTED,
+  EDIT_EDIT_END,
+  IMPORT_EDITS_END,
+  LOAD_EDITS_END,
+  LOAD_TASK_END,
+  LOCK_EDIT,
+  NEW_TASK_END,
+  REMOVE_EDIT,
+  REMOVE_EDIT_SEARCH_END,
+  REMOVE_SELECTED_TASK,
+  RESET_ALL,
+  SAVE_EDIT_SEARCH_END,
+  SET_CURRENT_PRODUCTION,
+  SET_EDIT_LIST_SCROLL_POSITION,
+  SET_EDIT_SELECTION,
+  SET_PREVIEW,
+  SORT_VALIDATION_COLUMNS,
+  UNLOCK_EDIT,
+  UPDATE_METADATA_DESCRIPTOR_END
+} from '@/store/mutation-types'
 
 describe('Edits store', () => {
   describe('loading flag lifecycle', () => {
@@ -700,5 +744,1054 @@ describe('Edits store, getEditsCsvLines', () => {
     const lines = editsStore.actions.getEditsCsvLines({ state, rootGetters })
 
     expect(lines[0].slice(2)).toEqual(['a', 'z'])
+  })
+})
+
+describe('Edits store, through a store', () => {
+  const production = { id: 'p1', name: 'Agent 327' }
+  const taskTypeMap = new Map([
+    ['tt-anim', { id: 'tt-anim', name: 'Animation', priority: 2 }],
+    ['tt-comp', { id: 'tt-comp', name: 'Compositing', priority: 1 }]
+  ])
+
+  let taskMap
+  let rootActions
+
+  const buildState = () => ({
+    editSearchText: '',
+    editSearchQueries: [],
+    editSorting: [],
+    currentEpisode: null,
+    isEditDescription: false,
+    isEditEstimation: false,
+    isEditTime: false,
+    displayedEdits: [],
+    displayedEditsCount: 0,
+    displayedEditsLength: 0,
+    displayedEditsTimeSpent: 0,
+    displayedEditsEstimation: 0,
+    editFilledColumns: {},
+    editSelectionGrid: new Set(),
+    isEditsLoading: false,
+    isEditsLoadingError: false,
+    editsLoadingKey: null,
+    editsCsvFormData: null,
+    editListScrollPosition: 0,
+    editValidationColumns: [],
+    selectedEdits: new Map()
+  })
+
+  const buildStore = ({ isTVShow = false, editTaskTypeIds = [] } = {}) =>
+    createStore({
+      modules: {
+        edits: {
+          // The actions read the module state directly, as in the app.
+          state: editsStore.state,
+          getters: editsStore.getters,
+          actions: editsStore.actions,
+          mutations: editsStore.mutations
+        }
+      },
+      getters: {
+        currentProduction: () => production,
+        isTVShow: () => isTVShow,
+        organisation: () => ({ hours_by_day: 8 }),
+        people: () => [],
+        personMap: () => new Map(),
+        productionEditTaskTypeIds: () => editTaskTypeIds,
+        taskMap: () => taskMap,
+        taskStatus: () => [],
+        taskStatusMap: () => new Map(),
+        taskTypeMap: () => taskTypeMap
+      },
+      actions: rootActions
+    })
+
+  const buildTask = (id, taskTypeId, fields = {}) => ({
+    id,
+    task_type_id: taskTypeId,
+    task_status_id: 'ts-wip',
+    duration: 0,
+    estimation: 0,
+    assignees: [],
+    ...fields
+  })
+
+  const buildEdit = (id, name, fields = {}) => ({
+    id,
+    name,
+    description: '',
+    data: {},
+    tasks: [],
+    ...fields
+  })
+
+  const load = (store, edits, userFilters = {}) =>
+    store.commit(LOAD_EDITS_END, {
+      production,
+      edits,
+      userFilters,
+      taskMap,
+      taskTypeMap,
+      personMap: new Map()
+    })
+
+  const names = list => list.map(({ name }) => name)
+
+  beforeEach(() => {
+    Object.values(client).forEach(fn => fn.mockReset())
+    Object.assign(editsStore.state, buildState())
+    taskMap = new Map()
+    rootActions = {
+      createEntityTasks: vi.fn(),
+      deleteAllTasks: vi.fn()
+    }
+  })
+
+  afterEach(() => {
+    editsStore.cache.removedEditIds.clear()
+    editsStore.cache.editMap.clear()
+    editsStore.cache.edits = []
+    editsStore.cache.result = []
+    editsStore.cache.editIndex = {}
+  })
+
+  describe('list load', () => {
+    test('computes the totals, flags, and columns of the edits', () => {
+      const store = buildStore()
+
+      load(
+        store,
+        [
+          buildEdit('e2', 'E02', {
+            canceled: true,
+            tasks: [buildTask('t3', 'tt-anim', { duration: 30 })]
+          }),
+          buildEdit('e1', 'E01', {
+            description: 'Opening',
+            tasks: [
+              buildTask('t1', 'tt-anim', { duration: 60, estimation: 120 }),
+              buildTask('t2', 'tt-comp', { estimation: 60 })
+            ]
+          })
+        ],
+        { edit: { p1: [{ id: 'f1', name: 'wip' }] } }
+      )
+
+      expect(names(store.getters.displayedEdits)).toEqual(['E01', 'E02'])
+      expect(store.getters.displayedEditsCount).toBe(2)
+      expect(store.getters.displayedEditsLength).toBe(1)
+      expect(store.getters.displayedEditsTimeSpent).toBe(60)
+      expect(store.getters.displayedEditsEstimation).toBe(180)
+      expect(store.getters.isEditTime).toBe(true)
+      expect(store.getters.isEditEstimation).toBe(true)
+      expect(store.getters.isEditDescription).toBe(true)
+      expect(store.getters.editValidationColumns).toEqual([
+        'tt-comp',
+        'tt-anim'
+      ])
+      expect(store.getters.editSearchQueries).toEqual([
+        { id: 'f1', name: 'wip' }
+      ])
+      expect(store.getters.isEditsLoading).toBe(false)
+      expect(store.getters.isEditsLoadingError).toBe(false)
+      expect(store.getters.editMap.get('e1').tasks).toEqual(['t1', 't2'])
+      expect(taskMap.get('t1')).toMatchObject({
+        entity_name: 'E01',
+        entity_type_name: 'Edit',
+        project_id: 'p1'
+      })
+    })
+
+    test('shows the first page, then the next one', () => {
+      const store = buildStore()
+      const edits = Array.from({ length: PAGE_SIZE + 5 }, (_, index) =>
+        buildEdit(`e${index}`, `E${String(index).padStart(3, '0')}`)
+      )
+      load(store, edits)
+      expect(store.getters.displayedEdits).toHaveLength(PAGE_SIZE)
+
+      store.dispatch('displayMoreEdits')
+
+      expect(store.getters.displayedEdits).toHaveLength(PAGE_SIZE + 5)
+    })
+  })
+
+  describe('search and sort', () => {
+    test('filters the list on a search, then clears it on a production switch', () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'Opening'), buildEdit('e2', 'Credits')])
+
+      store.dispatch('setEditSearch', 'opening')
+
+      expect(names(store.getters.displayedEdits)).toEqual(['Opening'])
+      expect(store.getters.displayedEditsCount).toBe(1)
+      expect(store.getters.editSearchText).toBe('opening')
+
+      store.commit(SET_CURRENT_PRODUCTION, production)
+      expect(store.getters.editSearchText).toBe('')
+    })
+
+    test('keeps the search when the sort changes', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'Opening'),
+        buildEdit('e2', 'Credits'),
+        buildEdit('e3', 'Open call')
+      ])
+      store.dispatch('setEditSearch', 'open')
+
+      store.dispatch('changeEditSort', null)
+
+      expect(store.getters.editSorting).toEqual([])
+      expect(names(store.getters.displayedEdits)).toEqual([
+        'Open call',
+        'Opening'
+      ])
+    })
+
+    test('saves a search once, then removes it', async () => {
+      const store = buildStore()
+      load(store, [])
+      client.ppost.mockResolvedValueOnce({ id: 'f2', name: 'opening' })
+      client.pdel.mockResolvedValueOnce()
+
+      await store.dispatch('saveEditSearch', 'opening')
+      await store.dispatch('saveEditSearch', 'opening')
+
+      expect(client.ppost).toHaveBeenCalledTimes(1)
+      expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
+        list_type: 'edit',
+        name: 'opening',
+        query: 'opening',
+        entity_type: null,
+        project_id: 'p1'
+      })
+      expect(names(store.getters.editSearchQueries)).toEqual(['opening'])
+
+      await store.dispatch('removeEditSearch', { id: 'f2', name: 'opening' })
+
+      expect(client.pdel).toHaveBeenCalledWith('/api/data/user/filters/f2')
+      expect(store.getters.editSearchQueries).toEqual([])
+    })
+
+    test('keeps the saved searches sorted and ignores a missing one', () => {
+      const store = buildStore()
+      load(store, [])
+
+      store.commit(SAVE_EDIT_SEARCH_END, { searchQuery: { name: 'wip' } })
+      store.commit(SAVE_EDIT_SEARCH_END, { searchQuery: { name: 'done' } })
+      store.commit(REMOVE_EDIT_SEARCH_END, { searchQuery: { name: 'other' } })
+
+      expect(names(store.getters.editSearchQueries)).toEqual(['done', 'wip'])
+    })
+
+    test('sorts the validation columns by task type priority', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { tasks: [buildTask('t1', 'tt-anim')] })
+      ])
+      store.state.edits.editValidationColumns = ['tt-anim', 'tt-comp']
+
+      store.commit(SORT_VALIDATION_COLUMNS, taskTypeMap)
+
+      expect(store.getters.editValidationColumns).toEqual([
+        'tt-comp',
+        'tt-anim'
+      ])
+    })
+  })
+
+  describe('edit changes', () => {
+    test('merges an edit change into the list and its search index', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { data: { look: 'warm', mood: 'calm' } })
+      ])
+      const row = store.getters.displayedEdits[0]
+
+      store.commit(EDIT_EDIT_END, {
+        id: 'e1',
+        name: 'Finale',
+        description: 'Last scene',
+        data: { look: 'cold' }
+      })
+
+      expect(store.getters.displayedEdits[0]).toMatchObject({
+        name: 'Finale',
+        data: { look: 'cold', mood: 'calm' }
+      })
+      // A row receives its edit as a prop: a new object renders the change.
+      expect(store.getters.displayedEdits[0]).not.toBe(row)
+      expect(store.getters.isEditDescription).toBe(true)
+      store.dispatch('setEditSearch', 'finale')
+      expect(names(store.getters.displayedEdits)).toEqual(['Finale'])
+    })
+
+    test('creates an edit and its tasks', async () => {
+      const store = buildStore({ editTaskTypeIds: ['tt-anim'] })
+      load(store, [buildEdit('e1', 'E01')])
+      client.ppost.mockResolvedValueOnce({
+        id: 'e2',
+        name: 'E02',
+        project_id: 'p1'
+      })
+
+      const edit = await store.dispatch('newEdit', {
+        name: 'E02',
+        description: 'Trailer',
+        data: {},
+        parent_id: 'ep-1',
+        project_id: 'p1'
+      })
+
+      expect(client.ppost).toHaveBeenCalledWith('/api/data/projects/p1/edits', {
+        name: 'E02',
+        description: 'Trailer',
+        data: {},
+        episode_id: 'ep-1'
+      })
+      expect(edit).toMatchObject({ id: 'e2', production_id: 'p1' })
+      expect(names(store.getters.displayedEdits)).toEqual(['E01', 'E02'])
+      expect(rootActions.createEntityTasks).toHaveBeenCalledWith(
+        expect.anything(),
+        { entityId: 'e2', taskTypeIds: ['tt-anim'] }
+      )
+    })
+
+    test('refuses an edit whose name the episode already holds', async () => {
+      const store = buildStore({ isTVShow: true })
+      load(store, [buildEdit('e1', 'E01', { parent_id: 'ep-1' })])
+
+      await expect(
+        store.dispatch('newEdit', { name: 'E01', parent_id: 'ep-1' })
+      ).rejects.toThrow('Edit already exists')
+      expect(client.ppost).not.toHaveBeenCalled()
+    })
+
+    test('saves an edit, locked until a while after the save', async () => {
+      vi.useFakeTimers()
+      try {
+        const store = buildStore()
+        load(store, [buildEdit('e1', 'E01')])
+        client.pput.mockResolvedValueOnce({})
+
+        await store.dispatch('editEdit', {
+          id: 'e1',
+          name: 'E01',
+          description: 'Cut',
+          data: {},
+          parent_id: 'ep-1'
+        })
+
+        expect(client.pput).toHaveBeenCalledWith('/api/data/entities/e1', {
+          name: 'E01',
+          description: 'Cut',
+          data: {},
+          parent_id: 'ep-1'
+        })
+        expect(store.getters.editMap.get('e1').lock).toBe(1)
+        vi.advanceTimersByTime(2000)
+        expect(store.getters.editMap.get('e1').lock).toBe(0)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    // A list reload or a deletion from another session can drop the edit
+    // between the opening of its modal and the save.
+    test('saves an edit missing from the loaded list', async () => {
+      vi.useFakeTimers()
+      try {
+        const store = buildStore()
+        load(store, [buildEdit('e1', 'E01')])
+        client.pput.mockResolvedValueOnce({})
+
+        await store.dispatch('editEdit', {
+          id: 'e9',
+          name: 'E09',
+          description: 'Gone',
+          data: {}
+        })
+
+        expect(client.pput).toHaveBeenCalledWith('/api/data/entities/e9', {
+          name: 'E09',
+          description: 'Gone',
+          data: {}
+        })
+        expect(editsStore.cache.edits.map(({ id }) => id)).toEqual(['e1'])
+        expect(store.getters.editMap.has('e9')).toBe(false)
+        vi.advanceTimersByTime(2000)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    test('counts the locks of an edit', () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01')])
+
+      store.commit(LOCK_EDIT, { id: 'e1' })
+      store.commit(LOCK_EDIT, { id: 'e1' })
+      store.commit(UNLOCK_EDIT, { id: 'e1' })
+      expect(store.getters.editMap.get('e1').lock).toBe(1)
+
+      store.commit(UNLOCK_EDIT, { id: 'e1' })
+      store.commit(UNLOCK_EDIT, { id: 'e1' })
+      expect(store.getters.editMap.get('e1').lock).toBe(0)
+    })
+
+    test('cancels an edit with tasks, deletes one without', async () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { tasks: [buildTask('t1', 'tt-anim')] }),
+        buildEdit('e2', 'E02')
+      ])
+      client.pdel.mockResolvedValue()
+
+      await store.dispatch('deleteEdit', { id: 'e1' })
+      await store.dispatch('deleteEdit', { id: 'e2' })
+
+      expect(client.pdel).toHaveBeenNthCalledWith(1, '/api/data/edits/e1')
+      expect(client.pdel).toHaveBeenNthCalledWith(2, '/api/data/edits/e2')
+      expect(store.getters.editMap.get('e1').canceled).toBe(true)
+      expect(store.getters.editMap.has('e2')).toBe(false)
+      expect(names(store.getters.displayedEdits)).toEqual(['E01'])
+    })
+
+    // The list footer shows the count of the edits not canceled.
+    test('counts a canceled edit out, then back in once restored', async () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { tasks: [buildTask('t1', 'tt-anim')] }),
+        buildEdit('e2', 'E02')
+      ])
+      client.pdel.mockResolvedValueOnce()
+      client.pput.mockResolvedValueOnce({ id: 'e1', canceled: false })
+      expect(store.getters.displayedEditsLength).toBe(2)
+
+      await store.dispatch('deleteEdit', { id: 'e1' })
+      expect(store.getters.displayedEditsLength).toBe(1)
+
+      await store.dispatch('restoreEdit', { id: 'e1' })
+      expect(store.getters.displayedEditsLength).toBe(2)
+    })
+
+    // The rows read the edits of the displayed list: a row that missed the
+    // change kept the buttons of an active edit.
+    test('shows a canceled edit as canceled in its row, then restored', async () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { canceled: false }),
+        buildEdit('e2', 'E02', {
+          canceled: false,
+          tasks: [buildTask('t2', 'tt-anim')]
+        })
+      ])
+      // A row keeps the entry it renders.
+      const row = store.getters.displayedEdits[1]
+      const isCanceled = computed(() => row.canceled)
+      expect(isCanceled.value).toBe(false)
+      client.pdel.mockResolvedValueOnce()
+      client.pput.mockResolvedValueOnce({ id: 'e2', canceled: false })
+
+      await store.dispatch('deleteEdit', { id: 'e2' })
+      expect(isCanceled.value).toBe(true)
+
+      await store.dispatch('restoreEdit', { id: 'e2' })
+      expect(isCanceled.value).toBe(false)
+    })
+
+    // A save leaves a copy of the edit in the displayed list.
+    test('shows an edit saved then canceled as canceled', async () => {
+      vi.useFakeTimers()
+      try {
+        const store = buildStore()
+        load(store, [
+          buildEdit('e1', 'E01', {
+            canceled: false,
+            tasks: [buildTask('t1', 'tt-anim')]
+          })
+        ])
+        client.pput.mockResolvedValueOnce({})
+        client.pdel.mockResolvedValueOnce()
+
+        await store.dispatch('editEdit', { id: 'e1', name: 'E01 v2' })
+        await store.dispatch('deleteEdit', { id: 'e1' })
+
+        expect(store.getters.displayedEdits[0]).toMatchObject({
+          name: 'E01 v2',
+          canceled: true
+        })
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    // The footer shows the active edits, and the list hides once empty.
+    test('counts a deleted edit out of the list', async () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01'), buildEdit('e2', 'E02')])
+      client.pdel.mockResolvedValue()
+
+      await store.dispatch('deleteEdit', { id: 'e1' })
+      expect(store.getters.displayedEditsCount).toBe(1)
+      expect(store.getters.displayedEditsLength).toBe(1)
+
+      await store.dispatch('deleteEdit', { id: 'e2' })
+      expect(store.getters.displayedEditsCount).toBe(0)
+      expect(store.getters.displayedEditsLength).toBe(0)
+    })
+
+    // A deletion parts the search result from the list. The next recount reads
+    // the result: what a creation adds has to reach it.
+    test('counts an edit created after a deletion', async () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01'), buildEdit('e2', 'E02')])
+      client.pdel.mockResolvedValue()
+      await store.dispatch('deleteEdit', { id: 'e1' })
+      client.ppost.mockResolvedValueOnce(buildEdit('e3', 'E03'))
+      await store.dispatch('newEdit', {
+        name: 'E03',
+        data: {},
+        project_id: 'p1'
+      })
+
+      await store.dispatch('deleteEdit', { id: 'e2' })
+
+      expect(names(store.getters.displayedEdits)).toEqual(['E03'])
+      expect(store.getters.displayedEditsCount).toBe(1)
+      expect(store.getters.displayedEditsLength).toBe(1)
+    })
+
+    test('counts an edit added live after a deletion', async () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01'), buildEdit('e2', 'E02')])
+      client.pdel.mockResolvedValue()
+      await store.dispatch('deleteEdit', { id: 'e1' })
+      store.commit(ADD_EDIT, {
+        edit: buildEdit('e3', 'E03'),
+        taskTypeMap,
+        taskMap,
+        personMap: new Map(),
+        production
+      })
+
+      await store.dispatch('deleteEdit', { id: 'e2' })
+
+      expect(names(store.getters.displayedEdits)).toEqual(['E03'])
+      expect(store.getters.displayedEditsCount).toBe(1)
+      expect(store.getters.displayedEditsLength).toBe(1)
+    })
+
+    test('counts an edit created under a search', async () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01'), buildEdit('e2', 'E02')])
+      store.dispatch('setEditSearch', 'e01')
+      client.ppost.mockResolvedValueOnce(buildEdit('e3', 'E03'))
+      await store.dispatch('newEdit', {
+        name: 'E03',
+        data: {},
+        project_id: 'p1'
+      })
+      expect(names(store.getters.displayedEdits)).toEqual(['E01', 'E03'])
+      client.pdel.mockResolvedValue()
+
+      await store.dispatch('deleteEdit', { id: 'e1' })
+
+      expect(names(store.getters.displayedEdits)).toEqual(['E03'])
+      expect(store.getters.displayedEditsCount).toBe(1)
+      expect(store.getters.displayedEditsLength).toBe(1)
+    })
+
+    test('keeps the order of a search once an edit is created', async () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01'), buildEdit('e3', 'E03')])
+      store.dispatch('setEditSearch', 'e0')
+      client.ppost.mockResolvedValueOnce(buildEdit('e2', 'E02'))
+
+      await store.dispatch('newEdit', {
+        name: 'E02',
+        data: {},
+        project_id: 'p1'
+      })
+
+      expect(names(store.getters.displayedEdits)).toEqual([
+        'E01',
+        'E02',
+        'E03'
+      ])
+    })
+
+    // The socket event comes ahead of the answer to the creation.
+    test('keeps an edit the socket added first in the order of a search', async () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01'), buildEdit('e3', 'E03')])
+      store.dispatch('setEditSearch', 'e0')
+      store.commit(ADD_EDIT, {
+        edit: buildEdit('e2', 'E02'),
+        taskTypeMap,
+        taskMap,
+        personMap: new Map(),
+        production
+      })
+      client.ppost.mockResolvedValueOnce(buildEdit('e2', 'E02'))
+
+      await store.dispatch('newEdit', {
+        name: 'E02 bis',
+        data: {},
+        project_id: 'p1'
+      })
+
+      expect(names(store.getters.displayedEdits)).toEqual([
+        'E01',
+        'E02',
+        'E03'
+      ])
+    })
+
+    // "For current list and filters" reads the search result.
+    test('keeps the tasks out of a search once an edit is created', async () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { tasks: [buildTask('t1', 'tt-anim')] }),
+        buildEdit('e2', 'E02', { tasks: [buildTask('t2', 'tt-anim')] })
+      ])
+      store.dispatch('setEditSearch', 'e01')
+      client.ppost.mockResolvedValueOnce(buildEdit('e3', 'E03'))
+      await store.dispatch('newEdit', {
+        name: 'E03',
+        data: {},
+        project_id: 'p1'
+      })
+
+      await store.dispatch('deleteAllEditTasks', {
+        projectId: 'p1',
+        taskTypeId: 'tt-anim',
+        selectionOnly: true
+      })
+
+      expect(rootActions.deleteAllTasks).toHaveBeenCalledWith(
+        expect.anything(),
+        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: ['t1'] }
+      )
+    })
+
+    test('lists an edit added live once', () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01')])
+
+      store.commit(ADD_EDIT, {
+        edit: buildEdit('e2', 'E02'),
+        taskTypeMap,
+        taskMap,
+        personMap: new Map(),
+        production
+      })
+
+      expect(names(store.getters.displayedEdits)).toEqual(['E01', 'E02'])
+      expect(store.getters.displayedEditsCount).toBe(2)
+    })
+
+    test('counts the active edits after a deletion, a creation, and a cancellation', async () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01'),
+        buildEdit('e2', 'E02', { tasks: [buildTask('t2', 'tt-anim')] }),
+        buildEdit('e3', 'E03')
+      ])
+      client.pdel.mockResolvedValue()
+      await store.dispatch('deleteEdit', { id: 'e1' })
+      client.ppost.mockResolvedValueOnce(buildEdit('e4', 'E04'))
+      await store.dispatch('newEdit', {
+        name: 'E04',
+        data: {},
+        project_id: 'p1'
+      })
+
+      await store.dispatch('deleteEdit', { id: 'e2' })
+
+      expect(store.getters.displayedEditsCount).toBe(3)
+      expect(store.getters.displayedEditsLength).toBe(2)
+    })
+
+    test('deletes a canceled edit for good', async () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01', { canceled: true })])
+      client.pdel.mockResolvedValueOnce()
+
+      await store.dispatch('deleteEdit', { id: 'e1', canceled: true })
+
+      expect(client.pdel).toHaveBeenCalledWith('/api/data/edits/e1?force=true')
+    })
+
+    test('restores a canceled edit', async () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01', { canceled: true })])
+      client.pput.mockResolvedValueOnce({ id: 'e1', canceled: false })
+
+      const edit = await store.dispatch('restoreEdit', { id: 'e1' })
+
+      expect(client.pput).toHaveBeenCalledWith('/api/data/entities/e1', {
+        canceled: false
+      })
+      expect(edit).toEqual({ id: 'e1', canceled: false })
+      expect(store.getters.editMap.get('e1').canceled).toBe(false)
+    })
+
+    test('takes the time of a deleted edit off the totals', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', {
+          tasks: [buildTask('t1', 'tt-anim', { duration: 60, estimation: 90 })]
+        }),
+        buildEdit('e2', 'E02', {
+          tasks: [buildTask('t2', 'tt-anim', { duration: 30, estimation: 45 })]
+        })
+      ])
+
+      store.commit(REMOVE_EDIT, store.getters.editMap.get('e1'))
+
+      expect(store.getters.displayedEditsTimeSpent).toBe(30)
+      expect(store.getters.displayedEditsEstimation).toBe(45)
+    })
+
+    test('deletes the selected edits in one request', async () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { tasks: [buildTask('t1', 'tt-anim')] }),
+        buildEdit('e2', 'E02'),
+        buildEdit('e3', 'E03')
+      ])
+      store.dispatch('setEditSelection', {
+        edit: store.getters.editMap.get('e1'),
+        selected: true
+      })
+      store.dispatch('setEditSelection', {
+        edit: store.getters.editMap.get('e2'),
+        selected: true
+      })
+      client.ppost.mockResolvedValueOnce({})
+
+      await store.dispatch('deleteSelectedEdits')
+
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/actions/projects/p1/delete-entities',
+        ['e1', 'e2']
+      )
+      expect(store.getters.editMap.get('e1').canceled).toBe(true)
+      expect(names(store.getters.displayedEdits)).toEqual(['E01', 'E03'])
+    })
+
+    test('deletes the selected edits for good once all are canceled', async () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01', { canceled: true })])
+      store.commit(SET_EDIT_SELECTION, {
+        edit: store.getters.editMap.get('e1'),
+        selected: true
+      })
+      client.ppost.mockResolvedValueOnce({})
+
+      await store.dispatch('deleteSelectedEdits')
+
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/actions/projects/p1/delete-entities?force=true',
+        ['e1']
+      )
+      expect(store.getters.editMap.has('e1')).toBe(false)
+    })
+
+    test('renames the data key of a renamed edit descriptor only', () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01', { data: { look: 'warm' } })])
+
+      store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
+        descriptor: { entity_type: 'Shot', field_name: 'style' },
+        previousDescriptorFieldName: 'look'
+      })
+      expect(store.getters.editMap.get('e1').data).toEqual({ look: 'warm' })
+
+      store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
+        descriptor: { entity_type: 'Edit', field_name: 'style' },
+        previousDescriptorFieldName: 'look'
+      })
+      expect(store.getters.editMap.get('e1').data).toEqual({ style: 'warm' })
+    })
+
+    test('imports a CSV file of edits', async () => {
+      const store = buildStore()
+      const formData = { file: 'edits.csv' }
+      store.commit(EDIT_CSV_FILE_SELECTED, formData)
+      expect(store.getters.editsCsvFormData).toEqual(formData)
+      client.ppostImport.mockResolvedValueOnce({})
+
+      await store.dispatch('uploadEditFile', true)
+
+      expect(client.ppostImport).toHaveBeenCalledWith(
+        '/api/import/csv/projects/p1/edits?update=true',
+        formData
+      )
+      expect(store.getters.editsCsvFormData).toBe(null)
+    })
+
+    test('clears the file of an import', () => {
+      const store = buildStore()
+      store.commit(EDIT_CSV_FILE_SELECTED, { file: 'edits.csv' })
+
+      store.commit(IMPORT_EDITS_END)
+
+      expect(store.getters.editsCsvFormData).toBe(null)
+    })
+
+    test('loads the history of an edit', async () => {
+      const store = buildStore()
+      client.pget.mockResolvedValueOnce([{ id: 'v1' }])
+
+      const history = await store.dispatch('loadEditHistory', 'e1')
+
+      expect(client.pget).toHaveBeenCalledWith('/api/data/edits/e1/versions')
+      expect(history).toEqual([{ id: 'v1' }])
+    })
+  })
+
+  describe('tasks', () => {
+    test('adds created tasks to their edits', () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01')])
+
+      store.commit(CREATE_TASKS_END, {
+        tasks: [
+          buildTask('t1', 'tt-anim', { entity_id: 'e1' }),
+          null,
+          buildTask('t2', 'tt-anim', { entity_id: 'e9' })
+        ]
+      })
+
+      const edit = store.getters.editMap.get('e1')
+      expect(edit.tasks).toEqual(['t1'])
+      expect(edit.validations.get('tt-anim')).toBe('t1')
+      expect(store.getters.displayedEdits[0].validations.get('tt-anim')).toBe(
+        't1'
+      )
+    })
+
+    test('adds the column of a new task type', () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01')])
+
+      store.commit(NEW_TASK_END, {
+        task: buildTask('t1', 'tt-anim', { entity_id: 'e1' })
+      })
+
+      expect(store.getters.editValidationColumns).toEqual(['tt-anim'])
+      expect(store.getters.editFilledColumns['tt-anim']).toBe(true)
+      expect(store.getters.displayedEdits[0].validations.get('tt-anim')).toBe(
+        't1'
+      )
+    })
+
+    // The edit page lists the tasks of an edit through their ids.
+    test('lists a new task of an edit by its id', () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01')])
+
+      store.commit(NEW_TASK_END, {
+        task: buildTask('t1', 'tt-anim', { entity_id: 'e1' })
+      })
+
+      expect(store.getters.editMap.get('e1').tasks).toEqual(['t1'])
+    })
+
+    test('drops a deleted task from its edit', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', {
+          tasks: [buildTask('t1', 'tt-anim'), buildTask('t2', 'tt-comp')]
+        })
+      ])
+
+      store.commit(DELETE_TASK_END, {
+        id: 't1',
+        entity_id: 'e1',
+        task_type_id: 'tt-anim'
+      })
+
+      const edit = store.getters.displayedEdits[0]
+      expect(edit.tasks).toEqual(['t2'])
+      expect([...edit.validations.keys()]).toEqual(['tt-comp'])
+    })
+
+    test('keeps the tasks of an edit when a task it does not list is deleted', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', {
+          tasks: [buildTask('t1', 'tt-anim'), buildTask('t2', 'tt-comp')]
+        })
+      ])
+
+      store.commit(DELETE_TASK_END, {
+        id: 't9',
+        entity_id: 'e1',
+        task_type_id: 'tt-fx'
+      })
+
+      expect(store.getters.displayedEdits[0].tasks).toEqual(['t1', 't2'])
+    })
+
+    test('sums the time of the tasks of an edit again', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', {
+          tasks: [buildTask('t1', 'tt-anim'), buildTask('t2', 'tt-comp')]
+        })
+      ])
+      const previousTaskMap = tasksStore.state.taskMap
+      tasksStore.state.taskMap = new Map([
+        ['t1', { id: 't1', duration: 60, estimation: 30 }],
+        ['t2', { id: 't2', duration: 15 }]
+      ])
+      try {
+        store.commit(LOAD_TASK_END, { id: 't1', entity_id: 'e1' })
+      } finally {
+        tasksStore.state.taskMap = previousTaskMap
+      }
+
+      expect(store.getters.editMap.get('e1')).toMatchObject({
+        timeSpent: 75,
+        estimation: 30
+      })
+    })
+
+    test('deletes the tasks of a task type, of the selection only', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { tasks: [buildTask('t1', 'tt-anim')] }),
+        buildEdit('e2', 'E02', { tasks: [buildTask('t2', 'tt-comp')] })
+      ])
+
+      store.dispatch('deleteAllEditTasks', {
+        projectId: 'p1',
+        taskTypeId: 'tt-anim',
+        selectionOnly: true
+      })
+      store.dispatch('deleteAllEditTasks', {
+        projectId: 'p1',
+        taskTypeId: 'tt-anim',
+        selectionOnly: false
+      })
+
+      expect(
+        rootActions.deleteAllTasks.mock.calls.map(([, args]) => args)
+      ).toEqual([
+        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: ['t1'] },
+        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: [] }
+      ])
+    })
+
+    test('shows the new preview of an edit and of its tasks', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { tasks: [buildTask('t1', 'tt-anim')] })
+      ])
+
+      store.commit(SET_PREVIEW, {
+        entityId: 'e1',
+        previewId: 'preview-2',
+        taskMap
+      })
+
+      expect(store.getters.displayedEdits[0].preview_file_id).toBe('preview-2')
+      expect(taskMap.get('t1').entity.preview_file_id).toBe('preview-2')
+    })
+  })
+
+  describe('selection', () => {
+    test('selects the cells of tasks, then unselects one', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', { tasks: [buildTask('t1', 'tt-anim')] })
+      ])
+      store.commit(SET_EDIT_SELECTION, {
+        edit: store.getters.editMap.get('e1'),
+        selected: true
+      })
+
+      store.commit(ADD_SELECTED_TASK, { x: 0, y: 0 })
+      expect(store.getters.selectedEdits.size).toBe(0)
+      store.commit(SET_EDIT_SELECTION, {
+        edit: store.getters.editMap.get('e1'),
+        selected: true
+      })
+      store.commit(ADD_SELECTED_TASKS, [
+        { x: 0, y: 0 },
+        { x: 0, y: 1 },
+        { x: 1, y: 0 }
+      ])
+      expect([...store.getters.editSelectionGrid]).toEqual([
+        '0-0',
+        '0-1',
+        '1-0'
+      ])
+      expect(store.getters.selectedEdits.size).toBe(0)
+
+      store.commit(REMOVE_SELECTED_TASK, {
+        task: { entity: { id: 'e1' }, column: { id: 'tt-anim' } }
+      })
+      expect([...store.getters.editSelectionGrid]).toEqual(['0-1', '1-0'])
+    })
+
+    test('clears the selected cells once tasks are selected', () => {
+      const store = buildStore()
+      store.commit(ADD_SELECTED_TASK, { x: 0, y: 0 })
+      const previousCount = tasksStore.state.nbSelectedTasks
+
+      store.commit(CLEAR_SELECTED_TASKS)
+      expect(store.getters.editSelectionGrid.size).toBe(1)
+
+      tasksStore.state.nbSelectedTasks = 1
+      try {
+        store.commit(CLEAR_SELECTED_TASKS)
+      } finally {
+        tasksStore.state.nbSelectedTasks = previousCount
+      }
+      expect(store.getters.editSelectionGrid.size).toBe(0)
+    })
+
+    test('selects edits, then unselects them', () => {
+      const store = buildStore()
+      load(store, [buildEdit('e1', 'E01'), buildEdit('e2', 'E02')])
+      store.commit(ADD_SELECTED_TASK, { x: 0, y: 0 })
+      const [first, second] = store.getters.displayedEdits
+
+      store.dispatch('setEditSelection', { edit: first, selected: true })
+      store.dispatch('setEditSelection', { edit: second, selected: true })
+      expect([...store.getters.selectedEdits.keys()]).toEqual(['e1', 'e2'])
+      expect(store.getters.editSelectionGrid.size).toBe(0)
+
+      store.dispatch('setEditSelection', { edit: first, selected: false })
+      expect([...store.getters.selectedEdits.keys()]).toEqual(['e2'])
+
+      store.dispatch('clearSelectedEdits')
+      expect(store.getters.selectedEdits.size).toBe(0)
+    })
+  })
+
+  test('keeps the scroll position of the list', () => {
+    const store = buildStore()
+
+    store.commit(SET_EDIT_LIST_SCROLL_POSITION, 240)
+
+    expect(store.getters.editListScrollPosition).toBe(240)
+  })
+
+  test('empties the list on RESET_ALL', () => {
+    const store = buildStore()
+    load(store, [buildEdit('e1', 'E01')])
+
+    store.commit(RESET_ALL)
+
+    expect(editsStore.cache.edits).toEqual([])
+    expect(editsStore.cache.result).toEqual([])
+    expect(store.getters.displayedEdits).toEqual([])
   })
 })

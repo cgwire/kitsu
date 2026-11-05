@@ -52,10 +52,10 @@ export const useBreakdownLoader = (store, onLoaded) => {
       }
       if (isTVShow.value) {
         if (currentEpisode.value) episodeId.value = currentEpisode.value.id
-        store.dispatch('setCastingEpisode', episodeId.value)
+        store.dispatch('setCastingEpisode')
         store.dispatch('setCastingForProductionEpisodes')
       } else {
-        store.dispatch('setCastingEpisode', null)
+        store.dispatch('setCastingEpisode')
       }
       await store.dispatch('loadAssets', { all: true, withTasks: true })
       if (isDisposed) return

@@ -28,8 +28,6 @@ import {
   DELETE_TASK_END,
   EDIT_EPISODE_END,
   LOAD_EPISODES_END,
-  LOAD_EPISODES_ERROR,
-  LOAD_EPISODES_START,
   NEW_EPISODE_END,
   NEW_TASK_END,
   REMOVE_EPISODE,
@@ -38,7 +36,6 @@ import {
   SET_CURRENT_EPISODE,
   SET_CURRENT_PRODUCTION,
   SET_EPISODE_LIST_SCROLL_POSITION,
-  SET_EPISODE_SELECTION,
   SET_EPISODE_SEARCH,
   SET_EPISODE_RETAKE_STATS,
   SET_EPISODE_STATS,
@@ -188,7 +185,6 @@ const initialState = {
   isEpisodeResolution: false,
   isEpisodeTime: false,
   isEpisodesLoading: false,
-  isEpisodesLoadingError: false,
 
   episodeListScrollPosition: 0,
   episodeSearchText: '',
@@ -209,7 +205,6 @@ const getters = {
   episodeSorting: state => state.episodeSorting,
 
   isEpisodesLoading: state => state.isEpisodesLoading,
-  isEpisodesLoadingError: state => state.isEpisodesLoadingError,
   displayedEpisodes: state => state.displayedEpisodes,
   displayedEpisodesLength: state => state.displayedEpisodesLength,
   displayedEpisodesEstimation: state => state.displayedEpisodesEstimation,
@@ -231,14 +226,9 @@ const getters = {
   episodeValidationColumns: state => state.episodeValidationColumns,
   episodeSelectionGrid: state => state.episodeSelectionGrid,
 
-  isSingleEpisode: state => state.displayedEpisodes.length < 2,
   runningEpisodes: state =>
     state.displayedEpisodes.filter(episode => {
       return !episode.status || ['', 'running'].includes(episode.status)
-    }),
-  episodeOptions: state =>
-    state.episodes.map(episode => {
-      return { label: episode.name, value: episode.id }
     }),
   episodeOptionGroups: state => {
     const groups = []
@@ -265,10 +255,6 @@ const getters = {
 const actions = {
   setCurrentEpisode({ commit }, episodeId) {
     commit(SET_CURRENT_EPISODE, episodeId)
-  },
-
-  setEpisodeListScrollPosition({ commit }, scrollPosition) {
-    commit(SET_EPISODE_LIST_SCROLL_POSITION, scrollPosition)
   },
 
   changeEpisodeSort({ commit, rootGetters }, sortInfo) {
@@ -326,14 +312,6 @@ const actions = {
   removeEpisodeSearch({ commit }, searchQuery) {
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_EPISODE_SEARCH, searchQuery)
-    })
-  },
-
-  setEpisodeSelection({ commit, rootGetters }, { episode, selected }) {
-    commit(SET_EPISODE_SELECTION, {
-      episode,
-      selected,
-      displayedEpisodes: rootGetters.displayedEpisodes
     })
   },
 
@@ -563,17 +541,6 @@ const mutations = {
     }
   },
 
-  [SET_EPISODE_SELECTION](state, { episode, selected, displayedEpisodes }) {
-    if (!selected && state.selectedEpisodes.has(episode.id)) {
-      state.selectedEpisodes.delete(episode.id)
-    }
-    if (selected) {
-      state.selectedEpisodes.set(episode.id, episode)
-      // unselect previously selected tasks
-      state.episodeSelectionGrid = buildSelectionGrid()
-    }
-  },
-
   [CLEAR_SELECTED_EPISODES](state) {
     state.selectedEpisodes = new Map()
   },
@@ -689,14 +656,12 @@ const mutations = {
       taskTypeMap
     )
 
-    state.nbValidationColumns = state.episodeValidationColumns.length
     state.isEpisodeTime = isTime
     state.isEpisodeEstimation = isEstimation
     state.isEpisodeDescription = isDescription
     state.isEpisodeResolution = isResolution
 
     state.isEpisodesLoading = false
-    state.isEpisodesLoadingError = false
 
     state.displayedEpisodes = displayedEpisodes
     state.displayedEpisodesLength = displayedEpisodes.length
@@ -814,29 +779,9 @@ const mutations = {
     if (episode.description && !state.isEpisodeDescription) {
       state.isEpisodeDescription = true
     }
-    if (episode.resolution && !state.isEpisodeResolution) {
+    if (episode.data.resolution && !state.isEpisodeResolution) {
       state.isEpisodeResolution = true
     }
-  },
-
-  [LOAD_EPISODES_START](state) {
-    cache.episodes = []
-    cache.result = []
-    cache.episodeIndex = {}
-    cache.episodeMap.clear()
-    state.episodeValidationColumns = []
-
-    state.isEpisodesLoading = true
-    state.isEpisodesLoadingError = false
-
-    state.episodeSearchQueries = []
-    state.displayedEpisodes = []
-    state.displayedEpisodesLength = 0
-  },
-
-  [LOAD_EPISODES_ERROR](state) {
-    state.isEpisodesLoading = false
-    state.isEpisodesLoadingError = true
   },
 
   [LOAD_EPISODES_END](state, { episodes, routeEpisodeId }) {
@@ -1022,7 +967,7 @@ const mutations = {
       const taskIndex = episode.tasks.findIndex(
         episodeTaskId => episodeTaskId === task.id
       )
-      episode.tasks.splice(taskIndex, 1)
+      if (taskIndex >= 0) episode.tasks.splice(taskIndex, 1)
     }
   },
 

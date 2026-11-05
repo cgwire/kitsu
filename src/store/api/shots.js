@@ -211,13 +211,6 @@ export default {
     )
   },
 
-  getPeopleQuotas(productionId, personId, detailLevel, computeMode) {
-    return client.pget(
-      `/api/data/projects/${productionId}/quotas/person/` +
-        `${personId}?detail=${detailLevel}&count_mode=${computeMode}`
-    )
-  },
-
   setNbFramesFromTaskTypePreviews(taskTypeId, productionId, episodeId) {
     let path =
       `/api/actions/projects/${productionId}/task-types/` +

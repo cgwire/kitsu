@@ -440,11 +440,11 @@ const exportTimesheet = () => {
     dailyRates: dailyRates.value,
     organisation: organisation.value,
     detailLevel: detailLevel.value,
-    todayYear: currentYear.value,
-    todayMonth: currentMonth.value,
-    year: moment().year(),
-    month: moment().month() + 1,
-    week: moment().isoWeek()
+    todayYear: moment().year(),
+    todayMonth: moment().month() + 1,
+    year: currentYear.value,
+    month: currentMonth.value,
+    week: currentWeek.value
   })
 }
 
