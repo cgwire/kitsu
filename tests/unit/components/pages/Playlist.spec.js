@@ -14,6 +14,7 @@ vi.mock('vue-router', () => ({
 import '@/lib/auth'
 import errors from '@/lib/errors'
 import editStore from '@/store/modules/edits'
+import episodeStore from '@/store/modules/episodes'
 import playlistStore from '@/store/modules/playlists'
 import sequenceStore from '@/store/modules/sequences'
 import shotStore from '@/store/modules/shots'
@@ -1011,9 +1012,16 @@ describe('Playlist page, task status of the entities to add', () => {
     name: 'Edit',
     validations: new Map([['tt-1', 'task-1']])
   }
+  const episode = { id: 'ep-1', name: 'E01' }
 
-  beforeEach(() => editStore.cache.editMap.set(edit.id, edit))
-  afterEach(() => editStore.cache.editMap.delete(edit.id))
+  beforeEach(() => {
+    editStore.cache.editMap.set(edit.id, edit)
+    episodeStore.cache.episodeMap.set(episode.id, episode)
+  })
+  afterEach(() => {
+    editStore.cache.editMap.delete(edit.id)
+    episodeStore.cache.episodeMap.delete(episode.id)
+  })
 
   it('shows the status of an edit for the task type of the playlist', async () => {
     const { wrapper } = await openPlaylist(
@@ -1030,6 +1038,17 @@ describe('Playlist page, task status of the entities to add', () => {
     await flushPromises()
 
     expect(wrapper.find('span[title="Done"]').exists()).toBe(true)
+  })
+
+  // The panel lists the episodes of the topbar, loaded without their tasks.
+  it('shows an episode loaded without its tasks', async () => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'episode', task_type_id: 'tt-1' },
+      { state: { displayedEpisodes: [episode] } }
+    )
+    await flushPromises()
+
+    expect(wrapper.find('.addition-shot').text()).toContain('E01')
   })
 })
 

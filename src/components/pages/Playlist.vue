@@ -846,7 +846,7 @@ const playlistElementStyle = playlist => {
 
 const getTaskStatus = entity => {
   if (!getCachedEntity(entity.id)) return {}
-  const taskId = entity.validations.get(currentPlaylist.value.task_type_id)
+  const taskId = entity.validations?.get(currentPlaylist.value.task_type_id)
   const task = taskMap.value.get(taskId)
   return task ? taskStatusMap.value.get(task.task_status_id) : {}
 }
