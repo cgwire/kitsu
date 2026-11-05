@@ -9,6 +9,7 @@ import assetTypeStore from '@/store/modules/assettypes'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
 import AssetList from '@/components/lists/AssetList.vue'
+import AssetListNumbers from '@/components/widgets/AssetListNumbers.vue'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
 
 import {
@@ -481,6 +482,54 @@ describe('lists/AssetList sticky columns', () => {
 
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('290px')
 
+    wrapper.unmount()
+  })
+})
+
+// The store changes the result in place, in the cache, out of the reactive
+// state: the rows are what tells the footer.
+describe('lists/AssetList footer', () => {
+  const mountFooter = async assets => {
+    assetStore.cache.result = assets
+    const wrapper = await mountEntityList(AssetList, {
+      getters: {
+        currentProduction: production,
+        displayedAssetsCount: assets.length,
+        getAssetTypeWorkflow,
+        organisation: { hours_by_day: 8 }
+      },
+      props: { displayedAssets: [assets] },
+      stubs: { AssetListNumbers: false }
+    })
+    return { footer: wrapper.findComponent(AssetListNumbers), wrapper }
+  }
+
+  afterEach(() => {
+    assetStore.cache.result = []
+  })
+
+  test('counts an asset added to the list', async () => {
+    const asset = buildAsset(new Map())
+    const { footer, wrapper } = await mountFooter([asset])
+    expect(footer.text()).toMatch(/^1 /)
+
+    assetStore.cache.result.push(character)
+    await wrapper.setProps({ displayedAssets: [[asset], [character]] })
+
+    expect(footer.text()).toMatch(/^2 /)
+    wrapper.unmount()
+  })
+
+  test('stops counting an asset once canceled', async () => {
+    const asset = buildAsset(new Map())
+    const assets = [asset, { ...character }]
+    const { footer, wrapper } = await mountFooter(assets)
+    expect(footer.text()).toMatch(/^2 /)
+
+    assets[1].canceled = true
+    await wrapper.setProps({ displayedAssets: [[...assets]] })
+
+    expect(footer.text()).toMatch(/^1 /)
     wrapper.unmount()
   })
 })
