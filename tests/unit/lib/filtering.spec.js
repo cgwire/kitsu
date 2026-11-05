@@ -321,6 +321,56 @@ describe('lib/filtering', () => {
       })
     })
 
+    describe('empty keyword on a task type', () => {
+      const animTaskTypes = [{ name: 'Anim body', id: 'task-type-anim' }]
+      const withTask = {
+        id: 'shot-with-task',
+        validations: new Map([['task-type-anim', 'task-anim']]),
+        tasks: ['task-anim']
+      }
+      const withoutTask = {
+        id: 'shot-without-task',
+        validations: new Map(),
+        tasks: []
+      }
+      const animTaskMap = new Map([
+        ['task-anim', { id: 'task-anim', task_status_id: 'task-status-1' }]
+      ])
+      const keptBy = query =>
+        applyFilters(
+          [withTask, withoutTask],
+          getFilters({
+            entryIndex,
+            assetTypes,
+            taskTypes: animTaskTypes,
+            taskStatuses,
+            descriptors,
+            persons,
+            query
+          }),
+          animTaskMap
+        ).map(entry => entry.id)
+
+      it('keeps the entries without the task', () => {
+        expect(keptBy('[anim body]=empty')).toEqual(['shot-without-task'])
+      })
+
+      it('keeps the entries with the task when negated', () => {
+        expect(keptBy('[anim body]=-empty')).toEqual(['shot-with-task'])
+        expect(keptBy('[anim body]=[-empty]')).toEqual(['shot-with-task'])
+      })
+
+      it('narrows a negated status to the entries with the task', () => {
+        expect(keptBy('[anim body]=-done')).toEqual([
+          'shot-with-task',
+          'shot-without-task'
+        ])
+        expect(keptBy('[anim body]=-done [anim body]=-empty')).toEqual([
+          'shot-with-task'
+        ])
+      })
+    })
+
     describe('archived task type sharing a live task type name', () => {
       // A studio archived an old COMPOSITING task type and kept a live one
       // with the same name. The archived twin used to win the name lookup,
