@@ -32,6 +32,31 @@ const LOCALE_MAP = {
   zh_Hant_TW: { language: 'zh_tw', code: 'zh-tw' }
 }
 
+// Alphabetical by the English name. The native name keeps a language
+// recognizable when the UI reads another one.
+export const languages = [
+  { label: 'Chinese (简体中文)', native: '简体中文', value: 'zh_Hans_CN' },
+  { label: 'Chinese TC (繁體中文)', native: '繁體中文', value: 'zh_Hant_TW' },
+  { label: 'Danish (Dansk)', native: 'Dansk', value: 'da_DK' },
+  { label: 'Dutch (Nederlands)', native: 'Nederlands', value: 'nl_NL' },
+  { label: 'English', native: 'English', value: 'en_US' },
+  { label: 'French (Français)', native: 'Français', value: 'fr_FR' },
+  { label: 'German (Deutsch)', native: 'Deutsch', value: 'de_DE' },
+  { label: 'Hungarian (Magyar)', native: 'Magyar', value: 'hu_HU' },
+  { label: 'Italian (Italiano)', native: 'Italiano', value: 'it_IT' },
+  { label: 'Japanese (日本語)', native: '日本語', value: 'ja_JP' },
+  { label: 'Korean (한국어)', native: '한국어', value: 'ko_KR' },
+  { label: 'Persian (فارسی)', native: 'فارسی', value: 'fa_IR' },
+  { label: 'Polish (Polski)', native: 'Polski', value: 'pl_PL' },
+  {
+    label: 'Portuguese Brazilian (Português)',
+    native: 'Português',
+    value: 'pt_BR'
+  },
+  { label: 'Russian (Русский)', native: 'Русский', value: 'ru_RU' },
+  { label: 'Spanish (Español)', native: 'Español', value: 'es_ES' }
+]
+
 // Reactive, Intl-safe formatting code for the active language ('en', 'zh-tw', …).
 export const localeCode = ref('en')
 

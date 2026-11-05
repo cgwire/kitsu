@@ -44,7 +44,7 @@ agree with it.
 
 ## Add a language
 
-Five files, mirroring how `it` is wired:
+Four files, mirroring how `it` is wired:
 
 1. **`src/locales/<lang>.json`** — copy an existing JSON locale (keeps the
    required `"default"` wrapper), then translate every value at full key parity
@@ -56,12 +56,11 @@ Five files, mirroring how `it` is wired:
 3. **`src/lib/lang.js`** — `import 'moment/locale/<code>'`. Add a `LOCALE_MAP`
    entry only when the vue-i18n key or the moment code differs from the first
    two letters of the profile value (today: only `zh_Hans_CN` / `zh_Hant_TW`).
+   Add `{ label: 'English name (Native name)', native: 'Native name', value: 'xx_XX' }`
+   to `languages`, alphabetical by English name.
 4. **`src/components/widgets/DateField.vue`** — import the date-fns locale and
    add it to `DATE_FNS_LOCALES` (keyed by two-letter code). The date picker uses
    date-fns; skip this and its calendar stays English.
-5. **`src/components/pages/Profile.vue`** — add
-   `{ label: 'English name (Native name)', value: 'xx_XX' }` to `localeOptions`,
-   alphabetical by English name.
 
 > **The profile `value` must be a valid Babel locale.** It is stored via
 > `babel.Locale.parse` in Zou, so it must parse: a language code, an optional

@@ -1,10 +1,11 @@
 // @vitest-environment node
 
 import moment from 'moment-timezone'
-import lang, { localeCode } from '@/lib/lang'
+import lang, { languages, localeCode } from '@/lib/lang'
 import timezone from '@/lib/timezone'
 
 import i18n from '@/lib/i18n'
+import { localeLoaders } from '@/locales'
 import store from '@/store'
 
 class ColorHash {
@@ -49,6 +50,16 @@ describe('lang', () => {
 
     lang.setLocale('fr_FR')
     expect(localeCode.value).toEqual('fr')
+  })
+
+  test('lists every language the app ships', async () => {
+    const listed = []
+    for (const { value } of languages) {
+      await lang.setLocale(value)
+      listed.push(i18n.global.locale.value)
+    }
+    await lang.setLocale('en_US')
+    expect(listed.sort()).toEqual(['en', ...Object.keys(localeLoaders)].sort())
   })
 
   // Dates formatted with moment go to the API, which rejects Persian digits.
