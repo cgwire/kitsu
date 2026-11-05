@@ -61,4 +61,69 @@ describe('players/MultiPictureViewer', () => {
     ])
     wrapper.unmount()
   })
+
+  // The snapshots read it after switching to another file.
+  test('tells whether the picture on screen is ready', async () => {
+    const ready = new Set(['preview-0'])
+    const wrapper = mount(MultiPictureViewer, {
+      props: {
+        currentPreview: preview(1),
+        previews: [preview(0), preview(1), preview(2)]
+      },
+      global: {
+        stubs: {
+          PictureViewer: {
+            props: ['preview'],
+            template: '<div />',
+            methods: {
+              isPictureReady() {
+                return ready.has(this.preview.id)
+              }
+            }
+          }
+        }
+      }
+    })
+    expect(wrapper.vm.isPictureReady()).toBe(false)
+
+    ready.add('preview-1')
+
+    expect(wrapper.vm.isPictureReady()).toBe(true)
+    // Not mounted yet
+    await wrapper.setProps({ currentPreview: preview(5) })
+    expect(wrapper.vm.isPictureReady()).toBe(false)
+    wrapper.unmount()
+  })
+
+  test('tells whether the picture on screen cannot load', async () => {
+    const unavailable = new Set(['preview-0'])
+    const wrapper = mount(MultiPictureViewer, {
+      props: {
+        currentPreview: preview(1),
+        previews: [preview(0), preview(1), preview(2)]
+      },
+      global: {
+        stubs: {
+          PictureViewer: {
+            props: ['preview'],
+            template: '<div />',
+            methods: {
+              isPictureUnavailable() {
+                return unavailable.has(this.preview.id)
+              }
+            }
+          }
+        }
+      }
+    })
+    expect(wrapper.vm.isPictureUnavailable()).toBe(false)
+
+    unavailable.add('preview-1')
+
+    expect(wrapper.vm.isPictureUnavailable()).toBe(true)
+    // Not mounted yet: it may still come.
+    await wrapper.setProps({ currentPreview: preview(5) })
+    expect(wrapper.vm.isPictureUnavailable()).toBe(false)
+    wrapper.unmount()
+  })
 })

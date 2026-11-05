@@ -82,6 +82,29 @@ describe('modals/AddAttachmentModal', () => {
     expect(wrapper.emitted('confirm')).toBeUndefined()
   })
 
+  // The loading look only stops the mouse: Enter or Space on the button would
+  // start a second extraction alongside the first one.
+  it('does not take the snapshots again while they are being taken', async () => {
+    const wrapper = mountModal({ isPicture: true })
+    const [standard, withLabel] = wrapper.findAll('.snapshot-button')
+
+    wrapper.vm.showAnnotationLoading('standard')
+    await wrapper.vm.$nextTick()
+    await standard.trigger('click')
+    wrapper.vm.showAnnotationLoading('label')
+    await wrapper.vm.$nextTick()
+    await withLabel.trigger('click')
+
+    expect(wrapper.emitted('add-snapshots')).toBeUndefined()
+    expect(wrapper.emitted('add-snapshots-with-label')).toBeUndefined()
+
+    wrapper.vm.hideAnnotationLoading()
+    await wrapper.vm.$nextTick()
+    await standard.trigger('click')
+
+    expect(wrapper.emitted('add-snapshots')).toHaveLength(1)
+  })
+
   it('prefixes the recorded file name with namePrefix', async () => {
     const wrapper = mountModal({ namePrefix: 'ep01-sh03-compositing' })
     await wrapper.find('.record-audio').trigger('click')

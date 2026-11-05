@@ -4,7 +4,8 @@ import {
   formatRevision,
   hasPreviewFilePicture,
   isPreviewFileStatus,
-  latestPreviewFileStatus
+  latestPreviewFileStatus,
+  waitForPicture
 } from '@/lib/preview'
 
 describe('lib/preview', () => {
@@ -63,6 +64,76 @@ describe('lib/preview', () => {
         'processing'
       )
       expect(latestPreviewFileStatus('ready', undefined)).toBe('ready')
+    })
+  })
+
+  // A picture shown for a snapshot loads asynchronously.
+  describe('waitForPicture', () => {
+    // isDone tells whether the wait is over, without awaiting it, and
+    // isInTime what it resolved to.
+    const startWait = isReady => {
+      const wait = { isDone: false, isInTime: null }
+      wait.promise = (async () => {
+        wait.isInTime = await waitForPicture(isReady)
+        wait.isDone = true
+      })()
+      return wait
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('resolves once the picture is ready', async () => {
+      let isReady = false
+      const wait = startWait(() => isReady)
+      await vi.advanceTimersByTimeAsync(1000)
+      expect(wait.isDone).toBe(false)
+
+      isReady = true
+      await vi.advanceTimersByTimeAsync(100)
+
+      expect(wait.isDone).toBe(true)
+      expect(wait.isInTime).toBe(true)
+      expect(vi.getTimerCount()).toBe(0)
+    })
+
+    it('gives up after 10 s', async () => {
+      const wait = startWait(() => false)
+      await vi.advanceTimersByTimeAsync(9900)
+      expect(wait.isDone).toBe(false)
+
+      await vi.advanceTimersByTimeAsync(200)
+
+      expect(wait.isDone).toBe(true)
+      expect(wait.isInTime).toBe(false)
+      expect(vi.getTimerCount()).toBe(0)
+    })
+
+    it('counts a picture ready right before the 10 s', async () => {
+      let isReady = false
+      const wait = startWait(() => isReady)
+      // Between two checks
+      await vi.advanceTimersByTimeAsync(9990)
+      isReady = true
+      await vi.advanceTimersByTimeAsync(10)
+
+      expect(wait.isDone).toBe(true)
+      expect(wait.isInTime).toBe(true)
+      expect(vi.getTimerCount()).toBe(0)
+    })
+
+    it('resolves at once for a picture already ready', async () => {
+      const wait = startWait(() => true)
+      await vi.advanceTimersByTimeAsync(0)
+
+      expect(wait.isDone).toBe(true)
+      expect(wait.isInTime).toBe(true)
+      expect(vi.getTimerCount()).toBe(0)
     })
   })
 })

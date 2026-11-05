@@ -128,6 +128,11 @@ const getNaturalDimensions = () => {
   return { height: 0, width: 0 }
 }
 
+const isPictureReady = () => Boolean(getCurrentViewer()?.isPictureReady())
+
+const isPictureUnavailable = () =>
+  Boolean(getCurrentViewer()?.isPictureUnavailable())
+
 // Returns the actual <img> the current PictureViewer's panzoom is
 // bound to. Called by the parent to wire wheel-target / media-element
 // on its AnnotationCanvas. Skipping the auto-unwrapped ref chain
@@ -217,6 +222,8 @@ defineExpose({
   getDimensions,
   getNaturalDimensions,
   getPictureElement,
+  isPictureReady,
+  isPictureUnavailable,
   panBy,
   pausePanZoom,
   resetPanZoom,

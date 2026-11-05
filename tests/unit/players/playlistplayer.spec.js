@@ -245,6 +245,17 @@ describe('PlaylistPlayer.vue', () => {
       vi.useRealTimers()
     })
 
+    // The next file of the shot, then the next shot
+    const nextShot = async () => {
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      await flushPromises()
+    }
+
     it.each([
       [
         'video',
@@ -306,6 +317,327 @@ describe('PlaylistPlayer.vue', () => {
         await expect(snapshots).resolves.toEqual([])
       }
     )
+
+    // Its snapshots would land in the closed dialog.
+    it('stops the video snapshots once the attachment dialog closes', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      // jsdom draws and encodes nothing
+      const snapshotCanvas = document.createElement('canvas')
+      snapshotCanvas.toBlob = callback => callback(new Blob())
+      vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        clearRect: () => {},
+        drawImage: () => {}
+      })
+      wrapper = mountPlayer({
+        entities: [
+          {
+            ...entity,
+            preview_file_extension: 'mp4',
+            preview_file_annotations: [1, 2].map(time => ({
+              time,
+              drawing: { objects: [] }
+            }))
+          }
+        ]
+      })
+      await flushPromises()
+      const controller = new AbortController()
+
+      const snapshots = wrapper.vm.extractAnnotationSnapshots({
+        signal: controller.signal
+      })
+      await vi.advanceTimersByTimeAsync(550)
+      controller.abort()
+      await vi.advanceTimersByTimeAsync(1500)
+
+      await expect(snapshots).resolves.toEqual([])
+    })
+
+    // The keyboard still moves the player under the attachment dialog.
+    it('stops the video snapshots once the player moves to another shot', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      // jsdom draws and encodes nothing
+      const snapshotCanvas = document.createElement('canvas')
+      snapshotCanvas.toBlob = callback => callback(new Blob())
+      vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        clearRect: () => {},
+        drawImage: () => {}
+      })
+      const annotations = [1, 2].map(time => ({
+        time,
+        drawing: { objects: [] }
+      }))
+      const movie = id => ({
+        ...entity,
+        id,
+        preview_file_id: `${id}-movie`,
+        preview_file_extension: 'mp4',
+        preview_file_annotations: annotations
+      })
+      wrapper = mountPlayer({ entities: [movie('shot-1'), movie('shot-2')] })
+      await flushPromises()
+
+      const snapshots = wrapper.vm.extractAnnotationSnapshots()
+      await vi.advanceTimersByTimeAsync(550)
+      await nextShot()
+      await vi.advanceTimersByTimeAsync(1500)
+
+      expect(wrapper.vm.playingEntityIndex).toBe(1)
+      await expect(snapshots).resolves.toEqual([])
+    })
+
+    // A picture loads once shown, and the next one of a revision can take
+    // longer than the snapshot of the previous one: a picture still loading
+    // makes a snapshot without the picture, or a 0x0 one that drawImage
+    // refuses, even once its size is known.
+    describe('of a revision with several pictures', () => {
+      let loaded = null
+      let snapshotCanvas = null
+      let unavailable = null
+
+      const mountRevision = async (otherShots = []) => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        // jsdom encodes nothing
+        snapshotCanvas = document.createElement('canvas')
+        snapshotCanvas.toBlob = callback => callback(new Blob())
+        vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+        loaded = new Set(['preview-1'])
+        unavailable = new Set()
+        wrapper = mountPlayer({
+          entities: [
+            {
+              ...entity,
+              preview_file_extension: 'png',
+              preview_file_revision: 1,
+              preview_file_previews: [
+                { id: 'preview-1b', extension: 'png', revision: 1 }
+              ]
+            },
+            ...otherShots
+          ],
+          stubs: {
+            // Its picture has a size before the whole file is in.
+            MultiPictureViewer: {
+              ...withMethods(['resetPanZoom', 'resumePanZoom', 'setPanZoom'], {
+                getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
+                getPictureElement: () => null
+              }),
+              props: {
+                currentPreview: { type: Object, default: null },
+                previews: { type: Array, default: () => [] }
+              },
+              setup: props => ({
+                isPictureReady: () => loaded.has(props.currentPreview?.id),
+                isPictureUnavailable: () =>
+                  unavailable.has(props.currentPreview?.id)
+              })
+            }
+          }
+        })
+        await flushPromises()
+      }
+
+      it('waits for the next picture to load', async () => {
+        await mountRevision()
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+        expect(isDone).toBe(false)
+
+        loaded.add('preview-1b')
+        await vi.advanceTimersByTimeAsync(1500)
+        await done
+
+        await expect(snapshots).resolves.toHaveLength(2)
+      })
+
+      it('leaves out a picture that does not load', async () => {
+        await mountRevision()
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        // A picture gets 10 s to load.
+        await vi.advanceTimersByTimeAsync(12000)
+
+        await expect(snapshots).resolves.toHaveLength(1)
+      })
+
+      // The live canvas gets 500 ms to settle once the picture is in: a picture
+      // that comes in after its 10 s would get less.
+      it('leaves out a picture that comes in after its 10 s', async () => {
+        await mountRevision()
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        await vi.advanceTimersByTimeAsync(10700)
+        loaded.add('preview-1b')
+        await vi.advanceTimersByTimeAsync(2000)
+
+        await expect(snapshots).resolves.toHaveLength(1)
+      })
+
+      it('does not wait for a picture that cannot load', async () => {
+        await mountRevision()
+        unavailable.add('preview-1b')
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+
+        expect(isDone).toBe(true)
+        await done
+        await expect(snapshots).resolves.toHaveLength(1)
+      })
+
+      it('goes back to the file of the user when a snapshot fails', async () => {
+        await mountRevision()
+        loaded.add('preview-1b')
+        const error = new Error('encoding failed')
+        let encoded = 0
+        snapshotCanvas.toBlob = callback => {
+          encoded += 1
+          if (encoded > 1) throw error
+          callback(new Blob())
+        }
+
+        const failure = wrapper.vm.extractAnnotationSnapshots().catch(e => e)
+        await vi.advanceTimersByTimeAsync(3000)
+
+        expect(await failure).toBe(error)
+        expect(
+          wrapper.findComponent({ ref: 'picture-player' }).props('currentPreview')
+            .id
+        ).toBe('preview-1')
+      })
+
+      // Its snapshots would land in the closed dialog.
+      it('stops once the attachment dialog closes, back on the first file', async () => {
+        await mountRevision()
+        const controller = new AbortController()
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots({
+          signal: controller.signal
+        })
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+        controller.abort()
+        await vi.advanceTimersByTimeAsync(1500)
+
+        expect(isDone).toBe(true)
+        await done
+        await expect(snapshots).resolves.toEqual([])
+        expect(wrapper.vm.currentPreviewIndex).toBe(0)
+      })
+
+      // The keyboard still moves the player under the attachment dialog.
+      it('stops once the player moves to another shot, and leaves it there', async () => {
+        await mountRevision([
+          {
+            ...entity,
+            id: 'shot-2',
+            preview_file_id: 'preview-2',
+            preview_file_extension: 'png',
+            preview_file_revision: 1,
+            preview_file_previews: [
+              { id: 'preview-2b', extension: 'png', revision: 1 }
+            ]
+          }
+        ])
+        // The user is on the second file of the first shot.
+        await nextShot()
+        expect(wrapper.vm.currentPreviewIndex).toBe(1)
+        let isDone = false
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        const done = (async () => {
+          await snapshots
+          isDone = true
+        })()
+        await vi.advanceTimersByTimeAsync(2000)
+        await nextShot()
+        await vi.advanceTimersByTimeAsync(1500)
+
+        expect(isDone).toBe(true)
+        await done
+        await expect(snapshots).resolves.toEqual([])
+        // The other shot opens on its first file, as without the snapshots.
+        expect(wrapper.vm.playingEntityIndex).toBe(1)
+        expect(wrapper.vm.currentPreviewIndex).toBe(0)
+      })
+
+      // Encoding a big picture takes a while.
+      it('drops the snapshots when the dialog closes during the last encoding', async () => {
+        await mountRevision()
+        loaded.add('preview-1b')
+        const controller = new AbortController()
+        let encoded = 0
+        let encodeLast = null
+        snapshotCanvas.toBlob = callback => {
+          encoded += 1
+          if (encoded === 2) {
+            encodeLast = () => callback(new Blob())
+          } else {
+            callback(new Blob())
+          }
+        }
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots({
+          signal: controller.signal
+        })
+        await vi.advanceTimersByTimeAsync(1500)
+        expect(encodeLast).not.toBeNull()
+        controller.abort()
+        encodeLast()
+        await vi.advanceTimersByTimeAsync(1000)
+
+        await expect(snapshots).resolves.toEqual([])
+      })
+
+      it('drops the snapshots when the player moves during the last encoding', async () => {
+        await mountRevision([
+          {
+            ...entity,
+            id: 'shot-2',
+            preview_file_id: 'preview-2',
+            preview_file_extension: 'png',
+            preview_file_revision: 1
+          }
+        ])
+        loaded.add('preview-1b')
+        let encoded = 0
+        let encodeLast = null
+        snapshotCanvas.toBlob = callback => {
+          encoded += 1
+          if (encoded === 2) {
+            encodeLast = () => callback(new Blob())
+          } else {
+            callback(new Blob())
+          }
+        }
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        await vi.advanceTimersByTimeAsync(1500)
+        expect(encodeLast).not.toBeNull()
+        await nextShot()
+        encodeLast()
+        await vi.advanceTimersByTimeAsync(1000)
+
+        await expect(snapshots).resolves.toEqual([])
+      })
+    })
   })
 
   // The waveform loads 100 ms after it is set up for the movie on screen:

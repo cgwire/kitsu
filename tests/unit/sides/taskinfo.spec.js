@@ -1915,6 +1915,84 @@ describe('TaskInfo.vue', () => {
       expect(errorHandler).not.toHaveBeenCalled()
     })
 
+    // Closing the attachment dialog aborts its signal: the player stops.
+    it('lets the attachment dialog stop the snapshots', async () => {
+      const { signal } = new AbortController()
+      const extractAnnotationSnapshots = vi.fn(() => Promise.resolve([]))
+      const { wrapper } = await mountPanel({
+        previews,
+        getterOverrides: {
+          currentUserRoleForProduction: () => () => 'manager'
+        },
+        stubs: {
+          AddComment: {
+            template: '<div />',
+            methods: {
+              hideAnnotationLoading: () => {},
+              setAnnotationSnapshots: () => {},
+              showAnnotationLoading: () => signal
+            }
+          },
+          PreviewPlayer: {
+            ...PlayerStub,
+            methods: { ...PlayerStub.methods, extractAnnotationSnapshots }
+          }
+        }
+      })
+
+      wrapper
+        .findComponent(AddComment)
+        .vm.$emit('annotation-snapshots-with-label-requested')
+      await flushPromises()
+
+      expect(extractAnnotationSnapshots).toHaveBeenCalledWith({
+        withLabel: true,
+        signal
+      })
+    })
+
+    // The snapshot buttons spin while the player takes the snapshots.
+    it('stops the snapshot loading when the snapshots fail', async () => {
+      const failure = new Error('drawImage failed')
+      const hideAnnotationLoading = vi.fn()
+      const setAnnotationSnapshots = vi.fn()
+      const { wrapper } = await mountPanel({
+        previews,
+        getterOverrides: {
+          currentUserRoleForProduction: () => () => 'manager'
+        },
+        stubs: {
+          AddComment: {
+            template: '<div />',
+            methods: {
+              hideAnnotationLoading,
+              setAnnotationSnapshots,
+              showAnnotationLoading: () => {}
+            }
+          },
+          PreviewPlayer: {
+            ...PlayerStub,
+            methods: {
+              ...PlayerStub.methods,
+              extractAnnotationSnapshots: () => Promise.reject(failure)
+            }
+          }
+        }
+      })
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+      wrapper
+        .findComponent(AddComment)
+        .vm.$emit('annotation-snapshots-requested')
+      await flushPromises()
+
+      expect(hideAnnotationLoading).toHaveBeenCalledTimes(1)
+      expect(setAnnotationSnapshots).not.toHaveBeenCalled()
+      // Still reported, as a Vue error
+      expect(errorHandler.mock.calls[0][0]).toBe(failure)
+    })
+
     it('logs an annotation refresh that fails', async () => {
       const consoleError = vi
         .spyOn(console, 'error')

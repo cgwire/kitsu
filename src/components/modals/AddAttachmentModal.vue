@@ -43,7 +43,7 @@
               'is-loading': snapshotLoading === 'standard'
             }"
             :disabled="snapshotLoading && snapshotLoading !== 'standard'"
-            @click="$emit('add-snapshots')"
+            @click="addSnapshots('add-snapshots')"
           >
             {{ $t('main.attach_snapshots') }}
           </button>
@@ -54,7 +54,7 @@
               'is-loading': snapshotLoading === 'label'
             }"
             :disabled="snapshotLoading && snapshotLoading !== 'label'"
-            @click="$emit('add-snapshots-with-label')"
+            @click="addSnapshots('add-snapshots-with-label')"
           >
             {{ $t('main.attach_snapshots_with_label') }}
           </button>
@@ -205,6 +205,11 @@ const onRecorded = file => {
 // reach the button.
 const confirm = () => {
   if (forms.value.length > 0 && !props.isLoading) emit('confirm', forms.value)
+}
+
+// A second extraction would run alongside the first one.
+const addSnapshots = event => {
+  if (!snapshotLoading.value) emit(event)
 }
 
 const reset = () => {
