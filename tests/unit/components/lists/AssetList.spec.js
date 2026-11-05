@@ -487,21 +487,22 @@ describe('lists/AssetList sticky columns', () => {
 })
 
 // The store changes the result in place, in the cache, out of the reactive
-// state: the rows are what tells the footer.
+// state: the rows and the count are what tell the footer.
 describe('lists/AssetList footer', () => {
   const mountFooter = async assets => {
     assetStore.cache.result = assets
+    const getters = reactive({
+      currentProduction: production,
+      displayedAssetsCount: assets.length,
+      getAssetTypeWorkflow,
+      organisation: { hours_by_day: 8 }
+    })
     const wrapper = await mountEntityList(AssetList, {
-      getters: {
-        currentProduction: production,
-        displayedAssetsCount: assets.length,
-        getAssetTypeWorkflow,
-        organisation: { hours_by_day: 8 }
-      },
+      getters,
       props: { displayedAssets: [assets] },
       stubs: { AssetListNumbers: false }
     })
-    return { footer: wrapper.findComponent(AssetListNumbers), wrapper }
+    return { footer: wrapper.findComponent(AssetListNumbers), getters, wrapper }
   }
 
   afterEach(() => {
@@ -517,6 +518,19 @@ describe('lists/AssetList footer', () => {
     await wrapper.setProps({ displayedAssets: [[asset], [character]] })
 
     expect(footer.text()).toMatch(/^2 /)
+    wrapper.unmount()
+  })
+
+  test('counts an asset left out of the displayed rows', async () => {
+    const asset = buildAsset(new Map())
+    const { footer, getters, wrapper } = await mountFooter([asset])
+    expect(footer.text()).toMatch(/^1 /)
+
+    assetStore.cache.result.push(character)
+    getters.displayedAssetsCount = 2
+    await flushPromises()
+
+    expect(wrapper.findComponent(AssetListNumbers).text()).toMatch(/^2 /)
     wrapper.unmount()
   })
 

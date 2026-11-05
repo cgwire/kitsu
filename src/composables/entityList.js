@@ -595,6 +595,14 @@ export const useEntityList = ({
 
   const getValidationCell = (x, y) => getRef(`validation-${x}-${y}`)?.[0]
 
+  // The last click stays on its entity, whichever row a new one moved it to.
+  const getLastSelection = () => {
+    if (!lastSelection) return null
+    const rows = entities.value.flat()
+    const x = rows.findIndex(({ id }) => id === lastSelection.entityId)
+    return x > -1 ? { ...lastSelection, x } : lastSelection
+  }
+
   // Column of a task type in the selection grid, -1 when it is not
   // displayed: the stuck columns come first.
   const getColumnIndexInGrid = taskTypeId => {
@@ -665,19 +673,20 @@ export const useEntityList = ({
     const selection = []
     emit('keep-task-panel-open', true)
     if (validationInfo.isShiftKey) {
-      if (lastSelection) {
-        let startX = lastSelection.x
+      const anchor = getLastSelection()
+      if (anchor) {
+        let startX = anchor.x
         let endX = validationInfo.x
-        let startY = lastSelection.y
+        let startY = anchor.y
         if (!sticked) startY += columnOffset
         let endY = validationInfo.y
-        if (validationInfo.x < lastSelection.x) {
+        if (validationInfo.x < anchor.x) {
           startX = validationInfo.x
-          endX = lastSelection.x
+          endX = anchor.x
         }
-        if (validationInfo.y < lastSelection.y) {
+        if (validationInfo.y < anchor.y) {
           startY = validationInfo.y
-          endY = lastSelection.y
+          endY = anchor.y
           if (!sticked) endY += columnOffset
         }
 
@@ -713,7 +722,7 @@ export const useEntityList = ({
     if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
       const x = validationInfo.x
       const y = sticked ? validationInfo.y : validationInfo.y - columnOffset
-      lastSelection = { x, y }
+      lastSelection = { x, y, entityId: validationInfo.entity?.id }
       const validationCell = getValidationCell(x, y)
       nextTick(() => {
         scrollToValidationCell(validationCell)
@@ -809,7 +818,7 @@ export const useEntityList = ({
   const onKeyDown = event => {
     shiftKeyPressed.value = event.shiftKey
     if (!event.altKey || ![37, 38, 39, 40].includes(event.keyCode)) return
-    const { x: i, y: j } = lastSelection || { x: 0, y: 0 }
+    const { x: i, y: j } = getLastSelection() || { x: 0, y: 0 }
     const moves = {
       37: [i, j - 1],
       38: [i - 1, j],

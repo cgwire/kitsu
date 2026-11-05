@@ -604,8 +604,10 @@
       <table-info :is-loading="isLoading" :is-error="isError" big-cells />
     </div>
 
+    <!-- A new asset past the displayed rows only changes the count. -->
     <asset-list-numbers
       :assets="[...assetCache.result]"
+      :key="displayedAssetsCount"
       v-if="!isEmptyList && !isLoading"
     />
   </div>

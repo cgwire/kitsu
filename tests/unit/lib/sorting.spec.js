@@ -1,6 +1,9 @@
 // @vitest-environment node
 
+import { PAGE_SIZE } from '@/lib/pagination'
 import {
+  insertAssetInPage,
+  insertShotInPage,
   sortAssets,
   sortByMetadata,
   sortByName,
@@ -26,6 +29,72 @@ const taskTypeMap = new Map(Object.entries({
 }))
 
 describe('lib/sorting', () => {
+  describe('insertShotInPage', () => {
+    const shot = name => ({ name, sequence_name: 'SQ01' })
+    const names = rows => rows.map(({ name }) => name)
+    const fullPage = () =>
+      Array.from({ length: PAGE_SIZE }, (_, index) =>
+        shot(`SH${String(index + 1).padStart(3, '0')}`)
+      )
+
+    it('fills an empty list', () => {
+      const rows = []
+      expect(insertShotInPage(rows, shot('SH010'), 1)).toBe(0)
+      expect(names(rows)).toEqual(['SH010'])
+    })
+
+    it('inserts among the rows of a page not full', () => {
+      const rows = [shot('SH010'), shot('SH030')]
+      expect(insertShotInPage(rows, shot('SH020'), 3)).toBe(1)
+      expect(names(rows)).toEqual(['SH010', 'SH020', 'SH030'])
+    })
+
+    it('adds after the rows of a page not full', () => {
+      const rows = [shot('SH010')]
+      expect(insertShotInPage(rows, shot('SH020'), 2)).toBe(1)
+      expect(names(rows)).toEqual(['SH010', 'SH020'])
+    })
+
+    it('leaves out a shot sorted past the rows of a list holding more', () => {
+      const rows = [shot('SH010'), shot('SH020')]
+      expect(insertShotInPage(rows, shot('SH999'), 4)).toBe(-1)
+      expect(names(rows)).toEqual(['SH010', 'SH020'])
+    })
+
+    it('leaves out a shot sorted past a full page', () => {
+      const rows = fullPage()
+      expect(insertShotInPage(rows, shot('SH999'), PAGE_SIZE + 1)).toBe(-1)
+      expect(names(rows)).toEqual(names(fullPage()))
+    })
+
+    it('keeps a full page full', () => {
+      const rows = fullPage()
+      expect(insertShotInPage(rows, shot('SH000'), PAGE_SIZE + 1)).toBe(0)
+      expect(names(rows)).toEqual(['SH000', ...names(fullPage()).slice(0, -1)])
+    })
+
+    it('keeps the next pages full too', () => {
+      const rows = [...fullPage(), ...fullPage()]
+      const nbListed = 2 * PAGE_SIZE + 1
+      expect(insertShotInPage(rows, shot('SH999'), nbListed)).toBe(-1)
+      expect(rows).toHaveLength(2 * PAGE_SIZE)
+      expect(insertShotInPage(rows, shot('SH000'), nbListed)).toBe(0)
+      expect(rows).toHaveLength(2 * PAGE_SIZE)
+    })
+  })
+
+  it('insertAssetInPage keeps a full page full', () => {
+    const asset = name => ({ name, asset_type_name: 'Character' })
+    const rows = Array.from({ length: PAGE_SIZE }, (_, index) =>
+      asset(`A${String(index + 1).padStart(3, '0')}`)
+    )
+    expect(insertAssetInPage(rows, asset('A999'), PAGE_SIZE + 1)).toBe(-1)
+    expect(rows).toHaveLength(PAGE_SIZE)
+    expect(insertAssetInPage(rows, asset('A000'), PAGE_SIZE + 1)).toBe(0)
+    expect(rows).toHaveLength(PAGE_SIZE)
+    expect(rows[0].name).toBe('A000')
+  })
+
   it('sortByMetadata', () => {
     const entries = [
       { id: 1, data: { render_layer: 'fg' } },

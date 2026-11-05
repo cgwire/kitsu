@@ -16,6 +16,7 @@ import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import {
+  insertShotInPage,
   insertSortedShot,
   sortByName,
   sortByPersonName,
@@ -23,7 +24,11 @@ import {
   sortShots,
   sortValidationColumns
 } from '@/lib/sorting'
-import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
+import {
+  addRowToSelectionGrid,
+  buildSelectionGrid,
+  clearSelectionGrid
+} from '@/lib/selection'
 import {
   getFilledColumns,
   groupEntitiesByParents,
@@ -514,7 +519,8 @@ const actions = {
             persons,
             personMap,
             production,
-            shot
+            shot,
+            isInLoadedScope
           })
           // A detail page loads its shot whatever the list holds: holding more
           // than its recorded scope, the list must be refetched by its pages.
@@ -1353,7 +1359,8 @@ const mutations = {
       persons,
       personMap,
       production,
-      shot
+      shot,
+      isInLoadedScope = true
     }
   ) {
     const taskIds = []
@@ -1406,17 +1413,31 @@ const mutations = {
       persons,
       query
     })
-    let result = indexSearch(addedShotIndex, keywords)
+    // No keyword leaves the shot to the filters, as for a list.
+    let result = indexSearch(addedShotIndex, keywords) || [shot]
     result = applyFilters(result, filters, taskMap)
 
-    if (result && result.length > 0) {
-      insertSortedShot(cache.result, shot)
-      insertSortedShot(state.displayedShots, shot)
-      state.displayedShotsCount = cache.shots.length
-      state.displayedShotsLength = cache.shots.filter(s => !s.canceled).length
-      state.shotFilledColumns = getFilledColumns(state.displayedShots)
+    if (isInLoadedScope && result.length > 0) {
+      if (!state.shotSearchText) {
+        cache.result = cache.shots
+      } else if (cache.result !== cache.shots) {
+        insertSortedShot(cache.result, shot)
+      }
+      helpers.setListStats(state, cache.result)
 
-      state.shotSelectionGrid = buildSelectionGrid()
+      const rowIndex = insertShotInPage(
+        state.displayedShots,
+        shot,
+        cache.result.length
+      )
+      if (rowIndex >= 0) {
+        state.shotFilledColumns = getFilledColumns(state.displayedShots)
+      }
+      // Select column reaches the rows of the next pages too.
+      state.shotSelectionGrid = addRowToSelectionGrid(
+        state.shotSelectionGrid,
+        rowIndex >= 0 ? rowIndex : cache.result.indexOf(shot)
+      )
     }
   },
 

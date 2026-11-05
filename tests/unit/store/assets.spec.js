@@ -1009,7 +1009,11 @@ describe('Assets store, ADD_ASSET', () => {
   // main pack, and carries no source_id: the list payloads are the ones that
   // carry source_id.
   const addAsset = payload => {
-    const state = { assetSearchText: '', assetSelectionGrid: {} }
+    const state = {
+      assetSearchText: '',
+      assetSelectionGrid: new Set(),
+      displayedAssets: []
+    }
     // The mutation completes the asset in place, so it is the object the
     // store keeps: assert on it, not on the fixture.
     const asset = {
@@ -1045,6 +1049,257 @@ describe('Assets store, ADD_ASSET', () => {
   test('falls back to the source_id the list payloads carry', () => {
     const asset = addAsset({ id: 'a-add-3', name: 'A3', source_id: 'ep-b' })
     expect(asset.episode_id).toEqual('ep-b')
+  })
+
+  // An asset created by someone else reaches the list through the socket
+  // handler.
+  describe('in a loaded list', () => {
+    const buildAsset = (id, name) => ({
+      id,
+      name,
+      project_id: 'p1',
+      asset_type_name: 'Character',
+      description: '',
+      data: {},
+      tasks: []
+    })
+    const names = assets => assets.map(({ name }) => name)
+
+    // A list load leaves the result and the list as the same array.
+    const loadList = (assets, assetSearchText = '', result = assets) => {
+      assetsStore.cache.assets = assets
+      assetsStore.cache.result = result
+      assetsStore.cache.assetMap = new Map(
+        assets.map(asset => [asset.id, asset])
+      )
+      assetsStore.cache.assetIndex = {}
+      return {
+        assetSearchText,
+        displayedAssets: [...result],
+        displayedAssetsCount: result.length,
+        displayedAssetsLength: result.length,
+        assetSelectionGrid: new Set()
+      }
+    }
+
+    const add = (state, asset) =>
+      assetsStore.mutations.ADD_ASSET(state, {
+        taskStatusMap: new Map(),
+        taskTypeMap: new Map(),
+        taskMap: new Map(),
+        persons: [],
+        personMap: new Map(),
+        production: { id: 'p1', name: 'Prod', descriptors: [] },
+        asset
+      })
+
+    test('shows the asset with no search', () => {
+      const state = loadList([buildAsset('a1', 'Rock')])
+
+      add(state, buildAsset('a2', 'Tree'))
+
+      expect(names(state.displayedAssets)).toEqual(['Rock', 'Tree'])
+      expect(names(assetsStore.cache.assets)).toEqual(['Rock', 'Tree'])
+      expect(names(assetsStore.cache.result)).toEqual(['Rock', 'Tree'])
+      expect(state.displayedAssetsCount).toBe(2)
+      expect(state.displayedAssetsLength).toBe(2)
+    })
+
+    test('shows the asset once a deletion parted the result from the list', () => {
+      const state = loadList([
+        buildAsset('a1', 'Boat'),
+        buildAsset('a2', 'Rock')
+      ])
+      assetsStore.mutations.REMOVE_ASSET(state, buildAsset('a1', 'Boat'))
+
+      add(state, buildAsset('a3', 'Tree'))
+
+      expect(names(state.displayedAssets)).toEqual(['Rock', 'Tree'])
+      expect(names(assetsStore.cache.assets)).toEqual(['Rock', 'Tree'])
+      expect(names(assetsStore.cache.result)).toEqual(['Rock', 'Tree'])
+      expect(state.displayedAssetsCount).toBe(2)
+    })
+
+    // Between a list load and its search, the result is the whole list.
+    test('lists the asset once when the search has not run yet', () => {
+      const state = loadList([buildAsset('a1', 'Rock')], 'r')
+
+      add(state, buildAsset('a2', 'Rope'))
+
+      expect(names(assetsStore.cache.assets)).toEqual(['Rock', 'Rope'])
+    })
+
+    test('counts the search, not the list, for an asset it asks for', () => {
+      const assets = [buildAsset('a1', 'Boat'), buildAsset('a2', 'Rock')]
+      const state = loadList(assets, 'ro', [assets[1]])
+
+      add(state, buildAsset('a3', 'Rope'))
+
+      expect(names(state.displayedAssets)).toEqual(['Rock', 'Rope'])
+      expect(names(assetsStore.cache.result)).toEqual(['Rock', 'Rope'])
+      expect(assetsStore.cache.assets).toHaveLength(3)
+      expect(state.displayedAssetsCount).toBe(2)
+    })
+
+    test('keeps the rows of a search that does not ask for the asset', () => {
+      const assets = [buildAsset('a1', 'Boat'), buildAsset('a2', 'Rock')]
+      const state = loadList(assets, 'ro', [assets[1]])
+
+      add(state, buildAsset('a3', 'Tree'))
+
+      expect(names(state.displayedAssets)).toEqual(['Rock'])
+      expect(names(assetsStore.cache.result)).toEqual(['Rock'])
+      expect(assetsStore.cache.assets).toHaveLength(3)
+      expect(state.displayedAssetsCount).toBe(1)
+    })
+
+    // The cells of a list are keyed by their position.
+    test('keeps the selected cells on their rows', () => {
+      const state = loadList([
+        buildAsset('a1', 'Boat'),
+        buildAsset('a2', 'Tree')
+      ])
+      state.assetSelectionGrid = new Set(['0-1', '1-1'])
+
+      add(state, buildAsset('a3', 'Rock'))
+
+      expect([...state.assetSelectionGrid]).toEqual(['0-1', '2-1'])
+    })
+
+    describe('on a full page', () => {
+      const loadPage = () => {
+        const assets = Array.from({ length: PAGE_SIZE + 5 }, (_, index) =>
+          buildAsset(`a${index}`, `A${String(index + 1).padStart(3, '0')}`)
+        )
+        return {
+          ...loadList(assets),
+          displayedAssets: assets.slice(0, PAGE_SIZE),
+          assetFilledColumns: 'columns of the page',
+          assetSelectionGrid: new Set(['1-0'])
+        }
+      }
+
+      test('leaves an asset sorted past the page to the next page', () => {
+        const state = loadPage()
+
+        add(state, buildAsset('a-new', 'A999'))
+
+        expect(state.displayedAssets).toHaveLength(PAGE_SIZE)
+        expect(state.displayedAssets.map(({ id }) => id)).not.toContain('a-new')
+        expect(state.assetFilledColumns).toBe('columns of the page')
+        expect([...state.assetSelectionGrid]).toEqual(['1-0'])
+        expect(state.displayedAssetsCount).toBe(PAGE_SIZE + 6)
+
+        assetsStore.mutations.DISPLAY_MORE_ASSETS(state)
+
+        expect(state.displayedAssets).toHaveLength(PAGE_SIZE + 6)
+        expect(state.displayedAssets.at(-1).id).toBe('a-new')
+      })
+
+      test('stays full with an asset sorted among its rows', () => {
+        const state = loadPage()
+        const lastRow = state.displayedAssets.at(-1)
+
+        add(state, buildAsset('a-new', 'A000'))
+
+        expect(state.displayedAssets).toHaveLength(PAGE_SIZE)
+        expect(state.displayedAssets[0].id).toBe('a-new')
+        expect(state.displayedAssets).not.toContain(lastRow)
+        expect([...state.assetSelectionGrid]).toEqual(['2-0'])
+      })
+
+      test('moves the selected cells of the next pages along', () => {
+        const state = loadPage()
+        state.assetSelectionGrid = new Set(['1-0', '103-0'])
+
+        add(state, buildAsset('a-new', 'A102b'))
+
+        expect(state.displayedAssets).toHaveLength(PAGE_SIZE)
+        expect([...state.assetSelectionGrid]).toEqual(['1-0', '104-0'])
+      })
+
+      test('leaves an asset sorted past the rows of a list holding more', () => {
+        const state = loadPage()
+        state.displayedAssets = state.displayedAssets.slice(0, PAGE_SIZE - 1)
+
+        add(state, buildAsset('a-new', 'A999'))
+
+        expect(state.displayedAssets).toHaveLength(PAGE_SIZE - 1)
+      })
+    })
+
+    describe('with a search on the asset types', () => {
+      const addCharacter = assetSearchText => {
+        const state = {
+          ...loadList([], assetSearchText, []),
+          assetTypes: [{ id: 'at-char', name: 'Character' }]
+        }
+        add(state, { ...buildAsset('a1', 'Rock'), asset_type_id: 'at-char' })
+        return state
+      }
+
+      test('shows an asset of the type asked for', () => {
+        expect(names(addCharacter('type=Character').displayedAssets)).toEqual([
+          'Rock'
+        ])
+      })
+
+      test('keeps out an asset of the type left out', () => {
+        expect(addCharacter('type=-Character').displayedAssets).toEqual([])
+      })
+    })
+
+    describe('through loadAsset', () => {
+      const load = (state, asset) => {
+        vi.spyOn(assetsApi, 'getAsset').mockResolvedValue(asset)
+        return assetsStore.actions.loadAsset(
+          {
+            commit: (type, payload) =>
+              assetsStore.mutations[type]?.(state, payload),
+            state,
+            rootGetters: {
+              currentProduction: { id: 'p1', descriptors: [] },
+              people: [],
+              personMap: new Map(),
+              taskMap: new Map(),
+              taskStatusMap: new Map(),
+              taskTypeMap: new Map()
+            }
+          },
+          asset.id
+        )
+      }
+
+      afterEach(() => {
+        vi.restoreAllMocks()
+      })
+
+      test('shows an asset of the loaded list', async () => {
+        const state = {
+          ...loadList([buildAsset('a1', 'Rock')]),
+          assetsLoadingKey: 'p1/'
+        }
+
+        await load(state, buildAsset('a2', 'Tree'))
+
+        expect(names(state.displayedAssets)).toEqual(['Rock', 'Tree'])
+      })
+
+      // A detail page loads its asset whatever the list holds, and the
+      // playlist page reads no row as no list.
+      test.each([
+        ['no list is loaded', null, 'ep-1'],
+        ['the list holds another episode', 'p1/ep-2', 'ep-1']
+      ])('leaves the rows alone when %s', async (_, loadingKey, episodeId) => {
+        const state = { ...loadList([]), assetsLoadingKey: loadingKey }
+
+        await load(state, { ...buildAsset('a2', 'Tree'), episode_id: episodeId })
+
+        expect(state.displayedAssets).toEqual([])
+        expect(state.displayedAssetsCount).toBe(0)
+        expect(assetsStore.cache.assetMap.has('a2')).toBe(true)
+      })
+    })
   })
 })
 
