@@ -60,7 +60,7 @@ const getFilterTaskTypes = filter =>
 
 const getFilterTasks = (entry, filter, taskMap) =>
   getFilterTaskTypes(filter)
-    .map(taskType => taskMap.get(entry.validations.get(taskType.id)))
+    .map(taskType => taskMap.get(entry.validations?.get(taskType.id)))
     .filter(Boolean)
 
 const applyFiltersFunctions = {
@@ -205,7 +205,7 @@ const applyFiltersFunctions = {
   priority(entry, filter, taskMap) {
     const taskTypeIds = filter.taskTypeIds ?? [filter.taskTypeId]
     return taskTypeIds.some(taskTypeId => {
-      const task = taskMap.get(entry.validations.get(taskTypeId))
+      const task = taskMap.get(entry.validations?.get(taskTypeId))
       return task?.priority === filter.value
     })
   },

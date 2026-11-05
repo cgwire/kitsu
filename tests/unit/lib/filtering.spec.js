@@ -1176,5 +1176,21 @@ describe('lib/filtering', () => {
       const results = applyFilters(assetEntries, filters, taskMap)
       expect(results).toHaveLength(1)
     })
+
+    // The plain list of the episodes comes without their tasks.
+    it.each([
+      [
+        'status',
+        {
+          taskType: taskTypes[0],
+          taskStatuses: ['task-status-1'],
+          type: 'status'
+        }
+      ],
+      ['priority', { taskTypeId: 'task-type-1', type: 'priority', value: 3 }]
+    ])('keeps no entry without tasks on a %s filter', (name, filter) => {
+      const episodes = [{ id: 'episode-1', name: 'E01' }]
+      expect(applyFilters(episodes, [filter], taskMap)).toEqual([])
+    })
   })
 })
