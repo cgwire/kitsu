@@ -19,6 +19,7 @@ import 'moment/locale/zh-cn'
 import 'moment/locale/zh-tw'
 
 import i18n, { loadLocaleMessages } from '@/lib/i18n'
+import localPreferences from '@/lib/preferences'
 
 // The dates sent to the API are formatted with moment, and Zou rejects the
 // Persian digits of the fa locale: print Latin ones (Persian ones still parse).
@@ -31,6 +32,12 @@ const LOCALE_MAP = {
   zh_Hans_CN: { language: 'zh', code: 'zh-cn' },
   zh_Hant_TW: { language: 'zh_tw', code: 'zh-tw' }
 }
+
+const LOCALE_PREFERENCE = 'locale'
+
+// A stalled translation chunk must not leave the page blank: past this delay
+// the app starts in English and flips once the chunk lands.
+const STARTUP_LOCALE_TIMEOUT = 1000
 
 // Alphabetical by the English name. The native name keeps a language
 // recognizable when the UI reads another one.
@@ -64,28 +71,62 @@ export const localeCode = ref('en')
 // after a newer switch and flipping the UI back.
 let pendingLanguage = null
 
+// Code of the language on screen. Moment and localeCode flip ahead of its chunk,
+// which may fail.
+let displayedCode = 'en'
+
+const getRememberedLocale = () =>
+  localPreferences.getPreference(LOCALE_PREFERENCE)
+
+const applyLocale = async locale => {
+  const fallback = locale?.substring(0, 2) || 'en'
+  const { language, code } = LOCALE_MAP[locale] || {
+    language: fallback,
+    code: fallback
+  }
+
+  moment.locale(code)
+  localeCode.value = code
+
+  pendingLanguage = language
+  try {
+    await loadLocaleMessages(language)
+    if (pendingLanguage === language) {
+      i18n.global.locale.value = language
+      displayedCode = code
+    }
+  } catch (err) {
+    if (pendingLanguage === language) {
+      moment.locale(displayedCode)
+      localeCode.value = displayedCode
+    }
+    throw err
+  }
+}
+
 export default {
   /**
-   * Set the locale for the application (vue-i18n + moment.js). Translation
-   * chunks load on demand, so the vue-i18n locale flips once the messages
-   * are registered; the returned promise resolves at that point.
+   * Set the locale for the application (vue-i18n + moment.js) and remember it
+   * for the pages shown before the user is known. Translation chunks load on
+   * demand, so the vue-i18n locale flips once the messages are registered;
+   * the returned promise resolves at that point.
    * @param {string} locale
    */
   setLocale(locale) {
-    const fallback = locale?.substring(0, 2) || 'en'
-    const { language, code } = LOCALE_MAP[locale] || {
-      language: fallback,
-      code: fallback
-    }
+    if (locale) localPreferences.setPreference(LOCALE_PREFERENCE, locale)
+    return applyLocale(locale)
+  },
 
-    moment.locale(code)
-    localeCode.value = code
-
-    pendingLanguage = language
-    return loadLocaleMessages(language).then(() => {
-      if (pendingLanguage === language) {
-        i18n.global.locale.value = language
-      }
+  /**
+   * Start in the last language used in this browser: nothing else applies one
+   * before the guards know the user, and the pages without a guard never do.
+   * Async so that nothing here can keep the app from mounting.
+   */
+  async applyStartupLocale() {
+    // Not a Promise.race: it would swallow a chunk failing past the delay.
+    await new Promise(resolve => {
+      applyLocale(getRememberedLocale()).finally(resolve)
+      setTimeout(resolve, STARTUP_LOCALE_TIMEOUT)
     })
   }
 }

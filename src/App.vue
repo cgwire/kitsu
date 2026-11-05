@@ -745,8 +745,7 @@ watch(
 watch(
   currentProduction,
   () => {
-    const userLocale = (user.value?.locale || 'en').substring(0, 2)
-    if (userLocale !== 'en') return
+    if (localeCode.value !== 'en') return
     const variant = currentProduction.value?.production_style
     if (['nft', 'video-game'].includes(variant)) {
       i18n.global.fallbackWarn = false

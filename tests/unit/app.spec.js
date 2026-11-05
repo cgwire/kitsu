@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import auth from '@/lib/auth'
 import errors from '@/lib/errors'
-import i18n, { loadLocaleMessages } from '@/lib/i18n'
+import i18n from '@/lib/i18n'
 import lang from '@/lib/lang'
 
 import App from '@/App.vue'
@@ -1104,8 +1104,9 @@ describe('App', () => {
   // English speakers read the vocabulary of the production type: the
   // overlays rename the shots to NFTs or to maps.
   describe('English overlays', () => {
-    afterEach(() => {
-      i18n.global.locale.value = 'en'
+    afterEach(async () => {
+      await lang.setLocale('en_US')
+      localStorage.removeItem('locale')
       i18n.global.fallbackWarn = true
     })
 
@@ -1128,9 +1129,23 @@ describe('App', () => {
       expect(i18n.global.fallbackWarn).toBe(true)
     })
 
+    // The guest of a shared playlist.
+    it('follows it without a user too', async () => {
+      await mountApp({
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            production_style: 'nft'
+          }),
+          user: () => null
+        }
+      })
+
+      expect(i18n.global.locale.value).toBe('en_nft')
+    })
+
     it('leaves the language of a user who reads another one', async () => {
-      await loadLocaleMessages('fr')
-      i18n.global.locale.value = 'fr'
+      await lang.setLocale('fr_FR')
 
       await mountApp({
         getters: {
@@ -1140,6 +1155,16 @@ describe('App', () => {
           }),
           user: () => ({ id: 'user-1', locale: 'fr_FR' })
         }
+      })
+
+      expect(i18n.global.locale.value).toBe('fr')
+    })
+
+    it('leaves the language the app started in before login', async () => {
+      await lang.setLocale('fr_FR')
+
+      await mountApp({
+        getters: { currentProduction: () => null, user: () => null }
       })
 
       expect(i18n.global.locale.value).toBe('fr')
