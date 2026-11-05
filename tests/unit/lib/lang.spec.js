@@ -83,6 +83,7 @@ describe('startup language', () => {
     vi.unstubAllGlobals()
     await lang.setLocale('en_US')
     localStorage.removeItem('locale')
+    localStorage.removeItem('studio-locale')
   })
 
   beforeEach(() => localStorage.removeItem('locale'))
@@ -153,6 +154,73 @@ describe('startup language', () => {
     test('prefers the language remembered in this browser', async () => {
       localStorage.setItem('locale', 'de_DE')
       expect(await startWith(['fr-FR'])).toBe('de')
+    })
+
+    test('takes the language of the studio for lack of a better one', async () => {
+      vi.stubGlobal('navigator', { languages: ['sv-SE'] })
+
+      await lang.applyStudioLocale('de_DE')
+
+      expect(localeCode.value).toBe('de')
+      expect(localStorage.getItem('locale')).toBeNull()
+    })
+
+    // The config answers after the first render.
+    test('starts in the language the studio gave on the last visit', async () => {
+      vi.stubGlobal('navigator', { languages: ['sv-SE'] })
+      await lang.applyStudioLocale('de_DE')
+      await lang.setLocale('en_US')
+      localStorage.removeItem('locale')
+
+      expect(await startWith(['sv-SE'])).toBe('de')
+    })
+
+    test('prefers a browser language to the studio of the last visit', async () => {
+      localStorage.setItem('studio-locale', 'de_DE')
+      expect(await startWith(['fr-FR'])).toBe('fr')
+    })
+
+    test('prefers a remembered language to the studio of the last visit', async () => {
+      localStorage.setItem('studio-locale', 'de_DE')
+      localStorage.setItem('locale', 'ja_JP')
+      expect(await startWith(['sv-SE'])).toBe('ja')
+    })
+
+    test('follows a new language of the studio', async () => {
+      localStorage.setItem('studio-locale', 'de_DE')
+      await startWith(['sv-SE'])
+
+      await lang.applyStudioLocale('fr_FR')
+
+      expect(localeCode.value).toBe('fr')
+      expect(localStorage.getItem('studio-locale')).toBe('fr_FR')
+    })
+
+    test('ignores the language of the studio for a browser language Kitsu has', async () => {
+      vi.stubGlobal('navigator', { languages: ['fr-FR'] })
+
+      await lang.applyStudioLocale('de_DE')
+
+      expect(localeCode.value).toBe('en')
+    })
+
+    test('ignores the language of the studio for a remembered language', async () => {
+      vi.stubGlobal('navigator', { languages: ['sv-SE'] })
+      localStorage.setItem('locale', 'fr_FR')
+
+      await lang.applyStudioLocale('de_DE')
+
+      expect(localeCode.value).toBe('en')
+    })
+
+    // A failed config comes as {}.
+    test('stays in place without any language for the studio', async () => {
+      vi.stubGlobal('navigator', { languages: ['sv-SE'] })
+
+      await lang.applyStudioLocale(undefined)
+
+      expect(localeCode.value).toBe('en')
+      expect(localStorage.getItem('studio-locale')).toBeNull()
     })
 
     // Only a language applied on purpose follows the visitor around.

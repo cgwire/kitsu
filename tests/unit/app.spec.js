@@ -1172,7 +1172,11 @@ describe('App', () => {
   })
 
   describe('page language', () => {
-    afterEach(() => lang.setLocale('en_US'))
+    afterEach(async () => {
+      await lang.setLocale('en_US')
+      localStorage.removeItem('locale')
+      localStorage.removeItem('studio-locale')
+    })
 
     it('declares the language in use', async () => {
       await mountApp({})
@@ -1182,6 +1186,17 @@ describe('App', () => {
       await flushPromises()
 
       expect(document.documentElement.lang).toBe('zh-tw')
+    })
+
+    it('takes the language of the studio for a browser in none of Kitsu', async () => {
+      vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['sv-SE'])
+
+      await mountApp({
+        actions: { setMainConfig: () => ({ default_locale: 'de_DE' }) }
+      })
+      await flushPromises()
+
+      expect(document.documentElement.lang).toBe('de')
     })
   })
 

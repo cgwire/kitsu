@@ -34,6 +34,7 @@ const LOCALE_MAP = {
 }
 
 const LOCALE_PREFERENCE = 'locale'
+const STUDIO_LOCALE_PREFERENCE = 'studio-locale'
 
 // A language tag naming its script overrides its region.
 const TRADITIONAL_CHINESE_REGIONS = ['hk', 'mo', 'tw']
@@ -96,6 +97,8 @@ const toLocale = languageTag => {
 
 const getBrowserLocale = () => navigator.languages.map(toLocale).find(Boolean)
 
+const getVisitorLocale = () => getRememberedLocale() || getBrowserLocale()
+
 const applyLocale = async locale => {
   const fallback = locale?.substring(0, 2) || 'en'
   const { language, code } = LOCALE_MAP[locale] || {
@@ -137,15 +140,31 @@ export default {
 
   /**
    * Start in the last language used in this browser, else in the first of its
-   * languages Kitsu has: nothing else applies one before the guards know the
-   * user, and the pages without a guard never do. Async so that nothing here
-   * can keep the app from mounting.
+   * languages Kitsu has, else in the one the studio gave on the last visit:
+   * nothing else applies one before the guards know the user, and the pages
+   * without a guard never do. Async so that nothing here can keep the app from
+   * mounting.
    */
   async applyStartupLocale() {
+    const locale =
+      getVisitorLocale() ||
+      localPreferences.getPreference(STUDIO_LOCALE_PREFERENCE)
     // Not a Promise.race: it would swallow a chunk failing past the delay.
     await new Promise(resolve => {
-      applyLocale(getRememberedLocale() || getBrowserLocale()).finally(resolve)
+      applyLocale(locale).finally(resolve)
       setTimeout(resolve, STARTUP_LOCALE_TIMEOUT)
     })
+  },
+
+  /**
+   * Make do with the language of the studio when the browser offers none that
+   * Kitsu has. It comes with the config, after the first render: it is kept
+   * for the first render of the next visit.
+   * @param {string} locale
+   */
+  async applyStudioLocale(locale) {
+    if (!locale) return
+    localPreferences.setPreference(STUDIO_LOCALE_PREFERENCE, locale)
+    if (!getVisitorLocale()) await applyLocale(locale)
   }
 }

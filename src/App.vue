@@ -35,7 +35,7 @@ import crisp from '@/lib/crisp'
 import { isNewShotInLoadedScope } from '@/lib/episodes'
 import errors from '@/lib/errors'
 import i18n from '@/lib/i18n'
-import { localeCode } from '@/lib/lang'
+import lang, { localeCode } from '@/lib/lang'
 import { getProductionRole } from '@/lib/people'
 import localPreferences from '@/lib/preferences'
 import { isPreviewFileStatus } from '@/lib/preview'
@@ -763,6 +763,7 @@ watch(
 
 onMounted(async () => {
   const config = await store.dispatch('setMainConfig')
+  lang.applyStudioLocale(config.default_locale)
   setupDarkTheme(config)
   setupCrisp(config)
   setupSentry(config)
