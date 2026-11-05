@@ -152,6 +152,13 @@ export default {
     )
   },
 
+  setTemplateAssetTypeWorkflow(templateId, assetTypeId, taskTypeIds) {
+    return client.pput(
+      `/api/data/project-templates/${templateId}/asset-types/${assetTypeId}/task-types`,
+      { task_type_ids: taskTypeIds }
+    )
+  },
+
   removeAssetTypeFromTemplate(templateId, assetTypeId) {
     return client.pdel(
       `/api/data/project-templates/${templateId}/asset-types/${assetTypeId}`

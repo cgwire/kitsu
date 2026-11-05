@@ -68,7 +68,10 @@
       },
       "include_all": "Inkluderer alle asset-opgavetyper",
       "add_asset_type_to_library": "Tilføj en asset-type til biblioteket",
-      "add_asset_type_placeholder": "+ Tilføj asset-type"
+      "add_asset_type_placeholder": "+ Tilføj asset-type",
+      "restore_studio_workflow": "Brug studiets workflow",
+      "workflow_production": "Produktionens workflow",
+      "workflow_studio": "Studiets workflow"
     },
     "breakdown": {
       "all_assets": "Alle tilgængelige assets",

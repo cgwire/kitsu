@@ -47,6 +47,7 @@ const mountWithAssetTypes = async (assetTypeIds, path = '/settings') => {
         task_statuses: []
       }),
       isCurrentUserProductionManager: () => true,
+      productionAssetTaskTypes: () => [],
       productionTaskStatuses: () => [],
       taskStatus: () => [],
       // Mirrors the real getter: an empty asset_types means "all".
@@ -112,6 +113,7 @@ const mountWithTaskStatuses = async (taskStatusIds, { errorHandler } = {}) => {
   const store = createStore({
     state: { taskStatusIds },
     getters: {
+      productionAssetTaskTypes: () => [],
       assetTypes: () => [],
       currentProduction: state => ({
         id: 'prod-1',

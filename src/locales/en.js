@@ -63,7 +63,10 @@ export default {
     include_all: 'Includes all asset task types',
     new_asset_type: 'Add an asset type',
     number: 'asset type | asset types',
+    restore_studio_workflow: 'Use the studio workflow',
     title: 'Asset Types',
+    workflow_production: 'Production workflow',
+    workflow_studio: 'Studio workflow',
     production_title: 'Asset Type Stats',
     fields: {
       name: 'Name',

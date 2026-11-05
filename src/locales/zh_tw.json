@@ -68,7 +68,10 @@
       },
       "include_all": "包括所有資產任務類型",
       "add_asset_type_to_library": "新增資產類型到資產類型庫",
-      "add_asset_type_placeholder": "+ 新增資產類型"
+      "add_asset_type_placeholder": "+ 新增資產類型",
+      "restore_studio_workflow": "使用工作室工作流程",
+      "workflow_production": "製作工作流程",
+      "workflow_studio": "工作室工作流程"
     },
     "breakdown": {
       "all_assets": "所有可用資產",

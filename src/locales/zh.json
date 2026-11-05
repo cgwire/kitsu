@@ -68,7 +68,10 @@
       },
       "include_all": "包括所有资产任务类型",
       "add_asset_type_to_library": "向库中添加资产类型",
-      "add_asset_type_placeholder": "+ 添加资产类型"
+      "add_asset_type_placeholder": "+ 添加资产类型",
+      "restore_studio_workflow": "使用工作室工作流程",
+      "workflow_production": "制作工作流程",
+      "workflow_studio": "工作室工作流程"
     },
     "breakdown": {
       "all_assets": "所有可用资产",

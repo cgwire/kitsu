@@ -27,9 +27,12 @@
         <asset-type-settings
           :asset-types="restrictedAssetTypes"
           :all-asset-types="assetTypes"
+          :task-types="sortedAssetTaskTypes"
+          :workflows="currentProduction?.asset_type_workflows"
           @add="addAssetType"
           @import-items="importAssetTypes"
           @remove="removeAssetType"
+          @update-workflow="updateAssetTypeWorkflow"
         />
       </div>
     </div>
@@ -168,7 +171,7 @@ import { useStore } from 'vuex'
 
 import { useDraggableRebuild } from '@/composables/draggableRebuild'
 import { useFieldCommitOnLeave } from '@/composables/fieldCommit'
-import { sortTaskStatuses } from '@/lib/sorting'
+import { sortTaskStatuses, sortTaskTypes } from '@/lib/sorting'
 
 import BooleanCell from '@/components/cells/BooleanCell.vue'
 import AssetTypeSettings from '@/components/pages/production/AssetTypeSettings.vue'
@@ -223,6 +226,9 @@ const layout = useTemplateRef('page')
 // --------------------------------------------------------------------------
 const assetTypes = computed(() => store.getters.assetTypes)
 const currentProduction = computed(() => store.getters.currentProduction)
+const sortedAssetTaskTypes = computed(() =>
+  sortTaskTypes(store.getters.productionAssetTaskTypes, currentProduction.value)
+)
 const isCurrentUserProductionManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
@@ -267,6 +273,10 @@ const importAssetTypes = async ({ ids, done }) => {
 
 const removeAssetType = assetTypeId => {
   store.dispatch('removeAssetTypeFromProduction', assetTypeId)
+}
+
+const updateAssetTypeWorkflow = payload => {
+  store.dispatch('setAssetTypeWorkflow', payload).catch(console.error)
 }
 
 const changeTaskStatuses = async (action, payload) => {

@@ -31,6 +31,7 @@ import EditEditModal from '@/components/modals/EditEditModal.vue'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
 import EditSequenceModal from '@/components/modals/EditSequenceModal.vue'
 import EditShotModal from '@/components/modals/EditShotModal.vue'
+import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import Asset from '@/components/pages/Asset.vue'
 import Edit from '@/components/pages/Edit.vue'
 import Episode from '@/components/pages/Episode.vue'
@@ -128,6 +129,7 @@ const mountPage = async (
       episodeMetadataDescriptors: () => [],
       episodeSearchText: () => '',
       getTaskTypePriority: () => () => 1,
+      isInAssetTypeWorkflow: () => () => true,
       isCurrentUserProductionManager: () => true,
       isCurrentUserProductionSupervisor: () => false,
       isTVShow: () => false,
@@ -402,6 +404,33 @@ describe('Asset page, concepts', () => {
 describe('Asset page, casting', () => {
   afterEach(() => {
     assetStore.cache.assetMap.clear()
+  })
+
+  test('lists only the tasks of the asset type workflow', async () => {
+    assetStore.cache.assetMap.set('entity-1', {
+      id: 'entity-1',
+      name: 'Tree',
+      asset_type_id: 'props',
+      tasks: ['task-1', 'task-2']
+    })
+    const { wrapper } = await mountPage(
+      Asset,
+      'asset_id',
+      production,
+      {},
+      {
+        isInAssetTypeWorkflow: () => (assetTypeId, taskTypeId) =>
+          assetTypeId === 'props' && taskTypeId === 'modeling',
+        taskMap: () =>
+          new Map([
+            ['task-1', { id: 'task-1', task_type_id: 'modeling' }],
+            ['task-2', { id: 'task-2', task_type_id: 'rigging' }]
+          ])
+      }
+    )
+
+    const entries = wrapper.findComponent(EntityTaskList).props('entries')
+    expect(entries.map(({ id }) => id)).toEqual(['task-1'])
   })
 
   test.each([

@@ -68,7 +68,10 @@
       },
       "include_all": "Включает все типы задач ассетов",
       "add_asset_type_to_library": "Добавить тип ассета в библиотеку",
-      "add_asset_type_placeholder": "+ Добавить тип ассета"
+      "add_asset_type_placeholder": "+ Добавить тип ассета",
+      "restore_studio_workflow": "Использовать рабочий процесс студии",
+      "workflow_production": "Рабочий процесс производства",
+      "workflow_studio": "Рабочий процесс студии"
     },
     "breakdown": {
       "all_assets": "Доступные ассеты",

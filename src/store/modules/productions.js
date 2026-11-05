@@ -36,6 +36,7 @@ import {
   SET_USER_PROJECT_ROLE,
   PRODUCTION_ADD_ASSET_TYPE,
   PRODUCTION_REMOVE_ASSET_TYPE,
+  PRODUCTION_SET_ASSET_TYPE_WORKFLOW,
   PRODUCTION_ADD_BACKGROUND,
   PRODUCTION_REMOVE_BACKGROUND,
   PRODUCTION_UPDATE_DEFAULT_BACKGROUND,
@@ -291,6 +292,21 @@ const getters = {
           .filter(Boolean)
       )
     }
+  },
+
+  // The production workflow of an asset type when it has one, else the studio
+  // one. An empty list means all the asset task types are accepted.
+  getAssetTypeWorkflow: state => assetTypeId => {
+    const workflow =
+      state.currentProduction?.asset_type_workflows?.[assetTypeId]
+    return workflow?.length
+      ? workflow
+      : assetTypeStore.cache.assetTypeMap.get(assetTypeId)?.task_types || []
+  },
+
+  isInAssetTypeWorkflow: (state, getters) => (assetTypeId, taskTypeId) => {
+    const workflow = getters.getAssetTypeWorkflow(assetTypeId)
+    return !workflow.length || workflow.includes(taskTypeId)
   },
 
   productionBackgrounds: (state, getters) => {
@@ -682,6 +698,15 @@ const actions = {
       state.currentProduction.id,
       assetTypeId
     )
+  },
+
+  async setAssetTypeWorkflow({ commit, state }, { assetTypeId, taskTypeIds }) {
+    await productionsApi.setAssetTypeWorkflow(
+      state.currentProduction.id,
+      assetTypeId,
+      taskTypeIds
+    )
+    commit(PRODUCTION_SET_ASSET_TYPE_WORKFLOW, { assetTypeId, taskTypeIds })
   },
 
   addTaskTypeToProduction(
@@ -1255,6 +1280,19 @@ const mutations = {
 
   [PRODUCTION_REMOVE_ASSET_TYPE](state, assetTypeId) {
     removeFromIdList(state.currentProduction, 'asset_types', assetTypeId)
+    const workflows = { ...state.currentProduction.asset_type_workflows }
+    delete workflows[assetTypeId]
+    state.currentProduction.asset_type_workflows = workflows
+  },
+
+  [PRODUCTION_SET_ASSET_TYPE_WORKFLOW](state, { assetTypeId, taskTypeIds }) {
+    const workflows = { ...state.currentProduction.asset_type_workflows }
+    if (taskTypeIds.length) {
+      workflows[assetTypeId] = taskTypeIds
+    } else {
+      delete workflows[assetTypeId]
+    }
+    state.currentProduction.asset_type_workflows = workflows
   },
 
   [PRODUCTION_ADD_BACKGROUND](state, backgroundId) {
@@ -1310,6 +1348,12 @@ const mutations = {
 
   [PRODUCTION_REMOVE_TASK_TYPE](state, taskTypeId) {
     removeFromIdList(state.currentProduction, 'task_types', taskTypeId)
+    // Zou drops it from the workflows too, and an emptied one no longer exists.
+    state.currentProduction.asset_type_workflows = Object.fromEntries(
+      Object.entries(state.currentProduction.asset_type_workflows || {})
+        .map(([id, workflow]) => [id, workflow.filter(t => t !== taskTypeId)])
+        .filter(([, workflow]) => workflow.length)
+    )
   },
 
   [PRODUCTION_ADD_STATUS_AUTOMATION](state, statusAutomationId) {

@@ -136,6 +136,14 @@ const actions = {
     return projectTemplatesApi.addAssetTypeToTemplate(templateId, assetTypeId)
   },
 
+  setTemplateAssetTypeWorkflow(_, { templateId, assetTypeId, taskTypeIds }) {
+    return projectTemplatesApi.setTemplateAssetTypeWorkflow(
+      templateId,
+      assetTypeId,
+      taskTypeIds
+    )
+  },
+
   removeAssetTypeFromTemplate(_, { templateId, assetTypeId }) {
     return projectTemplatesApi.removeAssetTypeFromTemplate(
       templateId,

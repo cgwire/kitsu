@@ -68,7 +68,10 @@
       },
       "include_all": "شامل تمام انواع وظایف منبع است",
       "add_asset_type_to_library": "افزودن نوع منبع به کتابخانه",
-      "add_asset_type_placeholder": "+ افزودن نوع منبع"
+      "add_asset_type_placeholder": "+ افزودن نوع منبع",
+      "restore_studio_workflow": "استفاده از گردش کار استودیو",
+      "workflow_production": "گردش کار تولید",
+      "workflow_studio": "گردش کار استودیو"
     },
     "breakdown": {
       "all_assets": "همه منابع موجود",

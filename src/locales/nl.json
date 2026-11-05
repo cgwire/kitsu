@@ -68,7 +68,10 @@
       },
       "include_all": "Omvat alle asset-taaktypes",
       "add_asset_type_to_library": "Een assettype toevoegen aan de bibliotheek",
-      "add_asset_type_placeholder": "+ Assettype toevoegen"
+      "add_asset_type_placeholder": "+ Assettype toevoegen",
+      "restore_studio_workflow": "De workflow van de studio gebruiken",
+      "workflow_production": "Workflow van de productie",
+      "workflow_studio": "Workflow van de studio"
     },
     "breakdown": {
       "all_assets": "Alle beschikbare assets",

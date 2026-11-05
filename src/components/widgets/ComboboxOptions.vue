@@ -27,32 +27,36 @@
         </div>
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
-      <div
-        ref="list"
-        class="select-input"
-        :class="{ 'align-right': alignRight }"
-        role="listbox"
-        aria-multiselectable="true"
-        v-if="showList"
-      >
+      <!-- Out of the list cells, which clip their overflow. -->
+      <teleport to="#theme-popups" :disabled="!teleported">
         <div
-          :id="optionId(index)"
-          :key="option.value"
-          class="option-line flexrow"
-          role="option"
-          :aria-selected="!!modelValue[option.value]"
-          @click="onUpdateValue(option.value)"
-          v-for="(option, index) in optionList"
+          ref="list"
+          class="select-input"
+          :class="{ 'align-right': alignRight, teleported }"
+          :style="listStyle"
+          role="listbox"
+          aria-multiselectable="true"
+          v-if="showList"
         >
-          <toggle-button
-            :label="$slots.option ? '' : option.label"
-            :model-value="!!modelValue[option.value]"
-          />
-          <span class="ml05" v-if="$slots.option">
-            <slot name="option" :option="option" />
-          </span>
+          <div
+            :id="optionId(index)"
+            :key="option.value"
+            class="option-line flexrow"
+            role="option"
+            :aria-selected="!!modelValue[option.value]"
+            @click="onUpdateValue(option.value)"
+            v-for="(option, index) in optionList"
+          >
+            <toggle-button
+              :label="$slots.option ? '' : option.label"
+              :model-value="!!modelValue[option.value]"
+            />
+            <span class="ml05" v-if="$slots.option">
+              <slot name="option" :option="option" />
+            </span>
+          </div>
         </div>
-      </div>
+      </teleport>
     </div>
     <div
       class="c-mask"
@@ -69,6 +73,7 @@ import { ref, computed, nextTick } from 'vue'
 import { ChevronDownIcon } from 'lucide-vue-next'
 
 import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
+import { getPopupStyle } from '@/lib/popup'
 
 import ToggleButton from '@/components/widgets/ToggleButton.vue'
 
@@ -89,6 +94,10 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  teleported: {
+    type: Boolean,
+    default: false
+  },
   thin: {
     type: Boolean,
     default: false
@@ -105,10 +114,29 @@ const showList = ref(false)
 const select = ref(null)
 const alignRight = ref(false)
 const openUp = ref(false)
+const listStyle = ref({})
 
 const optionList = computed(() => {
   return props.isReversed ? props.options.slice().reverse() : props.options
 })
+
+// Placed once rendered: its size depends on its options.
+const placeTeleportedList = () => {
+  const { width, height } = list.value.getBoundingClientRect()
+  const { bottom, left, maxHeight, top } = getPopupStyle(
+    select.value.getBoundingClientRect(),
+    { width, height },
+    { width: window.innerWidth, height: window.innerHeight },
+    -1 // drawn attached to the combo, over its border
+  )
+  listStyle.value = {
+    bottom,
+    left,
+    // Also capped at the list height: it overrides the CSS max height.
+    maxHeight: `${Math.min(parseFloat(maxHeight), height)}px`,
+    top
+  }
+}
 
 const toggleList = () => {
   if (showList.value) {
@@ -119,14 +147,19 @@ const toggleList = () => {
     // Reset before measuring: a list already flipped always fits.
     alignRight.value = false
     openUp.value = false
+    listStyle.value = {}
     nextTick(() => {
       // Measured after the first default-position paint: the list size is
       // only known once its options are rendered.
       const rect = list.value?.getBoundingClientRect()
-      alignRight.value = !!rect && rect.right > window.innerWidth
-      if (rect && rect.bottom > window.innerHeight) {
-        const comboTop = select.value.getBoundingClientRect().top
-        openUp.value = comboTop >= rect.height
+      if (props.teleported) {
+        if (rect) placeTeleportedList()
+      } else {
+        alignRight.value = !!rect && rect.right > window.innerWidth
+        if (rect && rect.bottom > window.innerHeight) {
+          const comboTop = select.value.getBoundingClientRect().top
+          openUp.value = comboTop >= rect.height
+        }
       }
       const top =
         lastScrollPosition.value ||
@@ -244,6 +277,12 @@ const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
     margin-left: 0;
     margin-right: -1px;
     right: 0;
+  }
+
+  &.teleported {
+    margin-left: 0;
+    position: fixed;
+    top: auto;
   }
 }
 

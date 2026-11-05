@@ -68,7 +68,10 @@
       },
       "add_asset_type_placeholder": "+ Asset típus hozzáadása",
       "add_asset_type_to_library": "Asset típus hozzáadása a könyvtárhoz",
-      "include_all": "Tartalmazza az összes asset feladat típust"
+      "include_all": "Tartalmazza az összes asset feladat típust",
+      "restore_studio_workflow": "A stúdió munkafolyamatának használata",
+      "workflow_production": "A produkció munkafolyamata",
+      "workflow_studio": "A stúdió munkafolyamata"
     },
     "breakdown": {
       "all_assets": "Minden rendelkezésre álló asset",

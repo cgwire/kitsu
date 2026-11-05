@@ -68,7 +68,10 @@
       },
       "include_all": "アセットのすべてのタスクタイプを含む",
       "add_asset_type_to_library": "アセットタイプをライブラリに追加",
-      "add_asset_type_placeholder": "+ アセットタイプの追加"
+      "add_asset_type_placeholder": "+ アセットタイプの追加",
+      "restore_studio_workflow": "スタジオのワークフローを使用",
+      "workflow_production": "プロダクションのワークフロー",
+      "workflow_studio": "スタジオのワークフロー"
     },
     "breakdown": {
       "all_assets": "利用可能なすべてのアセット",

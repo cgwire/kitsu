@@ -5,6 +5,7 @@
       :title="title"
       :options="options"
       :model-value="visibilityMap"
+      :teleported="teleported"
       @change="onVisibilityChanged"
     >
       <template #option="{ option }" v-if="$slots.option">
@@ -34,7 +35,8 @@ const { t } = useI18n()
 const props = defineProps({
   hidden: { type: Array, default: () => [] },
   label: { type: String, default: '' },
-  options: { type: Array, default: () => [] }
+  options: { type: Array, default: () => [] },
+  teleported: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['update:hidden'])

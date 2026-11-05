@@ -68,7 +68,10 @@
         "short_name": "Krótka nazwa",
         "description": "Opis",
         "task_types": "Przepływ pracy"
-      }
+      },
+      "restore_studio_workflow": "Użyj przepływu pracy studia",
+      "workflow_production": "Przepływ pracy produkcji",
+      "workflow_studio": "Przepływ pracy studia"
     },
     "backgrounds": {
       "create_error": "Wystąpił błąd podczas zapisywania tego tła. Czy na pewno nie istnieje już tło o podobnej nazwie?",

@@ -694,7 +694,14 @@ const getCurrentAsset = async () => {
   }
   localTasks.value = asset.tasks
     .map(taskId => taskMap.value.get(taskId))
-    .filter(Boolean)
+    .filter(
+      task =>
+        task &&
+        store.getters.isInAssetTypeWorkflow(
+          asset.asset_type_id,
+          task.task_type_id
+        )
+    )
   return asset
 }
 
