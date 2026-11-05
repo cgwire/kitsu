@@ -657,7 +657,9 @@ const displayedShots = computed(() => store.getters.displayedShots)
 const displayedShotsBySequence = computed(
   () => store.getters.displayedShotsBySequence
 )
+const editSearchText = computed(() => store.getters.editSearchText)
 const editsLoadingKey = computed(() => store.getters.editsLoadingKey)
+const episodeSearchText = computed(() => store.getters.episodeSearchText)
 const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
@@ -674,6 +676,7 @@ const playlistMap = computed(() => store.getters.playlistMap)
 const playlists = computed(() => store.getters.playlists)
 const playlistsPath = computed(() => store.getters.playlistsPath)
 const productionTaskTypes = computed(() => store.getters.productionTaskTypes)
+const sequenceSearchText = computed(() => store.getters.sequenceSearchText)
 const shotSearchText = computed(() => store.getters.shotSearchText)
 const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
 const taskMap = computed(() => store.getters.taskMap)
@@ -732,11 +735,15 @@ const flatAdditionEntities = computed(() => {
   return entities?.filter(entity => !entity.canceled)
 })
 
-const isAddSearchVisible = computed(
-  () =>
-    (isAssetPlaylist.value && assetSearchText.value) ||
-    (!isAssetPlaylist.value && shotSearchText.value)
-)
+const additionSearchText = computed(() => {
+  if (isAssetPlaylist.value) return assetSearchText.value
+  if (isSequencePlaylist.value) return sequenceSearchText.value
+  if (isEditPlaylist.value) return editSearchText.value
+  if (isEpisodePlaylist.value) return episodeSearchText.value
+  return shotSearchText.value
+})
+
+const isAddSearchVisible = computed(() => Boolean(additionSearchText.value))
 
 const addEntitiesText = computed(() => {
   if (isAssetPlaylist.value) return t('playlists.add_assets')
@@ -1274,9 +1281,12 @@ const getPendingEntities = async isDaily => {
 const addCurrentSelection = () => {
   let entities = displayedShots.value
   if (isAssetPlaylist.value) entities = displayedAssets.value
+  else if (isSequencePlaylist.value) entities = displayedSequences.value
   else if (isEditPlaylist.value) entities = displayedEdits.value
   else if (isEpisodePlaylist.value) entities = displayedEpisodes.value
-  return withSilent(() => addEntities(entities))
+  return withSilent(() =>
+    addEntities(entities.filter(entity => !entity.canceled))
+  )
 }
 
 const addSequence = sequenceShots => {
@@ -1372,17 +1382,21 @@ const confirmBuildFilter = query => {
   onSearchChange(query)
 }
 
-const onSearchChange = searchQuery => {
+const onSearchChange = (searchQuery, isNewSearch = true) => {
   const query = searchQuery.length > 1 ? searchQuery : ''
   if (isAssetPlaylist.value) {
     store.dispatch('setAssetSearch', query)
-    if (query) store.dispatch('displayMoreAssets')
+    if (query && isNewSearch) store.dispatch('displayMoreAssets')
   } else if (isSequencePlaylist.value) {
     store.dispatch('setSequenceSearch', query)
     if (query) store.dispatch('resetSequences')
+  } else if (isEditPlaylist.value) {
+    store.dispatch('setEditSearch', query)
+  } else if (isEpisodePlaylist.value) {
+    store.dispatch('setEpisodeSearch', query)
   } else {
     store.dispatch('setShotSearch', query)
-    if (query) store.dispatch('displayMoreShots')
+    if (query && isNewSearch) store.dispatch('displayMoreShots')
   }
 }
 
@@ -1742,10 +1756,17 @@ watch(
   }
 )
 
-// The build filter fills the search field of the addition panel: it closes
-// once the field is gone.
+// The search field goes with the addition panel, while the store keeps its
+// text, and a load of a list can drop its filter: a new field shows the
+// search and applies it again, without a further page of entities. The build
+// filter fills the field: it closes once the field is gone.
 watch(searchFieldRef, field => {
-  if (!field) modals.isBuildFilterDisplayed = false
+  if (!field) {
+    modals.isBuildFilterDisplayed = false
+    return
+  }
+  field.setValue(additionSearchText.value)
+  if (additionSearchText.value) onSearchChange(additionSearchText.value, false)
 })
 
 watch(currentPlaylist, () => {

@@ -65,6 +65,12 @@ const mountPage = async ({
     loadPlaylistShareLinks: vi.fn(() => Promise.resolve([])),
     loadPlaylists: resolved(),
     loadShots: resolved(),
+    resetSequences: vi.fn(),
+    setAssetSearch: vi.fn(),
+    setEditSearch: vi.fn(),
+    setEpisodeSearch: vi.fn(),
+    setSequenceSearch: vi.fn(),
+    setShotSearch: vi.fn(),
     ...actions
   }
   const fromState = name => state => state[name]
@@ -93,7 +99,9 @@ const mountPage = async ({
       displayedSequences: () => [],
       displayedShots: () => [],
       displayedShotsBySequence: () => [],
+      editSearchText: () => '',
       editsLoadingKey: fromState('editsLoadingKey'),
+      episodeSearchText: () => '',
       isAssetsLoading: () => false,
       isCurrentUserClient: () => false,
       isCurrentUserProductionManager: () => true,
@@ -106,6 +114,7 @@ const mountPage = async ({
       playlists: fromState('playlists'),
       playlistsPath: () => ({ name: 'playlists' }),
       productionTaskTypes: () => [],
+      sequenceSearchText: () => '',
       shotSearchText: () => '',
       shotsLoadingKey: fromState('shotsLoadingKey'),
       taskMap: () => new Map(),
@@ -128,7 +137,8 @@ const mountPage = async ({
     global: {
       plugins: [store],
       config: { globalProperties: { $socket: socket } },
-      stubs: { RouterLink: true, ...stubs }
+      directives: { focus: () => {} },
+      stubs: { RouterLink: true, SearchField: false, ...stubs }
     }
   })
   mountedWrapper = wrapper
@@ -803,6 +813,195 @@ describe('Playlist page, addition buttons', () => {
 
       expect(addedIds()).toEqual([['s-10', 's-20']])
     })
+  })
+})
+
+describe('Playlist page, search of the addition panel', () => {
+  const searchText = wrapper => wrapper.find('.search-input').element.value
+  const searches = {
+    assetSearchText: () => 'asset search',
+    editSearchText: () => 'edit search',
+    episodeSearchText: () => 'episode search',
+    sequenceSearchText: () => 'sequence search',
+    shotSearchText: () => 'shot search'
+  }
+  const addSelectionButton = wrapper =>
+    wrapper
+      .findAll('button')
+      .find(button => button.text() === 'playlists.add_selection')
+
+  // The field goes with the panel, while the store keeps the text.
+  it.each([
+    ['shot', 'shot search'],
+    ['asset', 'asset search'],
+    ['sequence', 'sequence search'],
+    ['edit', 'edit search'],
+    ['episode', 'episode search']
+  ])('shows the search of the %s entities', async (forEntity, search) => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: forEntity },
+      { getters: searches }
+    )
+    await flushPromises()
+
+    expect(searchText(wrapper)).toBe(search)
+  })
+
+  // A load of a list drops its filter and keeps the text.
+  it.each([
+    ['shot', 'setShotSearch', 'shot search'],
+    ['asset', 'setAssetSearch', 'asset search'],
+    ['sequence', 'setSequenceSearch', 'sequence search'],
+    ['edit', 'setEditSearch', 'edit search'],
+    ['episode', 'setEpisodeSearch', 'episode search']
+  ])(
+    'applies the search of the %s entities again',
+    async (forEntity, action, search) => {
+      const { actions } = await openPlaylist(
+        { for_entity: forEntity },
+        { getters: searches }
+      )
+      await flushPromises()
+
+      expect(actions[action]).toHaveBeenCalledTimes(1)
+      expect(lastPayload(actions[action])).toBe(search)
+    }
+  )
+
+  it('applies no search when the store has none', async () => {
+    const { actions } = await openPlaylist()
+    await flushPromises()
+
+    expect(actions.setShotSearch).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['edit', 'setEditSearch'],
+    ['episode', 'setEpisodeSearch']
+  ])('filters the %s entities with the field', async (forEntity, action) => {
+    const { wrapper, actions } = await openPlaylist({ for_entity: forEntity })
+    await flushPromises()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', 'typed')
+
+    expect(lastPayload(actions[action])).toBe('typed')
+    expect(actions.setShotSearch).not.toHaveBeenCalled()
+  })
+
+  it('offers no selection for the search of another type', async () => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'sequence' },
+      { getters: { shotSearchText: () => 'shot search' } }
+    )
+    await flushPromises()
+
+    expect(addSelectionButton(wrapper)).toBeUndefined()
+  })
+
+  // The panel hides the canceled entities.
+  it.each([
+    ['shot', 'shotSearchText', 'displayedShots'],
+    ['asset', 'assetSearchText', 'displayedAssets'],
+    ['sequence', 'sequenceSearchText', 'displayedSequences'],
+    ['edit', 'editSearchText', 'displayedEdits'],
+    ['episode', 'episodeSearchText', 'displayedEpisodes']
+  ])('adds the %s entities of the search', async (forEntity, search, list) => {
+    const { wrapper, actions } = await openPlaylist(
+      { for_entity: forEntity },
+      {
+        getters: {
+          [list]: () => [
+            { id: 'kept', name: 'Kept' },
+            { id: 'gone', name: 'Gone', canceled: true }
+          ],
+          [search]: () => 'search'
+        },
+        stubs: {
+          PlaylistPlayer: {
+            template: '<div />',
+            methods: { scrollToRight: () => {} }
+          }
+        }
+      }
+    )
+    await flushPromises()
+
+    await addSelectionButton(wrapper).trigger('click')
+    await flushPromises()
+
+    expect(lastPayload(actions.addEntitiesToPlaylist).entityIds).toEqual([
+      'kept'
+    ])
+  })
+
+  it.each([
+    ['shot', 'displayMoreShots'],
+    ['asset', 'displayMoreAssets']
+  ])(
+    'shows one more page of %s entities for a typed search only',
+    async (forEntity, action) => {
+      const { wrapper, actions } = await openPlaylist(
+        { for_entity: forEntity },
+        { getters: searches }
+      )
+      await flushPromises()
+      expect(actions[action]).not.toHaveBeenCalled()
+
+      wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', 'typed')
+
+      expect(actions[action]).toHaveBeenCalledTimes(1)
+    }
+  )
+
+  it('shows one more page for the search of the build filter', async () => {
+    const { wrapper, actions } = await openPlaylist()
+    await flushPromises()
+
+    wrapper
+      .findComponent({ name: 'BuildFilterModal' })
+      .vm.$emit('confirm', 'filter search')
+
+    expect(lastPayload(actions.setShotSearch)).toBe('filter search')
+    expect(actions.displayMoreShots).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the search when the panel opens again', async () => {
+    const { wrapper } = await openPlaylist({}, { getters: searches })
+    await flushPromises()
+
+    await wrapper.find('.addition-header .close-button').trigger('click')
+    expect(wrapper.find('.search-input').exists()).toBe(false)
+    wrapper.findComponent(PlaylistPlayer).vm.$emit('show-add-entities')
+    await flushPromises()
+
+    expect(searchText(wrapper)).toBe('shot search')
+  })
+
+  it('shows the search after a bulk addition that failed', async () => {
+    const failure = new Error('down')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await openPlaylist(
+      {},
+      {
+        getters: searches,
+        actions: {
+          addEntitiesToPlaylist: vi.fn(() => Promise.reject(failure)),
+          getPendingShots: vi.fn(() =>
+            Promise.resolve([{ id: 's9', name: 'SH900' }])
+          )
+        }
+      }
+    )
+    await flushPromises()
+
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'playlists.build_weekly')
+      .trigger('click')
+    await flushPromises()
+
+    expect(searchText(wrapper)).toBe('shot search')
+    expect(consoleError).toHaveBeenCalledWith(failure)
   })
 })
 
