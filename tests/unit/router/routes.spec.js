@@ -387,6 +387,20 @@ describe('router/routes', () => {
     })
   })
 
+  test('flags the pages a visitor reads before login', () => {
+    const names = router
+      .getRoutes()
+      .filter(({ meta }) => meta.isPublic)
+      .map(({ name }) => name)
+
+    expect(names.sort()).toEqual([
+      'first-connection',
+      'login',
+      'reset-change-password',
+      'reset-password'
+    ])
+  })
+
   describe('main guard', () => {
     const runGuard = to => mainRoute.beforeEnter(to, {})
 

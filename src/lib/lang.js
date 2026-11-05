@@ -1,5 +1,5 @@
 import moment from 'moment-timezone'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 // Moment locales matching src/locales/ (English is built-in).
 import 'moment/locale/da'
@@ -99,12 +99,23 @@ const getBrowserLocale = () => navigator.languages.map(toLocale).find(Boolean)
 
 const getVisitorLocale = () => getRememberedLocale() || getBrowserLocale()
 
-const applyLocale = async locale => {
+const parseLocale = locale => {
   const fallback = locale?.substring(0, 2) || 'en'
-  const { language, code } = LOCALE_MAP[locale] || {
-    language: fallback,
-    code: fallback
-  }
+  return LOCALE_MAP[locale] || { language: fallback, code: fallback }
+}
+
+// The list entry of the language in use. A profile can hold a region the list
+// has not, or a language the app has not, which then reads English.
+export const currentLanguage = computed(
+  () =>
+    languages.find(({ value }) => {
+      const { language, code } = parseLocale(value)
+      return [language, code].includes(localeCode.value)
+    }) || languages.find(({ value }) => value === 'en_US')
+)
+
+const applyLocale = async locale => {
+  const { language, code } = parseLocale(locale)
 
   moment.locale(code)
   localeCode.value = code

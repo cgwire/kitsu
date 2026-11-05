@@ -999,7 +999,8 @@ export const routes = [
   {
     path: '/login',
     component: Login,
-    name: 'login'
+    name: 'login',
+    meta: { isPublic: true }
   },
   {
     path: '/login/2fa',
@@ -1023,17 +1024,20 @@ export const routes = [
   {
     path: '/first-connection',
     component: FirstConnection,
-    name: 'first-connection'
+    name: 'first-connection',
+    meta: { isPublic: true }
   },
   {
     path: '/reset-password',
     component: ResetPassword,
-    name: 'reset-password'
+    name: 'reset-password',
+    meta: { isPublic: true }
   },
   {
     path: '/reset-change-password',
     component: ResetChangePassword,
-    name: 'reset-change-password'
+    name: 'reset-change-password',
+    meta: { isPublic: true }
   },
   {
     path: '/server-down',

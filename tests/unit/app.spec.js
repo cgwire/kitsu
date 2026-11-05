@@ -12,6 +12,7 @@ import lang from '@/lib/lang'
 
 import App from '@/App.vue'
 import MetadataTextarea from '@/components/cells/MetadataTextarea.vue'
+import PublicPageSettings from '@/components/widgets/PublicPageSettings.vue'
 
 import { recordUnhandledRejections } from './fixtures/unhandled-rejections'
 
@@ -25,6 +26,12 @@ const mountApp = async ({ actions, getters, mutations, path = '/' }) => {
     routes: [
       { path: '/', component: Page },
       { path: '/login', name: 'login', component: Page },
+      {
+        path: '/reset-password',
+        name: 'reset-password',
+        component: Page,
+        meta: { isPublic: true }
+      },
       {
         path: '/playlists/shared/:token',
         name: 'shared-playlist',
@@ -1197,6 +1204,38 @@ describe('App', () => {
       await flushPromises()
 
       expect(document.documentElement.lang).toBe('de')
+    })
+  })
+
+  describe('settings of the public pages', () => {
+    const hasSettings = () =>
+      wrapper.findComponent(PublicPageSettings).exists()
+
+    it('shows them to a visitor', async () => {
+      await mountApp({ path: '/reset-password' })
+      expect(hasSettings()).toBe(true)
+    })
+
+    it('leaves them out of the other pages', async () => {
+      await mountApp({ path: '/' })
+      expect(hasSettings()).toBe(false)
+    })
+
+    // The language of a known user comes from the profile.
+    it('leaves them out for a known user', async () => {
+      await mountApp({
+        getters: { user: () => ({ id: 'user-1', locale: 'en_US' }) },
+        path: '/reset-password'
+      })
+      expect(hasSettings()).toBe(false)
+    })
+
+    it('leaves them out of the loading screen', async () => {
+      await mountApp({
+        getters: { isDataLoading: () => true },
+        path: '/reset-password'
+      })
+      expect(hasSettings()).toBe(false)
     })
   })
 

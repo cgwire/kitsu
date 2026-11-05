@@ -10,6 +10,8 @@
     </div>
     <router-view v-else />
 
+    <public-page-settings v-if="isPublicPageSettingsVisible" />
+
     <preview-modal
       v-if="previewFileIdToShow"
       active
@@ -47,6 +49,7 @@ import sequenceStore from '@/store/modules/sequences.js'
 import shotsStore from '@/store/modules/shots.js'
 
 import PreviewModal from '@/components/modals/PreviewModal.vue'
+import PublicPageSettings from '@/components/widgets/PublicPageSettings.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 // Composables
@@ -97,6 +100,9 @@ const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const todoMap = computed(() => store.getters.todoMap)
 const user = computed(() => store.getters.user)
+const isPublicPageSettingsVisible = computed(
+  () => route.meta.isPublic && !user.value && !isDataLoading.value
+)
 
 // Functions
 // --------------------------------------------------------------------------
