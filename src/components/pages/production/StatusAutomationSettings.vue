@@ -88,4 +88,14 @@ watch(remainingAutomations, resetSelection, { immediate: true })
 .field {
   margin-bottom: 0;
 }
+
+// The headers are longer than their columns: kept on one line, they would push
+// the last columns out of sight. The sentence column then needs its own width.
+:deep(.datatable-head th) {
+  white-space: normal;
+}
+
+:deep(.input-separator) {
+  min-width: 170px;
+}
 </style>

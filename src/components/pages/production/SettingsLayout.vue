@@ -127,6 +127,12 @@ defineProps({
   max-width: 1200px;
 }
 
+// Their rows are too long for that cap: the board roles wrapped and the last
+// automation columns scrolled out of sight on a screen with room to spare.
+:deep(.tab.is-full) {
+  max-width: none;
+}
+
 // The look of the setting blocks of every tab lives here.
 // Same look as the .block panels of the entity pages (Shot.vue)
 :deep(.tab .section) {

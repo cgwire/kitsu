@@ -137,14 +137,14 @@
       </div>
     </div>
 
-    <div class="tab is-wide" v-show="isActiveTab('board')">
+    <div class="tab is-full" v-show="isActiveTab('board')">
       <div class="box section">
         <h2 class="subtitle">{{ $t('board.settings.title') }}</h2>
         <production-board />
       </div>
     </div>
 
-    <div class="tab is-wide" v-show="isActiveTab('statusAutomations')">
+    <div class="tab is-full" v-show="isActiveTab('statusAutomations')">
       <div class="box section">
         <h2 class="subtitle">{{ $t('status_automations.title') }}</h2>
         <production-status-automations />

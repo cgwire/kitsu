@@ -201,11 +201,11 @@ const currentStatusAutomation = computed(() => {
   max-height: 180px;
   top: calc(100% + 3px);
   left: 0;
-  // As wide as its longest row, up to the settings area, which clips it (see
-  // .tab.is-wide in SettingsLayout): the conditions wrap past that.
+  // As wide as its longest row, up to the settings block, since the .tab of
+  // SettingsLayout clips it: the conditions wrap past that.
   width: max-content;
   min-width: calc(100% + 2px);
-  max-width: min(1140px, calc(100vw - 329px));
+  max-width: calc(100vw - 349px);
   overflow-y: auto;
 }
 
