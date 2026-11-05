@@ -86,6 +86,7 @@ import { routes } from '@/router/routes'
 
 const appLoginRoute = routes.find(route => route.name === 'app-login')
 const homeRoute = routes.find(route => route.name === 'home')
+const login2FARoute = routes.find(route => route.name === 'login-2fa')
 const mainRoute = routes.find(route => route.path === '/')
 
 // The API client marks the failures of its requests.
@@ -668,6 +669,37 @@ describe('router/routes', () => {
       const bug = buildBug()
       init.mockRejectedValue(bug)
       await expect(homeRoute.beforeEnter({}, {})).rejects.toBe(bug)
+    })
+  })
+
+  describe('mandatory 2FA setup guard', () => {
+    afterEach(() => {
+      store.getters.user = undefined
+      pickedLocale.clear()
+      lang.setLocale.mockClear()
+    })
+
+    test('sends a visitor to the login page', () => {
+      expect(login2FARoute.beforeEnter({}, {})).toEqual({ name: 'login' })
+      expect(lang.setLocale).not.toHaveBeenCalled()
+    })
+
+    test('reads the language of the profile', () => {
+      store.getters.user = { locale: 'fr_FR' }
+
+      expect(login2FARoute.beforeEnter({}, {})).toBeUndefined()
+
+      expect(lang.setLocale).toHaveBeenCalledWith('fr_FR')
+    })
+
+    // Zou refuses the pick until the setup is over: the next guard saves it.
+    test('reads the language picked before login', () => {
+      store.getters.user = { locale: 'en_US' }
+      pickedLocale.set('fr_FR')
+
+      login2FARoute.beforeEnter({}, {})
+
+      expect(lang.setLocale).toHaveBeenCalledWith('fr_FR')
     })
   })
 

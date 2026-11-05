@@ -1033,7 +1033,9 @@ export const routes = [
     component: Login2FA,
     name: 'login-2fa',
     beforeEnter: (to, from) => {
-      if (!store.getters.user) return { name: 'login' }
+      const { user } = store.getters
+      if (!user) return { name: 'login' }
+      lang.setLocale(pickedLocale.get() || user.locale)
     }
   },
   {
