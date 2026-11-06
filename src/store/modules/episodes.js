@@ -713,6 +713,8 @@ const mutations = {
     })
     Object.assign(cache.episodeMap.get(episode.id), episode)
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
+    // A renamed episode moves in the topbar selector.
+    state.episodes = sortByName([...state.episodes])
   },
 
   [REMOVE_EPISODE](state, episodeToDelete) {
@@ -791,6 +793,8 @@ const mutations = {
       return stateEpisode
     })
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
+    // A renamed episode moves in the topbar selector.
+    state.episodes = sortByName([...state.episodes])
     if (episode.description && !state.isEpisodeDescription) {
       state.isEpisodeDescription = true
     }

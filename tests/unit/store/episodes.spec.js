@@ -1145,6 +1145,27 @@ describe('Episodes store, through a store', () => {
     expect(rows[0].validations).toBeInstanceOf(Map)
   })
 
+  test.each([
+    [
+      'an edit',
+      store =>
+        store.commit('EDIT_EPISODE_END', { id: 'ep3', name: 'E00', data: {} })
+    ],
+    [
+      'an update from another session',
+      store => store.commit('UPDATE_EPISODE', { id: 'ep3', name: 'E00' })
+    ]
+  ])('keeps the topbar selector by name after %s', async (_, rename) => {
+    const { store } = await buildStore()
+    loadEpisodes(store, buildEpisodes())
+    const labels = computed(() => selectorLabels(store))
+    expect(labels.value).toEqual(['E01', 'E02', 'E03'])
+
+    rename(store)
+
+    expect(labels.value).toEqual(['E00', 'E01', 'E02'])
+  })
+
   test('loads the episode stats and their task type columns', async () => {
     const taskTypeMap = new Map([
       ['tt-anim', { id: 'tt-anim', name: 'Animation', priority: 2 }],
