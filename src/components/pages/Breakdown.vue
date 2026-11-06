@@ -97,6 +97,8 @@
           />
         </div>
 
+        <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
+
         <spinner class="mt1" v-if="isLoading" />
 
         <div class="flexrow mb05 list-options">
@@ -236,7 +238,7 @@
               <div class="actions filler"></div>
             </div>
             <shot-line
-              :key="entity.id"
+              :key="`${entity.id}-${lineRedraws[entity.id] || 0}`"
               :entity="entity"
               :preview-file-id="entity.preview_file_id"
               :selection="selection"
@@ -443,6 +445,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useBreakdownLoader } from '@/composables/breakdownLoader'
+import { useCellSave } from '@/composables/cellSave'
 import clipboard from '@/lib/clipboard'
 import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
@@ -463,6 +466,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import ShowInfosButton from '@/components/widgets/ShowInfosButton.vue'
@@ -502,6 +506,7 @@ const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 const { episodeId, isLoading, load } = useBreakdownLoader(store, () =>
   onEntitiesLoaded()
 )
+const { cellSaveErrorText, saveCell } = useCellSave()
 
 // State
 // --------------------------------------------------------------------------
@@ -526,6 +531,8 @@ const isOnlyCurrentEpisode = ref(false)
 const isTextMode = ref(false)
 const libraryDisplayed = ref(false)
 const lineFilter = ref('all')
+// Part of the key of each line, to draw it again.
+const lineRedraws = ref({})
 const metadataDisplayHeaders = ref({ ...SHOT_DISPLAY_HEADERS })
 const parsedCSV = ref([])
 const readyTaskTypeId = ref('')
@@ -1309,11 +1316,38 @@ const editEntity = data => {
   return store.dispatch('editAsset', data)
 }
 
+const getLineFields = id => {
+  const line = document.getElementById(id)
+  return line ? [...line.querySelectorAll('input, select, textarea')] : []
+}
+
+// The store puts back the former value of a refused cell save out of sight
+// of Vue: drawn again, the line shows it. Its field typed in gets the focus
+// back, else the rest of the typing would go nowhere.
+const saveLine = async (entry, data) => {
+  const isSaved = await saveCell(entry, () => editEntity(data))
+  if (!isSaved) {
+    const field = document.activeElement
+    const index = getLineFields(entry.id).indexOf(field)
+    const { selectionStart, selectionEnd } = field || {}
+    lineRedraws.value[entry.id] = (lineRedraws.value[entry.id] || 0) + 1
+    if (index !== -1) {
+      await nextTick()
+      const newField = getLineFields(entry.id)[index]
+      newField?.focus()
+      // A number field has no selection.
+      if (typeof selectionStart === 'number') {
+        newField?.setSelectionRange(selectionStart, selectionEnd)
+      }
+    }
+  }
+}
+
 const onFieldChanged = ({ entry, fieldName, value }) =>
-  editEntity({ id: entry.id, [fieldName]: value })
+  saveLine(entry, { id: entry.id, [fieldName]: value })
 
 const onMetadataChanged = ({ entry, descriptor, value }) =>
-  editEntity({ id: entry.id, data: { [descriptor.field_name]: value } })
+  saveLine(entry, { id: entry.id, data: { [descriptor.field_name]: value } })
 
 const descriptorCurrentDepartments = descriptor =>
   (descriptor.departments || []).map(departmentId =>

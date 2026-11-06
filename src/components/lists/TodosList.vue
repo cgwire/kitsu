@@ -1,5 +1,6 @@
 <template>
   <div class="data-list task-list">
+    <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
     <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
       <table class="datatable datatable--cards" v-if="!isLoading">
         <thead class="datatable-head" id="datatable-todos" v-columns-resizable>
@@ -313,6 +314,7 @@ import moment from 'moment-timezone'
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useStore } from 'vuex'
 
+import { useCellSave } from '@/composables/cellSave'
 import { useFormat } from '@/composables/format'
 import { useTaskListSelection } from '@/composables/taskSelection'
 import { useTaskHelpers } from '@/composables/tasks'
@@ -339,12 +341,17 @@ import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 const store = useStore()
 const { formatDisplayDate, formatDuration, isDurationInHours, organisation } =
   useFormat()
 const { getTaskType } = useTaskHelpers()
+const { cellSaveErrorText, saveCell } = useCellSave(
+  task => task.full_entity_name,
+  { rowsAreTasks: true }
+)
 
 // Props / Emits
 // --------------------------------------------------------------------------
@@ -564,7 +571,7 @@ const updateSelectedTasks = buildData => {
     if (!task) return
     const data = buildData(task)
     if (data && isTaskChanged(task, data)) {
-      store.dispatch('updateTask', { taskId, data }).catch(console.error)
+      saveCell(task, () => store.dispatch('updateTask', { taskId, data }))
     }
   })
 }

@@ -1220,6 +1220,41 @@ describe('Shots store, editShot', () => {
     expect(shotsStore.cache.shots).toEqual([])
     expect(shotsStore.cache.shotMap.size).toBe(0)
   })
+
+  // The list and the pages show an edit before Zou answers.
+  test('puts back what an edit Zou refuses changed', async () => {
+    const shot = {
+      id: 'sh-1',
+      name: 'SH01',
+      sequence_name: 'SQ01',
+      description: '',
+      data: { fps: 24 },
+      nb_frames: 24
+    }
+    shotsStore.cache.shots = [shot]
+    shotsStore.cache.shotMap = new Map([[shot.id, shot]])
+    shotsStore.cache.shotIndex = buildShotIndex([shot])
+    vi.spyOn(shotsApi, 'updateShot').mockRejectedValue(new Error('Bad Request'))
+    const state = { displayedShots: [shot], shotSearchText: '' }
+    const commit = (type, payload) => shotsStore.mutations[type](state, payload)
+
+    await expect(
+      shotsStore.actions.editShot(
+        { commit, rootGetters: { displayedSequences: [] } },
+        { id: shot.id, name: 'SH02', description: 'Wide', data: { fps: 25 } }
+      )
+    ).rejects.toThrow('Bad Request')
+
+    expect(shot).toMatchObject({
+      name: 'SH01',
+      description: '',
+      data: { fps: 24 }
+    })
+    expect(state.displayedShots[0]).toMatchObject({
+      name: 'SH01',
+      description: ''
+    })
+  })
 })
 
 // The inline cells of the shots list save on every keystroke: the edits of a
@@ -1341,6 +1376,23 @@ describe('Shots store, editShotDebounced', () => {
     expect(shot.lock).toBe(2)
     await vi.advanceTimersByTimeAsync(1)
     expect(shot.lock).toBe(0)
+  })
+
+  test('puts back what the merged edits of a refused request changed', async () => {
+    shotsApi.updateShot.mockRejectedValue(new Error('offline'))
+    const { shot, state, edit } = buildContext()
+
+    const settled = Promise.allSettled([
+      edit(shot.id, { data: { frame_in: 1 }, nb_frames: 100 }),
+      edit(shot.id, { data: { frame_in: 12 }, nb_frames: 89 })
+    ])
+    await vi.advanceTimersByTimeAsync(400)
+    await settled
+
+    expect(shot.nb_frames).toBe(50)
+    expect(shot.data.frame_in).toBeUndefined()
+    expect(shot.data.frame_out).toBe(100)
+    expect(state.displayedShots[0].nb_frames).toBe(50)
   })
 
   test('rejects every merged call when the request fails', async () => {

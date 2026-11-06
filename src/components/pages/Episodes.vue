@@ -51,6 +51,7 @@
               v-if="!isLoading && !initialLoading && !isLoadingError"
             />
           </div>
+          <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
         </div>
 
         <sorting-info
@@ -164,6 +165,7 @@
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :episode-to-edit="episodeToEdit"
       @cancel="modals.isNewDisplayed = false"
       @confirm="confirmEditEpisode"
@@ -197,7 +199,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useEntityPage } from '@/composables/entityPage'
-import { logRequestFailure } from '@/lib/errors'
+import { isNotFound, logRequestFailure } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
 import EpisodeList from '@/components/lists/EpisodeList.vue'
@@ -212,6 +214,7 @@ import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import SortingInfo from '@/components/widgets/SortingInfo.vue'
@@ -285,6 +288,7 @@ const reset = () => {
 
 const {
   applySearchFromUrl,
+  cellSaveErrorText,
   closeMetadataModal,
   confirmAddMetadata,
   confirmAddThumbnails,
@@ -319,6 +323,7 @@ const {
   onMetadataChanged,
   onSearchChange,
   openEditModal: onEditClicked,
+  saveCell,
   saveScrollPosition,
   saveSearchQuery,
   selectableDepartments,
@@ -358,18 +363,21 @@ const confirmEditEpisode = async form => {
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   } finally {
     loading.edit = false
   }
 }
 
 const onFieldChanged = async ({ entry, fieldName, value }) => {
-  await store.dispatch('editEpisode', {
-    id: entry.id,
-    description: entry.description,
-    [fieldName]: value
-  })
-  applySearchFromUrl(false)
+  const isSaved = await saveCell(entry, () =>
+    store.dispatch('editEpisode', {
+      id: entry.id,
+      description: entry.description,
+      [fieldName]: value
+    })
+  )
+  if (isSaved) applySearchFromUrl(false)
 }
 
 // Watchers

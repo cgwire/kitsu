@@ -12,7 +12,7 @@ import {
 } from '@/lib/sorting'
 import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
-import { getFilledColumns, removeModelFromList } from '@/lib/models'
+import { getFilledColumns, removeModelFromList, trackEdit } from '@/lib/models'
 import { computeStats } from '@/lib/stats'
 import {
   ADD_EPISODE,
@@ -445,12 +445,29 @@ const actions = {
 
   editEpisode({ commit, state }, data) {
     commit(LOCK_EPISODE, data)
-    commit(EDIT_EPISODE_END, data)
-    return shotsApi.updateEpisode(data).finally(() => {
-      setTimeout(() => {
-        commit(UNLOCK_EPISODE, data)
-      }, 2000)
-    })
+    const trackedEdit = trackEdit(
+      () => cache.episodeMap.get(data.id),
+      () => commit(EDIT_EPISODE_END, data)
+    )
+    return shotsApi
+      .updateEpisode(data)
+      .then(
+        result => {
+          trackedEdit.keep()
+          return result
+        },
+        err => {
+          // A save Zou refuses puts back the values the changes replaced.
+          const undoEdit = trackedEdit.undo()
+          if (undoEdit) commit(EDIT_EPISODE_END, undoEdit)
+          throw err
+        }
+      )
+      .finally(() => {
+        setTimeout(() => {
+          commit(UNLOCK_EPISODE, data)
+        }, 2000)
+      })
   },
 
   deleteEpisode({ commit, state }, episode) {
@@ -762,19 +779,21 @@ const mutations = {
 
   [EDIT_EPISODE_END](state, newEpisode) {
     const episode = cache.episodeMap.get(newEpisode.id)
+    // Outside the loaded list, the episode is left alone and its update
+    // still goes out.
+    if (!episode) return
+
     const episodeFromMain = state.episodes.find(e => e.id === newEpisode.id)
-    if (episode) {
-      const copyNewEpisode = { ...newEpisode }
-      copyNewEpisode.data = { ...episode.data, ...newEpisode.data }
-      Object.assign(episode, copyNewEpisode)
-      Object.assign(episodeFromMain, copyNewEpisode)
-      state.displayedEpisodes = state.displayedEpisodes.map(stateEpisode => {
-        if (stateEpisode.id === newEpisode.id) {
-          return { ...episode }
-        }
-        return stateEpisode
-      })
-    }
+    const copyNewEpisode = { ...newEpisode }
+    copyNewEpisode.data = { ...episode.data, ...newEpisode.data }
+    Object.assign(episode, copyNewEpisode)
+    Object.assign(episodeFromMain, copyNewEpisode)
+    state.displayedEpisodes = state.displayedEpisodes.map(stateEpisode => {
+      if (stateEpisode.id === newEpisode.id) {
+        return { ...episode }
+      }
+      return stateEpisode
+    })
     cache.episodeIndex = buildEpisodeIndex(state.episodes)
     if (episode.description && !state.isEpisodeDescription) {
       state.isEpisodeDescription = true

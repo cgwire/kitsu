@@ -92,6 +92,7 @@
               v-if="!isShotsLoading && !initialLoading"
             />
           </div>
+          <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
         </div>
 
         <sorting-info
@@ -152,6 +153,7 @@
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :shot-to-edit="shotToEdit"
       @cancel="modals.isNewDisplayed = false"
       @confirm="confirmEditShot"
@@ -316,6 +318,7 @@ import {
   useEntityPage
 } from '@/composables/entityPage'
 import { getExportDescriptors } from '@/lib/descriptors'
+import { isNotFound } from '@/lib/errors'
 import shotStore from '@/store/modules/shots'
 
 /* eslint-disable no-unused-vars */
@@ -337,6 +340,7 @@ import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
@@ -448,6 +452,7 @@ const reset = async () => {
 
 const {
   applySearchFromUrl,
+  cellSaveErrorText,
   clearSearchAndScroll,
   closeMetadataModal,
   confirmAddMetadata,
@@ -492,6 +497,7 @@ const {
   renderImport,
   resetImport,
   restoreText,
+  saveCell,
   saveScrollPosition,
   saveSearchQuery,
   selectableDepartments,
@@ -624,6 +630,7 @@ const confirmEditShot = async form => {
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   } finally {
     loading.edit = false
   }
@@ -655,13 +662,15 @@ const hideShotHistoryModal = () => {
 }
 
 const onFieldChanged = async ({ entry, fieldName, value }) => {
-  await store.dispatch('editShotDebounced', {
-    id: entry.id,
-    nb_frames: entry.nb_frames,
-    description: entry.description,
-    [fieldName]: value
-  })
-  onSearchChange(false)
+  const isSaved = await saveCell(entry, () =>
+    store.dispatch('editShotDebounced', {
+      id: entry.id,
+      nb_frames: entry.nb_frames,
+      description: entry.description,
+      [fieldName]: value
+    })
+  )
+  if (isSaved) onSearchChange(false)
 }
 
 // A frame in or out typed on a shot holding the other bound sets the
@@ -687,12 +696,14 @@ const getFrameCount = (shot, fieldName, value) => {
 const onMetadataChanged = async ({ entry, descriptor, value }) => {
   const shot = shotMap.get(entry.id)
   const nbFrames = getFrameCount(shot, descriptor.field_name, value)
-  await store.dispatch('editShotDebounced', {
-    id: entry.id,
-    data: { [descriptor.field_name]: value },
-    ...(nbFrames === undefined ? {} : { nb_frames: nbFrames })
-  })
-  applySearchFromUrl(false)
+  const isSaved = await saveCell(entry, () =>
+    store.dispatch('editShotDebounced', {
+      id: entry.id,
+      data: { [descriptor.field_name]: value },
+      ...(nbFrames === undefined ? {} : { nb_frames: nbFrames })
+    })
+  )
+  if (isSaved) applySearchFromUrl(false)
 }
 
 // A timed out import disables the upload of the EDL modal: reopening it

@@ -339,6 +339,7 @@
       :active="modals.edit"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :episode-to-edit="currentEpisode"
       @cancel="modals.edit = false"
       @confirm="confirmEditEpisode"
@@ -372,6 +373,7 @@ import { useStore } from 'vuex'
 
 import { useCastingView } from '@/composables/castingView'
 import { useEntity } from '@/composables/entity'
+import { isNotFound } from '@/lib/errors'
 import { episodifyRoute } from '@/lib/path'
 import episodeStore from '@/store/modules/episodes'
 
@@ -416,7 +418,7 @@ const currentEpisode = ref(null)
 const playlistEntityIds = ref(null)
 const scheduleWidget = ref(null)
 const casting = reactive({ isLoading: false, isError: false })
-const errors = reactive({ edit: false })
+const errors = reactive({ edit: false, editDeleted: false })
 const loading = reactive({ edit: false })
 const modals = reactive({ edit: false })
 
@@ -538,17 +540,25 @@ const showEditModal = () => {
 }
 
 const confirmEditEpisode = async form => {
+  const data = { ...form, id: currentEpisode.value.id }
   loading.edit = true
   errors.edit = false
   try {
-    await store.dispatch('editEpisode', {
-      ...form,
-      id: currentEpisode.value.id
-    })
+    await store.dispatch('editEpisode', data)
+    // The store writes the changes into its cached episode out of sight of Vue:
+    // a copy shows them, unless the page moved on to another episode. Not after
+    // a refusal: the modal, open on the error, would reset what was typed.
+    const episode = episodeStore.cache.episodeMap.get(data.id)
+    if (episode && currentEpisode.value?.id === data.id) {
+      // The casting loads onto the episode shown, not onto the cached one.
+      const { casting, castingAssetsByType } = currentEpisode.value
+      currentEpisode.value = { ...episode, casting, castingAssetsByType }
+    }
     modals.edit = false
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   }
   loading.edit = false
 }

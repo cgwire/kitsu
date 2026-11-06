@@ -132,3 +132,80 @@ export const arrayMove = (array, fromIndex, toIndex) => {
   arr.splice(toIndex, 0, element)
   return arr
 }
+
+// The fields of an entity, its data copied: an edit gives it a new data
+// object.
+const copyFields = ({ data, ...fields }) => ({ fields, data: { ...data } })
+
+const getChangedKeys = (before, after) =>
+  [...new Set([...Object.keys(before), ...Object.keys(after)])].filter(
+    key => before[key] !== after[key]
+  )
+
+// The edits of each cached entity still waiting for their save, oldest first.
+const pendingEdits = new WeakMap()
+
+/*
+ * Applies the edit of a cached entity and follows it until its save settles:
+ * keep() once Zou saved it, undo() once Zou refused it. undo() gives the edit
+ * putting back the former value of each field the edit changed. A field
+ * changed again since keeps its new value, and the edit that changed it gets
+ * the former one, should Zou refuse it too. undo() gives null when nothing is
+ * left to undo, or when the cache no longer holds the entity (removed, or
+ * replaced by a reload).
+ */
+export const trackEdit = (getEntity, applyEdit) => {
+  const entity = getEntity()
+  if (!entity) {
+    applyEdit()
+    return { keep: () => {}, undo: () => null }
+  }
+  const before = copyFields(entity)
+  applyEdit()
+  const edit = { before, after: copyFields(entity) }
+  const edits = pendingEdits.get(entity) || []
+  edits.push(edit)
+  pendingEdits.set(entity, edits)
+
+  // Returns the edits made after this one.
+  const settle = () => {
+    const index = edits.indexOf(edit)
+    if (index < 0) return []
+    edits.splice(index, 1)
+    return edits.slice(index)
+  }
+
+  const undo = () => {
+    const laterEdits = settle()
+    if (getEntity() !== entity) return null
+    const current = copyFields(entity)
+    const formerValues = { fields: {}, data: {} }
+    Object.keys(formerValues).forEach(part => {
+      const valuesBefore = edit.before[part]
+      const valuesAfter = edit.after[part]
+      getChangedKeys(valuesBefore, valuesAfter).forEach(key => {
+        if (current[part][key] === valuesAfter[key]) {
+          formerValues[part][key] = valuesBefore[key]
+        } else {
+          const nextEdit = laterEdits.find(
+            later =>
+              later.before[part][key] === valuesAfter[key] &&
+              later.after[part][key] !== valuesAfter[key]
+          )
+          if (nextEdit) nextEdit.before[part][key] = valuesBefore[key]
+        }
+      })
+    })
+    const { fields, data } = formerValues
+    const hasData = Object.keys(data).length > 0
+    if (!hasData && Object.keys(fields).length === 0) return null
+    return { id: entity.id, ...fields, ...(hasData ? { data } : {}) }
+  }
+
+  return {
+    keep: () => {
+      settle()
+    },
+    undo
+  }
+}

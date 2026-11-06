@@ -842,6 +842,10 @@ export default {
     back: 'Back',
     before: 'Before',
     cancel: 'Cancel',
+    cell_save_error:
+      '"{name}" could not be saved: the previous value is back. Please reload the page and try again.',
+    cells_save_error:
+      'Some changes could not be saved: the previous values are back. Please reload the page and try again.',
     clear_selection: 'Clear current selection',
     clear_sorting: 'Clear current sorting',
     close: 'Close',
@@ -872,6 +876,7 @@ export default {
     documentation: 'Documentation',
     drop_files_here: 'Drop files here',
     edit: 'Edit',
+    edit_deleted_error: '"{name}" could not be saved: it was deleted in the meantime.',
     edit_mode_on: 'Toggle edit mode',
     empty_comment: 'Empty comment',
     empty_schedule: 'There are no tasks or they don\'t have start dates.',

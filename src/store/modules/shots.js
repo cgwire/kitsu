@@ -33,7 +33,8 @@ import {
   getFilledColumns,
   groupEntitiesByParents,
   removeModelFromList,
-  setCanceled
+  setCanceled,
+  trackEdit
 } from '@/lib/models'
 import { minutesToDays } from '@/lib/time'
 import {
@@ -115,12 +116,28 @@ const mergeShotEdits = (previous, next) => {
   return merged
 }
 
+// Shows the edit at once, and returns it followed until its save settles.
 const applyShotEdit = ({ commit, rootGetters }, data) => {
   commit(LOCK_SHOT, data)
-  commit(EDIT_SHOT_END, {
-    newShot: data,
-    sequences: rootGetters.displayedSequences
-  })
+  return trackEdit(
+    () => cache.shotMap.get(data.id),
+    () =>
+      commit(EDIT_SHOT_END, {
+        newShot: data,
+        sequences: rootGetters.displayedSequences
+      })
+  )
+}
+
+// A save Zou refuses puts back the values the changes replaced.
+const undoShotEdit = ({ commit, rootGetters }, trackedEdit) => {
+  const undoEdit = trackedEdit.undo()
+  if (undoEdit) {
+    commit(EDIT_SHOT_END, {
+      newShot: undoEdit,
+      sequences: rootGetters.displayedSequences
+    })
+  }
 }
 
 const helpers = {
@@ -543,32 +560,52 @@ const actions = {
   },
 
   editShot(context, data) {
-    applyShotEdit(context, data)
-    return shotsApi.updateShot(data).finally(() => {
-      setTimeout(() => {
-        context.commit(UNLOCK_SHOT, data)
-      }, 2000)
-    })
+    const trackedEdit = applyShotEdit(context, data)
+    return shotsApi
+      .updateShot(data)
+      .then(
+        result => {
+          trackedEdit.keep()
+          return result
+        },
+        err => {
+          undoShotEdit(context, trackedEdit)
+          throw err
+        }
+      )
+      .finally(() => {
+        setTimeout(() => {
+          context.commit(UNLOCK_SHOT, data)
+        }, 2000)
+      })
   },
 
   // editShot for the inline cells: the list is updated at once, the edits of
   // a shot made within EDIT_SHOT_DELAY are merged into one request, each call
   // resolves once that request settles and keeps its own lock 2 s after it.
   editShotDebounced(context, data) {
-    applyShotEdit(context, data)
+    const trackedEdit = applyShotEdit(context, data)
     const pending = pendingEdits.get(data.id) || { data: {}, waiters: [] }
     pending.data = mergeShotEdits(pending.data, data)
     clearTimeout(pending.timer)
     pendingEdits.set(data.id, pending)
     return new Promise((resolve, reject) => {
-      pending.waiters.push({ resolve, reject })
+      pending.waiters.push({ trackedEdit, resolve, reject })
       pending.timer = setTimeout(() => {
         pendingEdits.delete(data.id)
         shotsApi
           .updateShot(pending.data)
           .then(
-            result => pending.waiters.forEach(waiter => waiter.resolve(result)),
-            err => pending.waiters.forEach(waiter => waiter.reject(err))
+            result =>
+              pending.waiters.forEach(waiter => {
+                waiter.trackedEdit.keep()
+                waiter.resolve(result)
+              }),
+            err =>
+              pending.waiters.forEach(waiter => {
+                undoShotEdit(context, waiter.trackedEdit)
+                waiter.reject(err)
+              })
           )
           .finally(() => {
             setTimeout(() => {

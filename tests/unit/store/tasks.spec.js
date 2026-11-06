@@ -27,6 +27,7 @@ vi.mock('@/store/api/tasks', () => ({
     setPreview: vi.fn(),
     pinComment: vi.fn(),
     updatePreviewAnnotation: vi.fn(),
+    updateTask: vi.fn(),
     unassignPersonFromTasks: vi.fn(() => Promise.resolve()),
     createEntityTasks: vi.fn(() =>
       Promise.resolve([{ id: 'task-1' }, { id: 'task-2' }])
@@ -1872,5 +1873,78 @@ describe('Tasks store, comments of other users', () => {
 
       expect(tasksApi.getTaskComments).not.toHaveBeenCalled()
     })
+  })
+})
+
+// The cells of the task lists save each change at once, a keystroke for a
+// metadata: a save Zou refuses puts back the values it replaced.
+describe('Tasks store, refused task edits', () => {
+  let state
+  let task
+  const refusal = () => new Error('Bad Request')
+  const updateTask = data =>
+    tasksStore.actions.updateTask(
+      {
+        commit: (type, payload) => tasksStore.mutations[type](state, payload),
+        state
+      },
+      { taskId: task.id, data }
+    )
+  // Answers the saves one by one, in the order sent.
+  const holdSaves = () => {
+    const answers = []
+    tasksApi.updateTask.mockImplementation(
+      () =>
+        new Promise((resolve, reject) => answers.push({ resolve, reject }))
+    )
+    return answers
+  }
+
+  beforeEach(() => {
+    task = { id: 'task-1', estimation: 240, data: { mood: 'calm' } }
+    state = { taskMap: new Map([[task.id, task]]) }
+    tasksApi.updateTask.mockReset()
+  })
+
+  test('puts back a refused estimation', async () => {
+    tasksApi.updateTask.mockRejectedValueOnce(refusal())
+
+    await expect(updateTask({ estimation: 480 })).rejects.toThrow()
+
+    expect(task.estimation).toBe(240)
+  })
+
+  test('puts back a metadata the task did not hold', async () => {
+    tasksApi.updateTask.mockRejectedValueOnce(refusal())
+
+    await expect(updateTask({ data: { note: 'x' } })).rejects.toThrow()
+
+    expect(task.data.note).toBeUndefined()
+    expect(task.data.mood).toBe('calm')
+  })
+
+  test('puts back the value typed over once every keystroke is refused', async () => {
+    const answers = holdSaves()
+    const saves = ['c', 'ca', 'cal'].map(note =>
+      updateTask({ data: { note } }).catch(() => {})
+    )
+
+    answers.forEach(({ reject }) => reject(refusal()))
+    await Promise.all(saves)
+
+    expect(task.data.note).toBeUndefined()
+  })
+
+  // The earlier value of the refused save would replace the one Zou saved.
+  test('keeps a later change saved, its earlier save refused', async () => {
+    const answers = holdSaves()
+    const first = updateTask({ estimation: 480 }).catch(() => {})
+    const second = updateTask({ estimation: 720 })
+
+    answers[0].reject(refusal())
+    answers[1].resolve({ ...task, estimation: 720 })
+    await Promise.all([first, second])
+
+    expect(task.estimation).toBe(720)
   })
 })

@@ -71,6 +71,7 @@
               v-if="!isEditsLoading && !initialLoading"
             />
           </div>
+          <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
         </div>
 
         <sorting-info
@@ -121,6 +122,7 @@
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
+      :is-deleted="errors.editDeleted"
       :edit-to-edit="editToEdit"
       @cancel="modals.isNewDisplayed = false"
       @confirm="confirmEditEdit"
@@ -268,6 +270,7 @@ import {
   useEntityPage
 } from '@/composables/entityPage'
 import { getExportDescriptors } from '@/lib/descriptors'
+import { isNotFound } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
 import EditList from '@/components/lists/EditList.vue'
@@ -285,6 +288,7 @@ import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import SortingInfo from '@/components/widgets/SortingInfo.vue'
@@ -369,6 +373,7 @@ const reset = () => {
 const {
   applySearch,
   applySearchFromUrl,
+  cellSaveErrorText,
   clearSearchAndScroll,
   clearSelection,
   closeMetadataModal,
@@ -415,6 +420,7 @@ const {
   renderImport,
   resetImport,
   restoreText,
+  saveCell,
   saveScrollPosition,
   saveSearchQuery,
   selectableDepartments,
@@ -499,6 +505,7 @@ const confirmEditEdit = async form => {
   } catch (err) {
     console.error(err)
     errors.edit = true
+    errors.editDeleted = isNotFound(err)
   } finally {
     loading.edit = false
   }
@@ -514,12 +521,14 @@ const hideEditHistoryModal = () => {
 }
 
 const onFieldChanged = async ({ entry, fieldName, value }) => {
-  await store.dispatch('editEdit', {
-    id: entry.id,
-    description: entry.description,
-    [fieldName]: value
-  })
-  applySearchFromUrl(false)
+  const isSaved = await saveCell(entry, () =>
+    store.dispatch('editEdit', {
+      id: entry.id,
+      description: entry.description,
+      [fieldName]: value
+    })
+  )
+  if (isSaved) applySearchFromUrl(false)
 }
 
 // Watchers

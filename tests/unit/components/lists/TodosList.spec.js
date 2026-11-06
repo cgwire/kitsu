@@ -1,20 +1,30 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
 import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
+import { buildRefusal } from '../../fixtures/refusal'
 import { trackTaskSelection } from '../../fixtures/task-selection'
 
 import resizableColumn from '@/directives/resizable-column'
 
 import TodosList from '@/components/lists/TodosList.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
+
+vi.mock('vue-router', async importOriginal => ({
+  ...(await importOriginal()),
+  useRoute: () => ({ path: '/', query: {} })
+}))
 
 // The tasks module of the selection fixture reaches the store index.
 vi.mock('@/store', () => ({ default: {} }))
 
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
-  useI18n: () => ({ t: key => key })
+  // The parameters of a message show in its text.
+  useI18n: () => ({
+    t: (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key)
+  })
 }))
 
 const task = {
@@ -487,5 +497,81 @@ describe('lists/TodosList', () => {
 
       wrapper.unmount()
     })
+  })
+})
+
+// The cells of a selected row save at once, with no modal to tell a refusal.
+describe('lists/TodosList, cell save', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const mountEditableList = updateTask =>
+    mountLoadedList(undefined, {
+      getters: {
+        isCurrentUserManager: () => true,
+        taskMap: () => new Map([[task.id, task]])
+      },
+      actions: { updateTask }
+    })
+  const message = wrapper => {
+    const errorText = wrapper.findComponent(ErrorText)
+    return errorText.exists() ? errorText.props('text') : null
+  }
+  const typeEstimation = async (wrapper, value) => {
+    await wrapper.find('tbody td.estimation input').setValue(value)
+    await flushPromises()
+  }
+
+  // Its row names the entity of the task, which may still stand.
+  test('tells a task deleted meanwhile as any refusal', async () => {
+    const wrapper = await mountEditableList(() =>
+      Promise.reject(buildRefusal(404))
+    )
+    await wrapper.find('tbody td.duration').trigger('click')
+
+    await typeEstimation(wrapper, '1')
+
+    expect(message(wrapper)).toBe(
+      'main.cell_save_error {"name":"SQ010 / SH0010"}'
+    )
+
+    wrapper.unmount()
+  })
+
+  test('tells a cell save Zou refuses', async () => {
+    const error = buildRefusal()
+    const wrapper = await mountEditableList(() => Promise.reject(error))
+    await wrapper.find('tbody td.duration').trigger('click')
+
+    await typeEstimation(wrapper, '1')
+
+    expect(message(wrapper)).toBe(
+      'main.cell_save_error {"name":"SQ010 / SH0010"}'
+    )
+    expect(console.error).toHaveBeenCalledWith(error)
+
+    wrapper.unmount()
+  })
+
+  test('clears the message once a cell save goes through', async () => {
+    const updateTask = vi
+      .fn()
+      .mockImplementationOnce(() => Promise.reject(buildRefusal()))
+      .mockImplementationOnce(() => Promise.resolve())
+    const wrapper = await mountEditableList(updateTask)
+    await wrapper.find('tbody td.duration').trigger('click')
+    await typeEstimation(wrapper, '1')
+    expect(message(wrapper)).not.toBeNull()
+
+    await typeEstimation(wrapper, '2')
+
+    expect(message(wrapper)).toBeNull()
+
+    wrapper.unmount()
   })
 })

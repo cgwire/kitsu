@@ -22,7 +22,8 @@ import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
 import {
   getFilledColumns,
   removeModelFromList,
-  setCanceled
+  setCanceled,
+  trackEdit
 } from '@/lib/models'
 import { minutesToDays } from '@/lib/time'
 import { buildEditIndex, indexSearch } from '@/lib/indexing'
@@ -407,12 +408,29 @@ const actions = {
 
   editEdit({ commit, state }, data) {
     commit(LOCK_EDIT, data)
-    commit(EDIT_EDIT_END, data)
-    return editsApi.updateEdit(data).finally(() => {
-      setTimeout(() => {
-        commit(UNLOCK_EDIT, data)
-      }, 2000)
-    })
+    const trackedEdit = trackEdit(
+      () => cache.editMap.get(data.id),
+      () => commit(EDIT_EDIT_END, data)
+    )
+    return editsApi
+      .updateEdit(data)
+      .then(
+        result => {
+          trackedEdit.keep()
+          return result
+        },
+        err => {
+          // A save Zou refuses puts back the values the changes replaced.
+          const undoEdit = trackedEdit.undo()
+          if (undoEdit) commit(EDIT_EDIT_END, undoEdit)
+          throw err
+        }
+      )
+      .finally(() => {
+        setTimeout(() => {
+          commit(UNLOCK_EDIT, data)
+        }, 2000)
+      })
   },
 
   deleteEdit({ commit, state }, edit) {

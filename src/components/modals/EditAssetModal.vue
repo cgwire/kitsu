@@ -85,7 +85,11 @@
         {{ $t('main.close') }}
       </button>
       <p class="error has-text-right info-message" v-if="isError">
-        {{ $t('assets.edit_fail') }}
+        {{
+          isDeleted && assetToEdit?.id
+            ? $t('main.edit_deleted_error', { name: assetToEdit.name })
+            : $t('assets.edit_fail')
+        }}
       </p>
       <p class="success has-text-right info-message" v-if="isSuccess">
         {{ assetSuccessText }}
@@ -112,6 +116,7 @@ const store = useStore()
 const props = defineProps({
   active: { type: Boolean, default: false },
   assetToEdit: { type: Object, default: () => ({}) },
+  isDeleted: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   isLoadingStay: { type: Boolean, default: false },

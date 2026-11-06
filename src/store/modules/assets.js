@@ -35,7 +35,8 @@ import {
   getFilledColumns,
   groupEntitiesByParents,
   removeModelFromList,
-  setCanceled
+  setCanceled,
+  trackEdit
 } from '@/lib/models'
 import { computeStats, countEntities } from '@/lib/stats'
 import {
@@ -633,12 +634,38 @@ const actions = {
     }
     const assetTypeMap = assetTypeStore.cache.assetTypeMap
     commit(LOCK_ASSET, data)
-    commit(EDIT_ASSET_END, { newAsset: data, assetTypeMap })
-    return assetsApi.updateAsset(data).finally(() => {
-      setTimeout(() => {
-        commit(UNLOCK_ASSET, data)
-      }, 2000)
-    })
+    // EDIT_ASSET_END lists the assets it does not find, the new ones: the
+    // partial form of an asset deleted in another session must not enter.
+    // Out of the cache, an asset gets no undo edit either.
+    const trackedEdit = trackEdit(
+      () => cache.assetMap.get(data.id),
+      () => {
+        if (cache.assetMap.has(data.id)) {
+          commit(EDIT_ASSET_END, { newAsset: data, assetTypeMap })
+        }
+      }
+    )
+    return assetsApi
+      .updateAsset(data)
+      .then(
+        result => {
+          trackedEdit.keep()
+          return result
+        },
+        err => {
+          // A save Zou refuses puts back the values the changes replaced.
+          const undoEdit = trackedEdit.undo()
+          if (undoEdit) {
+            commit(EDIT_ASSET_END, { newAsset: undoEdit, assetTypeMap })
+          }
+          throw err
+        }
+      )
+      .finally(() => {
+        setTimeout(() => {
+          commit(UNLOCK_ASSET, data)
+        }, 2000)
+      })
   },
 
   deleteAsset({ commit, state }, asset) {

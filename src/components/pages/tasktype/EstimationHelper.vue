@@ -388,6 +388,11 @@ const onKeyDown = event => {
   } else if (event.key === 'ArrowUp') {
     pauseEvent(event)
     selectPrevious(event.shiftKey)
+  } else if (event.key === 'Enter') {
+    // Kept from the cell, which cancels the key and selects its line: the
+    // browser would not commit the typed estimation, and the line drawn
+    // again would show the stored one.
+    event.stopPropagation()
   }
 }
 
