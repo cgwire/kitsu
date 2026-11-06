@@ -89,6 +89,7 @@ import {
   useStatsPage
 } from '@/composables/statsPage'
 import csv from '@/lib/csv'
+import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
 import SequenceStatsList from '@/components/lists/SequenceStatsList.vue'
@@ -121,7 +122,10 @@ const isPaperProduction = computed(() => store.getters.isPaperProduction)
 const isShotsLoading = computed(() => store.getters.isShotsLoading)
 const isShotsLoadingError = computed(() => store.getters.isShotsLoadingError)
 const isTVShow = computed(() => store.getters.isTVShow)
-const searchedSequences = computed(() => store.getters.displayedSequences)
+// displayedSequences carries the sort of the Sequences page, not shown here.
+const searchedSequences = computed(() =>
+  sortByName([...store.getters.displayedSequences])
+)
 const searchSequenceFilters = computed(
   () => store.getters.searchSequenceFilters
 )

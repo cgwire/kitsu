@@ -1,4 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { ref } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -185,6 +186,31 @@ describe('SequenceStats page', () => {
     })
     expect(listProps().entries).toEqual([sq01, sq02])
     expect(listProps().isFiltered).toBe(false)
+  })
+
+  test('lists the sequences by name, whatever the sort of the Sequences page', async () => {
+    const sortedRows = [sq02, sq01]
+    await mountPage({ getters: { displayedSequences: () => sortedRows } })
+    expect(listProps().entries).toEqual([sq01, sq02])
+    expect(sequenceFilter().props('options')).toEqual([
+      { label: 'SQ01', value: 'sq01' },
+      { label: 'SQ02', value: 'sq02' }
+    ])
+    expect(sortedRows).toEqual([sq02, sq01])
+  })
+
+  test('keeps the sequences by name when the list changes', async () => {
+    const rows = ref([{ ...sq01 }, { id: 'sq03', name: 'SQ03' }])
+    const rowIds = () => listProps().entries.map(({ id }) => id)
+    await mountPage({ getters: { displayedSequences: () => rows.value } })
+
+    rows.value = [...rows.value, { id: 'sq00', name: 'SQ00' }]
+    await flushPromises()
+    expect(rowIds()).toEqual(['sq00', 'sq01', 'sq03'])
+
+    rows.value[0].name = 'SQ04'
+    await flushPromises()
+    expect(rowIds()).toEqual(['sq00', 'sq03', 'sq01'])
   })
 
   test('restores the hidden sequences from the URL', async () => {
