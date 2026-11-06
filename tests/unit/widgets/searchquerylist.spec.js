@@ -364,6 +364,31 @@ describe('SearchQueryList, additions', () => {
   })
 })
 
+// The list cuts a long name.
+describe('SearchQueryList, tooltips', () => {
+  const tag = wrapper => wrapper.find('.tag:not(.folder):not(.group)')
+
+  test('gives the whole name of a search', async () => {
+    const wrapper = await mountList()
+
+    expect(tag(wrapper).attributes('title')).toBe('wip')
+  })
+
+  test('adds who shared a search', async () => {
+    const wrapper = await mountList({ queries: [sharedSearch] })
+
+    expect(tag(wrapper).attributes('title')).toBe('zz\nmain.shared_by')
+  })
+
+  test('gives the whole name of a group', async () => {
+    const wrapper = await mountList()
+
+    expect(wrapper.find('.tag.group .filter-label').attributes('title')).toBe(
+      'Mine'
+    )
+  })
+})
+
 describe('SearchQueryList, edits', () => {
   afterEach(() => {
     vi.restoreAllMocks()

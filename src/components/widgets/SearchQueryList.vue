@@ -56,7 +56,9 @@
             :title="getDepartment(group)?.name"
             v-if="group.is_shared && group.department_id"
           ></span>
-          <span>{{ group.name }}</span>
+          <span class="filter-label" :title="group.name">
+            {{ group.name }}
+          </span>
           <chevron-down-icon
             class="chevron ml05"
             :size="12"
@@ -108,7 +110,7 @@
                 class="flexrow filter-name"
                 :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
               >
-                {{ searchQuery.name }}
+                <span class="filter-label">{{ searchQuery.name }}</span>
               </router-link>
               <button
                 class="edit"
@@ -154,7 +156,7 @@
           :title="getDepartment(searchQuery)?.name"
           v-if="searchQuery.is_shared && searchQuery.department_id"
         ></span>
-        {{ searchQuery.name }}
+        <span class="filter-label">{{ searchQuery.name }}</span>
       </router-link>
       <button
         class="edit"
@@ -510,10 +512,11 @@ const toggleFilterGroup = group => {
 
 const getSearchQueryTitle = searchQuery => {
   if (!searchQuery.is_shared) {
-    return
+    return searchQuery.name
   }
   const person = personMap.value.get(searchQuery.person_id)
-  return t('main.shared_by', { name: person?.full_name })
+  const sharedBy = t('main.shared_by', { name: person?.full_name })
+  return `${searchQuery.name}\n${sharedBy}`
 }
 
 const getDepartment = group => {
@@ -664,6 +667,15 @@ defineExpose({ addSearch })
 
 .filter-name {
   color: var(--text);
+}
+
+.filter-label {
+  display: inline-block;
+  max-width: 30em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
 }
 
 .search-queries .tag.active {
