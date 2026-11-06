@@ -386,11 +386,13 @@ const queryRoute = searchQuery => {
 
 const editGroup = (group = {}) => {
   groupToEdit.value = group
+  errors.group = false
   modals.group = true
 }
 
 const editSearch = searchQuery => {
   searchQueryToEdit.value = searchQuery
+  errors.edit = false
   modals.edit = true
 }
 

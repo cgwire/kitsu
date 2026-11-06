@@ -14,6 +14,7 @@
       />
 
       <text-field
+        ref="queryField"
         :label="$t('main.search_query')"
         v-model.trim="form.search_query"
         @enter="runConfirmation"
@@ -100,6 +101,7 @@ const form = ref({
   is_shared: 'false'
 })
 const nameField = ref(null)
+const queryField = ref(null)
 
 // Computed
 
@@ -116,16 +118,25 @@ const allowedGroups = computed(() =>
 
 // Functions
 
+// The Enter key of a field does not go through the footer, which stops a
+// confirmation during a save.
 const runConfirmation = event => {
+  if (props.isLoading) return
   if (!form.value.name.length) {
     nameField.value?.focus()
     return
   }
+  if (!form.value.search_query.length) {
+    queryField.value?.focus()
+    return
+  }
   if (!event || event.keyCode === 13 || !event.keyCode) {
+    const isShared = form.value.is_shared === 'true'
     emit('confirm', {
       id: props.searchQueryToEdit.id,
       ...form.value,
-      is_shared: form.value.is_shared === 'true'
+      is_shared: isShared,
+      department_id: isShared ? form.value.department_id : null
     })
   }
 }

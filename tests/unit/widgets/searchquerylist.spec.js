@@ -174,6 +174,10 @@ describe.each([
 })
 
 describe('SearchQueryList, edits', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   const editSearch = async wrapper => {
     await wrapper
       .find('.tag:not(.folder):not(.group) button.edit')
@@ -245,5 +249,45 @@ describe('SearchQueryList, edits', () => {
       name: 'renamed',
       project_id: 'production-2'
     })
+  })
+
+  test('opens a search without the error of a failed save', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const wrapper = await mountList({
+      actions: { updateSearchFilter: () => Promise.reject(new Error('down')) }
+    })
+    const modal = await editSearch(wrapper)
+    modal.vm.$emit('confirm', { id: search.id })
+    await flushPromises()
+    expect(modal.props('isError')).toBe(true)
+    await modal.vm.$emit('cancel')
+
+    const reopened = await editSearch(wrapper)
+
+    expect(reopened.props('isError')).toBe(false)
+    expect(console.error).toHaveBeenCalledWith(new Error('down'))
+  })
+
+  test('opens a group without the error of a failed save', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const wrapper = await mountList({
+      actions: {
+        updateSearchFilterGroup: () => Promise.reject(new Error('down'))
+      }
+    })
+    const editGroup = async () => {
+      await wrapper.find('.tag.group button.edit').trigger('click')
+      return wrapper.findComponent(EditSearchFilterGroupModal)
+    }
+    const modal = await editGroup()
+    modal.vm.$emit('confirm', { id: group.id })
+    await flushPromises()
+    expect(modal.props('isError')).toBe(true)
+    await modal.vm.$emit('cancel')
+
+    const reopened = await editGroup()
+
+    expect(reopened.props('isError')).toBe(false)
+    expect(console.error).toHaveBeenCalledWith(new Error('down'))
   })
 })

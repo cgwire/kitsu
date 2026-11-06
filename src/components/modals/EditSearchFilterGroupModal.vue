@@ -90,15 +90,20 @@ const modalTitle = computed(() =>
 
 // Functions
 
+// The Enter key of the field does not go through the footer, which stops a
+// confirmation during a save.
 const runConfirmation = event => {
+  if (props.isLoading) return
   if (!form.value.name.length) {
     nameField.value?.focus()
     return
   }
   if (!event || event.keyCode === 13 || !event.keyCode) {
+    const isShared = form.value.is_shared === 'true'
     emit('confirm', {
       ...form.value,
-      is_shared: form.value.is_shared === 'true'
+      is_shared: isShared,
+      department_id: isShared ? form.value.department_id : null
     })
   }
 }
