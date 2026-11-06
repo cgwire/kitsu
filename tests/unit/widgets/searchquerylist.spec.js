@@ -5,6 +5,8 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
 
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import EditSearchFilterGroupModal from '@/components/modals/EditSearchFilterGroupModal.vue'
+import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 // Labels render as their locale keys.
@@ -25,7 +27,11 @@ const search = {
 }
 const group = { id: 'group-1', name: 'Mine', color: '#ff3860', is_shared: false }
 
-const mountList = async ({ type = 'shot', actions = {} } = {}) => {
+const mountList = async ({
+  type = 'shot',
+  actions = {},
+  productionId
+} = {}) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: '/', component: { template: '<div />' } }]
@@ -44,7 +50,13 @@ const mountList = async ({ type = 'shot', actions = {} } = {}) => {
     actions
   })
   return shallowMount(SearchQueryList, {
-    props: { type, queries: [search], groups: [group], isGroupEnabled: true },
+    props: {
+      type,
+      queries: [search],
+      groups: [group],
+      isGroupEnabled: true,
+      productionId
+    },
     global: {
       plugins: [store, router, i18n],
       stubs: { RouterLink: RouterLinkStub }
@@ -158,5 +170,80 @@ describe.each([
     await flushPromises()
 
     expect(remove).toHaveBeenCalledWith(expect.anything(), search)
+  })
+})
+
+describe('SearchQueryList, edits', () => {
+  const editSearch = async wrapper => {
+    await wrapper
+      .find('.tag:not(.folder):not(.group) button.edit')
+      .trigger('click')
+    return wrapper.findComponent(EditSearchFilterModal)
+  }
+
+  test('saves a search in the production of its list', async () => {
+    const updateSearchFilter = vi.fn()
+    const wrapper = await mountList({
+      actions: { updateSearchFilter },
+      productionId: 'production-2'
+    })
+
+    const modal = await editSearch(wrapper)
+    modal.vm.$emit('confirm', { id: search.id, name: 'renamed' })
+    await flushPromises()
+
+    expect(updateSearchFilter.mock.calls[0][1]).toEqual({
+      id: search.id,
+      name: 'renamed',
+      project_id: 'production-2'
+    })
+  })
+
+  // My Tasks, People, and Person read the searches saved out of any
+  // production: one sent with the current production leaves their list.
+  test('leaves a search out of any production where it is', async () => {
+    const updateSearchFilter = vi.fn()
+    const wrapper = await mountList({
+      type: 'todo',
+      actions: { updateSearchFilter }
+    })
+
+    const modal = await editSearch(wrapper)
+    modal.vm.$emit('confirm', { id: search.id, name: 'renamed' })
+    await flushPromises()
+
+    expect(updateSearchFilter.mock.calls[0][1]).toEqual({
+      id: search.id,
+      name: 'renamed',
+      project_id: null
+    })
+  })
+
+  test('tells the modal the production of the list', async () => {
+    const wrapper = await mountList({ productionId: 'production-2' })
+
+    const modal = await editSearch(wrapper)
+
+    expect(modal.props('productionId')).toBe('production-2')
+  })
+
+  test('saves a group in the production of its list', async () => {
+    const updateSearchFilterGroup = vi.fn()
+    const wrapper = await mountList({
+      actions: { updateSearchFilterGroup },
+      productionId: 'production-2'
+    })
+
+    await wrapper.find('.tag.group button.edit').trigger('click')
+    wrapper
+      .findComponent(EditSearchFilterGroupModal)
+      .vm.$emit('confirm', { id: group.id, name: 'renamed' })
+    await flushPromises()
+
+    expect(updateSearchFilterGroup.mock.calls[0][1]).toEqual({
+      id: group.id,
+      name: 'renamed',
+      project_id: 'production-2'
+    })
   })
 })

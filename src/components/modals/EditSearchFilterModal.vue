@@ -23,7 +23,7 @@
         :label="$t('main.is_shared')"
         v-model="form.is_shared"
         @click="form.search_filter_group_id = null"
-        v-if="isCurrentUserManager && currentProduction"
+        v-if="isCurrentUserManager && productionId"
       />
 
       <combobox-department
@@ -84,6 +84,7 @@ const props = defineProps({
   isError: { type: Boolean, default: false },
   isGroupEnabled: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  productionId: { type: String, default: null },
   searchQueryToEdit: { type: Object, default: () => ({}) }
 })
 
@@ -102,7 +103,6 @@ const nameField = ref(null)
 
 // Computed
 
-const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const personMap = computed(() => store.getters.personMap)
 
