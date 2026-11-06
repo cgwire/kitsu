@@ -191,6 +191,7 @@
       :is-error="errors.edit"
       :is-group-enabled="isGroupEnabled"
       :production-id="productionId"
+      :queries="sortedFilters"
       :search-query-to-edit="searchQueryToEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditSearch"
@@ -201,6 +202,7 @@
       active
       :is-loading="loading.group"
       :is-error="errors.group"
+      :groups="userFilterGroups"
       :group-to-edit="groupToEdit"
       @cancel="modals.group = false"
       @confirm="confirmEditFilterGroup"

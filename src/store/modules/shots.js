@@ -715,14 +715,7 @@ const actions = {
       })
   },
 
-  saveShotSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
-    const groupExist = state.shotSearchFilterGroups.some(
-      query => query.name === filterGroup.name
-    )
-    if (groupExist) {
-      return
-    }
-
+  saveShotSearchFilterGroup({ commit, rootGetters }, filterGroup) {
     const production = rootGetters.currentProduction
     return peopleApi
       .createFilterGroup(

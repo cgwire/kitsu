@@ -288,14 +288,7 @@ const actions = {
       })
   },
 
-  saveBreakdownSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
-    const groupExist = state.breakdownSearchFilterGroups.some(
-      query => query.name === filterGroup.name
-    )
-    if (groupExist) {
-      return
-    }
-
+  saveBreakdownSearchFilterGroup({ commit, rootGetters }, filterGroup) {
     const production = rootGetters.currentProduction
     return peopleApi
       .createFilterGroup(

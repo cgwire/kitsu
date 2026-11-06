@@ -2769,7 +2769,7 @@ describe('Assets store, list workflow', () => {
       expect(store.state.assets.assetSearchQueries).toEqual([])
     })
 
-    test('saves a filter group once, then removes it', async () => {
+    test('saves a filter group, then removes it', async () => {
       const store = buildStore()
       load(store, [buildAsset('a1', 'Rock')])
       const group = { id: 'g1', name: 'Mine', color: '#f00' }
@@ -2782,9 +2782,7 @@ describe('Assets store, list workflow', () => {
         is_shared: false,
         department_id: null
       })
-      await store.dispatch('saveAssetSearchFilterGroup', { name: 'Mine' })
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith(
         '/api/data/user/filter-groups',
         {

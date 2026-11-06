@@ -607,6 +607,7 @@
       "filter_group_edit": "ویرایش یک گروه فیلتر",
       "filter_group_empty": "بدون فیلتر",
       "filter_group_error": "هنگام ذخیره این گروه فیلتر خطایی روی داد.",
+      "filter_name_taken": "این نام قبلاً در این لیست استفاده شده است.",
       "load_more": "بارگذاری بیشتر",
       "on": "در",
       "optional": "اختیاری",

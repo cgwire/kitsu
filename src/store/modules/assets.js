@@ -743,14 +743,7 @@ const actions = {
       })
   },
 
-  saveAssetSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
-    const groupExist = state.assetSearchFilterGroups.some(
-      query => query.name === filterGroup.name
-    )
-    if (groupExist) {
-      return
-    }
-
+  saveAssetSearchFilterGroup({ commit, rootGetters }, filterGroup) {
     const production = rootGetters.currentProduction
     return peopleApi
       .createFilterGroup(

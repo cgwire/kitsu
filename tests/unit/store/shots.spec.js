@@ -1835,7 +1835,7 @@ describe('Shots store, through a store', () => {
       expect(store.getters.shotSearchQueries).toEqual([])
     })
 
-    test('saves a filter group once, then removes it', async () => {
+    test('saves a filter group, then removes it', async () => {
       const store = buildStore()
       load(store, [])
       const group = {
@@ -1848,9 +1848,7 @@ describe('Shots store, through a store', () => {
       client.pdel.mockResolvedValueOnce()
 
       await store.dispatch('saveShotSearchFilterGroup', group)
-      await store.dispatch('saveShotSearchFilterGroup', group)
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith(
         '/api/data/user/filter-groups',
         {

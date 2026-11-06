@@ -607,6 +607,7 @@
       "filter_group_edit": "Een filtergroep bewerken",
       "filter_group_empty": "Geen filter",
       "filter_group_error": "Er is een fout opgetreden tijdens het opslaan van deze filtergroep.",
+      "filter_name_taken": "Deze naam wordt al gebruikt in deze lijst.",
       "load_more": "Meer laden",
       "on": "Op",
       "optional": "optioneel",

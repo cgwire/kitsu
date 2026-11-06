@@ -607,6 +607,7 @@
       "filter_group_edit": "フィルターグループを編集",
       "filter_group_empty": "フィルターなし",
       "filter_group_error": "フィルターグループの保存中にエラーが発生しました。",
+      "filter_name_taken": "この名前はこのリストですでに使用されています。",
       "load_more": "さらに読み込み",
       "on": "対象:",
       "optional": "任意",

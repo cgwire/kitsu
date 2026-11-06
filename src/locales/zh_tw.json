@@ -607,6 +607,7 @@
       "filter_group_edit": "編輯篩選群組",
       "filter_group_empty": "無篩選",
       "filter_group_error": "儲存此篩選群組時發生錯誤。",
+      "filter_name_taken": "此名稱已在此清單中使用。",
       "load_more": "載入更多",
       "on": "於",
       "optional": "選填",

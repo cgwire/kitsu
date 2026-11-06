@@ -607,6 +607,7 @@
       "filter_group_edit": "Editar um grupo de filtros",
       "filter_group_empty": "Sem filtro",
       "filter_group_error": "Ocorreu um erro ao salvar esse grupo de filtros.",
+      "filter_name_taken": "Este nome já é usado nesta lista.",
       "load_more": "Carregar mais",
       "on": "Em",
       "optional": "opcional",

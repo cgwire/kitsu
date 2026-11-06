@@ -39,7 +39,14 @@ const mountModal = (props = {}) => {
     props: { active: true, ...props },
     global: {
       plugins: [store, i18n],
-      stubs: { BaseModal: { template: '<div><slot /></div>' } }
+      stubs: {
+        BaseModal: { template: '<div><slot /></div>' },
+        TextField: {
+          methods: { focus: () => {} },
+          props: ['errored', 'errorText', 'maxlength'],
+          template: '<input />'
+        }
+      }
     }
   })
 }
@@ -71,6 +78,51 @@ describe('EditSearchFilterGroupModal', () => {
     wrapper.findComponent(TextField).vm.$emit('enter', 'Mine')
 
     expect(wrapper.emitted('confirm')).toBeUndefined()
+  })
+
+  describe('on a name the list holds', () => {
+    const groups = [group, { id: 'group-2', name: 'Taken' }]
+    const nameField = wrapper => wrapper.findComponent(TextField)
+    const footer = wrapper => wrapper.findComponent(ModalFooter)
+
+    test('refuses it on a new group', async () => {
+      const wrapper = mountModal({ groups })
+
+      await nameField(wrapper).vm.$emit('update:modelValue', 'Taken')
+
+      expect(nameField(wrapper).props('errored')).toBe(true)
+      expect(nameField(wrapper).props('errorText')).toBe(
+        'main.filter_name_taken'
+      )
+      expect(footer(wrapper).props('isDisabled')).toBe(true)
+
+      nameField(wrapper).vm.$emit('enter', 'Taken')
+      expect(wrapper.emitted('confirm')).toBeUndefined()
+    })
+
+    test('refuses it on a rename', async () => {
+      const wrapper = mountModal({ groups, groupToEdit: toEdit(group) })
+
+      await nameField(wrapper).vm.$emit('update:modelValue', 'Taken')
+
+      expect(nameField(wrapper).props('errored')).toBe(true)
+    })
+
+    test('leaves a name unchanged, so a duplicate stays editable', () => {
+      const wrapper = mountModal({
+        groups: [...groups, { id: 'group-3', name: 'Mine' }],
+        groupToEdit: toEdit(group)
+      })
+
+      expect(nameField(wrapper).props('errored')).toBe(false)
+      expect(footer(wrapper).props('isDisabled')).toBe(false)
+    })
+  })
+
+  test('limits its name to what Zou takes', () => {
+    const wrapper = mountModal()
+
+    expect(wrapper.findComponent(TextField).props('maxlength')).toBe(200)
   })
 
   test('drops the department of a new group no longer shared', async () => {

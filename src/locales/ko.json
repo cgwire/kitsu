@@ -607,6 +607,7 @@
       "filter_group_edit": "필터 그룹 편집",
       "filter_group_empty": "필터 없음",
       "filter_group_error": "이 필터 그룹을 저장하는 동안 오류가 발생했습니다.",
+      "filter_name_taken": "이 이름은 이 목록에서 이미 사용 중입니다.",
       "load_more": "더 보기",
       "on": "켜짐",
       "optional": "선택 사항",

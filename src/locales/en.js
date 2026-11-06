@@ -928,6 +928,7 @@ export default {
     filter_group_edit: 'Edit a filter group',
     filter_group_empty: 'No filter',
     filter_group_error: 'An error occurred while saving this filter group.',
+    filter_name_taken: 'This name is already used in this list.',
     for: 'For',
     fps: 'FPS',
     frames: 'Frames',

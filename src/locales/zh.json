@@ -607,6 +607,7 @@
       "filter_group_edit": "编辑过滤器组",
       "filter_group_empty": "无过滤器",
       "filter_group_error": "保存此过滤器组时发生错误。",
+      "filter_name_taken": "此名称已在此列表中使用。",
       "load_more": "加载更多",
       "on": "于",
       "optional": "可选的",

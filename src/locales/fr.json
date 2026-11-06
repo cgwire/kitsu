@@ -610,6 +610,7 @@
       "filter_group_edit": "Modifier un groupe de filtres",
       "filter_group_empty": "Pas de filtre",
       "filter_group_error": "Une erreur s'est produite lors de l'enregistrement de ce groupe de filtres.",
+      "filter_name_taken": "Ce nom est déjà utilisé dans cette liste.",
       "load_more": "Charger plus d'éléments",
       "on": "Sur",
       "optional": "facultatif",

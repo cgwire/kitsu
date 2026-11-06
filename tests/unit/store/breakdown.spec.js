@@ -820,7 +820,7 @@ describe('Breakdown store, through a store', () => {
       expect(names(store.getters.breakdownSearchQueries)).toEqual(['sets'])
     })
 
-    test('saves a filter group once', async () => {
+    test('saves a filter group', async () => {
       const store = buildStore()
       const group = {
         name: 'Layout',
@@ -831,9 +831,7 @@ describe('Breakdown store, through a store', () => {
       client.ppost.mockResolvedValueOnce({ id: 'g1', ...group })
 
       await store.dispatch('saveBreakdownSearchFilterGroup', group)
-      await store.dispatch('saveBreakdownSearchFilterGroup', group)
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith(
         '/api/data/user/filter-groups',
         {

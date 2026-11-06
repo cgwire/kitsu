@@ -30,13 +30,18 @@ const search = {
   search_filter_group_id: null,
   is_shared: false
 }
+const sharedSearch = { ...search, id: 'search-2', name: 'zz', is_shared: true }
 const group = { id: 'group-1', name: 'Mine', color: '#ff3860', is_shared: false }
+const sharedGroup = { ...group, id: 'group-2', name: 'Team', is_shared: true }
 
 const mountList = async ({
   type = 'shot',
   actions = {},
   entityType,
+  groups = [group],
+  isClient = false,
   productionId,
+  queries = [search],
   throughRef = false
 } = {}) => {
   const router = createRouter({
@@ -50,7 +55,7 @@ const mountList = async ({
       currentUserRoleForProduction: () => () => 'manager',
       departmentMap: () => new Map(),
       isCurrentUserAdmin: () => false,
-      isCurrentUserClient: () => false,
+      isCurrentUserClient: () => isClient,
       isCurrentUserManager: () => true,
       personMap: () => new Map()
     },
@@ -58,8 +63,8 @@ const mountList = async ({
   })
   const props = {
     type,
-    queries: [search],
-    groups: [group],
+    queries,
+    groups,
     isGroupEnabled: true,
     entityType,
     productionId
@@ -305,6 +310,42 @@ describe('SearchQueryList, additions', () => {
 
     expect(reopened.props('isError')).toBe(false)
     expect(console.error).toHaveBeenCalledWith(new Error('down'))
+  })
+
+  test('tells the modal the searches of the list', async () => {
+    const wrapper = await mountList({ queries: [search, sharedSearch] })
+
+    const modal = await addSearch(wrapper)
+
+    expect(modal.props('queries').map(({ id }) => id)).toEqual([
+      'search-1',
+      'search-2'
+    ])
+  })
+
+  // A client does not see the shared ones: their names stay free.
+  test('tells the modal only the searches a client sees', async () => {
+    const wrapper = await mountList({
+      isClient: true,
+      queries: [search, sharedSearch]
+    })
+
+    const modal = await addSearch(wrapper)
+
+    expect(modal.props('queries').map(({ id }) => id)).toEqual(['search-1'])
+  })
+
+  test('tells the group modal the groups of the list', async () => {
+    const wrapper = await mountList({ groups: [group, sharedGroup] })
+
+    await wrapper.find('.tag.folder').trigger('click')
+
+    expect(
+      wrapper
+        .findComponent(EditSearchFilterGroupModal)
+        .props('groups')
+        .map(({ id }) => id)
+    ).toEqual(['group-1', 'group-2'])
   })
 
   test('saves a search with the entity type of its list', async () => {

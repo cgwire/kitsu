@@ -3,6 +3,8 @@
     <form @submit.prevent>
       <text-field
         ref="nameField"
+        :errored="isNameTaken"
+        :error-text="$t('main.filter_name_taken')"
         :label="$t('assets.fields.name')"
         :maxlength="NAME_MAX_LENGTH"
         v-model.trim="form.name"
@@ -57,7 +59,7 @@
           ? $t('main.search_query_edit_error')
           : $t('main.search_query_add_error')
       "
-      :is-disabled="isQueryTooLong"
+      :is-disabled="isInvalid"
       :is-error="isError"
       :is-loading="isLoading"
       @confirm="runConfirmation"
@@ -101,6 +103,7 @@ const props = defineProps({
   isGroupEnabled: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   productionId: { type: String, default: null },
+  queries: { type: Array, default: () => [] },
   searchQueryToEdit: { type: Object, default: () => ({}) }
 })
 
@@ -133,6 +136,20 @@ const isQueryTooLong = computed(
   () => Array.from(form.value.search_query).length > QUERY_MAX_LENGTH
 )
 
+// As in Zou, a filter keeping its name passes, duplicate or not.
+const isNameTaken = computed(() => {
+  const { id, name } = props.searchQueryToEdit
+  if (id && form.value.name === name) return false
+  return props.queries.some(
+    query =>
+      query.name === form.value.name &&
+      (query.search_filter_group_id || null) ===
+        (form.value.search_filter_group_id || null)
+  )
+})
+
+const isInvalid = computed(() => isNameTaken.value || isQueryTooLong.value)
+
 const allowedGroups = computed(() =>
   props.groupOptions.filter(
     group =>
@@ -146,7 +163,7 @@ const allowedGroups = computed(() =>
 // The Enter key of a field does not go through the footer, which stops a
 // confirmation during a save.
 const runConfirmation = event => {
-  if (props.isLoading || isQueryTooLong.value) return
+  if (props.isLoading || isInvalid.value) return
   if (!form.value.name.length) {
     nameField.value?.focus()
     return

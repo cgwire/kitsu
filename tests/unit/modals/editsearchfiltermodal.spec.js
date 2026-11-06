@@ -5,6 +5,7 @@ import { createStore } from 'vuex'
 import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import BooleanField from '@/components/widgets/BooleanField.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
@@ -243,6 +244,82 @@ describe('EditSearchFilterModal', () => {
         .vm.$emit('update:modelValue', 'x'.repeat(500))
 
       expect(wrapper.findComponent(ModalFooter).props('isDisabled')).toBe(false)
+    })
+  })
+
+  describe('on a name the list holds', () => {
+    const queries = [
+      search,
+      { id: 'search-2', name: 'taken', search_filter_group_id: null },
+      { id: 'search-3', name: 'grouped', search_filter_group_id: 'group-1' }
+    ]
+    const newSearch = name => ({ name, search_query: 'anim=wip' })
+    const nameField = wrapper => wrapper.findComponent(TextField)
+    const footer = wrapper => wrapper.findComponent(ModalFooter)
+
+    test('refuses it on a new search', () => {
+      const wrapper = mountModal({
+        queries,
+        searchQueryToEdit: newSearch('taken')
+      })
+
+      expect(nameField(wrapper).props('errored')).toBe(true)
+      expect(nameField(wrapper).props('errorText')).toBe(
+        'main.filter_name_taken'
+      )
+      expect(footer(wrapper).props('isDisabled')).toBe(true)
+
+      nameField(wrapper).vm.$emit('enter', 'taken')
+      expect(wrapper.emitted('confirm')).toBeUndefined()
+    })
+
+    test('refuses it on a rename', async () => {
+      const wrapper = mountModal({
+        queries,
+        searchQueryToEdit: toEdit(search)
+      })
+
+      await nameField(wrapper).vm.$emit('update:modelValue', 'taken')
+
+      expect(nameField(wrapper).props('errored')).toBe(true)
+      expect(footer(wrapper).props('isDisabled')).toBe(true)
+    })
+
+    test('leaves a name unchanged, so a duplicate stays editable', () => {
+      const wrapper = mountModal({
+        queries: [...queries, { ...search, id: 'search-4' }],
+        searchQueryToEdit: toEdit(search)
+      })
+
+      expect(nameField(wrapper).props('errored')).toBe(false)
+      expect(footer(wrapper).props('isDisabled')).toBe(false)
+    })
+
+    test('takes a name of another filter group', () => {
+      const wrapper = mountModal({
+        queries,
+        searchQueryToEdit: newSearch('grouped')
+      })
+
+      expect(nameField(wrapper).props('errored')).toBe(false)
+    })
+
+    test('checks the name in the filter group picked', async () => {
+      const wrapper = mountModal({
+        groupOptions: [
+          { label: '', value: null },
+          { label: 'Mine', value: 'group-1', is_shared: false }
+        ],
+        isGroupEnabled: true,
+        queries,
+        searchQueryToEdit: newSearch('grouped')
+      })
+
+      await wrapper
+        .findComponent(Combobox)
+        .vm.$emit('update:modelValue', 'group-1')
+
+      expect(nameField(wrapper).props('errored')).toBe(true)
     })
   })
 

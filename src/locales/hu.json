@@ -612,6 +612,7 @@
       "filter_group_edit": "Szűrőcsoport szerkesztése",
       "filter_group_empty": "Nincs szűrő",
       "filter_group_error": "Hiba történt a szűrőcsoport mentésekor.",
+      "filter_name_taken": "Ez a név már szerepel ebben a listában.",
       "frame_in": "Kezdő kocka",
       "frame_out": "Végső kocka",
       "hide_support_chat": "Támogatói chat elrejtése",

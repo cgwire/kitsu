@@ -891,6 +891,7 @@
       "filter_group_edit": "Edytuj grupę filtrów",
       "filter_group_empty": "Brak filtra",
       "filter_group_error": "Wystąpił błąd podczas zapisywania tej grupy filtrów.",
+      "filter_name_taken": "Ta nazwa jest już używana na tej liście.",
       "for": "Dla",
       "fps": "FPS",
       "frames": "Klatki",

@@ -607,6 +607,7 @@
       "filter_group_edit": "Rediger en filtergruppe",
       "filter_group_empty": "Intet filter",
       "filter_group_error": "Der opstod en fejl under gemning af denne filtergruppe.",
+      "filter_name_taken": "Dette navn er allerede brugt i denne liste.",
       "load_more": "Indlæs mere",
       "on": "På",
       "optional": "Valgfrit",
