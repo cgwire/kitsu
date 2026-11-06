@@ -352,6 +352,8 @@ const actions = {
       } else if (payload.type === 'sequences') {
         entityIds = sequenceStore.cache.result.map(sequence => sequence.id)
       }
+      // Zou takes an empty list for every entity of the production.
+      if (entityIds.length === 0) return Promise.resolve([])
     }
     const data = {
       task_type_id: payload.task_type_id,

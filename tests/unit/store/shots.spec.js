@@ -26,6 +26,7 @@ import episodeStore from '@/store/modules/episodes'
 import sequenceStore from '@/store/modules/sequences'
 import tasksStore from '@/store/modules/tasks'
 import taskStatusStore from '@/store/modules/taskstatus'
+import taskTypesStore from '@/store/modules/tasktypes'
 import { buildShotIndex } from '@/lib/indexing'
 import { PAGE_SIZE } from '@/lib/pagination'
 import {
@@ -783,6 +784,380 @@ describe('Shots store, NEW_SHOT_END', () => {
 
     expect(shotsStore.cache.shots.map(({ id }) => id)).toEqual(['shot-1'])
     expect(state.displayedShots.map(({ id }) => id)).toEqual(['shot-1'])
+  })
+
+  // A created shot has no time yet: the footer hides totals that are no
+  // numbers.
+  test('keeps the time totals of the list', () => {
+    sequenceStore.cache.sequenceMap.set('sq-1', { id: 'sq-1', name: 'SQ01' })
+    const listedShot = {
+      id: 'shot-1',
+      name: 'SH01',
+      sequence_name: 'SQ01',
+      nb_frames: 24,
+      timeSpent: 240,
+      estimation: 480
+    }
+    shotsStore.cache.shots = [listedShot]
+    shotsStore.cache.shotMap = new Map([[listedShot.id, listedShot]])
+    shotsStore.cache.shotIndex = {}
+    const state = { displayedShots: [listedShot], shotSearchText: '' }
+
+    shotsStore.mutations.NEW_SHOT_END(state, {
+      shot: { id: 'shot-2', name: 'SH02', parent_id: 'sq-1', nb_frames: 0 },
+      episodeMap: new Map()
+    })
+
+    expect(state.displayedShotsTimeSpent).toBe(240)
+    expect(state.displayedShotsEstimation).toBe(480)
+  })
+})
+
+// A shot created by someone else reaches the list through the socket handler.
+describe('Shots store, ADD_SHOT', () => {
+  const buildShot = (id, name, fields = {}) => ({
+    id,
+    name,
+    sequence_name: 'SQ01',
+    nb_frames: 24,
+    data: {},
+    tasks: [],
+    timeSpent: 0,
+    estimation: 0,
+    ...fields
+  })
+  const names = shots => shots.map(({ name }) => name)
+
+  // A list load leaves the result and the list as the same array.
+  const loadList = (shots, shotSearchText = '', result = shots) => {
+    shotsStore.cache.shots = shots
+    shotsStore.cache.result = result
+    shotsStore.cache.shotMap = new Map(shots.map(shot => [shot.id, shot]))
+    shotsStore.cache.shotIndex = {}
+    return {
+      shotSearchText,
+      displayedShots: [...result],
+      displayedShotsCount: result.length,
+      displayedShotsLength: result.length,
+      displayedShotsTimeSpent: 0,
+      displayedShotsEstimation: 0,
+      shotSelectionGrid: new Set()
+    }
+  }
+
+  const addShot = (state, shot, fields = {}) =>
+    shotsStore.mutations.ADD_SHOT(state, {
+      taskStatusMap: new Map(),
+      taskTypeMap: new Map(),
+      taskMap: new Map(),
+      persons: [],
+      personMap: new Map(),
+      production: { id: 'p1', name: 'Prod', descriptors: [] },
+      shot,
+      ...fields
+    })
+
+  test('shows the shot with no search', () => {
+    const state = loadList([
+      buildShot('s1', 'SH010'),
+      buildShot('s2', 'SH020')
+    ])
+
+    addShot(state, buildShot('s3', 'SH030'))
+
+    const all = ['SH010', 'SH020', 'SH030']
+    expect(names(state.displayedShots)).toEqual(all)
+    expect(names(shotsStore.cache.shots)).toEqual(all)
+    expect(names(shotsStore.cache.result)).toEqual(all)
+    expect(state.displayedShotsCount).toBe(3)
+    expect(state.displayedShotsLength).toBe(3)
+  })
+
+  test('shows the shot once a deletion parted the result from the list', () => {
+    const state = loadList([
+      buildShot('s1', 'SH010'),
+      buildShot('s2', 'SH020'),
+      buildShot('s3', 'SH030')
+    ])
+    shotsStore.mutations.REMOVE_SHOT(state, { id: 's1' })
+
+    addShot(state, buildShot('s4', 'SH040'))
+
+    const left = ['SH020', 'SH030', 'SH040']
+    expect(names(state.displayedShots)).toEqual(left)
+    expect(names(shotsStore.cache.shots)).toEqual(left)
+    expect(names(shotsStore.cache.result)).toEqual(left)
+    expect(state.displayedShotsCount).toBe(3)
+  })
+
+  // The cells of a list are keyed by their position.
+  test('keeps the selected cells on their rows', () => {
+    const state = loadList([
+      buildShot('s1', 'SH010'),
+      buildShot('s2', 'SH030')
+    ])
+    state.shotSelectionGrid = new Set(['0-1', '1-1'])
+
+    addShot(state, buildShot('s3', 'SH020'))
+
+    expect([...state.shotSelectionGrid]).toEqual(['0-1', '2-1'])
+  })
+
+  describe('on a full page', () => {
+    const loadPage = () => {
+      const shots = Array.from({ length: PAGE_SIZE + 5 }, (_, index) =>
+        buildShot(`s${index}`, `SH${String(index + 1).padStart(3, '0')}`)
+      )
+      return {
+        ...loadList(shots),
+        displayedShots: shots.slice(0, PAGE_SIZE),
+        shotFilledColumns: 'columns of the page',
+        shotSelectionGrid: new Set(['1-0'])
+      }
+    }
+
+    test('leaves a shot sorted past the page to the next page', () => {
+      const state = loadPage()
+
+      addShot(state, buildShot('s-new', 'SH999'))
+
+      expect(state.displayedShots).toHaveLength(PAGE_SIZE)
+      expect(state.displayedShots.map(({ id }) => id)).not.toContain('s-new')
+      expect(state.shotFilledColumns).toBe('columns of the page')
+      expect([...state.shotSelectionGrid]).toEqual(['1-0'])
+      expect(state.displayedShotsCount).toBe(PAGE_SIZE + 6)
+
+      shotsStore.mutations.DISPLAY_MORE_SHOTS(state, {})
+
+      expect(state.displayedShots).toHaveLength(PAGE_SIZE + 6)
+      expect(state.displayedShots.at(-1).id).toBe('s-new')
+    })
+
+    test('stays full with a shot sorted among its rows', () => {
+      const state = loadPage()
+      const lastRow = state.displayedShots.at(-1)
+
+      addShot(state, buildShot('s-new', 'SH000'))
+
+      expect(state.displayedShots).toHaveLength(PAGE_SIZE)
+      expect(state.displayedShots[0].id).toBe('s-new')
+      expect(state.displayedShots).not.toContain(lastRow)
+      expect([...state.shotSelectionGrid]).toEqual(['2-0'])
+    })
+
+    test('moves the selected cells of the next pages along', () => {
+      const state = loadPage()
+      state.shotSelectionGrid = new Set(['1-0', '103-0'])
+
+      addShot(state, buildShot('s-new', 'SH102b'))
+
+      expect(state.displayedShots).toHaveLength(PAGE_SIZE)
+      expect([...state.shotSelectionGrid]).toEqual(['1-0', '104-0'])
+    })
+
+    test('leaves a shot sorted past the rows of a list holding more', () => {
+      const state = loadPage()
+      state.displayedShots = state.displayedShots.slice(0, PAGE_SIZE - 1)
+
+      addShot(state, buildShot('s-new', 'SH999'))
+
+      expect(state.displayedShots).toHaveLength(PAGE_SIZE - 1)
+    })
+  })
+
+  // A creation feeds the list only, and a deletion leaves the result behind.
+  test('counts a shot created since a deletion', () => {
+    sequenceStore.cache.sequenceMap.set('sq-1', { id: 'sq-1', name: 'SQ01' })
+    const state = loadList([
+      buildShot('s1', 'SH010'),
+      buildShot('s2', 'SH020')
+    ])
+    shotsStore.mutations.REMOVE_SHOT(state, { id: 's1' })
+    shotsStore.mutations.NEW_SHOT_END(state, {
+      shot: { id: 's3', name: 'SH030', parent_id: 'sq-1', nb_frames: 0 },
+      episodeMap: new Map()
+    })
+
+    addShot(state, buildShot('s4', 'SH040'))
+
+    const left = ['SH020', 'SH030', 'SH040']
+    expect(names(state.displayedShots)).toEqual(left)
+    expect(names(shotsStore.cache.result)).toEqual(left)
+    expect(state.displayedShotsCount).toBe(3)
+  })
+
+  test('adds the shot to the totals of the list', () => {
+    const state = loadList([
+      buildShot('s1', 'SH010', { timeSpent: 60, estimation: 120 })
+    ])
+    const tasks = [
+      {
+        id: 't1',
+        task_type_id: 'tt-anim',
+        task_status_id: 'ts-todo',
+        duration: 30,
+        estimation: 90,
+        assignees: []
+      }
+    ]
+
+    addShot(state, buildShot('s2', 'SH020', { tasks }), {
+      taskMap: new Map()
+    })
+
+    expect(state.displayedShotsTimeSpent).toBe(90)
+    expect(state.displayedShotsEstimation).toBe(210)
+    expect(state.displayedShotsFrames).toBe(48)
+  })
+
+  // Between a list load and its search, the result is the whole list.
+  test('lists the shot once when the search has not run yet', () => {
+    const state = loadList([buildShot('s1', 'SH010')], 'SH0')
+
+    addShot(state, buildShot('s2', 'SH020'))
+
+    expect(names(shotsStore.cache.shots)).toEqual(['SH010', 'SH020'])
+  })
+
+  test('counts the search, not the list, for a shot it asks for', () => {
+    const shots = [
+      buildShot('s1', 'SH010'),
+      buildShot('s2', 'SH020'),
+      buildShot('s3', 'SH090')
+    ]
+    const state = loadList(shots, 'SH09', [shots[2]])
+
+    addShot(state, buildShot('s4', 'SH091'))
+
+    expect(names(state.displayedShots)).toEqual(['SH090', 'SH091'])
+    expect(names(shotsStore.cache.result)).toEqual(['SH090', 'SH091'])
+    expect(shotsStore.cache.shots).toHaveLength(4)
+    expect(state.displayedShotsCount).toBe(2)
+  })
+
+  test('keeps the rows of a search that does not ask for the shot', () => {
+    const shots = [buildShot('s1', 'SH010'), buildShot('s2', 'SH020')]
+    const state = loadList(shots, 'SH01', [shots[0]])
+
+    addShot(state, buildShot('s3', 'SH090'))
+
+    expect(names(state.displayedShots)).toEqual(['SH010'])
+    expect(names(shotsStore.cache.result)).toEqual(['SH010'])
+    expect(shotsStore.cache.shots).toHaveLength(3)
+    expect(state.displayedShotsCount).toBe(1)
+  })
+
+  describe('through loadShot', () => {
+    const load = (state, shot) => {
+      vi.spyOn(shotsApi, 'getShot').mockResolvedValue(shot)
+      return shotsStore.actions.loadShot(
+        {
+          commit: (type, payload) =>
+            shotsStore.mutations[type]?.(state, payload),
+          state,
+          rootGetters: {
+            currentProduction: { id: 'p1', descriptors: [] },
+            people: [],
+            personMap: new Map(),
+            taskMap: new Map(),
+            taskStatusMap: new Map(),
+            taskTypeMap: new Map()
+          }
+        },
+        shot.id
+      )
+    }
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    test('shows a shot of the loaded list', async () => {
+      const state = {
+        ...loadList([buildShot('s1', 'SH010')]),
+        shotsLoadingKey: 'p1/'
+      }
+
+      await load(state, buildShot('s2', 'SH020', { project_id: 'p1' }))
+
+      expect(names(state.displayedShots)).toEqual(['SH010', 'SH020'])
+    })
+
+    // A detail page loads its shot whatever the list holds, and a page reads
+    // no row as no list.
+    test.each([
+      ['no list is loaded', null, 'ep-1'],
+      ['the list holds another episode', 'p1/ep-2', 'ep-1']
+    ])('leaves the rows alone when %s', async (_, loadingKey, episodeId) => {
+      const state = { ...loadList([]), shotsLoadingKey: loadingKey }
+
+      await load(
+        state,
+        buildShot('s2', 'SH020', { project_id: 'p1', episode_id: episodeId })
+      )
+
+      expect(state.displayedShots).toEqual([])
+      expect(state.displayedShotsCount).toBe(0)
+      expect(shotsStore.cache.shotMap.has('s2')).toBe(true)
+    })
+  })
+
+  // Such a search has no keyword: the test threw on the shot.
+  describe('with a search made of filters only', () => {
+    const taskTypeMap = new Map([
+      ['tt-anim', { id: 'tt-anim', name: 'Animation', for_entity: 'Shot' }]
+    ])
+    const taskStatusMap = new Map([
+      ['ts-todo', { id: 'ts-todo', name: 'Todo', short_name: 'todo' }],
+      ['ts-wip', { id: 'ts-wip', name: 'WIP', short_name: 'wip' }]
+    ])
+    const addShotWithStatus = (state, id, taskStatusId) => {
+      const task = {
+        id: `task-${id}`,
+        task_type_id: 'tt-anim',
+        task_status_id: taskStatusId,
+        duration: 0,
+        estimation: 0,
+        assignees: []
+      }
+      addShot(state, buildShot(id, `SH0${id}`, { tasks: [task] }), {
+        taskStatusMap,
+        taskTypeMap,
+        taskMap: new Map()
+      })
+    }
+
+    beforeEach(() => {
+      taskTypesStore.cache.taskTypeMap.set('tt-anim', {
+        id: 'tt-anim',
+        name: 'Animation',
+        priority: 1
+      })
+    })
+
+    afterEach(() => {
+      taskTypesStore.cache.taskTypeMap.delete('tt-anim')
+    })
+
+    test('shows a shot the filters ask for', () => {
+      const shots = [buildShot('s1', 'SH010')]
+      const state = loadList(shots, 'animation=todo', [])
+
+      addShotWithStatus(state, '20', 'ts-todo')
+
+      expect(names(state.displayedShots)).toEqual(['SH020'])
+      expect(state.displayedShotsCount).toBe(1)
+    })
+
+    test('keeps out a shot the filters do not ask for', () => {
+      const shots = [buildShot('s1', 'SH010')]
+      const state = loadList(shots, 'animation=todo', [])
+
+      addShotWithStatus(state, '20', 'ts-wip')
+
+      expect(state.displayedShots).toEqual([])
+      expect(state.displayedShotsCount).toBe(0)
+    })
   })
 })
 
@@ -2068,7 +2443,7 @@ describe('Shots store, through a store', () => {
         rootActions.deleteAllTasks.mock.calls.map(([, args]) => args)
       ).toEqual([
         { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: ['t1'] },
-        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: [] }
+        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: undefined }
       ])
     })
 

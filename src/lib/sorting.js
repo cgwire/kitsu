@@ -1,5 +1,6 @@
 import { firstBy } from 'thenby'
 
+import { PAGE_SIZE } from '@/lib/pagination'
 import {
   getTaskStatusPriorityOfProd,
   getTaskTypePriorityOfProd
@@ -34,9 +35,7 @@ export const sortShots = shots => {
   return shots.sort(shotComparator)
 }
 
-// Insert one entity into an already-sorted list (binary search) instead of
-// re-sorting the whole array on every unit add.
-const insertSorted = (items, item, comparator) => {
+const findSortedIndex = (items, item, comparator) => {
   let low = 0
   let high = items.length
   while (low < high) {
@@ -47,8 +46,29 @@ const insertSorted = (items, item, comparator) => {
       high = middle
     }
   }
-  items.splice(low, 0, item)
+  return low
+}
+
+// Insert one entity into an already-sorted list (binary search) instead of
+// re-sorting the whole array on every unit add.
+const insertSorted = (items, item, comparator) => {
+  items.splice(findSortedIndex(items, item, comparator), 0, item)
   return items
+}
+
+// Insert one entity into the rows of a paged list of nbListed entities, and
+// return its row. A full page stays full, or an import with the list open
+// would render every new entity: the last row goes back to the next page. An
+// entity sorted past the rows waits for it too (-1), unless it ends a page
+// that is not full.
+const insertInPage = (rows, item, comparator, nbListed) => {
+  const index = findSortedIndex(rows, item, comparator)
+  const isPageFull = rows.length > 0 && rows.length % PAGE_SIZE === 0
+  const hasNextPage = nbListed > rows.length + 1
+  if (index === rows.length && (isPageFull || hasNextPage)) return -1
+  rows.splice(index, 0, item)
+  if (isPageFull) rows.pop()
+  return index
 }
 
 export const insertSortedAsset = (assets, asset) =>
@@ -56,6 +76,12 @@ export const insertSortedAsset = (assets, asset) =>
 
 export const insertSortedShot = (shots, shot) =>
   insertSorted(shots, shot, shotComparator)
+
+export const insertAssetInPage = (rows, asset, nbListed) =>
+  insertInPage(rows, asset, assetComparator, nbListed)
+
+export const insertShotInPage = (rows, shot, nbListed) =>
+  insertInPage(rows, shot, shotComparator, nbListed)
 
 export const sortEdits = edits => {
   return edits.sort(

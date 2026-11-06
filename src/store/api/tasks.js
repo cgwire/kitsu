@@ -177,16 +177,18 @@ export default {
   },
 
   deleteAllTasks(projectId, taskTypeId, taskIds) {
-    if (taskIds && taskIds.length > 0) {
-      return client.ppost(
-        `/api/actions/projects/${projectId}/delete-tasks`,
-        taskIds
-      )
-    } else {
+    // No list deletes every task of the type across the production. An empty
+    // list deletes nothing.
+    if (!taskIds) {
       return client.pdel(
         `/api/actions/projects/${projectId}/task-types/${taskTypeId}/delete-tasks`
       )
     }
+    if (taskIds.length === 0) return Promise.resolve()
+    return client.ppost(
+      `/api/actions/projects/${projectId}/delete-tasks`,
+      taskIds
+    )
   },
 
   addPreview(data) {

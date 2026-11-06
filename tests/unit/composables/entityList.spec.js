@@ -1,7 +1,7 @@
 vi.mock('@/store', () => ({ default: {} }))
 
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
-import { computed, defineComponent, inject, nextTick } from 'vue'
+import { computed, defineComponent, inject, nextTick, ref } from 'vue'
 import { createMemoryHistory, createRouter, useRoute } from 'vue-router'
 
 import {
@@ -791,6 +791,12 @@ const committed = (wrapper, mutation) =>
     .filter(([name]) => name === mutation)
     .map(([, payload]) => payload)
 
+const oneColumnGrid = [
+  [gridCell(0, 0)],
+  [gridCell(1, 0)],
+  [gridCell(2, 0)]
+]
+
 describe('entity list task range selection', () => {
   const firstClick = { x: 0, y: 0, task: grid[0][0].task, isUserClick: true }
   const shiftClick = { x: 1, y: 1, task: grid[1][1].task, isShiftKey: true }
@@ -837,6 +843,31 @@ describe('entity list task range selection', () => {
 
     expect(committed(wrapper, 'ADD_SELECTED_TASKS')).toEqual([])
     expect(committed(wrapper, 'ADD_SELECTED_TASK')).toEqual([shiftClick])
+  })
+
+  test('starts from the row of the first click, moved by a new row', async () => {
+    const entities = ref([[{ id: 'entity-1' }], [{ id: 'entity-2' }]])
+    const wrapper = await mountHost(
+      {},
+      { cells: oneColumnGrid, options: { entities } }
+    )
+    wrapper.vm.list.onTaskSelected(
+      { ...firstClick, entity: { id: 'entity-1' } },
+      true
+    )
+
+    entities.value = [
+      [{ id: 'entity-0' }, { id: 'entity-1' }],
+      [{ id: 'entity-2' }]
+    ]
+    wrapper.vm.list.onTaskSelected(
+      { x: 2, y: 0, task: oneColumnGrid[2][0].task, isShiftKey: true },
+      true
+    )
+
+    expect(
+      committed(wrapper, 'ADD_SELECTED_TASKS')[0].map(({ task }) => task.id)
+    ).toEqual(['task-1-0', 'task-2-0'])
   })
 })
 
@@ -975,6 +1006,35 @@ describe('entity list keyboard selection', () => {
     expect(pressKey('keydown', { altKey: true }, 39).defaultPrevented).toBe(
       true
     )
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  test('moves from the row of the last click, moved by a new row', async () => {
+    const entities = ref([{ id: 'entity-1' }])
+    const wrapper = await mountHost(
+      {},
+      { cells: oneColumnGrid, options: { entities } }
+    )
+    wrapper.vm.list.onTaskSelected(
+      {
+        x: 0,
+        y: 0,
+        entity: { id: 'entity-1' },
+        task: oneColumnGrid[0][0].task,
+        isUserClick: true
+      },
+      true
+    )
+    entities.value = [
+      { id: 'entity-0' },
+      { id: 'entity-1' },
+      { id: 'entity-2' }
+    ]
+    const onClick = vi.fn()
+    wrapper.vm.$refs['validation-2-0'][0].$el.addEventListener('click', onClick)
+
+    pressKey('keydown', { altKey: true }, 40)
+
     expect(onClick).toHaveBeenCalledTimes(1)
   })
 

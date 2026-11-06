@@ -332,7 +332,7 @@ const actions = {
     { dispatch },
     { projectId, taskTypeId, selectionOnly }
   ) {
-    let taskIds = []
+    let taskIds
     if (selectionOnly) {
       taskIds = cache.result
         .filter(sequence => sequence.validations.get(taskTypeId))

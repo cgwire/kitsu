@@ -680,6 +680,29 @@ describe('Edits store, NEW_EDIT_END', () => {
     expect(editsStore.cache.edits.map(({ id }) => id)).toEqual(['edit-1'])
     expect(state.displayedEdits.map(({ id }) => id)).toEqual(['edit-1'])
   })
+
+  // A created edit has no time yet: the footer hides totals that are no
+  // numbers.
+  test('keeps the time totals of the list', () => {
+    const listedEdit = {
+      id: 'edit-1',
+      name: 'E01',
+      timeSpent: 240,
+      estimation: 480
+    }
+    editsStore.cache.edits = [listedEdit]
+    editsStore.cache.editMap = new Map([[listedEdit.id, listedEdit]])
+    const state = { displayedEdits: [listedEdit] }
+
+    editsStore.mutations.NEW_EDIT_END(state, {
+      id: 'edit-2',
+      name: 'E02',
+      project_id: 'p-1'
+    })
+
+    expect(state.displayedEditsTimeSpent).toBe(240)
+    expect(state.displayedEditsEstimation).toBe(480)
+  })
 })
 
 describe('Edits store, getEditsCsvLines', () => {
@@ -1684,7 +1707,7 @@ describe('Edits store, through a store', () => {
         rootActions.deleteAllTasks.mock.calls.map(([, args]) => args)
       ).toEqual([
         { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: ['t1'] },
-        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: [] }
+        { projectId: 'p1', taskTypeId: 'tt-anim', taskIds: undefined }
       ])
     })
 

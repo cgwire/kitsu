@@ -17,6 +17,7 @@ import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { minutesToDays } from '@/lib/time'
 import { PAGE_SIZE } from '@/lib/pagination'
 import {
+  insertAssetInPage,
   insertSortedAsset,
   sortAssetResult,
   sortAssets,
@@ -25,7 +26,11 @@ import {
   sortTasks,
   sortValidationColumns
 } from '@/lib/sorting'
-import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
+import {
+  addRowToSelectionGrid,
+  buildSelectionGrid,
+  clearSelectionGrid
+} from '@/lib/selection'
 import {
   getFilledColumns,
   groupEntitiesByParents,
@@ -575,7 +580,8 @@ const actions = {
             taskMap,
             persons,
             personMap,
-            production
+            production,
+            isInLoadedScope
           })
           // A detail page loads its asset whatever the list holds: holding more
           // than its recorded scope, the list must be refetched by its pages.
@@ -858,7 +864,7 @@ const actions = {
   },
 
   deleteAllAssetTasks({ dispatch }, { projectId, taskTypeId, selectionOnly }) {
-    let taskIds = []
+    let taskIds
     if (selectionOnly) {
       taskIds = cache.result
         .filter(asset => asset.validations.get(taskTypeId))
@@ -1124,7 +1130,8 @@ const mutations = {
       persons,
       personMap,
       production,
-      asset
+      asset,
+      isInLoadedScope = true
     }
   ) {
     asset.tasks = sortTasks(asset.tasks, taskTypeMap)
@@ -1158,23 +1165,36 @@ const mutations = {
     const keywords = getKeyWords(query) || []
     const filters = getFilters({
       entryIndex: addedAssetIndex,
-      assetTypes: [],
+      assetTypes: state.assetTypes,
       taskTypes,
       taskStatuses,
       descriptors: production?.descriptors || [],
       persons,
       query
     })
-    let result = indexSearch(addedAssetIndex, keywords)
+    // No keyword leaves the asset to the filters, as for a list.
+    let result = indexSearch(addedAssetIndex, keywords) || [asset]
     result = applyFilters(result, filters, taskMap)
 
-    if (result && result.length > 0) {
-      cache.result.push(asset)
-      insertSortedAsset(state.displayedAssets, asset)
-      helpers.setListStats(state, cache.assets)
-      state.assetFilledColumns = getFilledColumns(state.displayedAssets)
+    if (isInLoadedScope && result.length > 0) {
+      if (cache.result !== cache.assets) {
+        insertSortedAsset(cache.result, asset)
+      }
+      helpers.setListStats(state, cache.result)
 
-      state.assetSelectionGrid = buildSelectionGrid()
+      const rowIndex = insertAssetInPage(
+        state.displayedAssets,
+        asset,
+        cache.result.length
+      )
+      if (rowIndex >= 0) {
+        state.assetFilledColumns = getFilledColumns(state.displayedAssets)
+      }
+      // Select column reaches the rows of the next pages too.
+      state.assetSelectionGrid = addRowToSelectionGrid(
+        state.assetSelectionGrid,
+        rowIndex >= 0 ? rowIndex : cache.result.indexOf(asset)
+      )
     }
   },
 

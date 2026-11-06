@@ -604,8 +604,10 @@
       <table-info :is-loading="isLoading" :is-error="isError" big-cells />
     </div>
 
+    <!-- A new asset past the displayed rows only changes the count. -->
     <asset-list-numbers
-      :assets="assetCache.result"
+      :assets="[...assetCache.result]"
+      :key="displayedAssetsCount"
       v-if="!isEmptyList && !isLoading"
     />
   </div>
@@ -652,6 +654,8 @@ const store = useStore()
 const { formatDuration } = useFormat()
 
 // Non-reactive store caches, read at call time.
+// Out of the reactive state and changed in place: the footer recounts on the
+// new array each render of the rows gives it.
 const assetCache = assetStore.cache
 const episodeMap = episodeStore.cache.episodeMap
 

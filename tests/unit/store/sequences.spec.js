@@ -1402,7 +1402,7 @@ describe('Sequences store, through a store', () => {
 
     expect(deleteAllTasks.mock.calls.map(([, payload]) => payload)).toEqual([
       { projectId: 'p1', taskTypeId: 'tt-1', taskIds: ['task-sq1'] },
-      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: [] }
+      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: undefined }
     ])
   })
 
