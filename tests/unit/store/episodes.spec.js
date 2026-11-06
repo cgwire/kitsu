@@ -749,13 +749,14 @@ describe('Episodes store, through a store', () => {
   const buildStore = async (getters = {}, actions = {}) => {
     vi.resetModules()
     const { default: module } = await import('@/store/modules/episodes')
+    const { default: tasksStore } = await import('@/store/modules/tasks')
     const store = createStore({
       modules: { episodes: module },
       getters: {
         currentProduction: () => production,
         people: () => [],
         productionEpisodeTaskTypeIds: () => [],
-        taskMap: () => new Map(),
+        taskMap: () => tasksStore.state.taskMap,
         taskStatus: () => [],
         taskStatusMap: () => new Map(),
         taskTypeMap: () => new Map(),
@@ -782,10 +783,10 @@ describe('Episodes store, through a store', () => {
       production,
       episodes,
       userFilters: {},
-      taskMap: new Map(),
+      taskMap: store.getters.taskMap,
       taskTypeMap: new Map(),
       personMap: new Map(),
-      taskStatusMap: new Map()
+      taskStatusMap: store.getters.taskStatusMap
     })
 
   const selectorLabels = store =>
@@ -1118,6 +1119,203 @@ describe('Episodes store, through a store', () => {
       await store.dispatch('changeEpisodeSort', sortInfo)
 
       expect(names(module.cache.episodes)).toEqual(['E03', 'E01', 'E02'])
+    })
+
+    describe.each([
+      [
+        'a new episode',
+        store =>
+          store.commit('NEW_EPISODE_END', {
+            id: 'ep0',
+            name: 'E00',
+            project_id: 'p1',
+            status: 'running',
+            data: { prod_order: '2' }
+          }),
+        ['E03', 'E00', 'E01', 'E02']
+      ],
+      [
+        'an episode from another session',
+        store =>
+          store.commit('ADD_EPISODE', {
+            id: 'ep0',
+            name: 'E00',
+            status: 'running',
+            data: { prod_order: '2' }
+          }),
+        ['E03', 'E00', 'E01', 'E02']
+      ]
+    ])('with %s', (_, addEpisode, sortedNames) => {
+      const addToSortedList = async () => {
+        const context = await buildStore()
+        const { store } = context
+        loadEpisodes(store, buildEpisodes())
+        loadWithTasks(store, buildEpisodes())
+        await store.dispatch('changeEpisodeSort', sortInfo)
+        addEpisode(store)
+        return context
+      }
+
+      test('keeps the rows and the cached list sorted', async () => {
+        const { module, store } = await addToSortedList()
+
+        expect(names(store.getters.displayedEpisodes)).toEqual(sortedNames)
+        expect(names(module.cache.episodes)).toEqual(sortedNames)
+      })
+
+      test('keeps the topbar selector by name', async () => {
+        const { store } = await addToSortedList()
+
+        expect(selectorLabels(store)).toEqual(['E00', 'E01', 'E02', 'E03'])
+      })
+    })
+
+    describe('with default tasks', () => {
+      const buildTask = (id, entityId, statusId) => ({
+        id,
+        entity_id: entityId,
+        task_type_id: 'tt-1',
+        task_status_id: statusId,
+        assignees: [],
+        duration: 0,
+        estimation: 0
+      })
+      const taskStatusMap = new Map([
+        ['ts-todo', { short_name: 'todo' }],
+        ['ts-wip', { short_name: 'wip' }]
+      ])
+
+      const buildStoreWithDefaultTask = () =>
+        buildStore(
+          {
+            productionEpisodeTaskTypeIds: () => ['tt-1'],
+            taskStatusMap: () => taskStatusMap
+          },
+          {
+            createEntityTasks: ({ commit, rootGetters }, { entityId }) => {
+              const task = buildTask(`t-${entityId}`, entityId, 'ts-todo')
+              rootGetters.taskMap.set(task.id, task)
+              commit('NEW_TASK_END', {
+                task,
+                production,
+                taskTypeMap: new Map(),
+                taskStatusMap
+              })
+            }
+          }
+        )
+
+      const sortByTaskType = store =>
+        store.dispatch('changeEpisodeSort', {
+          type: 'status',
+          column: 'tt-1',
+          name: 'Layout'
+        })
+
+      const createEpisode = (store, id, name) => {
+        client.ppost.mockResolvedValueOnce({ id, name, project_id: 'p1' })
+        return store.dispatch('newEpisode', { name, project_id: 'p1' })
+      }
+
+      // Its tasks come once the episode has joined the list, and they decide
+      // its place under a task type sort.
+      test('moves a new episode to its place once it holds its tasks', async () => {
+        const { module, store } = await buildStoreWithDefaultTask()
+        loadWithTasks(store, [
+          { ...buildEpisodes()[0], tasks: [buildTask('t1', 'ep1', 'ts-wip')] },
+          { ...buildEpisodes()[1], tasks: [buildTask('t2', 'ep2', 'ts-todo')] },
+          { ...buildEpisodes()[2], tasks: [buildTask('t3', 'ep3', 'ts-wip')] }
+        ])
+        await sortByTaskType(store)
+        const rows = computed(() => names(store.getters.displayedEpisodes))
+        expect(rows.value).toEqual(['E02', 'E01', 'E03'])
+
+        await createEpisode(store, 'ep4', 'E04')
+
+        expect(rows.value).toEqual(['E02', 'E04', 'E01', 'E03'])
+        expect(names(module.cache.episodes)).toEqual(rows.value)
+      })
+
+      test('moves a new episode to its place after a live row', async () => {
+        const { store } = await buildStoreWithDefaultTask()
+        loadWithTasks(store, [
+          { ...buildEpisodes()[0], tasks: [buildTask('t1', 'ep1', 'ts-wip')] },
+          { ...buildEpisodes()[1], tasks: [buildTask('t2', 'ep2', 'ts-todo')] }
+        ])
+        await sortByTaskType(store)
+        store.commit('ADD_EPISODE', { id: 'ep9', name: 'E09', data: {} })
+
+        await createEpisode(store, 'ep4', 'E04')
+
+        expect(names(store.getters.displayedEpisodes)).toEqual([
+          'E09',
+          'E02',
+          'E04',
+          'E01'
+        ])
+      })
+
+      // The sort outlives its production, Episode Stats applies it through its
+      // search at each visit, and the rows of a plain list hold no tasks.
+      test('keeps a plain list by name', async () => {
+        const { module, store } = await buildStoreWithDefaultTask()
+        loadWithTasks(store, buildEpisodes())
+        await sortByTaskType(store)
+        store.commit('CLEAR_EPISODES')
+        loadEpisodes(store, buildEpisodes())
+        await store.dispatch('setEpisodeSearch', '')
+
+        await createEpisode(store, 'ep4', 'E02B')
+        await createEpisode(store, 'ep5', 'E02C')
+
+        const expected = ['E01', 'E02', 'E02B', 'E02C', 'E03']
+        expect(names(store.getters.displayedEpisodes)).toEqual(expected)
+        expect(names(module.cache.episodes)).toEqual(expected)
+      })
+
+      test('keeps a new episode its search does not find', async () => {
+        const { store } = await buildStoreWithDefaultTask()
+        loadWithTasks(store, buildEpisodes())
+        await store.dispatch('setEpisodeSearch', 'E01')
+
+        await createEpisode(store, 'ep4', 'E04')
+
+        expect(names(store.getters.displayedEpisodes)).toEqual(['E01', 'E04'])
+      })
+    })
+
+    test('sorts a live episode when the plain list landed last', async () => {
+      const { module, store } = await buildStore()
+      loadWithTasks(store, buildEpisodes())
+      loadEpisodes(store, buildEpisodes())
+      await store.dispatch('changeEpisodeSort', sortInfo)
+
+      store.commit('ADD_EPISODE', {
+        id: 'ep0',
+        name: 'E00',
+        data: { prod_order: '2' }
+      })
+
+      const sorted = ['E03', 'E00', 'E01', 'E02']
+      expect(names(store.getters.displayedEpisodes)).toEqual(sorted)
+      expect(names(module.cache.episodes)).toEqual(sorted)
+    })
+
+    // The sort outlives its production, and the Shots page adds episodes to
+    // a plain list.
+    test('keeps a plain list by name under a sort', async () => {
+      const { store } = await buildStore()
+      await store.dispatch('changeEpisodeSort', sortInfo)
+      loadEpisodes(store, buildEpisodes())
+
+      store.commit('ADD_EPISODE', { id: 'ep4', name: 'E04', data: {} })
+
+      expect(names(store.getters.displayedEpisodes)).toEqual([
+        'E01',
+        'E02',
+        'E03',
+        'E04'
+      ])
     })
 
     test('shows a sort reapplied to a list loaded with tasks', async () => {

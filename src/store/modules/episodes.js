@@ -1,6 +1,8 @@
 import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
+import tasksStore from '@/store/modules/tasks'
+import taskTypesStore from '@/store/modules/tasktypes'
 
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { buildEpisodeIndex, indexSearch } from '@/lib/indexing'
@@ -41,6 +43,7 @@ import {
   SET_EPISODE_STATS,
   SET_EPISODES_WITH_TASKS,
   SET_PREVIEW,
+  SORT_EPISODES,
   UPDATE_EPISODE,
   UPDATE_METADATA_DESCRIPTOR_END,
   LOCK_EPISODE,
@@ -94,6 +97,16 @@ const helpers = {
       episodeSearchText: episodeSearch,
       episodeSelectionGrid: buildSelectionGrid()
     })
+  },
+
+  // A row joining a sorted list takes its place in the order of that list.
+  sortList(state, episodes) {
+    return sortEpisodeResult(
+      episodes,
+      cache.isLoadedWithTasks ? state.episodeSorting : [],
+      taskTypesStore.cache.taskTypeMap,
+      tasksStore.state.taskMap
+    )
   },
 
   populateTask(production, task, episode, taskTypeMap, taskStatusMap) {
@@ -165,6 +178,9 @@ const helpers = {
 const cache = {
   episodes: [],
   result: [],
+  // Only the list of the Episodes page follows its sort: the plain list of the
+  // topbar stays by name, and state.episodeSorting outlives a production.
+  isLoadedWithTasks: false,
   episodeIndex: {},
   episodeMap: new Map()
 }
@@ -432,7 +448,10 @@ const actions = {
         entityId: episode.id,
         taskTypeIds
       })
-        .then(() => episode)
+        .then(() => {
+          commit(SORT_EPISODES)
+          return episode
+        })
         .catch(console.error)
     })
   },
@@ -518,6 +537,7 @@ const mutations = {
     Object.assign(state, { ...initialState })
     cache.episodes = []
     cache.result = []
+    cache.isLoadedWithTasks = false
     cache.episodeIndex = {}
   },
 
@@ -536,6 +556,15 @@ const mutations = {
       taskTypeMap,
       taskMap
     })
+  },
+
+  // A new episode gets its tasks once in the list, and they decide its place
+  // under a task type sort. No search here: it would hide that episode.
+  [SORT_EPISODES](state) {
+    cache.episodes = helpers.sortList(state, [...cache.episodes])
+    state.displayedEpisodes = helpers.sortList(state, [
+      ...state.displayedEpisodes
+    ])
   },
 
   [ADD_EPISODE_SEARCH](state, searchQuery) {
@@ -564,6 +593,7 @@ const mutations = {
     state.currentEpisode = null
     cache.episodes = []
     cache.result = []
+    cache.isLoadedWithTasks = false
     cache.episodeIndex = {}
     // clear(), never a new Map(): the episodeMap getter has no reactive
     // dependency, so Vuex memoizes the reference captured at its first read.
@@ -657,6 +687,7 @@ const mutations = {
     })
     cache.episodes = episodes
     cache.result = episodes
+    cache.isLoadedWithTasks = true
     cache.episodeIndex = buildEpisodeIndex(episodes)
 
     const displayedEpisodes = cache.episodes
@@ -697,8 +728,11 @@ const mutations = {
     // tasks in cache.episodes only and must not get the plain list instead.
     cache.episodeMap.set(episode.id, episode)
     state.episodes = sortByName([...state.episodes, episode])
-    cache.episodes = sortByName([...cache.episodes, episode])
-    state.displayedEpisodes = sortByName([...state.displayedEpisodes, episode])
+    cache.episodes = helpers.sortList(state, [...cache.episodes, episode])
+    state.displayedEpisodes = helpers.sortList(state, [
+      ...state.displayedEpisodes,
+      episode
+    ])
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
     state.displayedEpisodesLength = state.displayedEpisodes.length
   },
@@ -763,8 +797,8 @@ const mutations = {
       // episode the search filtered out, the topbar selector included.
       cache.episodeMap.set(episode.id, episode)
       state.episodes = sortByName([...state.episodes, episode])
-      cache.episodes = sortByName([...cache.episodes, episode])
-      state.displayedEpisodes = sortByName([
+      cache.episodes = helpers.sortList(state, [...cache.episodes, episode])
+      state.displayedEpisodes = helpers.sortList(state, [
         ...state.displayedEpisodes,
         episode
       ])
