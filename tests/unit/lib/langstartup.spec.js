@@ -32,7 +32,7 @@ vi.mock('@/locales', async importOriginal => ({
 }))
 
 import i18n from '@/lib/i18n'
-import lang, { localeCode } from '@/lib/lang'
+import lang, { localeCode, pageLocaleCode } from '@/lib/lang'
 import pickedLocale from '@/lib/picked-locale'
 
 const messages = { default: { default: { main: { cancel: 'Translated' } } } }
@@ -97,11 +97,13 @@ describe('startup language chunk', () => {
     await vi.advanceTimersByTimeAsync(1000)
     expect(startup.isSettled).toBe(true)
     expect(i18n.global.locale.value).toBe('en')
+    expect(pageLocaleCode.value).toBe('en')
 
     chunks.de.land()
     await vi.advanceTimersByTimeAsync(0)
 
     expect(i18n.global.locale.value).toBe('de')
+    expect(pageLocaleCode.value).toBe('de')
   })
 
   // Unhandled, it reaches the console.
@@ -162,6 +164,7 @@ describe('language chunks out of order', () => {
     await expect(lang.setLocale('nl_NL')).rejects.toBe(failure)
 
     expect(getLanguages()).toEqual({ messages: 'ko', code: 'ko', dates: 'ko' })
+    expect(pageLocaleCode.value).toBe('ko')
   })
 
   test('leaves the last request alone when an older chunk fails', async () => {

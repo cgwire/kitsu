@@ -78,7 +78,7 @@ let pendingLanguage = null
 
 // Code of the language on screen. Moment and localeCode flip ahead of its chunk,
 // which may fail.
-let displayedCode = 'en'
+const displayedCode = ref('en')
 
 const getRememberedLocale = () =>
   localPreferences.getPreference(LOCALE_PREFERENCE)
@@ -105,14 +105,22 @@ const parseLocale = locale => {
   return LOCALE_MAP[locale] || { language: fallback, code: fallback }
 }
 
-// The list entry of the language in use. A profile can hold a region the list
-// has not, or a language the app has not, which then reads English.
-export const currentLanguage = computed(
-  () =>
-    languages.find(({ value }) => {
-      const { language, code } = parseLocale(value)
-      return [language, code].includes(localeCode.value)
-    }) || languages.find(({ value }) => value === 'en_US')
+// A profile can hold a region the list has not, or a language the app has not,
+// which then reads English.
+const getListedLanguage = listedCode =>
+  languages.find(({ value }) => {
+    const { language, code } = parseLocale(value)
+    return [language, code].includes(listedCode)
+  }) || languages.find(({ value }) => value === 'en_US')
+
+// The list entry of the language in use.
+export const currentLanguage = computed(() =>
+  getListedLanguage(localeCode.value)
+)
+
+// The language the page reads, to declare to browsers and screen readers.
+export const pageLocaleCode = computed(
+  () => parseLocale(getListedLanguage(displayedCode.value).value).code
 )
 
 const applyLocale = async locale => {
@@ -126,12 +134,12 @@ const applyLocale = async locale => {
     await loadLocaleMessages(language)
     if (pendingLanguage === language) {
       i18n.global.locale.value = language
-      displayedCode = code
+      displayedCode.value = code
     }
   } catch (err) {
     if (pendingLanguage === language) {
-      moment.locale(displayedCode)
-      localeCode.value = displayedCode
+      moment.locale(displayedCode.value)
+      localeCode.value = displayedCode.value
     }
     throw err
   }

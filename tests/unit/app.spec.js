@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import auth from '@/lib/auth'
 import errors from '@/lib/errors'
-import i18n from '@/lib/i18n'
+import i18n, { loadLocaleMessages } from '@/lib/i18n'
 import lang from '@/lib/lang'
 
 import App from '@/App.vue'
@@ -1197,6 +1197,7 @@ describe('App', () => {
 
     it('takes the language of the studio for a browser in none of Kitsu', async () => {
       vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['sv-SE'])
+      await loadLocaleMessages('de')
 
       await mountApp({
         actions: { setMainConfig: () => ({ default_locale: 'de_DE' }) }
@@ -1204,6 +1205,32 @@ describe('App', () => {
       await flushPromises()
 
       expect(document.documentElement.lang).toBe('de')
+    })
+
+    // vue-i18n warns on the way to its English fallback.
+    it('declares English for a language of the studio Kitsu lacks', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+      vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['sv-SE'])
+
+      await mountApp({
+        actions: { setMainConfig: () => ({ default_locale: 'sv_SE' }) }
+      })
+      await flushPromises()
+
+      expect(document.documentElement.lang).toBe('en')
+    })
+
+    it('declares English on leaving a language Kitsu has for one it lacks', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+      await mountApp({})
+      await lang.setLocale('de_DE')
+      await flushPromises()
+      expect(document.documentElement.lang).toBe('de')
+
+      await lang.setLocale('sv_SE')
+      await flushPromises()
+
+      expect(document.documentElement.lang).toBe('en')
     })
   })
 

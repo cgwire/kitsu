@@ -37,7 +37,7 @@ import crisp from '@/lib/crisp'
 import { isNewShotInLoadedScope } from '@/lib/episodes'
 import errors from '@/lib/errors'
 import i18n from '@/lib/i18n'
-import lang, { localeCode } from '@/lib/lang'
+import lang, { localeCode, pageLocaleCode } from '@/lib/lang'
 import { getProductionRole } from '@/lib/people'
 import localPreferences from '@/lib/preferences'
 import { isPreviewFileStatus } from '@/lib/preview'
@@ -741,9 +741,9 @@ watch(
 )
 
 watch(
-  localeCode,
+  pageLocaleCode,
   () => {
-    document.documentElement.lang = localeCode.value
+    document.documentElement.lang = pageLocaleCode.value
   },
   { immediate: true }
 )

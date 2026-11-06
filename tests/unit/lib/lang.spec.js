@@ -3,7 +3,7 @@
 import moment from 'moment-timezone'
 import { vi } from 'vitest'
 
-import lang, { languages, localeCode } from '@/lib/lang'
+import lang, { languages, localeCode, pageLocaleCode } from '@/lib/lang'
 import pickedLocale from '@/lib/picked-locale'
 import timezone from '@/lib/timezone'
 
@@ -63,6 +63,22 @@ describe('lang', () => {
     }
     await lang.setLocale('en_US')
     expect(listed.sort()).toEqual(['en', ...Object.keys(localeLoaders)].sort())
+  })
+
+  // vue-i18n warns on the way to its English fallback.
+  test.each([
+    ['fr_FR', 'fr'],
+    ['fr_CA', 'fr'],
+    ['zh_Hant_TW', 'zh-tw'],
+    ['zh_CN', 'zh-cn'],
+    ['sv_SE', 'en']
+  ])('declares %s as %s, the language the page reads', async (locale, code) => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    await lang.setLocale(locale)
+
+    expect(pageLocaleCode.value).toBe(code)
+    await lang.setLocale('en_US')
   })
 
   // Dates formatted with moment go to the API, which rejects Persian digits.
