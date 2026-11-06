@@ -2760,7 +2760,7 @@ describe('Assets store, list workflow', () => {
       })
       expect(store.state.assets.assetSearchQueries).toEqual([filter])
 
-      await store.dispatch('removeAssetSearch', { id: 'f9', name: 'other' })
+      await store.dispatch('removeAssetSearch', { id: 'f9', name: 'props' })
       expect(store.state.assets.assetSearchQueries).toEqual([filter])
 
       await store.dispatch('removeAssetSearch', filter)
@@ -2799,7 +2799,7 @@ describe('Assets store, list workflow', () => {
 
       await store.dispatch('removeAssetSearchFilterGroup', {
         id: 'g9',
-        name: 'Other'
+        name: 'Mine'
       })
       expect(store.state.assets.assetSearchFilterGroups).toEqual([group])
 

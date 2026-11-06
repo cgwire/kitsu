@@ -551,7 +551,7 @@ const mutations = {
 
   [REMOVE_EPISODE_SEARCH](state, searchQuery) {
     const queryIndex = state.episodeSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.episodeSearchQueries.splice(queryIndex, 1)

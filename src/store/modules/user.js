@@ -797,7 +797,7 @@ const mutations = {
 
   [REMOVE_TODO_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.todoSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.todoSearchQueries.splice(queryIndex, 1)

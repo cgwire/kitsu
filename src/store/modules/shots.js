@@ -1110,7 +1110,7 @@ const mutations = {
 
   [REMOVE_SHOT_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.shotSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.shotSearchQueries.splice(queryIndex, 1)
@@ -1119,7 +1119,7 @@ const mutations = {
 
   [REMOVE_SHOT_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
     const groupIndex = state.shotSearchFilterGroups.findIndex(
-      query => query.name === filterGroup.name
+      query => query.id === filterGroup.id
     )
     if (groupIndex >= 0) {
       state.shotSearchFilterGroups.splice(groupIndex, 1)

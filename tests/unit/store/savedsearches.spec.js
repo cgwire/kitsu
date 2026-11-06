@@ -249,6 +249,25 @@ describe.each(lists)(
 
       expect(names(store.getters[queries])).toEqual(['done', 'wip'])
     })
+
+    // Two searches can share a name, in different filter groups.
+    test('removes only the search asked for', async () => {
+      userStore.state.userFilters = {
+        [listType]: {
+          [key]: [
+            { ...savedSearch('f1', 'wip'), search_filter_group_id: 'g1' },
+            savedSearch('f2', 'wip')
+          ]
+        }
+      }
+      const store = buildStore(modules)
+      load(store)
+      client.pdel.mockResolvedValueOnce()
+
+      await remove(store, store.getters[queries][1])
+
+      expect(store.getters[queries].map(({ id }) => id)).toEqual(['f1'])
+    })
   }
 )
 
@@ -308,6 +327,21 @@ describe.each(groupLists)(
       load(store)
 
       expect(store.getters[groups]).toEqual([])
+    })
+
+    test('removes only the group asked for', async () => {
+      const store = buildStore(modules)
+      load(store)
+      client.ppost.mockResolvedValueOnce({ id: 'g1', ...group })
+      client.ppost.mockResolvedValueOnce({ id: 'g2', ...group })
+      client.pdel.mockResolvedValueOnce()
+
+      await save(store, group)
+      await save(store, { ...group, name: 'Other' })
+      store.getters[groups][1].name = 'Mine'
+      await remove(store, store.getters[groups][1])
+
+      expect(store.getters[groups].map(({ id }) => id)).toEqual(['g1'])
     })
   }
 )

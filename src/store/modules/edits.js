@@ -760,7 +760,7 @@ const mutations = {
 
   [REMOVE_EDIT_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.editSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.editSearchQueries.splice(queryIndex, 1)

@@ -612,7 +612,7 @@ const mutations = {
 
   [REMOVE_BREAKDOWN_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.breakdownSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.breakdownSearchQueries.splice(queryIndex, 1)
@@ -621,7 +621,7 @@ const mutations = {
 
   [REMOVE_BREAKDOWN_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
     const groupIndex = state.breakdownSearchFilterGroups.findIndex(
-      query => query.name === filterGroup.name
+      query => query.id === filterGroup.id
     )
     if (groupIndex >= 0) {
       state.breakdownSearchFilterGroups.splice(groupIndex, 1)

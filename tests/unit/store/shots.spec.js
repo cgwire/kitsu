@@ -1877,18 +1877,22 @@ describe('Shots store, through a store', () => {
     test('keeps the saved searches and groups sorted, once each', () => {
       const store = buildStore()
       load(store, [])
-      const group = { name: 'Lighting' }
+      const group = { id: 'g2', name: 'Lighting' }
 
-      store.commit(SAVE_SHOT_SEARCH_END, { searchQuery: { name: 'wip' } })
-      store.commit(SAVE_SHOT_SEARCH_END, { searchQuery: { name: 'done' } })
-      store.commit(REMOVE_SHOT_SEARCH_END, { searchQuery: { name: 'other' } })
+      const saveSearch = searchQuery =>
+        store.commit(SAVE_SHOT_SEARCH_END, { searchQuery })
+      saveSearch({ id: 'f1', name: 'wip' })
+      saveSearch({ id: 'f2', name: 'done' })
+      store.commit(REMOVE_SHOT_SEARCH_END, {
+        searchQuery: { id: 'f9', name: 'wip' }
+      })
       store.commit(SAVE_SHOT_SEARCH_FILTER_GROUP_END, {
-        filterGroup: { name: 'Layout' }
+        filterGroup: { id: 'g1', name: 'Layout' }
       })
       store.commit(SAVE_SHOT_SEARCH_FILTER_GROUP_END, { filterGroup: group })
       store.commit(SAVE_SHOT_SEARCH_FILTER_GROUP_END, { filterGroup: group })
       store.commit(REMOVE_SHOT_SEARCH_FILTER_GROUP_END, {
-        filterGroup: { name: 'other' }
+        filterGroup: { id: 'g9', name: 'Layout' }
       })
 
       expect(names(store.getters.shotSearchQueries)).toEqual(['done', 'wip'])

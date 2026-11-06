@@ -1705,7 +1705,7 @@ const mutations = {
 
   [REMOVE_TASK_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.taskSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.taskSearchQueries.splice(queryIndex, 1)

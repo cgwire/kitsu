@@ -1002,9 +1002,13 @@ describe('Edits store, through a store', () => {
       const store = buildStore()
       load(store, [])
 
-      store.commit(SAVE_EDIT_SEARCH_END, { searchQuery: { name: 'wip' } })
-      store.commit(SAVE_EDIT_SEARCH_END, { searchQuery: { name: 'done' } })
-      store.commit(REMOVE_EDIT_SEARCH_END, { searchQuery: { name: 'other' } })
+      const save = searchQuery =>
+        store.commit(SAVE_EDIT_SEARCH_END, { searchQuery })
+      save({ id: 'f1', name: 'wip' })
+      save({ id: 'f2', name: 'done' })
+      store.commit(REMOVE_EDIT_SEARCH_END, {
+        searchQuery: { id: 'f9', name: 'wip' }
+      })
 
       expect(names(store.getters.editSearchQueries)).toEqual(['done', 'wip'])
     })

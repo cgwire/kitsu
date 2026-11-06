@@ -964,7 +964,7 @@ const mutations = {
 
   [REMOVE_PERSON_TASKS_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.personTaskSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.personTaskSearchQueries.splice(queryIndex, 1)
@@ -1121,7 +1121,7 @@ const mutations = {
 
   [REMOVE_PEOPLE_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.peopleSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.peopleSearchQueries.splice(queryIndex, 1)
