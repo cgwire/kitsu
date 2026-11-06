@@ -34,7 +34,8 @@
         :type="type"
         :value="getFieldValue()"
         @input="updateValue()"
-        @keyup.enter="emitEnter()"
+        @keydown.enter="onEnterDown"
+        @keyup.enter="onEnterUp"
       />
       <button
         class="button flexrow-item"
@@ -143,6 +144,7 @@ const fieldId = useId()
 const descriptionId = `${fieldId}-description`
 const errorId = `${fieldId}-error`
 const inputRef = ref(null)
+let isEnterPressed = false
 
 const describedBy = computed(
   () =>
@@ -175,6 +177,17 @@ const getFieldValue = () => {
 
 const emitEnter = () => {
   emit('enter', getInputValue())
+}
+
+// Only a press made in the field counts: the key that opens a modal comes up
+// in the field the modal focuses, and can repeat there while held.
+const onEnterDown = event => {
+  if (!event.repeat) isEnterPressed = true
+}
+
+const onEnterUp = () => {
+  if (isEnterPressed) emitEnter()
+  isEnterPressed = false
 }
 
 const updateValue = () => {

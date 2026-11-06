@@ -52,6 +52,51 @@ const typedValues = wrapper =>
   wrapper.emitted('update:model-value').map(([value]) => value)
 
 describe('TextField', () => {
+  describe('enter key', () => {
+    const mountField = () =>
+      mount(TextField, { props: { modelValue: 'wip' } })
+
+    it('emits enter for a key pressed in the field', async () => {
+      const wrapper = mountField()
+      const input = wrapper.find('input')
+
+      await input.trigger('keydown', { key: 'Enter' })
+      await input.trigger('keyup', { key: 'Enter' })
+
+      expect(wrapper.emitted('enter')).toEqual([['wip']])
+    })
+
+    it('emits enter once for a key held in the field', async () => {
+      const wrapper = mountField()
+      const input = wrapper.find('input')
+
+      await input.trigger('keydown', { key: 'Enter' })
+      await input.trigger('keydown', { key: 'Enter', repeat: true })
+      await input.trigger('keyup', { key: 'Enter' })
+
+      expect(wrapper.emitted('enter')).toEqual([['wip']])
+    })
+
+    // The key that opened a modal comes up in the field the modal focuses.
+    it('ignores a key pressed elsewhere', async () => {
+      const wrapper = mountField()
+
+      await wrapper.find('input').trigger('keyup', { key: 'Enter' })
+
+      expect(wrapper.emitted('enter')).toBeUndefined()
+    })
+
+    it('ignores a key held since elsewhere', async () => {
+      const wrapper = mountField()
+      const input = wrapper.find('input')
+
+      await input.trigger('keydown', { key: 'Enter', repeat: true })
+      await input.trigger('keyup', { key: 'Enter' })
+
+      expect(wrapper.emitted('enter')).toBeUndefined()
+    })
+  })
+
   describe('number', () => {
     // Written back from the number, "2.0" turned into "2": typing 2.05 key
     // by key gave 25.
