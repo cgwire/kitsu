@@ -1809,16 +1809,17 @@ describe('Shots store, through a store', () => {
       expect(names(store.getters.displayedShots)).toEqual(['SH020', 'SH030'])
     })
 
-    test('saves a search once, then removes it', async () => {
+    test('saves a search, then removes it', async () => {
       const store = buildStore()
       load(store, [])
       client.ppost.mockResolvedValueOnce({ id: 'f2', name: 'layout' })
       client.pdel.mockResolvedValueOnce()
 
-      await store.dispatch('saveShotSearch', 'layout')
-      await store.dispatch('saveShotSearch', 'layout')
+      await store.dispatch('saveShotSearch', {
+        name: 'layout',
+        search_query: 'layout'
+      })
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
         list_type: 'shot',
         name: 'layout',

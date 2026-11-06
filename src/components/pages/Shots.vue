@@ -6,7 +6,7 @@
           <div class="flexrow mb1">
             <search-field
               ref="shot-search-field"
-              :can-save="true"
+              :can-save="!isShotsLoading && !initialLoading"
               @change="onSearchTyped"
               @enter="onSearchChange"
               @save="saveSearchQuery"
@@ -84,6 +84,7 @@
 
           <div class="query-list">
             <search-query-list
+              ref="shot-search-query-list"
               :groups="shotSearchFilterGroups"
               :is-group-enabled="true"
               :queries="shotSearchQueries"
@@ -361,6 +362,7 @@ const addThumbnailsModalRef = useTemplateRef('add-thumbnails-modal')
 const importModalRef = useTemplateRef('import-modal')
 const listRef = useTemplateRef('shot-list')
 const searchFieldRef = useTemplateRef('shot-search-field')
+const searchQueryListRef = useTemplateRef('shot-search-query-list')
 
 const historyShot = ref({})
 const initialLoading = ref(true)
@@ -512,6 +514,7 @@ const {
   pageName: 'Shots',
   listRef,
   searchFieldRef,
+  searchQueryListRef,
   addThumbnailsModalRef,
   importModalRef,
   reset,

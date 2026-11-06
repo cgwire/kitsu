@@ -36,6 +36,7 @@ import {
 
 const production = { id: 'p1' }
 const names = list => list.map(({ name }) => name)
+const search = (name, fields) => ({ name, search_query: name, ...fields })
 
 const loadShots = store =>
   store.commit(LOAD_SHOTS_END, {
@@ -65,7 +66,8 @@ const lists = [
     modules: { shots: shotsStore },
     listType: 'shot',
     queries: 'shotSearchQueries',
-    save: (store, name) => store.dispatch('saveShotSearch', name),
+    save: (store, ...fields) =>
+      store.dispatch('saveShotSearch', search(...fields)),
     remove: (store, query) => store.dispatch('removeShotSearch', query),
     load: loadShots
   },
@@ -74,7 +76,8 @@ const lists = [
     modules: { edits: editsStore },
     listType: 'edit',
     queries: 'editSearchQueries',
-    save: (store, name) => store.dispatch('saveEditSearch', name),
+    save: (store, ...fields) =>
+      store.dispatch('saveEditSearch', search(...fields)),
     remove: (store, query) => store.dispatch('removeEditSearch', query),
     load: store =>
       store.commit(LOAD_EDITS_END, {
@@ -91,7 +94,8 @@ const lists = [
     modules: { sequences: sequencesStore },
     listType: 'sequence',
     queries: 'sequenceSearchQueries',
-    save: (store, name) => store.dispatch('saveSequenceSearch', name),
+    save: (store, ...fields) =>
+      store.dispatch('saveSequenceSearch', search(...fields)),
     remove: (store, query) => store.dispatch('removeSequenceSearch', query),
     load: store =>
       store.commit(LOAD_SEQUENCES_END, {
@@ -106,7 +110,8 @@ const lists = [
     modules: { episodes: episodesStore },
     listType: 'episode',
     queries: 'episodeSearchQueries',
-    save: (store, name) => store.dispatch('saveEpisodeSearch', name),
+    save: (store, ...fields) =>
+      store.dispatch('saveEpisodeSearch', search(...fields)),
     remove: (store, query) => store.dispatch('removeEpisodeSearch', query),
     load: store =>
       store.commit(SET_EPISODES_WITH_TASKS, {
@@ -125,7 +130,8 @@ const lists = [
     modules: { breakdown: breakdownStore },
     listType: 'breakdown',
     queries: 'breakdownSearchQueries',
-    save: (store, name) => store.dispatch('saveBreakdownSearch', name),
+    save: (store, ...fields) =>
+      store.dispatch('saveBreakdownSearch', search(...fields)),
     remove: (store, query) => store.dispatch('removeBreakdownSearch', query),
     load: loadBreakdown
   },
@@ -134,8 +140,11 @@ const lists = [
     modules: { tasks: tasksStore },
     listType: 'task',
     queries: 'taskSearchQueries',
-    save: (store, name) =>
-      store.dispatch('saveTaskSearch', { searchQuery: name, entityType: 'Shot' }),
+    save: (store, name, fields) =>
+      store.dispatch('saveTaskSearch', {
+        ...search(name, fields),
+        entity_type: 'Shot'
+      }),
     remove: (store, query) => store.dispatch('removeTaskSearch', query),
     load: loadShots
   },
@@ -145,7 +154,8 @@ const lists = [
     listType: 'people',
     key: 'all',
     queries: 'peopleSearchQueries',
-    save: (store, name) => store.dispatch('savePeopleSearch', name),
+    save: (store, ...fields) =>
+      store.dispatch('savePeopleSearch', search(...fields)),
     remove: (store, query) => store.dispatch('removePeopleSearch', query),
     load: store =>
       store.commit(LOAD_PEOPLE_END, {
@@ -159,7 +169,8 @@ const lists = [
     listType: 'persontasks',
     key: 'all',
     queries: 'personTaskSearchQueries',
-    save: (store, name) => store.dispatch('savePersonTasksSearch', name),
+    save: (store, ...fields) =>
+      store.dispatch('savePersonTasksSearch', search(...fields)),
     remove: (store, query) =>
       store.dispatch('removePersonTasksSearch', query),
     load: store =>
@@ -176,7 +187,8 @@ const lists = [
     listType: 'todos',
     key: 'all',
     queries: 'todoSearchQueries',
-    save: (store, name) => store.dispatch('saveTodoSearch', name),
+    save: (store, ...fields) =>
+      store.dispatch('saveTodoSearch', search(...fields)),
     remove: (store, query) => store.dispatch('removeTodoSearch', query),
     load: store =>
       store.commit(USER_LOAD_TODOS_END, {
@@ -250,6 +262,45 @@ describe.each(lists)(
       expect(names(store.getters[queries])).toEqual(['done', 'wip'])
     })
 
+    test('saves all that the search filter modal asks for', async () => {
+      const store = buildStore(modules)
+      load(store)
+      client.ppost.mockResolvedValueOnce(savedSearch('f1', 'mine'))
+
+      await save(store, 'mine', {
+        search_query: 'anim=wip',
+        is_shared: true,
+        search_filter_group_id: 'g1',
+        department_id: 'd1'
+      })
+
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/data/user/filters',
+        expect.objectContaining({
+          list_type: listType,
+          name: 'mine',
+          query: 'anim=wip',
+          is_shared: true,
+          search_filter_group_id: 'g1',
+          department_id: 'd1'
+        })
+      )
+    })
+
+    // Two searches can share a name, in different filter groups.
+    test('saves a name the list already holds', async () => {
+      const store = buildStore(modules)
+      load(store)
+      client.ppost
+        .mockResolvedValueOnce(savedSearch('f1', 'wip'))
+        .mockResolvedValueOnce(savedSearch('f2', 'wip'))
+
+      await save(store, 'wip')
+      await save(store, 'wip', { search_filter_group_id: 'g1' })
+
+      expect(store.getters[queries].map(({ id }) => id)).toEqual(['f1', 'f2'])
+    })
+
     // Two searches can share a name, in different filter groups.
     test('removes only the search asked for', async () => {
       userStore.state.userFilters = {
@@ -270,6 +321,22 @@ describe.each(lists)(
     })
   }
 )
+
+test('saves a search of a task type with its entity type', async () => {
+  const store = buildStore({ tasks: tasksStore })
+  loadShots(store)
+  client.ppost.mockResolvedValueOnce({ id: 'f1', name: 'wip' })
+
+  await store.dispatch('saveTaskSearch', {
+    ...search('wip'),
+    entity_type: 'Asset'
+  })
+
+  expect(client.ppost).toHaveBeenCalledWith(
+    '/api/data/user/filters',
+    expect.objectContaining({ list_type: 'task', entity_type: 'Asset' })
+  )
+})
 
 const groupLists = [
   {

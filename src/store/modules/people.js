@@ -568,16 +568,10 @@ const actions = {
     commit(SET_PERSON_TASKS_SEARCH, searchText)
   },
 
-  async savePersonTasksSearch({ commit }, searchQuery) {
-    if (
-      state.personTaskSearchQueries.some(query => query.name === searchQuery)
-    ) {
-      return
-    }
-    searchQuery = await peopleApi.createFilter(
+  async savePersonTasksSearch({ commit }, searchFilter) {
+    const searchQuery = await peopleApi.createFilter(
       'persontasks',
-      searchQuery,
-      searchQuery,
+      searchFilter,
       null,
       null
     )
@@ -684,14 +678,10 @@ const actions = {
     })
   },
 
-  async savePeopleSearch({ commit }, searchQuery) {
-    if (state.peopleSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
-    searchQuery = await peopleApi.createFilter(
+  async savePeopleSearch({ commit }, searchFilter) {
+    const searchQuery = await peopleApi.createFilter(
       'people',
-      searchQuery,
-      searchQuery,
+      searchFilter,
       null,
       null
     )

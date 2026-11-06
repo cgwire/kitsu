@@ -36,13 +36,15 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 
 import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
+import { buildSearchQueryListStub } from '../fixtures/search-query-list'
 
 const currentUser = { id: 'person-1', role: 'admin' }
 
 const mountPage = async ({
   user = currentUser,
   query = {},
-  getters = {}
+  getters = {},
+  stubs = {}
 } = {}) => {
   routeHolder.route = reactive({ params: {}, query })
   const resolved = () => vi.fn(() => Promise.resolve())
@@ -84,9 +86,11 @@ const mountPage = async ({
       stubs: {
         SearchField: {
           name: 'SearchField',
+          props: { canSave: { type: Boolean, default: false } },
           template: '<div />',
           methods: { getValue: () => '', setValue: () => {} }
-        }
+        },
+        ...stubs
       }
     }
   })
@@ -104,6 +108,34 @@ const mountPage = async ({
 }
 
 describe('People page', () => {
+  describe('saved searches', () => {
+    const searchField = wrapper =>
+      wrapper.findComponent({ name: 'SearchField' })
+
+    it('opens the search filter modal on Save', async () => {
+      const SearchQueryList = buildSearchQueryListStub()
+      const { wrapper } = await mountPage({ stubs: { SearchQueryList } })
+
+      searchField(wrapper).vm.$emit('save', 'ada')
+
+      expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('ada')
+      wrapper.unmount()
+    })
+
+    // The list that opens the modal shows once the people are loaded.
+    it('offers the Save button once the people are loaded', async () => {
+      const loading = await mountPage({
+        getters: { isPeopleLoading: () => true }
+      })
+      const loaded = await mountPage()
+
+      expect(searchField(loading.wrapper).props('canSave')).toBe(false)
+      expect(searchField(loaded.wrapper).props('canSave')).toBe(true)
+      loading.wrapper.unmount()
+      loaded.wrapper.unmount()
+    })
+  })
+
   describe('edit confirmation', () => {
     it('asks for a confirmation when the admin lowers their own role', async () => {
       const { actions, submitEdit, downgradeModal } = await mountPage()

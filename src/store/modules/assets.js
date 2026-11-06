@@ -733,13 +733,10 @@ const actions = {
     commit(SET_SHARED_ASSET_SEARCH, { assetSearch })
   },
 
-  saveAssetSearch({ commit, state, rootGetters }, searchQuery) {
-    if (state.assetSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveAssetSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter('asset', searchQuery, searchQuery, production.id, null)
+      .createFilter('asset', searchFilter, production.id, null)
       .then(searchQuery => {
         commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
         return searchQuery

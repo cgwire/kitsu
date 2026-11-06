@@ -480,12 +480,9 @@ const actions = {
     }
   },
 
-  saveTodoSearch({ commit, rootGetters }, searchQuery) {
-    if (state.todoSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveTodoSearch({ commit }, searchFilter) {
     return peopleApi
-      .createFilter('todos', searchQuery, searchQuery, null, null)
+      .createFilter('todos', searchFilter, null, null)
       .then(searchQuery => {
         commit(SAVE_TODO_SEARCH_END, { searchQuery })
         return searchQuery

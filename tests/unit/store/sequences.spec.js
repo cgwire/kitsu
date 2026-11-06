@@ -1009,7 +1009,10 @@ describe('Sequences store, saved searches', () => {
     reloadSequences(store)
     client.ppost.mockResolvedValueOnce({ id: 'f1', name: 'wip' })
 
-    await store.dispatch('saveSequenceSearch', 'wip')
+    await store.dispatch('saveSequenceSearch', {
+      name: 'wip',
+      search_query: 'wip'
+    })
 
     expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
       list_type: 'sequence',

@@ -1,5 +1,10 @@
-import { flushPromises, RouterLinkStub, shallowMount } from '@vue/test-utils'
-import { nextTick } from 'vue'
+import {
+  flushPromises,
+  mount,
+  RouterLinkStub,
+  shallowMount
+} from '@vue/test-utils'
+import { h, nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
@@ -30,7 +35,9 @@ const group = { id: 'group-1', name: 'Mine', color: '#ff3860', is_shared: false 
 const mountList = async ({
   type = 'shot',
   actions = {},
-  productionId
+  entityType,
+  productionId,
+  throughRef = false
 } = {}) => {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -49,18 +56,29 @@ const mountList = async ({
     },
     actions
   })
+  const props = {
+    type,
+    queries: [search],
+    groups: [group],
+    isGroupEnabled: true,
+    entityType,
+    productionId
+  }
+  const stubs = { RouterLink: RouterLinkStub }
+  if (throughRef) {
+    // A page holds the list by a template ref, which reaches only what the
+    // list exposes.
+    const page = { render: () => h(SearchQueryList, { ...props, ref: 'list' }) }
+    return mount(page, {
+      global: {
+        plugins: [store, router, i18n],
+        stubs: { ...stubs, EditSearchFilterModal: true }
+      }
+    })
+  }
   return shallowMount(SearchQueryList, {
-    props: {
-      type,
-      queries: [search],
-      groups: [group],
-      isGroupEnabled: true,
-      productionId
-    },
-    global: {
-      plugins: [store, router, i18n],
-      stubs: { RouterLink: RouterLinkStub }
-    }
+    props,
+    global: { plugins: [store, router, i18n], stubs }
   })
 }
 
@@ -170,6 +188,138 @@ describe.each([
     await flushPromises()
 
     expect(remove).toHaveBeenCalledWith(expect.anything(), search)
+  })
+})
+
+// The lists whose action does not follow save<Type>Search are listed too.
+describe.each([
+  ['asset', 'saveAssetSearch'],
+  ['breakdown', 'saveBreakdownSearch'],
+  ['edit', 'saveEditSearch'],
+  ['episode', 'saveEpisodeSearch'],
+  ['people', 'savePeopleSearch'],
+  ['person', 'savePersonTasksSearch'],
+  ['sequence', 'saveSequenceSearch'],
+  ['sequenceStat', 'saveSequenceSearch'],
+  ['shot', 'saveShotSearch'],
+  ['taskType', 'saveTaskSearch'],
+  ['todo', 'saveTodoSearch']
+])('SearchQueryList of type %s', (type, action) => {
+  test(`saves a new search through ${action}`, async () => {
+    const save = vi.fn(() => Promise.resolve())
+    const wrapper = await mountList({ type, actions: { [action]: save } })
+
+    wrapper.vm.addSearch('anim=wip')
+    await nextTick()
+    wrapper
+      .findComponent(EditSearchFilterModal)
+      .vm.$emit('confirm', { id: null, name: 'mine' })
+    await flushPromises()
+
+    expect(save.mock.calls[0][1]).toEqual({
+      id: null,
+      name: 'mine',
+      entity_type: null
+    })
+  })
+})
+
+describe('SearchQueryList, additions', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const addSearch = async (wrapper, searchQuery = 'anim=wip') => {
+    wrapper.vm.addSearch(searchQuery)
+    await nextTick()
+    return wrapper.findComponent(EditSearchFilterModal)
+  }
+
+  test('opens the search filter modal for a page holding the list', async () => {
+    const wrapper = await mountList({ throughRef: true })
+
+    wrapper.vm.$refs.list.addSearch('anim=wip')
+    await nextTick()
+
+    expect(
+      wrapper.findComponent(EditSearchFilterModal).props('searchQueryToEdit')
+    ).toEqual({ name: 'anim=wip', search_query: 'anim=wip' })
+  })
+
+  test('opens the search filter modal on the search', async () => {
+    const wrapper = await mountList()
+
+    const modal = await addSearch(wrapper)
+
+    expect(modal.props('searchQueryToEdit')).toEqual({
+      name: 'anim=wip',
+      search_query: 'anim=wip'
+    })
+  })
+
+  test('closes the modal once the search is saved', async () => {
+    let endSave
+    const saveShotSearch = vi.fn(
+      () =>
+        new Promise(resolve => {
+          endSave = resolve
+        })
+    )
+    const wrapper = await mountList({ actions: { saveShotSearch } })
+
+    const modal = await addSearch(wrapper)
+    modal.vm.$emit('confirm', { name: 'mine' })
+    await nextTick()
+
+    expect(modal.props('isLoading')).toBe(true)
+    endSave()
+    await flushPromises()
+    expect(wrapper.findComponent(EditSearchFilterModal).exists()).toBe(false)
+  })
+
+  test('keeps the modal open on a failed save', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const wrapper = await mountList({
+      actions: { saveShotSearch: () => Promise.reject(new Error('down')) }
+    })
+
+    const modal = await addSearch(wrapper)
+    modal.vm.$emit('confirm', { name: 'mine' })
+    await flushPromises()
+
+    expect(modal.props('isError')).toBe(true)
+    expect(console.error).toHaveBeenCalledWith(new Error('down'))
+  })
+
+  test('opens without the error of a failed save', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const wrapper = await mountList({
+      actions: { saveShotSearch: () => Promise.reject(new Error('down')) }
+    })
+    const modal = await addSearch(wrapper)
+    modal.vm.$emit('confirm', { name: 'mine' })
+    await flushPromises()
+    await modal.vm.$emit('cancel')
+
+    const reopened = await addSearch(wrapper)
+
+    expect(reopened.props('isError')).toBe(false)
+    expect(console.error).toHaveBeenCalledWith(new Error('down'))
+  })
+
+  test('saves a search with the entity type of its list', async () => {
+    const saveTaskSearch = vi.fn(() => Promise.resolve())
+    const wrapper = await mountList({
+      type: 'taskType',
+      actions: { saveTaskSearch },
+      entityType: 'Asset'
+    })
+
+    const modal = await addSearch(wrapper)
+    modal.vm.$emit('confirm', { name: 'mine' })
+    await flushPromises()
+
+    expect(saveTaskSearch.mock.calls[0][1].entity_type).toBe('Asset')
   })
 })
 

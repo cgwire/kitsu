@@ -37,6 +37,13 @@ describe('lib/string', () => {
     expect(stringHelpers.shortenText(null, 4)).toEqual('')
   })
 
+  it('cutToLength', () => {
+    expect(stringHelpers.cutToLength('long text', 4)).toEqual('long')
+    expect(stringHelpers.cutToLength('short', 10)).toEqual('short')
+    // An emoji is one character for Zou, and two for a JavaScript string.
+    expect(stringHelpers.cutToLength('😀😀😀', 2)).toEqual('😀😀')
+  })
+
   it('slugify', () => {
     expect(stringHelpers.slugify('text spécial', 0)).toEqual('text_special')
   })

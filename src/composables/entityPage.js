@@ -86,7 +86,6 @@ const LOADING = {
   edit: false,
   importing: false,
   restore: false,
-  savingSearch: false,
   stay: false
 }
 
@@ -108,8 +107,8 @@ const ERRORS = {
  * Options:
  * - type: 'asset' | 'edit' | 'episode' | 'sequence' | 'shot'
  * - pageName: the preference key prefix ('Shots')
- * - listRef, searchFieldRef, addThumbnailsModalRef, importModalRef:
- *   template refs
+ * - listRef, searchFieldRef, searchQueryListRef, addThumbnailsModalRef,
+ *   importModalRef: template refs
  * - reset: () => void, reloads the entities of the page
  * - loadEntities: () => Promise, the plain load run after a CSV import
  * - dataMatchers: ref of the CSV columns identifying an entity
@@ -123,6 +122,7 @@ export const useEntityPage = ({
   pageName,
   listRef,
   searchFieldRef,
+  searchQueryListRef,
   addThumbnailsModalRef = ref(null),
   importModalRef = ref(null),
   reset,
@@ -299,16 +299,8 @@ export const useEntityPage = ({
     searchFieldRef.value?.focus(options)
   }
 
-  const saveSearchQuery = async searchQuery => {
-    if (loading.savingSearch) return
-    loading.savingSearch = true
-    try {
-      await store.dispatch(`save${entityTypeName}Search`, searchQuery)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      loading.savingSearch = false
-    }
+  const saveSearchQuery = searchQuery => {
+    searchQueryListRef.value?.addSearch(searchQuery)
   }
 
   // Scroll and scope

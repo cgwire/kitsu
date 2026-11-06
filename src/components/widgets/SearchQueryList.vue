@@ -230,6 +230,13 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
 import EditSearchFilterGroupModal from '@/components/modals/EditSearchFilterGroupModal.vue'
 
+// The lists whose search saving action is not save<Type>Search.
+const SAVE_SEARCH_ACTIONS = {
+  person: 'savePersonTasksSearch',
+  sequenceStat: 'saveSequenceSearch',
+  taskType: 'saveTaskSearch'
+}
+
 // The lists whose search removal action is not remove<Type>Search.
 const REMOVE_SEARCH_ACTIONS = {
   person: 'removePersonTasksSearch',
@@ -254,6 +261,11 @@ const props = defineProps({
   isGroupEnabled: {
     type: Boolean,
     default: false
+  },
+  // Entity type of a list that saves its searches per entity type.
+  entityType: {
+    type: String,
+    default: null
   },
   type: {
     type: String,
@@ -396,6 +408,10 @@ const editSearch = searchQuery => {
   modals.edit = true
 }
 
+const addSearch = searchQuery => {
+  editSearch({ name: searchQuery, search_query: searchQuery })
+}
+
 const navigateToSearchQuery = searchQuery => {
   router.push(queryPaths.value[searchQuery.id] || { name: 'open-productions' })
 }
@@ -426,8 +442,16 @@ const confirmEditSearch = async searchFilter => {
   try {
     loading.edit = true
     errors.edit = false
-    searchFilter.project_id = props.productionId
-    await store.dispatch('updateSearchFilter', searchFilter)
+    if (searchFilter.id) {
+      searchFilter.project_id = props.productionId
+      await store.dispatch('updateSearchFilter', searchFilter)
+    } else {
+      const type = stringHelpers.capitalize(props.type)
+      await store.dispatch(
+        SAVE_SEARCH_ACTIONS[props.type] || `save${type}Search`,
+        { ...searchFilter, entity_type: props.entityType }
+      )
+    }
     modals.edit = false
   } catch (err) {
     console.error(err)
@@ -512,6 +536,8 @@ watch(
 watch(route, () => {
   setQueryPaths()
 })
+
+defineExpose({ addSearch })
 </script>
 
 <style lang="scss" scoped>

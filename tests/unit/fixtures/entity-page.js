@@ -60,6 +60,7 @@ const buildSearchFieldStub = () => {
     state,
     stub: {
       name: 'SearchField',
+      props: { canSave: { type: Boolean, default: false } },
       template: '<div />',
       methods: {
         getValue: () => state.value,

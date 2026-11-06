@@ -5,6 +5,7 @@ import { createStore } from 'vuex'
 import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import BooleanField from '@/components/widgets/BooleanField.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 // Labels render as their locale keys.
@@ -42,8 +43,15 @@ const mountModal = ({ isManager = true, productionId, ...props } = {}) => {
     global: {
       plugins: [store, i18n],
       stubs: {
-        BaseModal: { template: '<div><slot /></div>' },
-        TextField: { methods: { focus }, template: '<input />' }
+        BaseModal: {
+          props: ['title'],
+          template: '<div><h2>{{ title }}</h2><slot /></div>'
+        },
+        TextField: {
+          methods: { focus },
+          props: ['errored', 'errorText', 'maxlength', 'modelValue'],
+          template: '<input />'
+        }
       }
     }
   })
@@ -111,6 +119,131 @@ describe('EditSearchFilterModal', () => {
 
     expect(wrapper.emitted('confirm')).toBeUndefined()
     expect(focus).toHaveBeenCalledTimes(1)
+  })
+
+  describe('on a new search', () => {
+    const newSearch = { name: 'anim=wip', search_query: 'anim=wip' }
+
+    test('titles and fills itself from the search', () => {
+      const wrapper = mountModal({ searchQueryToEdit: newSearch })
+      const [name, query] = wrapper.findAllComponents(TextField)
+
+      expect(wrapper.find('h2').text()).toBe('main.search_query_add')
+      expect(wrapper.findComponent(ModalFooter).props('errorText')).toBe(
+        'main.search_query_add_error'
+      )
+      expect(name.props('modelValue')).toBe('anim=wip')
+      expect(query.props('modelValue')).toBe('anim=wip')
+    })
+
+    test('confirms the search with no id', () => {
+      const wrapper = mountModal({ searchQueryToEdit: newSearch })
+
+      wrapper.findComponent(ModalFooter).vm.$emit('confirm')
+
+      expect(wrapper.emitted('confirm')).toEqual([
+        [
+          {
+            ...search,
+            id: null,
+            name: 'anim=wip'
+          }
+        ]
+      ])
+    })
+
+    // A max length does not hold on a value set by script.
+    test('cuts its name to the length Zou takes', () => {
+      const long = `${'x'.repeat(199)} and more`
+      const wrapper = mountModal({
+        searchQueryToEdit: { name: long, search_query: long }
+      })
+
+      expect(
+        wrapper.findComponent(TextField).props('modelValue')
+      ).toBe('x'.repeat(199))
+    })
+
+    test('drops the department of a search no longer shared', async () => {
+      const wrapper = mountModal({
+        productionId: 'production-1',
+        searchQueryToEdit: newSearch
+      })
+      const sharing = wrapper.findComponent(BooleanField)
+
+      await sharing.vm.$emit('update:modelValue', 'true')
+      await wrapper
+        .findComponent(ComboboxDepartment)
+        .vm.$emit('update:modelValue', 'department-1')
+      await sharing.vm.$emit('update:modelValue', 'false')
+      wrapper.findComponent(ModalFooter).vm.$emit('confirm')
+
+      expect(wrapper.emitted('confirm')[0][0]).toMatchObject({
+        is_shared: false,
+        department_id: null
+      })
+    })
+
+    test('counts the length in characters', () => {
+      const emojis = '😀'.repeat(300)
+      const wrapper = mountModal({
+        searchQueryToEdit: { name: emojis, search_query: emojis }
+      })
+
+      expect(wrapper.findComponent(TextField).props('modelValue')).toBe(
+        '😀'.repeat(200)
+      )
+      expect(
+        wrapper.findAllComponents(TextField)[1].props('errored')
+      ).toBe(false)
+    })
+  })
+
+  test('titles itself as an edit on a saved search', () => {
+    const wrapper = mountModal({ searchQueryToEdit: toEdit(search) })
+
+    expect(wrapper.find('h2').text()).toBe('main.search_query_edit')
+    expect(wrapper.findComponent(ModalFooter).props('errorText')).toBe(
+      'main.search_query_edit_error'
+    )
+  })
+
+  test('limits its fields to what Zou takes', () => {
+    const wrapper = mountModal({ searchQueryToEdit: toEdit(search) })
+    const [name, query] = wrapper.findAllComponents(TextField)
+
+    expect(name.props('maxlength')).toBe(200)
+    expect(query.props('maxlength')).toBe(500)
+  })
+
+  describe('on a query too long to save', () => {
+    const tooLong = 'x'.repeat(501)
+
+    test('tells it and refuses to confirm', () => {
+      const wrapper = mountModal({
+        searchQueryToEdit: { name: 'long', search_query: tooLong }
+      })
+      const query = wrapper.findAllComponents(TextField)[1]
+
+      expect(query.props('errored')).toBe(true)
+      expect(query.props('errorText')).toBe('main.search_query_too_long')
+      expect(wrapper.findComponent(ModalFooter).props('isDisabled')).toBe(true)
+
+      query.vm.$emit('enter', tooLong)
+      expect(wrapper.emitted('confirm')).toBeUndefined()
+    })
+
+    test('takes it once shortened', async () => {
+      const wrapper = mountModal({
+        searchQueryToEdit: { name: 'long', search_query: tooLong }
+      })
+
+      await wrapper
+        .findAllComponents(TextField)[1]
+        .vm.$emit('update:modelValue', 'x'.repeat(500))
+
+      expect(wrapper.findComponent(ModalFooter).props('isDisabled')).toBe(false)
+    })
   })
 
   test('keeps the department of a shared search', () => {

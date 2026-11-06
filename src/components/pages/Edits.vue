@@ -6,7 +6,7 @@
           <div class="flexrow mb1">
             <search-field
               ref="edit-search-field"
-              :can-save="true"
+              :can-save="!isEditsLoading && !initialLoading"
               @change="onSearchTyped"
               @enter="onSearchChange"
               @save="saveSearchQuery"
@@ -65,6 +65,7 @@
 
           <div class="query-list">
             <search-query-list
+              ref="edit-search-query-list"
               :queries="editSearchQueries"
               type="edit"
               :production-id="currentProduction?.id"
@@ -307,6 +308,7 @@ const addThumbnailsModalRef = useTemplateRef('add-thumbnails-modal')
 const importModalRef = useTemplateRef('import-modal')
 const listRef = useTemplateRef('edit-list')
 const searchFieldRef = useTemplateRef('edit-search-field')
+const searchQueryListRef = useTemplateRef('edit-search-query-list')
 
 const historyEdit = ref({})
 const initialLoading = ref(true)
@@ -436,6 +438,7 @@ const {
   pageName: 'Edits',
   listRef,
   searchFieldRef,
+  searchQueryListRef,
   addThumbnailsModalRef,
   importModalRef,
   reset,

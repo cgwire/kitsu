@@ -278,15 +278,10 @@ const actions = {
     })
   },
 
-  saveBreakdownSearch({ commit, rootGetters }, searchQuery) {
-    if (
-      state.breakdownSearchQueries.some(query => query.name === searchQuery)
-    ) {
-      return
-    }
+  saveBreakdownSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter('breakdown', searchQuery, searchQuery, production.id, null)
+      .createFilter('breakdown', searchFilter, production.id, null)
       .then(searchQuery => {
         commit(SAVE_BREAKDOWN_SEARCH_END, { searchQuery, production })
         return searchQuery

@@ -315,13 +315,16 @@ export default {
     return client.pput(`/api/data/user/filters/${searchFilter.id}`, data)
   },
 
-  createFilter(listType, name, query, productionId, entityType) {
+  createFilter(listType, searchFilter, productionId, entityType) {
     const data = {
       list_type: listType,
-      name,
-      query,
+      name: searchFilter.name,
+      query: searchFilter.search_query,
       entity_type: entityType,
-      project_id: productionId
+      project_id: productionId,
+      is_shared: searchFilter.is_shared,
+      search_filter_group_id: searchFilter.search_filter_group_id,
+      department_id: searchFilter.department_id
     }
     return client.ppost('/api/data/user/filters', data)
   },

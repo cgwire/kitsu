@@ -1065,13 +1065,15 @@ const actions = {
     commit(REMOVE_SELECTED_TASK, task)
   },
 
-  saveTaskSearch({ commit, rootGetters }, { searchQuery, entityType }) {
-    if (state.taskSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveTaskSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter('task', searchQuery, searchQuery, production.id, entityType)
+      .createFilter(
+        'task',
+        searchFilter,
+        production.id,
+        searchFilter.entity_type
+      )
       .then(searchQuery => {
         commit(SAVE_TASK_SEARCH_END, { searchQuery, production })
         return searchQuery

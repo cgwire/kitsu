@@ -705,13 +705,10 @@ const actions = {
     })
   },
 
-  saveShotSearch({ commit, rootGetters }, searchQuery) {
-    if (state.shotSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveShotSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter('shot', searchQuery, searchQuery, production.id, null)
+      .createFilter('shot', searchFilter, production.id, null)
       .then(searchQuery => {
         commit(SAVE_SHOT_SEARCH_END, { searchQuery, production })
         return searchQuery

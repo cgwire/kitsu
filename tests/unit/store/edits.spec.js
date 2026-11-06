@@ -973,16 +973,17 @@ describe('Edits store, through a store', () => {
       ])
     })
 
-    test('saves a search once, then removes it', async () => {
+    test('saves a search, then removes it', async () => {
       const store = buildStore()
       load(store, [])
       client.ppost.mockResolvedValueOnce({ id: 'f2', name: 'opening' })
       client.pdel.mockResolvedValueOnce()
 
-      await store.dispatch('saveEditSearch', 'opening')
-      await store.dispatch('saveEditSearch', 'opening')
+      await store.dispatch('saveEditSearch', {
+        name: 'opening',
+        search_query: 'opening'
+      })
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
         list_type: 'edit',
         name: 'opening',

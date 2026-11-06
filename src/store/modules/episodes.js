@@ -290,19 +290,10 @@ const actions = {
     })
   },
 
-  saveEpisodeSearch({ commit, rootGetters }, searchQuery) {
-    if (state.episodeSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveEpisodeSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter(
-        'episode',
-        searchQuery,
-        searchQuery,
-        production.id,
-        'Episode'
-      )
+      .createFilter('episode', searchFilter, production.id, 'Episode')
       .then(searchQuery => {
         commit(ADD_EPISODE_SEARCH, searchQuery)
         return searchQuery

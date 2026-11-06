@@ -117,6 +117,7 @@
               v-show="!isActiveTab('productivity')"
             >
               <search-query-list
+                ref="person-search-query-list"
                 :queries="personTaskSearchQueries"
                 type="person"
               />
@@ -291,7 +292,6 @@ import {
   onBeforeUnmount,
   onMounted,
   onUnmounted,
-  reactive,
   ref,
   useTemplateRef,
   watch
@@ -358,11 +358,9 @@ const areFiltersFolded = ref(true)
 const productionId = ref(undefined)
 const selectedDate = ref(moment().format('YYYY-MM-DD'))
 const zoomLevel = ref(1)
-const loading = reactive({
-  savingSearch: false
-})
 
 const searchFieldRef = useTemplateRef('person-tasks-search-field')
+const searchQueryListRef = useTemplateRef('person-search-query-list')
 const taskListRef = useTemplateRef('task-list')
 const doneListRef = useTemplateRef('done-list')
 const timesheetListRef = useTemplateRef('timesheet-list')
@@ -869,17 +867,10 @@ const onSearchChange = search => {
   store.dispatch('setPersonTasksSearch', searchQuery)
 }
 
+// Folded on a phone, the filters hide the list that holds the modal.
 const saveSearchQuery = searchQuery => {
-  if (loading.savingSearch) {
-    return
-  }
-  loading.savingSearch = true
-  store
-    .dispatch('savePersonTasksSearch', searchQuery)
-    .catch(console.error)
-    .finally(() => {
-      loading.savingSearch = false
-    })
+  areFiltersFolded.value = false
+  searchQueryListRef.value?.addSearch(searchQuery)
 }
 
 const setPersonTasksScrollPosition = position =>

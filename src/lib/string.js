@@ -43,6 +43,11 @@ export default {
     return result
   },
 
+  // In characters, as Zou counts them: an emoji stays whole.
+  cutToLength(text, maxLength) {
+    return Array.from(text).slice(0, maxLength).join('')
+  },
+
   slugify(str) {
     str = str.replace(/^\s+|\s+$/g, '').toLowerCase()
 

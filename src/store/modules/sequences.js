@@ -299,19 +299,10 @@ const actions = {
     })
   },
 
-  saveSequenceSearch({ commit, rootGetters }, searchQuery) {
-    if (state.sequenceSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveSequenceSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter(
-        'sequence',
-        searchQuery,
-        searchQuery,
-        production.id,
-        'Sequence'
-      )
+      .createFilter('sequence', searchFilter, production.id, 'Sequence')
       .then(searchQuery => {
         commit(SAVE_SEQUENCE_SEARCH_END, { searchQuery, production })
         return searchQuery

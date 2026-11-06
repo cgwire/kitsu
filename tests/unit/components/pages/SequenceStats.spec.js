@@ -18,6 +18,8 @@ import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
+import { buildSearchQueryListStub } from '../../fixtures/search-query-list'
+
 const status = (count, frames) => ({
   done: { name: 'done', color: '#22d160', count, frames, drawings: 0 }
 })
@@ -46,7 +48,12 @@ const router = createRouter({
 
 let wrapper
 
-const mountPage = async ({ dispatch, getters = {}, query = {} } = {}) => {
+const mountPage = async ({
+  dispatch,
+  getters = {},
+  query = {},
+  stubs = {}
+} = {}) => {
   const store = createStore({
     getters: {
       currentEpisode: () => null,
@@ -78,7 +85,7 @@ const mountPage = async ({ dispatch, getters = {}, query = {} } = {}) => {
   wrapper = shallowMount(SequenceStats, {
     global: {
       plugins: [store, router],
-      stubs: { SearchField: false }
+      stubs: { SearchField: false, ...stubs }
     }
   })
   await flushPromises()
@@ -97,6 +104,22 @@ const findButton = icon =>
     .find(button => button.props('icon') === icon)
 
 describe('SequenceStats page', () => {
+  describe('saved searches', () => {
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    test('opens the search filter modal on Save', async () => {
+      const SearchQueryListStub = buildSearchQueryListStub()
+      await mountPage({ stubs: { SearchQueryList: SearchQueryListStub } })
+
+      wrapper.findComponent(SearchField).vm.$emit('save', 's01')
+
+      expect(SearchQueryListStub.methods.addSearch).toHaveBeenCalledWith('s01')
+    })
+  })
+
   describe('client', () => {
     afterEach(() => {
       wrapper?.unmount()

@@ -489,13 +489,10 @@ const actions = {
     })
   },
 
-  saveEditSearch({ commit, rootGetters }, searchQuery) {
-    if (state.editSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveEditSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter('edit', searchQuery, searchQuery, production.id, null)
+      .createFilter('edit', searchFilter, production.id, null)
       .then(searchQuery => {
         commit(SAVE_EDIT_SEARCH_END, { searchQuery, production })
         return searchQuery

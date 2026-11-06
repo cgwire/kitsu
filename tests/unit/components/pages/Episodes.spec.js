@@ -14,6 +14,7 @@ import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import Episodes from '@/components/pages/Episodes.vue'
 
 import { mountEntityPage, production } from '../../fixtures/entity-page'
+import { buildSearchQueryListStub } from '../../fixtures/search-query-list'
 import { recordUnhandledRejections } from '../../fixtures/unhandled-rejections'
 
 const mountPage = options =>
@@ -45,6 +46,15 @@ describe('Episodes page', () => {
 
     expect(dispatched('loadEpisodesWithTasks')).toHaveLength(0)
     expect(list.selectTaskFromQuery).toHaveBeenCalled()
+  })
+
+  test('opens the search filter modal on Save', async () => {
+    const SearchQueryList = buildSearchQueryListStub()
+    const { wrapper } = await mountPage({ stubs: { SearchQueryList } })
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('save', 'e01')
+
+    expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('e01')
   })
 
   test('writes the search in the URL', async () => {
@@ -268,6 +278,9 @@ describe('Episodes page, reload after a production switch', () => {
     expect(wrapper.findComponent({ name: 'SearchQueryList' }).exists()).toBe(
       false
     )
+    expect(wrapper.findComponent({ name: 'SearchField' }).props('canSave')).toBe(
+      false
+    )
   })
 
   test('clears the loading error once a reload succeeds', async () => {
@@ -334,15 +347,19 @@ describe('Episodes page, reload after a production switch', () => {
     )
     const savedSearches = () =>
       wrapper.findComponent({ name: 'SearchQueryList' })
+    const saveButton = () =>
+      wrapper.findComponent({ name: 'SearchField' }).props('canSave')
 
     await switchTo('production-2')
     expect(listOf(wrapper).props('isLoading')).toBe(true)
     expect(savedSearches().exists()).toBe(false)
+    expect(saveButton()).toBe(false)
     endLoad()
     await flushPromises()
 
     expect(listOf(wrapper).props('isLoading')).toBe(false)
     expect(savedSearches().exists()).toBe(true)
+    expect(saveButton()).toBe(true)
   })
 
   test('keeps the loading state until the latest load ends', async () => {

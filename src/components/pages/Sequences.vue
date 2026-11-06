@@ -6,7 +6,7 @@
           <div class="flexrow">
             <search-field
               ref="sequence-search-field"
-              :can-save="true"
+              :can-save="!isLoading && !initialLoading && !isLoadingError"
               @change="onSearchChange"
               @save="saveSearchQuery"
               placeholder="ex: e01 sequence=wip"
@@ -45,6 +45,7 @@
 
           <div class="query-list mt1">
             <search-query-list
+              ref="sequence-search-query-list"
               :queries="sequenceSearchQueries"
               type="sequence"
               :production-id="currentProduction?.id"
@@ -232,6 +233,7 @@ const contactSheetMode = false
 
 const listRef = useTemplateRef('sequence-list')
 const searchFieldRef = useTemplateRef('sequence-search-field')
+const searchQueryListRef = useTemplateRef('sequence-search-query-list')
 
 const initialLoading = ref(true)
 // No store action flags a load of this list or its failure.
@@ -344,6 +346,7 @@ const {
   pageName: 'Sequences',
   listRef,
   searchFieldRef,
+  searchQueryListRef,
   reset
 })
 

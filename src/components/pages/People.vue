@@ -29,7 +29,7 @@
       <search-field
         ref="people-search-field"
         class="search flexrow-item"
-        :can-save="true"
+        :can-save="!isPeopleLoading"
         @change="onSearchChange"
         @save="saveSearchQuery"
         placeholder="ex: John Doe"
@@ -57,6 +57,7 @@
 
     <div class="query-list">
       <search-query-list
+        ref="people-search-query-list"
         :queries="peopleSearchQueries"
         type="people"
         v-if="!isPeopleLoading"
@@ -246,6 +247,7 @@ const roleOptions = [
 // --------------------------------------------------------------------------
 
 const searchFieldRef = useTemplateRef('people-search-field')
+const searchQueryListRef = useTemplateRef('people-search-query-list')
 
 const activeTab = ref('active')
 const parsedCSV = ref([])
@@ -278,7 +280,6 @@ const loading = reactive({
   edit: false,
   invite: false,
   inviteLink: false,
-  savingSearch: false,
   updatingAvatar: false
 })
 const modals = reactive({
@@ -465,16 +466,8 @@ const onSearchChange = () => {
   setSearchInUrl()
 }
 
-const saveSearchQuery = async searchQuery => {
-  if (loading.savingSearch) return
-  loading.savingSearch = true
-  try {
-    await store.dispatch('savePeopleSearch', searchQuery)
-  } catch (err) {
-    console.error(err)
-  } finally {
-    loading.savingSearch = false
-  }
+const saveSearchQuery = searchQuery => {
+  searchQueryListRef.value?.addSearch(searchQuery)
 }
 
 // Unset filters stay out of the URL: the router drops undefined values.

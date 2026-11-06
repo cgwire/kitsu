@@ -35,8 +35,10 @@ import ErrorText from '@/components/widgets/ErrorText.vue'
 
 import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
 import { buildRefusal } from '../fixtures/refusal'
+import { buildSearchQueryListStub } from '../fixtures/search-query-list'
 
 const SearchFieldStub = {
+  props: { canSave: { type: Boolean, default: false } },
   template: '<div />',
   methods: {
     focus: () => {},
@@ -181,6 +183,69 @@ const taskTypeRoutes = [
 describe('TaskType page', () => {
   afterEach(() => {
     vi.useRealTimers()
+  })
+
+  describe('saved searches', () => {
+    const TaskListStub = {
+      template: '<div />',
+      methods: { resetSelection: () => {} }
+    }
+
+    const mountList = async (initTaskType = vi.fn()) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const SearchQueryList = buildSearchQueryListStub()
+      const { wrapper } = await mountPage({
+        section: 'tasks',
+        stubs: { SearchQueryList, TaskList: TaskListStub },
+        actions: { initTaskType, loadScheduleItems: vi.fn(() => []) },
+        getters: {
+          assetValidationColumns: () => [],
+          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' })
+        }
+      })
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+      return { SearchQueryList, wrapper }
+    }
+
+    // The list that opens the modal shows once the entities are loaded.
+    it('offers the Save button once the tasks are loaded', async () => {
+      let endLoad
+      const { wrapper } = await mountList(
+        () =>
+          new Promise(resolve => {
+            endLoad = resolve
+          })
+      )
+      const saveButton = () =>
+        wrapper.findComponent(SearchFieldStub).props('canSave')
+
+      expect(saveButton()).toBe(false)
+      endLoad()
+      await flushPromises()
+
+      expect(saveButton()).toBe(true)
+      wrapper.unmount()
+    })
+
+    // The list holds the modal: it has to be there for the first search.
+    it('opens the search filter modal with no saved search', async () => {
+      const { SearchQueryList, wrapper } = await mountList()
+
+      wrapper.findComponent(SearchFieldStub).vm.$emit('save', 'retake')
+
+      expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('retake')
+      wrapper.unmount()
+    })
+
+    it('saves its searches under its entity type', async () => {
+      const { SearchQueryList, wrapper } = await mountList()
+
+      expect(wrapper.findComponent(SearchQueryList).props('entityType')).toBe(
+        'Asset'
+      )
+      wrapper.unmount()
+    })
   })
 
   // The estimation helper and the schedule widget send the estimation in

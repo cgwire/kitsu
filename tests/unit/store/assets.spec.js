@@ -2740,17 +2740,18 @@ describe('Assets store, list workflow', () => {
       expect(names(store.getters.displayedAssets)).toEqual(['Rock', 'Tree'])
     })
 
-    test('saves a search once, then removes it', async () => {
+    test('saves a search, then removes it', async () => {
       const store = buildStore()
       load(store, [buildAsset('a1', 'Rock')])
       const filter = { id: 'f1', name: 'props', search_query: 'props' }
       client.ppost.mockResolvedValueOnce(filter)
       client.pdel.mockResolvedValue()
 
-      await store.dispatch('saveAssetSearch', 'props')
-      await store.dispatch('saveAssetSearch', 'props')
+      await store.dispatch('saveAssetSearch', {
+        name: 'props',
+        search_query: 'props'
+      })
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
         list_type: 'asset',
         name: 'props',

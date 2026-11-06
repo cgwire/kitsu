@@ -10,6 +10,7 @@ import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import Sequences from '@/components/pages/Sequences.vue'
 
 import { mountEntityPage, production } from '../../fixtures/entity-page'
+import { buildSearchQueryListStub } from '../../fixtures/search-query-list'
 import { recordUnhandledRejections } from '../../fixtures/unhandled-rejections'
 
 // The store holds the sequences of the production: the page decides on
@@ -153,6 +154,9 @@ describe('Sequences page, reload after a production switch', () => {
     expect(wrapper.findComponent({ name: 'SearchQueryList' }).exists()).toBe(
       false
     )
+    expect(wrapper.findComponent({ name: 'SearchField' }).props('canSave')).toBe(
+      false
+    )
   })
 
   test('clears the loading error once a reload succeeds', async () => {
@@ -200,15 +204,19 @@ describe('Sequences page, reload after a production switch', () => {
     )
     const savedSearches = () =>
       wrapper.findComponent({ name: 'SearchQueryList' })
+    const saveButton = () =>
+      wrapper.findComponent({ name: 'SearchField' }).props('canSave')
 
     await switchTo('production-2')
     expect(listOf(wrapper).props('isLoading')).toBe(true)
     expect(savedSearches().exists()).toBe(false)
+    expect(saveButton()).toBe(false)
     endLoad()
     await flushPromises()
 
     expect(listOf(wrapper).props('isLoading')).toBe(false)
     expect(savedSearches().exists()).toBe(true)
+    expect(saveButton()).toBe(true)
   })
 
   test('keeps the loading state until the latest load ends', async () => {
@@ -361,5 +369,26 @@ describe('Sequences page, first load', () => {
     })
 
     expect(rejections).toEqual([bug])
+  })
+})
+
+describe('Sequences page, saved searches', () => {
+  test('opens the search filter modal on Save', async () => {
+    const SearchQueryList = buildSearchQueryListStub()
+    const { wrapper } = await mountEntityPage(Sequences, {
+      listName: 'SequenceList',
+      getters: {
+        sequenceMap: new Map([
+          ['sequence-1', { id: 'sequence-1', project_id: production.id }]
+        ]),
+        sequenceValidationColumns: ['task-type-1']
+      },
+      stubs: { SearchQueryList }
+    })
+    await flushPromises()
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('save', 's01')
+
+    expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('s01')
   })
 })
