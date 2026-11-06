@@ -2,7 +2,11 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
+import lang from '@/lib/lang'
+
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
+
+import { mountWithI18n } from '../fixtures/i18n'
 
 const i18n = createI18n({
   legacy: false,
@@ -52,6 +56,46 @@ describe('widgets/TwoFactorAuthentication', () => {
     await wrapper.find('button').trigger('click')
 
     expect(wrapper.emitted('validate')).toBeUndefined()
+  })
+
+  // The code step of the login page sits under the language list.
+  describe('validation label', () => {
+    let wrapper = null
+
+    const mountLabel = async props => {
+      wrapper = mountWithI18n(TwoFactorAuthentication, {
+        props: {
+          preferredTwoFa: 'totp',
+          twoFasEnabled: ['totp'],
+          email: 'ada@example.com',
+          ...props
+        },
+        global: { plugins: [createStore({})] }
+      })
+      await flushPromises()
+    }
+
+    afterEach(async () => {
+      wrapper.unmount()
+      await lang.setLocale('en_US')
+      localStorage.removeItem('locale')
+    })
+
+    it('follows the language of the page', async () => {
+      await mountLabel()
+      expect(wrapper.find('button').text()).toBe('Verify')
+
+      await lang.setLocale('fr_FR')
+      await flushPromises()
+
+      expect(wrapper.find('button').text()).toBe('Vérifier')
+    })
+
+    it('leaves the label its parent gives', async () => {
+      await mountLabel({ textValidateButton: 'Enable' })
+
+      expect(wrapper.find('button').text()).toBe('Enable')
+    })
   })
 
   describe('with a FIDO device', () => {

@@ -12,7 +12,8 @@ files are organized, how to add or change a key, and how to add a whole language
   values).
 - Every other language is a JSON file whose messages are wrapped in a top-level
   `"default"` key (`{ "default": { … } }`) — this wrapper is **required**.
-- `src/locales/index.js` imports every locale into the map used by `i18n.js`.
+- `src/locales/index.js` keeps English and its overlays in the main bundle, and
+  lists the other locales in `localeLoaders`, loaded on demand.
 - Missing keys don't error: vue-i18n falls back to English
   (`fallbackLocale: 'en'`), so parity with `en.js` matters.
 - `en_nft.js` and `en_video-game.js` are English-only overlays that remap a few
@@ -44,24 +45,23 @@ agree with it.
 
 ## Add a language
 
-Five files, mirroring how `it` is wired:
+Four files, mirroring how `it` is wired:
 
 1. **`src/locales/<lang>.json`** — copy an existing JSON locale (keeps the
    required `"default"` wrapper), then translate every value at full key parity
    with `en.js`.
-2. **`src/locales/index.js`** — add the import and a `.default` map entry
-   (`xx: xx.default`), keeping the map alphabetical. Its key must match what
-   `setLocale` resolves to: the two-letter code, or the `LOCALE_MAP` `language`
-   for the Chinese variants.
+2. **`src/locales/index.js`** — add the loader to `localeLoaders`
+   (`xx: () => import('@/locales/xx.json')`), keeping the map alphabetical. Its
+   key must match what `setLocale` resolves to: the two-letter code, or the
+   `LOCALE_MAP` `language` for the Chinese variants.
 3. **`src/lib/lang.js`** — `import 'moment/locale/<code>'`. Add a `LOCALE_MAP`
    entry only when the vue-i18n key or the moment code differs from the first
    two letters of the profile value (today: only `zh_Hans_CN` / `zh_Hant_TW`).
+   Add `{ label: 'English name (Native name)', native: 'Native name', value: 'xx_XX' }`
+   to `languages`, alphabetical by English name.
 4. **`src/components/widgets/DateField.vue`** — import the date-fns locale and
    add it to `DATE_FNS_LOCALES` (keyed by two-letter code). The date picker uses
    date-fns; skip this and its calendar stays English.
-5. **`src/components/pages/Profile.vue`** — add
-   `{ label: 'English name (Native name)', value: 'xx_XX' }` to `localeOptions`,
-   alphabetical by English name.
 
 > **The profile `value` must be a valid Babel locale.** It is stored via
 > `babel.Locale.parse` in Zou, so it must parse: a language code, an optional

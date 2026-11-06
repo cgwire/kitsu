@@ -147,7 +147,10 @@ const OTPValue = ref('')
 const twoFactorPayload = ref({})
 const errorSendingEmail = ref(false)
 const errorRequestingFIDOChallenge = ref(false)
-const textValidateButtonOrVerify = ref('')
+
+const textValidateButtonOrVerify = computed(
+  () => props.textValidateButton || t('login.verify')
+)
 
 const placeholderInputText = computed(() => {
   switch (chosenTwoFA.value) {
@@ -277,11 +280,6 @@ const requestGetFIDOChallenge = () => {
 
 onMounted(() => {
   changeTwoFA(props.preferredTwoFa, false)
-  if (props.textValidateButton) {
-    textValidateButtonOrVerify.value = props.textValidateButton
-  } else {
-    textValidateButtonOrVerify.value = t('login.verify')
-  }
 })
 </script>
 

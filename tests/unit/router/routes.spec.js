@@ -20,12 +20,16 @@ vi.mock('bowser', () => ({
   default: { getParser: () => ({ satisfies: () => true }) }
 }))
 vi.mock('@/lib/init', () => ({ default: vi.fn() }))
-vi.mock('@/lib/lang', () => ({ default: { setLocale: vi.fn() } }))
+vi.mock('@/lib/lang', () => ({
+  default: { isSameLanguage: vi.fn(), setLocale: vi.fn() }
+}))
 vi.mock('@/lib/sentry', () => ({ default: { setContext: vi.fn() } }))
 vi.mock('@/lib/timezone', () => ({ default: { setTimezone: vi.fn() } }))
 vi.mock('@/store', () => ({
   default: {
     commit: vi.fn(),
+    dispatch: vi.fn(),
+    getters: {},
     state: { productions: { openProductions: [] } }
   }
 }))
@@ -71,14 +75,18 @@ vi.mock('vue-router', async importOriginal => {
 import auth from '@/lib/auth'
 import { markRequestFailure } from '@/lib/errors'
 import init from '@/lib/init'
+import lang from '@/lib/lang'
+import pickedLocale from '@/lib/picked-locale'
 import router from '@/router'
 import store from '@/store'
 import productionsStore from '@/store/modules/productions'
 import taskTypeStore from '@/store/modules/tasktypes'
+import userStore from '@/store/modules/user'
 import { routes } from '@/router/routes'
 
 const appLoginRoute = routes.find(route => route.name === 'app-login')
 const homeRoute = routes.find(route => route.name === 'home')
+const login2FARoute = routes.find(route => route.name === 'login-2fa')
 const mainRoute = routes.find(route => route.path === '/')
 
 // The API client marks the failures of its requests.
@@ -387,6 +395,143 @@ describe('router/routes', () => {
     })
   })
 
+  test('flags the pages a visitor reads before login', () => {
+    const names = router
+      .getRoutes()
+      .filter(({ meta }) => meta.isPublic)
+      .map(({ name }) => name)
+
+    expect(names.sort()).toEqual([
+      'first-connection',
+      'login',
+      'reset-change-password',
+      'reset-password'
+    ])
+  })
+
+  // The language picked before login lands in the profile first: the guard
+  // then applies the profile.
+  describe('language picked before login', () => {
+    const to = { matched: [{ meta: {} }] }
+
+    const pick = locale => {
+      pickedLocale.set(locale)
+      store.dispatch.mockImplementation(async (action, value) => {
+        if (action === 'saveUserLocale') userStore.state.user.locale = value
+      })
+    }
+
+    beforeEach(() => {
+      vi.stubGlobal('window', { navigator: { userAgent: '' } })
+    })
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+      userStore.state.user.locale = 'en'
+      delete userStore.state.user.preview_project_id
+      store.dispatch.mockReset()
+      pickedLocale.clear()
+      lang.isSameLanguage.mockReset()
+      lang.setLocale.mockClear()
+    })
+
+    test.each([
+      ['home', homeRoute],
+      ['main', mainRoute],
+      ['app login', appLoginRoute]
+    ])('saves it and applies it, %s guard', async (_, route) => {
+      pick('fr_FR')
+
+      await route.beforeEnter(to, {})
+
+      expect(store.dispatch).toHaveBeenCalledWith('saveUserLocale', 'fr_FR')
+      expect(pickedLocale.get()).toBeNull()
+      expect(lang.setLocale).toHaveBeenLastCalledWith('fr_FR')
+    })
+
+    test('writes nothing without a pick', async () => {
+      await mainRoute.beforeEnter(to, {})
+
+      expect(store.dispatch).not.toHaveBeenCalledWith(
+        'saveUserLocale',
+        expect.anything()
+      )
+      expect(lang.setLocale).toHaveBeenLastCalledWith('en')
+    })
+
+    test('writes nothing for the language of the profile', async () => {
+      pick('fr_FR')
+      lang.isSameLanguage.mockReturnValue(true)
+
+      await mainRoute.beforeEnter(to, {})
+
+      expect(lang.isSameLanguage).toHaveBeenCalledWith('fr_FR', 'en')
+      expect(store.dispatch).not.toHaveBeenCalledWith(
+        'saveUserLocale',
+        expect.anything()
+      )
+      expect(pickedLocale.get()).toBeNull()
+    })
+
+    // Zou refuses it until the setup is over: the next guard saves it then.
+    test('keeps the pick of a session waiting for its 2FA setup', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = buildRequestFailure()
+      failure.body = { two_factor_authentication_required: true }
+      pickedLocale.set('fr_FR')
+      store.dispatch.mockRejectedValue(failure)
+
+      await mainRoute.beforeEnter(to, {})
+
+      expect(consoleError).not.toHaveBeenCalled()
+      expect(pickedLocale.get()).toBe('fr_FR')
+      expect(lang.setLocale).toHaveBeenLastCalledWith('en')
+    })
+
+    // Kept, it would land in the next profile of the tab, or over a language
+    // set later in the profile.
+    test('drops a pick Zou refuses for any other reason', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = buildRequestFailure()
+      pickedLocale.set('fr_FR')
+      store.dispatch.mockRejectedValue(failure)
+
+      await mainRoute.beforeEnter(to, {})
+
+      expect(consoleError).toHaveBeenCalledWith(failure)
+      expect(pickedLocale.get()).toBeNull()
+      expect(lang.setLocale).toHaveBeenLastCalledWith('en')
+    })
+
+    // Zou refuses every write of these read-only accounts.
+    test('sends nothing for a preview account', async () => {
+      userStore.state.user.preview_project_id = 'production-1'
+      pick('fr_FR')
+
+      await mainRoute.beforeEnter(to, {})
+
+      expect(store.dispatch).not.toHaveBeenCalledWith(
+        'saveUserLocale',
+        expect.anything()
+      )
+      expect(pickedLocale.get()).toBeNull()
+      expect(lang.setLocale).toHaveBeenLastCalledWith('en')
+    })
+
+    test('leaves a bug to Sentry', async () => {
+      const bug = buildBug()
+      pickedLocale.set('fr_FR')
+      store.dispatch.mockRejectedValue(bug)
+
+      await expect(mainRoute.beforeEnter(to, {})).rejects.toBe(bug)
+    })
+  })
+
   describe('main guard', () => {
     const runGuard = to => mainRoute.beforeEnter(to, {})
 
@@ -524,6 +669,37 @@ describe('router/routes', () => {
       const bug = buildBug()
       init.mockRejectedValue(bug)
       await expect(homeRoute.beforeEnter({}, {})).rejects.toBe(bug)
+    })
+  })
+
+  describe('mandatory 2FA setup guard', () => {
+    afterEach(() => {
+      store.getters.user = undefined
+      pickedLocale.clear()
+      lang.setLocale.mockClear()
+    })
+
+    test('sends a visitor to the login page', () => {
+      expect(login2FARoute.beforeEnter({}, {})).toEqual({ name: 'login' })
+      expect(lang.setLocale).not.toHaveBeenCalled()
+    })
+
+    test('reads the language of the profile', () => {
+      store.getters.user = { locale: 'fr_FR' }
+
+      expect(login2FARoute.beforeEnter({}, {})).toBeUndefined()
+
+      expect(lang.setLocale).toHaveBeenCalledWith('fr_FR')
+    })
+
+    // Zou refuses the pick until the setup is over: the next guard saves it.
+    test('reads the language picked before login', () => {
+      store.getters.user = { locale: 'en_US' }
+      pickedLocale.set('fr_FR')
+
+      login2FARoute.beforeEnter({}, {})
+
+      expect(lang.setLocale).toHaveBeenCalledWith('fr_FR')
     })
   })
 

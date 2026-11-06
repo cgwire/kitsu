@@ -56,7 +56,7 @@
           />
           <combobox
             :label="$t('profile.language')"
-            :options="localeOptions"
+            :options="languages"
             v-model="form.locale"
             @update:model-value="localeChanged"
           />
@@ -202,7 +202,7 @@ import { useHead } from '@unhead/vue'
 import { useStore } from 'vuex'
 
 import { getCountryOptions } from '@/lib/countries'
-import lang, { localeCode } from '@/lib/lang'
+import lang, { languages, localeCode } from '@/lib/lang'
 import { DATE_DISPLAY_FORMATS } from '@/lib/time'
 
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
@@ -252,28 +252,6 @@ const changeAvatar = reactive({
 
 const loading = reactive({ info: false, notifications: false })
 const errors = reactive({ info: false, notifications: false })
-
-// Locale list — alphabetical by the English name (as in the original page),
-// with the native name in parentheses so it stays recognizable when the UI
-// language doesn't match.
-const localeOptions = [
-  { label: 'Chinese (简体中文)', value: 'zh_Hans_CN' },
-  { label: 'Chinese TC (繁體中文)', value: 'zh_Hant_TW' },
-  { label: 'Danish (Dansk)', value: 'da_DK' },
-  { label: 'Dutch (Nederlands)', value: 'nl_NL' },
-  { label: 'English', value: 'en_US' },
-  { label: 'French (Français)', value: 'fr_FR' },
-  { label: 'German (Deutsch)', value: 'de_DE' },
-  { label: 'Hungarian (Magyar)', value: 'hu_HU' },
-  { label: 'Italian (Italiano)', value: 'it_IT' },
-  { label: 'Japanese (日本語)', value: 'ja_JP' },
-  { label: 'Korean (한국어)', value: 'ko_KR' },
-  { label: 'Persian (فارسی)', value: 'fa_IR' },
-  { label: 'Polish (Polski)', value: 'pl_PL' },
-  { label: 'Portuguese Brazilian (Português)', value: 'pt_BR' },
-  { label: 'Russian (Русский)', value: 'ru_RU' },
-  { label: 'Spanish (Español)', value: 'es_ES' }
-]
 
 // Computed
 

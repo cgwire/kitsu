@@ -229,7 +229,9 @@ const store = useStore()
 const searchFieldRef = useTemplateRef('searchField')
 
 const filteredProductions = ref([])
-const isContributions = ref(false)
+const isContributionsHidden = ref(
+  preferences.getPreference('open-productions:contributions') === 'false'
+)
 const isWelcome = ref(false)
 // The client overviews, by production id.
 const overviews = ref({})
@@ -247,6 +249,10 @@ const organisation = computed(() => store.getters.organisation)
 const lastProductionScreen = computed(() => store.getters.lastProductionScreen)
 const mainConfig = computed(() => store.getters.mainConfig)
 const openProductions = computed(() => store.getters.openProductions)
+
+const isContributions = computed(
+  () => mainConfig.value.is_self_hosted && !isContributionsHidden.value
+)
 
 // Functions
 // --------------------------------------------------------------------------
@@ -339,7 +345,7 @@ const loadOverviews = () => {
 }
 
 const hideContributions = () => {
-  isContributions.value = false
+  isContributionsHidden.value = true
   preferences.setPreference('open-productions:contributions', false)
 }
 
@@ -365,9 +371,6 @@ watch(
 // --------------------------------------------------------------------------
 
 onMounted(() => {
-  isContributions.value =
-    mainConfig.value.is_self_hosted &&
-    preferences.getPreference('open-productions:contributions') !== 'false'
   isWelcome.value =
     isCurrentUserClient.value &&
     preferences.getPreference('open-productions:client-welcome') !== 'false'
