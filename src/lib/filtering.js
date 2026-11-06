@@ -159,6 +159,11 @@ const applyFiltersFunctions = {
     return isOk
   },
 
+  empty(entry, filter, taskMap) {
+    const isEmpty = getFilterTasks(entry, filter, taskMap).length === 0
+    return filter.excluding ? !isEmpty : isEmpty
+  },
+
   exclusion(entry, filter, taskMap) {
     return !filter.excludedIds[entry.id]
   },
@@ -499,6 +504,13 @@ export const getTaskTypeFilters = (taskTypes, taskStatuses, queryText) => {
             taskTypes: matchedTaskTypes,
             assigned: true,
             type: 'assignation'
+          })
+        } else if (value === 'empty') {
+          results.push({
+            taskType: matchedTaskTypes[0],
+            taskTypes: matchedTaskTypes,
+            type: 'empty',
+            excluding
           })
         } else if (value) {
           const values = value
