@@ -229,6 +229,19 @@ describe('Episodes store', () => {
   })
 
   describe('NEW_EPISODE_END', () => {
+    test('keeps the metadata typed in the creation form', () => {
+      const state = { episodes: [], displayedEpisodes: [], episodeSorting: [] }
+
+      episodesStore.mutations.NEW_EPISODE_END(state, {
+        id: 'episode-new',
+        name: 'E04',
+        project_id: 'production-1',
+        data: { prod_order: '4' }
+      })
+
+      expect(state.displayedEpisodes[0].data).toEqual({ prod_order: '4' })
+    })
+
     // The displayed list is a search result: taking it for the whole
     // dataset dropped every episode the search filtered out, and the topbar
     // validates the route episode against that list.

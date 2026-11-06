@@ -747,7 +747,7 @@ const mutations = {
     episode.preview_file_id = ''
     episode.tasks = []
     episode.validations = new Map()
-    episode.data = {}
+    episode.data = episode.data || {}
 
     state.episodeSelectionGrid = buildSelectionGrid()
 
