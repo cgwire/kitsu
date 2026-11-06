@@ -67,7 +67,7 @@ const mountPage = async ({ getters = {}, query = {} } = {}) => {
       episodeRetakeStats: () => episodeRetakeStats,
       episodeSearchText: () => '',
       episodeStats: () => episodeStats,
-      episodeValidationColumns: () => ['layout', 'anim'],
+      episodeStatColumns: () => ['layout', 'anim'],
       clientAccess: () => ({ isTaskTypeVisible: () => true }),
       isCurrentUserClient: () => false,
       isPaperProduction: () => false,

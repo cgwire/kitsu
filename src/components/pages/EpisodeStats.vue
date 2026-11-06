@@ -142,9 +142,7 @@ const displayedEpisodes = computed(() => store.getters.displayedEpisodes)
 const episodeMap = computed(() => store.getters.episodeMap)
 const episodeRetakeStats = computed(() => store.getters.episodeRetakeStats)
 const episodeStats = computed(() => store.getters.episodeStats)
-const episodeValidationColumns = computed(
-  () => store.getters.episodeValidationColumns
-)
+const episodeStatColumns = computed(() => store.getters.episodeStatColumns)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isPaperProduction = computed(() => store.getters.isPaperProduction)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -186,7 +184,7 @@ const {
   preferenceKey: 'stats:episode-display-mode',
   rowsParam: 'hiddenEpisodes',
   rows: episodeEntries,
-  columnIds: episodeValidationColumns
+  columnIds: episodeStatColumns
 })
 
 const displayedStats = computed(() => getDisplayedStats(episodeStats.value))

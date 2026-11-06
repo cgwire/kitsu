@@ -721,11 +721,11 @@ describe('Episodes store, retake stats', () => {
   // Both stats count the same tasks: a retake load that is skipped or fails
   // must not empty the table.
   test('keeps the columns of the status stats', () => {
-    const state = { episodeValidationColumns: ['layout', 'anim'] }
+    const state = { episodeStatColumns: ['layout', 'anim'] }
     episodesStore.mutations.SET_EPISODE_RETAKE_STATS(state, {
       episodeRetakeStats: {}
     })
-    expect(state.episodeValidationColumns).toEqual(['layout', 'anim'])
+    expect(state.episodeStatColumns).toEqual(['layout', 'anim'])
     expect(state.episodeRetakeStats).toEqual({})
   })
 })
@@ -1139,10 +1139,30 @@ describe('Episodes store, through a store', () => {
       '/api/data/projects/p1/episodes/stats'
     )
     expect(store.getters.episodeStats).toEqual(episodeStats)
-    expect(store.getters.episodeValidationColumns).toEqual([
-      'tt-layout',
-      'tt-anim'
-    ])
+    expect(store.getters.episodeStatColumns).toEqual(['tt-layout', 'tt-anim'])
+  })
+
+  // The stats count the tasks of the shots: their columns are not the ones
+  // of the Episodes page, which takes its own for a list already loaded.
+  test('leaves the columns of the list to the list', async () => {
+    const { store } = await buildStore()
+    store.state.episodes.episodeValidationColumns = ['tt-storyboard']
+    client.pget.mockResolvedValueOnce({
+      all: { all: { name: 'All' }, 'tt-anim': { done: 1 } }
+    })
+
+    await store.dispatch('loadEpisodeStats', 'p1')
+
+    expect(store.getters.episodeValidationColumns).toEqual(['tt-storyboard'])
+  })
+
+  test('forgets the columns of the list with the list', async () => {
+    const { store } = await buildStore()
+    store.state.episodes.episodeValidationColumns = ['tt-storyboard']
+
+    await store.dispatch('clearEpisodes')
+
+    expect(store.getters.episodeValidationColumns).toEqual([])
   })
 
   test('reloads the stats of a TV show', async () => {

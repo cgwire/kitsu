@@ -194,7 +194,8 @@ const initialState = {
   selectedEpisodes: new Map(),
 
   episodeRetakeStats: {},
-  episodeStats: {}
+  episodeStats: {},
+  episodeStatColumns: []
 }
 
 const state = { ...initialState }
@@ -220,6 +221,7 @@ const getters = {
   episodeMap: state => cache.episodeMap,
   episodeRetakeStats: state => state.episodeRetakeStats,
   episodeStats: state => state.episodeStats,
+  episodeStatColumns: state => state.episodeStatColumns,
 
   episodeSearchText: state => state.episodeSearchText,
   episodeListScrollPosition: state => state.episodeListScrollPosition,
@@ -556,6 +558,8 @@ const mutations = {
 
   [CLEAR_EPISODES](state) {
     state.episodes = []
+    // The Episodes page takes them for a list already loaded with its tasks.
+    state.episodeValidationColumns = []
     state.isEpisodeListLoaded = false
     state.currentEpisode = null
     cache.episodes = []
@@ -857,7 +861,7 @@ const mutations = {
   },
 
   [SET_EPISODE_STATS](state, { episodeStats, taskTypeMap, production }) {
-    state.episodeValidationColumns = helpers.sortStatColumns(
+    state.episodeStatColumns = helpers.sortStatColumns(
       episodeStats,
       taskTypeMap,
       production

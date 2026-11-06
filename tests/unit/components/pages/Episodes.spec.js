@@ -21,7 +21,12 @@ const mountPage = options =>
   mountEntityPage(Episodes, { listName: 'EpisodeList', ...options })
 
 const episodeMap = projectId =>
-  new Map([['episode-1', { id: 'episode-1', project_id: projectId }]])
+  new Map([
+    [
+      'episode-1',
+      { id: 'episode-1', project_id: projectId, validations: new Map() }
+    ]
+  ])
 
 describe('Episodes page', () => {
   test('loads the episodes of the production on mount', async () => {
@@ -55,6 +60,29 @@ describe('Episodes page', () => {
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('save', 'e01')
 
     expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('e01')
+  })
+
+  // An episode created from the Shots page brings its task columns to a store
+  // that holds the plain list of the topbar.
+  test('loads the tasks of the rows the store holds without them', async () => {
+    const { dispatched } = await mountPage({
+      getters: {
+        episodeMap: new Map([
+          [
+            'episode-1',
+            {
+              id: 'episode-1',
+              project_id: production.id,
+              validations: new Map()
+            }
+          ],
+          ['episode-2', { id: 'episode-2', project_id: production.id }]
+        ]),
+        episodeValidationColumns: ['task-type-1']
+      }
+    })
+
+    expect(dispatched('loadEpisodesWithTasks')).toHaveLength(1)
   })
 
   test('writes the search in the URL', async () => {
@@ -265,8 +293,7 @@ describe('Episodes page, reload after a production switch', () => {
     expect(rejections).toEqual([bug])
   })
 
-  // The store still holds the episodes, columns and saved searches of the
-  // production left.
+  // The store still holds the rows and saved searches of the production left.
   test('shows the loading error instead of the production left', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     const failure = requestFailure()
