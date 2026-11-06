@@ -108,20 +108,6 @@ const getters = {
         return null
       }
       return getTaskTypePriorityOfProd(taskType, rootGetters.currentProduction)
-    },
-
-  isTaskTypePriorityHigherById:
-    (state, getters, rootState, rootGetters) => (taskTypeAId, taskTypeBId) => {
-      return (
-        getTaskTypePriorityOfProd(
-          getters.getTaskType(taskTypeAId),
-          rootGetters.currentProduction
-        ) >
-        getTaskTypePriorityOfProd(
-          getters.getTaskType(taskTypeBId),
-          rootGetters.currentProduction
-        )
-      )
     }
 }
 

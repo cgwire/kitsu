@@ -2,6 +2,8 @@ import { mount } from '@vue/test-utils'
 
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 
+import { mountWithI18n } from '../fixtures/i18n'
+
 const confirmButton = wrapper => wrapper.find('a.button.is-primary')
 
 const activate = async wrapper => {
@@ -39,5 +41,34 @@ describe('modals/ModalFooter', () => {
     await activate(wrapper)
 
     expect(wrapper.emitted('confirm')).toBeUndefined()
+  })
+
+  it('shows the details of an error under its text', async () => {
+    const wrapper = mountWithI18n(ModalFooter, {
+      props: { errorText: 'Could not save.', errorDetails: 'Bad value.' }
+    })
+    expect(wrapper.find('.error-details').exists()).toBe(false)
+
+    await wrapper.setProps({ isError: true })
+    expect(wrapper.find('.error').text()).toBe('Could not save.')
+    expect(wrapper.find('.error-details').text()).toBe(
+      '(Technical details: Bad value.)'
+    )
+
+    await wrapper.setProps({ errorDetails: '' })
+    expect(wrapper.find('.error-details').exists()).toBe(false)
+  })
+
+  // A screen reader reads an alert as it shows up.
+  it('announces an error with its details', async () => {
+    const wrapper = mountWithI18n(ModalFooter, {
+      props: { errorText: 'Could not save.', errorDetails: 'Bad value.' }
+    })
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+
+    await wrapper.setProps({ isError: true })
+    expect(
+      wrapper.find('[role="alert"]').text().replace(/\s+/g, ' ')
+    ).toBe('Could not save. (Technical details: Bad value.)')
   })
 })

@@ -929,6 +929,14 @@ describe('ProjectTemplateSettings page, settings layout', () => {
         'backgrounds.title'
       ])
     )
-    expect(wrapper.findAll('.tab.is-wide')).toHaveLength(6)
+    expect(wrapper.findAll('.tab.is-wide')).toHaveLength(4)
+  })
+
+  it('lets the board and automation tabs fill the page', async () => {
+    const { wrapper } = await mountPage()
+
+    expect(
+      wrapper.findAll('.tab.is-full h2.subtitle').map(title => title.text())
+    ).toEqual(['board.settings.title', 'status_automations.title'])
   })
 })

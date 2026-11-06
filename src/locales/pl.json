@@ -386,29 +386,32 @@
     "status_automations": {
       "add_status_automation_placeholder": "+ Dodaj automatyzację statusu",
       "change_ready_for": "zmienia „gotowe do” na",
-      "change_status": "zmienia status zadania na",
-      "create_error": "Wystąpił błąd podczas zapisywania tej automatyzacji statusu. Czy na pewno nie istnieje inna automatyzacja o tej samej nazwie?",
-      "delete_text": "Czy na pewno chcesz usunąć automatyzację statusu {name} z bazy danych?",
-      "delete_error": "Wystąpił błąd podczas usuwania tej automatyzacji statusu. Może być powiązana z produkcją. W takim przypadku musisz najpierw usunąć ją z każdej produkcji.",
+      "change_status": "zmienia status zadania",
+      "create_error": "Nie udało się zapisać. Spróbuj ponownie.",
+      "delete_text": "Czy na pewno chcesz usunąć tę automatyzację statusu z bazy danych?",
+      "delete_error": "Wystąpił błąd podczas usuwania tej automatyzacji statusu. Może być powiązana z produkcją lub szablonem produkcji. W takim przypadku musisz najpierw usunąć ją z każdej produkcji i każdego szablonu.",
       "edit_title": "Edytuj automatyzację statusu",
-      "entity_title": "Typ obiektu, którego dotyczy wyzwalacz",
       "number": "automatyzacja statusu | automatyzacji statusu",
-      "in_title": "Status wyzwalający zmianę",
+      "in_title": "Warunki wyzwalające",
       "out_title": "Zmiana, która zostanie zastosowana po zadziałaniu wyzwalacza",
       "new_status_automation": "Dodaj automatyzację statusu",
       "production_description": "Automatyzacja zmienia status zadania lub następne zadanie, gdy ustawiony zostanie status.",
       "run_for_selection": "Uruchom automatyzację statusu dla wybranych zadań:",
+      "save_refused": "Tej automatyzacji nie można zapisać w obecnej postaci.",
       "title": "Automatyzacje",
-      "wrong_automation": "Ta automatyzacja dotyczy typu zadania znajdującego się wcześniej w procesie. Kitsu na to nie pozwala (aby uniknąć nieskończonych cykli). Nie będzie ona miała żadnego efektu.",
+      "to_status": "na",
+      "wrong_automation": "W tej produkcji każdy warunek używa typu zadania występującego po docelowym typie zadania. Ich zmiany statusu nie uruchamiają tej automatyzacji, aby uniknąć nieskończonych cykli: nie ma ona żadnego efektu.",
       "fields": {
         "entity_type": "Typ obiektu",
-        "in_field_type": "Typ pola wejściowego",
         "in_task_type": "Typ zadania",
         "in_task_status": "Status zadania",
-        "out_field_type": "Wyzwalacz",
+        "out_field_type": "Zastosowana zmiana",
         "out_task_type": "Docelowy typ zadania",
         "out_task_status": "Docelowy status zadania",
-        "import_last_revision": "Importuj ostatnią wersję"
+        "import_last_revision": "Importuj ostatnią wersję",
+        "conditions": "Warunki",
+        "operator": "Operator",
+        "out_only_if_task_status_ids": "Tylko gdy zadanie docelowe ma status"
       },
       "entity_types": {
         "asset": "Asset",
@@ -420,7 +423,36 @@
       "field_types": {
         "status": "Status",
         "ready_for": "Gotowe do"
-      }
+      },
+      "connectors": {
+        "and": "i",
+        "or": "lub"
+      },
+      "guard_only_condition_and": "W tej produkcji {taskType} występuje po docelowym typie zadania: jego zmiany statusu nie uruchamiają tej automatyzacji, ale warunek nadal musi być spełniony.",
+      "guard_only_condition_or": "W tej produkcji {taskType} występuje po docelowym typie zadania: ten warunek jest pomijany.",
+      "trigger_when": "Uruchom, gdy",
+      "operators": {
+        "and": "spełnione są wszystkie poniższe warunki",
+        "or": "spełniony jest jeden z poniższych warunków"
+      },
+      "add_condition": "+ Dodaj warunek",
+      "remove_condition": "Usuń warunek",
+      "remove_condition_on": "Usuń warunek: {taskType}",
+      "help": {
+        "and": "Uruchamia się, gdy zmiana statusu sprawia, że wszystkie warunki są spełnione. Typ zadania, którego obiekt nie ma, jest pomijany.",
+        "or": "Uruchamia się, gdy zmiana statusu sprawia, że jeden z warunków jest spełniony, podczas gdy wcześniej żaden nie był.",
+        "new_comments_only": "Automatyzacje uruchamiają się, gdy nowy komentarz zmienia status, nigdy przy edycji ani usuwaniu komentarza.",
+        "import_and": "Wersja pochodzi z zadania pierwszego warunku, którego typ zadania ma obiekt.",
+        "import_or": "Wersja pochodzi z zadania, którego zmiana statusu spełniła warunki.",
+        "out_only_if": "Pozostaw puste, aby zastosować zmianę niezależnie od statusu zadania docelowego."
+      },
+      "errors": {
+        "max_conditions": "Automatyzacja przyjmuje co najwyżej 10 warunków.",
+        "missing_value": "Wybierz typ zadania i co najmniej jeden status.",
+        "same_task_type": "Ten typ zadania jest już używany przez inny warunek: dodaj tam statusy.",
+        "output_in_conditions": "Docelowego typu zadania nie można użyć w warunkach."
+      },
+      "only_from": "tylko z"
     },
     "departments": {
       "all_departments": "Wszystkie działy",
@@ -1804,6 +1836,7 @@
       "create_error": "Wystąpił błąd podczas zapisywania tego statusu zadania. Czy na pewno nie istnieje już status zadania o podobnej nazwie?",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tego statusu zadania. Mogą istnieć dane, które są obecnie z nim powiązane. Czy na pewno żadne zadanie nie jest powiązane z tym statusem?",
+      "delete_blocked_by_automations": "Nadal istnieją automatyzacje statusu używające tego statusu zadania, w tym zarchiwizowane. Najpierw je edytuj lub usuń.",
       "edit_title": "Edytuj status zadania",
       "name": "status zadania",
       "number": "status zadania | statusów zadań",
@@ -1826,13 +1859,15 @@
         "name": "Nazwa",
         "short_name": "Krótka nazwa",
         "description": "Opis"
-      }
+      },
+      "remove_status": "Usuń status {name}"
     },
     "task_types": {
       "add_task_type_placeholder": "+ Dodaj typ zadania",
       "add_task_type_to_library": "Dodaj typ zadania do biblioteki",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tego typu zadania. Mogą istnieć dane, które są obecnie z nim powiązane. Czy na pewno żadne zadanie nie jest powiązane z tym typem zadania?",
+      "delete_blocked_by_automations": "Nadal istnieją automatyzacje statusu używające tego typu zadania, w tym zarchiwizowane. Najpierw je edytuj lub usuń.",
       "delete_blocked_by_links": "Ten typ zadania jest nadal używany w harmonogramie lub w przepływie pracy niektórych produkcji. Odłączenie go usunie jego daty z harmonogramu we wszystkich produkcjach.",
       "delete_blocked_by_tasks": "Nadal istnieją zadania używające tego typu zadania. Usuń je lub przypisz ponownie przed jego usunięciem.",
       "delete_force": "Odłącz i usuń",

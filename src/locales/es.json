@@ -1411,6 +1411,7 @@
       "create_error": "Se ha producido un error al guardar este estado de tarea. ¿Está seguro que no hay otro estado de tarea con un nombre similar?",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar este estado de tarea. Es probable que haya datos asociados. ¿Está seguro de que este estado de tarea no tiene ninguna tarea asociada?",
+      "delete_blocked_by_automations": "Todavía hay automatizaciones de estado que usan este estado de tarea, incluidas las archivadas. Modifíquelas o bórrelas primero.",
       "edit_title": "Modificar el estado de la tarea",
       "number": "estado de la tarea | estados de la tarea",
       "new_task_status": "Añadir un estado de tarea",
@@ -1435,11 +1436,13 @@
         "entities": "Recursos, tomas, secuencias, ..."
       },
       "add_task_status_to_library": "Añadir un estado de tarea a la biblioteca",
-      "add_task_status_placeholder": "+ Añadir estado de la tarea"
+      "add_task_status_placeholder": "+ Añadir estado de la tarea",
+      "remove_status": "Quitar el estado {name}"
     },
     "task_types": {
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar este tipo de tarea. Es probable que haya datos asociados. ¿Está seguro de que este tipo de tarea no tiene ninguna tarea asociada?",
+      "delete_blocked_by_automations": "Todavía hay automatizaciones de estado que usan este tipo de tarea, incluidas las archivadas. Modifíquelas o bórrelas primero.",
       "delete_blocked_by_links": "Este tipo de tarea todavía se usa en el calendario o en el flujo de trabajo de algunas producciones. Desvincularlo eliminará sus fechas del calendario en todas las producciones.",
       "delete_blocked_by_tasks": "Todavía hay tareas que usan este tipo de tarea. Bórrelas o reasígnelas antes de quitarlo.",
       "delete_force": "Desvincular y borrar",
@@ -2012,29 +2015,32 @@
     },
     "status_automations": {
       "change_ready_for": "cambia \"preparado para\" a",
-      "change_status": "cambia el estado de la tarea a",
-      "create_error": "Se ha producido un error al guardar esta automatización de estado. ¿Está seguro de que no hay otra automatización con el mismo nombre?",
-      "delete_text": "¿Está seguro de que desea eliminar la automatización de estado {name} de su base de datos?",
-      "delete_error": "Se ha producido un error al eliminar esta automatización de estado. Es probable que esté vinculada a una producción. En ese caso, primero deberá eliminarla de cada producción.",
+      "change_status": "cambia el estado de la tarea",
+      "create_error": "No se ha podido guardar. Por favor, inténtelo de nuevo.",
+      "delete_text": "¿Está seguro de que desea eliminar esta automatización de estado de su base de datos?",
+      "delete_error": "Se ha producido un error al eliminar esta automatización de estado. Es posible que esté vinculada a una producción o a una plantilla de producción. En ese caso, primero deberá eliminarla de cada producción y de cada plantilla.",
       "edit_title": "Modificar una automatización de estado",
-      "entity_title": "Tipo de entidad afectada por el activador",
       "number": "automatización de estado | automatizaciones de estado",
-      "in_title": "Estado que provoca un cambio",
+      "in_title": "Condiciones de activación",
       "out_title": "El cambio que se aplicará al activarse el activador",
       "new_status_automation": "Añadir una automatización de estado",
       "production_description": "Una automatización cambia el estado de una tarea, o la tarea siguiente, cuando se aplica un estado.",
       "run_for_selection": "Ejecutar la automatización de estado para las tareas seleccionadas:",
+      "save_refused": "Esta automatización no se puede guardar tal como está.",
       "title": "Automatizaciones",
-      "wrong_automation": "Esta automatización se aplica a un tipo de tarea anterior. No está permitido por Kitsu (para evitar ciclos infinitos). No tendrá efecto.",
+      "to_status": "a",
+      "wrong_automation": "En esta producción, todas las condiciones usan un tipo de tarea que va después del tipo de tarea aplicado. Sus cambios de estado no ejecutan esta automatización, para evitar ciclos infinitos: no tiene ningún efecto.",
       "fields": {
         "entity_type": "Tipo de entidad",
-        "in_field_type": "Tipo de campo de entrada",
         "in_task_type": "Tipo de tarea",
         "in_task_status": "Estado de la tarea",
-        "out_field_type": "Activador",
+        "out_field_type": "Cambio aplicado",
         "out_task_type": "Tipo de tarea aplicado",
         "out_task_status": "Estado de tarea aplicado",
-        "import_last_revision": "Importar última revisión"
+        "import_last_revision": "Importar última revisión",
+        "conditions": "Condiciones",
+        "operator": "Operador",
+        "out_only_if_task_status_ids": "Solo si la tarea aplicada está en"
       },
       "entity_types": {
         "asset": "Recurso",
@@ -2047,7 +2053,36 @@
         "status": "Estado",
         "ready_for": "Preparado para"
       },
-      "add_status_automation_placeholder": "+ Añadir automatización de estado"
+      "add_status_automation_placeholder": "+ Añadir automatización de estado",
+      "connectors": {
+        "and": "y",
+        "or": "o"
+      },
+      "guard_only_condition_and": "En esta producción, {taskType} va después del tipo de tarea aplicado: sus cambios de estado no ejecutan esta automatización, pero la condición debe cumplirse igualmente.",
+      "guard_only_condition_or": "En esta producción, {taskType} va después del tipo de tarea aplicado: esta condición se ignora.",
+      "trigger_when": "Activar cuando",
+      "operators": {
+        "and": "se cumplan todas las condiciones siguientes",
+        "or": "se cumpla alguna de las condiciones siguientes"
+      },
+      "add_condition": "+ Añadir condición",
+      "remove_condition": "Quitar la condición",
+      "remove_condition_on": "Quitar la condición de {taskType}",
+      "help": {
+        "and": "Se ejecuta cuando un cambio de estado cumple todas las condiciones. Un tipo de tarea que la entidad no tiene se ignora.",
+        "or": "Se ejecuta cuando un cambio de estado cumple una de las condiciones y antes no se cumplía ninguna.",
+        "new_comments_only": "Las automatizaciones se ejecutan cuando un comentario nuevo cambia un estado, nunca al modificar o eliminar un comentario.",
+        "import_and": "La revisión proviene de la tarea de la primera condición que tiene la entidad.",
+        "import_or": "La revisión proviene de la tarea cuyo cambio de estado cumplió las condiciones.",
+        "out_only_if": "Déjelo vacío para aplicar el cambio sea cual sea el estado de la tarea aplicada."
+      },
+      "errors": {
+        "max_conditions": "Una automatización acepta como máximo 10 condiciones.",
+        "missing_value": "Elija un tipo de tarea y al menos un estado.",
+        "same_task_type": "Otra condición ya usa este tipo de tarea: añada los estados allí.",
+        "output_in_conditions": "El tipo de tarea aplicado no puede usarse en las condiciones."
+      },
+      "only_from": "solo desde"
     },
     "preview_room": {
       "join_room": "Unirse a la sala de revisión",

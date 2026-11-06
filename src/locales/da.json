@@ -1411,6 +1411,7 @@
       "create_error": "Der opstod en fejl under gemning af denne opgavestatus. Er du sikker på, at der ikke allerede findes en opgavestatus med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletning af denne opgavestatus. Der kan være eksisterende data knyttet til den. Er du sikker på, at denne opgavestatus ikke har nogen opgave knyttet til sig?",
+      "delete_blocked_by_automations": "Der er stadig statusautomatiseringer, der bruger denne opgavestatus, også arkiverede. Rediger eller slet dem først.",
       "edit_title": "Rediger opgavestatus",
       "number": "opgavestatus | opgavestatusser",
       "new_task_status": "Tilføj en opgavestatus",
@@ -1435,11 +1436,13 @@
         "entities": "Assets, shots, sequences, ..."
       },
       "add_task_status_to_library": "Tilføj en opgavestatus til biblioteket",
-      "add_task_status_placeholder": "+ Tilføj opgavestatus"
+      "add_task_status_placeholder": "+ Tilføj opgavestatus",
+      "remove_status": "Fjern status {name}"
     },
     "task_types": {
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletning af denne opgavetype. Der kan være eksisterende data knyttet til den. Er du sikker på, at denne opgavetype ikke har nogen opgave knyttet til sig?",
+      "delete_blocked_by_automations": "Der er stadig statusautomatiseringer, der bruger denne opgavetype, også arkiverede. Rediger eller slet dem først.",
       "delete_blocked_by_links": "Denne opgavetype bruges stadig i tidsplanen eller i arbejdsgangen for nogle produktioner. Hvis den frakobles, slettes dens tidsplandatoer i alle produktioner.",
       "delete_blocked_by_tasks": "Der er stadig opgaver, der bruger denne opgavetype. Slet eller omfordel dem, før du fjerner den.",
       "delete_force": "Frakobl og slet",
@@ -2012,29 +2015,32 @@
     },
     "status_automations": {
       "change_ready_for": "skifter \"klar til\" til",
-      "change_status": "skifter opgavestatus til",
-      "create_error": "Der opstod en fejl under gemning af denne statusautomatisering. Er du sikker på, at der ikke allerede findes en anden automatisering med samme navn?",
-      "delete_text": "Er du sikker på, at du vil fjerne statusautomatisering {name} fra din database?",
-      "delete_error": "Der opstod en fejl under sletning af denne statusautomatisering. Den kan være knyttet til en produktion. Hvis det er tilfældet, skal du først fjerne den fra alle produktioner.",
+      "change_status": "skifter status for",
+      "create_error": "Kunne ikke gemme. Prøv venligst igen.",
+      "delete_text": "Er du sikker på, at du vil fjerne denne statusautomatisering fra din database?",
+      "delete_error": "Der opstod en fejl under sletning af denne statusautomatisering. Den kan være knyttet til en produktion eller en produktionsskabelon. Hvis det er tilfældet, skal du først fjerne den fra alle produktioner og skabeloner.",
       "edit_title": "Rediger en statusautomatisering",
-      "entity_title": "Enhedstype påvirket af triggeren",
       "number": "statusautomatisering | statusautomatiseringer",
-      "in_title": "Status, der udløser en ændring",
+      "in_title": "Udløsende betingelser",
       "out_title": "Ændringen, der vil blive anvendt ved udløsning af triggeren",
       "new_status_automation": "Tilføj statusautomatisering",
       "production_description": "En automatisering ændrer en opgaves status, eller den næste opgave, når en status sættes.",
       "run_for_selection": "Kør statusautomatisering for valgte opgaver:",
+      "save_refused": "Denne automatisering kan ikke gemmes, som den er.",
       "title": "Automatiseringer",
-      "wrong_automation": "Denne automatisering gælder for en opgavetype opstrøms. Det er ikke tilladt af Kitsu (for at undgå uendelige cyklusser). Den vil ikke have nogen effekt.",
+      "to_status": "til",
+      "wrong_automation": "I denne produktion bruger hver betingelse en opgavetype, der kommer efter den anvendte opgavetype. Deres statusændringer kører ikke denne automatisering, for at undgå uendelige cyklusser: den har ingen effekt.",
       "fields": {
         "entity_type": "Enhedstype",
-        "in_field_type": "Inputfelttype",
         "in_task_type": "Opgavetype",
         "in_task_status": "Opgavestatus",
-        "out_field_type": "Trigger",
+        "out_field_type": "Anvendt ændring",
         "out_task_type": "Anvendt opgavetype",
         "out_task_status": "Anvendt opgavestatus",
-        "import_last_revision": "Importer Seneste Revision"
+        "import_last_revision": "Importer Seneste Revision",
+        "conditions": "Betingelser",
+        "operator": "Operator",
+        "out_only_if_task_status_ids": "Kun når den anvendte opgave har status"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2047,7 +2053,36 @@
         "status": "Status",
         "ready_for": "Klar til"
       },
-      "add_status_automation_placeholder": "+ Tilføj statusautomatisering"
+      "add_status_automation_placeholder": "+ Tilføj statusautomatisering",
+      "connectors": {
+        "and": "og",
+        "or": "eller"
+      },
+      "guard_only_condition_and": "I denne produktion kommer {taskType} efter den anvendte opgavetype: dens statusændringer kører ikke denne automatisering, men betingelsen skal stadig være opfyldt.",
+      "guard_only_condition_or": "I denne produktion kommer {taskType} efter den anvendte opgavetype: denne betingelse ignoreres.",
+      "trigger_when": "Udløs når",
+      "operators": {
+        "and": "alle følgende betingelser er opfyldt",
+        "or": "en af følgende betingelser er opfyldt"
+      },
+      "add_condition": "+ Tilføj betingelse",
+      "remove_condition": "Fjern betingelse",
+      "remove_condition_on": "Fjern betingelsen for {taskType}",
+      "help": {
+        "and": "Kører, når en statusændring opfylder alle betingelserne. En opgavetype, som enheden ikke har, ignoreres.",
+        "or": "Kører, når en statusændring opfylder en af betingelserne, og ingen af dem var opfyldt før.",
+        "new_comments_only": "Automatiseringer kører, når en ny kommentar ændrer en status, aldrig når en kommentar redigeres eller slettes.",
+        "import_and": "Revisionen kommer fra opgaven for den første betingelse, som enheden har.",
+        "import_or": "Revisionen kommer fra den opgave, hvis statusændring opfyldte betingelserne.",
+        "out_only_if": "Lad feltet være tomt for at anvende ændringen uanset den anvendte opgaves status."
+      },
+      "errors": {
+        "max_conditions": "En automatisering accepterer højst 10 betingelser.",
+        "missing_value": "Vælg en opgavetype og mindst én status.",
+        "same_task_type": "Denne opgavetype bruges allerede af en anden betingelse: tilføj statusserne der.",
+        "output_in_conditions": "Den anvendte opgavetype kan ikke bruges i betingelserne."
+      },
+      "only_from": "kun fra"
     },
     "preview_room": {
       "join_room": "Deltag i gennemgangsrummet",

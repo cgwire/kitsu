@@ -1411,6 +1411,7 @@
       "create_error": "Ocorreu um erro ao salvar este status de tarefa. Tem certeza de que não há status de tarefa com nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este status de tarefa. Pode haver dados vinculados a ele. Tem certeza de que este status de tarefa não tem nenhuma tarefa vinculada a ele?",
+      "delete_blocked_by_automations": "Ainda há automações de status que usam este status de tarefa, incluindo as arquivadas. Edite-as ou exclua-as primeiro.",
       "edit_title": "Editar o status da tarefa",
       "number": "status da tarefa | status das tarefas",
       "new_task_status": "Adicionar um status de tarefa",
@@ -1435,11 +1436,13 @@
         "entities": "Assets, shots, sequências, ..."
       },
       "add_task_status_to_library": "Adicionar um status de tarefa à biblioteca",
-      "add_task_status_placeholder": "+ Adicionar status da tarefa"
+      "add_task_status_placeholder": "+ Adicionar status da tarefa",
+      "remove_status": "Remover o status {name}"
     },
     "task_types": {
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este tipo de tarefa. Pode haver dados vinculados a ele. Tem certeza de que este tipo de tarefa não possui nenhuma tarefa vinculada a ele?",
+      "delete_blocked_by_automations": "Ainda há automações de status que usam este tipo de tarefa, incluindo as arquivadas. Edite-as ou exclua-as primeiro.",
       "delete_blocked_by_links": "Este tipo de tarefa ainda é usado no cronograma ou no fluxo de trabalho de algumas produções. Desvinculá-lo excluirá suas datas de cronograma em todas as produções.",
       "delete_blocked_by_tasks": "Ainda há tarefas que usam este tipo de tarefa. Exclua-as ou reatribua-as antes de removê-lo.",
       "delete_force": "Desvincular e excluir",
@@ -2012,29 +2015,32 @@
     },
     "status_automations": {
       "change_ready_for": "altera \"pronto para\" para",
-      "change_status": "altera o status da tarefa para",
-      "create_error": "Ocorreu um erro ao salvar essa automação de status. Tem certeza de que não há outra automação com o mesmo nome?",
-      "delete_text": "Tem certeza de que deseja remover a automação de status {name} do seu banco de dados?",
-      "delete_error": "Ocorreu um erro ao excluir essa automação de status. Ela pode estar vinculada a uma produção. Se for o caso, você deve removê-la de cada produção primeiro.",
+      "change_status": "altera o status da tarefa",
+      "create_error": "Não foi possível salvar. Tente novamente.",
+      "delete_text": "Tem certeza de que deseja remover essa automação de status do seu banco de dados?",
+      "delete_error": "Ocorreu um erro ao excluir essa automação de status. Ela pode estar vinculada a uma produção ou a um template de produção. Se for o caso, você deve removê-la de cada produção e de cada template primeiro.",
       "edit_title": "Editar uma automação de status",
-      "entity_title": "Tipo de entidade afetada pelo acionador",
       "number": "automação de status | automações de status",
-      "in_title": "Status que aciona uma alteração",
+      "in_title": "Condições de disparo",
       "out_title": "A alteração que será aplicada no disparo do gatilho",
       "new_status_automation": "Adicionar automação de status",
       "production_description": "Uma automação muda o status de uma tarefa, ou a tarefa seguinte, quando um status é definido.",
       "run_for_selection": "Executar automação de status para tarefas selecionadas:",
+      "save_refused": "Esta automação não pode ser salva como está.",
       "title": "Automações",
-      "wrong_automation": "Essa automação se aplica a um tipo de tarefa anterior no fluxo de trabalho. Ela não é permitida pelo Kitsu (para evitar ciclos infinitos). Ela não terá efeito.",
+      "to_status": "para",
+      "wrong_automation": "Nesta produção, todas as condições usam um tipo de tarefa que vem depois do tipo de tarefa aplicada. As mudanças de status deles não executam esta automação, para evitar ciclos infinitos: ela não tem efeito.",
       "fields": {
         "entity_type": "Tipo de entidade",
-        "in_field_type": "Tipo de campo de entrada",
         "in_task_type": "Tipo de tarefa",
         "in_task_status": "Status da tarefa",
-        "out_field_type": "Gatilho",
+        "out_field_type": "Alteração aplicada",
         "out_task_type": "Tipo de tarefa aplicada",
         "out_task_status": "Status da tarefa aplicada",
-        "import_last_revision": "Importar última revisão"
+        "import_last_revision": "Importar última revisão",
+        "conditions": "Condições",
+        "operator": "Operador",
+        "out_only_if_task_status_ids": "Somente se a tarefa aplicada estiver em"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2047,7 +2053,36 @@
         "status": "Status",
         "ready_for": "Pronto para"
       },
-      "add_status_automation_placeholder": "+ Adicionar automação de status"
+      "add_status_automation_placeholder": "+ Adicionar automação de status",
+      "connectors": {
+        "and": "e",
+        "or": "ou"
+      },
+      "guard_only_condition_and": "Nesta produção, {taskType} vem depois do tipo de tarefa aplicada: as mudanças de status dele não executam esta automação, mas a condição ainda precisa ser atendida.",
+      "guard_only_condition_or": "Nesta produção, {taskType} vem depois do tipo de tarefa aplicada: esta condição é ignorada.",
+      "trigger_when": "Disparar quando",
+      "operators": {
+        "and": "todas as condições a seguir forem atendidas",
+        "or": "uma das condições a seguir for atendida"
+      },
+      "add_condition": "+ Adicionar condição",
+      "remove_condition": "Remover a condição",
+      "remove_condition_on": "Remover a condição de {taskType}",
+      "help": {
+        "and": "É executada quando uma mudança de status atende a todas as condições. Um tipo de tarefa que a entidade não tem é ignorado.",
+        "or": "É executada quando uma mudança de status atende a uma das condições e antes nenhuma era atendida.",
+        "new_comments_only": "As automações são executadas quando um comentário novo altera um status, nunca ao editar ou excluir um comentário.",
+        "import_and": "A revisão vem da tarefa da primeira condição que a entidade tem.",
+        "import_or": "A revisão vem da tarefa cuja mudança de status atendeu às condições.",
+        "out_only_if": "Deixe vazio para aplicar a mudança qualquer que seja o status da tarefa aplicada."
+      },
+      "errors": {
+        "max_conditions": "Uma automação aceita no máximo 10 condições.",
+        "missing_value": "Escolha um tipo de tarefa e pelo menos um status.",
+        "same_task_type": "Este tipo de tarefa já é usado por outra condição: adicione os status nela.",
+        "output_in_conditions": "O tipo de tarefa aplicada não pode ser usado nas condições."
+      },
+      "only_from": "somente a partir de"
     },
     "preview_room": {
       "join_room": "Entrar na sala de revisão",

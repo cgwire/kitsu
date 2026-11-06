@@ -7,11 +7,8 @@
             <th scope="col" class="name">
               {{ $t('status_automations.fields.entity_type') }}
             </th>
-            <th scope="col" class="in-task-type">
-              {{ $t('status_automations.fields.in_task_type') }}
-            </th>
-            <th scope="col" class="in-task-status">
-              {{ $t('status_automations.fields.in_task_status') }}
+            <th scope="col" class="conditions">
+              {{ $t('status_automations.fields.conditions') }}
             </th>
             <th scope="col" class="automation-type">
               {{ $t('status_automations.fields.out_field_type') }}
@@ -21,6 +18,9 @@
             </th>
             <th scope="col" class="out-task-status">
               {{ $t('status_automations.fields.out_task_status') }}
+            </th>
+            <th scope="col" class="guard">
+              {{ $t('status_automations.fields.out_only_if_task_status_ids') }}
             </th>
             <th scope="col" class="import-last-revision">
               {{ $t('status_automations.fields.import_last_revision') }}
@@ -39,7 +39,10 @@
                 <span
                   class="flexrow-item"
                   :title="$t('status_automations.wrong_automation')"
-                  v-if="isStatusAutomationDisabled(statusAutomation)"
+                  v-if="
+                    withPriorityWarnings &&
+                    isStatusAutomationDisabled(statusAutomation)
+                  "
                 >
                   <alert-triangle-icon />
                 </span>
@@ -48,14 +51,12 @@
                 </span>
               </div>
             </td>
-            <task-type-cell
-              class="in-task-type"
-              :task-type="getTaskType(statusAutomation.in_task_type_id)"
-            />
-            <task-status-cell
-              class="in-task-status"
-              :entry="taskStatusMap.get(statusAutomation.in_task_status_id)"
-            />
+            <td class="conditions">
+              <status-automation-conditions
+                :status-automation="statusAutomation"
+                :with-priority-warnings="withPriorityWarnings"
+              />
+            </td>
             <td class="input-separator">
               {{
                 statusAutomation.out_field_type === 'ready_for'
@@ -73,6 +74,31 @@
               :entry="taskStatusMap.get(statusAutomation.out_task_status_id)"
             />
             <td class="name out-task-status" v-else></td>
+            <td
+              class="guard"
+              :class="{
+                'is-empty': getGuardStatuses(statusAutomation).length === 0
+              }"
+            >
+              <template v-if="getGuardStatuses(statusAutomation).length > 0">
+                <span class="mobile-label">
+                  {{
+                    $t('status_automations.fields.out_only_if_task_status_ids')
+                  }}:
+                </span>
+                <span
+                  class="tag"
+                  :key="taskStatus.id"
+                  :style="{
+                    background: backgroundColor(taskStatus),
+                    color: color(taskStatus)
+                  }"
+                  v-for="taskStatus in getGuardStatuses(statusAutomation)"
+                >
+                  {{ taskStatus.short_name }}
+                </span>
+              </template>
+            </td>
             <td class="import-last-revision">
               <span class="mobile-label">
                 {{ $t('status_automations.fields.import_last_revision') }}:
@@ -116,27 +142,35 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { useTaskStatusStyle } from '@/composables/taskStatus'
+import { getEntityTypeName, getGuardStatusIds } from '@/lib/statusautomations'
+
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
-import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
+import StatusAutomationConditions from '@/components/widgets/StatusAutomationConditions.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const store = useStore()
+const { backgroundColor, color } = useTaskStatusStyle()
 
 // Props / Emits
-
+// --------------------------------------------------------------------------
 const props = defineProps({
   entries: { type: Array, default: () => [] },
   isEditable: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
-  isLoading: { type: Boolean, default: false }
+  isLoading: { type: Boolean, default: false },
+  // The priorities of the current production: the production settings set
+  // it, the admin page and the templates have no current production.
+  withPriorityWarnings: { type: Boolean, default: false }
 })
 
 defineEmits(['delete-clicked', 'edit-clicked', 'remove-clicked'])
 
 // Computed
-
+// --------------------------------------------------------------------------
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const getTaskType = computed(() => store.getters.getTaskType)
 const isStatusAutomationDisabled = computed(
@@ -146,15 +180,22 @@ const isStatusAutomationDisabled = computed(
 const statusAutomations = computed(() =>
   props.entries.map(statusAutomation => ({
     ...statusAutomation,
-    entityType: t(
-      `status_automations.entity_types.${statusAutomation.entity_type.toLowerCase()}`
-    )
+    entityType: getEntityTypeName(statusAutomation.entity_type, { t, te })
   }))
 )
 
 // Functions
-
+// --------------------------------------------------------------------------
 const formatBoolean = value => (value ? t('main.yes') : t('main.no'))
+
+// Called from the template: the task status map is filled in place, so a
+// computed over it would keep its first read.
+const getGuardStatuses = statusAutomation =>
+  statusAutomation.out_field_type === 'status'
+    ? getGuardStatusIds(statusAutomation)
+        .map(taskStatusId => taskStatusMap.value.get(taskStatusId))
+        .filter(Boolean)
+    : []
 </script>
 
 <style lang="scss" scoped>
@@ -172,14 +213,20 @@ td.name {
   text-transform: capitalize;
 }
 
-.in-task-type {
-  width: 150px;
+.conditions {
+  min-width: 260px;
+}
+
+.guard {
   min-width: 150px;
 }
 
-.in-task-status {
-  width: 150px;
-  min-width: 150px;
+.guard .tag {
+  margin: 0.2em;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .separator {
@@ -237,10 +284,9 @@ td.name {
     grid-template-columns: 1fr auto;
     grid-template-areas:
       'entity entity'
-      'in-type in-status'
+      'conditions conditions'
       'separator separator'
-      'out-type out-status'
-      'revision revision';
+      'out-type out-status';
     align-items: center;
     gap: 0.5em;
     padding: 0.75em;
@@ -269,13 +315,8 @@ td.name {
     font-size: 1.1em;
   }
 
-  .in-task-type {
-    grid-area: in-type;
-  }
-
-  .in-task-status {
-    grid-area: in-status;
-    justify-self: end;
+  .conditions {
+    grid-area: conditions;
   }
 
   .input-separator {
@@ -294,8 +335,18 @@ td.name {
     justify-self: end;
   }
 
+  // A full row each after the output, so that a card without a guard gets
+  // no empty row, and no extra gap, for it.
+  .guard,
   .import-last-revision {
-    grid-area: revision;
+    grid-column: 1 / -1;
+  }
+
+  td.guard.is-empty {
+    display: none !important;
+  }
+
+  .import-last-revision {
     padding-top: 0.25em !important;
     color: var(--text-alt);
     font-size: 0.9em;

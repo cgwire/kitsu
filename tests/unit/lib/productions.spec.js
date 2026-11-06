@@ -7,6 +7,7 @@ import {
   clampBitrates,
   getMovieBitrateDefaults,
   getMovieMegabytesPerMinute,
+  getProjectTaskTypePriority,
   getTaskTypePriorityOfProd,
   getTaskStatusPriorityOfProd,
   isTaskStatusClientAllowed,
@@ -148,6 +149,27 @@ describe('productions', () => {
     it('falls back to taskType priority when production is null', () => {
       const taskType = { id: 'tt-3', priority: 4 }
       expect(getTaskTypePriorityOfProd(taskType, null)).toBe(4)
+    })
+  })
+
+  // Zou reads the production priorities only to skip an automation.
+  describe('getProjectTaskTypePriority', () => {
+    it('returns the priority of the task type in the production', () => {
+      const production = { task_types_priority: { 'tt-1': 3 } }
+      expect(getProjectTaskTypePriority('tt-1', production)).toBe(3)
+    })
+
+    it('counts a missing or null priority as 0', () => {
+      expect(
+        getProjectTaskTypePriority('tt-1', { task_types_priority: {} })
+      ).toBe(0)
+      expect(
+        getProjectTaskTypePriority('tt-1', {
+          task_types_priority: { 'tt-1': null }
+        })
+      ).toBe(0)
+      expect(getProjectTaskTypePriority('tt-1', {})).toBe(0)
+      expect(getProjectTaskTypePriority('tt-1', null)).toBe(0)
     })
   })
 

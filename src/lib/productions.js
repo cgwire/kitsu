@@ -122,6 +122,11 @@ export function getTaskTypePriorityOfProd(taskType, production) {
   return productionPriority || taskType.priority
 }
 
+// The priority Zou reads to run the status automations: the production one
+// only, a missing or null one counting as 0.
+export const getProjectTaskTypePriority = (taskTypeId, production) =>
+  production?.task_types_priority?.[taskTypeId] || 0
+
 export function getTaskStatusPriorityOfProd(taskStatus, production) {
   if (!taskStatus) {
     return 1

@@ -22,6 +22,7 @@
 
     <edit-status-automation-modal
       :active="modals.edit"
+      :error-details="editErrorMessage"
       :is-loading="loading.edit"
       :is-error="errors.edit"
       :status-automation-to-edit="statusAutomationToEdit"
@@ -33,7 +34,7 @@
       :active="modals.del"
       :is-loading="loading.del"
       :is-error="errors.del"
-      :text="deleteText"
+      :text="$t('status_automations.delete_text')"
       :error-text="$t('status_automations.delete_error')"
       @cancel="modals.del = false"
       @confirm="confirmDeleteStatusAutomation"
@@ -49,6 +50,12 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
+import {
+  formatTaskStatuses,
+  formatTrigger,
+  getGuardStatusIds,
+  getTrigger
+} from '@/lib/statusautomations'
 import stringHelpers from '@/lib/string'
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -63,6 +70,7 @@ const store = useStore()
 // State
 
 const activeTab = ref(route.query.tab || 'active')
+const editErrorMessage = ref('')
 const statusAutomationToDelete = ref(null)
 const statusAutomationToEdit = ref(null)
 const modals = reactive({ edit: false, del: false })
@@ -89,27 +97,32 @@ const statusAutomationsList = computed(() =>
   isActiveTab.value ? statusAutomations.value : archivedStatusAutomations.value
 )
 
-const deleteText = computed(() => {
-  const sa = statusAutomationToDelete.value
-  return sa ? t('custom_actions.delete_text', { name: sa.name }) : ''
-})
-
 // Functions
 
 const confirmEditStatusAutomation = form => {
-  const isEdit = !!statusAutomationToEdit.value?.id
-  if (isEdit) form.id = statusAutomationToEdit.value.id
+  const statusAutomation = statusAutomationToEdit.value
+  const isEdit = !!statusAutomation?.id
+  if (isEdit) form.id = statusAutomation.id
 
   loading.edit = true
   errors.edit = false
+  editErrorMessage.value = ''
   store
     .dispatch(isEdit ? 'editStatusAutomation' : 'newStatusAutomation', form)
     .then(() => {
-      modals.edit = false
+      if (statusAutomation === statusAutomationToEdit.value) {
+        modals.edit = false
+      }
     })
     .catch(err => {
       console.error(err)
-      errors.edit = true
+      // A late answer must not land on a modal reopened for another row.
+      if (modals.edit && statusAutomation === statusAutomationToEdit.value) {
+        // A 400 is Zou refusing the automation, with a message saying why.
+        editErrorMessage.value =
+          err?.status === 400 ? err.body?.message || '' : ''
+        errors.edit = true
+      }
     })
     .finally(() => {
       loading.edit = false
@@ -117,16 +130,23 @@ const confirmEditStatusAutomation = form => {
 }
 
 const confirmDeleteStatusAutomation = () => {
+  if (loading.del) return
+  const statusAutomation = statusAutomationToDelete.value
   loading.del = true
   errors.del = false
   store
-    .dispatch('deleteStatusAutomation', statusAutomationToDelete.value)
+    .dispatch('deleteStatusAutomation', statusAutomation)
     .then(() => {
-      modals.del = false
+      if (statusAutomation === statusAutomationToDelete.value) {
+        modals.del = false
+      }
     })
     .catch(err => {
       console.error(err)
-      errors.del = true
+      // A late answer must not land on a modal reopened for another row.
+      if (modals.del && statusAutomation === statusAutomationToDelete.value) {
+        errors.del = true
+      }
     })
     .finally(() => {
       loading.del = false
@@ -136,22 +156,24 @@ const confirmDeleteStatusAutomation = () => {
 const onExportClicked = () => {
   const name = stringHelpers.slugify(t('status_automations.title'))
   const headers = [
-    t('main.type'),
     t('status_automations.fields.entity_type'),
-    t('status_automations.fields.in_task_type'),
-    t('status_automations.fields.in_task_status'),
+    t('status_automations.fields.operator'),
+    t('status_automations.fields.conditions'),
     t('status_automations.fields.out_field_type'),
     t('status_automations.fields.out_task_type'),
     t('status_automations.fields.out_task_status'),
+    t('status_automations.fields.out_only_if_task_status_ids'),
     t('status_automations.fields.import_last_revision')
   ]
   const entries = [
     headers,
     ...statusAutomations.value.map(sa => [
-      sa.type,
       sa.entity_type,
-      taskTypeMap.value.get(sa.in_task_type_id)?.name,
-      taskStatusMap.value.get(sa.in_task_status_id)?.short_name,
+      t(`status_automations.connectors.${getTrigger(sa).operator}`),
+      formatTrigger(sa, {
+        taskTypeMap: taskTypeMap.value,
+        taskStatusMap: taskStatusMap.value
+      }),
       sa.out_field_type === 'ready_for'
         ? t('status_automations.change_ready_for')
         : t('status_automations.change_status'),
@@ -159,6 +181,9 @@ const onExportClicked = () => {
       sa.out_field_type === 'status'
         ? taskStatusMap.value.get(sa.out_task_status_id)?.short_name
         : undefined,
+      sa.out_field_type === 'status'
+        ? formatTaskStatuses(getGuardStatusIds(sa), taskStatusMap.value)
+        : '',
       sa.import_last_revision
     ])
   ]
@@ -168,12 +193,14 @@ const onExportClicked = () => {
 const onNewClicked = () => {
   statusAutomationToEdit.value = {}
   errors.edit = false
+  editErrorMessage.value = ''
   modals.edit = true
 }
 
 const onEditClicked = sa => {
   statusAutomationToEdit.value = sa
   errors.edit = false
+  editErrorMessage.value = ''
   modals.edit = true
 }
 

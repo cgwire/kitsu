@@ -17,6 +17,7 @@
             width: width ? `${width}px` : undefined
           }"
           ref="selectRef"
+          :aria-label="ariaLabel || undefined"
           :disabled="disabled"
           :required="required && !hasSelectedOption"
           @keyup.enter="emitEnter()"
@@ -57,6 +58,11 @@ const fieldId = useId()
 // --------------------------------------------------------------------------
 const props = defineProps({
   label: {
+    default: '',
+    type: String
+  },
+  // For a select a sentence names instead of a label.
+  ariaLabel: {
     default: '',
     type: String
   },

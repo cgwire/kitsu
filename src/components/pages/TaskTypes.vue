@@ -134,9 +134,11 @@ const deleteText = computed(() =>
 
 // Zou refuses to delete a task type still attached to schedule items or
 // productions unless force is passed, and force does not help with
-// remaining tasks. The server message says which case it is.
+// remaining tasks or status automations. The server message says which case
+// it is.
 const deleteErrorText = computed(() => {
   const explanations = {
+    automations: 'task_types.delete_blocked_by_automations',
     links: 'task_types.delete_blocked_by_links',
     tasks: 'task_types.delete_blocked_by_tasks'
   }
@@ -172,6 +174,7 @@ const confirmEditTaskType = async form => {
 // Zou's refusal names the force flag when detaching would unblock the
 // deletion; a foreign key error means tasks still use the type.
 const getDeleteBlocker = message => {
+  if (message.includes('status automation')) return 'automations'
   if (message.includes('force=true')) return 'links'
   return message.includes('referencing') ? 'tasks' : ''
 }

@@ -5,13 +5,14 @@
       'field--narrow': narrow
     }"
   >
-    <label class="label" v-if="label">
+    <label class="label" :id="labelId" v-if="label">
       {{ label }}
     </label>
     <div class="status-combo" :style="comboStyles">
       <div
         class="flexrow"
         role="combobox"
+        :aria-labelledby="label ? labelId : ariaLabelledby || undefined"
         tabindex="0"
         aria-haspopup="listbox"
         :aria-expanded="showStatusList"
@@ -80,7 +81,7 @@
 // Imports
 // --------------------------------------------------------------------------
 import { ChevronDownIcon } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
@@ -98,6 +99,11 @@ const { backgroundColor, color } = useTaskStatusStyle()
 // Props / Emits
 // --------------------------------------------------------------------------
 const props = defineProps({
+  // The id of the element naming a combobox without a label of its own.
+  ariaLabelledby: {
+    default: '',
+    type: String
+  },
   colorOnly: {
     default: false,
     type: Boolean
@@ -140,6 +146,9 @@ const emit = defineEmits(['update:model-value'])
 
 // State
 // --------------------------------------------------------------------------
+// The label names the combobox: a <label for> cannot point to a div.
+const labelId = useId()
+
 const {
   showList: showStatusList,
   toggle: toggleStatusList,

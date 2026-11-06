@@ -25,6 +25,7 @@ import previewsApi from '@/store/api/previews'
 import projectTemplatesApi from '@/store/api/projecttemplates'
 import scheduleApi from '@/store/api/schedule'
 import shotsApi from '@/store/api/shots'
+import statusAutomationsApi from '@/store/api/statusautomation'
 import tasksApi from '@/store/api/tasks'
 import taskTypesApi from '@/store/api/tasktypes'
 
@@ -488,5 +489,75 @@ describe('store/api endpoints', () => {
       '/api/data/tasks?project_id=p1&task_type_id=tt1&page=1&limit=1'
     )
     expect(nbTasks).toBe(12)
+  })
+
+  describe('status automations', () => {
+    const form = {
+      id: 'automation-1',
+      entityType: 'shot',
+      operator: 'and',
+      conditions: [
+        { taskTypeId: 'task-type-lighting', taskStatusIds: ['done'] },
+        { taskTypeId: 'task-type-fx', taskStatusIds: ['done', 'na'] }
+      ],
+      outFieldType: 'status',
+      outTaskTypeId: 'task-type-compositing',
+      outTaskStatusId: 'ready',
+      outOnlyIfTaskStatusIds: [],
+      importLastRevision: 'true',
+      archived: 'true'
+    }
+    const trigger = {
+      operator: 'and',
+      conditions: [
+        { task_type_id: 'task-type-lighting', task_status_ids: ['done'] },
+        { task_type_id: 'task-type-fx', task_status_ids: ['done', 'na'] }
+      ]
+    }
+
+    it('creates an automation with its trigger conditions', () => {
+      statusAutomationsApi.newStatusAutomation(form)
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/data/status-automations/',
+        {
+          entity_type: 'shot',
+          in_conditions: trigger,
+          out_field_type: 'status',
+          out_task_type_id: 'task-type-compositing',
+          out_task_status_id: 'ready',
+          out_only_if_task_status_ids: [],
+          import_last_revision: true
+        }
+      )
+    })
+
+    it('updates an automation, archived flag included', () => {
+      statusAutomationsApi.updateStatusAutomation(form)
+      const [path, data] = client.pput.mock.calls[0]
+      expect(path).toBe('/api/data/status-automations/automation-1')
+      expect(data.in_conditions).toEqual(trigger)
+      expect(data.archived).toBe(true)
+      expect(data).not.toHaveProperty('in_task_type_id')
+    })
+
+    it('leaves out the trigger of an edit that keeps it', () => {
+      statusAutomationsApi.updateStatusAutomation({
+        ...form,
+        isTriggerChanged: false
+      })
+      const [, data] = client.pput.mock.calls[0]
+      expect(data).not.toHaveProperty('in_conditions')
+      expect(data.out_task_type_id).toBe('task-type-compositing')
+    })
+
+    it('leaves out the guard of an edit that keeps it', () => {
+      statusAutomationsApi.updateStatusAutomation({
+        ...form,
+        isGuardChanged: false
+      })
+      const [, data] = client.pput.mock.calls[0]
+      expect(data).not.toHaveProperty('out_only_if_task_status_ids')
+      expect(data.in_conditions.operator).toBe('and')
+    })
   })
 })

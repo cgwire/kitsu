@@ -194,12 +194,18 @@ const currentStatusAutomation = computed(() => {
   border: 1px solid $light-grey-light;
   border-bottom-left-radius: 1em;
   border-bottom-right-radius: 1em;
+  // The part extending past the combo needs its own rounding.
+  border-top-right-radius: 1em;
   z-index: $z-dropdown;
   margin-left: -1px;
   max-height: 180px;
-  top: 56px;
+  top: calc(100% + 3px);
   left: 0;
-  right: 0;
+  // As wide as its longest row, up to the settings block, since the .tab of
+  // SettingsLayout clips it: the conditions wrap past that.
+  width: max-content;
+  min-width: calc(100% + 2px);
+  max-width: calc(100vw - 349px);
   overflow-y: auto;
 }
 

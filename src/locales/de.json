@@ -1411,6 +1411,7 @@
       "create_error": "Beim Speichern dieses Aufgabenstatus ist ein Fehler aufgetreten. Sind Sie sicher, dass es keinen Aufgabenstatus mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Aufgabenstatus ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Aufgabenstatus keine Aufgabe zugeordnet hat?",
+      "delete_blocked_by_automations": "Es gibt noch Statusautomatisierungen mit diesem Aufgabenstatus, auch archivierte. Bearbeiten oder löschen Sie sie zuerst.",
       "edit_title": "Aufgabenstatus bearbeiten",
       "number": "Aufgabenstatus | Aufgabenstatus",
       "new_task_status": "Hinzufügen eines Aufgabenstatus",
@@ -1435,11 +1436,13 @@
         "entities": "Assets, Shots, Sequenzen, ..."
       },
       "add_task_status_to_library": "Hinzufügen eines Aufgabenstatus zur Bibliothek",
-      "add_task_status_placeholder": "+ Aufgabenstatus hinzufügen"
+      "add_task_status_placeholder": "+ Aufgabenstatus hinzufügen",
+      "remove_status": "Status {name} entfernen"
     },
     "task_types": {
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Aufgabentyps ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Aufgabentyp keine Aufgabe hat, die mit ihm verknüpft ist?",
+      "delete_blocked_by_automations": "Es gibt noch Statusautomatisierungen mit diesem Aufgabentyp, auch archivierte. Bearbeiten oder löschen Sie sie zuerst.",
       "delete_blocked_by_links": "Dieser Aufgabentyp wird noch im Zeitplan oder im Workflow einiger Produktionen verwendet. Beim Loslösen werden seine Zeitplandaten in allen Produktionen gelöscht.",
       "delete_blocked_by_tasks": "Es gibt noch Aufgaben mit diesem Aufgabentyp. Löschen Sie sie oder weisen Sie sie neu zu, bevor Sie ihn entfernen.",
       "delete_force": "Loslösen und löschen",
@@ -2012,29 +2015,32 @@
     },
     "status_automations": {
       "change_ready_for": "ändert „bereit für“ in",
-      "change_status": "ändert den Aufgabenstatus in",
-      "create_error": "Beim Speichern dieser Statusautomatisierung ist ein Fehler aufgetreten. Sind Sie sicher, dass es keine andere Automatisierung mit demselben Namen gibt?",
-      "delete_text": "Sind Sie sicher, dass Sie die Statusautomatisierung {name} aus Ihrer Datenbank entfernen möchten?",
-      "delete_error": "Beim Löschen dieser Statusautomatisierung ist ein Fehler aufgetreten. Sie ist möglicherweise mit einer Produktion verknüpft. In diesem Fall müssen Sie sie zuerst aus jeder Produktion entfernen.",
+      "change_status": "ändert den Status der Aufgabe",
+      "create_error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "delete_text": "Sind Sie sicher, dass Sie diese Statusautomatisierung aus Ihrer Datenbank entfernen möchten?",
+      "delete_error": "Beim Löschen dieser Statusautomatisierung ist ein Fehler aufgetreten. Sie ist möglicherweise mit einer Produktion oder einer Produktionsvorlage verknüpft. In diesem Fall müssen Sie sie zuerst aus jeder Produktion und jeder Vorlage entfernen.",
       "edit_title": "Eine Statusautomatisierung bearbeiten",
-      "entity_title": "Vom Auslöser betroffener Entitätstyp",
       "number": "Statusautomatisierung | Statusautomatisierungen",
-      "in_title": "Status, der eine Änderung auslöst",
+      "in_title": "Auslösende Bedingungen",
       "out_title": "Die Änderung, die beim Auslösen des Triggers angewendet wird",
       "new_status_automation": "Statusautomatisierung hinzufügen",
       "production_description": "Eine Automatisierung ändert den Status einer Aufgabe oder die nächste Aufgabe, wenn ein Status gesetzt wird.",
       "run_for_selection": "Führen Sie die Statusautomatisierung für ausgewählte Aufgaben aus:",
+      "save_refused": "Diese Automatisierung kann so nicht gespeichert werden.",
       "title": "Statusautomatisierungen",
-      "wrong_automation": "Diese Automatisierung gilt für einen vorgelagerten Aufgabentyp. Kitsu erlaubt dies nicht (um Endlosschleifen zu vermeiden). Sie hat keine Auswirkung.",
+      "to_status": "auf",
+      "wrong_automation": "In dieser Produktion verwendet jede Bedingung einen Aufgabentyp, der nach dem angewendeten Aufgabentyp kommt. Deren Statusänderungen lösen diese Automatisierung nicht aus, um Endlosschleifen zu vermeiden: Sie hat keine Wirkung.",
       "fields": {
         "entity_type": "Entitätstyp",
-        "in_field_type": "Eingabefeldtyp",
         "in_task_type": "Aufgabentyp",
         "in_task_status": "Aufgabenstatus",
-        "out_field_type": "Trigger",
+        "out_field_type": "Angewendete Änderung",
         "out_task_type": "Angewendeter Aufgabentyp",
         "out_task_status": "Angewendeter Aufgabenstatus",
-        "import_last_revision": "Letzte Revision importieren"
+        "import_last_revision": "Letzte Revision importieren",
+        "conditions": "Bedingungen",
+        "operator": "Operator",
+        "out_only_if_task_status_ids": "Nur wenn die angewendete Aufgabe den Status hat"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2047,7 +2053,36 @@
         "status": "Status",
         "ready_for": "Bereit für"
       },
-      "add_status_automation_placeholder": "+ Statusautomatisierung hinzufügen"
+      "add_status_automation_placeholder": "+ Statusautomatisierung hinzufügen",
+      "connectors": {
+        "and": "und",
+        "or": "oder"
+      },
+      "guard_only_condition_and": "In dieser Produktion kommt {taskType} nach dem angewendeten Aufgabentyp: Seine Statusänderungen lösen diese Automatisierung nicht aus, die Bedingung muss aber trotzdem erfüllt sein.",
+      "guard_only_condition_or": "In dieser Produktion kommt {taskType} nach dem angewendeten Aufgabentyp: Diese Bedingung wird ignoriert.",
+      "trigger_when": "Auslösen, wenn",
+      "operators": {
+        "and": "alle folgenden Bedingungen erfüllt sind",
+        "or": "eine der folgenden Bedingungen erfüllt ist"
+      },
+      "add_condition": "+ Bedingung hinzufügen",
+      "remove_condition": "Bedingung entfernen",
+      "remove_condition_on": "Bedingung für {taskType} entfernen",
+      "help": {
+        "and": "Wird ausgeführt, wenn eine Statusänderung alle Bedingungen erfüllt. Ein Aufgabentyp, den die Entität nicht hat, wird ignoriert.",
+        "or": "Wird ausgeführt, wenn eine Statusänderung eine der Bedingungen erfüllt und zuvor keine erfüllt war.",
+        "new_comments_only": "Automatisierungen werden ausgeführt, wenn ein neuer Kommentar einen Status ändert, nie beim Bearbeiten oder Löschen eines Kommentars.",
+        "import_and": "Die Revision stammt aus der Aufgabe der ersten Bedingung, die die Entität hat.",
+        "import_or": "Die Revision stammt aus der Aufgabe, deren Statusänderung die Bedingungen erfüllt hat.",
+        "out_only_if": "Leer lassen, um die Änderung unabhängig vom Status der angewendeten Aufgabe anzuwenden."
+      },
+      "errors": {
+        "max_conditions": "Eine Automatisierung akzeptiert höchstens 10 Bedingungen.",
+        "missing_value": "Wählen Sie einen Aufgabentyp und mindestens einen Status.",
+        "same_task_type": "Dieser Aufgabentyp wird bereits von einer anderen Bedingung verwendet: Fügen Sie die Status dort hinzu.",
+        "output_in_conditions": "Der angewendete Aufgabentyp kann nicht in den Bedingungen verwendet werden."
+      },
+      "only_from": "nur von"
     },
     "preview_room": {
       "join_room": "Review-Raum beitreten",

@@ -355,17 +355,6 @@ const getters = {
     }
   },
 
-  remainingStatusAutomations: (state, getters, rootState, rootGetters) => {
-    // Archived automations are hidden from the main settings list: they
-    // must not stay addable from the production settings either.
-    return rootState.statusAutomations.statusAutomations.filter(
-      s =>
-        !s.archived &&
-        !state.currentProduction.status_automations.includes(s.id) &&
-        !rootGetters.isStatusAutomationDisabled(s)
-    )
-  },
-
   productionTaskTypes: (state, getters, rootState) => {
     if (helpers.isEmptyArray(state.currentProduction, 'task_types')) {
       return rootState.taskTypes.taskTypes

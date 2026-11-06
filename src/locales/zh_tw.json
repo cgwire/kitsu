@@ -1411,6 +1411,7 @@
       "create_error": "儲存此任務狀態時發生錯誤。您確定沒有名稱相似的任務狀態嗎？",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "delete_error": "刪除此任務狀態時發生錯誤。目前可能有資料連結至此任務狀態。您確定沒有任務連結至此任務狀態嗎？",
+      "delete_blocked_by_automations": "仍有狀態自動化（包括已封存的）在使用此任務狀態。請先編輯或刪除這些自動化。",
       "edit_title": "編輯任務狀態",
       "number": "任務狀態 | 任務狀態",
       "new_task_status": "新增任務狀態",
@@ -1435,11 +1436,13 @@
         "entities": "資產、鏡頭、序列..."
       },
       "add_task_status_to_library": "在任務狀態庫中新增任務狀態",
-      "add_task_status_placeholder": "+ 新增任務狀態"
+      "add_task_status_placeholder": "+ 新增任務狀態",
+      "remove_status": "移除狀態 {name}"
     },
     "task_types": {
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "delete_error": "刪除此任務類型時發生錯誤。目前可能有資料連結至此任務類型。您確定沒有任務連結至此任務類型嗎？",
+      "delete_blocked_by_automations": "仍有狀態自動化（包括已封存的）在使用此任務類型。請先編輯或刪除這些自動化。",
       "delete_blocked_by_links": "此任務類型仍在某些製作項目的時間表或工作流程中使用。解除關聯將刪除其在所有製作項目中的時間表日期。",
       "delete_blocked_by_tasks": "仍有任務在使用此任務類型。請先刪除或重新指派這些任務，再移除它。",
       "delete_force": "解除關聯並刪除",
@@ -2012,29 +2015,32 @@
     },
     "status_automations": {
       "change_ready_for": "將「可用於」改為",
-      "change_status": "將任務狀態變更為",
-      "create_error": "儲存此狀態自動化時發生錯誤。您確定沒有其他同名的自動化嗎？",
-      "delete_text": "您確定要從資料庫中移除狀態自動化 {name} 嗎？",
-      "delete_error": "刪除此狀態自動化時發生錯誤。它可能與某個製作項目連結。如果是的話，您必須先從每個製作項目中移除它。",
+      "change_status": "變更任務狀態：",
+      "create_error": "無法儲存。請再試一次。",
+      "delete_text": "您確定要從資料庫中移除此狀態自動化嗎？",
+      "delete_error": "刪除此狀態自動化時發生錯誤。它可能與某個製作項目或製作項目範本連結。如果是的話，您必須先從每個製作項目和範本中移除它。",
       "edit_title": "編輯狀態自動化",
-      "entity_title": "受觸發影響的實體類型",
       "number": "狀態自動化 | 狀態自動化",
-      "in_title": "觸發變更的狀態",
+      "in_title": "觸發條件",
       "out_title": "觸發啟動時應用的變更",
       "new_status_automation": "新增狀態自動化",
       "production_description": "自動化會在設定某個狀態時變更任務狀態或下一個任務。",
       "run_for_selection": "為選取的任務執行狀態自動化：",
+      "save_refused": "此自動化無法按原樣儲存。",
       "title": "自動化",
-      "wrong_automation": "此自動化適用於上游任務類型。Kitsu 不允許這樣做（避免無限循環）。它不會有任何效果。",
+      "to_status": "改為",
+      "wrong_automation": "在此製作項目中，每個條件使用的任務類型都位於套用的任務類型之後。為避免無限循環，它們的狀態變更不會執行此自動化：它不會有任何效果。",
       "fields": {
         "entity_type": "實體類型",
-        "in_field_type": "輸入欄位類型",
         "in_task_type": "任務類型",
         "in_task_status": "任務狀態",
-        "out_field_type": "觸發器",
+        "out_field_type": "套用的變更",
         "out_task_type": "套用的任務類型",
         "out_task_status": "套用的任務狀態",
-        "import_last_revision": "匯入上次修訂"
+        "import_last_revision": "匯入上次修訂",
+        "conditions": "條件",
+        "operator": "運算子",
+        "out_only_if_task_status_ids": "僅當套用的任務處於以下狀態時"
       },
       "entity_types": {
         "asset": "資產",
@@ -2047,7 +2053,36 @@
         "status": "狀態",
         "ready_for": "可用於"
       },
-      "add_status_automation_placeholder": "+ 新增狀態自動化"
+      "add_status_automation_placeholder": "+ 新增狀態自動化",
+      "connectors": {
+        "and": "且",
+        "or": "或"
+      },
+      "guard_only_condition_and": "在此製作項目中，{taskType} 位於套用的任務類型之後：其狀態變更不會執行此自動化，但仍須符合此條件。",
+      "guard_only_condition_or": "在此製作項目中，{taskType} 位於套用的任務類型之後：此條件會被忽略。",
+      "trigger_when": "觸發時機",
+      "operators": {
+        "and": "符合以下所有條件時",
+        "or": "符合以下任一條件時"
+      },
+      "add_condition": "+ 新增條件",
+      "remove_condition": "移除條件",
+      "remove_condition_on": "移除 {taskType} 的條件",
+      "help": {
+        "and": "當狀態變更使所有條件都符合時執行。實體沒有的任務類型會被忽略。",
+        "or": "當狀態變更使其中一個條件符合、而先前沒有任何條件符合時執行。",
+        "new_comments_only": "自動化在新評論變更狀態時執行，編輯或刪除評論時從不執行。",
+        "import_and": "修訂取自實體所具有的第一個條件的任務。",
+        "import_or": "修訂取自其狀態變更符合條件的任務。",
+        "out_only_if": "留空則無論套用的任務處於什麼狀態都會套用此變更。"
+      },
+      "errors": {
+        "max_conditions": "一個自動化最多接受 10 個條件。",
+        "missing_value": "請選擇一個任務類型和至少一個狀態。",
+        "same_task_type": "此任務類型已被另一個條件使用：請在該處新增狀態。",
+        "output_in_conditions": "套用的任務類型不能用於條件。"
+      },
+      "only_from": "僅從"
     },
     "preview_room": {
       "join_room": "加入審閱室",

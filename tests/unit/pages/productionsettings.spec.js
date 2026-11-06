@@ -88,6 +88,16 @@ describe('ProductionSettings — asset types tab', () => {
   })
 })
 
+describe('ProductionSettings — tab widths', () => {
+  it('lets the board and automation tabs fill the page', async () => {
+    const wrapper = await mountWithAssetTypes([])
+
+    expect(
+      wrapper.findAll('.tab.is-full h2.subtitle').map(title => title.text())
+    ).toEqual(['board.settings.title', 'status_automations.title'])
+  })
+})
+
 describe('ProductionSettings — tab from the URL', () => {
   // The menu rows follow menuGroups: parameters, brief, clients, ...
   const activeTab = wrapper =>

@@ -54,6 +54,28 @@ describe('ComboboxStatus', () => {
     expect(wrapper.find('.tag').text()).toBe('WIP')
   })
 
+  it('names the combobox by its label, else by the given element', () => {
+    const mountNamed = props =>
+      shallowMountWithI18n(ComboboxStatus, {
+        props: { taskStatusList, modelValue: 'status-2', ...props },
+        global: { plugins: [store] }
+      })
+    const labeled = mountNamed({ label: 'Status' })
+    const labelId = labeled.find('label').attributes('id')
+    expect(labelId).toBeTruthy()
+    expect(
+      labeled.find('[role="combobox"]').attributes('aria-labelledby')
+    ).toBe(labelId)
+    expect(
+      mountNamed({ ariaLabelledby: 'field-label' })
+        .find('[role="combobox"]')
+        .attributes('aria-labelledby')
+    ).toBe('field-label')
+    expect(
+      wrapper.find('[role="combobox"]').attributes('aria-labelledby')
+    ).toBeUndefined()
+  })
+
   it('does not show the dropdown list initially', () => {
     expect(wrapper.find('.select-input').exists()).toBe(false)
   })
