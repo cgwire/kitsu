@@ -712,7 +712,7 @@ const mutations = {
       if (listedEpisode) Object.assign(listedEpisode, episode)
     })
     Object.assign(cache.episodeMap.get(episode.id), episode)
-    cache.episodeIndex = buildEpisodeIndex(state.episodes)
+    cache.episodeIndex = buildEpisodeIndex(cache.episodes)
   },
 
   [REMOVE_EPISODE](state, episodeToDelete) {
@@ -790,7 +790,7 @@ const mutations = {
       }
       return stateEpisode
     })
-    cache.episodeIndex = buildEpisodeIndex(state.episodes)
+    cache.episodeIndex = buildEpisodeIndex(cache.episodes)
     if (episode.description && !state.isEpisodeDescription) {
       state.isEpisodeDescription = true
     }

@@ -758,6 +758,28 @@ describe('Episodes store, through a store', () => {
 
   const names = list => list.map(({ name }) => name)
 
+  const buildEpisodes = () => [
+    { id: 'ep1', name: 'E01', data: { prod_order: '2' }, tasks: [] },
+    { id: 'ep2', name: 'E02', data: { prod_order: '3' }, tasks: [] },
+    { id: 'ep3', name: 'E03', data: { prod_order: '1' }, tasks: [] }
+  ]
+
+  const loadWithTasks = (store, episodes) =>
+    store.commit('SET_EPISODES_WITH_TASKS', {
+      production,
+      episodes,
+      userFilters: {},
+      taskMap: new Map(),
+      taskTypeMap: new Map(),
+      personMap: new Map(),
+      taskStatusMap: new Map()
+    })
+
+  const selectorLabels = store =>
+    store.getters.episodeOptionGroups.flatMap(({ episodeList }) =>
+      episodeList.map(({ label }) => label)
+    )
+
   beforeEach(() => {
     Object.values(client).forEach(fn => fn.mockReset())
     vi.useFakeTimers()
@@ -1039,25 +1061,6 @@ describe('Episodes store, through a store', () => {
       data_type: 'number',
       ascending: true
     }
-    const buildEpisodes = () => [
-      { id: 'ep1', name: 'E01', data: { prod_order: '2' }, tasks: [] },
-      { id: 'ep2', name: 'E02', data: { prod_order: '3' }, tasks: [] },
-      { id: 'ep3', name: 'E03', data: { prod_order: '1' }, tasks: [] }
-    ]
-    const loadWithTasks = (store, episodes) =>
-      store.commit('SET_EPISODES_WITH_TASKS', {
-        production,
-        episodes,
-        userFilters: {},
-        taskMap: new Map(),
-        taskTypeMap: new Map(),
-        personMap: new Map(),
-        taskStatusMap: new Map()
-      })
-    const selectorLabels = store =>
-      store.getters.episodeOptionGroups.flatMap(({ episodeList }) =>
-        episodeList.map(({ label }) => label)
-      )
 
     // After a plain list load, the page and the topbar selector start from
     // the same episodes: a sort of the page must stay on the page.
@@ -1115,6 +1118,31 @@ describe('Episodes store, through a store', () => {
 
       expect(rows.value).toEqual(['E03', 'E01', 'E02'])
     })
+  })
+
+  // The topbar keeps its own copies of the episodes, without their tasks: the
+  // search must keep finding the rows of the page.
+  test.each([
+    [
+      'an edit',
+      store =>
+        store.commit('EDIT_EPISODE_END', { id: 'ep1', name: 'E01', data: {} })
+    ],
+    [
+      'an update from another session',
+      store => store.commit('UPDATE_EPISODE', { id: 'ep1', description: 'New' })
+    ]
+  ])('finds the rows with their tasks after %s', async (_, update) => {
+    const { store } = await buildStore()
+    loadEpisodes(store, buildEpisodes())
+    loadWithTasks(store, buildEpisodes())
+
+    update(store)
+    await store.dispatch('setEpisodeSearch', 'E02')
+
+    const rows = store.getters.displayedEpisodes
+    expect(names(rows)).toEqual(['E02'])
+    expect(rows[0].validations).toBeInstanceOf(Map)
   })
 
   test('loads the episode stats and their task type columns', async () => {
