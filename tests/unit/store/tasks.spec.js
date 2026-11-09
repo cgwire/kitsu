@@ -1036,7 +1036,12 @@ describe('Tasks store, rolled back preview publications', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    state = { isSavingCommentPreview: false, taskComments: {}, taskPreviews: {} }
+    state = {
+      isSavingCommentPreview: false,
+      taskComments: {},
+      taskEntityPreviews: {},
+      taskPreviews: {}
+    }
     tasksApi.commentTask.mockResolvedValue({ id: 'comment-1', previews: [] })
     tasksApi.addPreview.mockResolvedValue({ id: 'preview-1' })
     tasksApi.deleteTaskComment.mockResolvedValue('')
@@ -2007,7 +2012,12 @@ describe('Tasks store, revisions of a task', () => {
     mutations.DELETE_PREVIEW_END(state, { taskId, previewId })
 
   beforeEach(() => {
-    state = { taskComments: {}, taskMap: new Map(), taskPreviews: {} }
+    state = {
+      taskComments: {},
+      taskEntityPreviews: {},
+      taskMap: new Map(),
+      taskPreviews: {}
+    }
     mutations.LOAD_TASK_COMMENTS_END(state, {
       taskId,
       comments: [
@@ -2341,6 +2351,65 @@ describe('Tasks store, revisions of a task', () => {
       expect(listed()).toEqual([3])
     })
 
+    // The comparison of the player lists the revisions of the entity by task
+    // type, its first file by date.
+    describe('with the revisions the player compares', () => {
+      const compared = () =>
+        Object.fromEntries(
+          Object.entries(state.taskEntityPreviews).map(
+            ([taskTypeId, previews]) => [taskTypeId, previews.map(({ id }) => id)]
+          )
+        )
+
+      beforeEach(() => {
+        // Zou lists the other files of a revision under its first one.
+        state.taskEntityPreviews = {
+          'task-type-1': [
+            { id: 'preview-4a', revision: 4, previews: [{ id: 'preview-4b' }] },
+            { id: 'preview-3', revision: 3, previews: [] }
+          ],
+          'task-type-2': [{ id: 'preview-layout', revision: 1, previews: [] }]
+        }
+      })
+
+      test.each([
+        ['an event', commentId => removeElsewhere(commentId)],
+        ['an answer', commentId => deleteComment(commentId)]
+      ])('drops the revision on %s', (_, remove) => {
+        remove('comment-3')
+
+        expect(compared()).toEqual({
+          'task-type-1': ['preview-4a'],
+          'task-type-2': ['preview-layout']
+        })
+      })
+
+      // Reloaded after the trash took its first file, the comment lists the
+      // others only.
+      test('drops a revision named by another of its files', () => {
+        mutations.NEW_TASK_COMMENT_END(state, {
+          comment: makeComment('comment-4', [{ id: 'preview-4b', revision: 4 }]),
+          taskId
+        })
+
+        removeElsewhere('comment-4')
+
+        expect(compared()).toEqual({
+          'task-type-1': ['preview-3'],
+          'task-type-2': ['preview-layout']
+        })
+      })
+
+      // The player rebuilds its lookup only when the whole list changes.
+      test('gives the player a new list', () => {
+        const before = state.taskEntityPreviews
+
+        removeElsewhere('comment-3')
+
+        expect(state.taskEntityPreviews).not.toBe(before)
+      })
+    })
+
     // An upload that ended just before the deletion answers just after it.
     test('keeps out a file whose comment and revision went', () => {
       removeElsewhere('comment-3')
@@ -2381,6 +2450,35 @@ describe('Tasks store, revisions of a task', () => {
       expect(entry.id).toBe('preview-3b')
       expect(entry.previews.map(({ id }) => id)).toEqual(['preview-3b'])
     })
+  })
+})
+
+// The comparison of the player lists the revisions of every task of the
+// entity: a comment deleted on another task may take one of them.
+describe('Tasks store, revisions compared after a deletion elsewhere', () => {
+  const taskEntityPreviews = {
+    'task-type-1': [{ id: 'preview-1', task_id: 'task-1', previews: [] }],
+    'task-type-2': [{ id: 'preview-2', task_id: 'task-2', previews: [] }]
+  }
+
+  const refresh = taskId => {
+    const dispatch = vi.fn(() => Promise.resolve())
+    tasksStore.actions.refreshTaskEntityPreviewFiles(
+      { dispatch, state: { taskEntityPreviews } },
+      { entityId: 'entity-1', taskId }
+    )
+    return dispatch
+  }
+
+  test('reloads them for a task they list', () => {
+    expect(refresh('task-2')).toHaveBeenCalledWith(
+      'loadTaskEntityPreviewFiles',
+      'entity-1'
+    )
+  })
+
+  test('leaves them for a task they do not list', () => {
+    expect(refresh('task-3')).not.toHaveBeenCalled()
   })
 })
 

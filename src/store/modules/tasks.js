@@ -162,14 +162,22 @@ const helpers = {
 
   // Zou deletes the files of a comment along with it, and so their revision.
   // An entry keeps the id of its first file, which the trash may have taken
-  // and a reload dropped: the files it still holds name it too.
+  // and a reload dropped: the files it still holds name it too. The player
+  // also compares with the revisions of the entity, listed by task type: it
+  // rebuilds its lookup only when the whole list changes.
   removeRevisionsOfFiles(state, taskId, files = []) {
-    if (!state.taskPreviews[taskId]) return
     const fileIds = files.map(({ id }) => id)
-    state.taskPreviews[taskId] = state.taskPreviews[taskId].filter(
-      ({ id, previews }) =>
-        !fileIds.includes(id) &&
-        !previews.some(preview => fileIds.includes(preview.id))
+    const isKept = ({ id, previews }) =>
+      !fileIds.includes(id) &&
+      !previews.some(preview => fileIds.includes(preview.id))
+    if (state.taskPreviews[taskId]) {
+      state.taskPreviews[taskId] = state.taskPreviews[taskId].filter(isKept)
+    }
+    state.taskEntityPreviews = Object.fromEntries(
+      Object.entries(state.taskEntityPreviews).map(([taskTypeId, previews]) => [
+        taskTypeId,
+        previews.filter(isKept)
+      ])
     )
   }
 }
@@ -283,6 +291,18 @@ const actions = {
       commit(LOAD_TASK_ENTITY_PREVIEW_FILES_END, previewFiles)
       return previewFiles
     })
+  },
+
+  // The comparison of the player lists the revisions of every task of the
+  // entity: a comment deleted on another task may have taken one of them, and
+  // its event names no file.
+  refreshTaskEntityPreviewFiles({ dispatch, state }, { entityId, taskId }) {
+    const isListed = Object.values(state.taskEntityPreviews).some(previews =>
+      previews.some(preview => preview.task_id === taskId)
+    )
+    return isListed
+      ? dispatch('loadTaskEntityPreviewFiles', entityId)
+      : Promise.resolve()
   },
 
   // Given its task, as Zou names it for a new comment, the comment also moves

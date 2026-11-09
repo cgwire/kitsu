@@ -1808,6 +1808,13 @@ const onCommentDelete = eventData => {
     store.commit('REMOVE_TASK_COMMENT', { task: task.value, comment })
     taskComments.value = getCurrentTaskComments()
     taskPreviews.value = getCurrentTaskPreviews()
+  } else if (eventData.task_id !== task.value.id) {
+    store
+      .dispatch('refreshTaskEntityPreviewFiles', {
+        entityId: task.value.entity_id,
+        taskId: eventData.task_id
+      })
+      .catch(logRequestFailure)
   }
 }
 

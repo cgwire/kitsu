@@ -2072,7 +2072,12 @@ describe('TaskInfo.vue', () => {
     })
 
     const mountOnRevisions = async (revisions, stubs = {}) => {
-      const state = { taskComments: {}, taskMap: new Map(), taskPreviews: {} }
+      const state = {
+        taskComments: {},
+        taskEntityPreviews: {},
+        taskMap: new Map(),
+        taskPreviews: {}
+      }
       mutations.LOAD_TASK_COMMENTS_END(state, {
         taskId: TASK_ID,
         comments: revisions.map(revision => buildComment(revision))
@@ -2195,6 +2200,36 @@ describe('TaskInfo.vue', () => {
 
       expect(options(panel.wrapper)).toEqual(['preview-1'])
       expect(shownFiles(panel.wrapper)).toEqual(['preview-1'])
+    })
+
+    // The comparison of the player lists the revisions of the other tasks of
+    // the entity too.
+    it('refreshes the revisions compared once a comment goes on another task', async () => {
+      const panel = await mountOnRevisions([2, 1])
+
+      await panel.emitEvent('comment:delete', {
+        comment_id: 'comment-elsewhere',
+        task_id: 'task-2'
+      })
+
+      expect(panel.store.dispatch).toHaveBeenCalledWith(
+        'refreshTaskEntityPreviewFiles',
+        { entityId: ENTITY_ID, taskId: 'task-2' }
+      )
+    })
+
+    it('refreshes nothing for a comment of its own task', async () => {
+      const panel = await mountOnRevisions([2, 1])
+
+      await deleteElsewhere(panel, 2)
+      await panel.emitEvent('comment:delete', {
+        comment_id: 'comment-unknown',
+        task_id: TASK_ID
+      })
+
+      expect(dispatchedTypes(panel.store)).not.toContain(
+        'refreshTaskEntityPreviewFiles'
+      )
     })
 
     it('shows no player once the only revision goes', async () => {

@@ -882,6 +882,7 @@ const {
   overlayOpacity,
   toggleComparison,
   setDefaultComparisonPreview,
+  setDefaultComparisonTaskType,
   goToPreviousComparison,
   goToNextComparison,
   toggleFullOverlay,
@@ -2630,6 +2631,10 @@ watch(
     resetPreviewFileMap()
     if (previewToCompareId.value) {
       previewToCompare.value = resolvePreviewToCompare(previewToCompareId.value)
+      // A colleague may have deleted the revision compared, or the last one
+      // of its task type.
+      if (!previewToCompare.value) setDefaultComparisonPreview()
+      if (!previewToCompareId.value) setDefaultComparisonTaskType()
     }
   }
 )

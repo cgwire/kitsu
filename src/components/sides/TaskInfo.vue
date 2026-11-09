@@ -1684,6 +1684,13 @@ const onRemoteCommentDelete = eventData => {
       store.commit('REMOVE_TASK_COMMENT', { task: props.task, comment })
       resetComments()
       taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+    } else if (eventData.task_id !== props.task.id) {
+      store
+        .dispatch('refreshTaskEntityPreviewFiles', {
+          entityId: props.task.entity_id,
+          taskId: eventData.task_id
+        })
+        .catch(logRequestFailure)
     }
     animOn.value = false
   }

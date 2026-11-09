@@ -596,7 +596,12 @@ describe('Task.vue preview selection', () => {
     })
 
     const mountOnRevisions = async (revisions, options = {}) => {
-      const state = { taskComments: {}, taskMap: new Map(), taskPreviews: {} }
+      const state = {
+        taskComments: {},
+        taskEntityPreviews: {},
+        taskMap: new Map(),
+        taskPreviews: {}
+      }
       mutations.LOAD_TASK_COMMENTS_END(state, {
         taskId: TASK_ID,
         comments: revisions.map(buildComment)
@@ -683,6 +688,36 @@ describe('Task.vue preview selection', () => {
       await emitDeletion(page, 1)
 
       expect(page.wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+    })
+
+    // The comparison of the player lists the revisions of the other tasks of
+    // the entity too.
+    it('refreshes the revisions compared once a comment goes on another task', async () => {
+      const page = await mountOnRevisions([2, 1])
+      const [, onCommentDelete] = page.socket.on.mock.calls.find(
+        ([event]) => event === 'comment:delete'
+      )
+
+      onCommentDelete({ comment_id: 'comment-elsewhere', task_id: 'task-2' })
+      await flushPromises()
+
+      expect(page.store.dispatch).toHaveBeenCalledWith(
+        'refreshTaskEntityPreviewFiles',
+        { entityId: buildTask().entity_id, taskId: 'task-2' }
+      )
+    })
+
+    it('refreshes nothing for a comment of its own task', async () => {
+      const page = await mountOnRevisions([2, 1])
+      const [, onCommentDelete] = page.socket.on.mock.calls.find(
+        ([event]) => event === 'comment:delete'
+      )
+
+      await emitDeletion(page, 2)
+      onCommentDelete({ comment_id: 'comment-unknown', task_id: TASK_ID })
+      await flushPromises()
+
+      expect(page.dispatched).not.toContain('refreshTaskEntityPreviewFiles')
     })
 
     // The options go by number, the list by date of publication.

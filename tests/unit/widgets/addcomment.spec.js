@@ -408,7 +408,12 @@ describe('AddComment', () => {
         { isTaskRevisionTaken: tasksStore.getters.isTaskRevisionTaken },
         {},
         {
-          state: { taskComments: {}, taskMap: new Map(), taskPreviews: {} },
+          state: {
+            taskComments: {},
+            taskEntityPreviews: {},
+            taskMap: new Map(),
+            taskPreviews: {}
+          },
           mutations: {
             ADD_PREVIEW_END,
             DELETE_PREVIEW_END,
