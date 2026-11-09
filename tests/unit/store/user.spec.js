@@ -9,7 +9,8 @@ vi.mock('@/store/api/people', () => ({
     loadDone: vi.fn(),
     loadTasksToCheck: vi.fn(),
     loadTimeSpents: vi.fn(),
-    unregisterFIDO: vi.fn()
+    unregisterFIDO: vi.fn(),
+    updatePersonLocale: vi.fn()
   }
 }))
 
@@ -441,6 +442,53 @@ describe('User store', () => {
   describe('Actions', () => {
     afterEach(() => {
       vi.clearAllMocks()
+    })
+
+    describe('saveUserLocale', () => {
+      const context = locale => {
+        const state = { user: { id: 'person-1', locale, role: 'user' } }
+        const commit = (type, form) => store.mutations[type](state, form)
+        return { commit, state }
+      }
+
+      test('writes the language to the profile, and only that', async () => {
+        peopleApi.updatePersonLocale.mockResolvedValue({})
+        const { commit, state } = context('en_US')
+
+        await store.actions.saveUserLocale({ commit, state }, 'fr_FR')
+
+        expect(peopleApi.updatePersonLocale).toHaveBeenCalledExactlyOnceWith(
+          'person-1',
+          'fr_FR'
+        )
+        expect(state.user.locale).toBe('fr_FR')
+      })
+
+      // The people store updates its list through this id.
+      test('names the person in the mutation', async () => {
+        peopleApi.updatePersonLocale.mockResolvedValue({})
+        const commit = vi.fn()
+        const { state } = context('en_US')
+
+        await store.actions.saveUserLocale({ commit, state }, 'fr_FR')
+
+        expect(commit).toHaveBeenCalledExactlyOnceWith(
+          'USER_SAVE_PROFILE_SUCCESS',
+          { id: 'person-1', locale: 'fr_FR' }
+        )
+      })
+
+      test('keeps the profile as it is when Zou refuses', async () => {
+        const failure = new Error('Forbidden')
+        peopleApi.updatePersonLocale.mockRejectedValue(failure)
+        const { commit, state } = context('en_US')
+
+        await expect(
+          store.actions.saveUserLocale({ commit, state }, 'fr_FR')
+        ).rejects.toBe(failure)
+
+        expect(state.user.locale).toBe('en_US')
+      })
     })
 
     // A 2xx response without a JSON body (proxy maintenance page) makes pget

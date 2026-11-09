@@ -10,6 +10,8 @@
     </div>
     <router-view v-else />
 
+    <public-page-settings v-if="isPublicPageSettingsVisible" />
+
     <preview-modal
       v-if="previewFileIdToShow"
       active
@@ -35,6 +37,7 @@ import crisp from '@/lib/crisp'
 import { isNewShotInLoadedScope } from '@/lib/episodes'
 import errors from '@/lib/errors'
 import i18n from '@/lib/i18n'
+import lang, { localeCode, pageLocaleCode } from '@/lib/lang'
 import { getProductionRole } from '@/lib/people'
 import localPreferences from '@/lib/preferences'
 import { isPreviewFileStatus } from '@/lib/preview'
@@ -46,6 +49,7 @@ import sequenceStore from '@/store/modules/sequences.js'
 import shotsStore from '@/store/modules/shots.js'
 
 import PreviewModal from '@/components/modals/PreviewModal.vue'
+import PublicPageSettings from '@/components/widgets/PublicPageSettings.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 // Composables
@@ -96,6 +100,9 @@ const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const todoMap = computed(() => store.getters.todoMap)
 const user = computed(() => store.getters.user)
+const isPublicPageSettingsVisible = computed(
+  () => route.meta.isPublic && !user.value && !isDataLoading.value
+)
 
 // Functions
 // --------------------------------------------------------------------------
@@ -734,10 +741,17 @@ watch(
 )
 
 watch(
+  pageLocaleCode,
+  () => {
+    document.documentElement.lang = pageLocaleCode.value
+  },
+  { immediate: true }
+)
+
+watch(
   currentProduction,
   () => {
-    const userLocale = (user.value?.locale || 'en').substring(0, 2)
-    if (userLocale !== 'en') return
+    if (localeCode.value !== 'en') return
     const variant = currentProduction.value?.production_style
     if (['nft', 'video-game'].includes(variant)) {
       i18n.global.fallbackWarn = false
@@ -755,6 +769,7 @@ watch(
 
 onMounted(async () => {
   const config = await store.dispatch('setMainConfig')
+  lang.applyStudioLocale(config.default_locale)
   setupDarkTheme(config)
   setupCrisp(config)
   setupSentry(config)

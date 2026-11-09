@@ -27,6 +27,7 @@ const productions = [
 
 const mountPage = async ({
   isClient = false,
+  mainConfig = ref({ is_self_hosted: false }),
   openProductions = ref(productions),
   failing = []
 } = {}) => {
@@ -36,7 +37,7 @@ const mountPage = async ({
       isCurrentUserClient: () => isClient,
       isCurrentUserManager: () => !isClient,
       lastProductionScreen: () => 'assets',
-      mainConfig: () => ({ is_self_hosted: false }),
+      mainConfig: () => mainConfig.value,
       openProductions: () => openProductions.value,
       organisation: () => ({ name: 'Doudou Corp' })
     }
@@ -124,6 +125,47 @@ describe('OpenProductions', () => {
     expect(again.wrapper.find('.client-welcome').exists()).toBe(false)
     const studio = await mountPage()
     expect(studio.wrapper.find('.client-welcome').exists()).toBe(false)
+  })
+
+  describe('contributions', () => {
+    const selfHosted = () => ref({ is_self_hosted: true })
+
+    afterEach(() => {
+      localStorage.removeItem('open-productions:contributions')
+    })
+
+    it('leaves them out of the hosted version', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(wrapper.find('.social-contributions').exists()).toBe(false)
+    })
+
+    it('shows them on a self-hosted instance', async () => {
+      const { wrapper } = await mountPage({ mainConfig: selfHosted() })
+
+      expect(wrapper.find('.social-contributions').exists()).toBe(true)
+    })
+
+    it('shows them when the config comes after the page', async () => {
+      const mainConfig = ref({})
+      const { wrapper } = await mountPage({ mainConfig })
+      expect(wrapper.find('.social-contributions').exists()).toBe(false)
+
+      mainConfig.value = { is_self_hosted: true }
+      await flushPromises()
+
+      expect(wrapper.find('.social-contributions').exists()).toBe(true)
+    })
+
+    it('hides them for good once closed', async () => {
+      const { wrapper } = await mountPage({ mainConfig: selfHosted() })
+
+      await wrapper.find('.close-contributions').trigger('click')
+
+      expect(wrapper.find('.social-contributions').exists()).toBe(false)
+      const again = await mountPage({ mainConfig: selfHosted() })
+      expect(again.wrapper.find('.social-contributions').exists()).toBe(false)
+    })
   })
 
   it('keeps the production grid for the studio', async () => {

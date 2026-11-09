@@ -8,9 +8,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import auth from '@/lib/auth'
 import errors from '@/lib/errors'
 import i18n, { loadLocaleMessages } from '@/lib/i18n'
+import lang from '@/lib/lang'
 
 import App from '@/App.vue'
 import MetadataTextarea from '@/components/cells/MetadataTextarea.vue'
+import PublicPageSettings from '@/components/widgets/PublicPageSettings.vue'
 
 import { recordUnhandledRejections } from './fixtures/unhandled-rejections'
 
@@ -24,6 +26,12 @@ const mountApp = async ({ actions, getters, mutations, path = '/' }) => {
     routes: [
       { path: '/', component: Page },
       { path: '/login', name: 'login', component: Page },
+      {
+        path: '/reset-password',
+        name: 'reset-password',
+        component: Page,
+        meta: { isPublic: true }
+      },
       {
         path: '/playlists/shared/:token',
         name: 'shared-playlist',
@@ -1103,8 +1111,9 @@ describe('App', () => {
   // English speakers read the vocabulary of the production type: the
   // overlays rename the shots to NFTs or to maps.
   describe('English overlays', () => {
-    afterEach(() => {
-      i18n.global.locale.value = 'en'
+    afterEach(async () => {
+      await lang.setLocale('en_US')
+      localStorage.removeItem('locale')
       i18n.global.fallbackWarn = true
     })
 
@@ -1127,9 +1136,23 @@ describe('App', () => {
       expect(i18n.global.fallbackWarn).toBe(true)
     })
 
+    // The guest of a shared playlist.
+    it('follows it without a user too', async () => {
+      await mountApp({
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            production_style: 'nft'
+          }),
+          user: () => null
+        }
+      })
+
+      expect(i18n.global.locale.value).toBe('en_nft')
+    })
+
     it('leaves the language of a user who reads another one', async () => {
-      await loadLocaleMessages('fr')
-      i18n.global.locale.value = 'fr'
+      await lang.setLocale('fr_FR')
 
       await mountApp({
         getters: {
@@ -1142,6 +1165,104 @@ describe('App', () => {
       })
 
       expect(i18n.global.locale.value).toBe('fr')
+    })
+
+    it('leaves the language the app started in before login', async () => {
+      await lang.setLocale('fr_FR')
+
+      await mountApp({
+        getters: { currentProduction: () => null, user: () => null }
+      })
+
+      expect(i18n.global.locale.value).toBe('fr')
+    })
+  })
+
+  describe('page language', () => {
+    afterEach(async () => {
+      await lang.setLocale('en_US')
+      localStorage.removeItem('locale')
+      localStorage.removeItem('studio-locale')
+    })
+
+    it('declares the language in use', async () => {
+      await mountApp({})
+      expect(document.documentElement.lang).toBe('en')
+
+      await lang.setLocale('zh_Hant_TW')
+      await flushPromises()
+
+      expect(document.documentElement.lang).toBe('zh-tw')
+    })
+
+    it('takes the language of the studio for a browser in none of Kitsu', async () => {
+      vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['sv-SE'])
+      await loadLocaleMessages('de')
+
+      await mountApp({
+        actions: { setMainConfig: () => ({ default_locale: 'de_DE' }) }
+      })
+      await flushPromises()
+
+      expect(document.documentElement.lang).toBe('de')
+    })
+
+    // vue-i18n warns on the way to its English fallback.
+    it('declares English for a language of the studio Kitsu lacks', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+      vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['sv-SE'])
+
+      await mountApp({
+        actions: { setMainConfig: () => ({ default_locale: 'sv_SE' }) }
+      })
+      await flushPromises()
+
+      expect(document.documentElement.lang).toBe('en')
+    })
+
+    it('declares English on leaving a language Kitsu has for one it lacks', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+      await mountApp({})
+      await lang.setLocale('de_DE')
+      await flushPromises()
+      expect(document.documentElement.lang).toBe('de')
+
+      await lang.setLocale('sv_SE')
+      await flushPromises()
+
+      expect(document.documentElement.lang).toBe('en')
+    })
+  })
+
+  describe('settings of the public pages', () => {
+    const hasSettings = () =>
+      wrapper.findComponent(PublicPageSettings).exists()
+
+    it('shows them to a visitor', async () => {
+      await mountApp({ path: '/reset-password' })
+      expect(hasSettings()).toBe(true)
+    })
+
+    it('leaves them out of the other pages', async () => {
+      await mountApp({ path: '/' })
+      expect(hasSettings()).toBe(false)
+    })
+
+    // The language of a known user comes from the profile.
+    it('leaves them out for a known user', async () => {
+      await mountApp({
+        getters: { user: () => ({ id: 'user-1', locale: 'en_US' }) },
+        path: '/reset-password'
+      })
+      expect(hasSettings()).toBe(false)
+    })
+
+    it('leaves them out of the loading screen', async () => {
+      await mountApp({
+        getters: { isDataLoading: () => true },
+        path: '/reset-password'
+      })
+      expect(hasSettings()).toBe(false)
     })
   })
 

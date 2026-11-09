@@ -15,6 +15,7 @@ import store from '@/store'
 import { setupChunkErrorHandler } from '@/lib/chunk-error'
 import { followLostRedirects } from '@/lib/navigation-failure'
 import { createSocket } from '@/lib/socket'
+import { startApp } from '@/lib/startup'
 
 import vAutosize from '@/directives/autosize'
 import VueAnimXYZ from '@animxyz/vue3'
@@ -25,7 +26,6 @@ const head = createHead()
 
 app.use(i18n)
 app.use(head)
-app.use(router)
 app.use(store)
 app.use(resizableColumn)
 app.config.globalProperties.$socket = createSocket()
@@ -78,4 +78,4 @@ window.addEventListener('unhandledrejection', event => {
 setupChunkErrorHandler(router)
 followLostRedirects(router)
 
-app.mount('#app')
+startApp(app, router)
