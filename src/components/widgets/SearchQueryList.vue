@@ -190,6 +190,7 @@
       :is-loading="loading.edit"
       :is-error="errors.edit"
       :is-group-enabled="isGroupEnabled"
+      :production-id="productionId"
       :search-query-to-edit="searchQueryToEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditSearch"
@@ -290,7 +291,6 @@ const modals = reactive({
 })
 const toggleGroupId = ref(null)
 
-const currentProduction = computed(() => store.getters.currentProduction)
 const departmentMap = computed(() => store.getters.departmentMap)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(() =>
@@ -402,9 +402,7 @@ const confirmEditFilterGroup = async filterGroup => {
   try {
     loading.group = true
     errors.group = false
-    filterGroup.project_id = currentProduction.value
-      ? currentProduction.value.id
-      : null
+    filterGroup.project_id = props.productionId
     if (!filterGroup.id) {
       await store.dispatch(
         `save${stringHelpers.capitalize(props.type)}SearchFilterGroup`,
@@ -426,9 +424,7 @@ const confirmEditSearch = async searchFilter => {
   try {
     loading.edit = true
     errors.edit = false
-    searchFilter.project_id = currentProduction.value
-      ? currentProduction.value.id
-      : null
+    searchFilter.project_id = props.productionId
     await store.dispatch('updateSearchFilter', searchFilter)
     modals.edit = false
   } catch (err) {
