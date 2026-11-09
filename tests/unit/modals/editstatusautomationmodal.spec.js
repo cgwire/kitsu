@@ -286,6 +286,19 @@ describe('EditStatusAutomationModal', () => {
     ).toBe('task-type-animation')
   })
 
+  // Zou imports a revision on a status change only.
+  it('offers no revision import for a ready for automation', async () => {
+    const wrapper = await mountModal(statusAutomation)
+    expect(
+      findField(wrapper, ComboboxBoolean, 'Import Last Revision')
+    ).toBeTruthy()
+
+    await wrapper.setProps({ statusAutomationToEdit: readyForAutomation })
+    expect(
+      findField(wrapper, ComboboxBoolean, 'Import Last Revision')
+    ).toBeFalsy()
+  })
+
   it('groups the trigger and the applied change in two blocks', async () => {
     const wrapper = await mountModal(statusAutomation)
     const blocks = wrapper.findAll('.automation-block')
