@@ -294,8 +294,13 @@ const syncFormFromUser = () => {
 const saveSection = async section => {
   loading[section] = true
   errors[section] = false
+  // The form stays open during the request: only what was sent counts.
+  const sent = { ...form.value }
   try {
-    await store.dispatch('saveProfile', { form: form.value })
+    await store.dispatch('saveProfile', { form: sent })
+    // Not applied: a save leaves the screen as it is, a language tried during
+    // the request included.
+    lang.rememberLocale(sent.locale)
   } catch {
     errors[section] = true
   }
@@ -307,7 +312,7 @@ const saveNotifications = () => saveSection('notifications')
 
 const localeChanged = value => {
   form.value.locale = value
-  lang.setLocale(value)
+  lang.applyLocale(value)
 }
 
 const passwordChangeRequested = async () => {
