@@ -110,6 +110,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { isBehindModal } from '@/composables/modal'
 import { useTime } from '@/composables/time'
 import { isFreeEscape } from '@/lib/keyboard'
 import {
@@ -365,6 +366,8 @@ const onKeyDown = event => {
     closeTask()
     return
   }
+  // A modal may be asking about the task shown, which stays as it is.
+  if (isBehindModal(body.value)) return
   if (newsList.value && newsList.value.length > 0 && event.altKey) {
     let index = newsList.value.findIndex(news => news.id === selectedNewsId)
     if ([37, 38].includes(event.keyCode)) {

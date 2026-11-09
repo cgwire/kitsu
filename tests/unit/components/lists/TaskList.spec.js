@@ -3,6 +3,7 @@ import { vi } from 'vitest'
 import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
+import { openModalHost } from '../../fixtures/modal-host'
 import { buildRefusal } from '../../fixtures/refusal'
 import { trackTaskSelection } from '../../fixtures/task-selection'
 
@@ -230,6 +231,36 @@ describe('lists/TaskList', () => {
 
     expect(wrapper.findAll('tbody tr.selected')).toHaveLength(1)
     expect(selection.selectedIds()).toEqual(['task-1'])
+
+    wrapper.unmount()
+  })
+
+  // Confirming in a modal sent the change to the row Alt+Down had reached.
+  test('keeps the selection on Alt+Down behind a modal', async () => {
+    const tasks = ['task-1', 'task-2'].map(id => ({ ...task, id }))
+    const selection = trackTaskSelection()
+    const wrapper = mountList(undefined, { selection, props: { tasks } })
+    await wrapper.find('tbody td.name').trigger('click')
+    const closeModal = await openModalHost()
+
+    const event = new KeyboardEvent('keydown', {
+      altKey: true,
+      cancelable: true,
+      keyCode: 40
+    })
+    window.dispatchEvent(event)
+    await nextTick()
+
+    expect(selection.selectedIds()).toEqual(['task-1'])
+    expect(event.defaultPrevented).toBe(true)
+
+    closeModal()
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { altKey: true, keyCode: 40 })
+    )
+    await nextTick()
+
+    expect(selection.selectedIds()).toEqual(['task-2'])
 
     wrapper.unmount()
   })

@@ -153,6 +153,7 @@ import { useStore } from 'vuex'
 
 import { pauseEvent } from '@/composables/dom'
 import { useFormat } from '@/composables/format'
+import { isBehindModal } from '@/composables/modal'
 
 import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
@@ -241,6 +242,12 @@ const onKeyDown = event => {
       ? 1
       : 0
   if (delta === 0) return
+  // A modal may be asking about the selection, which stays as it is. The key
+  // stays caught: Alt+Left would leave the page.
+  if (isBehindModal(document.body)) {
+    pauseEvent(event)
+    return
+  }
   const { length } = props.tasks
   const current = props.tasks.findIndex(({ id }) => id === selectedTaskId.value)
   const index = (Math.max(current, 0) + delta + length) % length

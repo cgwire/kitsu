@@ -32,6 +32,7 @@ import {
   pauseEvent,
   removeEvents
 } from '@/composables/dom'
+import { isBehindModal } from '@/composables/modal'
 import colors from '@/lib/colors'
 import { getMetadataEventValue, getMetadataFieldValue } from '@/lib/descriptors'
 import preferences from '@/lib/preferences'
@@ -818,6 +819,12 @@ export const useEntityList = ({
   const onKeyDown = event => {
     shiftKeyPressed.value = event.shiftKey
     if (!event.altKey || ![37, 38, 39, 40].includes(event.keyCode)) return
+    // A modal may be asking about the selection, which stays as it is. The key
+    // stays caught: Alt+Left would leave the page.
+    if (isBehindModal(getBody())) {
+      stopEvent(event)
+      return
+    }
     const { x: i, y: j } = getLastSelection() || { x: 0, y: 0 }
     const moves = {
       37: [i, j - 1],
