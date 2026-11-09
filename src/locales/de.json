@@ -146,6 +146,7 @@
       "attachments": "Anhänge",
       "attachments_to_add": "Anhänge hinzufügen",
       "max_retakes_error": "Sie können bei dieser Aufgabe keine Retakes mehr hinzufügen.",
+      "revision_taken_error": "Revision {revision} existiert bereits. Wählen Sie eine andere Nummer.",
       "unknown_status_error": "Der ausgewählte Aufgabenstatus ist nicht mehr verfügbar. Bitte laden Sie die Seite neu und versuchen Sie es erneut.",
       "previews": "Als neue Version zu veröffentlichende Vorschaudateien",
       "selected_files": "Ausgewählte Dateien",

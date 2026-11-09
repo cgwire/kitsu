@@ -146,6 +146,7 @@
       "attachments": "附件",
       "attachments_to_add": "添加附件",
       "max_retakes_error": "您无法再为此任务添加返修。",
+      "revision_taken_error": "修订 {revision} 已存在。请选择其他编号。",
       "unknown_status_error": "所选的任务状态已不可用。请重新加载页面并重试。",
       "previews": "要作为新修订版发布的预览文件",
       "selected_files": "选定的文件",

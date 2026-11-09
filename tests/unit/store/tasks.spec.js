@@ -1967,6 +1967,201 @@ describe('Tasks store, comments of other users', () => {
 
 // The cells of the task lists save each change at once, a keystroke for a
 // metadata: a save Zou refuses puts back the values it replaced.
+describe('Tasks store, revisions taken', () => {
+  const { getters, mutations } = tasksStore
+  const taskId = 'task-1'
+  const task = { id: taskId }
+  let state
+
+  const isTaken = (revision, id = taskId) =>
+    getters.isTaskRevisionTaken(state)(id, revision)
+
+  const makeComment = (id, previews = []) => ({
+    id,
+    person: { id: 'person-1', first_name: 'Ann', last_name: 'Lee' },
+    person_id: 'person-1',
+    previews,
+    task_status: {}
+  })
+
+  // The way a comment and its revision reach the store on a live publication.
+  const publish = (commentId, preview) => {
+    const comment = makeComment(commentId)
+    mutations.NEW_TASK_COMMENT_END(state, { comment, taskId })
+    mutations.ADD_PREVIEW_END(state, {
+      preview,
+      taskId,
+      commentId,
+      comment: state.taskComments[taskId].find(({ id }) => id === commentId)
+    })
+    return comment
+  }
+
+  const deleteComment = commentId =>
+    mutations.DELETE_COMMENT_END(state, {
+      taskId,
+      commentId,
+      taskStatusMap: new Map(),
+      todoStatus: {}
+    })
+
+  const trash = previewId =>
+    mutations.DELETE_PREVIEW_END(state, { taskId, previewId })
+
+  beforeEach(() => {
+    state = { taskComments: {}, taskMap: new Map(), taskPreviews: {} }
+    mutations.LOAD_TASK_COMMENTS_END(state, {
+      taskId,
+      comments: [
+        makeComment('comment-3', [{ id: 'preview-3', revision: 3 }]),
+        makeComment('comment-4', [
+          { id: 'preview-4a', position: 1, revision: 4 },
+          { id: 'preview-4b', position: 2, revision: 4 }
+        ])
+      ]
+    })
+  })
+
+  test('holds the revisions of the loaded comments', () => {
+    expect(isTaken(3)).toBe(true)
+    expect(isTaken(4)).toBe(true)
+    expect(isTaken(5)).toBe(false)
+  })
+
+  test('holds nothing for another task, or before its comments load', () => {
+    expect(isTaken(3, 'task-2')).toBe(false)
+    expect(getters.isTaskRevisionTaken(state)(undefined, 3)).toBe(false)
+  })
+
+  test('holds revision 0 like any other', () => {
+    publish('comment-0', { id: 'preview-0', revision: 0 })
+
+    expect(isTaken(0)).toBe(true)
+  })
+
+  test('holds a revision published since', () => {
+    publish('comment-5', { id: 'preview-5', revision: 5 })
+
+    expect(isTaken(5)).toBe(true)
+  })
+
+  test('holds a revision whose comment was reloaded with bare ids', () => {
+    mutations.NEW_TASK_COMMENT_END(state, {
+      comment: makeComment('comment-3', [{ id: 'preview-3' }]),
+      taskId
+    })
+
+    expect(isTaken(3)).toBe(true)
+  })
+
+  test('frees the revision of a comment deleted elsewhere', () => {
+    const comment = state.taskComments[taskId][0]
+    const revision = comment.previews[0].revision
+
+    mutations.REMOVE_TASK_COMMENT(state, { task, comment })
+
+    expect(isTaken(revision)).toBe(false)
+  })
+
+  // Zou sends the event before it answers the request.
+  test('frees it when the event of a deletion comes before the answer', () => {
+    const comment = state.taskComments[taskId][0]
+    const revision = comment.previews[0].revision
+
+    mutations.REMOVE_TASK_COMMENT(state, { task, comment })
+    deleteComment(comment.id)
+
+    expect(isTaken(revision)).toBe(false)
+  })
+
+  test('frees it when the answer of a deletion comes before the event', () => {
+    const comment = state.taskComments[taskId][0]
+    const revision = comment.previews[0].revision
+
+    deleteComment(comment.id)
+
+    expect(isTaken(revision)).toBe(false)
+  })
+
+  test('keeps a revision until the trash took its last file', () => {
+    trash('preview-4a')
+    expect(isTaken(4)).toBe(true)
+
+    trash('preview-4b')
+    expect(isTaken(4)).toBe(false)
+  })
+
+  // The previews keep an entry that the next publication of its number reuses.
+  describe.each([
+    ['the trash emptied it', () => trash('preview-3')],
+    [
+      'its comment was deleted elsewhere',
+      () =>
+        mutations.REMOVE_TASK_COMMENT(state, {
+          task,
+          comment: state.taskComments[taskId].find(
+            ({ id }) => id === 'comment-3'
+          )
+        })
+    ]
+  ])('a number published again after %s', (_, freeNumber) => {
+    beforeEach(() => {
+      freeNumber()
+      expect(isTaken(3)).toBe(false)
+      publish('comment-3b', { id: 'preview-3b', revision: 3 })
+    })
+
+    test('is taken again', () => {
+      expect(isTaken(3)).toBe(true)
+    })
+
+    test('is free once the publication is rolled back', () => {
+      mutations.REMOVE_FAILED_COMMENT(state, {
+        taskId,
+        commentId: 'comment-3b',
+        previewId: 'preview-3b'
+      })
+
+      expect(isTaken(3)).toBe(false)
+    })
+
+    test('is free once the publication is deleted', () => {
+      deleteComment('comment-3b')
+
+      expect(isTaken(3)).toBe(false)
+    })
+  })
+
+  test('takes a file whose comment the store does not hold', () => {
+    mutations.ADD_PREVIEW_END(state, {
+      preview: { id: 'preview-3-extra', position: 2, revision: 3 },
+      taskId,
+      commentId: 'comment-elsewhere'
+    })
+
+    const [entry] = state.taskPreviews[taskId].filter(
+      ({ revision }) => revision === 3
+    )
+    expect(entry.previews.map(({ id }) => id)).toContain('preview-3-extra')
+  })
+
+  test('leaves the comment of an extra file as it was', () => {
+    const comment = state.taskComments[taskId].find(
+      ({ id }) => id === 'comment-3'
+    )
+    const [mainPreview] = comment.previews
+
+    mutations.ADD_PREVIEW_END(state, {
+      preview: { id: 'preview-3-extra', position: 2, revision: 3 },
+      taskId,
+      commentId: comment.id,
+      comment
+    })
+
+    expect(comment.previews).toEqual([mainPreview])
+  })
+})
+
 describe('Tasks store, refused task edits', () => {
   let state
   let task

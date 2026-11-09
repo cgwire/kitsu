@@ -167,6 +167,22 @@ const getters = {
   getTaskComments: state => id => state.taskComments[id] ?? [],
   getTaskPreviews: state => id => state.taskPreviews[id] ?? [],
 
+  // The previews of a task keep the revision of a comment deleted meanwhile,
+  // and its comments keep a file sent to the trash: a revision is taken when
+  // both still hold one of its files.
+  isTaskRevisionTaken: state => (taskId, revision) => {
+    const commentFileIds = new Set(
+      (state.taskComments[taskId] ?? []).flatMap(({ previews }) =>
+        (previews ?? []).map(({ id }) => id)
+      )
+    )
+    return (state.taskPreviews[taskId] ?? []).some(
+      preview =>
+        preview.revision === revision &&
+        preview.previews?.some(({ id }) => commentFileIds.has(id))
+    )
+  },
+
   getTaskComment: state => (taskId, commentId) => {
     return state.taskComments[taskId]?.find(comment => comment.id === commentId)
   },
@@ -1409,6 +1425,11 @@ const mutations = {
         )
         if (!existingSubPreview) {
           existingPreview.previews.push(newPreview)
+        }
+        // The entry outlived its files, through the trash or a comment deleted
+        // meanwhile: this is the first file of the revision for its comment.
+        if (comment && !comment.previews?.length) {
+          comment.previews = [{ ...newPreview }]
         }
       } else {
         newPreview.previews = [{ ...newPreview }]
