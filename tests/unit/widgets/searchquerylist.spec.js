@@ -736,3 +736,293 @@ describe('SearchQueryList, edits', () => {
     expect(console.error).toHaveBeenCalledWith(new Error('down'))
   })
 })
+
+describe('SearchQueryList, a request ending after its modal closed', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // An action whose requests end when the test says so.
+  const heldAction = () => {
+    const requests = []
+    const action = vi.fn(
+      () =>
+        new Promise((resolve, reject) => {
+          requests.push({ resolve, reject })
+        })
+    )
+    return { action, requests }
+  }
+
+  // Confirms a new search, closes its modal during the request, then opens
+  // the modal of another search.
+  const saveThenAddAnother = async wrapper => {
+    const modal = () => wrapper.findComponent(EditSearchFilterModal)
+    wrapper.vm.addSearch('first')
+    await nextTick()
+    modal().vm.$emit('confirm', { id: null, name: 'first' })
+    await nextTick()
+    modal().vm.$emit('cancel')
+    await nextTick()
+    wrapper.vm.addSearch('second')
+    await nextTick()
+    return modal
+  }
+
+  test('holds the next filter modal while it saves, then leaves it open', async () => {
+    const save = heldAction()
+    const wrapper = await mountList({
+      actions: { saveShotSearch: save.action }
+    })
+    const modal = await saveThenAddAnother(wrapper)
+    expect(modal().props('isLoading')).toBe(true)
+
+    save.requests[0].resolve()
+    await flushPromises()
+
+    expect(modal().exists()).toBe(true)
+    expect(modal().props('searchQueryToEdit').name).toBe('second')
+    expect(modal().props('isLoading')).toBe(false)
+  })
+
+  // Two saves of a name could cross in Zou and both get in.
+  test('saves from the next filter modal only once it ends', async () => {
+    const save = heldAction()
+    const wrapper = await mountList({
+      actions: { saveShotSearch: save.action }
+    })
+    const modal = await saveThenAddAnother(wrapper)
+    modal().vm.$emit('confirm', { id: null, name: 'second' })
+    await nextTick()
+
+    expect(save.action).toHaveBeenCalledTimes(1)
+
+    save.requests[0].resolve()
+    await flushPromises()
+    modal().vm.$emit('confirm', { id: null, name: 'second' })
+    await nextTick()
+
+    expect(save.action).toHaveBeenCalledTimes(2)
+    expect(modal().props('isLoading')).toBe(true)
+    save.requests[1].resolve()
+    await flushPromises()
+    expect(modal().exists()).toBe(false)
+  })
+
+  test('keeps its failure out of the next filter modal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const save = heldAction()
+    const wrapper = await mountList({
+      actions: { saveShotSearch: save.action }
+    })
+    const modal = await saveThenAddAnother(wrapper)
+
+    save.requests[0].reject(new Error('down'))
+    await flushPromises()
+
+    expect(modal().props()).toMatchObject({ isError: false, isLoading: false })
+    expect(console.error).toHaveBeenCalledWith(new Error('down'))
+  })
+
+  test('holds the next group modal while it saves, then leaves it open', async () => {
+    const save = heldAction()
+    const wrapper = await mountList({
+      actions: { saveShotSearchFilterGroup: save.action }
+    })
+    const modal = () => wrapper.findComponent(EditSearchFilterGroupModal)
+    const addGroup = () =>
+      wrapper
+        .find('.tag.folder[title="main.filter_group_add"]')
+        .trigger('click')
+    await addGroup()
+    modal().vm.$emit('confirm', { name: 'first' })
+    await nextTick()
+    modal().vm.$emit('cancel')
+    await nextTick()
+    await addGroup()
+    expect(modal().props('isLoading')).toBe(true)
+
+    save.requests[0].resolve()
+    await flushPromises()
+
+    expect(modal().exists()).toBe(true)
+    expect(modal().props('isLoading')).toBe(false)
+  })
+
+  test('holds the next removal confirmation while it removes, then leaves it open', async () => {
+    const removal = heldAction()
+    const other = { ...search, id: 'search-3', name: 'other' }
+    const wrapper = await mountList({
+      actions: { removeShotSearch: removal.action },
+      queries: [search, other]
+    })
+    const trashes = () =>
+      wrapper.findAll('.tag:not(.folder):not(.group) button.del')
+    await trashes()[0].trigger('click')
+    confirmation(wrapper).vm.$emit('confirm')
+    await nextTick()
+    confirmation(wrapper).vm.$emit('cancel')
+    await nextTick()
+    await trashes()[1].trigger('click')
+    expect(confirmation(wrapper).props('isLoading')).toBe(true)
+
+    removal.requests[0].resolve()
+    await flushPromises()
+
+    expect(confirmation(wrapper).exists()).toBe(true)
+    expect(confirmation(wrapper).props('isLoading')).toBe(false)
+  })
+
+  // Removes the first row, closes the confirmation during the request, then
+  // opens it again for the same row.
+  const removeTwice = async (wrapper, removeRow) => {
+    await removeRow(wrapper)
+    confirmation(wrapper).vm.$emit('confirm')
+    await nextTick()
+    confirmation(wrapper).vm.$emit('cancel')
+    await nextTick()
+    await removeRow(wrapper)
+  }
+
+  test('closes the next removal confirmation of the filter it removed', async () => {
+    const removal = heldAction()
+    const wrapper = await mountList({
+      actions: { removeShotSearch: removal.action }
+    })
+    await removeTwice(wrapper, removeSearch)
+    expect(confirmation(wrapper).exists()).toBe(true)
+
+    removal.requests[0].resolve()
+    await flushPromises()
+
+    expect(confirmation(wrapper).exists()).toBe(false)
+    expect(removal.action).toHaveBeenCalledTimes(1)
+  })
+
+  test('closes the next removal confirmation of the group it removed', async () => {
+    const removal = heldAction()
+    const wrapper = await mountList({
+      actions: { removeShotSearchFilterGroup: removal.action }
+    })
+    await removeTwice(wrapper, removeGroup)
+    expect(confirmation(wrapper).exists()).toBe(true)
+
+    removal.requests[0].resolve()
+    await flushPromises()
+
+    expect(confirmation(wrapper).exists()).toBe(false)
+    expect(removal.action).toHaveBeenCalledTimes(1)
+  })
+
+  // Saves the first row, closes its modal during the request, then opens the
+  // modal of the row given, which Zou changes in place for the first one, as
+  // the store does.
+  const editTwice = async ({ modal, buttons, rows, changes, next }) => {
+    await buttons()[0].trigger('click')
+    modal().vm.$emit('confirm', { ...rows[0], ...changes })
+    await nextTick()
+    modal().vm.$emit('cancel')
+    await nextTick()
+    await buttons()[next].trigger('click')
+    Object.assign(rows[0], changes)
+  }
+
+  // The modal fills its form again when it gets a new row.
+  test('shows a filter as saved in its modal opened again during the save', async () => {
+    const save = heldAction()
+    const rows = [reactive({ ...search })]
+    const wrapper = await mountList({
+      actions: { updateSearchFilter: save.action },
+      queries: rows
+    })
+    const modal = () => wrapper.findComponent(EditSearchFilterModal)
+    await editTwice({
+      modal,
+      buttons: () => wrapper.findAll('.tag:not(.folder):not(.group) button.edit'),
+      rows,
+      changes: { name: 'renamed' },
+      next: 0
+    })
+
+    save.requests[0].resolve()
+    await flushPromises()
+
+    expect(modal().props('searchQueryToEdit')).not.toBe(rows[0])
+    expect(modal().props('searchQueryToEdit').name).toBe('renamed')
+  })
+
+  test('leaves the modal of another filter as it was', async () => {
+    const save = heldAction()
+    // Sorted by name, the other filter comes second.
+    const rows = [
+      reactive({ ...search }),
+      reactive({ ...search, id: 'search-3', name: 'zz other' })
+    ]
+    const wrapper = await mountList({
+      actions: { updateSearchFilter: save.action },
+      queries: rows
+    })
+    const modal = () => wrapper.findComponent(EditSearchFilterModal)
+    await editTwice({
+      modal,
+      buttons: () => wrapper.findAll('.tag:not(.folder):not(.group) button.edit'),
+      rows,
+      changes: { name: 'renamed' },
+      next: 1
+    })
+
+    save.requests[0].resolve()
+    await flushPromises()
+
+    expect(modal().props('searchQueryToEdit').name).toBe('zz other')
+  })
+
+  test('shows a group as saved in its modal opened again during the save', async () => {
+    const save = heldAction()
+    const groups = [reactive({ ...group })]
+    const wrapper = await mountList({
+      actions: { updateSearchFilterGroup: save.action },
+      groups
+    })
+    const modal = () => wrapper.findComponent(EditSearchFilterGroupModal)
+    await editTwice({
+      modal,
+      buttons: () => wrapper.findAll('.tag.group button.edit'),
+      rows: groups,
+      changes: { name: 'Renamed' },
+      next: 0
+    })
+
+    save.requests[0].resolve()
+    await flushPromises()
+
+    expect(modal().props('groupToEdit').name).toBe('Renamed')
+  })
+
+  test('leaves the modal of another group as it was', async () => {
+    const save = heldAction()
+    const groups = [
+      reactive({ ...group }),
+      reactive({ ...group, id: 'group-3', name: 'Other' })
+    ]
+    const wrapper = await mountList({
+      actions: { updateSearchFilterGroup: save.action },
+      groups
+    })
+    const modal = () => wrapper.findComponent(EditSearchFilterGroupModal)
+    await editTwice({
+      modal,
+      buttons: () => wrapper.findAll('.tag.group button.edit'),
+      rows: groups,
+      changes: { name: 'Renamed' },
+      next: 1
+    })
+    const shown = modal().props('groupToEdit')
+
+    save.requests[0].resolve()
+    await flushPromises()
+
+    expect(modal().props('groupToEdit')).toBe(shown)
+    expect(shown.name).toBe('Other')
+  })
+})

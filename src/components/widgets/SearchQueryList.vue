@@ -299,6 +299,10 @@ const modals = reactive({
   group: false,
   remove: false
 })
+// Each opening of a modal starts a session of its own: a request still running
+// for a closed one keeps the next one waiting, then leaves it alone unless it
+// changed the row of that one.
+const sessions = { edit: 0, group: 0, remove: 0 }
 const toggleGroupId = ref(null)
 
 const departmentMap = computed(() => store.getters.departmentMap)
@@ -411,16 +415,41 @@ const queryRoute = searchQuery => {
   }
 }
 
+const openModal = kind => {
+  sessions[kind]++
+  errors[kind] = false
+  modals[kind] = true
+}
+
+// One request at a time for each kind of modal, so that nothing is saved or
+// removed twice. Its end closes or marks its modal only if it was not opened
+// again since; onLateSuccess handles a modal opened again on the same row.
+const runInModal = async (kind, request, onLateSuccess) => {
+  if (loading[kind]) return
+  const session = sessions[kind]
+  const isCurrent = () => session === sessions[kind]
+  loading[kind] = true
+  errors[kind] = false
+  try {
+    await request()
+    if (isCurrent()) modals[kind] = false
+    else onLateSuccess?.()
+  } catch (err) {
+    console.error(err)
+    if (isCurrent()) errors[kind] = true
+  } finally {
+    loading[kind] = false
+  }
+}
+
 const editGroup = (group = {}) => {
   groupToEdit.value = group
-  errors.group = false
-  modals.group = true
+  openModal('group')
 }
 
 const editSearch = searchQuery => {
   searchQueryToEdit.value = searchQuery
-  errors.edit = false
-  modals.edit = true
+  openModal('edit')
 }
 
 const addSearch = searchQuery => {
@@ -431,90 +460,85 @@ const navigateToSearchQuery = searchQuery => {
   router.push(queryPaths.value[searchQuery.id] || { name: 'open-productions' })
 }
 
-const confirmEditFilterGroup = async filterGroup => {
-  try {
-    loading.group = true
-    errors.group = false
-    filterGroup.project_id = props.productionId
-    if (!filterGroup.id) {
-      await store.dispatch(
+const confirmEditFilterGroup = filterGroup =>
+  runInModal(
+    'group',
+    () => {
+      filterGroup.project_id = props.productionId
+      if (filterGroup.id) {
+        return store.dispatch('updateSearchFilterGroup', filterGroup)
+      }
+      return store.dispatch(
         `save${stringHelpers.capitalize(props.type)}SearchFilterGroup`,
         filterGroup
       )
-    } else {
-      await store.dispatch('updateSearchFilterGroup', filterGroup)
+    },
+    // The modal opened again on this group shows it as saved.
+    () => {
+      const saved = props.groups.find(({ id }) => id === filterGroup.id)
+      if (saved && groupToEdit.value.id === saved.id) {
+        groupToEdit.value = { ...saved }
+      }
     }
-    modals.group = false
-  } catch (err) {
-    console.error(err)
-    errors.group = true
-  } finally {
-    loading.group = false
-  }
-}
+  )
 
-const confirmEditSearch = async searchFilter => {
-  try {
-    loading.edit = true
-    errors.edit = false
-    if (searchFilter.id) {
-      searchFilter.project_id = props.productionId
-      await store.dispatch('updateSearchFilter', searchFilter)
-    } else {
+const confirmEditSearch = searchFilter =>
+  runInModal(
+    'edit',
+    () => {
+      if (searchFilter.id) {
+        searchFilter.project_id = props.productionId
+        return store.dispatch('updateSearchFilter', searchFilter)
+      }
       const type = stringHelpers.capitalize(props.type)
-      await store.dispatch(
+      return store.dispatch(
         SAVE_SEARCH_ACTIONS[props.type] || `save${type}Search`,
         { ...searchFilter, entity_type: props.entityType }
       )
+    },
+    // The modal opened again on this filter shows it as saved: the store
+    // changed the row in place, and the modal fills its form from a new one.
+    () => {
+      const saved = props.queries.find(({ id }) => id === searchFilter.id)
+      if (saved && searchQueryToEdit.value.id === saved.id) {
+        searchQueryToEdit.value = { ...saved }
+      }
     }
-    modals.edit = false
-  } catch (err) {
-    console.error(err)
-    errors.edit = true
-  } finally {
-    loading.edit = false
-  }
-}
+  )
 
 const confirmRemoveSearch = searchQuery => {
   searchQueryToRemove.value = searchQuery
   groupToRemove.value = {}
-  errors.remove = false
-  modals.remove = true
+  openModal('remove')
 }
 
 const confirmRemoveGroup = filterGroup => {
   groupToRemove.value = filterGroup
   searchQueryToRemove.value = {}
-  errors.remove = false
-  modals.remove = true
+  openModal('remove')
 }
 
 // The confirmation stays open until the removal ends, with its error when it
 // fails.
-const removeSearch = async () => {
+const removeSearch = () => {
   const type = stringHelpers.capitalize(props.type)
-  loading.remove = true
-  errors.remove = false
-  try {
-    if (searchQueryToRemove.value.id) {
-      await store.dispatch(
-        REMOVE_SEARCH_ACTIONS[props.type] || `remove${type}Search`,
-        searchQueryToRemove.value
-      )
-    } else {
-      await store.dispatch(
-        `remove${type}SearchFilterGroup`,
-        groupToRemove.value
-      )
+  const isSearch = Boolean(searchQueryToRemove.value.id)
+  const row = isSearch ? searchQueryToRemove.value : groupToRemove.value
+  return runInModal(
+    'remove',
+    () =>
+      isSearch
+        ? store.dispatch(
+            REMOVE_SEARCH_ACTIONS[props.type] || `remove${type}Search`,
+            row
+          )
+        : store.dispatch(`remove${type}SearchFilterGroup`, row),
+    // A confirmation opened again for this row has nothing left to remove.
+    () => {
+      const shown = searchQueryToRemove.value.id || groupToRemove.value.id
+      if (shown === row.id) modals.remove = false
     }
-    modals.remove = false
-  } catch (err) {
-    console.error(err)
-    errors.remove = true
-  } finally {
-    loading.remove = false
-  }
+  )
 }
 
 const toggleFilterGroup = group => {
