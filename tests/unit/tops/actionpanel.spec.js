@@ -554,6 +554,13 @@ describe('ActionPanel, status change', () => {
     confirmButton(wrapper).classes().includes('is-disabled')
   const pressCtrlEnter = wrapper =>
     commentField(wrapper).trigger('keyup.ctrl.enter')
+  // `trigger` cannot set the click count: `detail` is read-only on its event.
+  const clickButtonAtCount = async (wrapper, clickCount) => {
+    confirmButton(wrapper).element.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, detail: clickCount })
+    )
+    await flushPromises()
+  }
 
   const statusChanges = store =>
     store.dispatch.mock.calls
@@ -655,6 +662,30 @@ describe('ActionPanel, status change', () => {
       ])
     })
 
+    // The list of statuses lies over the button: the second click of a double
+    // click on a status lands on it.
+    test('ignores the second click of a double click', async () => {
+      const { store, wrapper } = await mountOnOneTask()
+      await chooseStatus(wrapper, 'status-retake')
+
+      await clickButtonAtCount(wrapper, 2)
+
+      expect(statusChanges(store)).toEqual([])
+      expect(statusCombo(wrapper).props('modelValue')).toBe('status-retake')
+    })
+
+    test('answers the click after a double click', async () => {
+      const { store, wrapper } = await mountOnOneTask()
+      await chooseStatus(wrapper, 'status-retake')
+      await clickButtonAtCount(wrapper, 2)
+
+      await clickButtonAtCount(wrapper, 1)
+
+      expect(statusChanges(store)).toEqual([
+        { taskStatusId: 'status-retake', comment: '' }
+      ])
+    })
+
     test('sends the change once on a key pressed twice', async () => {
       const { store, wrapper } = await mountOnOneTask()
       await chooseStatus(wrapper, 'status-retake')
@@ -684,6 +715,20 @@ describe('ActionPanel, status change', () => {
 
       expect(modal(wrapper).props('active')).toBe(true)
       expect(statusChanges(store)).toEqual([])
+    })
+
+    test('does not ask on the second click of a double click', async () => {
+      const { store, wrapper } = await mountOnShots()
+      await chooseStatus(wrapper, 'status-retake')
+
+      await clickButtonAtCount(wrapper, 2)
+
+      expect(modal(wrapper).props('active')).toBe(false)
+      expect(statusChanges(store)).toEqual([])
+
+      await clickButtonAtCount(wrapper, 1)
+
+      expect(modal(wrapper).props('active')).toBe(true)
     })
 
     test.each(['ctrl', 'meta'])('asks on %s+Enter', async modifier => {

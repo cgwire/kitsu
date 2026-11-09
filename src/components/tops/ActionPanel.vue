@@ -1507,9 +1507,13 @@ const runTaskStatusChange = async () => {
   }
 }
 
-// The loading look only stops the mouse: Ctrl+Enter still gets here.
-const confirmTaskStatusChange = async () => {
-  if (loading.changeStatus || !isStatusChangeReady.value) return
+// The list of statuses lies over the button: the second click of a double click
+// on a status lands here. The loading look only stops the mouse: Ctrl+Enter
+// still gets here.
+const confirmTaskStatusChange = async event => {
+  if (event.detail > 1 || loading.changeStatus || !isStatusChangeReady.value) {
+    return
+  }
   if (nbSelectedTasks.value > 1) {
     errors.changeStatus = false
     modals.statusChange = true
