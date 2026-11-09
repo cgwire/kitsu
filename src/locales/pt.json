@@ -238,6 +238,7 @@
       "thumbnails": {
         "error": "Ocorreu um erro ao enviar as miniaturas",
         "shots_pattern": "\"NomeDaSequência NomeDoShot\", por exemplo, SQ01_SH01.",
+        "shots_tvshow_pattern": "\"NomeDoEpisódio NomeDaSequência NomeDoShot\", por exemplo, E01_SQ01_SH01.",
         "assets_pattern": "\"TipoDeAsset NomeDoAsset\", por exemplo, Environment_Forest.",
         "select_files": "Selecionar Arquivos",
         "selected_files": "Arquivos Selecionados",

@@ -7,6 +7,7 @@ import { createStore } from 'vuex'
 // AddThumbnailsModal transitively imports assets/shots store modules.
 import '@/lib/auth'
 import assetStore from '@/store/modules/assets'
+import shotStore from '@/store/modules/shots'
 
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
@@ -172,5 +173,56 @@ describe('AddThumbnailsModal', () => {
 
     expect(confirm()).toEqual([form])
     expect(form.task).toEqual({ id: 'task-3' })
+  })
+})
+
+describe('AddThumbnailsModal, shots of a TV show', () => {
+  const shot = {
+    id: 'shot-1',
+    name: 'SH01',
+    sequence_name: 'SQ01',
+    episode_name: 'E01',
+    validations: new Map([['task-type-1', 'task-1']])
+  }
+  const otherEpisodeShot = { ...shot, id: 'shot-2', episode_name: 'E02' }
+
+  afterEach(() => {
+    shotStore.cache.shots = []
+  })
+
+  it('matches the files on the episode, sequence and shot names', async () => {
+    shotStore.cache.shots = [shot, otherEpisodeShot]
+    const store = createStore({
+      getters: {
+        shotValidationColumns: () => ['task-type-1'],
+        taskMap: () => new Map([['task-1', task]]),
+        taskTypeMap: () =>
+          new Map([['task-type-1', { id: 'task-type-1', name: 'Anim' }]])
+      }
+    })
+    const wrapper = shallowMount(AddThumbnailsModal, {
+      props: { entityType: 'Shot', parent: 'shots_tvshow' },
+      global: {
+        plugins: [store],
+        stubs: {
+          BaseModal: { template: '<div><slot /></div>' },
+          FileUpload: {
+            name: 'FileUpload',
+            template: '<div></div>',
+            methods: { reset() {} }
+          }
+        }
+      }
+    })
+    const matching = makeForm('E02_SQ01_SH01.mp4')
+    wrapper
+      .findComponent({ name: 'FileUpload' })
+      .vm.$emit('fileselected', [matching, makeForm('SQ01_SH01.mp4')])
+    await nextTick()
+    wrapper.findComponent({ name: 'ModalFooter' }).vm.$emit('confirm')
+
+    const [confirmed] = wrapper.emitted('confirm')[0]
+    expect(confirmed).toEqual([matching])
+    expect(confirmed[0].asset.id).toBe('shot-2')
   })
 })

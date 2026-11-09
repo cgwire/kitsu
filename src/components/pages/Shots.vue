@@ -276,7 +276,7 @@
       ref="add-thumbnails-modal"
       active
       entity-type="Shot"
-      parent="shots"
+      :parent="isTVShow ? 'shots_tvshow' : 'shots'"
       :is-loading="loading.addThumbnails"
       :is-error="errors.addThumbnails"
       @cancel="hideAddThumbnailsModal"

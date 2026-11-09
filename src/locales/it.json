@@ -238,6 +238,7 @@
       "thumbnails": {
         "error": "Si è verificato un errore durante il caricamento delle miniature",
         "shots_pattern": "\"SequenceName ShotName\" es. SQ01_SH01.",
+        "shots_tvshow_pattern": "\"EpisodeName SequenceName ShotName\" es. E01_SQ01_SH01.",
         "assets_pattern": "\"AssetType AssetName\" es. Ambiente_Foresta.",
         "select_files": "Seleziona i file",
         "selected_files": "File selezionati",

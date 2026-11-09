@@ -238,6 +238,7 @@
       "thumbnails": {
         "error": "در هنگام بارگذاری بندانگشتی خطایی رخ داده.",
         "shots_pattern": "\"نام سکانس نام شات\" مثلاً SQ01_SH01.",
+        "shots_tvshow_pattern": "\"نام قسمت نام سکانس نام شات\" مثلاً E01_SQ01_SH01.",
         "assets_pattern": "\"نوع منبع نام منبع\" مثلاً Environment_Forest.",
         "select_files": "انتخاب فایل ها",
         "selected_files": "فایل های انتخاب شده",

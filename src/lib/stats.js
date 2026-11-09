@@ -1,3 +1,5 @@
+import Color from 'color'
+
 const RETAKE_CHART_COLORS = {
   done: '#22d160',
   retake: '#ff3860',
@@ -7,9 +9,14 @@ const RETAKE_CHART_COLORS = {
 const DEFAULT_STATUS_COLOR = '#6F727A'
 
 // Out of the box the default status is near white, unreadable on a light
-// background: it is drawn grey.
+// background: it is drawn grey, as any near white status (a todo status
+// that lost its default flag). Near white is read on the lightness: by its
+// luminance, a bright yellow would pass for white.
 export const getStatusColor = taskStatus =>
-  taskStatus.is_default ? DEFAULT_STATUS_COLOR : taskStatus.color
+  taskStatus.is_default ||
+  (taskStatus.color && Color(taskStatus.color).lightness() > 90)
+    ? DEFAULT_STATUS_COLOR
+    : taskStatus.color
 
 const createStatusEntry = taskStatus => ({
   name: taskStatus.short_name,
@@ -41,7 +48,7 @@ export const getChartData = (
       const data = statusData[taskStatusId]
       const taskStatus = taskStatusMap?.get(taskStatusId)
       const isDefault = data.is_default ?? taskStatus?.is_default
-      const color = isDefault ? DEFAULT_STATUS_COLOR : data.color
+      const color = getStatusColor({ is_default: isDefault, color: data.color })
       const isDone = data.is_done ?? taskStatus?.is_done
       return [data.name, data[valueField], color, !!isDone]
     })

@@ -238,6 +238,7 @@
       "thumbnails": {
         "error": "섬네일을 업로드하는 도중 오류가 발생했습니다",
         "shots_pattern": "\"시퀀스이름 샷이름\" 예: SQ01_SH01.",
+        "shots_tvshow_pattern": "\"에피소드이름 시퀀스이름 샷이름\" 예: E01_SQ01_SH01.",
         "assets_pattern": "\"어셋종류 어셋이름\" 예. Environment_Forest",
         "select_files": "파일 선택",
         "selected_files": "선택한 파일",

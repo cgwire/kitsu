@@ -626,6 +626,8 @@ export default {
       selected_files: 'Selected Files',
       select_task_type: 'Select Task Type',
       shots_pattern: '"SequenceName ShotName" e.g. SQ01_SH01.',
+      shots_tvshow_pattern:
+        '"EpisodeName SequenceName ShotName" e.g. E01_SQ01_SH01.',
       title: 'Add Thumbnails',
       undefined: 'Undefined',
       undefined_pattern: 'Undefined',

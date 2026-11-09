@@ -238,6 +238,7 @@
       "thumbnails": {
         "error": "Er is een fout opgetreden bij het uploaden van thumbnails",
         "shots_pattern": "\"SequentieNaam OpnameNaam\" bijv. SQ01_SH01.",
+        "shots_tvshow_pattern": "\"EpisodeName SequentieNaam OpnameNaam\" bijv. E01_SQ01_SH01.",
         "assets_pattern": "\"AssetType AssetNaam\" bv. Omgeving_Bos.",
         "select_files": "Selecteer bestanden",
         "selected_files": "Geselecteerde bestanden",

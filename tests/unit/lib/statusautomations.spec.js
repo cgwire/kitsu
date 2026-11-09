@@ -245,6 +245,15 @@ describe('lib/statusautomations', () => {
       expect(payload.out_only_if_task_status_ids).toEqual([])
     })
 
+    // An edited ready for row may still hold a flag the form no longer shows.
+    it('sends no revision import for a ready for output', () => {
+      const payload = formToPayload(
+        form({ outFieldType: 'ready_for', importLastRevision: 'true' }),
+        { isEditing: true }
+      )
+      expect(payload.import_last_revision).toBe(false)
+    })
+
     it('shares no array with the form', () => {
       const source = form()
       const payload = formToPayload(source)

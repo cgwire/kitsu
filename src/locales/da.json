@@ -238,6 +238,7 @@
       "thumbnails": {
         "error": "Der opstod en fejl under upload af thumbnails",
         "shots_pattern": "\"SequenceNavn ShotNavn\" fx SQ01_SH01.",
+        "shots_tvshow_pattern": "\"EpisodeNavn SequenceNavn ShotNavn\" fx E01_SQ01_SH01.",
         "assets_pattern": "\"AssetType AssetNavn\" fx Miljø_Skov.",
         "select_files": "Vælg Filer",
         "selected_files": "Markerede Filer",

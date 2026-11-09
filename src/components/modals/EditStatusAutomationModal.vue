@@ -153,15 +153,17 @@
           </p>
         </template>
 
-        <combobox-boolean
-          class="mt1 field-with-help"
-          :label="$t('status_automations.fields.import_last_revision')"
-          @enter="confirmClicked"
-          v-model="form.importLastRevision"
-        />
-        <p class="help" v-if="isImportHelpShown">
-          {{ $t(importHelpKey) }}
-        </p>
+        <template v-if="form.outFieldType === 'status'">
+          <combobox-boolean
+            class="mt1 field-with-help"
+            :label="$t('status_automations.fields.import_last_revision')"
+            @enter="confirmClicked"
+            v-model="form.importLastRevision"
+          />
+          <p class="help" v-if="form.importLastRevision === 'true'">
+            {{ $t(importHelpKey) }}
+          </p>
+        </template>
       </section>
 
       <combobox-boolean
@@ -337,11 +339,6 @@ const isValid = computed(
     isFormValid(form, { isTriggerSent: isTriggerSent.value })
 )
 
-// Zou imports a revision for a status change only.
-const isImportHelpShown = computed(
-  () => form.importLastRevision === 'true' && form.outFieldType === 'status'
-)
-
 const importHelpKey = computed(() =>
   form.operator === 'and' && form.conditions.length > 1
     ? 'status_automations.help.import_and'
@@ -439,8 +436,10 @@ const onEntityTypeChanged = entityType => {
   resetOutput()
 }
 
+// Zou imports a revision for a status change only.
 const onOutFieldTypeChanged = outFieldType => {
   form.outFieldType = outFieldType
+  if (outFieldType !== 'status') form.importLastRevision = 'false'
   resetOutput()
 }
 

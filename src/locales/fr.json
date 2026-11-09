@@ -238,6 +238,7 @@
       "thumbnails": {
         "error": "Une erreur s'est produite en envoyant les vignettes",
         "shots_pattern": "\"SequenceName ShotName\" ex. SQ01_SH01.",
+        "shots_tvshow_pattern": "\"EpisodeName SequenceName ShotName\" ex. E01_SQ01_SH01.",
         "assets_pattern": "\"AssetType AssetName\" ex. Environnement_Forêt.",
         "select_files": "Sélectionner les fichiers",
         "selected_files": "Fichiers sélectionnés",

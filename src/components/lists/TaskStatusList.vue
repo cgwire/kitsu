@@ -4,6 +4,7 @@
       <table class="datatable">
         <thead class="datatable-head">
           <tr>
+            <th scope="col" class="grab"></th>
             <th scope="col" class="short-name">
               {{ $t('task_status.fields.short_name') }}
             </th>
@@ -47,6 +48,9 @@
         >
           <template #item="{ element: status }">
             <tr class="datatable-row task-status">
+              <td class="grab">
+                <grip-vertical-icon />
+              </td>
               <task-status-cell
                 class="short-name"
                 :entry="status"
@@ -120,7 +124,7 @@
 </template>
 
 <script setup>
-import { HelpCircleIcon } from 'lucide-vue-next'
+import { GripVerticalIcon, HelpCircleIcon } from 'lucide-vue-next'
 import draggable from 'vuedraggable'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
@@ -230,11 +234,21 @@ onBeforeUnmount(() => {
   cursor: grabbing;
 }
 
+.grab {
+  color: $grey;
+  width: 30px;
+}
+
 @media screen and (max-width: 768px) {
   // Drag-and-drop is disabled on mobile, so reset the grab cursor.
   .task-status,
   .task-status[draggable='true'] {
     cursor: default;
+  }
+
+  .datatable-row td.grab,
+  th.grab {
+    display: none;
   }
 
   // Stack each row as a card, mirroring the AssetTypeList mobile layout.

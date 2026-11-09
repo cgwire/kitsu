@@ -97,7 +97,7 @@ export const formToPayload = (form, { isEditing = false } = {}) => {
     out_task_type_id: form.outTaskTypeId,
     out_task_status_id: isStatusOutput ? form.outTaskStatusId : null,
     out_only_if_task_status_ids: [...getSentGuard(form)],
-    import_last_revision: form.importLastRevision === 'true'
+    import_last_revision: isStatusOutput && form.importLastRevision === 'true'
   }
   if (isEditing) {
     payload.archived = form.archived === 'true'

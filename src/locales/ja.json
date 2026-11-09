@@ -238,6 +238,7 @@
       "thumbnails": {
         "error": "サムネイルのアップロード中にエラーが発生しました",
         "shots_pattern": "\"シーケンス名 ショット名\" 例: SQ01_SH01.",
+        "shots_tvshow_pattern": "\"エピソード名 シーケンス名 ショット名\" 例: E01_SQ01_SH01.",
         "assets_pattern": "\"アセットタイプ アセット名\" 例: Environment_Forest.",
         "select_files": "ファイルを選択",
         "selected_files": "選択したファイル",

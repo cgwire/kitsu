@@ -460,6 +460,21 @@ describe('lib/stats', () => {
       '#6F727A'
     )
     expect(getStatusColor({ color: 'blue', is_default: false })).toEqual('blue')
+    expect(getStatusColor({ color: '#f5f5f5', is_default: false })).toEqual(
+      '#6F727A'
+    )
+    expect(getStatusColor({ color: '#ffdd57' })).toEqual('#ffdd57')
+    expect(getStatusColor({ color: '#ffff00' })).toEqual('#ffff00')
+    expect(getStatusColor({ color: '#e6e6fa' })).toEqual('#6F727A')
+  })
+
+  it('getChartData - draws a near white status grey, default or not', () => {
+    const stats = {
+      'sequence-1': { all: { s1: { name: 'todo', color: '#f5f5f5', count: 2 } } }
+    }
+    expect(getChartData(stats, 'sequence-1', 'all')).toEqual([
+      ['todo', 2, '#6F727A', false]
+    ])
   })
 
   it('aggregateStats', () => {

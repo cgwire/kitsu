@@ -4,6 +4,7 @@
       <table class="datatable">
         <thead class="datatable-head" v-if="entries.length > 0">
           <tr>
+            <th scope="col" class="grab"></th>
             <th scope="col" class="department">
               {{ $t('task_types.fields.department') }}
             </th>
@@ -36,6 +37,9 @@
         >
           <template #item="{ element: taskType }">
             <tr class="datatable-row tasktype-item">
+              <td class="grab">
+                <grip-vertical-icon />
+              </td>
               <td
                 class="department"
                 :data-label="$t('task_types.fields.department')"
@@ -74,7 +78,7 @@
           </template>
           <template #footer v-if="!entries.length">
             <tr class="empty">
-              <th scope="rowgroup" colspan="6">
+              <th scope="rowgroup" colspan="7">
                 <span class="text">
                   {{ $t('task_types.no_task_types') }}
                 </span>
@@ -100,6 +104,7 @@
 </template>
 
 <script setup>
+import { GripVerticalIcon } from 'lucide-vue-next'
 import draggable from 'vuedraggable'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
@@ -216,6 +221,11 @@ onBeforeUnmount(() => {
   cursor: grabbing;
 }
 
+.grab {
+  color: $grey;
+  width: 30px;
+}
+
 .empty {
   th {
     font-size: 1.2rem;
@@ -238,6 +248,11 @@ onBeforeUnmount(() => {
   .tasktype-item,
   .tasktype-item[draggable='true'] {
     cursor: default;
+  }
+
+  .datatable-row td.grab,
+  th.grab {
+    display: none;
   }
 
   // Stack each row as a card, mirroring the AssetTypeList mobile layout.
