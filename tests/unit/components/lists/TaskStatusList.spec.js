@@ -1,4 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { GripVerticalIcon } from 'lucide-vue-next'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -35,6 +36,19 @@ const mountList = () => {
 }
 
 describe('TaskStatusList', () => {
+  it('starts the header and each row with a drag handle', () => {
+    const { rows, wrapper } = mountList()
+    const firstCells = [wrapper.find('thead tr'), ...rows()].map(
+      row => row.element.firstElementChild.className
+    )
+    expect(firstCells).toEqual(['grab', 'grab', 'grab', 'grab', 'grab'])
+    expect(
+      rows().map(row =>
+        row.find('td.grab').findComponent(GripVerticalIcon).exists()
+      )
+    ).toEqual([true, true, true, true])
+  })
+
   // Regression: the answers to the saves of a reorder rebuild the list one
   // status at a time. During the next drag, vuedraggable then moved the row
   // found at the index the dragged one had when its drag started.
