@@ -4,7 +4,7 @@
     :title="$t('entities.thumbnails.title')"
     @cancel="$emit('cancel')"
   >
-    <p>
+    <p class="mb1">
       {{ $t('entities.thumbnails.explanation') }}
     </p>
 
@@ -14,7 +14,7 @@
       v-model="taskTypeId"
     />
 
-    <p>
+    <p class="mb1">
       {{ $t('entities.thumbnails.explanation_two') }}
       {{ $t(`entities.thumbnails.${parent}_pattern`) }}
     </p>
