@@ -224,7 +224,11 @@ const addEntityToEntityMap = entity => {
         : entity.name
     )
   } else if (isShots.value) {
-    fullName = stringHelpers.slugify(`${entity.sequence_name}_${entity.name}`)
+    fullName = stringHelpers.slugify(
+      entity.episode_name
+        ? `${entity.episode_name}_${entity.sequence_name}_${entity.name}`
+        : `${entity.sequence_name}_${entity.name}`
+    )
   }
   entityMap.value[fullName] = entity
 }

@@ -601,6 +601,7 @@
         "selected_files": "Wybrane pliki",
         "select_task_type": "Wybierz typ zadania",
         "shots_pattern": "\"NazwaSekwencji NazwaUjęcia\" np. SQ01_SH01.",
+        "shots_tvshow_pattern": "\"NazwaOdcinka NazwaSekwencji NazwaUjęcia\" np. E01_SQ01_SH01.",
         "title": "Dodaj miniatury",
         "undefined": "Nieokreślony",
         "undefined_pattern": "Nieokreślony",

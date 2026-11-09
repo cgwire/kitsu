@@ -43,7 +43,9 @@ export default {
 
   entities: {
     thumbnails: {
-      shots_pattern: '"SequenceName NFTName" e.g. SQ01_NFT01.'
+      shots_pattern: '"SequenceName NFTName" e.g. SQ01_NFT01.',
+      shots_tvshow_pattern:
+        '"EpisodeName SequenceName NFTName" e.g. E01_SQ01_NFT01.'
     }
   },
 

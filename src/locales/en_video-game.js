@@ -55,7 +55,8 @@ export default {
   entities: {
     thumbnails: {
       edits_tvshow_pattern: '"ChapterName EditName" e.g. CH01_Trailer.',
-      shots_pattern: '"LevelName MapName" e.g. LV01_MP01.'
+      shots_pattern: '"LevelName MapName" e.g. LV01_MP01.',
+      shots_tvshow_pattern: '"ChapterName LevelName MapName" e.g. CH01_LV01_MP01.'
     }
   },
 

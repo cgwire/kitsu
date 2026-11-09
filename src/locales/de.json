@@ -238,6 +238,7 @@
       "thumbnails": {
         "error": "Beim Hochladen von Miniaturbildern ist ein Fehler aufgetreten",
         "shots_pattern": "\"SequenceName ShotName\" z.B. SQ01_SH01.",
+        "shots_tvshow_pattern": "\"Episodenname SequenceName ShotName\" z.B. E01_SQ01_SH01.",
         "assets_pattern": "\"AssetType AssetName\" z.B. Umgebung_Wald.",
         "select_files": "Dateien auswählen",
         "selected_files": "Ausgewählte Dateien",

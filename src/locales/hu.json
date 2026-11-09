@@ -238,6 +238,7 @@
       "thumbnails": {
         "error": "Hiba történt a nézőképek feltöltésekor",
         "shots_pattern": "\"SzekvenciaNév ShotNév\" pl.: SQ01_SH01.",
+        "shots_tvshow_pattern": "\"EpizódNév SzekvenciaNév ShotNév\" pl.: E01_SQ01_SH01.",
         "assets_pattern": "\"AssetTípus AssetNév\" pl.: Helyszin_erdo.",
         "select_files": "Jelöld ki a fájlokat",
         "selected_files": "Kijelölt fájlok",
