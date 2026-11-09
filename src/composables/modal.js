@@ -76,6 +76,11 @@ const getWrapTarget = (container, isBackward) => {
     : null
 }
 
+// The button that opens a modal gets the first click of a double click, and the
+// background the second.
+const isSecondClickOnBackground = event =>
+  event.detail > 1 && event.target.matches?.('.modal-background')
+
 export const useModal = (active, emit, containerRef = null) => {
   const instance = getCurrentInstance()
   // Where keyboard focus was before the modal opened, restored on close.
@@ -143,7 +148,12 @@ export const useModal = (active, emit, containerRef = null) => {
     target instanceof Node && Boolean(instance?.proxy?.$el?.contains?.(target))
 
   const onClick = event => {
-    if (!isTop() || !holds(event.target)) return
+    if (!isTop()) return
+    if (isSecondClickOnBackground(event)) {
+      event.stopPropagation()
+      return
+    }
+    if (!holds(event.target)) return
     if (event.target.type === 'file') {
       clearTimeout(restoreTimer)
       fullScreenElement = getFullScreenElement() ?? fullScreenElement

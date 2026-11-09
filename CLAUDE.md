@@ -202,7 +202,7 @@ Composables live in `src/composables/`, the player ones in `src/composables/play
 
 ### `useModal(active, emit)`
 
-Handles Escape, moves the focus into the dialog when it opens, keeps Tab and Shift+Tab inside it and gives the focus back to the opener on close or unmount. Only the top open modal answers the keyboard. The dialog is the optional third argument (`BaseModal` passes its `.modal-content`), else the component root element: keep the template on a single root, since a top-level comment makes it a fragment in dev builds and turns the trap off.
+Handles Escape, moves the focus into the dialog when it opens, keeps Tab and Shift+Tab inside it and gives the focus back to the opener on close or unmount. Only the top open modal answers the keyboard. The second click of a double click on `.modal-background` never reaches it: the first one opened the modal. The dialog is the optional third argument (`BaseModal` passes its `.modal-content`), else the component root element: keep the template on a single root, since a top-level comment makes it a fragment in dev builds and turns the trap off.
 
 ```js
 import { toRef } from 'vue'
