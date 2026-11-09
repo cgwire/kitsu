@@ -2283,6 +2283,7 @@ export default {
     change_priority: 'Change priority of the selected task | Change priority of the {nbSelectedTasks} selected tasks',
     change_priority_to: 'New priority:',
     change_task_status: 'Change status for the selected task | Change status for the {nbSelectedTasks} selected tasks',
+    change_task_status_error: 'An error occurred while updating the selected task. | An error occurred while updating the {count} selected tasks: some of them may have changed. Check them before trying again.',
     clear_all_assignations: 'unassign all',
     clear_assignations: 'unassign from selection',
     clear_own_assignations: 'clear your assignments',

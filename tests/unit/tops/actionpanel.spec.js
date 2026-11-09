@@ -28,7 +28,9 @@ vi.mock('@/components/modals/ViewPlaylistModal.vue', async () => {
 })
 
 import ActionPanel from '@/components/tops/ActionPanel.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
+import errors from '@/lib/errors'
 import assetsStore from '@/store/modules/assets'
 
 const assets = [
@@ -68,7 +70,9 @@ const mountPanel = async (
     validations = 0,
     // Lines selected in the list of the page: assets, shots or edits.
     lines = [],
-    customActions = []
+    customActions = [],
+    statuses = [],
+    errorHandler = null
   } = {}
 ) => {
   const router = createRouter({
@@ -143,7 +147,7 @@ const mountPanel = async (
       selectedShots: state => state.selectedLines,
       selectedTasks: state => state.selectedTasks,
       taskMap: () => new Map(),
-      taskStatusForCurrentUser: () => [],
+      taskStatusForCurrentUser: () => statuses,
       taskTypeMap: () => new Map(),
       user: () => ({ id: 'user-1', departments: [] })
     }
@@ -152,7 +156,10 @@ const mountPanel = async (
 
   const wrapper = shallowMount(ActionPanel, {
     props: { productionId: 'production-1' },
-    global: { plugins: [router, store] }
+    global: {
+      plugins: [router, store],
+      ...(errorHandler ? { config: { errorHandler } } : {})
+    }
   })
   await flushPromises()
   mountedPanels.push(wrapper)
@@ -502,6 +509,121 @@ describe('ActionPanel, opened on a task selection', () => {
       expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
     }
   )
+})
+
+describe('ActionPanel, status change', () => {
+  const tasks = ['task-1', 'task-2', 'task-3'].map(id => ({
+    id,
+    project_id: 'production-1',
+    task_type_id: 'task-type-1',
+    task_status_id: 'status-wip'
+  }))
+  const statuses = [
+    { id: 'status-retake', name: 'Retake', short_name: 'retake' },
+    { id: 'status-wip', name: 'Work In Progress', short_name: 'wip' }
+  ]
+
+  const mountOnShots = (selection = tasks, options = {}) =>
+    mountPanel([], {
+      path: '/productions/production-1/shots',
+      statuses,
+      tasks: selection,
+      ...options
+    })
+
+  const chooseStatus = async (wrapper, statusId) => {
+    wrapper
+      .findComponent(ComboboxStatus)
+      .vm.$emit('update:model-value', statusId)
+    await flushPromises()
+  }
+
+  const confirmButton = wrapper => wrapper.find('.action-bar .confirm-button')
+  const barError = wrapper => wrapper.find('.action-bar p.is-danger')
+  const commentField = wrapper => wrapper.find('.action-bar textarea')
+
+  const refusal = () => {
+    const err = new Error('Refused')
+    errors.markRequestFailure(err)
+    return err
+  }
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('with one task', () => {
+    const mountOnOneTask = options => mountOnShots([tasks[0]], options)
+
+    test('tells when the change fails', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { store, wrapper } = await mountOnOneTask()
+      const failure = refusal()
+      store.dispatch.mockRejectedValueOnce(failure)
+      await chooseStatus(wrapper, 'status-retake')
+      await commentField(wrapper).setValue('Check the timing')
+
+      await confirmButton(wrapper).trigger('click')
+      await flushPromises()
+
+      expect(barError(wrapper).text()).toBe('tasks.change_task_status_error')
+      expect(confirmButton(wrapper).classes()).not.toContain('is-loading')
+      expect(commentField(wrapper).element.value).toBe('Check the timing')
+      expect(consoleError).toHaveBeenCalledWith(failure)
+    })
+
+    test('clears the failure on the next try', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { store, wrapper } = await mountOnOneTask()
+      store.dispatch.mockRejectedValueOnce(refusal())
+      await chooseStatus(wrapper, 'status-retake')
+      await confirmButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(barError(wrapper).exists()).toBe(true)
+
+      await confirmButton(wrapper).trigger('click')
+
+      expect(barError(wrapper).exists()).toBe(false)
+    })
+
+    test('forgets the failure once the selection changes', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { store, wrapper } = await mountOnOneTask()
+      store.dispatch.mockRejectedValueOnce(refusal())
+      await chooseStatus(wrapper, 'status-retake')
+      await confirmButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(barError(wrapper).exists()).toBe(true)
+
+      store.state.selectedTasks.set('task-2', tasks[1])
+      await flushPromises()
+
+      expect(barError(wrapper).exists()).toBe(false)
+    })
+
+    // A failed request is already reported: anything else is a bug that must
+    // reach Sentry.
+    test('leaves a bug unhandled', async () => {
+      const errorHandler = vi.fn()
+      const { store, wrapper } = await mountOnOneTask({ errorHandler })
+      const bug = new TypeError('Not a request failure')
+      store.dispatch.mockRejectedValueOnce(bug)
+      await chooseStatus(wrapper, 'status-retake')
+
+      await confirmButton(wrapper).trigger('click')
+      await flushPromises()
+
+      expect(errorHandler.mock.calls[0][0]).toBe(bug)
+      expect(barError(wrapper).exists()).toBe(true)
+      expect(confirmButton(wrapper).classes()).not.toContain('is-loading')
+    })
+  })
 })
 
 describe('ActionPanel, opened on empty cells', () => {

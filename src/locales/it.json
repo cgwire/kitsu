@@ -1831,6 +1831,7 @@
       "assign_explanation": "Seleziona una persona da assegnare...",
       "change_priority_to": "Nuova priorità:",
       "change_task_status": "Cambia lo stato del task selezionato | Cambia lo stato dei {nbSelectedTasks} task selezionati",
+      "change_task_status_error": "Si è verificato un errore durante l'aggiornamento del task selezionato. | Si è verificato un errore durante l'aggiornamento dei {count} task selezionati: alcuni potrebbero essere cambiati. Controllali prima di riprovare.",
       "due_date": "Stato della scadenza",
       "due_after_today": "In scadenza dopo oggi",
       "due_before_today": "In scadenza prima di oggi",

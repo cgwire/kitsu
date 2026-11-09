@@ -346,6 +346,14 @@
               }}
             </button>
           </div>
+          <p
+            class="is-danger has-text-centered mt05"
+            v-if="errors.changeStatus"
+          >
+            {{
+              $t('tasks.change_task_status_error', { count: nbSelectedTasks })
+            }}
+          </p>
         </div>
 
         <div
@@ -927,6 +935,7 @@ import { useStore } from 'vuex'
 
 import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
 import { intersection } from '@/lib/array'
+import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import { isFreeEscape } from '@/lib/keyboard'
 import assetsStore from '@/store/modules/assets.js'
@@ -1012,6 +1021,7 @@ const loading = reactive({
 
 const errors = reactive({
   assetDeletion: false,
+  changeStatus: false,
   conceptDeletion: false,
   copyClientComments: false,
   editDeletion: false,
@@ -1418,6 +1428,7 @@ const confirmTaskStatusChange = async () => {
   }
   if (!taskStatusId.value) return
   loading.changeStatus = true
+  errors.changeStatus = false
   try {
     await store.dispatch('changeSelectedTaskStatus', {
       taskStatusId: taskStatusId.value,
@@ -1425,9 +1436,11 @@ const confirmTaskStatusChange = async () => {
     })
     statusComment.value = ''
   } catch (err) {
-    console.error(err)
+    errors.changeStatus = true
+    logRequestFailure(err)
+  } finally {
+    loading.changeStatus = false
   }
-  loading.changeStatus = false
 }
 
 const confirmAssign = async () => {
@@ -1813,6 +1826,10 @@ watch(availableBars, bars => {
 })
 
 watch(nbSelectedTasks, refreshSelectionActions, { immediate: true })
+
+watch(selectedTaskIds, () => {
+  errors.changeStatus = false
+})
 
 watch(
   () => route.name,
