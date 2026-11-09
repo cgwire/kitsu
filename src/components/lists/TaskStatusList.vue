@@ -268,8 +268,11 @@ onBeforeUnmount(() => {
     display: none;
   }
 
-  .datatable-row {
-    background: var(--background);
+  // App.vue makes the last row transparent with !important and paints its
+  // cells: the cards override both, as in TaskTypeList.
+  .datatable-row,
+  .datatable-row:last-child {
+    background: var(--background) !important;
     border: 1px solid var(--border);
     border-radius: 12px;
     display: block;
@@ -277,11 +280,13 @@ onBeforeUnmount(() => {
     padding: 0.85em 1em;
   }
 
-  .dark .datatable-row {
-    background: var(--background-alt);
+  .dark .datatable-row,
+  .dark .datatable-row:last-child {
+    background: var(--background-alt) !important;
   }
 
   .datatable-row td {
+    background-color: transparent !important;
     border: 0;
     display: block;
     height: auto;
