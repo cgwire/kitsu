@@ -10,10 +10,11 @@ const DEFAULT_STATUS_COLOR = '#6F727A'
 
 // Out of the box the default status is near white, unreadable on a light
 // background: it is drawn grey, as any near white status (a todo status
-// that lost its default flag).
+// that lost its default flag). Near white is read on the lightness: by its
+// luminance, a bright yellow would pass for white.
 export const getStatusColor = taskStatus =>
   taskStatus.is_default ||
-  (taskStatus.color && Color(taskStatus.color).luminosity() > 0.85)
+  (taskStatus.color && Color(taskStatus.color).lightness() > 90)
     ? DEFAULT_STATUS_COLOR
     : taskStatus.color
 
