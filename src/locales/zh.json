@@ -1512,6 +1512,36 @@
       "assign_no_fit": "{count} 个任务无法排入日期范围。 | {count} 个任务无法排入日期范围。",
       "batch_schedule": "批量排期任务",
       "confirm_move_children": "移动此条也会更改 {count} 个子项的日期。是否继续？ | 移动此条也会更改 {count} 个子项的日期。是否继续？",
+      "create_task": {
+        "asset_type": "资产类型",
+        "button": "创建任务",
+        "color": "颜色",
+        "department": "部门",
+        "description": "描述",
+        "due_date": "截止日期（可选）",
+        "error": "创建任务时出错，请重试。",
+        "kind": "创建",
+        "kinds": {
+          "asset": "新资产",
+          "edit": "新剪辑",
+          "shot": "新镜头",
+          "untracked": "未跟踪项（仅排期）"
+        },
+        "link": "关联到",
+        "link_episode": "剧集 {name}",
+        "link_none": "整个制作",
+        "name": "名称",
+        "new_sequence": "新建序列…",
+        "new_sequence_name": "序列名称",
+        "no_task_types": "该制作没有适用于此类项目的任务类型。请在制作设置中添加。",
+        "sequence": "序列",
+        "shot": "镜头",
+        "shot_none": "整个序列",
+        "start_date": "开始日期",
+        "task_types": "要创建的任务类型",
+        "title": "在排期中创建任务",
+        "untracked_hint": "未跟踪项仅显示在排期中，不会出现在资产、镜头或剪辑列表里。待序列或镜头创建后，再将其关联。"
+      },
       "create_version": "创建日程计划版本",
       "daily_quota": "每人每天的任务数",
       "daily_quota_estimated": "所有任务都有预估：日期以此为准，每人每天 {quota}。输入的值适用于所有任务，包括已预估的任务。",
@@ -1577,6 +1607,9 @@
       "title": "日程计划",
       "title_main": "主要日程",
       "today": "今天",
+      "untracked": {
+        "title": "未跟踪"
+      },
       "version": "版本",
       "versions": {
         "reference": "参考预测",

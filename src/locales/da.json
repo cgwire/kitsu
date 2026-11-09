@@ -1512,6 +1512,36 @@
       "assign_no_fit": "{count} opgave passede ikke ind i datointervallet. | {count} opgaver passede ikke ind i datointervallet.",
       "batch_schedule": "Planlæg opgaver samlet",
       "confirm_move_children": "Flytning af denne bjælke ændrer også datoerne for {count} underelement. Fortsæt? | Flytning af denne bjælke ændrer også datoerne for {count} underelementer. Fortsæt?",
+      "create_task": {
+        "asset_type": "Aktivtype",
+        "button": "Opret opgave",
+        "color": "Farve",
+        "department": "Afdeling",
+        "description": "Beskrivelse",
+        "due_date": "Deadline (valgfri)",
+        "error": "Der opstod en fejl under oprettelsen af opgaverne. Prøv igen.",
+        "kind": "Opret",
+        "kinds": {
+          "asset": "Et nyt aktiv",
+          "edit": "En ny redigering",
+          "shot": "Et nyt shot",
+          "untracked": "Et ikke-sporet element (kun tidsplan)"
+        },
+        "link": "Tilknyttet",
+        "link_episode": "Episode {name}",
+        "link_none": "Hele produktionen",
+        "name": "Navn",
+        "new_sequence": "Ny sekvens…",
+        "new_sequence_name": "Sekvensnavn",
+        "no_task_types": "Produktionen har ingen opgavetype til denne slags element. Tilføj en i produktionsindstillingerne.",
+        "sequence": "Sekvens",
+        "shot": "Shot",
+        "shot_none": "Hele sekvensen",
+        "start_date": "Startdato",
+        "task_types": "Opgavetyper, der skal oprettes",
+        "title": "Opret opgaver i tidsplanen",
+        "untracked_hint": "Et ikke-sporet element vises kun i tidsplanen, ikke i listerne over aktiver, shots eller redigeringer. Tilknyt det senere til en sekvens eller et shot, når de findes."
+      },
       "create_version": "Opret version af tidsplan",
       "daily_quota": "Opgaver pr. person pr. dag",
       "daily_quota_estimated": "Alle opgaver har et estimat: datoerne følger det, {quota} pr. person pr. dag. En indtastet værdi gælder for alle opgaver, estimater inklusive.",
@@ -1577,6 +1607,9 @@
       "title": "Tidsplan",
       "title_main": "Hovedtidsplan",
       "today": "I dag",
+      "untracked": {
+        "title": "Ikke-sporet"
+      },
       "version": "Version",
       "versions": {
         "reference": "Referenceprognose",

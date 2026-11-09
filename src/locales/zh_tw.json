@@ -1512,6 +1512,36 @@
       "assign_no_fit": "{count} 個任務無法排入日期範圍。 | {count} 個任務無法排入日期範圍。",
       "batch_schedule": "批次排程任務",
       "confirm_move_children": "移動此條也會變更 {count} 個子項目的日期。要繼續嗎？ | 移動此條也會變更 {count} 個子項目的日期。要繼續嗎？",
+      "create_task": {
+        "asset_type": "資產類型",
+        "button": "建立任務",
+        "color": "顏色",
+        "department": "部門",
+        "description": "描述",
+        "due_date": "截止日期（選填）",
+        "error": "建立任務時發生錯誤，請再試一次。",
+        "kind": "建立",
+        "kinds": {
+          "asset": "新資產",
+          "edit": "新剪輯",
+          "shot": "新鏡頭",
+          "untracked": "未追蹤項目（僅排程）"
+        },
+        "link": "連結至",
+        "link_episode": "集數 {name}",
+        "link_none": "整個製作",
+        "name": "名稱",
+        "new_sequence": "新增序列…",
+        "new_sequence_name": "序列名稱",
+        "no_task_types": "此製作沒有適用於這類項目的任務類型。請在製作設定中新增。",
+        "sequence": "序列",
+        "shot": "鏡頭",
+        "shot_none": "整個序列",
+        "start_date": "開始日期",
+        "task_types": "要建立的任務類型",
+        "title": "在排程中建立任務",
+        "untracked_hint": "未追蹤項目只會顯示在排程中，不會出現在資產、鏡頭或剪輯清單裡。等序列或鏡頭建立後，再將其連結。"
+      },
       "create_version": "建立排程版本",
       "daily_quota": "每人每天的任務數",
       "daily_quota_estimated": "所有任務都有預估：日期以此為準，每人每天 {quota}。輸入的值適用於所有任務，包括已預估的任務。",
@@ -1577,6 +1607,9 @@
       "title": "時間表",
       "title_main": "主時間表",
       "today": "今天",
+      "untracked": {
+        "title": "未追蹤"
+      },
       "version": "版本",
       "versions": {
         "reference": "參考預測",

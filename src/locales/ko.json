@@ -1512,6 +1512,36 @@
       "assign_no_fit": "{count}개의 작업이 날짜 범위에 맞지 않았습니다. | {count}개의 작업이 날짜 범위에 맞지 않았습니다.",
       "batch_schedule": "작업 일괄 일정 지정",
       "confirm_move_children": "이 막대를 이동하면 하위 항목 {count}개의 날짜도 변경됩니다. 계속하시겠습니까? | 이 막대를 이동하면 하위 항목 {count}개의 날짜도 변경됩니다. 계속하시겠습니까?",
+      "create_task": {
+        "asset_type": "에셋 유형",
+        "button": "작업 생성",
+        "color": "색상",
+        "department": "부서",
+        "description": "설명",
+        "due_date": "마감일 (선택 사항)",
+        "error": "작업을 생성하는 중 오류가 발생했습니다. 다시 시도해 주세요.",
+        "kind": "생성",
+        "kinds": {
+          "asset": "새 에셋",
+          "edit": "새 편집",
+          "shot": "새 샷",
+          "untracked": "추적하지 않는 항목 (일정 전용)"
+        },
+        "link": "연결 대상",
+        "link_episode": "에피소드 {name}",
+        "link_none": "전체 프로덕션",
+        "name": "이름",
+        "new_sequence": "새 시퀀스…",
+        "new_sequence_name": "시퀀스 이름",
+        "no_task_types": "이 프로덕션에는 이 종류의 항목에 대한 작업 유형이 없습니다. 프로덕션 설정에서 추가하세요.",
+        "sequence": "시퀀스",
+        "shot": "샷",
+        "shot_none": "전체 시퀀스",
+        "start_date": "시작일",
+        "task_types": "생성할 작업 유형",
+        "title": "일정에 작업 생성",
+        "untracked_hint": "추적하지 않는 항목은 일정에만 표시되며 에셋, 샷, 편집 목록에는 표시되지 않습니다. 시퀀스나 샷이 생기면 나중에 연결하세요."
+      },
       "create_version": "일정 버전 만들기",
       "daily_quota": "담당자 1인당 하루 작업 수",
       "daily_quota_estimated": "모든 작업에 견적이 있습니다. 날짜는 그에 따릅니다(1인 1일 {quota}). 입력한 값은 견적된 작업을 포함한 모든 작업에 적용됩니다.",
@@ -1577,6 +1607,9 @@
       "title": "일정",
       "title_main": "주요 일정",
       "today": "오늘",
+      "untracked": {
+        "title": "추적 안 함"
+      },
       "version": "버전",
       "versions": {
         "reference": "참조 예측",

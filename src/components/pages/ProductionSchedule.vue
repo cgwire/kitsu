@@ -128,6 +128,14 @@
             @click="toggleSidePanel"
             v-if="!isAllEpisodes"
           />
+          <button-simple
+            class="flexrow-item"
+            :disabled="isLockedSchedule || isVersioned"
+            icon="plus"
+            :text="$t('schedule.create_task.button')"
+            @click="openCreateTaskModal"
+            v-if="!isAllEpisodes"
+          />
         </div>
       </div>
 
@@ -476,6 +484,17 @@
     </div>
   </div>
 
+  <create-schedule-task-modal
+    :episode-id="currentEpisodeId"
+    :is-error="errors.createTask"
+    :is-loading="loading.createTask"
+    :is-main-pack="isMainPack"
+    :start-date="createTaskStartDate"
+    @cancel="modals.createTask = false"
+    @confirm="createScheduleTask"
+    v-if="modals.createTask"
+  />
+
   <edit-schedule-version-modal
     :schedule-version-to-edit="scheduleVersionToEdit"
     :version="version"
@@ -626,6 +645,7 @@ import shotStore from '@/store/modules/shots'
 import taskTypeStore from '@/store/modules/tasktypes'
 
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import CreateScheduleTaskModal from '@/components/modals/CreateScheduleTaskModal.vue'
 import EditScheduleVersionModal from '@/components/modals/EditScheduleVersionModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import Schedule from '@/components/schedule/Schedule.vue'
@@ -703,15 +723,18 @@ const loading = ref({
   deleteScheduleVersion: false,
   editScheduleVersion: false,
   applyScheduleVersion: false,
+  createTask: false,
   expandSchedule: false
 })
 const errors = ref({
+  createTask: false,
   editScheduleVersion: false,
   deleteScheduleVersion: false,
   applyScheduleVersion: false,
   exportSchedule: false
 })
 const modals = ref({
+  createTask: false,
   editScheduleVersion: false,
   deleteScheduleVersion: false,
   applyScheduleVersion: false,
@@ -1124,18 +1147,28 @@ const loadData = async () => {
         rowEndDate = scheduleEndDate.clone()
       }
 
-      const path = getTaskTypeSchedulePath(
-        taskType.id,
-        currentProduction.value.id,
-        linkedEpisodeId.value,
-        taskType.for_entity
-      )
+      // the task type pages list assets, shots, edits...: none lists the
+      // untracked items, so their rows link nowhere
+      const path =
+        taskType.for_entity === 'Untracked'
+          ? null
+          : getTaskTypeSchedulePath(
+              taskType.id,
+              currentProduction.value.id,
+              linkedEpisodeId.value,
+              taskType.for_entity
+            )
 
       return {
         ...item,
         color: taskType.color,
         for_entity: taskType.for_entity,
-        name: `${taskType.for_entity} / ${taskType.name}`,
+        // being untracked is a state of the work, not a kind of it: the
+        // row carries the name of the work alone
+        name:
+          taskType.for_entity === 'Untracked'
+            ? taskType.name
+            : `${taskType.for_entity} / ${taskType.name}`,
         priority: taskType.priority,
         startDate: rowStartDate,
         endDate: rowEndDate,
@@ -1306,7 +1339,8 @@ const entityLoaders = {
   Shot: () => store.dispatch('loadShots'),
   Sequence: () => store.dispatch('loadSequences'),
   Episode: () => store.dispatch('loadEpisodes'),
-  Edit: () => store.dispatch('loadEdits')
+  Edit: () => store.dispatch('loadEdits'),
+  Untracked: () => store.dispatch('loadUntracked', currentProduction.value)
 }
 
 const loadEntities = async forEntity => {
@@ -1435,13 +1469,15 @@ const loadTaskTypeRows = async taskTypeElement => {
     taskTypeElement.entitiesByType = {}
 
     // one row per asset type (Asset), sequence (Shot/Sequence),
-    // episode (Episode) or edit (Edit)
+    // episode (Episode), edit (Edit) or untracked item (Untracked)
     const scheduleItemLoaders = {
       Asset: payload => store.dispatch('loadAssetTypeScheduleItems', payload),
       Shot: payload => store.dispatch('loadSequenceScheduleItems', payload),
       Sequence: payload => store.dispatch('loadSequenceScheduleItems', payload),
       Episode: payload => store.dispatch('loadEpisodeScheduleItems', payload),
-      Edit: payload => store.dispatch('loadEditScheduleItems', payload)
+      Edit: payload => store.dispatch('loadEditScheduleItems', payload),
+      Untracked: payload =>
+        store.dispatch('loadUntrackedScheduleItems', payload)
     }
     const loadEntityRows =
       scheduleItemLoaders[taskTypeElement.for_entity] ??
@@ -1527,6 +1563,7 @@ const loadTaskTypeRows = async taskTypeElement => {
     const sequenceMap = sequenceStore.cache.sequenceMap
     const episodeMap = episodeStore.cache.episodeMap
     const editMap = editStore.cache.editMap
+    const untrackedMap = store.getters.untrackedMap
 
     // group tasks by entity type and assignee
     const tasksByType = {}
@@ -1559,6 +1596,10 @@ const loadTaskTypeRows = async taskTypeElement => {
         task.entity_type_id = task.entity_id
       } else if (taskTypeElement.for_entity === 'Edit') {
         task.entity = editMap.get(task.entity_id)
+        if (!task.entity) return
+        task.entity_type_id = task.entity_id
+      } else if (taskTypeElement.for_entity === 'Untracked') {
+        task.entity = untrackedMap.get(task.entity_id)
         if (!task.entity) return
         task.entity_type_id = task.entity_id
       } else {
@@ -1693,6 +1734,15 @@ const loadTaskTypeRows = async taskTypeElement => {
       children = children.filter(item => {
         const edit = editMap.get(item.object_id)
         return edit && edit.episode_id === currentEpisodeId.value
+      })
+    } else if (taskTypeElement.for_entity === 'Untracked') {
+      // the server already scopes them to the episode; show the link of
+      // each item next to its name
+      children.forEach(item => {
+        const untracked = untrackedMap.get(item.object_id)
+        if (untracked?.link_name) {
+          item.name = `${item.name} (${untracked.link_name})`
+        }
       })
     }
 
@@ -1875,6 +1925,181 @@ const isInDepartment = taskType =>
   (isCurrentUserSupervisor.value &&
     (!user.value.departments.length ||
       user.value.departments.includes(taskType?.department_id)))
+
+// Today, kept inside the displayed range so the new bars show up.
+const createTaskStartDate = computed(() => {
+  let day = getUserDay()
+  if (day.isBefore(startDate.value)) day = startDate.value.clone()
+  if (day.isAfter(endDate.value)) day = endDate.value.clone()
+  return day.format('YYYY-MM-DD')
+})
+
+// What a failed creation already made, so that confirming again picks it up
+// instead of creating it twice. Reset with each opening of the dialog.
+let createdBeforeFailure = { sequence: null, entity: null, entityKey: null }
+
+const openCreateTaskModal = () => {
+  createdBeforeFailure = { sequence: null, entity: null, entityKey: null }
+  errors.value.createTask = false
+  modals.value.createTask = true
+}
+
+const getEntityKey = form =>
+  JSON.stringify([
+    form.kind,
+    form.name,
+    form.assetTypeId,
+    form.sequenceId,
+    form.newSequenceName,
+    form.parentId
+  ])
+
+const createEntity = async form => {
+  const entityKey = getEntityKey(form)
+  if (createdBeforeFailure.entityKey === entityKey) {
+    return createdBeforeFailure.entity
+  }
+  const entity = await createNewEntity(form)
+  createdBeforeFailure = { ...createdBeforeFailure, entity, entityKey }
+  return entity
+}
+
+const createNewEntity = async form => {
+  const production = currentProduction.value
+  const episodeId = currentEpisodeId.value
+  const base = {
+    name: form.name,
+    description: form.description,
+    project_id: production.id,
+    taskTypeIds: form.taskTypeIds
+  }
+  if (form.kind === 'Asset') {
+    return store.dispatch('newAsset', {
+      ...base,
+      entity_type_id: form.assetTypeId,
+      source_id: episodeId || 'null',
+      data: {},
+      is_shared: false
+    })
+  } else if (form.kind === 'Shot') {
+    let sequenceId = form.sequenceId
+    if (form.newSequenceName) {
+      let sequence = createdBeforeFailure.sequence
+      if (sequence?.name !== form.newSequenceName) {
+        // no sequence task is created along: only the shot ones were asked
+        sequence = await store.dispatch('newSequence', {
+          name: form.newSequenceName,
+          episode_id: episodeId,
+          project_id: production.id,
+          taskTypeIds: []
+        })
+        createdBeforeFailure = { ...createdBeforeFailure, sequence }
+      }
+      sequenceId = sequence.id
+    }
+    return store.dispatch('newShot', { ...base, sequence_id: sequenceId })
+  } else if (form.kind === 'Edit') {
+    return store.dispatch('newEdit', {
+      ...base,
+      parent_id: episodeId || 'null',
+      data: {}
+    })
+  }
+  return store.dispatch('newUntracked', {
+    ...base,
+    parent_id: form.parentId,
+    create_task: true,
+    department_id: form.departmentId,
+    color: form.color
+  })
+}
+
+const createScheduleTask = async form => {
+  loading.value.createTask = true
+  errors.value.createTask = false
+  try {
+    const entity = await createEntity(form)
+    // the untracked route returns its tasks; the asset, shot and edit lists
+    // keep only the task ids on their entities, the tasks are in the store
+    const tasks =
+      form.kind === 'Untracked'
+        ? entity.tasks
+        : [...store.getters.taskMap.values()].filter(
+            task =>
+              task.entity_id === entity.id &&
+              form.taskTypeIds.includes(task.task_type_id)
+          )
+    if (!tasks.length) throw new Error('No task created')
+    if (form.kind === 'Untracked') {
+      // its task type may be new, and new to the production
+      await Promise.all([
+        store.dispatch('loadTaskTypes'),
+        store.dispatch('loadProduction', currentProduction.value.id)
+      ])
+    }
+    await Promise.all(
+      tasks.map(task =>
+        store.dispatch('updateTask', {
+          taskId: task.id,
+          data: { start_date: form.startDate, due_date: form.dueDate }
+        })
+      )
+    )
+    modals.value.createTask = false
+    await reloadAndExpand(tasks.map(task => task.task_type_id))
+    await widenTaskTypeBars(tasks.map(task => task.id))
+  } catch (err) {
+    console.error(err)
+    errors.value.createTask = true
+  } finally {
+    loading.value.createTask = false
+  }
+}
+
+// Rebuild the rows (a task type planned for the first time gets its row),
+// then open again the rows that were open, and the ones of the new tasks.
+const reloadAndExpand = async taskTypeIds => {
+  const expandedIds = scheduleItems.value
+    .filter(item => item.expanded)
+    .map(item => item.task_type_id)
+  await loadData()
+  const toExpand = new Set([...expandedIds, ...taskTypeIds])
+  // one after the other: each expansion ends by filling the side panel with
+  // its task type, and the last one has to be the selected one
+  for (const item of scheduleItems.value) {
+    if (toExpand.has(item.task_type_id)) {
+      await expandTaskTypeElement(
+        item,
+        element => scheduleRef.value?.refreshItemPositions(element),
+        true,
+        false
+      )
+    }
+  }
+}
+
+// Like a task drag, the new tasks widen the bar of their task type, never
+// shrink it. Their rows already enclose them on display, so each task is
+// measured against the task type bar itself.
+const widenTaskTypeBars = async taskIds => {
+  const createdIds = new Set(taskIds)
+  const widenedBars = new Set()
+  scheduleItems.value.forEach(taskTypeElement => {
+    taskTypeElement.children.forEach(row => {
+      subItemsOf(row)
+        .filter(task => createdIds.has(task.id))
+        .forEach(task => {
+          widenParents({
+            startDate: task.startDate,
+            endDate: task.endDate,
+            parentElement: taskTypeElement
+          }).forEach(bar => widenedBars.add(bar))
+        })
+    })
+  })
+  await Promise.all([...widenedBars].map(updateScheduleItem))
+  widenedBars.forEach(bar => scheduleRef.value?.refreshItemPositions(bar))
+}
 
 const scrollScheduleToToday = () => {
   scheduleRef.value?.scrollToToday()
@@ -2134,6 +2359,34 @@ const selectTaskTypeElement = async (
         children: edits
       }
     })
+  } else if (taskType.for_entity === 'Untracked') {
+    if (!preloadedTasks) {
+      await store.dispatch('loadUntracked', currentProduction.value)
+    }
+
+    // untracked items are the assignable entities, in a single group; the
+    // ones linked to another episode stay out of an episode schedule
+    const untrackedItems = store.getters.untrackedItems.filter(
+      item =>
+        (!currentEpisodeId.value ||
+          !item.parent_id ||
+          item.episode_id === currentEpisodeId.value) &&
+        taskEntityIds.has(item.id)
+    )
+    untrackedItems.forEach(item => {
+      item.assigned = taskType.entitiesByType?.[item.id]?.includes(item.id)
+    })
+    assignments.value.entityTypes = untrackedItems.length
+      ? [
+          {
+            id: taskType.for_entity,
+            name: t('schedule.untracked.title'),
+            for_entity: taskType.for_entity,
+            expanded: true,
+            children: untrackedItems
+          }
+        ]
+      : []
   }
 
   // keep the group in use, else open on the row the schedule selected

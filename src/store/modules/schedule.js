@@ -65,6 +65,14 @@ const actions = {
     return scheduleApi.getEditScheduleItems(production, taskType, episodeId)
   },
 
+  loadUntrackedScheduleItems({}, { production, taskType, episodeId = null }) {
+    return scheduleApi.getUntrackedScheduleItems(
+      production,
+      taskType,
+      episodeId
+    )
+  },
+
   loadEpisodeScheduleItems({}, { production, taskType, episodeId = null }) {
     return scheduleApi.getEpisodeScheduleItems(production, taskType, episodeId)
   },
