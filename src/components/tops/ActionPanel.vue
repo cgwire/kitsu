@@ -313,6 +313,7 @@
           <div class="flexrow mb05">
             <div class="flexrow-item change-status-item">
               <combobox-status
+                :placeholder="$t('tasks.select_status')"
                 :with-margin="false"
                 :task-status-list="availableTaskStatuses"
                 v-model="taskStatusId"
@@ -334,16 +335,13 @@
             <button
               class="button confirm-button is-wide"
               :class="{
+                'is-disabled': !isStatusChangeReady,
                 'is-loading': loading.changeStatus
               }"
+              :aria-disabled="!isStatusChangeReady"
               @click="confirmTaskStatusChange"
             >
-              {{
-                $t('tasks.change_task_status', {
-                  count: nbSelectedTasks,
-                  nbSelectedTasks
-                })
-              }}
+              {{ statusChangeLabel }}
             </button>
           </div>
           <p
@@ -1427,11 +1425,51 @@ const availableBars = computed(() => {
   ])
 })
 
+// Zou refuses an artist a status they cannot use, even the one a task holds:
+// a comment of theirs cannot leave it on such a task. An artist there is the
+// role user on the production of each task: neither a vendor nor an admin.
+const canKeepStatus = computed(() => {
+  const { currentUserRoleForProduction, isCurrentUserAdmin } = store.getters
+  return (
+    isCurrentUserAdmin ||
+    selectedTaskIds.value.every(taskId => {
+      const task = taskMap.value.get(taskId)
+      return (
+        !task ||
+        currentUserRoleForProduction(task.project_id) !== 'user' ||
+        taskStatusMap.value.get(task.task_status_id)?.is_artist_allowed
+      )
+    })
+  )
+})
+
+const isCommentOnly = computed(
+  () =>
+    !taskStatusId.value &&
+    canKeepStatus.value &&
+    statusComment.value.trim().length > 0
+)
+
+const isStatusChangeReady = computed(
+  () => Boolean(taskStatusId.value) || isCommentOnly.value
+)
+
+const statusChangeLabel = computed(() =>
+  isCommentOnly.value
+    ? t('tasks.post_comment_on_tasks', { count: nbSelectedTasks.value })
+    : t('tasks.change_task_status', {
+        count: nbSelectedTasks.value,
+        nbSelectedTasks: nbSelectedTasks.value
+      })
+)
+
 const statusChangeText = computed(() =>
-  t('tasks.confirm_change_task_status', {
-    count: nbSelectedTasks.value,
-    status: taskStatusMap.value.get(taskStatusId.value)?.name ?? ''
-  })
+  taskStatusId.value
+    ? t('tasks.confirm_change_task_status', {
+        count: nbSelectedTasks.value,
+        status: taskStatusMap.value.get(taskStatusId.value)?.name ?? ''
+      })
+    : t('tasks.confirm_post_comment', { count: nbSelectedTasks.value })
 )
 
 const storagePrefix = computed(() => {
@@ -1459,6 +1497,7 @@ const runTaskStatusChange = async () => {
       comment: statusComment.value
     })
     statusComment.value = ''
+    taskStatusId.value = ''
     modals.statusChange = false
   } catch (err) {
     errors.changeStatus = true
@@ -1470,11 +1509,7 @@ const runTaskStatusChange = async () => {
 
 // The loading look only stops the mouse: Ctrl+Enter still gets here.
 const confirmTaskStatusChange = async () => {
-  if (loading.changeStatus) return
-  if (!taskStatusId.value) {
-    taskStatusId.value = availableTaskStatuses.value[0]?.id ?? ''
-  }
-  if (!taskStatusId.value) return
+  if (loading.changeStatus || !isStatusChangeReady.value) return
   if (nbSelectedTasks.value > 1) {
     errors.changeStatus = false
     modals.statusChange = true

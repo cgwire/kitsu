@@ -73,7 +73,10 @@ const mountPanel = async (
     lines = [],
     customActions = [],
     statuses = [],
-    errorHandler = null
+    errorHandler = null,
+    isAdmin = false,
+    isArtist = false,
+    projectRoles = {}
   } = {}
 ) => {
   const router = createRouter({
@@ -133,10 +136,11 @@ const mountPanel = async (
       assetsByType: () => [assets],
       currentProduction: () => ({ id: 'production-1' }),
       conceptFolders: () => folders,
-      currentUserRoleForProduction: () => () => role,
+      currentUserRoleForProduction: () => productionId =>
+        projectRoles[productionId] ?? role,
       getCustomActionsByType: () => () => customActions,
-      isCurrentUserAdmin: () => false,
-      isCurrentUserArtist: () => false,
+      isCurrentUserAdmin: () => isAdmin,
+      isCurrentUserArtist: () => isArtist,
       isCurrentUserClient: () => false,
       isShowAssignations: () => true,
       nbSelectedTasks: state => state.nbSelectedTasks,
@@ -147,7 +151,7 @@ const mountPanel = async (
       selectedEdits: state => state.selectedLines,
       selectedShots: state => state.selectedLines,
       selectedTasks: state => state.selectedTasks,
-      taskMap: () => new Map(),
+      taskMap: () => toSelection(tasks),
       taskStatusForCurrentUser: () => statuses,
       taskStatusMap: () => new Map(statuses.map(status => [status.id, status])),
       taskTypeMap: () => new Map(),
@@ -544,6 +548,10 @@ describe('ActionPanel, status change', () => {
   const barError = wrapper => wrapper.find('.action-bar p.is-danger')
   const commentField = wrapper => wrapper.find('.action-bar textarea')
   const modal = wrapper => wrapper.findComponent(ConfirmModal)
+  const statusCombo = wrapper => wrapper.findComponent(ComboboxStatus)
+  const isButtonDisabled = wrapper =>
+    confirmButton(wrapper).attributes('aria-disabled') === 'true' &&
+    confirmButton(wrapper).classes().includes('is-disabled')
   const pressCtrlEnter = wrapper =>
     commentField(wrapper).trigger('keyup.ctrl.enter')
 
@@ -760,9 +768,7 @@ describe('ActionPanel, status change', () => {
       expect(modal(wrapper).props('active')).toBe(false)
       expect(statusChanges(store)).toEqual([])
       expect(commentField(wrapper).element.value).toBe('Check the timing')
-      expect(
-        wrapper.findComponent(ComboboxStatus).props('modelValue')
-      ).toBe('status-retake')
+      expect(statusCombo(wrapper).props('modelValue')).toBe('status-retake')
     })
 
     test('keeps the modal open on a failure', async () => {
@@ -799,6 +805,226 @@ describe('ActionPanel, status change', () => {
       expect(modal(wrapper).props('active')).toBe(true)
       expect(modal(wrapper).props('isError')).toBe(false)
     })
+
+    test('starts over with no status after the change', async () => {
+      const { wrapper } = await mountOnShots()
+      await chooseStatus(wrapper, 'status-retake')
+      await confirmButton(wrapper).trigger('click')
+
+      modal(wrapper).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(statusCombo(wrapper).props('modelValue')).toBe('')
+    })
+
+    test('keeps the chosen status after a failure', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { store, wrapper } = await mountOnShots()
+      store.dispatch.mockRejectedValueOnce(refusal())
+      await chooseStatus(wrapper, 'status-retake')
+      await confirmButton(wrapper).trigger('click')
+
+      modal(wrapper).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(statusCombo(wrapper).props('modelValue')).toBe('status-retake')
+    })
+
+    test('keeps the chosen status while the selection changes', async () => {
+      const { store, wrapper } = await mountOnShots()
+      await chooseStatus(wrapper, 'status-retake')
+
+      store.state.selectedTasks.delete('task-3')
+      await flushPromises()
+
+      expect(statusCombo(wrapper).props('modelValue')).toBe('status-retake')
+    })
+  })
+
+  describe('with no status chosen', () => {
+    test('invites to select a status, out of the list of statuses', async () => {
+      const { wrapper } = await mountOnShots()
+
+      const combo = statusCombo(wrapper)
+      expect(combo.props('modelValue')).toBe('')
+      expect(combo.props('placeholder')).toBe('tasks.select_status')
+      expect(combo.props('taskStatusList')).toEqual(statuses)
+    })
+
+    // Disabled in the look and for assistive technologies only: a native
+    // disabled would drop the focus the modal gives back to the button.
+    test('sends nothing without a comment', async () => {
+      const { store, wrapper } = await mountOnShots()
+
+      expect(isButtonDisabled(wrapper)).toBe(true)
+      expect(confirmButton(wrapper).attributes('disabled')).toBeUndefined()
+      await confirmButton(wrapper).trigger('click')
+      await pressCtrlEnter(wrapper)
+      await flushPromises()
+
+      expect(modal(wrapper).props('active')).toBe(false)
+      expect(statusChanges(store)).toEqual([])
+    })
+
+    test('takes a blank comment for no comment', async () => {
+      const { wrapper } = await mountOnShots()
+
+      await commentField(wrapper).setValue('  \n ')
+
+      expect(isButtonDisabled(wrapper)).toBe(true)
+      expect(confirmButton(wrapper).text()).toBe('tasks.change_task_status')
+    })
+
+    test('posts a comment alone once confirmed', async () => {
+      const { store, wrapper } = await mountOnShots()
+      await commentField(wrapper).setValue('Check the timing')
+      expect(confirmButton(wrapper).text()).toBe('tasks.post_comment_on_tasks')
+
+      await confirmButton(wrapper).trigger('click')
+      expect(modal(wrapper).props('active')).toBe(true)
+      expect(modal(wrapper).props('text')).toBe('tasks.confirm_post_comment')
+      expect(statusChanges(store)).toEqual([])
+
+      modal(wrapper).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(statusChanges(store)).toEqual([
+        { taskStatusId: '', comment: 'Check the timing' }
+      ])
+    })
+
+    test('posts a comment on one task without asking', async () => {
+      const { store, wrapper } = await mountOnShots([tasks[0]])
+      await commentField(wrapper).setValue('Check the timing')
+
+      await confirmButton(wrapper).trigger('click')
+      await flushPromises()
+
+      expect(modal(wrapper).props('active')).toBe(false)
+      expect(statusChanges(store)).toEqual([
+        { taskStatusId: '', comment: 'Check the timing' }
+      ])
+    })
+
+    test('changes nothing with a list of statuses left empty', async () => {
+      const { store, wrapper } = await mountOnShots(tasks, { statuses: [] })
+
+      await pressCtrlEnter(wrapper)
+      await flushPromises()
+
+      expect(statusChanges(store)).toEqual([])
+    })
+  })
+
+  // Zou refuses an artist a status they cannot use, even the one the task
+  // already holds. An artist there is the role user on the production of each
+  // task, whatever `isCurrentUserArtist` says: it holds vendors, and reads the
+  // global role out of a production page.
+  describe('as an artist', () => {
+    const artistStatuses = [
+      {
+        id: 'status-retake',
+        name: 'Retake',
+        short_name: 'retake',
+        is_artist_allowed: false
+      },
+      {
+        id: 'status-wip',
+        name: 'Work In Progress',
+        short_name: 'wip',
+        is_artist_allowed: true
+      }
+    ]
+    const taskOn = (id, statusId, projectId = 'production-1') => ({
+      id,
+      project_id: projectId,
+      task_type_id: 'task-type-1',
+      task_status_id: statusId
+    })
+    const mountAsArtist = (selection, options = {}) =>
+      mountOnShots(selection, {
+        isArtist: true,
+        role: 'user',
+        statuses: artistStatuses,
+        ...options
+      })
+
+    test('keeps a status they can use', async () => {
+      const { wrapper } = await mountAsArtist([
+        taskOn('task-1', 'status-wip'),
+        taskOn('task-2', 'status-wip')
+      ])
+
+      await commentField(wrapper).setValue('Check the timing')
+
+      expect(isButtonDisabled(wrapper)).toBe(false)
+    })
+
+    test('asks for a status when a task holds one they cannot use', async () => {
+      const { store, wrapper } = await mountAsArtist([
+        taskOn('task-1', 'status-wip'),
+        taskOn('task-2', 'status-retake')
+      ])
+
+      await commentField(wrapper).setValue('Check the timing')
+
+      expect(isButtonDisabled(wrapper)).toBe(true)
+      expect(confirmButton(wrapper).text()).toBe('tasks.change_task_status')
+      await pressCtrlEnter(wrapper)
+      await flushPromises()
+      expect(modal(wrapper).props('active')).toBe(false)
+      expect(statusChanges(store)).toEqual([])
+
+      await chooseStatus(wrapper, 'status-wip')
+
+      expect(isButtonDisabled(wrapper)).toBe(false)
+    })
+
+    test.each([
+      ['a vendor', { role: 'vendor' }],
+      ['a supervisor of this production', { role: 'supervisor' }],
+      ['an admin listed as an artist on this production', { isAdmin: true }]
+    ])('lets %s post a comment alone', async (_, options) => {
+      const { wrapper } = await mountAsArtist(
+        [taskOn('task-1', 'status-retake')],
+        options
+      )
+
+      await commentField(wrapper).setValue('Check the timing')
+
+      expect(isButtonDisabled(wrapper)).toBe(false)
+    })
+
+    test('stops a manager elsewhere who is an artist here', async () => {
+      const { wrapper } = await mountAsArtist(
+        [taskOn('task-1', 'status-retake')],
+        { isArtist: false }
+      )
+
+      await commentField(wrapper).setValue('Check the timing')
+
+      expect(isButtonDisabled(wrapper)).toBe(true)
+    })
+
+    test.each([
+      ['status-retake', 'status-wip', false],
+      ['status-wip', 'status-retake', true]
+    ])(
+      'reads the role per production, on %s and %s',
+      async (statusHere, statusThere, isStopped) => {
+        const { wrapper } = await mountAsArtist(
+          [
+            taskOn('task-1', statusHere),
+            taskOn('task-2', statusThere, 'production-2')
+          ],
+          { role: 'supervisor', projectRoles: { 'production-2': 'user' } }
+        )
+
+        await commentField(wrapper).setValue('Check the timing')
+
+        expect(isButtonDisabled(wrapper)).toBe(isStopped)
+      }
+    )
   })
 })
 

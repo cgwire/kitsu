@@ -114,6 +114,27 @@ describe('ActionPanel, status change messages', () => {
     )
   })
 
+  test('invites to select a status', async () => {
+    const { wrapper } = await mountPanel()
+
+    expect(wrapper.findComponent(ComboboxStatus).props('placeholder')).toBe(
+      'Select a status'
+    )
+  })
+
+  test('announces a comment alone on the button and in the modal', async () => {
+    const { wrapper } = await mountPanel()
+
+    await wrapper.find('.action-bar textarea').setValue('Check the timing')
+
+    expect(wrapper.find('.action-bar .confirm-button').text()).toBe(
+      'Post the comment on the 3 selected tasks'
+    )
+    expect(modal(wrapper).props('text')).toBe(
+      'Post the comment on the 3 selected tasks?'
+    )
+  })
+
   test('warns that a failure may have changed some of the tasks', async () => {
     const { wrapper } = await mountPanel()
 

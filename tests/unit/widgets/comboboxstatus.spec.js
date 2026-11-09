@@ -110,7 +110,42 @@ describe('ComboboxStatus', () => {
       },
       global: { plugins: [store] }
     })
-    expect(w.find('.tag').exists()).toBe(true)
+    expect(w.find('.tag').text()).toBe('+ Add Task Status')
+  })
+
+  it('shows the given placeholder as text, out of the list of statuses', async () => {
+    const w = shallowMountWithI18n(ComboboxStatus, {
+      props: {
+        taskStatusList,
+        modelValue: '',
+        placeholder: 'Select a status'
+      },
+      global: { plugins: [store] }
+    })
+    expect(w.find('.selected-status-line').text()).toBe('Select a status')
+    expect(w.find('.selected-status-line .tag').exists()).toBe(false)
+
+    await w.find('.flexrow').trigger('click')
+
+    expect(w.findAll('.status-line').map(line => line.text())).toEqual([
+      'TODO',
+      'WIP',
+      'DONE'
+    ])
+    expect(w.find('[aria-selected="true"]').exists()).toBe(false)
+  })
+
+  it('shows the chosen status rather than the given placeholder', () => {
+    const w = shallowMountWithI18n(ComboboxStatus, {
+      props: {
+        taskStatusList,
+        modelValue: 'status-2',
+        placeholder: 'Select a status'
+      },
+      global: { plugins: [store] }
+    })
+    expect(w.find('.selected-status-line').text()).toBe('WIP')
+    expect(w.find('.selected-status-line .tag').text()).toBe('WIP')
   })
 
   it('falls back to first status when modelValue is empty and no placeholder', () => {
