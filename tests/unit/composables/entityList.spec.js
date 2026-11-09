@@ -21,6 +21,7 @@ import {
   stickColumns,
   taskTypeId
 } from '../fixtures/entity-list'
+import { openModalHost } from '../fixtures/modal-host'
 
 enableAutoUnmount(afterEach)
 
@@ -1006,6 +1007,28 @@ describe('entity list keyboard selection', () => {
     expect(pressKey('keydown', { altKey: true }, 39).defaultPrevented).toBe(
       true
     )
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  // Confirming in a modal sent the change to the cell Alt and an arrow reached.
+  test('keeps the selection behind a modal', async () => {
+    const wrapper = await mountHost({}, { cells: grid })
+    const onClick = vi.fn()
+    wrapper.vm.$refs['validation-0-1'][0].$el.addEventListener('click', onClick)
+    wrapper.vm.list.onTaskSelected(
+      { x: 0, y: 0, task: grid[0][0].task, isUserClick: true },
+      true
+    )
+    const closeModal = await openModalHost()
+
+    expect(pressKey('keydown', { altKey: true }, 39).defaultPrevented).toBe(
+      true
+    )
+    expect(onClick).not.toHaveBeenCalled()
+
+    closeModal()
+    pressKey('keydown', { altKey: true }, 39)
+
     expect(onClick).toHaveBeenCalledTimes(1)
   })
 

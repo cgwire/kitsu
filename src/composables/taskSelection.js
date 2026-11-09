@@ -2,6 +2,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import { pauseEvent } from '@/composables/dom'
+import { isBehindModal } from '@/composables/modal'
 import { range } from '@/lib/time'
 
 /*
@@ -97,6 +98,12 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
       } else if ([39, 40].includes(event.keyCode)) {
         index = index + 1 >= list.length ? 0 : index + 1
       } else {
+        return
+      }
+      // A modal may be asking about the selection, which stays as it is. The
+      // key stays caught: Alt+Left would leave the page.
+      if (isBehindModal(body.value)) {
+        pauseEvent(event)
         return
       }
       // A field leaves with the selection of its row, and a field removed

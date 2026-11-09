@@ -34,6 +34,9 @@
           >
             {{ currentStatus.short_name }}
           </span>
+          <span class="status-placeholder" v-else-if="placeholder">
+            {{ placeholder }}
+          </span>
         </div>
         <chevron-down-icon
           class="down-icon flexrow-item"
@@ -132,6 +135,10 @@ const props = defineProps({
     default: false,
     type: Boolean
   },
+  placeholder: {
+    default: '',
+    type: String
+  },
   openTop: {
     default: false,
     type: Boolean
@@ -181,6 +188,8 @@ const sortedTaskStatusList = computed(() => {
 const currentStatus = computed(() => {
   if (props.modelValue) {
     return taskStatusMap.value.get(props.modelValue)
+  } else if (props.placeholder) {
+    return null
   } else if (props.addPlaceholder) {
     return {
       short_name: t('task_status.add_task_status_placeholder'),
@@ -246,6 +255,13 @@ const comboStyles = computed(() => ({
   text-transform: uppercase;
   flex: 1;
   margin-right: 0;
+}
+
+.status-placeholder {
+  color: var(--text);
+  padding-left: 0.25em;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .status-line {

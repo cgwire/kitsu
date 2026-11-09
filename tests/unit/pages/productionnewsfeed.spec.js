@@ -26,6 +26,8 @@ import NewsRow from '@/components/pages/news/NewsRow.vue'
 import ProductionNewsFeed from '@/components/pages/ProductionNewsFeed.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
+import { openModalHost } from '../fixtures/modal-host'
+
 const production = { id: 'production-1', name: 'Caminandes' }
 
 const newsList = [
@@ -500,6 +502,31 @@ describe('pages/ProductionNewsFeed', () => {
 
       expect(newsIds(store)).toEqual(['news-2', 'news-1'])
       expect(store.getters.newsList[0].change).toBe(true)
+    })
+  })
+
+  describe('Alt and an arrow', () => {
+    const pressAltDown = async () => {
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { altKey: true, keyCode: 40 })
+      )
+      await flushPromises()
+    }
+
+    // The task of a comment being edited moved behind the modal.
+    it('keeps the task shown behind a modal', async () => {
+      const loadTask = vi.fn((_, { taskId }) => ({ id: taskId }))
+      await mountPage(`/productions/${production.id}/news-feed`, { loadTask })
+      const closeModal = await openModalHost()
+
+      await pressAltDown()
+
+      expect(loadTask).not.toHaveBeenCalled()
+
+      closeModal()
+      await pressAltDown()
+
+      expect(loadTask).toHaveBeenCalledTimes(1)
     })
   })
 

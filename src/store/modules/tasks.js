@@ -498,6 +498,7 @@ const actions = {
     })
   },
 
+  // Without a status, each task keeps its own and only the comment goes out.
   changeSelectedTaskStatus(
     { commit, state, rootGetters },
     { taskStatusId, comment }
@@ -508,12 +509,12 @@ const actions = {
       const task = state.taskMap.get(taskId)
       const isChanged =
         task &&
-        (task.task_status_id !== taskStatusId ||
+        ((taskStatusId && task.task_status_id !== taskStatusId) ||
           (comment && comment.length > 0))
       if (isChanged) {
         tasksToChange.push({
           object_id: taskId,
-          task_status_id: taskStatusId,
+          task_status_id: taskStatusId || task.task_status_id,
           comment: comment || '',
           checklist: []
         })

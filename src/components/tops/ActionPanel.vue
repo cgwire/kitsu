@@ -313,6 +313,7 @@
           <div class="flexrow mb05">
             <div class="flexrow-item change-status-item">
               <combobox-status
+                :placeholder="$t('tasks.select_status')"
                 :with-margin="false"
                 :task-status-list="availableTaskStatuses"
                 v-model="taskStatusId"
@@ -334,18 +335,23 @@
             <button
               class="button confirm-button is-wide"
               :class="{
+                'is-disabled': !isStatusChangeReady,
                 'is-loading': loading.changeStatus
               }"
+              :aria-disabled="!isStatusChangeReady"
               @click="confirmTaskStatusChange"
             >
-              {{
-                $t('tasks.change_task_status', {
-                  count: nbSelectedTasks,
-                  nbSelectedTasks
-                })
-              }}
+              {{ statusChangeLabel }}
             </button>
           </div>
+          <p
+            class="is-danger has-text-centered mt05"
+            v-if="errors.changeStatus"
+          >
+            {{
+              $t('tasks.change_task_status_error', { count: nbSelectedTasks })
+            }}
+          </p>
         </div>
 
         <div
@@ -881,6 +887,18 @@
       </div>
     </div>
 
+    <confirm-modal
+      :active="modals.statusChange"
+      :error-text="
+        $t('tasks.change_task_status_error', { count: nbSelectedTasks })
+      "
+      :is-error="errors.changeStatus"
+      :is-loading="loading.changeStatus"
+      :text="statusChangeText"
+      @cancel="cancelStatusChange"
+      @confirm="runTaskStatusChange"
+    />
+
     <build-filter-modal
       :active="modals.buildFilter"
       @confirm="confirmBuildFilter"
@@ -927,11 +945,13 @@ import { useStore } from 'vuex'
 
 import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
 import { intersection } from '@/lib/array'
+import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import { isFreeEscape } from '@/lib/keyboard'
 import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import DeleteEntities from '@/components/tops/actions/DeleteEntities.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxModel from '@/components/widgets/ComboboxModel.vue'
@@ -992,7 +1012,8 @@ const taskStatusId = ref('')
 
 const modals = reactive({
   buildFilter: false,
-  playlist: false
+  playlist: false,
+  statusChange: false
 })
 
 const loading = reactive({
@@ -1012,6 +1033,7 @@ const loading = reactive({
 
 const errors = reactive({
   assetDeletion: false,
+  changeStatus: false,
   conceptDeletion: false,
   copyClientComments: false,
   editDeletion: false,
@@ -1044,6 +1066,7 @@ const selectedEdits = computed(() => store.getters.selectedEdits)
 const selectedShots = computed(() => store.getters.selectedShots)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const taskMap = computed(() => store.getters.taskMap)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskStatusForCurrentUser = computed(
   () => store.getters.taskStatusForCurrentUser
 )
@@ -1402,6 +1425,53 @@ const availableBars = computed(() => {
   ])
 })
 
+// Zou refuses an artist a status they cannot use, even the one a task holds:
+// a comment of theirs cannot leave it on such a task. An artist there is the
+// role user on the production of each task: neither a vendor nor an admin.
+const canKeepStatus = computed(() => {
+  const { currentUserRoleForProduction, isCurrentUserAdmin } = store.getters
+  return (
+    isCurrentUserAdmin ||
+    selectedTaskIds.value.every(taskId => {
+      const task = taskMap.value.get(taskId)
+      return (
+        !task ||
+        currentUserRoleForProduction(task.project_id) !== 'user' ||
+        taskStatusMap.value.get(task.task_status_id)?.is_artist_allowed
+      )
+    })
+  )
+})
+
+const isCommentOnly = computed(
+  () =>
+    !taskStatusId.value &&
+    canKeepStatus.value &&
+    statusComment.value.trim().length > 0
+)
+
+const isStatusChangeReady = computed(
+  () => Boolean(taskStatusId.value) || isCommentOnly.value
+)
+
+const statusChangeLabel = computed(() =>
+  isCommentOnly.value
+    ? t('tasks.post_comment_on_tasks', { count: nbSelectedTasks.value })
+    : t('tasks.change_task_status', {
+        count: nbSelectedTasks.value,
+        nbSelectedTasks: nbSelectedTasks.value
+      })
+)
+
+const statusChangeText = computed(() =>
+  taskStatusId.value
+    ? t('tasks.confirm_change_task_status', {
+        count: nbSelectedTasks.value,
+        status: taskStatusMap.value.get(taskStatusId.value)?.name ?? ''
+      })
+    : t('tasks.confirm_post_comment', { count: nbSelectedTasks.value })
+)
+
 const storagePrefix = computed(() => {
   if (isCurrentViewTaskType.value) return 'tasks-'
   if (isCurrentViewConcept.value) return 'concepts-'
@@ -1412,22 +1482,44 @@ const storagePrefix = computed(() => {
 // Functions
 // --------------------------------------------------------------------------
 
-const confirmTaskStatusChange = async () => {
-  if (!taskStatusId.value) {
-    taskStatusId.value = availableTaskStatuses.value[0]?.id ?? ''
-  }
-  if (!taskStatusId.value) return
+// A change once sent cannot be called back: closing the modal now would read as
+// a cancel.
+const cancelStatusChange = () => {
+  if (!loading.changeStatus) modals.statusChange = false
+}
+
+const runTaskStatusChange = async () => {
   loading.changeStatus = true
+  errors.changeStatus = false
   try {
     await store.dispatch('changeSelectedTaskStatus', {
       taskStatusId: taskStatusId.value,
       comment: statusComment.value
     })
     statusComment.value = ''
+    taskStatusId.value = ''
+    modals.statusChange = false
   } catch (err) {
-    console.error(err)
+    errors.changeStatus = true
+    logRequestFailure(err)
+  } finally {
+    loading.changeStatus = false
   }
-  loading.changeStatus = false
+}
+
+// The list of statuses lies over the button: the second click of a double click
+// on a status lands here. The loading look only stops the mouse: Ctrl+Enter
+// still gets here.
+const confirmTaskStatusChange = async event => {
+  if (event.detail > 1 || loading.changeStatus || !isStatusChangeReady.value) {
+    return
+  }
+  if (nbSelectedTasks.value > 1) {
+    errors.changeStatus = false
+    modals.statusChange = true
+  } else {
+    await runTaskStatusChange()
+  }
 }
 
 const confirmAssign = async () => {
@@ -1813,6 +1905,10 @@ watch(availableBars, bars => {
 })
 
 watch(nbSelectedTasks, refreshSelectionActions, { immediate: true })
+
+watch(selectedTaskIds, () => {
+  errors.changeStatus = false
+})
 
 watch(
   () => route.name,

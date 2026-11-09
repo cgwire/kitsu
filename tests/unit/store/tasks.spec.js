@@ -11,6 +11,14 @@ vi.mock('@/store/api/tasks', () => ({
     addExtraPreview: vi.fn(),
     addPreview: vi.fn(),
     commentTask: vi.fn(),
+    commentTasks: vi.fn((projectId, comments) =>
+      Promise.resolve(
+        comments.map(comment => ({
+          id: `comment-${comment.object_id}`,
+          ...comment
+        }))
+      )
+    ),
     copyLastClientComments: vi.fn((projectId, taskIds) =>
       Promise.resolve(
         taskIds
@@ -256,6 +264,87 @@ describe('Tasks store', () => {
       )
       expect(tasksApi.unassignPersonFromTasks).not.toHaveBeenCalled()
       expect(commit).not.toHaveBeenCalled()
+    })
+
+    describe('changeSelectedTaskStatus', () => {
+      const context = () => ({
+        commit: vi.fn(),
+        rootGetters: { currentProduction: { id: 'production-1' } },
+        state: {
+          selectedTasks: new Map([
+            ['task-1', true],
+            ['task-2', true]
+          ]),
+          taskMap: new Map([
+            ['task-1', { id: 'task-1', task_status_id: 'status-wip' }],
+            ['task-2', { id: 'task-2', task_status_id: 'status-retake' }]
+          ])
+        }
+      })
+      const sentComments = () =>
+        tasksApi.commentTasks.mock.calls.flatMap(([, comments]) => comments)
+
+      test('leaves out the tasks already on the chosen status', async () => {
+        await tasksStore.actions.changeSelectedTaskStatus(context(), {
+          taskStatusId: 'status-retake',
+          comment: ''
+        })
+
+        expect(sentComments()).toEqual([
+          {
+            object_id: 'task-1',
+            task_status_id: 'status-retake',
+            comment: '',
+            checklist: []
+          }
+        ])
+      })
+
+      test('posts the comment on the tasks already on the chosen status', async () => {
+        await tasksStore.actions.changeSelectedTaskStatus(context(), {
+          taskStatusId: 'status-retake',
+          comment: 'Check the timing'
+        })
+
+        expect(sentComments().map(comment => comment.object_id)).toEqual([
+          'task-1',
+          'task-2'
+        ])
+      })
+
+      test('keeps the status of each task without a chosen one', async () => {
+        const { commit, rootGetters, state } = context()
+
+        await tasksStore.actions.changeSelectedTaskStatus(
+          { commit, rootGetters, state },
+          { taskStatusId: '', comment: 'Check the timing' }
+        )
+
+        expect(sentComments()).toEqual([
+          {
+            object_id: 'task-1',
+            task_status_id: 'status-wip',
+            comment: 'Check the timing',
+            checklist: []
+          },
+          {
+            object_id: 'task-2',
+            task_status_id: 'status-retake',
+            comment: 'Check the timing',
+            checklist: []
+          }
+        ])
+        expect(commit).toHaveBeenCalledTimes(2)
+      })
+
+      test('sends no task without a chosen status nor a comment', async () => {
+        await tasksStore.actions.changeSelectedTaskStatus(context(), {
+          taskStatusId: '',
+          comment: ''
+        })
+
+        expect(sentComments()).toEqual([])
+      })
     })
 
     test('changeSelectedPriorities updates the selection in one request', async () => {
