@@ -1488,20 +1488,31 @@ const toFrameNumber = value => {
   return Number.isNaN(frame) ? -1 : frame
 }
 
-// Handles describe the trim of the main preview: hide them on
-// sub-previews, whose timelines they don't apply to. Like in
-// PlaylistPlayer, unset handles fall back to the clip bounds so the
-// markers always show on shot movies and dragging them creates the trim.
+// The main preview shows the trim of the shot. The extra previews of the
+// revision have timelines of their own, so each one keeps its own trim on
+// its preview file. Like in PlaylistPlayer, unset handles fall back to the
+// clip bounds so the markers always show on shot movies and dragging them
+// creates the trim.
+const isExtraPreview = computed(() => currentIndex.value > 1)
+
+const getCurrentTrim = () => {
+  const shot = getTrimmedShot()
+  if (!shot) return null
+  if (isExtraPreview.value) {
+    return currentPreview.value?.id ? currentPreview.value : null
+  }
+  return shot.data || {}
+}
+
 const resetHandles = () => {
-  const shot = currentIndex.value === 1 ? getTrimmedShot() : null
-  if (!shot) {
+  const trim = getCurrentTrim()
+  if (!trim) {
     handleIn.value = -1
     handleOut.value = -1
     return
   }
-  const data = shot.data || {}
-  const inFrame = toFrameNumber(data.handle_in)
-  const outFrame = toFrameNumber(data.handle_out)
+  const inFrame = toFrameNumber(trim.handle_in)
+  const outFrame = toFrameNumber(trim.handle_out)
   handleIn.value = Math.max(inFrame, 0)
   handleOut.value = outFrame > 0 ? outFrame : nbFrames.value
 }
@@ -1509,7 +1520,13 @@ const resetHandles = () => {
 // Only the moved handle is saved: the other one shows either the clip
 // bound of the revision on screen, or a trim set on another revision.
 const saveHandles = handles => {
-  saveTrimmedShot(handles).catch(err => {
+  const save = isExtraPreview.value
+    ? store.dispatch('updatePreviewTrim', {
+        preview: currentPreview.value,
+        trim: handles
+      })
+    : saveTrimmedShot(handles)
+  save.catch(err => {
     console.error(err)
     resetHandles()
   })
@@ -2574,7 +2591,10 @@ watch(
     () => props.task,
     currentIndex,
     nbFrames,
-    () => store.getters.isShotsLoading
+    () => store.getters.isShotsLoading,
+    // An extra preview's trim, saved here or by another user.
+    () => currentPreview.value?.handle_in,
+    () => currentPreview.value?.handle_out
   ],
   () => resetHandles(),
   { immediate: true }

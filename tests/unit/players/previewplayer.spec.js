@@ -579,6 +579,79 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  // An extra preview of the revision has a timeline of its own: it keeps
+  // its own trim on its preview file, the shot trim stays on the main one.
+  describe('extra preview trim handles', () => {
+    const extraPreview = {
+      ...moviePreview,
+      id: 'preview-extra',
+      position: 2,
+      duration: 4,
+      handle_in: 10,
+      handle_out: 80
+    }
+
+    const mountOnExtra = async ({ extra = extraPreview, canEdit = true } = {}) => {
+      wrapper = mountPlayer({
+        props: { previews: [moviePreview, extra], readOnly: false },
+        getterOverrides: {
+          canEditShotTrim: () => () => canEdit,
+          shotMap: () =>
+            new Map([
+              [
+                task.entity_id,
+                { id: task.entity_id, data: { handle_in: 3, handle_out: 200 } }
+              ]
+            ])
+        }
+      })
+      await nextTick()
+      wrapper.findComponent({ name: 'BrowsingBar' }).vm.$emit('next-clicked')
+      await nextTick()
+    }
+
+    const progress = () => wrapper.findComponent({ name: 'VideoProgress' })
+    const dispatched = action =>
+      wrapper.vm.$store.dispatch.mock.calls.filter(([a]) => a === action)
+    const dragHandle = (event, frameNumber) =>
+      progress().vm.$emit(event, { frameNumber, save: true })
+
+    it('shows the trim of the extra preview, not the one of the shot', async () => {
+      await mountOnExtra()
+      expect(progress().vm.$attrs['handle-in']).toBe(10)
+      expect(progress().vm.$attrs['handle-out']).toBe(80)
+    })
+
+    it('falls back to the clip bounds when the extra preview has no trim', async () => {
+      await mountOnExtra({ extra: { ...extraPreview, handle_in: null, handle_out: null } })
+      expect(progress().vm.$attrs['handle-in']).toBe(0)
+      expect(progress().vm.$attrs['handle-out']).toBe(100)
+    })
+
+    it('saves a moved handle on the preview file, not on the shot', async () => {
+      await mountOnExtra()
+      dragHandle('handle-in-changed', 20)
+      expect(dispatched('editShot')).toHaveLength(0)
+      const [[, payload]] = dispatched('updatePreviewTrim')
+      expect(payload.preview.id).toBe('preview-extra')
+      expect(payload.trim).toEqual({ handle_in: 20 })
+    })
+
+    it('clears the end trim when its handle goes back to the clip end', async () => {
+      await mountOnExtra()
+      dragHandle('handle-out-changed', 100)
+      const [[, payload]] = dispatched('updatePreviewTrim')
+      expect(payload.trim).toEqual({ handle_out: null })
+    })
+
+    it('keeps the handles frozen for users who cannot edit the trim', async () => {
+      await mountOnExtra({ canEdit: false })
+      dragHandle('handle-in-changed', 20)
+      expect(dispatched('updatePreviewTrim')).toHaveLength(0)
+      expect(progress().vm.$attrs['handle-in']).toBe(10)
+    })
+  })
+
   // Like the playlists, by a frame of the production, up to its last frame.
   describe('sound keys', () => {
     const soundPreview = { ...preview, id: 'preview-sound', extension: 'mp3' }

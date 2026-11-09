@@ -306,6 +306,12 @@ export default {
     return client.pdel(path)
   },
 
+  // Only the sent keys change, null clears a handle.
+  updatePreviewTrim(previewId, trim) {
+    const path = `/api/actions/preview-files/${previewId}/update-trim`
+    return client.pput(path, trim)
+  },
+
   updateRevisionPreviewPosition(previewId, position) {
     const path = `/api/actions/preview-files/${previewId}/update-position`
     return client.pput(path, { position: position + 1 })
