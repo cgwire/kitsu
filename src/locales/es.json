@@ -1832,6 +1832,7 @@
       "change_priority_to": "Nueva prioridad:",
       "change_task_status": "Cambiar estado de la tarea seleccionada | Cambiar estado de las {nbSelectedTasks} tareas seleccionadas",
       "change_task_status_error": "Se produjo un error al actualizar la tarea seleccionada. | Se produjo un error al actualizar las {count} tareas seleccionadas: es posible que algunas hayan cambiado. Compruébelas antes de volver a intentarlo.",
+      "confirm_change_task_status": "¿Cambiar el estado de la tarea seleccionada a {status}? | ¿Cambiar el estado de las {count} tareas seleccionadas a {status}?",
       "due_date": "Estado de la fecha de vencimiento",
       "due_after_today": "Vencimiento después de hoy",
       "due_before_today": "Vencimiento antes de hoy",

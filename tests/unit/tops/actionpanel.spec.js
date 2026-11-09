@@ -27,6 +27,7 @@ vi.mock('@/components/modals/ViewPlaylistModal.vue', async () => {
   }
 })
 
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import ActionPanel from '@/components/tops/ActionPanel.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
@@ -148,6 +149,7 @@ const mountPanel = async (
       selectedTasks: state => state.selectedTasks,
       taskMap: () => new Map(),
       taskStatusForCurrentUser: () => statuses,
+      taskStatusMap: () => new Map(statuses.map(status => [status.id, status])),
       taskTypeMap: () => new Map(),
       user: () => ({ id: 'user-1', departments: [] })
     }
@@ -541,6 +543,14 @@ describe('ActionPanel, status change', () => {
   const confirmButton = wrapper => wrapper.find('.action-bar .confirm-button')
   const barError = wrapper => wrapper.find('.action-bar p.is-danger')
   const commentField = wrapper => wrapper.find('.action-bar textarea')
+  const modal = wrapper => wrapper.findComponent(ConfirmModal)
+  const pressCtrlEnter = wrapper =>
+    commentField(wrapper).trigger('keyup.ctrl.enter')
+
+  const statusChanges = store =>
+    store.dispatch.mock.calls
+      .filter(([action]) => action === 'changeSelectedTaskStatus')
+      .map(([, payload]) => payload)
 
   const refusal = () => {
     const err = new Error('Refused')
@@ -622,6 +632,172 @@ describe('ActionPanel, status change', () => {
       expect(errorHandler.mock.calls[0][0]).toBe(bug)
       expect(barError(wrapper).exists()).toBe(true)
       expect(confirmButton(wrapper).classes()).not.toContain('is-loading')
+    })
+
+    test('changes the task without asking', async () => {
+      const { store, wrapper } = await mountOnOneTask()
+      await chooseStatus(wrapper, 'status-retake')
+
+      await confirmButton(wrapper).trigger('click')
+      await flushPromises()
+
+      expect(modal(wrapper).props('active')).toBe(false)
+      expect(statusChanges(store)).toEqual([
+        { taskStatusId: 'status-retake', comment: '' }
+      ])
+    })
+
+    test('sends the change once on a key pressed twice', async () => {
+      const { store, wrapper } = await mountOnOneTask()
+      await chooseStatus(wrapper, 'status-retake')
+      await commentField(wrapper).setValue('Check the timing')
+      let finish = null
+      store.dispatch.mockReturnValueOnce(
+        new Promise(resolve => {
+          finish = resolve
+        })
+      )
+
+      await pressCtrlEnter(wrapper)
+      await pressCtrlEnter(wrapper)
+      finish()
+      await flushPromises()
+
+      expect(statusChanges(store)).toHaveLength(1)
+    })
+  })
+
+  describe('with several tasks', () => {
+    test('asks before changing them', async () => {
+      const { store, wrapper } = await mountOnShots()
+      await chooseStatus(wrapper, 'status-retake')
+
+      await confirmButton(wrapper).trigger('click')
+
+      expect(modal(wrapper).props('active')).toBe(true)
+      expect(statusChanges(store)).toEqual([])
+    })
+
+    test.each(['ctrl', 'meta'])('asks on %s+Enter', async modifier => {
+      const { store, wrapper } = await mountOnShots()
+      await chooseStatus(wrapper, 'status-retake')
+
+      await commentField(wrapper).trigger(`keyup.${modifier}.enter`)
+
+      expect(modal(wrapper).props('active')).toBe(true)
+      expect(statusChanges(store)).toEqual([])
+    })
+
+    test('changes them once confirmed', async () => {
+      const { store, wrapper } = await mountOnShots()
+      await chooseStatus(wrapper, 'status-retake')
+      await commentField(wrapper).setValue('Check the timing')
+      await confirmButton(wrapper).trigger('click')
+
+      modal(wrapper).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(statusChanges(store)).toEqual([
+        { taskStatusId: 'status-retake', comment: 'Check the timing' }
+      ])
+      expect(modal(wrapper).props('active')).toBe(false)
+      expect(commentField(wrapper).element.value).toBe('')
+    })
+
+    test('shows the change running in the modal', async () => {
+      const { store, wrapper } = await mountOnShots()
+      await chooseStatus(wrapper, 'status-retake')
+      let finish = null
+      store.dispatch.mockReturnValueOnce(
+        new Promise(resolve => {
+          finish = resolve
+        })
+      )
+      await confirmButton(wrapper).trigger('click')
+
+      modal(wrapper).vm.$emit('confirm')
+      await flushPromises()
+      expect(modal(wrapper).props('isLoading')).toBe(true)
+
+      finish()
+      await flushPromises()
+      expect(modal(wrapper).props('isLoading')).toBe(false)
+    })
+
+    test('stays open on a cancel while the change runs', async () => {
+      const { store, wrapper } = await mountOnShots()
+      await chooseStatus(wrapper, 'status-retake')
+      let finish = null
+      store.dispatch.mockReturnValueOnce(
+        new Promise(resolve => {
+          finish = resolve
+        })
+      )
+      await confirmButton(wrapper).trigger('click')
+      modal(wrapper).vm.$emit('confirm')
+      await flushPromises()
+
+      modal(wrapper).vm.$emit('cancel')
+      await flushPromises()
+
+      expect(modal(wrapper).props('active')).toBe(true)
+
+      finish()
+      await flushPromises()
+
+      expect(modal(wrapper).props('active')).toBe(false)
+    })
+
+    test('changes nothing on a cancel, and keeps what was typed', async () => {
+      const { store, wrapper } = await mountOnShots()
+      await chooseStatus(wrapper, 'status-retake')
+      await commentField(wrapper).setValue('Check the timing')
+      await confirmButton(wrapper).trigger('click')
+
+      modal(wrapper).vm.$emit('cancel')
+      await flushPromises()
+
+      expect(modal(wrapper).props('active')).toBe(false)
+      expect(statusChanges(store)).toEqual([])
+      expect(commentField(wrapper).element.value).toBe('Check the timing')
+      expect(
+        wrapper.findComponent(ComboboxStatus).props('modelValue')
+      ).toBe('status-retake')
+    })
+
+    test('keeps the modal open on a failure', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { store, wrapper } = await mountOnShots()
+      store.dispatch.mockRejectedValueOnce(refusal())
+      await chooseStatus(wrapper, 'status-retake')
+      await commentField(wrapper).setValue('Check the timing')
+      await confirmButton(wrapper).trigger('click')
+
+      modal(wrapper).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(modal(wrapper).props('active')).toBe(true)
+      expect(modal(wrapper).props('isError')).toBe(true)
+      expect(modal(wrapper).props('isLoading')).toBe(false)
+      expect(commentField(wrapper).element.value).toBe('Check the timing')
+    })
+
+    test('reopens without the past failure', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { store, wrapper } = await mountOnShots()
+      store.dispatch.mockRejectedValueOnce(refusal())
+      await chooseStatus(wrapper, 'status-retake')
+      await confirmButton(wrapper).trigger('click')
+      modal(wrapper).vm.$emit('confirm')
+      await flushPromises()
+      modal(wrapper).vm.$emit('cancel')
+      await flushPromises()
+      expect(barError(wrapper).exists()).toBe(true)
+
+      await confirmButton(wrapper).trigger('click')
+
+      expect(modal(wrapper).props('active')).toBe(true)
+      expect(modal(wrapper).props('isError')).toBe(false)
     })
   })
 })

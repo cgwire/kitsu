@@ -1832,6 +1832,7 @@
       "change_priority_to": "新的优先级：",
       "change_task_status": "更改所选任务的状态 | 更改所选 {nbSelectedTasks} 个任务的状态",
       "change_task_status_error": "更新所选任务时出错。 | 更新所选 {count} 个任务时出错：部分任务可能已更改。请先检查，然后重试。",
+      "confirm_change_task_status": "要将所选任务的状态更改为 {status} 吗？ | 要将所选 {count} 个任务的状态更改为 {status} 吗？",
       "due_date": "截止日期的状态",
       "due_after_today": "今天后到期",
       "due_before_today": "今天前到期",

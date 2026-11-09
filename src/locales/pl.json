@@ -2190,6 +2190,7 @@
       "change_priority_to": "Nowy priorytet:",
       "change_task_status": "Zmień status wybranego zadania | Zmień status wybranych zadań ({nbSelectedTasks})",
       "change_task_status_error": "Wystąpił błąd podczas aktualizacji wybranego zadania. | Wystąpił błąd podczas aktualizacji wybranych zadań ({count}): niektóre mogły już zostać zmienione. Sprawdź je przed ponowną próbą.",
+      "confirm_change_task_status": "Zmienić status wybranego zadania na {status}? | Zmienić status wybranych zadań ({count}) na {status}?",
       "clear_all_assignations": "usuń wszystkie przypisania",
       "clear_assignations": "usuń przypisania z zaznaczenia",
       "clear_own_assignations": "usuń swoje przypisania",

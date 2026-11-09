@@ -889,6 +889,18 @@
       </div>
     </div>
 
+    <confirm-modal
+      :active="modals.statusChange"
+      :error-text="
+        $t('tasks.change_task_status_error', { count: nbSelectedTasks })
+      "
+      :is-error="errors.changeStatus"
+      :is-loading="loading.changeStatus"
+      :text="statusChangeText"
+      @cancel="cancelStatusChange"
+      @confirm="runTaskStatusChange"
+    />
+
     <build-filter-modal
       :active="modals.buildFilter"
       @confirm="confirmBuildFilter"
@@ -941,6 +953,7 @@ import { isFreeEscape } from '@/lib/keyboard'
 import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import DeleteEntities from '@/components/tops/actions/DeleteEntities.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxModel from '@/components/widgets/ComboboxModel.vue'
@@ -1001,7 +1014,8 @@ const taskStatusId = ref('')
 
 const modals = reactive({
   buildFilter: false,
-  playlist: false
+  playlist: false,
+  statusChange: false
 })
 
 const loading = reactive({
@@ -1054,6 +1068,7 @@ const selectedEdits = computed(() => store.getters.selectedEdits)
 const selectedShots = computed(() => store.getters.selectedShots)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const taskMap = computed(() => store.getters.taskMap)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskStatusForCurrentUser = computed(
   () => store.getters.taskStatusForCurrentUser
 )
@@ -1412,6 +1427,13 @@ const availableBars = computed(() => {
   ])
 })
 
+const statusChangeText = computed(() =>
+  t('tasks.confirm_change_task_status', {
+    count: nbSelectedTasks.value,
+    status: taskStatusMap.value.get(taskStatusId.value)?.name ?? ''
+  })
+)
+
 const storagePrefix = computed(() => {
   if (isCurrentViewTaskType.value) return 'tasks-'
   if (isCurrentViewConcept.value) return 'concepts-'
@@ -1422,11 +1444,13 @@ const storagePrefix = computed(() => {
 // Functions
 // --------------------------------------------------------------------------
 
-const confirmTaskStatusChange = async () => {
-  if (!taskStatusId.value) {
-    taskStatusId.value = availableTaskStatuses.value[0]?.id ?? ''
-  }
-  if (!taskStatusId.value) return
+// A change once sent cannot be called back: closing the modal now would read as
+// a cancel.
+const cancelStatusChange = () => {
+  if (!loading.changeStatus) modals.statusChange = false
+}
+
+const runTaskStatusChange = async () => {
   loading.changeStatus = true
   errors.changeStatus = false
   try {
@@ -1435,11 +1459,27 @@ const confirmTaskStatusChange = async () => {
       comment: statusComment.value
     })
     statusComment.value = ''
+    modals.statusChange = false
   } catch (err) {
     errors.changeStatus = true
     logRequestFailure(err)
   } finally {
     loading.changeStatus = false
+  }
+}
+
+// The loading look only stops the mouse: Ctrl+Enter still gets here.
+const confirmTaskStatusChange = async () => {
+  if (loading.changeStatus) return
+  if (!taskStatusId.value) {
+    taskStatusId.value = availableTaskStatuses.value[0]?.id ?? ''
+  }
+  if (!taskStatusId.value) return
+  if (nbSelectedTasks.value > 1) {
+    errors.changeStatus = false
+    modals.statusChange = true
+  } else {
+    await runTaskStatusChange()
   }
 }
 

@@ -2289,6 +2289,7 @@ export default {
     clear_own_assignations: 'clear your assignments',
     client_comments_copied: 'Comments created: {nbCopied}. Tasks without client comment: {nbSkipped}.',
     comment_image: 'Attach files',
+    confirm_change_task_status: 'Change the status of the selected task to {status}? | Change the status of the {count} selected tasks to {status}?',
     copy_client_comments: 'Copy the last client comment to the selected task | Copy the last client comment to the {nbSelectedTasks} selected tasks',
     copy_client_comments_error: 'An error occurred while copying the client comments.',
     copy_client_comments_prefix: 'Prefix (optional), e.g. Client feedback:',

@@ -1832,6 +1832,7 @@
       "change_priority_to": "新的優先順序：",
       "change_task_status": "變更選取任務的狀態 | 變更選取的 {nbSelectedTasks} 個任務的狀態",
       "change_task_status_error": "更新選取的任務時發生錯誤。 | 更新選取的 {count} 個任務時發生錯誤：部分任務可能已變更。請先檢查再重試。",
+      "confirm_change_task_status": "要將選取任務的狀態變更為 {status} 嗎？ | 要將選取的 {count} 個任務的狀態變更為 {status} 嗎？",
       "due_date": "到期日狀態",
       "due_after_today": "今天之後到期",
       "due_before_today": "今天之前到期",

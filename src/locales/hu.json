@@ -1826,6 +1826,7 @@
       "change_status": "Hozzászólás küldése",
       "change_task_status": "Állapot megváltoztatása a kijelölt feladaton | Állapot megváltoztatása a(z) {nbSelectedTasks} kijelölt feladaton",
       "change_task_status_error": "Hiba történt a kijelölt feladat frissítése közben. | Hiba történt a(z) {count} kijelölt feladat frissítése közben: némelyik már megváltozhatott. Ellenőrizd őket, mielőtt újra próbálkoznál.",
+      "confirm_change_task_status": "Megváltoztatod a kijelölt feladat állapotát erre: {status}? | Megváltoztatod a(z) {count} kijelölt feladat állapotát erre: {status}?",
       "clear_all_assignations": "összes kiosztás megszüntetése",
       "clear_own_assignations": "saját kiosztásaid törlése",
       "combobox_departments": {

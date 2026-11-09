@@ -1832,6 +1832,7 @@
       "change_priority_to": "Nouvelle priorité :",
       "change_task_status": "Changer le statut de la tâche sélectionnée | Changer le statut des {nbSelectedTasks} tâches sélectionnées",
       "change_task_status_error": "Une erreur est survenue pendant la mise à jour de la tâche sélectionnée. | Une erreur est survenue pendant la mise à jour des {count} tâches sélectionnées : certaines ont peut-être changé. Vérifiez-les avant de réessayer.",
+      "confirm_change_task_status": "Changer le statut de la tâche sélectionnée en {status} ? | Changer le statut des {count} tâches sélectionnées en {status} ?",
       "due_date": "État de la date de livraison",
       "due_after_today": "Tâches dues après aujourd'hui",
       "due_before_today": "Tâches dues avant aujourd'hui",
