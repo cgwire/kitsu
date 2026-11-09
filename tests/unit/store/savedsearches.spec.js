@@ -375,6 +375,57 @@ test('saves a search of a task type with its entity type', async () => {
   )
 })
 
+// Zou ignores the department asked by someone who can no longer share.
+describe('what Zou answers to an edit', () => {
+  const rows = {
+    filter: { id: 'f1', name: 'wip', department_id: 'animation' },
+    group: { id: 'g1', name: 'Mine', department_id: 'animation' }
+  }
+  const buildSavedStore = () => {
+    const filter = {
+      ...rows.filter,
+      search_filter_group_id: 'g1',
+      is_shared: true
+    }
+    const group = { ...rows.group, is_shared: true }
+    userStore.state.userFilters = { shot: { p1: [filter] } }
+    userStore.state.userFilterGroups = { shot: { p1: [group] } }
+    return buildStore({})
+  }
+
+  test('wins over the search sent', async () => {
+    const store = buildSavedStore()
+    client.pput.mockResolvedValueOnce({ ...rows.filter, name: 'mine' })
+
+    await store.dispatch('updateSearchFilter', {
+      id: 'f1',
+      name: 'mine',
+      department_id: null
+    })
+
+    expect(store.getters.userFilters.shot.p1[0]).toMatchObject({
+      name: 'mine',
+      department_id: 'animation'
+    })
+  })
+
+  test('wins over the group sent, for its searches too', async () => {
+    const store = buildSavedStore()
+    client.pput.mockResolvedValueOnce({ ...rows.group, is_shared: true })
+
+    await store.dispatch('updateSearchFilterGroup', {
+      id: 'g1',
+      is_shared: true,
+      department_id: null
+    })
+
+    expect(store.getters.userFilterGroups.shot.p1[0].department_id).toBe(
+      'animation'
+    )
+    expect(store.getters.userFilters.shot.p1[0].department_id).toBe('animation')
+  })
+})
+
 const groupLists = [
   {
     name: 'Shots',

@@ -479,13 +479,13 @@ const actions = {
   },
 
   async updateSearchFilterGroup({ commit }, searchFilterGroup) {
-    await peopleApi.updateFilterGroup(searchFilterGroup)
-    commit(UPDATE_USER_FILTER_GROUP, searchFilterGroup)
+    const saved = await peopleApi.updateFilterGroup(searchFilterGroup)
+    commit(UPDATE_USER_FILTER_GROUP, { ...searchFilterGroup, ...saved })
   },
 
   async updateSearchFilter({ commit }, searchFilter) {
-    await peopleApi.updateFilter(searchFilter)
-    commit(UPDATE_USER_FILTER, searchFilter)
+    const saved = await peopleApi.updateFilter(searchFilter)
+    commit(UPDATE_USER_FILTER, { ...searchFilter, ...saved })
   },
 
   async loadUserSearchFilters({ commit }) {
@@ -880,12 +880,16 @@ const mutations = {
           f => f.id === userFilterGroup.id
         )
         if (filterGroup) {
+          const { department_id: formerDepartmentId } = filterGroup
           Object.assign(filterGroup, userFilterGroup)
-          // update the shared status of filters in group: a production can
-          // hold a group before any search of its list
+          // update the filters in group, as Zou does: a production can hold a
+          // group before any search of its list
           state.userFilters?.[typeName]?.[projectId]?.forEach(filter => {
             if (filter.search_filter_group_id === userFilterGroup.id) {
               filter.is_shared = userFilterGroup.is_shared
+              if (filter.department_id === formerDepartmentId) {
+                filter.department_id = filterGroup.department_id
+              }
             }
           })
         }

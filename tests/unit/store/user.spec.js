@@ -393,6 +393,72 @@ describe('User store', () => {
       expect(search.is_shared).toBe(false)
     })
 
+    // As in Zou: a search left behind would leave its group empty for those
+    // the group reaches now.
+    describe('UPDATE_USER_FILTER_GROUP, departments of the searches', () => {
+      const buildSearch = fields => ({
+        id: 'filter-1',
+        is_shared: true,
+        search_filter_group_id: 'group-1',
+        department_id: 'animation',
+        ...fields
+      })
+      const updateGroup = (search, fields) => {
+        const group = {
+          id: 'group-1',
+          is_shared: true,
+          department_id: 'animation'
+        }
+        store.mutations.UPDATE_USER_FILTER_GROUP(
+          {
+            userFilters: { shot: { 'production-1': [search] } },
+            userFilterGroups: { shot: { 'production-1': [group] } }
+          },
+          { id: 'group-1', is_shared: true, ...fields }
+        )
+      }
+
+      test('moves a search on the former department of its group', () => {
+        const search = buildSearch()
+
+        updateGroup(search, { department_id: 'modeling' })
+
+        expect(search.department_id).toBe('modeling')
+      })
+
+      test('takes a search out of the department with its group', () => {
+        const search = buildSearch()
+
+        updateGroup(search, { department_id: null })
+
+        expect(search.department_id).toBeNull()
+      })
+
+      test('leaves a search on another department', () => {
+        const search = buildSearch({ department_id: 'layout' })
+
+        updateGroup(search, { department_id: null })
+
+        expect(search.department_id).toBe('layout')
+      })
+
+      test('leaves a search of another group', () => {
+        const search = buildSearch({ search_filter_group_id: 'group-2' })
+
+        updateGroup(search, { department_id: null })
+
+        expect(search.department_id).toBe('animation')
+      })
+
+      test('leaves a search when the group keeps its department', () => {
+        const search = buildSearch()
+
+        updateGroup(search, { name: 'Ours' })
+
+        expect(search.department_id).toBe('animation')
+      })
+    })
+
     // NEW_TASK_COMMENT_END no longer rebuilds cache.doneIndex. That rebuild
     // is dead only because the done list comes from its own fetch: the same
     // task sits in both lists as two distinct objects, so commenting the todo
