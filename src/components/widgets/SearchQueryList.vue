@@ -530,7 +530,7 @@ onMounted(() => {
 })
 
 watch(
-  () => props.queries.length,
+  () => props.queries.map(query => query.search_query),
   () => {
     nextTick(() => {
       setQueryPaths()

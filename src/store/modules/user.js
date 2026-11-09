@@ -149,6 +149,25 @@ const removeFromFilters = (filters, listType, entry) => {
   })
 }
 
+// A list keeps the rows of its last load until the next one, which a page with
+// its data in cache does not make: a new context updates these rows rather than
+// replacing them, or the list would miss the later edits.
+const reuseRows = (previousLists, lists) => {
+  const listsOf = filters =>
+    Object.values(filters).flatMap(projectLists => Object.values(projectLists))
+  const rows = new Map(
+    listsOf(previousLists)
+      .flat()
+      .map(row => [row.id, row])
+  )
+  listsOf(lists).forEach(list => {
+    list.forEach((row, index) => {
+      if (rows.has(row.id)) list[index] = Object.assign(rows.get(row.id), row)
+    })
+  })
+  return lists
+}
+
 const initialState = {
   user: null,
   isAuthenticated: false,
@@ -835,7 +854,7 @@ const mutations = {
 
   [LOAD_USER_FILTERS_ERROR](state) {},
   [LOAD_USER_FILTERS_END](state, userFilters) {
-    state.userFilters = userFilters
+    state.userFilters = reuseRows(state.userFilters, userFilters)
   },
   [UPDATE_USER_FILTER](state, userFilter) {
     Object.keys(state.userFilters).forEach(typeName => {
@@ -851,7 +870,7 @@ const mutations = {
 
   [LOAD_USER_FILTER_GROUPS_ERROR](state) {},
   [LOAD_USER_FILTER_GROUPS_END](state, userFilterGroups) {
-    state.userFilterGroups = userFilterGroups
+    state.userFilterGroups = reuseRows(state.userFilterGroups, userFilterGroups)
   },
   [UPDATE_USER_FILTER_GROUP](state, userFilterGroup) {
     Object.keys(state.userFilterGroups).forEach(typeName => {

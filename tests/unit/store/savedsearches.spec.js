@@ -30,6 +30,8 @@ import {
   LOAD_PERSON_TASKS_END,
   LOAD_SEQUENCES_END,
   LOAD_SHOTS_END,
+  LOAD_USER_FILTER_GROUPS_END,
+  LOAD_USER_FILTERS_END,
   SET_EPISODES_WITH_TASKS,
   USER_LOAD_TODOS_END
 } from '@/store/mutation-types'
@@ -319,6 +321,41 @@ describe.each(lists)(
 
       expect(store.getters[queries].map(({ id }) => id)).toEqual(['f1'])
     })
+
+    // The settings pages reload the context, and the list can outlive that:
+    // a page with its rows in cache does not load them again on its return.
+    describe('through a reload of the context', () => {
+      const reloadContext = (store, name) =>
+        store.commit(LOAD_USER_FILTERS_END, {
+          [listType]: { [key]: [savedSearch('f1', name)] }
+        })
+
+      beforeEach(() => {
+        userStore.state.userFilters = {
+          [listType]: { [key]: [savedSearch('f1', 'wip')] }
+        }
+      })
+
+      test('follows a later edit', async () => {
+        const store = buildStore(modules)
+        load(store)
+        reloadContext(store, 'wip')
+        client.pput.mockResolvedValueOnce()
+
+        await store.dispatch('updateSearchFilter', { id: 'f1', name: 'mine' })
+
+        expect(names(store.getters[queries])).toEqual(['mine'])
+      })
+
+      test('takes the values of the reload', () => {
+        const store = buildStore(modules)
+        load(store)
+
+        reloadContext(store, 'renamed elsewhere')
+
+        expect(names(store.getters[queries])).toEqual(['renamed elsewhere'])
+      })
+    })
   }
 )
 
@@ -342,6 +379,7 @@ const groupLists = [
   {
     name: 'Shots',
     modules: { shots: shotsStore },
+    listType: 'shot',
     groups: 'shotSearchFilterGroups',
     save: (store, group) => store.dispatch('saveShotSearchFilterGroup', group),
     remove: (store, group) =>
@@ -351,6 +389,7 @@ const groupLists = [
   {
     name: 'Breakdown',
     modules: { breakdown: breakdownStore },
+    listType: 'breakdown',
     groups: 'breakdownSearchFilterGroups',
     save: (store, group) =>
       store.dispatch('saveBreakdownSearchFilterGroup', group),
@@ -362,13 +401,31 @@ const groupLists = [
 
 describe.each(groupLists)(
   '$name list, filter groups',
-  ({ groups, load, modules, remove, save }) => {
+  ({ groups, listType, load, modules, remove, save }) => {
     const group = {
       name: 'Mine',
       color: '#ff0000',
       is_shared: false,
       department_id: null
     }
+
+    test('follows a later edit through a reload of the context', async () => {
+      const rows = () => ({
+        [listType]: { [production.id]: [{ id: 'g1', ...group }] }
+      })
+      userStore.state.userFilterGroups = rows()
+      const store = buildStore(modules)
+      load(store)
+      store.commit(LOAD_USER_FILTER_GROUPS_END, rows())
+      client.pput.mockResolvedValueOnce()
+
+      await store.dispatch('updateSearchFilterGroup', {
+        id: 'g1',
+        name: 'Ours'
+      })
+
+      expect(names(store.getters[groups])).toEqual(['Ours'])
+    })
 
     test('keeps the first group of a production across a load', async () => {
       const store = buildStore(modules)

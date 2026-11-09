@@ -4,7 +4,7 @@ import {
   RouterLinkStub,
   shallowMount
 } from '@vue/test-utils'
-import { h, nextTick } from 'vue'
+import { h, nextTick, reactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
@@ -42,13 +42,14 @@ const mountList = async ({
   isClient = false,
   productionId,
   queries = [search],
-  throughRef = false
+  throughRef = false,
+  url = '/'
 } = {}) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: '/', component: { template: '<div />' } }]
   })
-  await router.push('/')
+  await router.push(url)
   const store = createStore({
     getters: {
       currentProduction: () => ({ id: 'production-1' }),
@@ -361,6 +362,92 @@ describe('SearchQueryList, additions', () => {
     await flushPromises()
 
     expect(saveTaskSearch.mock.calls[0][1].entity_type).toBe('Asset')
+  })
+})
+
+describe('SearchQueryList, links', () => {
+  const lastLink = wrapper =>
+    wrapper.findAllComponents(RouterLinkStub).at(-1).props('to')
+  const pageSearch = wrapper =>
+    wrapper.vm.$router.currentRoute.value.query.search
+
+  // The store edits a search in place, as UPDATE_USER_FILTER does: neither the
+  // number of searches nor the route changes.
+  const mountEditableList = async url => {
+    const queries = reactive([{ ...search, search_query: 'old' }])
+    const wrapper = await mountList({
+      queries,
+      url,
+      actions: {
+        updateSearchFilter: (_, searchFilter) => {
+          Object.assign(queries[0], searchFilter)
+        }
+      }
+    })
+    await flushPromises()
+    return wrapper
+  }
+  const editQuery = async (wrapper, searchQuery) => {
+    await wrapper
+      .find('.tag:not(.folder):not(.group) button.edit')
+      .trigger('click')
+    wrapper
+      .findComponent(EditSearchFilterModal)
+      .vm.$emit('confirm', { id: search.id, search_query: searchQuery })
+    await flushPromises()
+  }
+  const clickTag = async wrapper => {
+    await wrapper.find('.tag:not(.folder):not(.group)').trigger('click')
+    await flushPromises()
+  }
+
+  test('links a search to its query', async () => {
+    const wrapper = await mountEditableList('/')
+
+    expect(lastLink(wrapper).query.search).toBe('old')
+  })
+
+  test('links a search added to the list', async () => {
+    const queries = reactive([search])
+    const wrapper = await mountList({ queries })
+    await flushPromises()
+
+    queries.push({
+      ...search,
+      id: 'search-3',
+      name: 'zz',
+      search_query: 'added'
+    })
+    await flushPromises()
+
+    expect(lastLink(wrapper).query.search).toBe('added')
+  })
+
+  test('links an edited search to its new query', async () => {
+    const wrapper = await mountEditableList('/')
+
+    await editQuery(wrapper, 'new')
+
+    expect(lastLink(wrapper).query.search).toBe('new')
+  })
+
+  test('runs the new query of an edited search', async () => {
+    const wrapper = await mountEditableList('/?search=other')
+    await editQuery(wrapper, 'new')
+
+    await clickTag(wrapper)
+
+    expect(pageSearch(wrapper)).toBe('new')
+  })
+
+  // The old link leads to the page as it is: the click would do nothing.
+  test('runs the new query of a search edited on its old one', async () => {
+    const wrapper = await mountEditableList('/?search=old')
+    await editQuery(wrapper, 'new')
+
+    await clickTag(wrapper)
+
+    expect(pageSearch(wrapper)).toBe('new')
   })
 })
 
