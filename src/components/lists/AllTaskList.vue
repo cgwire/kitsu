@@ -154,6 +154,7 @@ import { useStore } from 'vuex'
 import { pauseEvent } from '@/composables/dom'
 import { useFormat } from '@/composables/format'
 import { isBehindModal } from '@/composables/modal'
+import { isCaretMoveOnMac } from '@/lib/keyboard'
 
 import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
@@ -242,6 +243,8 @@ const onKeyDown = event => {
       ? 1
       : 0
   if (delta === 0) return
+  // A field keeps the caret moves of macOS.
+  if (isCaretMoveOnMac(event)) return
   // A modal may be asking about the selection, which stays as it is. The key
   // stays caught: Alt+Left would leave the page.
   if (isBehindModal(document.body)) {

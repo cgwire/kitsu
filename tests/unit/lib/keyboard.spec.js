@@ -1,4 +1,6 @@
-import { isFreeEscape, isSearchShortcut } from '@/lib/keyboard'
+import { isCaretMoveOnMac, isFreeEscape, isSearchShortcut } from '@/lib/keyboard'
+
+import { onPlatform } from '../fixtures/platform'
 
 describe('lib/keyboard', () => {
   describe('isFreeEscape', () => {
@@ -178,6 +180,85 @@ describe('lib/keyboard', () => {
     it('ignores another letter typed on the physical F key', () => {
       // bépo types its e on the physical F key
       expect(shortcut({ key: 'e', code: 'KeyF' })).toBe(false)
+    })
+  })
+
+  describe('isCaretMoveOnMac', () => {
+    afterEach(() => {
+      document.body.innerHTML = ''
+    })
+
+    const element = html => {
+      document.body.innerHTML = html
+      return document.body.firstElementChild
+    }
+
+    // A keydown of Alt and Left by default, sent from the given element.
+    const keydownFrom = (target, init = {}) => {
+      const event = new KeyboardEvent('keydown', {
+        altKey: true,
+        key: 'ArrowLeft',
+        ...init
+      })
+      target.dispatchEvent(event)
+      return event
+    }
+
+    it('leaves Option and an arrow to a field holding text on macOS', () => {
+      onPlatform('MacIntel')
+      const input = element('<input type="text" value="Shot">')
+      const arrows = ['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown']
+
+      arrows.forEach(key => {
+        expect(isCaretMoveOnMac(keydownFrom(input, { key }))).toBe(true)
+      })
+      const textarea = element('<textarea>A draft</textarea>')
+      expect(isCaretMoveOnMac(keydownFrom(textarea))).toBe(true)
+    })
+
+    it('reads the arrow from its key code too', () => {
+      onPlatform('MacIntel')
+      const event = new KeyboardEvent('keydown', { altKey: true })
+      Object.defineProperty(event, 'keyCode', { value: 37 })
+      element('<input value="Shot">').dispatchEvent(event)
+
+      expect(isCaretMoveOnMac(event)).toBe(true)
+    })
+
+    it('leaves the key to the page anywhere else', () => {
+      onPlatform('Win32')
+      const field = element('<input value="Shot">')
+      expect(isCaretMoveOnMac(keydownFrom(field))).toBe(false)
+
+      onPlatform('MacIntel')
+      const input = element('<input value="Shot">')
+      expect(isCaretMoveOnMac(keydownFrom(input, { altKey: false }))).toBe(
+        false
+      )
+      expect(isCaretMoveOnMac(keydownFrom(input, { key: 'a' }))).toBe(false)
+      const checkbox = element('<input type="checkbox">')
+      expect(isCaretMoveOnMac(keydownFrom(checkbox))).toBe(false)
+      expect(isCaretMoveOnMac(keydownFrom(document.body))).toBe(false)
+    })
+
+    // An empty field has no caret to move: the list walks from it.
+    it('leaves the key to the page from an empty field', () => {
+      onPlatform('MacIntel')
+
+      expect(isCaretMoveOnMac(keydownFrom(element('<input>')))).toBe(false)
+      expect(isCaretMoveOnMac(keydownFrom(element('<textarea />')))).toBe(false)
+    })
+
+    it('leaves the key to an editable element holding text', () => {
+      onPlatform('MacIntel')
+      const editor = element('<div contenteditable="true">A draft</div>')
+      // jsdom has no isContentEditable: set it as a browser does.
+      Object.defineProperty(editor, 'isContentEditable', { value: true })
+
+      expect(isCaretMoveOnMac(keydownFrom(editor))).toBe(true)
+
+      editor.textContent = ''
+      expect(isCaretMoveOnMac(keydownFrom(editor))).toBe(false)
     })
   })
 })

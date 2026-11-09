@@ -3,6 +3,7 @@ import { useStore } from 'vuex'
 
 import { pauseEvent } from '@/composables/dom'
 import { isBehindModal } from '@/composables/modal'
+import { isCaretMoveOnMac } from '@/lib/keyboard'
 import { range } from '@/lib/time'
 
 /*
@@ -98,6 +99,10 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
       } else if ([39, 40].includes(event.keyCode)) {
         index = index + 1 >= list.length ? 0 : index + 1
       } else {
+        return
+      }
+      // A field out of the list keeps the caret moves of macOS.
+      if (isCaretMoveOnMac(event) && !body.value?.contains(event.target)) {
         return
       }
       // A modal may be asking about the selection, which stays as it is. The

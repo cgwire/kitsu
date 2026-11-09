@@ -14,6 +14,11 @@ import '@/lib/auth'
 import AllTaskList from '@/components/lists/AllTaskList.vue'
 
 import { openModalHost } from '../../fixtures/modal-host'
+import {
+  addTextField,
+  onPlatform,
+  pressAltArrow
+} from '../../fixtures/platform'
 import { trackTaskSelection } from '../../fixtures/task-selection'
 
 describe('lists/AllTaskList', () => {
@@ -69,5 +74,36 @@ describe('lists/AllTaskList', () => {
     expect(selection.selectedIds()).toEqual(['task-2'])
 
     wrapper.unmount()
+  })
+
+  const mountOnFirstTask = async () => {
+    const selection = trackTaskSelection()
+    const wrapper = mountList(selection)
+    onTestFinished(() => wrapper.unmount())
+    await wrapper.find('tbody tr.task-line').trigger('click')
+    return selection
+  }
+
+  // macOS moves the caret of the field by word on Option and an arrow.
+  test('leaves Option+Down to a field on macOS', async () => {
+    onPlatform('MacIntel')
+    const selection = await mountOnFirstTask()
+
+    const event = pressAltArrow(addTextField('textarea', 'A draft'), 40)
+    await nextTick()
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(selection.selectedIds()).toEqual(['task-1'])
+  })
+
+  // An empty field has no caret to move.
+  test('walks from an empty field on macOS', async () => {
+    onPlatform('MacIntel')
+    const selection = await mountOnFirstTask()
+
+    pressAltArrow(addTextField('textarea', ''), 40)
+    await nextTick()
+
+    expect(selection.selectedIds()).toEqual(['task-2'])
   })
 })
