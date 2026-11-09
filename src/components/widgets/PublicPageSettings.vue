@@ -10,7 +10,7 @@
         <option
           :key="language.value"
           :value="language.value"
-          v-for="language in languages"
+          v-for="language in sortedLanguages"
         >
           {{ language.native }}
         </option>
@@ -48,6 +48,12 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 import lang, { currentLanguage, languages } from '@/lib/lang'
+
+// Only the native names show here. A fixed collation keeps one order whatever
+// the language of the browser.
+const sortedLanguages = [...languages].sort((a, b) =>
+  a.native.localeCompare(b.native, 'en')
+)
 
 // Composables
 // --------------------------------------------------------------------------

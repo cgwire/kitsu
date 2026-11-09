@@ -78,16 +78,42 @@ describe('widgets/PublicPageSettings', () => {
       expect(wrapper.find('select').attributes('aria-label')).toBe('Language')
     })
 
-    test('lists the languages under their native names', () => {
+    test('lists the languages by native name', () => {
       wrapper = mountSettings()
 
       const options = wrapper.findAll('option')
+      const names = options.map(option => option.text())
 
-      expect(options.map(option => option.text())).toEqual(
-        languages.map(({ native }) => native)
-      )
+      expect(names).toEqual([
+        'Dansk',
+        'Deutsch',
+        'English',
+        'Español',
+        'Français',
+        'Italiano',
+        'Magyar',
+        'Nederlands',
+        'Polski',
+        'Português',
+        'Русский',
+        'فارسی',
+        '한국어',
+        '日本語',
+        '简体中文',
+        '繁體中文'
+      ])
       expect(options.map(option => option.element.value)).toEqual(
-        languages.map(({ value }) => value)
+        names.map(name => languages.find(({ native }) => native === name).value)
+      )
+    })
+
+    test('leaves the shared list by English name', () => {
+      wrapper = mountSettings()
+
+      const labels = languages.map(({ label }) => label)
+
+      expect(labels).toEqual(
+        [...labels].sort((a, b) => a.localeCompare(b, 'en'))
       )
     })
 
