@@ -129,7 +129,7 @@
                     :options="previewOptions"
                     is-preview
                     thin
-                    :model-value="previewOptions[currentPreviewIndex]?.value"
+                    :model-value="currentPreviewId"
                     @update:model-value="onPreviewChanged"
                   />
                 </div>
@@ -521,7 +521,7 @@ if (props.root) {
 const animOn = ref(false)
 const previewForms = ref([])
 const currentFrameRaw = ref(0)
-const currentPreviewIndex = ref(0)
+const pickedPreviewId = ref(null)
 const commentToEdit = ref(null)
 const commentToMove = ref(null)
 const failedActionCommentId = ref(null)
@@ -531,6 +531,7 @@ const taskComments = ref([])
 const taskPreviews = ref([])
 
 let currentExtraPreviewId = null
+let extraFileRevisionId = null
 // Extend-drag bookkeeping, read only inside event handlers
 let lastWidth = 0
 let lastWidthX = 0
@@ -764,8 +765,12 @@ const entityFrames = computed(() => {
   return shotMap.value.get(props.task.entity.id)?.nb_frames || 0
 })
 
+// Revisions come and go under the panel: a position in their list would point
+// at another one. Unless a revision is picked, the first one shows.
 const currentPreview = computed(
-  () => taskPreviews.value[currentPreviewIndex.value] ?? null
+  () =>
+    taskPreviews.value.find(({ id }) => id === pickedPreviewId.value) ??
+    taskPreviews.value[0]
 )
 
 const currentPreviewComment = computed(() =>
@@ -1035,15 +1040,16 @@ const clearPreviewFiles = () => {
 const createExtraPreview = forms => {
   errors.addExtraPreview = false
   loading.addExtraPreview = true
+  const previewId = extraFileRevisionId ?? currentPreviewId.value
   const comment = taskComments.value.find(comment =>
-    comment.previews.some(preview => preview.id === currentPreviewId.value)
+    comment.previews.some(preview => preview.id === previewId)
   )
   const taskId = props.task.id
   store
     .dispatch('addCommentExtraPreview', {
       taskId,
       commentId: comment?.id,
-      previewId: currentPreviewId.value,
+      previewId,
       forms
     })
     .then(() => {
@@ -1129,7 +1135,9 @@ const onAddPreviewClicked = () => {
   modals.addPreview = true
 }
 
+// The revisions may change behind the modal: the file must join this one.
 const onAddExtraPreview = () => {
+  extraFileRevisionId = currentPreviewId.value
   modals.addExtraPreview = true
 }
 
@@ -1159,10 +1167,10 @@ const onCloseExtraPreview = () => {
   modals.addExtraPreview = false
 }
 
+// Back on the first revision, the panel takes the next publications again.
 const onPreviewChanged = previewId => {
-  currentPreviewIndex.value = taskPreviews.value.findIndex(
-    p => p.id === previewId
-  )
+  pickedPreviewId.value =
+    previewId === taskPreviews.value[0]?.id ? null : previewId
 }
 
 const changeCurrentPreview = previewFile => onPreviewChanged(previewFile.id)
@@ -1352,7 +1360,8 @@ const confirmDeleteTaskPreview = () => {
     comment.previews.some(p => p.id === previewId)
   )
 
-  previewPlayerRef.value.displayFirst()
+  // A colleague may have deleted the only revision, and so the player.
+  previewPlayerRef.value?.displayFirst()
   store
     .dispatch('deleteTaskPreview', {
       taskId: props.task.id,
@@ -1748,7 +1757,8 @@ watch(
   () => props.task,
   () => {
     clearPreviewFiles()
-    currentPreviewIndex.value = 0
+    pickedPreviewId.value = null
+    extraFileRevisionId = null
     failedActionCommentId.value = null
     if (!props.silent) {
       loadTaskData()

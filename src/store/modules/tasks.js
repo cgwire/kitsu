@@ -158,6 +158,19 @@ const helpers = {
   // connection lost once the file left, Zou may still process the file.
   hasFailedForGood(err) {
     return err?.status ? err.status <= 500 : err?.isBodySent === false
+  },
+
+  // Zou deletes the files of a comment along with it, and so their revision.
+  // An entry keeps the id of its first file, which the trash may have taken
+  // and a reload dropped: the files it still holds name it too.
+  removeRevisionsOfFiles(state, taskId, files = []) {
+    if (!state.taskPreviews[taskId]) return
+    const fileIds = files.map(({ id }) => id)
+    state.taskPreviews[taskId] = state.taskPreviews[taskId].filter(
+      ({ id, previews }) =>
+        !fileIds.includes(id) &&
+        !previews.some(preview => fileIds.includes(preview.id))
+    )
   }
 }
 
@@ -167,21 +180,11 @@ const getters = {
   getTaskComments: state => id => state.taskComments[id] ?? [],
   getTaskPreviews: state => id => state.taskPreviews[id] ?? [],
 
-  // The previews of a task keep the revision of a comment deleted meanwhile,
-  // and its comments keep a file sent to the trash: a revision is taken when
-  // both still hold one of its files.
-  isTaskRevisionTaken: state => (taskId, revision) => {
-    const commentFileIds = new Set(
-      (state.taskComments[taskId] ?? []).flatMap(({ previews }) =>
-        (previews ?? []).map(({ id }) => id)
-      )
-    )
-    return (state.taskPreviews[taskId] ?? []).some(
-      preview =>
-        preview.revision === revision &&
-        preview.previews?.some(({ id }) => commentFileIds.has(id))
-    )
-  },
+  // The trash leaves the entry of a revision it emptied.
+  isTaskRevisionTaken: state => (taskId, revision) =>
+    (state.taskPreviews[taskId] ?? []).some(
+      preview => preview.revision === revision && preview.previews.length > 0
+    ),
 
   getTaskComment: state => (taskId, commentId) => {
     return state.taskComments[taskId]?.find(comment => comment.id === commentId)
@@ -1331,12 +1334,7 @@ const mutations = {
     comments = comments.filter(c => c.id !== commentId)
     state.taskComments[taskId] = comments
     if (oldComment) {
-      state.taskPreviews[taskId] = [...state.taskPreviews[taskId]].filter(
-        p =>
-          !(
-            oldComment.previews.length > 0 && oldComment.previews[0].id === p.id
-          )
-      )
+      helpers.removeRevisionsOfFiles(state, taskId, oldComment.previews)
     }
 
     if (oldCommentIndex === pinnedCount) {
@@ -1419,22 +1417,24 @@ const mutations = {
         p => p.revision === preview.revision
       )
 
-      if (existingPreview) {
+      if (existingPreview?.previews.length > 0) {
         const existingSubPreview = existingPreview.previews.find(
           p => p.id === newPreview.id
         )
         if (!existingSubPreview) {
           existingPreview.previews.push(newPreview)
         }
-        // The entry outlived its files, through the trash or a comment deleted
-        // meanwhile: this is the first file of the revision for its comment.
+        // A deletion the socket missed left the entry: this is the first file
+        // of the revision for its comment.
         if (comment && !comment.previews?.length) {
           comment.previews = [{ ...newPreview }]
         }
-      } else {
+      } else if (comment) {
+        // The entry the trash emptied names a file gone, as its old comment
+        // does: it must not stand for the new one.
         newPreview.previews = [{ ...newPreview }]
         state.taskPreviews[taskId] = [newPreview].concat(
-          state.taskPreviews[taskId]
+          state.taskPreviews[taskId].filter(p => p !== existingPreview)
         )
 
         comment.preview = newPreview
@@ -1451,11 +1451,7 @@ const mutations = {
         ({ id }) => id !== commentId
       )
     }
-    if (state.taskPreviews[taskId]) {
-      state.taskPreviews[taskId] = state.taskPreviews[taskId].filter(
-        ({ id }) => id !== previewId
-      )
-    }
+    helpers.removeRevisionsOfFiles(state, taskId, [{ id: previewId }])
   },
 
   [DELETE_PREVIEW_END](state, { taskId, previewId }) {
@@ -1777,6 +1773,7 @@ const mutations = {
     state.taskComments[task.id] = state.taskComments[task.id].filter(
       c => c.id !== comment.id
     )
+    helpers.removeRevisionsOfFiles(state, task.id, comment.previews)
   },
 
   [UPDATE_COMMENT_CHECKLIST](state, { comment, checklist }) {

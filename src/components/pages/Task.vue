@@ -122,7 +122,8 @@
                   class="preview-combo flexrow-item"
                   :options="previewOptions"
                   is-preview
-                  v-model="selectedPreviewId"
+                  :model-value="currentPreviewId"
+                  @update:model-value="selectedPreviewId = $event"
                 />
               </div>
               <div v-else>
@@ -577,6 +578,7 @@ const hookupPlaylistTaskIds = ref([])
 const addPreviewFormData = ref(null)
 const addExtraPreviewFormData = ref(null)
 const currentExtraPreviewId = ref(null)
+const extraFileRevisionId = ref(null)
 
 const taskLoading = ref({ isLoading: true, isError: false })
 
@@ -1366,7 +1368,6 @@ const confirmDeleteTaskComment = () => {
     .then(() => {
       loading.value.deleteComment = false
       reset()
-      if (isPreviews.value) resetPreview()
       modals.value.deleteComment = false
     })
     .catch(err => {
@@ -1440,21 +1441,24 @@ const selectFile = forms => {
 const createExtraPreview = forms => {
   errors.value.addExtraPreview = false
   loading.value.addExtraPreview = true
+  const previewId = extraFileRevisionId.value ?? currentPreviewId.value
   const comment = getCurrentTaskComments().find(item =>
-    item.previews.find(preview => preview.id === currentPreviewId.value)
+    item.previews.find(preview => preview.id === previewId)
   )
   const taskId = task.value.id
   store
     .dispatch('addCommentExtraPreview', {
       taskId,
       commentId: comment?.id,
-      previewId: currentPreviewId.value,
+      previewId,
       forms
     })
     .then(() => {
       loading.value.addExtraPreview = false
       modals.value.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
+      // A file may start over a revision the trash emptied meanwhile.
+      taskPreviews.value = getCurrentTaskPreviews()
       setTimeout(() => {
         // The page may have moved on to another task, with or without a
         // player.
@@ -1501,7 +1505,8 @@ const confirmDeleteTaskPreview = () => {
     item => item.previews.findIndex(p => p.id === previewId) >= 0
   )
 
-  previewPlayerRef.value.displayFirst()
+  // A colleague may have deleted the only revision, and so the player.
+  previewPlayerRef.value?.displayFirst()
   store
     .dispatch('deleteTaskPreview', {
       taskId: task.value.id,
@@ -1553,7 +1558,9 @@ const onPreviewAdded = eventData => {
   }
 }
 
+// The revisions may change behind the modal: the file must join this one.
 const onAddExtraPreviewClicked = () => {
+  extraFileRevisionId.value = currentPreviewId.value
   modals.value.addExtraPreview = true
 }
 
@@ -1864,6 +1871,7 @@ const socketEvents = {
 watch(route, () => {
   if (task.value && route.params.task_id !== task.value.id) {
     failedActionCommentId.value = null
+    extraFileRevisionId.value = null
     loadTaskData()
   }
   if (route.params.preview_id !== selectedPreviewId.value) {

@@ -1,4 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -18,12 +19,14 @@ import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import drafts from '@/lib/drafts'
 import i18n, { loadLocaleMessages } from '@/lib/i18n'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotStore from '@/store/modules/shots'
+import tasksStore from '@/store/modules/tasks'
 
 import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
@@ -2045,6 +2048,383 @@ describe('TaskInfo.vue', () => {
       )
       expect(consoleError).toHaveBeenCalledWith(error)
       expect(actionPanel.props('isSetFrameThumbnailLoading')).toBe(false)
+    })
+  })
+
+  // The revisions of a task change under the panel: the real mutations hold
+  // them here, since the order of their events decides what is left.
+  describe('revision shown', () => {
+    const { mutations } = tasksStore
+
+    const buildComment = (revision, previews) => ({
+      id: `comment-${revision}`,
+      person: { id: USER_ID, first_name: 'Ann', last_name: 'Lee' },
+      person_id: USER_ID,
+      previews: previews ?? [
+        {
+          id: `preview-${revision}`,
+          revision,
+          extension: 'png',
+          task_id: TASK_ID
+        }
+      ],
+      task_status: {}
+    })
+
+    const mountOnRevisions = async (revisions, stubs = {}) => {
+      const state = { taskComments: {}, taskMap: new Map(), taskPreviews: {} }
+      mutations.LOAD_TASK_COMMENTS_END(state, {
+        taskId: TASK_ID,
+        comments: revisions.map(revision => buildComment(revision))
+      })
+      const { wrapper, socket, store } = await mountPanel({
+        stubs,
+        getterOverrides: {
+          getTaskComment: () => (taskId, commentId) =>
+            state.taskComments[taskId]?.find(({ id }) => id === commentId),
+          getTaskComments: () => id => state.taskComments[id] ?? [],
+          getTaskPreviews: () => id => state.taskPreviews[id] ?? []
+        }
+      })
+      store.commit.mockImplementation((type, payload) => {
+        if (['ADD_PREVIEW_END', 'REMOVE_TASK_COMMENT'].includes(type)) {
+          mutations[type](state, payload)
+        }
+      })
+      const emitEvent = (event, data) => {
+        const [, handler] = socket.on.mock.calls.find(
+          ([name]) => name === event
+        )
+        handler(data)
+        return flushPromises()
+      }
+      return { state, store, wrapper, emitEvent }
+    }
+
+    const shownFiles = wrapper =>
+      wrapper
+        .findComponent(PreviewPlayer)
+        .props('previews')
+        .map(({ id }) => id)
+
+    const combobox = wrapper => wrapper.findComponent(ComboboxStyled)
+
+    const options = wrapper =>
+      combobox(wrapper)
+        .props('options')
+        .map(({ value }) => value)
+
+    const pick = async (wrapper, previewId) => {
+      combobox(wrapper).vm.$emit('update:model-value', previewId)
+      await flushPromises()
+    }
+
+    const deleteElsewhere = ({ emitEvent }, revision) =>
+      emitEvent('comment:delete', {
+        comment_id: `comment-${revision}`,
+        task_id: TASK_ID
+      })
+
+    // A comment and its first file, as the events bring them.
+    const publish = ({ state, emitEvent }, revision) => {
+      mutations.NEW_TASK_COMMENT_END(state, {
+        comment: buildComment(revision, []),
+        taskId: TASK_ID
+      })
+      return emitEvent('preview-file:add-file', {
+        task_id: TASK_ID,
+        comment_id: `comment-${revision}`,
+        preview_file_id: `preview-${revision}`,
+        revision,
+        extension: 'png',
+        status: 'ready'
+      })
+    }
+
+    it('shows the first revision of the list', async () => {
+      const { wrapper } = await mountOnRevisions([2, 1])
+
+      expect(shownFiles(wrapper)).toEqual(['preview-2'])
+      expect(combobox(wrapper).props('modelValue')).toBe('preview-2')
+    })
+
+    // The options go by number, the list by date of publication.
+    it('names the revision it shows when a lower number came last', async () => {
+      const { wrapper } = await mountOnRevisions([3, 5])
+
+      expect(shownFiles(wrapper)).toEqual(['preview-3'])
+      expect(combobox(wrapper).props('modelValue')).toBe('preview-3')
+    })
+
+    it('stays on an older revision when the latest goes', async () => {
+      const panel = await mountOnRevisions([2, 1])
+      await pick(panel.wrapper, 'preview-1')
+
+      await deleteElsewhere(panel, 2)
+
+      expect(options(panel.wrapper)).toEqual(['preview-1'])
+      expect(shownFiles(panel.wrapper)).toEqual(['preview-1'])
+      expect(combobox(panel.wrapper).props('modelValue')).toBe('preview-1')
+    })
+
+    it('stays on a middle revision when the latest goes', async () => {
+      const panel = await mountOnRevisions([3, 2, 1])
+      await pick(panel.wrapper, 'preview-2')
+
+      await deleteElsewhere(panel, 3)
+
+      expect(options(panel.wrapper)).toEqual(['preview-2', 'preview-1'])
+      expect(shownFiles(panel.wrapper)).toEqual(['preview-2'])
+    })
+
+    it('moves to the first revision when the one it shows goes', async () => {
+      const panel = await mountOnRevisions([3, 2, 1])
+      await pick(panel.wrapper, 'preview-1')
+
+      await deleteElsewhere(panel, 1)
+
+      expect(options(panel.wrapper)).toEqual(['preview-3', 'preview-2'])
+      expect(shownFiles(panel.wrapper)).toEqual(['preview-3'])
+      expect(combobox(panel.wrapper).props('modelValue')).toBe('preview-3')
+    })
+
+    it('moves to the next revision when the latest it shows goes', async () => {
+      const panel = await mountOnRevisions([2, 1])
+
+      await deleteElsewhere(panel, 2)
+
+      expect(options(panel.wrapper)).toEqual(['preview-1'])
+      expect(shownFiles(panel.wrapper)).toEqual(['preview-1'])
+    })
+
+    it('shows no player once the only revision goes', async () => {
+      const panel = await mountOnRevisions([1])
+
+      await deleteElsewhere(panel, 1)
+
+      expect(panel.wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+    })
+
+    // Zou sends the event before it answers the request: the local stack gave
+    // that order on every run, nothing says a production server does.
+    describe.each([
+      ['the event comes first', true],
+      ['the answer comes first', false]
+    ])('deleted from the panel, %s', (_, isEventFirst) => {
+      const deleteFromPanel = async (panel, revision) => {
+        const { state, store, wrapper, emitEvent } = panel
+        store.dispatch.mockImplementation(async (type, { commentId }) => {
+          if (type !== 'deleteTaskComment') return
+          if (isEventFirst) await deleteElsewhere(panel, revision)
+          mutations.DELETE_COMMENT_END(state, {
+            taskId: TASK_ID,
+            commentId,
+            taskStatusMap: new Map(),
+            todoStatus: {}
+          })
+          if (!isEventFirst) {
+            await nextTick()
+            emitEvent('comment:delete', {
+              comment_id: commentId,
+              task_id: TASK_ID
+            })
+          }
+        })
+        wrapper
+          .findAllComponents(Comment)
+          .find(comment => comment.props('comment').id === `comment-${revision}`)
+          .vm.$emit('delete-comment', { id: `comment-${revision}` })
+        await flushPromises()
+        wrapper
+          .findAllComponents(DeleteModal)
+          .find(modal => modal.props('active'))
+          .vm.$emit('confirm')
+        await flushPromises()
+      }
+
+      it('stays on an older revision', async () => {
+        const panel = await mountOnRevisions([2, 1])
+        await pick(panel.wrapper, 'preview-1')
+
+        await deleteFromPanel(panel, 2)
+
+        expect(options(panel.wrapper)).toEqual(['preview-1'])
+        expect(shownFiles(panel.wrapper)).toEqual(['preview-1'])
+      })
+
+      it('moves to the next revision from the one that goes', async () => {
+        const panel = await mountOnRevisions([2, 1])
+
+        await deleteFromPanel(panel, 2)
+
+        expect(options(panel.wrapper)).toEqual(['preview-1'])
+        expect(shownFiles(panel.wrapper)).toEqual(['preview-1'])
+      })
+    })
+
+    it('stays on a picked revision when a new one is published', async () => {
+      const panel = await mountOnRevisions([3, 2, 1])
+      await pick(panel.wrapper, 'preview-1')
+
+      await publish(panel, 4)
+
+      expect(shownFiles(panel.wrapper)).toEqual(['preview-1'])
+    })
+
+    it('shows a new revision from the latest one', async () => {
+      const panel = await mountOnRevisions([2, 1])
+
+      await publish(panel, 3)
+
+      expect(shownFiles(panel.wrapper)).toEqual(['preview-3'])
+      expect(combobox(panel.wrapper).props('modelValue')).toBe('preview-3')
+    })
+
+    it('shows a new revision once the latest is picked back', async () => {
+      const panel = await mountOnRevisions([2, 1])
+      await pick(panel.wrapper, 'preview-1')
+      await pick(panel.wrapper, 'preview-2')
+
+      await publish(panel, 3)
+
+      expect(shownFiles(panel.wrapper)).toEqual(['preview-3'])
+    })
+
+    // The player asks for a revision by its first file.
+    it('follows the revision the player asks for', async () => {
+      const panel = await mountOnRevisions([2, 1])
+
+      panel.wrapper
+        .findComponent(PreviewPlayer)
+        .vm.$emit('change-current-preview', { id: 'preview-1' })
+      await flushPromises()
+
+      expect(shownFiles(panel.wrapper)).toEqual(['preview-1'])
+    })
+
+    // The list may change behind a modal of the player.
+    describe('with a modal of the player open', () => {
+      const previewForm = () => {
+        const form = new FormData()
+        form.append('file', new File(['frame'], 'sh010-alt.png'))
+        return form
+      }
+
+      const confirmExtraFile = async wrapper => {
+        wrapper
+          .findComponent({ ref: 'add-extra-preview-modal' })
+          .vm.$emit('confirm', [previewForm()])
+        await flushPromises()
+      }
+
+      // The panel shows the last file of the revision once the upload ends.
+      const playerStub = {
+        props: ['previews'],
+        template: '<div />',
+        methods: { displayLast: () => {}, focus: () => {} }
+      }
+
+      it('adds a file to the revision it opened on, once a new one is published', async () => {
+        const panel = await mountOnRevisions([2, 1], {
+          PreviewPlayer: playerStub
+        })
+        panel.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+
+        await publish(panel, 3)
+        await confirmExtraFile(panel.wrapper)
+
+        expect(panel.store.dispatch).toHaveBeenCalledWith(
+          'addCommentExtraPreview',
+          expect.objectContaining({
+            commentId: 'comment-2',
+            previewId: 'preview-2'
+          })
+        )
+      })
+
+      it('adds a file to no other revision once its own goes', async () => {
+        const panel = await mountOnRevisions([2, 1], {
+          PreviewPlayer: playerStub
+        })
+        panel.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+
+        await deleteElsewhere(panel, 2)
+        await confirmExtraFile(panel.wrapper)
+
+        expect(panel.store.dispatch).toHaveBeenCalledWith(
+          'addCommentExtraPreview',
+          expect.objectContaining({
+            commentId: undefined,
+            previewId: 'preview-2'
+          })
+        )
+      })
+
+      // Alt and the arrows walk the list behind a modal.
+      it('adds a file to the revision shown once the task changes', async () => {
+        const panel = await mountOnRevisions([2, 1], {
+          PreviewPlayer: playerStub
+        })
+        mutations.LOAD_TASK_COMMENTS_END(panel.state, {
+          taskId: 'task-2',
+          comments: [buildComment(5)]
+        })
+        panel.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+
+        await panel.wrapper.setProps({ task: buildTask({ id: 'task-2' }) })
+        await flushPromises()
+        await confirmExtraFile(panel.wrapper)
+
+        expect(panel.store.dispatch).toHaveBeenCalledWith(
+          'addCommentExtraPreview',
+          expect.objectContaining({
+            taskId: 'task-2',
+            commentId: 'comment-5',
+            previewId: 'preview-5'
+          })
+        )
+      })
+
+      it('tells a trash Zou refuses once the only revision went', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const panel = await mountOnRevisions([1])
+        panel.wrapper
+          .findComponent(PreviewPlayer)
+          .vm.$emit('remove-extra-preview', { id: 'preview-1' })
+        await flushPromises()
+        const refusal = new Error('Not Found')
+        panel.store.dispatch.mockImplementation(type =>
+          type === 'deleteTaskPreview'
+            ? Promise.reject(refusal)
+            : Promise.resolve()
+        )
+        await deleteElsewhere(panel, 1)
+
+        const modal = panel.wrapper
+          .findAllComponents(DeleteModal)
+          .find(deleteModal => deleteModal.props('active'))
+        modal.vm.$emit('confirm')
+        await flushPromises()
+
+        expect(consoleError).toHaveBeenCalledWith(refusal)
+        expect(modal.props('isLoading')).toBe(false)
+        expect(modal.props('isError')).toBe(true)
+        consoleError.mockRestore()
+      })
+    })
+
+    it('goes back to the latest revision after another task', async () => {
+      const { wrapper } = await mountOnRevisions([2, 1])
+      await pick(wrapper, 'preview-1')
+
+      await wrapper.setProps({ task: buildTask({ id: 'task-2' }) })
+      await flushPromises()
+      await wrapper.setProps({ task: buildTask() })
+      await flushPromises()
+
+      expect(shownFiles(wrapper)).toEqual(['preview-2'])
     })
   })
 })
