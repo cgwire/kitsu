@@ -6,7 +6,8 @@ import { createStore } from 'vuex'
 vi.mock('@/store/api/notifications', () => ({
   default: {
     getNotification: vi.fn(),
-    getNotifications: vi.fn()
+    getNotifications: vi.fn(),
+    updateNotificationReadStatus: vi.fn()
   }
 }))
 
@@ -15,7 +16,9 @@ import notificationsStore from '@/store/modules/notifications'
 import {
   LOAD_MORE_NOTIFICATIONS_END,
   LOAD_NOTIFICATION_END,
-  RESET_ALL
+  REMOVE_COMMENT_NOTIFICATIONS,
+  RESET_ALL,
+  SET_NOTIFICATION_COUNT
 } from '@/store/mutation-types'
 
 const notification = (id, createdAt) => ({ id, created_at: createdAt })
@@ -34,6 +37,8 @@ const storeWithFirstPage = async rows => {
   notificationsApi.getNotifications.mockClear()
   return store
 }
+
+const listedIds = store => store.getters.notifications.map(({ id }) => id)
 
 describe('Notifications store', () => {
   // A value a test leaves unconsumed must not answer the next test.
@@ -112,6 +117,42 @@ describe('Notifications store', () => {
       )
     })
 
+    test('asks for the next page after a row left the list', async () => {
+      const store = await storeWithFirstPage([
+        { ...notification('gone', NEWEST_DATE), comment_id: 'comment-1' },
+        ...fullPage(99)
+      ])
+      store.commit(REMOVE_COMMENT_NOTIFICATIONS, 'comment-1')
+      notificationsApi.getNotifications.mockResolvedValueOnce([])
+
+      await store.dispatch('loadMoreNotifications', {})
+
+      expect(notificationsApi.getNotifications).toHaveBeenCalledExactlyOnceWith(
+        { before: OLDEST_DATE }
+      )
+    })
+
+    test('keeps the page in flight when a row leaves the list', async () => {
+      const store = await storeWithFirstPage([
+        { ...notification('gone', NEWEST_DATE), comment_id: 'comment-1' },
+        ...fullPage(99)
+      ])
+      let resolvePage
+      notificationsApi.getNotifications.mockReturnValueOnce(
+        new Promise(resolve => {
+          resolvePage = resolve
+        })
+      )
+
+      const pending = store.dispatch('loadMoreNotifications', {})
+      store.commit(REMOVE_COMMENT_NOTIFICATIONS, 'comment-1')
+      resolvePage([notification('older', '2026-08-01T10:00:00')])
+      await pending
+
+      expect(listedIds(store)).toHaveLength(100)
+      expect(listedIds(store).at(-1)).toBe('older')
+    })
+
     test('asks for nothing more once a page came back short', async () => {
       const store = await storeWithFirstPage(fullPage())
       notificationsApi.getNotifications.mockResolvedValueOnce([])
@@ -133,6 +174,70 @@ describe('Notifications store', () => {
       await store.dispatch('loadMoreNotifications', {})
 
       expect(notificationsApi.getNotifications).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('toggleNotificationReadStatus', () => {
+    const rows = () => [
+      { ...notification('n1', NEWEST_DATE), read: false },
+      { ...notification('n2', OLDEST_DATE), read: false }
+    ]
+
+    test('removes an entry deleted on the server', async () => {
+      const store = await storeWithFirstPage(rows())
+      store.commit(SET_NOTIFICATION_COUNT, 2)
+      notificationsApi.updateNotificationReadStatus.mockRejectedValueOnce(
+        Object.assign(new Error('NOT FOUND'), { status: 404 })
+      )
+
+      await store.dispatch(
+        'toggleNotificationReadStatus',
+        store.getters.notifications[0]
+      )
+
+      expect(listedIds(store)).toEqual(['n2'])
+      expect(store.getters.notificationCount).toBe(2)
+    })
+
+    test('restores the entry and rethrows any other failure', async () => {
+      const store = await storeWithFirstPage(rows())
+      store.commit(SET_NOTIFICATION_COUNT, 2)
+      const error = Object.assign(new Error('Server error'), { status: 500 })
+      notificationsApi.updateNotificationReadStatus.mockRejectedValueOnce(error)
+
+      await expect(
+        store.dispatch(
+          'toggleNotificationReadStatus',
+          store.getters.notifications[0]
+        )
+      ).rejects.toBe(error)
+
+      expect(listedIds(store)).toEqual(['n1', 'n2'])
+      expect(store.getters.notifications[0].read).toBe(false)
+      expect(store.getters.notificationCount).toBe(2)
+    })
+  })
+
+  describe(REMOVE_COMMENT_NOTIFICATIONS, () => {
+    test('removes the entries of that comment only', () => {
+      const state = {
+        notifications: [
+          { id: 'comment', comment_id: 'comment-1' },
+          { id: 'mention', comment_id: 'comment-1' },
+          { id: 'other', comment_id: 'comment-2' },
+          { id: 'assignation', comment_id: null }
+        ]
+      }
+
+      notificationsStore.mutations[REMOVE_COMMENT_NOTIFICATIONS](
+        state,
+        'comment-1'
+      )
+
+      expect(state.notifications.map(({ id }) => id)).toEqual([
+        'other',
+        'assignation'
+      ])
     })
   })
 

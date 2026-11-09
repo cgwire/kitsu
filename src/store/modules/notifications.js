@@ -1,5 +1,6 @@
-import notificationsApi from '@/store/api/notifications'
+import { isNotFound } from '@/lib/errors'
 import { sortByDate } from '@/lib/sorting'
+import notificationsApi from '@/store/api/notifications'
 
 import {
   CLEAR_NOTIFICATIONS,
@@ -11,6 +12,8 @@ import {
   LOAD_NOTIFICATIONS_END,
   MARK_ALL_NOTIFICATIONS_AS_READ,
   NOTIFICATION_ADD_PREVIEW,
+  REMOVE_COMMENT_NOTIFICATIONS,
+  REMOVE_NOTIFICATION,
   SET_NOTIFICATION_COUNT,
   TOGGLE_NOTIFICATION_READ_STATUS,
   RESET_ALL
@@ -20,7 +23,7 @@ import {
 const PAGE_SIZE = 100
 
 // Where the page after given one starts, if any. The list cannot tell: live
-// notifications enter it, whatever their date.
+// notifications enter it, whatever their date, and deleted ones leave it.
 const getNextPageDate = page =>
   page.length >= PAGE_SIZE ? page[page.length - 1].created_at : null
 
@@ -33,6 +36,13 @@ const initialState = () => ({
 })
 
 const state = initialState()
+
+// In place: a page in flight checks that the list is still the same one.
+const removeNotifications = (state, isRemoved) => {
+  state.notifications.filter(isRemoved).forEach(notification => {
+    state.notifications.splice(state.notifications.indexOf(notification), 1)
+  })
+}
 
 const getters = {
   notificationCount: state => state.notificationCount,
@@ -112,6 +122,11 @@ const actions = {
       .catch(err => {
         // The mutation toggles: re-committing restores the previous state.
         commit(TOGGLE_NOTIFICATION_READ_STATUS, notification)
+        // Zou deleted it with its comment or its reply, and no event names it.
+        if (isNotFound(err)) {
+          commit(REMOVE_NOTIFICATION, notification.id)
+          return
+        }
         throw err
       })
   },
@@ -138,14 +153,9 @@ const mutations = {
     const page = sortByDate(notifications)
     // A live entry can carry an old date (a Zou without its mention fix
     // recreates the mentions of an edited comment with the date of the
-    // comment): its page then brings it again. In place, as a page in
-    // flight checks that the list is still the same one.
+    // comment): its page then brings it again.
     const pageIds = new Set(page.map(({ id }) => id))
-    state.notifications
-      .filter(({ id }) => pageIds.has(id))
-      .forEach(notification => {
-        state.notifications.splice(state.notifications.indexOf(notification), 1)
-      })
+    removeNotifications(state, ({ id }) => pageIds.has(id))
     state.notifications.push(...page)
     state.nextPageDate = getNextPageDate(page)
   },
@@ -158,6 +168,14 @@ const mutations = {
       state.notifications.push(notification)
       state.notifications = sortByDate(state.notifications)
     }
+  },
+
+  [REMOVE_NOTIFICATION](state, notificationId) {
+    removeNotifications(state, ({ id }) => id === notificationId)
+  },
+
+  [REMOVE_COMMENT_NOTIFICATIONS](state, commentId) {
+    removeNotifications(state, ({ comment_id }) => comment_id === commentId)
   },
 
   [SET_NOTIFICATION_COUNT](state, count) {
