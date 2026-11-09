@@ -26,12 +26,19 @@ const i18n = createI18n({
 const search = {
   id: 'search-1',
   name: 'wip',
+  person_id: 'me',
   search_query: 'wip',
   search_filter_group_id: null,
   is_shared: false
 }
 const sharedSearch = { ...search, id: 'search-2', name: 'zz', is_shared: true }
-const group = { id: 'group-1', name: 'Mine', color: '#ff3860', is_shared: false }
+const group = {
+  id: 'group-1',
+  name: 'Mine',
+  color: '#ff3860',
+  person_id: 'me',
+  is_shared: false
+}
 const sharedGroup = { ...group, id: 'group-2', name: 'Team', is_shared: true }
 
 const mountList = async ({
@@ -39,9 +46,11 @@ const mountList = async ({
   actions = {},
   entityType,
   groups = [group],
+  isAdmin = false,
   isClient = false,
   productionId,
   queries = [search],
+  role = 'manager',
   throughRef = false,
   url = '/'
 } = {}) => {
@@ -53,12 +62,13 @@ const mountList = async ({
   const store = createStore({
     getters: {
       currentProduction: () => ({ id: 'production-1' }),
-      currentUserRoleForProduction: () => () => 'manager',
+      currentUserRoleForProduction: () => () => role,
       departmentMap: () => new Map(),
-      isCurrentUserAdmin: () => false,
+      isCurrentUserAdmin: () => isAdmin,
       isCurrentUserClient: () => isClient,
-      isCurrentUserManager: () => true,
-      personMap: () => new Map()
+      isCurrentUserManager: () => isAdmin || role === 'manager',
+      personMap: () => new Map(),
+      user: () => ({ id: 'me' })
     },
     actions
   })
@@ -473,6 +483,138 @@ describe('SearchQueryList, tooltips', () => {
     expect(wrapper.find('.tag.group .filter-label').attributes('title')).toBe(
       'Mine'
     )
+  })
+})
+
+describe('SearchQueryList, buttons of a row', () => {
+  const buttonsOf = node => [
+    node.find('button.edit').exists(),
+    node.find('button.del').exists()
+  ]
+
+  // A filter alone, a filter in a group, a group holding it, and an empty
+  // group, all of the given owner.
+  const mountRows = async (personId, isShared, who) => {
+    const row = { is_shared: isShared, person_id: personId }
+    const wrapper = await mountList({
+      ...who,
+      productionId: 'production-1',
+      queries: [
+        { ...search, ...row, id: 'alone', name: 'alone' },
+        {
+          ...search,
+          ...row,
+          id: 'held',
+          name: 'held',
+          search_filter_group_id: 'holding'
+        }
+      ],
+      groups: [
+        { ...group, ...row, id: 'holding', name: 'A' },
+        { ...group, ...row, id: 'empty', name: 'B' }
+      ]
+    })
+    const [holding, empty] = wrapper.findAll('.tag.group')
+    await holding.trigger('click')
+    return {
+      alone: buttonsOf(
+        wrapper.find('.search-queries > .tag:not(.folder):not(.group)')
+      ),
+      held: buttonsOf(holding.find('.group-list .tag')),
+      holding: buttonsOf(holding.find('.group-header')),
+      empty: buttonsOf(empty.find('.group-header'))
+    }
+  }
+
+  const visible = {
+    alone: [true, true],
+    held: [true, true],
+    // A group holding filters cannot be removed.
+    holding: [true, false],
+    empty: [true, true]
+  }
+  const hidden = {
+    alone: [false, false],
+    held: [false, false],
+    holding: [false, false],
+    empty: [false, false]
+  }
+
+  test.each([
+    ['its owner, a manager', 'me', { role: 'manager' }, visible],
+    ['a manager who does not own it', 'other', { role: 'manager' }, hidden],
+    ['an admin who does not own it', 'other', { isAdmin: true }, visible],
+    ['its owner, no longer a manager', 'me', { role: 'user' }, hidden],
+    ['an artist who does not own it', 'other', { role: 'user' }, hidden]
+  ])('on a shared row, for %s', async (_, personId, who, expected) => {
+    expect(await mountRows(personId, true, who)).toEqual(expected)
+  })
+
+  test('on a private row, for an artist', async () => {
+    expect(await mountRows('me', false, { role: 'user' })).toEqual(visible)
+  })
+
+  // A filter of someone else in a shared group turns private with the group,
+  // and stays in the list of its owner until a reload.
+  test.each([
+    ['a manager', { role: 'manager' }, hidden],
+    ['an admin', { isAdmin: true }, visible]
+  ])('on a private row of someone else, for %s', async (_, who, expected) => {
+    expect(await mountRows('other', false, who)).toEqual(expected)
+  })
+
+  const theirs = { is_shared: true, person_id: 'other' }
+  const held = { search_filter_group_id: sharedGroup.id }
+
+  test.each([
+    ['nothing in the list', [], [], {}, false],
+    ['a filter of their own', [sharedSearch], [], {}, true],
+    ['a group of their own', [], [sharedGroup], {}, true],
+    ['only the filter of a colleague', [{ ...sharedSearch, ...theirs }], [], {}, false],
+    ['only the group of a colleague', [], [{ ...sharedGroup, ...theirs }], {}, false],
+    [
+      'their filter in the group of a colleague',
+      [{ ...sharedSearch, ...held }],
+      [{ ...sharedGroup, ...theirs }],
+      {},
+      true
+    ],
+    [
+      'an admin, on the rows of others',
+      [{ ...sharedSearch, ...theirs }],
+      [],
+      { isAdmin: true },
+      true
+    ],
+    ['an artist, on a shared row', [{ ...sharedSearch, ...theirs }], [], { role: 'user' }, false]
+  ])('the edit mode, with %s', async (_, queries, groups, who, expected) => {
+    const wrapper = await mountList({
+      ...who,
+      groups,
+      productionId: 'production-1',
+      queries
+    })
+
+    expect(
+      wrapper.find('.tag.folder[title="main.edit_mode_on"]').exists()
+    ).toBe(expected)
+  })
+
+  test('leaves the edit mode with the last row it can change', async () => {
+    const pencil = wrapper =>
+      wrapper.find('.tag.folder[title="main.edit_mode_on"]')
+    const theirs = { ...sharedSearch, person_id: 'other' }
+    const wrapper = await mountList({ groups: [], queries: [search, theirs] })
+    await pencil(wrapper).trigger('click')
+    expect(pencil(wrapper).classes()).toContain('active')
+
+    await wrapper.setProps({ queries: [theirs] })
+    expect(pencil(wrapper).exists()).toBe(false)
+
+    const saved = { ...search, id: 'search-3', name: 'new' }
+    await wrapper.setProps({ queries: [saved, theirs] })
+    expect(pencil(wrapper).classes()).not.toContain('active')
+    expect(wrapper.find('.tag.is-editing').exists()).toBe(false)
   })
 })
 

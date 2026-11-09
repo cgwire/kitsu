@@ -23,10 +23,7 @@
       @keydown.enter.prevent="isEditing = !isEditing"
       @keydown.space.prevent="isEditing = !isEditing"
       :title="$t('main.edit_mode_on')"
-      v-if="
-        userFilters.length > 0 ||
-        (isGroupEnabled && userFilterGroups.length > 0)
-      "
+      v-if="hasChangeableRow"
     >
       <pencil-icon :size="12" />
     </span>
@@ -69,7 +66,7 @@
             class="edit"
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="editGroup(group)"
-            v-if="!group.is_shared || isCurrentUserManager"
+            v-if="canChange(group)"
           >
             <edit2-icon :size="8" />
           </button>
@@ -77,10 +74,7 @@
             class="del"
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="confirmRemoveGroup(group)"
-            v-if="
-              !group.queries.length &&
-              (!group.is_shared || isCurrentUserManager)
-            "
+            v-if="!group.queries.length && canChange(group)"
           >
             <trash2-icon :size="8" />
           </button>
@@ -118,7 +112,7 @@
                   backgroundColor: `${group.color}53`
                 }"
                 @click.stop="editSearch(searchQuery)"
-                v-if="!searchQuery.is_shared || isCurrentUserManager"
+                v-if="canChange(searchQuery)"
               >
                 <edit2-icon :size="8" />
               </button>
@@ -126,7 +120,7 @@
                 class="del"
                 :style="{ backgroundColor: `${group.color}53` }"
                 @click.stop="confirmRemoveSearch(searchQuery)"
-                v-if="!searchQuery.is_shared || isCurrentUserManager"
+                v-if="canChange(searchQuery)"
               >
                 <trash2-icon :size="8" />
               </button>
@@ -161,14 +155,14 @@
       <button
         class="edit"
         @click.stop="editSearch(searchQuery)"
-        v-if="!searchQuery.is_shared || isCurrentUserManager"
+        v-if="canChange(searchQuery)"
       >
         <edit2-icon :size="8" />
       </button>
       <button
         class="del"
         @click.stop="confirmRemoveSearch(searchQuery)"
-        v-if="!searchQuery.is_shared || isCurrentUserManager"
+        v-if="canChange(searchQuery)"
       >
         <trash2-icon :size="8" />
       </button>
@@ -308,15 +302,17 @@ const modals = reactive({
 const toggleGroupId = ref(null)
 
 const departmentMap = computed(() => store.getters.departmentMap)
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(() =>
   props.productionId
-    ? store.getters.isCurrentUserAdmin ||
+    ? isCurrentUserAdmin.value ||
       store.getters.currentUserRoleForProduction(props.productionId) ===
         'manager'
     : store.getters.isCurrentUserManager
 )
 const personMap = computed(() => store.getters.personMap)
+const user = computed(() => store.getters.user)
 
 const sortedFilters = computed(() => {
   const queries = props.queries.filter(
@@ -354,6 +350,21 @@ const userFilterGroups = computed(() => {
     )
   }))
 })
+
+// Zou takes a change only from the owner of a row or an admin. A row can be in
+// the list of someone else: a filter of a shared group that turned private
+// stays there until a reload.
+const canChange = row =>
+  isCurrentUserAdmin.value ||
+  (row.person_id === user.value?.id &&
+    (!row.is_shared || isCurrentUserManager.value))
+
+const hasChangeableRow = computed(() =>
+  [
+    ...userFilters.value,
+    ...userFilterGroups.value.flatMap(group => [group, ...group.queries])
+  ].some(canChange)
+)
 
 const groupOptions = computed(() => {
   return [
@@ -540,6 +551,12 @@ watch(
 
 watch(route, () => {
   setQueryPaths()
+})
+
+// The pencil hides once no row is left to change: the edit mode goes with it,
+// rather than coming back on with the next row saved.
+watch(hasChangeableRow, isChangeable => {
+  if (!isChangeable) isEditing.value = false
 })
 
 defineExpose({ addSearch })
