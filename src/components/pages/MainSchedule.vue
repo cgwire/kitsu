@@ -32,13 +32,44 @@
             :text="$t('schedule.today')"
             @click="scrollScheduleToToday"
           />
+          <button-simple
+            class="flexrow-item toggle-filters"
+            :active="showMoreFilters"
+            icon="funnel"
+            :title="
+              showMoreFilters
+                ? $t('main.less_filters')
+                : $t('main.more_filters')
+            "
+            @click="showMoreFilters = !showMoreFilters"
+          />
+        </div>
+        <div class="toolbar-row" v-show="showMoreFilters">
+          <div class="flexrow-item">
+            <label class="label">{{ $t('productions.title') }}</label>
+            <combobox-options
+              :title="productionFilterTitle"
+              :options="productionFilterOptions"
+              :model-value="productionVisibilityMap"
+              @change="onProductionVisibilityChanged"
+            />
+          </div>
+          <div class="flexrow-item">
+            <label class="label">{{ $t('task_types.title') }}</label>
+            <combobox-options
+              :title="taskTypeFilterTitle"
+              :options="taskTypeFilterOptions"
+              :model-value="taskTypeVisibilityMap"
+              @change="onTaskTypeVisibilityChanged"
+            />
+          </div>
         </div>
       </div>
 
       <schedule
         ref="schedule"
         :end-date="endDate"
-        :hierarchy="scheduleItems"
+        :hierarchy="filteredScheduleItems"
         :is-loading="false"
         :start-date="startDate"
         :zoom-level="zoomLevel"
@@ -63,6 +94,11 @@ import { useStore } from 'vuex'
 import colors from '@/lib/colors'
 import { episodifyRoute, getProductionSchedulePath } from '@/lib/path'
 import {
+  getTaskTypeFilterTitle,
+  getTaskTypeVisibilityMap,
+  setTaskTypeVisibility
+} from '@/lib/productionSchedule'
+import {
   getEndDateFromString,
   getFirstStartDate,
   getLastEndDate,
@@ -73,6 +109,7 @@ import {
 import Schedule from '@/components/schedule/Schedule.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import DateField from '@/components/widgets/DateField.vue'
 
 // Composables
@@ -84,9 +121,12 @@ const store = useStore()
 // State
 // --------------------------------------------------------------------------
 const endDate = ref(moment().add(6, 'months'))
+const hiddenProductionIds = ref([])
+const hiddenTaskTypeIds = ref([])
 const scheduleItems = ref([])
 const selectedEndDate = ref(null)
 const selectedStartDate = ref(null)
+const showMoreFilters = ref(false)
 const startDate = ref(moment())
 const zoomLevel = ref(0)
 
@@ -96,6 +136,58 @@ const scheduleRef = useTemplateRef('schedule')
 // --------------------------------------------------------------------------
 const openProductions = computed(() => store.getters.openProductions)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const taskTypes = computed(() => store.getters.taskTypes)
+
+const productionFilterOptions = computed(() =>
+  openProductions.value.map(production => ({
+    label: production.name,
+    value: production.id
+  }))
+)
+
+const productionVisibilityMap = computed(() =>
+  getTaskTypeVisibilityMap(
+    productionFilterOptions.value,
+    hiddenProductionIds.value
+  )
+)
+
+const productionFilterTitle = computed(() =>
+  getTaskTypeFilterTitle(
+    filteredScheduleItems.value.length,
+    productionFilterOptions.value.length,
+    t('main.all')
+  )
+)
+
+// in the studio order, the task types of the open productions only
+const taskTypeFilterOptions = computed(() => {
+  const usedIds = new Set(
+    openProductions.value.flatMap(production => production.task_types || [])
+  )
+  return taskTypes.value
+    .filter(taskType => usedIds.has(taskType.id))
+    .map(taskType => ({ label: taskType.name, value: taskType.id }))
+})
+
+const taskTypeVisibilityMap = computed(() =>
+  getTaskTypeVisibilityMap(taskTypeFilterOptions.value, hiddenTaskTypeIds.value)
+)
+
+const taskTypeFilterTitle = computed(() => {
+  const nbOptions = taskTypeFilterOptions.value.length
+  return getTaskTypeFilterTitle(
+    nbOptions - hiddenTaskTypeIds.value.length,
+    nbOptions,
+    t('main.all')
+  )
+})
+
+const filteredScheduleItems = computed(() =>
+  scheduleItems.value.filter(
+    item => !hiddenProductionIds.value.includes(item.id)
+  )
+)
 
 const zoomOptions = computed(() => [
   { label: t('main.week'), value: 0 },
@@ -144,6 +236,32 @@ const convertTaskTypeScheduleItems = items =>
       })
     })
 
+const getVisibleTaskTypeItems = items =>
+  items.filter(item => !hiddenTaskTypeIds.value.includes(item.task_type_id))
+
+const onProductionVisibilityChanged = ({ key, value }) => {
+  hiddenProductionIds.value = setTaskTypeVisibility(
+    hiddenProductionIds.value,
+    key,
+    value
+  )
+}
+
+// The rows of a production are loaded when it unfolds: the filter applies
+// to the ones already loaded and to the next ones.
+const onTaskTypeVisibilityChanged = ({ key, value }) => {
+  hiddenTaskTypeIds.value = setTaskTypeVisibility(
+    hiddenTaskTypeIds.value,
+    key,
+    value
+  )
+  scheduleItems.value.forEach(item => {
+    if (item.allChildren) {
+      item.children = getVisibleTaskTypeItems(item.allChildren)
+    }
+  })
+}
+
 const expandProductionElement = async productionElement => {
   if (productionElement.expanded) {
     productionElement.expanded = false
@@ -153,7 +271,10 @@ const expandProductionElement = async productionElement => {
   productionElement.expanded = true
   try {
     const items = await store.dispatch('loadScheduleItems', productionElement)
-    productionElement.children = convertTaskTypeScheduleItems(items)
+    productionElement.allChildren = convertTaskTypeScheduleItems(items)
+    productionElement.children = getVisibleTaskTypeItems(
+      productionElement.allChildren
+    )
   } catch (err) {
     console.error(err)
     productionElement.expanded = false
@@ -227,6 +348,13 @@ useHead({
     padding-top: 0;
   }
 
+  :deep(.combo) {
+    align-items: center;
+    display: inline-flex;
+    height: 42px;
+    margin-top: 0;
+  }
+
   :deep(.button) {
     height: 42px;
   }
@@ -252,6 +380,10 @@ useHead({
   align-items: flex-end;
   flex-wrap: wrap;
   row-gap: 0.5em;
+
+  & + & {
+    margin-top: 0.75em;
+  }
 
   > :last-child {
     margin-right: 0;
