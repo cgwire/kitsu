@@ -219,6 +219,38 @@ describe('pages/Profile', () => {
       )
     })
 
+    // The store updates the user in place, as the user module does: the
+    // form follows a user loaded again, not its own save.
+    test('keeps an unsaved email when the other card is saved', async () => {
+      const store = createStore({
+        state: { user: { id: 'person-1', email: 'ada@example.com' } },
+        getters: {
+          changePassword: () => ({ isValid: true }),
+          user: state => state.user
+        },
+        mutations: {
+          save(state, form) {
+            Object.assign(state.user, form)
+          }
+        },
+        actions: {
+          saveProfile: ({ commit }, { form }) => commit('save', form)
+        }
+      })
+      const wrapper = shallowMountWithI18n(Profile, {
+        global: { plugins: [store], renderStubDefaultSlot: true }
+      })
+      await type(wrapper, EMAIL, 'new@example.com')
+
+      await save(wrapper, NOTIFICATIONS_CARD)
+      await flushPromises()
+
+      expect(store.state.user.email).toBe('ada@example.com')
+      expect(findFields(wrapper, EMAIL)[0].props('modelValue')).toBe(
+        'new@example.com'
+      )
+    })
+
     test('leaves the email out of the notification settings', async () => {
       const { wrapper, saveProfile } = mountPage()
       await type(wrapper, EMAIL, 'new@example.com')
