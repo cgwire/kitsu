@@ -1194,6 +1194,22 @@ describe('Episodes store, through a store', () => {
     ])
   })
 
+  // The Episodes page loads its list when the store holds only the plain one.
+  test('tells whether the list was loaded with its tasks', async () => {
+    const { store } = await buildStore()
+    const isLoadedWithTasks = computed(
+      () => store.getters.isEpisodeListLoadedWithTasks
+    )
+    loadEpisodes(store, buildEpisodes())
+    expect(isLoadedWithTasks.value).toBe(false)
+
+    loadWithTasks(store, buildEpisodes())
+    expect(isLoadedWithTasks.value).toBe(true)
+
+    store.commit('CLEAR_EPISODES')
+    expect(isLoadedWithTasks.value).toBe(false)
+  })
+
   describe('list sorted by the Episodes page', () => {
     const sortInfo = {
       type: 'metadata',

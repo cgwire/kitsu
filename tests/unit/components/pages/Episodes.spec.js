@@ -44,7 +44,8 @@ describe('Episodes page', () => {
     const { dispatched, list } = await mountPage({
       getters: {
         episodeMap: episodeMap(production.id),
-        episodeValidationColumns: ['task-type-1']
+        episodeValidationColumns: ['task-type-1'],
+        isEpisodeListLoadedWithTasks: true
       }
     })
     await flushPromises()
@@ -62,8 +63,7 @@ describe('Episodes page', () => {
     expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('e01')
   })
 
-  // An episode created from the Shots page brings its task columns to a store
-  // that holds the plain list of the topbar.
+  // An episode received live joins the store without its tasks.
   test('loads the tasks of the rows the store holds without them', async () => {
     const { dispatched } = await mountPage({
       getters: {
@@ -78,6 +78,21 @@ describe('Episodes page', () => {
           ],
           ['episode-2', { id: 'episode-2', project_id: production.id }]
         ]),
+        episodeValidationColumns: ['task-type-1'],
+        isEpisodeListLoadedWithTasks: true
+      }
+    })
+
+    expect(dispatched('loadEpisodesWithTasks')).toHaveLength(1)
+  })
+
+  // A production that started empty, its episodes all created from the Shots
+  // page: the store holds them with their tasks, but never loaded the list
+  // with them, and a new episode would leave the sort.
+  test('loads the list the store never loaded with its tasks', async () => {
+    const { dispatched } = await mountPage({
+      getters: {
+        episodeMap: episodeMap(production.id),
         episodeValidationColumns: ['task-type-1']
       }
     })
@@ -101,7 +116,8 @@ describe('Episodes page', () => {
     const { dispatched } = await mountPage({
       getters: {
         episodeMap: episodeMap(production.id),
-        episodeValidationColumns: ['task-type-1']
+        episodeValidationColumns: ['task-type-1'],
+        isEpisodeListLoadedWithTasks: true
       },
       query: { search: 'e01' }
     })
@@ -247,7 +263,8 @@ describe('Episodes page, reload after a production switch', () => {
     const getters = reactive({
       currentProduction: production,
       episodeMap: episodeMap(production.id),
-      episodeValidationColumns: ['task-type-1']
+      episodeValidationColumns: ['task-type-1'],
+      isEpisodeListLoadedWithTasks: true
     })
     const page = await mountPage({ getters, actions: { loadEpisodesWithTasks } })
     const switchTo = async id => {
@@ -422,7 +439,8 @@ describe('Episodes page, reload after a task creation', () => {
       getters: {
         episodeListScrollPosition: 1200,
         episodeMap: episodeMap(production.id),
-        episodeValidationColumns: ['task-type-1']
+        episodeValidationColumns: ['task-type-1'],
+        isEpisodeListLoadedWithTasks: true
       },
       actions: {
         loadEpisodesWithTasks: () =>

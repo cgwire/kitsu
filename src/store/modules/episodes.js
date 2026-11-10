@@ -112,7 +112,7 @@ const helpers = {
   sortList(state, episodes) {
     return sortEpisodeResult(
       episodes,
-      cache.isLoadedWithTasks ? state.episodeSorting : [],
+      state.isEpisodeListLoadedWithTasks ? state.episodeSorting : [],
       taskTypesStore.cache.taskTypeMap,
       tasksStore.state.taskMap
     )
@@ -196,9 +196,6 @@ const helpers = {
 const cache = {
   episodes: [],
   result: [],
-  // Only the list of the Episodes page follows its sort: the plain list of the
-  // topbar stays by name, and state.episodeSorting outlives a production.
-  isLoadedWithTasks: false,
   episodeIndex: {},
   episodeMap: new Map()
 }
@@ -207,6 +204,9 @@ const initialState = {
   currentEpisode: null,
   episodes: [],
   isEpisodeListLoaded: false,
+  // Only the list of the Episodes page follows its sort: the plain list of the
+  // topbar stays by name, and state.episodeSorting outlives a production.
+  isEpisodeListLoadedWithTasks: false,
 
   displayedEpisodes: [],
   displayedEpisodesLength: 0,
@@ -246,6 +246,7 @@ const getters = {
   displayedEpisodesEstimation: state => state.displayedEpisodesEstimation,
   displayedEpisodesTimeSpent: state => state.displayedEpisodesTimeSpent,
   isEpisodeDescription: state => state.isEpisodeDescription,
+  isEpisodeListLoadedWithTasks: state => state.isEpisodeListLoadedWithTasks,
   isEpisodeResolution: state => state.isEpisodeResolution,
   isEpisodeEstimation: state => state.isEpisodeEstimation,
   isEpisodeTime: state => state.isEpisodeTime,
@@ -556,7 +557,6 @@ const mutations = {
     Object.assign(state, { ...initialState })
     cache.episodes = []
     cache.result = []
-    cache.isLoadedWithTasks = false
     cache.episodeIndex = {}
   },
 
@@ -613,7 +613,7 @@ const mutations = {
     state.currentEpisode = null
     cache.episodes = []
     cache.result = []
-    cache.isLoadedWithTasks = false
+    state.isEpisodeListLoadedWithTasks = false
     cache.episodeIndex = {}
     // clear(), never a new Map(): the episodeMap getter has no reactive
     // dependency, so Vuex memoizes the reference captured at its first read.
@@ -707,7 +707,7 @@ const mutations = {
     })
     cache.episodes = episodes
     cache.result = episodes
-    cache.isLoadedWithTasks = true
+    state.isEpisodeListLoadedWithTasks = true
     cache.episodeIndex = buildEpisodeIndex(episodes)
 
     const displayedEpisodes = cache.episodes
