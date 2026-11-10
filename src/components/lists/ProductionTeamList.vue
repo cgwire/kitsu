@@ -43,13 +43,13 @@
             </td>
             <td class="role">
               <div class="flexrow">
-                <!-- Admin is a global-only role: no project role select.
-                     Own row excluded too: a manager demoting themselves
-                     would lock themselves out with no way back. -->
+                <!-- Admin and client are global-only roles: no project role
+                     select. Own row excluded too: a manager demoting
+                     themselves would lock themselves out with no way back. -->
                 <combobox
                   v-if="
                     isCurrentUserProductionManager &&
-                    person.role !== 'admin' &&
+                    !['admin', 'client'].includes(person.role) &&
                     person.id !== user.id
                   "
                   thin

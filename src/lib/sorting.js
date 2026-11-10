@@ -306,6 +306,7 @@ const sortByField = (sortInfo, taskTypeMap, episodeMap) => (a, b) => {
   return collator.compare(String(dataA), String(dataB))
 }
 
+// Sorts a copy: the list given is often the one of the topbar menus (#2322).
 const sortEntityResult = (
   result,
   sorting,
@@ -331,9 +332,9 @@ const sortEntityResult = (
     for (const step of thenBySteps) {
       sorter = sorter.thenBy(step)
     }
-    result = result.sort(sorter)
+    result = [...result].sort(sorter)
   } else {
-    result = defaultSort(result)
+    result = defaultSort([...result])
   }
   return result
 }

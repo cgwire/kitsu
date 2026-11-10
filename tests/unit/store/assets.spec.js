@@ -353,10 +353,8 @@ describe('Assets store', () => {
     test('EDIT_ASSET_END does not duplicate the created asset when cache.result aliases cache.assets', () => {
       const state = makeState()
 
-      // Empty query: indexSearch yields null, so buildResult falls back to
-      // cache.assets and cache.result becomes the SAME array reference.
-      assetsStore.mutations.SET_ASSET_SEARCH(state, searchPayload(''))
-      expect(assetsStore.cache.result).toBe(assetsStore.cache.assets)
+      // As the load mutations leave them: the SAME array reference.
+      assetsStore.cache.result = assetsStore.cache.assets
 
       assetsStore.mutations.EDIT_ASSET_END(state, {
         newAsset: makeAsset('a2', 'Created'),
