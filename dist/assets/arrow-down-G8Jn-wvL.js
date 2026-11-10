@@ -1,0 +1,2 @@
+import{t as e}from"./createLucideIcon-CMt3gcNM.js";var t=e(`arrow-down`,[[`path`,{d:`M12 5v14`,key:`s699le`}],[`path`,{d:`m19 12-7 7-7-7`,key:`1idqje`}]]);export{t};
+//# sourceMappingURL=arrow-down-G8Jn-wvL.js.map

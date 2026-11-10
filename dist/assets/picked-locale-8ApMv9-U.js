@@ -1,0 +1,2 @@
+var e=`picked-locale`,t={get(){return sessionStorage.getItem(e)},set(t){t?sessionStorage.setItem(e,t):this.clear()},clear(){sessionStorage.removeItem(e)}};export{t};
+//# sourceMappingURL=picked-locale-8ApMv9-U.js.map
