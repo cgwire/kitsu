@@ -600,10 +600,7 @@
                     dropTarget.forbidden
                   "
                 >
-                  <span
-                    class="drop-forbidden-message"
-                    :style="{ left: `${dropTarget.messageLeft + 16}px` }"
-                  >
+                  <span class="drop-forbidden-message">
                     <ban-icon :size="14" />
                     {{ $t(`schedule.drop_forbidden_${dropTarget.forbidden}`) }}
                   </span>
@@ -927,7 +924,6 @@ let expandHoverRootId = null
 // overlay (forbidden)
 const dropTarget = reactive({
   forbidden: null,
-  messageLeft: 0,
   rootElementId: null,
   segments: []
 })
@@ -2655,14 +2651,18 @@ const onTaskDragOver = (event, rootElement) => {
     dropTarget.forbidden &&
     dropTarget.rootElementId === rootElement.id
   ) {
-    // the explanation pill follows the cursor so it cannot be missed
+    // the explanation pill follows the cursor so it cannot be missed,
+    // through a CSS variable: a reactive left would render the whole
+    // timeline on every mouse move
     if (!wrapperRect) {
       wrapperRect = timelineContentWrapperRef.value.getBoundingClientRect()
     }
-    dropTarget.messageLeft =
+    const left =
       timelineContentWrapperRef.value.scrollLeft +
       getClientX(event) -
-      wrapperRect.left
+      wrapperRect.left +
+      16
+    event.currentTarget.style.setProperty('--drop-message-left', `${left}px`)
     // no preventDefault: the browser shows the native no-drop cursor
     return
   }
@@ -2674,14 +2674,31 @@ const onTaskDragOver = (event, rootElement) => {
   if (!ranges.length) {
     return
   }
-  dropTarget.rootElementId = rootElement.id
-  dropTarget.segments = ranges.map(({ item, startDate, endDate }) => ({
+  const segments = ranges.map(({ item, startDate, endDate }) => ({
     id: item.id,
     left: getTimebarLeft({ startDate }),
     width: getTimebarWidth({ startDate, endDate }),
     color: item.type_color || null
   }))
+  // dragover fires on every mouse move: a new array would render the whole
+  // timeline each time, while the ghost only changes with the aimed day
+  if (
+    dropTarget.rootElementId !== rootElement.id ||
+    !isSameSegments(dropTarget.segments, segments)
+  ) {
+    dropTarget.rootElementId = rootElement.id
+    dropTarget.segments = segments
+  }
 }
+
+const isSameSegments = (segments, others) =>
+  segments.length === others.length &&
+  segments.every(
+    (segment, index) =>
+      segment.id === others[index].id &&
+      segment.left === others[index].left &&
+      segment.width === others[index].width
+  )
 
 const clearDropTarget = () => {
   dropTarget.rootElementId = null
@@ -3488,7 +3505,8 @@ defineExpose({
     font-size: 0.9em;
     gap: 0.4em;
     padding: 0.25em 0.75em;
-    // follows the drag cursor (left is set inline on dragover)
+    // follows the drag cursor: dragover sets the variable on the row
+    left: var(--drop-message-left, 16px);
     position: absolute;
     top: 50%;
     transform: translateY(-50%);

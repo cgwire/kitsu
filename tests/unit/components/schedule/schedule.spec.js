@@ -401,6 +401,72 @@ describe('Schedule widget - dragging a collapsed root row bar', () => {
   })
 })
 
+describe('Schedule widget - dragover renders', () => {
+  // the whole timeline renders at once: a dragover fires on every mouse
+  // move, so it renders only when what it shows changes
+  const mountCounted = props => {
+    const updates = { count: 0 }
+    const wrapper = mountSchedule(props, {
+      global: {
+        stubs: { RouterLink: true },
+        mixins: [
+          {
+            updated() {
+              if (this.$options.__name === 'Schedule') updates.count++
+            }
+          }
+        ]
+      }
+    })
+    return { updates, wrapper }
+  }
+
+  // trigger() drops the clientX of a drag event in jsdom
+  const dragOver = async (row, clientX) => {
+    row.element.dispatchEvent(
+      new MouseEvent('dragover', { bubbles: true, cancelable: true, clientX })
+    )
+    await nextTick()
+  }
+
+  test('renders the drop ghost again only when the aimed day changes', async () => {
+    const { updates, wrapper } = mountCounted({
+      draggedItems: [{ ...task, estimation: 480 }]
+    })
+    const row = wrapper.find('.children[data-root-element-id]')
+    await row.trigger('dragenter', { clientX: 300 })
+    await dragOver(row, 300)
+    expect(wrapper.findAll('.drop-ghost')).toHaveLength(1)
+
+    updates.count = 0
+    // 20px wide day columns: 305 aims at the same day as 300
+    await dragOver(row, 305)
+    expect(updates.count).toBe(0)
+
+    await dragOver(row, 400)
+    expect(updates.count).toBe(1)
+    wrapper.unmount()
+  })
+
+  test('moves the forbidden pill with the cursor without rendering', async () => {
+    const { updates, wrapper } = mountCounted({
+      assignRule: () => 'task_type',
+      draggedItems: [task]
+    })
+    const row = wrapper.find('.children[data-root-element-id]')
+    await row.trigger('dragenter', { clientX: 300 })
+    await nextTick()
+
+    updates.count = 0
+    await dragOver(row, 310)
+    expect(updates.count).toBe(0)
+    expect(row.element.style.getPropertyValue('--drop-message-left')).toBe(
+      '326px'
+    )
+    wrapper.unmount()
+  })
+})
+
 describe('Schedule widget - root row name', () => {
   test('a click on the name unfolds the row like its chevron', async () => {
     const rootElement = buildRootElement()
