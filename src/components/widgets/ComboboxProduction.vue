@@ -175,6 +175,9 @@ const currentProduction = computed(() => {
   background: $white;
   width: 300px;
   position: absolute;
+  // without a top, a parent centering the combo content (flex column)
+  // centers the list on the combo too
+  top: 100%;
   border: 1px solid $light-grey-light;
   z-index: $z-dropdown;
   margin-left: -1px;
