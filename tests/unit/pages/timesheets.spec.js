@@ -16,6 +16,7 @@ import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
 const alice = { id: 'person-1', full_name: 'Alice', active: true }
+const bob = { id: 'person-2', full_name: 'Bob', active: true }
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -209,6 +210,44 @@ describe('Timesheets', () => {
           withDaysOff: false
         }
       )
+    })
+
+    const twoPeople = {
+      people: () => [alice, bob],
+      personMap: () => new Map([alice, bob].map(person => [person.id, person]))
+    }
+
+    // a failed read would leave the days off of the person shown before
+    test('drops the days off of the person shown before', async () => {
+      const error = new Error('Server error')
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      try {
+        await mountPage(path, {
+          actions: {
+            loadAggregatedPersonDaysOff: ({ personId }) =>
+              personId === alice.id
+                ? [{ date: '2026-10-05' }]
+                : Promise.reject(error),
+            loadAggregatedPersonTimeSpents: () => tasks
+          },
+          getters: twoPeople
+        })
+        const panel = wrapper.findComponent(PeopleTimesheetInfo)
+        expect(panel.props('dayOffs')).toEqual([{ date: '2026-10-05' }])
+
+        await router.push(`/timesheets/month/2026/10/persons/${bob.id}`)
+        await flushPromises()
+
+        expect(panel.props()).toMatchObject({
+          dayOffs: [],
+          isLoadingError: true
+        })
+        expect(consoleError).toHaveBeenCalledWith(error)
+      } finally {
+        consoleError.mockRestore()
+      }
     })
   })
 })

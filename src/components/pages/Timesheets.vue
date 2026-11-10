@@ -409,6 +409,7 @@ const loadAggregate = async () => {
   isInfoLoadingError.value = false
   infoWithDaysOff.value = withDaysOff
   tasks.value = []
+  dayOffs.value = []
   try {
     const aggregatedTasks = await store.dispatch(
       'loadAggregatedPersonTimeSpents',

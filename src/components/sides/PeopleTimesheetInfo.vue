@@ -39,8 +39,13 @@
           $t(totalKey, { count: total })
         }}</span>
       </div>
-      <div class="info-stat" v-if="withDaysOff && currentLevel !== 'day'">
-        <span class="info-stat-value">{{ dayOffCount }}</span>
+      <div
+        class="info-stat"
+        v-if="withDaysOff && !isLoadingError && currentLevel !== 'day'"
+      >
+        <span class="info-stat-value" :class="{ skeleton: isLoading }">
+          <template v-if="!isLoading">{{ dayOffCount }}</template>
+        </span>
         <span class="info-stat-label">
           {{ $t('days_off.nb_days_off', { count: dayOffCount }) }}
         </span>

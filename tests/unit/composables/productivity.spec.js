@@ -438,6 +438,33 @@ describe('useProductivity', () => {
       expect(productivity.isProductivityInfoLoadingError.value).toBe(false)
     })
 
+    // a failed read would leave the days off of the period shown before
+    test('drops the days off of the period shown before', async () => {
+      const error = new Error('Server error')
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      try {
+        const { productivity } = run({
+          query: { view: 'week', year: '2026', period: '12' }
+        })
+        actions.loadAggregatedPersonDaysOff = vi.fn(() => [{ date: 'x' }])
+        route.query = { ...route.query, period: '13' }
+        await flush()
+        expect(productivity.productivityDaysOff.value).toEqual([{ date: 'x' }])
+
+        actions.loadAggregatedPersonDaysOff = vi.fn(() => Promise.reject(error))
+        route.query = { ...route.query, period: '14' }
+        await flush()
+
+        expect(productivity.productivityDaysOff.value).toEqual([])
+        expect(productivity.isProductivityInfoLoadingError.value).toBe(true)
+        expect(consoleError).toHaveBeenCalledWith(error)
+      } finally {
+        consoleError.mockRestore()
+      }
+    })
+
     test('loads nothing without a selected period', async () => {
       run()
       await flush()

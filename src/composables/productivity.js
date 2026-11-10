@@ -278,6 +278,7 @@ export const useProductivity = ({
     isProductivityInfoLoadingError.value = false
     productivityWithDaysOff.value = withDaysOff
     productivityAggregatedTasks.value = []
+    productivityDaysOff.value = []
     const period = {
       personId: toValue(personId),
       detailLevel: productivityLevel.value,
