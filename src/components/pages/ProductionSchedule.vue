@@ -86,7 +86,7 @@
           <button-simple
             class="flexrow-item toggle-filters"
             :active="showMoreFilters"
-            :icon="showMoreFilters ? 'minus' : 'plus'"
+            icon="funnel"
             :title="
               showMoreFilters
                 ? $t('main.less_filters')
@@ -3106,7 +3106,7 @@ useHead({
   background: var(--background-panel);
   border-radius: 12px;
   margin-bottom: 1em;
-  padding: 0.5em 1em 1em;
+  padding: 0.75em 1em 1em;
 
   .field {
     padding-bottom: 0;
