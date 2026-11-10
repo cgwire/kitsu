@@ -1,40 +1,31 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
-      <div class="flexrow date-filters">
-        <div class="flexrow-item">
-          <label class="label">
-            {{ $t('main.start_date') }}
-          </label>
-          <date-field
-            utc
-            v-model="selectedStartDate"
-            @update:model-value="onUpdateSelectedStartDate"
-          />
-        </div>
-        <div class="flexrow-item">
-          <label class="label">
-            {{ $t('main.end_date') }}
-          </label>
-          <date-field
-            utc
-            v-model="selectedEndDate"
-            @update:model-value="onUpdateSelectedEndDate"
-          />
-        </div>
-        <div class="flexrow-item zoom-level">
-          <label class="label">
-            {{ $t('schedule.zoom_level') }}
-          </label>
+      <div class="schedule-toolbar">
+        <div class="toolbar-row">
+          <div class="flexrow-item">
+            <date-field
+              :label="$t('main.start_date')"
+              utc
+              v-model="selectedStartDate"
+              @update:model-value="onUpdateSelectedStartDate"
+            />
+          </div>
+          <div class="flexrow-item">
+            <date-field
+              :label="$t('main.end_date')"
+              utc
+              v-model="selectedEndDate"
+              @update:model-value="onUpdateSelectedEndDate"
+            />
+          </div>
           <combobox-number
-            is-simple
+            class="flexrow-item zoom-level nowrap"
+            :label="$t('schedule.zoom_level')"
             :options="zoomOptions"
             v-model="zoomLevel"
           />
-        </div>
-
-        <div class="filler"></div>
-        <div class="flexrow">
+          <div class="filler"></div>
           <button-simple
             class="flexrow-item"
             icon="clock"
@@ -48,40 +39,51 @@
             :text="$t('tasks.unassigned_tasks')"
             @click="toggleTaskSidePanel"
           />
-        </div>
-      </div>
-      <div class="flexrow filters">
-        <combobox-studio
-          class="flexrow-item"
-          all-studios-label
-          :label="$t('main.studio')"
-          :width="300"
-          v-model="selectedStudio"
-        />
-        <combobox-department
-          class="flexrow-item"
-          :display-all-and-my-departments="true"
-          :label="$t('main.department')"
-          :my-departments-only="isSupervisorWithDepartments"
-          :width="300"
-          v-model="selectedDepartment"
-        />
-        <combobox-production
-          class="flexrow-item"
-          :label="$t('main.production')"
-          :production-list="productionList"
-          v-model="selectedProduction"
-        />
-        <div class="flexrow-item people-filter">
-          <label class="label">
-            {{ $t('main.person') }}
-          </label>
-          <people-field
-            ref="people-field"
-            :people="selectablePeople"
-            :placeholder="$t('team_schedule.person_placeholder')"
-            v-model="selectedPerson"
+          <button-simple
+            class="flexrow-item toggle-filters"
+            :active="showMoreFilters"
+            icon="funnel"
+            :title="
+              showMoreFilters
+                ? $t('main.less_filters')
+                : $t('main.more_filters')
+            "
+            @click="showMoreFilters = !showMoreFilters"
           />
+        </div>
+        <div class="toolbar-row" v-show="showMoreFilters">
+          <combobox-studio
+            class="flexrow-item"
+            all-studios-label
+            :label="$t('main.studio')"
+            :width="300"
+            v-model="selectedStudio"
+          />
+          <combobox-department
+            class="flexrow-item"
+            :display-all-and-my-departments="true"
+            :label="$t('main.department')"
+            :my-departments-only="isSupervisorWithDepartments"
+            :width="300"
+            v-model="selectedDepartment"
+          />
+          <combobox-production
+            class="flexrow-item"
+            :label="$t('main.production')"
+            :production-list="productionList"
+            v-model="selectedProduction"
+          />
+          <div class="flexrow-item people-filter">
+            <label class="label">
+              {{ $t('main.person') }}
+            </label>
+            <people-field
+              ref="people-field"
+              :people="selectablePeople"
+              :placeholder="$t('team_schedule.person_placeholder')"
+              v-model="selectedPerson"
+            />
+          </div>
         </div>
       </div>
 
@@ -324,6 +326,7 @@ const draggedTasks = ref([])
 const selectedTaskIds = ref(new Set())
 const endDate = ref(moment().add(3, 'months'))
 const isTaskSidePanelOpen = ref(false)
+const showMoreFilters = ref(false)
 const personDates = ref({})
 const scheduleItems = ref([])
 const selectedDepartment = ref('ALL')
@@ -1064,76 +1067,36 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .filters {
-    color: $white-grey;
-    border-bottom: 1px solid $grey;
-  }
+.dark .schedule-toolbar {
+  color: var(--text);
 }
 
-.date-filters {
-  padding-bottom: 1em;
-  .field {
-    padding-bottom: 0;
-    margin-bottom: 0;
-  }
-}
-
-.filters {
-  border-bottom: 1px solid #eee;
-  padding-bottom: 1em;
+.schedule-toolbar {
+  background: var(--background-panel);
+  border-radius: 12px;
+  margin-bottom: 1em;
+  padding: 0.75em 1em 1em;
 
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
   }
-}
 
-.fixed-page {
-  padding: 1em;
-  padding-top: 90px;
-  padding-left: 2em;
-}
-
-.main-column {
-  display: flex;
-  border: 0;
-  overflow: hidden;
-  flex-direction: column;
-}
-
-.zoom-level {
-  white-space: nowrap;
-}
-
-// The filter rows mix five widgets with five natural control heights
-// (datepicker, select, custom combos, multiselect): force a single
-// height so both rows line up.
-$filter-control-height: 40px;
-
-.date-filters,
-.filters {
-  // vertical-align kills the baseline descender space under the
-  // inline-flex datepicker, and the fixed height overrides the 2.5em
-  // Bulma puts on the .select span regardless of its content: without
-  // both, the centered flexrow shifts the zoom item down.
-  :deep(.datepicker) {
-    vertical-align: top;
+  // Every control sits on the row bottom at the select height, as in the
+  // production schedule toolbar: datepicker, select, custom combos and
+  // multiselect each have their own natural height
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
   }
 
+  :deep(.button) {
+    height: 42px;
+  }
+
+  .zoom-level :deep(.control),
   .zoom-level :deep(.select) {
-    height: $filter-control-height;
-  }
-
-  .zoom-level :deep(.select-input) {
-    height: $filter-control-height;
-    vertical-align: top;
-  }
-
-  // ComboboxNumber tunes the dropdown arrow for its 3em select: recenter
-  // it for the 40px control (Bulma's own centering offset)
-  .zoom-level :deep(.select::after) {
-    margin-top: -0.4375em;
+    height: 42px;
   }
 
   :deep(.studio-combo),
@@ -1142,13 +1105,51 @@ $filter-control-height: 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: $filter-control-height;
+    height: 42px;
   }
 
   :deep(.multiselect),
   :deep(.multiselect__tags) {
-    min-height: $filter-control-height;
+    min-height: 42px;
   }
+}
+
+// #app .dp--input sets the height globally; the id outranks the scope
+#app .schedule-toolbar :deep(.dp--input) {
+  height: 42px;
+}
+
+// the picker's dark input (#26292f) vanishes on the #25282e panel
+.dark .schedule-toolbar :deep(.dp--input) {
+  background: var(--background);
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  row-gap: 0.5em;
+
+  & + & {
+    margin-top: 0.75em;
+  }
+
+  > :last-child {
+    margin-right: 0;
+  }
+}
+
+.fixed-page {
+  padding: 1em;
+  // the 60px topbar, then the same 1em as the sides
+  padding-top: calc(60px + 1em);
+}
+
+.main-column {
+  display: flex;
+  border: 0;
+  overflow: hidden;
+  flex-direction: column;
 }
 
 .people-filter {
@@ -1176,10 +1177,13 @@ $filter-control-height: 40px;
 
 .side-column {
   position: relative;
-  top: -30px;
-  right: -14px;
-  height: calc(100% + 44px);
   margin-top: 0;
+  padding: 0 0 0 1em;
+
+  :deep(.side) {
+    background: var(--background-panel);
+    border-radius: 12px;
+  }
 
   // Hide the task selection counter
   :deep(.task-info.empty) {
@@ -1190,9 +1194,15 @@ $filter-control-height: 40px;
   }
 
   .close-button {
+    color: var(--text);
+    opacity: 0.6;
     position: absolute;
     right: 1em;
     top: 1em;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   .task-list {
@@ -1265,5 +1275,10 @@ $filter-control-height: 40px;
       }
     }
   }
+}
+
+// the page background App.vue gives every side column
+.dark .side-column {
+  background: transparent;
 }
 </style>

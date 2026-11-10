@@ -1,41 +1,38 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
-      <div class="flexrow project-dates">
-        <div class="flexrow-item">
-          <label class="label">
-            {{ $t('main.start_date') }}
-          </label>
-          <date-field
-            week-days-disabled
-            v-model="selectedStartDate"
-            @update:model-value="onUpdateSelectedStartDate"
+      <div class="schedule-toolbar">
+        <div class="toolbar-row">
+          <div class="flexrow-item">
+            <date-field
+              :label="$t('main.start_date')"
+              week-days-disabled
+              v-model="selectedStartDate"
+              @update:model-value="onUpdateSelectedStartDate"
+            />
+          </div>
+          <div class="flexrow-item">
+            <date-field
+              :label="$t('main.end_date')"
+              week-days-disabled
+              v-model="selectedEndDate"
+              @update:model-value="onUpdateSelectedEndDate"
+            />
+          </div>
+          <combobox-number
+            class="flexrow-item zoom-level nowrap"
+            :label="$t('schedule.zoom_level')"
+            :options="zoomOptions"
+            v-model="zoomLevel"
+          />
+          <div class="filler"></div>
+          <button-simple
+            class="flexrow-item"
+            icon="clock"
+            :text="$t('schedule.today')"
+            @click="scrollScheduleToToday"
           />
         </div>
-        <div class="flexrow-item field">
-          <label class="label">
-            {{ $t('main.end_date') }}
-          </label>
-          <date-field
-            week-days-disabled
-            v-model="selectedEndDate"
-            @update:model-value="onUpdateSelectedEndDate"
-          />
-        </div>
-        <combobox-number
-          class="flexrow-item zoom-level"
-          :label="$t('schedule.zoom_level')"
-          :options="zoomOptions"
-          v-model="zoomLevel"
-        />
-
-        <div class="filler"></div>
-        <button-simple
-          class="flexrow-item"
-          icon="clock"
-          :text="$t('schedule.today')"
-          @click="scrollScheduleToToday"
-        />
       </div>
 
       <schedule
@@ -220,27 +217,63 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .project-dates {
-    color: $white-grey;
-    border-bottom: 1px solid $grey;
-  }
+.dark .schedule-toolbar {
+  color: var(--text);
 }
 
-.project-dates {
-  border-bottom: 1px solid #eee;
-  padding-bottom: 1em;
+.schedule-toolbar {
+  background: var(--background-panel);
+  border-radius: 12px;
+  margin-bottom: 1em;
+  padding: 0.75em 1em 1em;
 
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
   }
+
+  // Every control sits on the row bottom at the select height, as in the
+  // production schedule toolbar
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  :deep(.button) {
+    height: 42px;
+  }
+
+  .zoom-level :deep(.control),
+  .zoom-level :deep(.select) {
+    height: 42px;
+  }
+}
+
+// #app .dp--input sets the height globally; the id outranks the scope
+#app .schedule-toolbar :deep(.dp--input) {
+  height: 42px;
+}
+
+// the picker's dark input (#26292f) vanishes on the #25282e panel
+.dark .schedule-toolbar :deep(.dp--input) {
+  background: var(--background);
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  row-gap: 0.5em;
+
+  > :last-child {
+    margin-right: 0;
+  }
 }
 
 .fixed-page {
   padding: 1em;
-  padding-top: 90px;
-  padding-left: 2em;
+  // the 60px topbar, then the same 1em as the sides
+  padding-top: calc(60px + 1em);
 }
 
 .main-column {
@@ -248,16 +281,5 @@ useHead({
   border: 0;
   overflow: hidden;
   flex-direction: column;
-}
-
-// measured on the live row: the ComboboxNumber select renders 3em (42px)
-// while Bulma fixes its .select/.control wrappers at 2.5em (35px), so the
-// flex child ends up shorter than the date blocks and the row centering
-// shifts it 2.5px. Pin all three to the date-field input height instead
-// of the old margin-top hack.
-.zoom-level :deep(.select-input),
-.zoom-level :deep(.select),
-.zoom-level :deep(.control) {
-  height: 40px;
 }
 </style>
