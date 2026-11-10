@@ -138,6 +138,7 @@
         :is-loading-error="isInfoLoadingError"
         :tasks="tasks"
         :day-offs="dayOffs"
+        :with-days-off="infoWithDaysOff"
       />
     </div>
   </div>
@@ -183,6 +184,9 @@ const salaryScale = ref(null)
 const showFilters = ref(false)
 const isInfoLoading = ref(false)
 const isInfoLoadingError = ref(false)
+// whether the load of the panel read the days off: the rule can change while
+// the panel is open
+const infoWithDaysOff = ref(false)
 const isLoading = ref(false)
 const isLoadingError = ref(false)
 const tasks = ref([])
@@ -278,6 +282,10 @@ const showInfo = computed(() => Boolean(route.params.person_id))
 
 const currentPerson = computed(
   () => personMap.value.get(route.params.person_id) ?? {}
+)
+
+const canReadDaysOff = computed(() =>
+  store.getters.canReadDaysOff(route.params.person_id)
 )
 
 const detailOptions = computed(() => [
@@ -396,8 +404,10 @@ const reloadTimesheet = async () => {
 }
 
 const loadAggregate = async () => {
+  const withDaysOff = canReadDaysOff.value
   isInfoLoading.value = true
   isInfoLoadingError.value = false
+  infoWithDaysOff.value = withDaysOff
   tasks.value = []
   try {
     const aggregatedTasks = await store.dispatch(
@@ -414,13 +424,15 @@ const loadAggregate = async () => {
       }
     )
     tasks.value = aggregatedTasks.filter(task => task.duration > 0)
-    dayOffs.value = await store.dispatch('loadAggregatedPersonDaysOff', {
-      personId: route.params.person_id,
-      detailLevel: detailLevel.value,
-      year: route.params.year,
-      month: route.params.month,
-      week: route.params.week
-    })
+    dayOffs.value = withDaysOff
+      ? await store.dispatch('loadAggregatedPersonDaysOff', {
+          personId: route.params.person_id,
+          detailLevel: detailLevel.value,
+          year: route.params.year,
+          month: route.params.month,
+          week: route.params.week
+        })
+      : []
   } catch (error) {
     console.error(error)
     isInfoLoadingError.value = true
