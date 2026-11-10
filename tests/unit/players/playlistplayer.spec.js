@@ -877,6 +877,42 @@ describe('PlaylistPlayer.vue', () => {
       expect(play).toHaveBeenCalledTimes(2)
     })
 
+    it('stays paused when a pause follows the move to the sound', async () => {
+      const { play } = await mountWithSound([picture, sound])
+      playbackBar().vm.$emit('play-pause-clicked')
+      await vi.advanceTimersByTimeAsync(200)
+
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+
+      expect(playbackBar().props('isPlaying')).toBe(false)
+      expect(play).not.toHaveBeenCalled()
+    })
+
+    // A review room moves a paused playlist to the host's entry, then plays
+    // it, in one call.
+    it('plays the sound when a play follows the move to it', async () => {
+      const { play } = await mountWithSound([picture, sound])
+
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+
+      expect(playbackBar().props('isPlaying')).toBe(true)
+      expect(play).toHaveBeenCalledTimes(1)
+    })
+
     // Zou keeps no duration for a sound: the entity bar takes the decoded
     // one, and the playlist bar spreads the sound over the slot it has.
     it('seeks the sound from the entity bar', async () => {

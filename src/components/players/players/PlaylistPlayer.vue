@@ -2566,9 +2566,8 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
     }
     if (isPlaying.value && entity) {
       if (isSoundPreview(entity.preview_file_extension)) {
-        // The sound viewer gets its new file on the next render. A build holds
-        // the movies only, and plays its own sound.
-        if (!isFullMode.value) nextTick(playSound)
+        // A build holds the movies only, and plays its own sound.
+        if (!isFullMode.value) playSound()
       } else if (
         // Entities without any preview borrow the picture timer so
         // continuous playback holds their slot and then moves on instead
@@ -3198,10 +3197,16 @@ const playPicture = () => {
   }, 100)
 }
 
+// After a move to a sound, the viewer shows up, or gets the new file, on the
+// next render.
 const playSound = () => {
   if (playingPictureTimeout) clearTimeout(playingPictureTimeout)
   isPlaying.value = true
-  if (isCurrentPreviewSound.value) soundPlayer.value?.play()
+  nextTick(() => {
+    if (isPlaying.value && isCurrentPreviewSound.value) {
+      soundPlayer.value?.play()
+    }
+  })
 }
 
 // A sound has no time update to chain the playlist on, like a movie does:
