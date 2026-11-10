@@ -1594,7 +1594,9 @@
         "locked": "gesperrt",
         "canceled": "gestrichen"
       },
-      "zoom_level": "Zoomstufe"
+      "zoom_days": "Tage ({size})",
+      "zoom_level": "Zoomstufe",
+      "zoom_weeks": "Wochen"
     },
     "quota": {
       "average": "Durchschnitt",

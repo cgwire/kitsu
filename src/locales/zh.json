@@ -1594,7 +1594,9 @@
         "locked": "锁定",
         "canceled": "已取消"
       },
-      "zoom_level": "缩放等级"
+      "zoom_days": "天 ({size})",
+      "zoom_level": "缩放等级",
+      "zoom_weeks": "周"
     },
     "quota": {
       "average": "平均",

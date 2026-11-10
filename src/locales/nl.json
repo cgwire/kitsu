@@ -1594,7 +1594,9 @@
         "locked": "vergrendeld",
         "canceled": "geannuleerd"
       },
-      "zoom_level": "Zoomniveau"
+      "zoom_days": "Dagen ({size})",
+      "zoom_level": "Zoomniveau",
+      "zoom_weeks": "Weken"
     },
     "quota": {
       "average": "Gemiddeld",

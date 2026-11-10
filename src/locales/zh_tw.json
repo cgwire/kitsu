@@ -1594,7 +1594,9 @@
         "locked": "鎖定",
         "canceled": "已取消"
       },
-      "zoom_level": "縮放等級"
+      "zoom_days": "天 ({size})",
+      "zoom_level": "縮放等級",
+      "zoom_weeks": "週"
     },
     "quota": {
       "average": "平均",

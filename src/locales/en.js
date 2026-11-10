@@ -2137,7 +2137,9 @@ export default {
       locked: 'locked',
       canceled: 'canceled'
     },
-    zoom_level: 'Zoom level'
+    zoom_days: 'Days ({size})',
+    zoom_level: 'Zoom level',
+    zoom_weeks: 'Weeks'
   },
 
   team_schedule: {

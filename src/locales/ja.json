@@ -1594,7 +1594,9 @@
         "locked": "ロック済み",
         "canceled": "キャンセル"
       },
-      "zoom_level": "ズームレベル"
+      "zoom_days": "日 ({size})",
+      "zoom_level": "ズームレベル",
+      "zoom_weeks": "週"
     },
     "quota": {
       "average": "平均",

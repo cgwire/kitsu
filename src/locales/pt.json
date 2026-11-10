@@ -1594,7 +1594,9 @@
         "locked": "bloqueado",
         "canceled": "cancelado"
       },
-      "zoom_level": "Nível de zoom"
+      "zoom_days": "Dias ({size})",
+      "zoom_level": "Nível de zoom",
+      "zoom_weeks": "Semanas"
     },
     "quota": {
       "average": "Média",

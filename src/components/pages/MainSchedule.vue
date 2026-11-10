@@ -96,6 +96,7 @@ import { episodifyRoute, getProductionSchedulePath } from '@/lib/path'
 import {
   getTaskTypeFilterTitle,
   getTaskTypeVisibilityMap,
+  getZoomOptions,
   setTaskTypeVisibility
 } from '@/lib/productionSchedule'
 import {
@@ -189,12 +190,7 @@ const filteredScheduleItems = computed(() =>
   )
 )
 
-const zoomOptions = computed(() => [
-  { label: t('main.week'), value: 0 },
-  { label: '1', value: 1 },
-  { label: '2', value: 2 },
-  { label: '3', value: 3 }
-])
+const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
 // Functions
 // --------------------------------------------------------------------------

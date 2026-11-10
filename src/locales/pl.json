@@ -2049,7 +2049,9 @@
         "locked": "zablokowana",
         "canceled": "anulowana"
       },
-      "zoom_level": "Poziom powiększenia"
+      "zoom_days": "Dni ({size})",
+      "zoom_level": "Poziom powiększenia",
+      "zoom_weeks": "Tygodnie"
     },
     "team_schedule": {
       "busy": "Zajęty przy innej produkcji",

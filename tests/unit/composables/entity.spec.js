@@ -10,6 +10,11 @@ import '@/lib/auth'
 import { useEntity } from '@/composables/entity'
 import { parseSimpleDate } from '@/lib/time'
 
+vi.mock('vue-i18n', async importOriginal => ({
+  ...(await importOriginal()),
+  useI18n: () => ({ t: key => key })
+}))
+
 enableAutoUnmount(afterEach)
 
 const entities = [{ id: 'entity-0' }, { id: 'entity-1' }, { id: 'entity-2' }]

@@ -1594,7 +1594,9 @@
         "locked": "잠김",
         "canceled": "취소됨"
       },
-      "zoom_level": "확대/축소 수준"
+      "zoom_days": "일 ({size})",
+      "zoom_level": "확대/축소 수준",
+      "zoom_weeks": "주"
     },
     "quota": {
       "average": "평균",

@@ -285,6 +285,7 @@ import { useStore } from 'vuex'
 
 import colors from '@/lib/colors'
 import { getPersonPath } from '@/lib/path'
+import { getZoomOptions } from '@/lib/productionSchedule'
 import {
   addBusinessDays,
   getFirstStartDate,
@@ -355,12 +356,7 @@ const loading = reactive({
   unassignedTasks: false
 })
 
-const zoomOptions = [
-  { label: '1', value: 1 },
-  { label: '2', value: 2 },
-  { label: '3', value: 3 },
-  { label: '4', value: 4 }
-]
+const zoomOptions = computed(() => getZoomOptions(t, [1, 2, 3, 4]))
 
 // non-reactive: person id -> raw tasks, so re-expanding a row is instant.
 // Entries are dropped whenever the row's assignments or dates change.
@@ -1046,7 +1042,7 @@ onMounted(() => {
   }
   syncDepartmentFilter()
   const zoom = Number(route.query.zoom)
-  zoomLevel.value = zoomOptions.some(option => option.value === zoom)
+  zoomLevel.value = zoomOptions.value.some(option => option.value === zoom)
     ? zoom
     : DEFAULT_ZOOM
 

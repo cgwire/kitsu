@@ -1594,7 +1594,9 @@
         "locked": "قفل شده",
         "canceled": "لغو شد"
       },
-      "zoom_level": "سطح بزرگنمایی"
+      "zoom_days": "روزها ({size})",
+      "zoom_level": "سطح بزرگنمایی",
+      "zoom_weeks": "هفته‌ها"
     },
     "quota": {
       "average": "میانگین",

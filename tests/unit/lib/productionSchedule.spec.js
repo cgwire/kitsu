@@ -13,6 +13,7 @@ import {
   getTaskTypeVisibilityMap,
   getTaskUpdate,
   getVersionedTaskUpdate,
+  getZoomOptions,
   isTaskTypeFilterShown,
   parseHiddenTaskTypeIds,
   refreshRawDates,
@@ -263,5 +264,19 @@ describe('lib/productionSchedule', () => {
         }
       })
     })
+  })
+})
+
+describe('getZoomOptions', () => {
+  const t = (key, params) => (params ? `${key}:${params.size}` : key)
+
+  it('names the week level and sizes the day levels', () => {
+    expect(getZoomOptions(t, [0, 1, 2, 3, 4])).toEqual([
+      { label: 'schedule.zoom_weeks', value: 0 },
+      { label: 'schedule.zoom_days:S', value: 1 },
+      { label: 'schedule.zoom_days:M', value: 2 },
+      { label: 'schedule.zoom_days:L', value: 3 },
+      { label: 'schedule.zoom_days:XL', value: 4 }
+    ])
   })
 })

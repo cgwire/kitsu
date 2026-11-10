@@ -1594,7 +1594,9 @@
         "locked": "zárolt",
         "reference": "Referencia-előrejelzés"
       },
-      "zoom_level": "Zoom szint"
+      "zoom_days": "Napok ({size})",
+      "zoom_level": "Zoom szint",
+      "zoom_weeks": "Hetek"
     },
     "quota": {
       "average": "Átlag",
