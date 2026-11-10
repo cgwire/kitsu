@@ -267,18 +267,44 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
       expect(findCodeCheck(wrapper).exists()).toBe(false)
     })
 
-    it('keeps the setup open when the code is refused', async () => {
-      const enableTOTP = vi.fn(() =>
-        Promise.reject({ body: { wrong_OTP: true } })
-      )
+    // Zou tells which of the two codes it refused: only that one is wrong.
+    it.each([
+      { name: 'new code', flag: 'wrong_OTP', isNewCodeWrong: true },
+      { name: 'enabled factor', flag: 'wrong_existing_OTP' }
+    ])('keeps the setup open when the $name is refused', async scenario => {
+      const { flag, isNewCodeWrong = false } = scenario
+      const enableTOTP = vi.fn(() => Promise.reject({ body: { [flag]: true } }))
       const wrapper = mountSetup({ email_otp_enabled: true }, { enableTOTP })
       await fillSetup(wrapper, 'totp.button_enable', '123456')
 
       findCodeCheck(wrapper).vm.$emit('validate', twoFactorPayload)
       await flushPromises()
 
-      expect(findCodeCheck(wrapper).props('isWrongOtp')).toBe(true)
+      expect(wrapper.find('.two-fa-flow > .show-message-2fa').exists()).toBe(
+        isNewCodeWrong
+      )
+      expect(findCodeCheck(wrapper).props('isWrongOtp')).toBe(!isNewCodeWrong)
       expect(wrapper.find('.otp-input').element.value).toBe('123456')
+    })
+
+    it('keeps a FIDO registration open when the factor is refused', async () => {
+      vi.stubGlobal('navigator', {
+        credentials: { create: () => Promise.resolve('credential') }
+      })
+      const registerFIDO = vi.fn(() =>
+        Promise.reject({ body: { wrong_existing_OTP: true } })
+      )
+      const wrapper = mountSetup(
+        { totp_enabled: true },
+        { preRegisterFIDO: () => 'publicKey', registerFIDO }
+      )
+      await fillSetup(wrapper, 'fido.button_register', 'Yubikey')
+
+      findCodeCheck(wrapper).vm.$emit('validate', twoFactorPayload)
+      await flushPromises()
+
+      expect(findCodeCheck(wrapper).props('isWrongOtp')).toBe(true)
+      expect(wrapper.find('.otp-input').element.value).toBe('Yubikey')
     })
   })
 
