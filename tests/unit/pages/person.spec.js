@@ -927,6 +927,41 @@ describe('Person page', () => {
       })
       wrapper.unmount()
     })
+
+    // Zou refuses the days off of the person to some viewers; the day level
+    // reads none
+    it('shows the time of the clicked month to a viewer refused the days off', async () => {
+      const loadAggregatedPersonDaysOff = vi.fn(() =>
+        Promise.reject(new Error('Forbidden'))
+      )
+      const wrapper = await mountPage({
+        actions: {
+          loadAggregatedPersonDaysOff,
+          loadAggregatedPersonTimeSpents: vi.fn(() => [
+            { id: 'task-1', duration: 60 }
+          ]),
+          loadPersonTimeSpentsByPeriod: vi.fn(() => [])
+        },
+        getters: {
+          canReadDaysOff: () => () => false,
+          isCurrentUserSupervisor: () => true,
+          user: () => otherUser
+        },
+        query: { section: 'productivity', view: 'month', year: '2026' }
+      })
+
+      wrapper.findComponent(ProductivityChart).vm.$emit('column-selected', 10)
+      await flushPromises()
+
+      expect(loadAggregatedPersonDaysOff).not.toHaveBeenCalled()
+      expect(wrapper.findComponent(PeopleTimesheetInfo).props()).toMatchObject({
+        month: 10,
+        dayOffs: [],
+        isLoadingError: false,
+        tasks: [{ id: 'task-1', duration: 60 }]
+      })
+      wrapper.unmount()
+    })
   })
 
   describe('time spent', () => {

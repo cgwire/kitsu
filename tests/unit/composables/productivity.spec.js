@@ -45,7 +45,8 @@ const setup = ({
   taskTypeId = '',
   openProductions = productions,
   sideColumn = ref(null),
-  loadTimeSpents = vi.fn(() => [])
+  loadTimeSpents = vi.fn(() => []),
+  canReadDaysOff
 } = {}) => {
   route.query = query
   router.push.mockClear()
@@ -66,7 +67,7 @@ const setup = ({
   }
   const scope = effectScope()
   const productivity = scope.run(() =>
-    useProductivity({ ...refs, loadTimeSpents, sideColumn })
+    useProductivity({ ...refs, canReadDaysOff, loadTimeSpents, sideColumn })
   )
   return { productivity, scope, loadTimeSpents, ...refs }
 }
@@ -384,6 +385,28 @@ describe('useProductivity', () => {
       ])
       expect(productivity.productivityDaysOff.value).toEqual([{ date: 'x' }])
       expect(productivity.isProductivityInfoLoading.value).toBe(false)
+    })
+
+    // Zou refuses the days off of a person to some viewers
+    test('loads the time spents alone for a viewer refused the days off', async () => {
+      const { productivity } = run({
+        query: { view: 'week', year: '2026', period: '12' },
+        canReadDaysOff: ref(false)
+      })
+      actions.loadAggregatedPersonTimeSpents = vi.fn(() => [
+        { id: 'task-1', duration: 60 }
+      ])
+      actions.loadAggregatedPersonDaysOff = vi.fn(() =>
+        Promise.reject(new Error('Forbidden'))
+      )
+      route.query = { ...route.query, period: '13' }
+      await flush()
+      expect(dispatched('loadAggregatedPersonDaysOff')).toEqual([])
+      expect(productivity.productivityTasks.value).toEqual([
+        { id: 'task-1', duration: 60 }
+      ])
+      expect(productivity.productivityDaysOff.value).toEqual([])
+      expect(productivity.isProductivityInfoLoadingError.value).toBe(false)
     })
 
     test('loads nothing without a selected period', async () => {

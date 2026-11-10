@@ -13,7 +13,9 @@ const quotaModes = ['weighted', 'feedback', 'weighteddone', 'done']
  * month, period, metric, quotaMode, countMode), and the chart and its side
  * panel load the time spents or the quotas of `personId`. `loadTimeSpents`
  * fetches the time spents of a { startDate, endDate } range, through the
- * route that fits the page. The other parameters are refs or getters.
+ * route that fits the page. The side panel reads the days off of the person
+ * only when `canReadDaysOff` (true by default) allows it. The other
+ * parameters are refs or getters.
  */
 export const useProductivity = ({
   personId,
@@ -21,6 +23,7 @@ export const useProductivity = ({
   taskTypeId,
   openProductions,
   isActive,
+  canReadDaysOff = true,
   loadTimeSpents,
   sideColumn
 }) => {
@@ -285,10 +288,9 @@ export const useProductivity = ({
       productivityAggregatedTasks.value = tasks.filter(
         task => task.duration > 0
       )
-      const daysOff = await store.dispatch(
-        'loadAggregatedPersonDaysOff',
-        period
-      )
+      const daysOff = toValue(canReadDaysOff)
+        ? await store.dispatch('loadAggregatedPersonDaysOff', period)
+        : []
       if (isStale()) return
       productivityDaysOff.value = daysOff
     } catch (err) {

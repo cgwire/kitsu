@@ -595,6 +595,7 @@ const {
       !person.value?.is_bot &&
       isCurrentUserAllowed.value
   ),
+  canReadDaysOff,
   sideColumn: useTemplateRef('productivity-side-column'),
   loadTimeSpents: ({ startDate, endDate }) =>
     store.dispatch('loadPersonTimeSpentsByPeriod', {
