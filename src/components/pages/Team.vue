@@ -35,9 +35,12 @@
             v-model="role"
           />
         </div>
+        <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
         <production-team-list
           :entries="filteredTeam"
           :project-roles="projectRoles"
+          :role-redraws="roleRedraws"
+          @remove-person="removePerson"
           @update-role="updateRole"
         />
       </div>
@@ -119,6 +122,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useCellSave } from '@/composables/cellSave'
 import { filterPeople, roleOptions } from '@/lib/people'
 import { sortPeople } from '@/lib/sorting'
 
@@ -129,6 +133,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
@@ -139,12 +144,16 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useStore()
+const { cellSaveErrorText, saveCell } = useCellSave(
+  member => member.full_name || member.name
+)
 
 // State
 const importDepartmentId = ref(null)
 const importProductionId = ref(null)
 const peopleFieldRef = ref(null)
 const person = ref(null)
+const roleRedraws = ref({})
 
 // Computed
 const activePeople = computed(() => store.getters.activePeople)
@@ -202,8 +211,12 @@ const unlistedPeople = computed(() =>
 const pushQuery = (key, value) =>
   router.push({ query: { ...route.query, [key]: value || undefined } })
 
+// The store puts back a change Zou refuses: the page tells it.
 const addPersonToTeam = personToAdd =>
-  store.dispatch('addPersonToTeam', personToAdd)
+  saveCell(personToAdd, () => store.dispatch('addPersonToTeam', personToAdd))
+
+const removePerson = member =>
+  saveCell(member, () => store.dispatch('removePersonFromTeam', member))
 
 const addPerson = () => {
   if (person.value) {
@@ -233,10 +246,13 @@ const loadTeamRoles = () => {
   store.dispatch('loadProductionTeam').catch(console.error)
 }
 
-const updateRole = ({ person: member, role }) => {
-  store
-    .dispatch('setTeamMemberRole', { personId: member.id, role })
-    .catch(console.error)
+const updateRole = async ({ person: member, role }) => {
+  const isSaved = await saveCell(member, () =>
+    store.dispatch('setTeamMemberRole', { personId: member.id, role })
+  )
+  if (!isSaved) {
+    roleRedraws.value[member.id] = (roleRedraws.value[member.id] || 0) + 1
+  }
 }
 
 // Watchers

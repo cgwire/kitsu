@@ -636,9 +636,21 @@ const actions = {
     commit(PRODUCTION_AVATAR_UPLOADED, productionId)
   },
 
-  addPersonToTeam({ commit, state }, person) {
-    commit(TEAM_ADD_PERSON, person.id)
-    return productionsApi.addPersonToTeam(state.currentProduction.id, person.id)
+  // The team changes at once in the list, and changes back if Zou refuses,
+  // in its own production even when the user opened another one meanwhile.
+  async addPersonToTeam({ commit, state }, person) {
+    const production = state.currentProduction
+    // An import also adds the people already in the team: they stay.
+    const isMember = production.team?.includes(person.id)
+    commit(TEAM_ADD_PERSON, { production, personId: person.id })
+    try {
+      return await productionsApi.addPersonToTeam(production.id, person.id)
+    } catch (err) {
+      if (!isMember) {
+        commit(TEAM_REMOVE_PERSON, { production, personId: person.id })
+      }
+      throw err
+    }
   },
 
   async loadProductionTeam({ commit, state, rootState }) {
@@ -675,12 +687,16 @@ const actions = {
     return link
   },
 
-  removePersonFromTeam({ commit, state }, person) {
-    commit(TEAM_REMOVE_PERSON, person.id)
-    return productionsApi.removePersonFromTeam(
-      state.currentProduction.id,
-      person.id
-    )
+  async removePersonFromTeam({ commit, state }, person) {
+    const production = state.currentProduction
+    const role = state.teamRoles[production.id]?.[person.id]
+    commit(TEAM_REMOVE_PERSON, { production, personId: person.id })
+    try {
+      return await productionsApi.removePersonFromTeam(production.id, person.id)
+    } catch (err) {
+      commit(TEAM_ADD_PERSON, { production, personId: person.id, role })
+      throw err
+    }
   },
 
   addAssetTypeToProduction({ commit, state }, assetTypeId) {
@@ -1248,13 +1264,20 @@ const mutations = {
     state.currentProduction = production
   },
 
-  [TEAM_ADD_PERSON](state, personId) {
-    addToIdList(state.currentProduction, 'team', personId)
+  // A refused removal brings the member back with their project role.
+  [TEAM_ADD_PERSON](state, { production, personId, role }) {
+    addToIdList(production, 'team', personId)
+    if (role) {
+      state.teamRoles = {
+        ...state.teamRoles,
+        [production.id]: { ...state.teamRoles[production.id], [personId]: role }
+      }
+    }
   },
 
-  [TEAM_REMOVE_PERSON](state, personId) {
-    removeFromIdList(state.currentProduction, 'team', personId)
-    delete state.teamRoles[state.currentProduction.id]?.[personId]
+  [TEAM_REMOVE_PERSON](state, { production, personId }) {
+    removeFromIdList(production, 'team', personId)
+    delete state.teamRoles[production.id]?.[personId]
   },
 
   [TEAM_ROLES_LOADED](state, { productionId, team }) {

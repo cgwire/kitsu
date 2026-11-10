@@ -40,8 +40,6 @@ import {
   PRODUCTION_REMOVE_TASK_TYPE,
   REMOVE_PRODUCTION,
   SET_CURRENT_PRODUCTION,
-  TEAM_ADD_PERSON,
-  TEAM_REMOVE_PERSON,
   UPDATE_METADATA_DESCRIPTOR_END,
   UPDATE_PRODUCTION
 } from '@/store/mutation-types'
@@ -759,16 +757,100 @@ describe('Productions store', () => {
       }
     })
 
-    test('addPersonToTeam', () => {
-      const mockCommit = vi.fn()
-      const state = {
-        currentProduction: { id: '123' }
-      }
-      productionApi.addPersonToTeam = vi.fn()
-      store.actions.addPersonToTeam({ commit: mockCommit, state }, { id: '456' })
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, TEAM_ADD_PERSON, '456')
-      expect(productionApi.addPersonToTeam).toBeCalledTimes(1)
+    // The list moves at once, and back when Zou refuses.
+    describe('team changes', () => {
+      const refusal = new Error('Refused')
+      let state
+
+      // Runs the action through the real mutations of the module.
+      const run = (action, person) =>
+        store.actions[action](
+          {
+            commit: (type, payload) => store.mutations[type](state, payload),
+            state
+          },
+          person
+        )
+
+      beforeEach(() => {
+        state = {
+          currentProduction: { id: '123', team: ['456'] },
+          teamRoles: { 123: { 456: 'supervisor' } }
+        }
+      })
+
+      test('addPersonToTeam lists the person before Zou answers', () => {
+        productionApi.addPersonToTeam = vi.fn(() => new Promise(() => {}))
+        run('addPersonToTeam', { id: '789' })
+        expect(state.currentProduction.team).toEqual(['456', '789'])
+        expect(productionApi.addPersonToTeam).toHaveBeenCalledWith('123', '789')
+      })
+
+      test('addPersonToTeam takes out a person Zou refuses', async () => {
+        productionApi.addPersonToTeam = vi.fn(() => Promise.reject(refusal))
+        await expect(run('addPersonToTeam', { id: '789' })).rejects.toBe(refusal)
+        expect(state.currentProduction.team).toEqual(['456'])
+      })
+
+      // An import also adds the people already in the team.
+      test('addPersonToTeam keeps a member Zou refuses to add again', async () => {
+        productionApi.addPersonToTeam = vi.fn(() => Promise.reject(refusal))
+        await expect(run('addPersonToTeam', { id: '456' })).rejects.toBe(refusal)
+        expect(state.currentProduction.team).toEqual(['456'])
+        expect(state.teamRoles).toEqual({ 123: { 456: 'supervisor' } })
+      })
+
+      test('removePersonFromTeam takes the member out before Zou answers', () => {
+        productionApi.removePersonFromTeam = vi.fn(() => new Promise(() => {}))
+        run('removePersonFromTeam', { id: '456' })
+        expect(state.currentProduction.team).toEqual([])
+        expect(productionApi.removePersonFromTeam).toHaveBeenCalledWith('123', '456')
+      })
+
+      test('removePersonFromTeam puts back a member Zou keeps, with their role', async () => {
+        productionApi.removePersonFromTeam = vi.fn(() => Promise.reject(refusal))
+        await expect(run('removePersonFromTeam', { id: '456' })).rejects.toBe(
+          refusal
+        )
+        expect(state.currentProduction.team).toEqual(['456'])
+        expect(state.teamRoles).toEqual({ 123: { 456: 'supervisor' } })
+      })
+
+      describe('with another production opened meanwhile', () => {
+        let otherProduction
+
+        beforeEach(() => {
+          otherProduction = { id: '999', team: ['789'] }
+        })
+
+        const runAndSwitch = async (action, person) => {
+          const running = run(action, person)
+          state.currentProduction = otherProduction
+          state.teamRoles[999] = { 789: 'manager' }
+          await expect(running).rejects.toBe(refusal)
+        }
+
+        // Back on the production left, its list reads the team again only
+        // with a reload of the page.
+        test('addPersonToTeam takes the person out of their own production', async () => {
+          productionApi.addPersonToTeam = vi.fn(() => Promise.reject(refusal))
+          const production = state.currentProduction
+          await runAndSwitch('addPersonToTeam', { id: '789' })
+          expect(production.team).toEqual(['456'])
+          expect(otherProduction.team).toEqual(['789'])
+          expect(state.teamRoles[999]).toEqual({ 789: 'manager' })
+        })
+
+        test('removePersonFromTeam puts the member back in their own production', async () => {
+          productionApi.removePersonFromTeam = vi.fn(() => Promise.reject(refusal))
+          const production = state.currentProduction
+          await runAndSwitch('removePersonFromTeam', { id: '456' })
+          expect(production.team).toEqual(['456'])
+          expect(state.teamRoles[123]).toEqual({ 456: 'supervisor' })
+          expect(otherProduction.team).toEqual(['789'])
+          expect(state.teamRoles[999]).toEqual({ 789: 'manager' })
+        })
+      })
     })
 
     describe('team roles', () => {
@@ -873,18 +955,6 @@ describe('Productions store', () => {
           })
         })
       })
-    })
-
-    test('removePersonFromTeam', () => {
-      const mockCommit = vi.fn()
-      const state = {
-        currentProduction: { id: '123' }
-      }
-      productionApi.removePersonFromTeam = vi.fn()
-      store.actions.removePersonFromTeam({ commit: mockCommit, state }, { id: '456' })
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, TEAM_REMOVE_PERSON, '456')
-      expect(productionApi.removePersonFromTeam).toBeCalledTimes(1)
     })
 
     test('addAssetTypeToProduction', () => {
@@ -1394,23 +1464,48 @@ describe('Productions store', () => {
       expect(state.currentProduction).toEqual({ id: 'production-id' })
     })
 
+    // The team changes in the production given, which may not be the
+    // current one anymore.
     test('TEAM_ADD_PERSON', () => {
-      state.currentProduction = {
-        team: []
-      }
-      store.mutations.TEAM_ADD_PERSON(state, 123)
-      expect(state.currentProduction.team[0]).toEqual(123)
+      const production = { id: 'production-1', team: [] }
+      state.currentProduction = { id: 'production-2', team: [] }
+      state.teamRoles = {}
+      store.mutations.TEAM_ADD_PERSON(state, { production, personId: 123 })
+      expect(production.team).toEqual([123])
+      expect(state.currentProduction.team).toEqual([])
+      expect(state.teamRoles).toEqual({})
+    })
+
+    // A refused removal brings the member back with their project role.
+    test('TEAM_ADD_PERSON with a role', () => {
+      const production = { id: 'production-1', team: [] }
+      state.currentProduction = { id: 'production-2', team: [] }
+      state.teamRoles = { 'production-1': { 456: 'client' } }
+      store.mutations.TEAM_ADD_PERSON(state, {
+        production,
+        personId: 123,
+        role: 'manager'
+      })
+      expect(production.team).toEqual([123])
+      expect(state.teamRoles).toEqual({
+        'production-1': { 123: 'manager', 456: 'client' }
+      })
     })
 
     test('TEAM_REMOVE_PERSON', () => {
-      state.currentProduction = {
-        id: 'production-1',
-        team: [123]
+      const production = { id: 'production-1', team: [123] }
+      state.currentProduction = { id: 'production-2', team: [123] }
+      state.teamRoles = {
+        'production-1': { 123: 'manager' },
+        'production-2': { 123: 'supervisor' }
       }
-      state.teamRoles = { 'production-1': { 123: 'manager' } }
-      store.mutations.TEAM_REMOVE_PERSON(state, 123)
-      expect(state.currentProduction.team).toHaveLength(0)
-      expect(state.teamRoles['production-1'][123]).toBeUndefined()
+      store.mutations.TEAM_REMOVE_PERSON(state, { production, personId: 123 })
+      expect(production.team).toHaveLength(0)
+      expect(state.currentProduction.team).toEqual([123])
+      expect(state.teamRoles).toEqual({
+        'production-1': {},
+        'production-2': { 123: 'supervisor' }
+      })
     })
 
     // The roles are kept per production: the comments of a task read those
