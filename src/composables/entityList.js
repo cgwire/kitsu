@@ -761,7 +761,8 @@ export const useEntityList = ({
       .map(({ entity, x }) => ({
         entity,
         column: taskTypeMap.value.get(taskTypeId),
-        task: taskMap.value.get(entity.validations.get(taskTypeId)),
+        // An episode or a sequence received live comes without its tasks.
+        task: taskMap.value.get(entity.validations?.get(taskTypeId)),
         x,
         y
       }))

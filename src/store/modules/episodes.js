@@ -12,7 +12,11 @@ import {
   sortEpisodeResult,
   sortValidationColumns
 } from '@/lib/sorting'
-import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
+import {
+  addRowToSelectionGrid,
+  buildSelectionGrid,
+  clearSelectionGrid
+} from '@/lib/selection'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
 import { getFilledColumns, removeModelFromList, trackEdit } from '@/lib/models'
 import { computeStats } from '@/lib/stats'
@@ -131,6 +135,15 @@ const helpers = {
     })
 
     return task
+  },
+
+  // The listed rows, which "Create tasks", "Select column" and "Delete all"
+  // read, hold the cached episodes: an edit puts copies among the displayed
+  // ones, and a production switch clears the cache before them.
+  setListedRows(state) {
+    cache.result = state.displayedEpisodes
+      .map(({ id }) => cache.episodeMap.get(id))
+      .filter(Boolean)
   },
 
   setListStats(state, episodes) {
@@ -335,9 +348,10 @@ const actions = {
   ) {
     let taskIds
     if (selectionOnly) {
+      // An episode received live comes without its tasks.
       taskIds = cache.result
-        .filter(episode => episode.validations.get(taskTypeId))
-        .map(episode => episode.validations.get(taskTypeId))
+        .map(episode => episode.validations?.get(taskTypeId))
+        .filter(Boolean)
     }
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
   },
@@ -565,6 +579,7 @@ const mutations = {
     state.displayedEpisodes = helpers.sortList(state, [
       ...state.displayedEpisodes
     ])
+    helpers.setListedRows(state)
   },
 
   [ADD_EPISODE_SEARCH](state, searchQuery) {
@@ -733,6 +748,12 @@ const mutations = {
       ...state.displayedEpisodes,
       episode
     ])
+    helpers.setListedRows(state)
+    // The selected cells are keyed by their row.
+    state.episodeSelectionGrid = addRowToSelectionGrid(
+      state.episodeSelectionGrid,
+      state.displayedEpisodes.indexOf(episode)
+    )
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
     state.displayedEpisodesLength = state.displayedEpisodes.length
   },
@@ -802,6 +823,7 @@ const mutations = {
         ...state.displayedEpisodes,
         episode
       ])
+      helpers.setListedRows(state)
     }
 
     helpers.setListStats(state, state.displayedEpisodes)

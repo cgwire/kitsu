@@ -108,7 +108,11 @@ describe('Episodes store', () => {
     // first: the response is still the list, and the live episode may be
     // missing from it.
     test('merges an episode created while the list was in flight', () => {
-      const state = { episodes: [], displayedEpisodes: [] }
+      const state = {
+        episodes: [],
+        displayedEpisodes: [],
+        episodeSelectionGrid: new Set()
+      }
       episodesStore.mutations.ADD_EPISODE(state, {
         id: 'episode-3',
         name: 'E03',
@@ -180,6 +184,24 @@ describe('Episodes store', () => {
     })
   })
 
+  const loadListedEpisodes = (state, episodeSearch = '') => {
+    episodesStore.mutations.LOAD_EPISODES_END(state, {
+      episodes: [
+        { id: 'episode-1', name: 'E01', status: 'running' },
+        { id: 'episode-3', name: 'E03', status: 'running' }
+      ],
+      routeEpisodeId: 'episode-1'
+    })
+    episodesStore.mutations.SET_EPISODE_SEARCH(state, {
+      episodeSearch,
+      production: { id: 'production-1' },
+      persons: [],
+      taskMap: new Map(),
+      taskStatusMap: new Map(),
+      taskTypeMap: new Map()
+    })
+  }
+
   describe('ADD_EPISODE', () => {
     // The Episodes page loads its rows with tasks into cache.episodes while
     // state.episodes keeps the plain list the topbar loaded: a live episode
@@ -226,9 +248,78 @@ describe('Episodes store', () => {
         'episode-2'
       ])
     })
+
+    // "Create tasks" on the listed rows and "Select column" read the search
+    // result.
+    test('lists a live episode in the search result', () => {
+      const state = { episodes: [], displayedEpisodes: [], episodeSorting: [] }
+      loadListedEpisodes(state)
+
+      episodesStore.mutations.ADD_EPISODE(state, {
+        id: 'episode-2',
+        name: 'E02',
+        status: 'running'
+      })
+
+      expect(episodesStore.cache.result.map(({ id }) => id)).toEqual([
+        'episode-1',
+        'episode-2',
+        'episode-3'
+      ])
+    })
+
+    // A production switch clears the store before the rows of the list.
+    test('lists only the episodes the store holds', () => {
+      const state = { episodes: [], displayedEpisodes: [], episodeSorting: [] }
+      loadListedEpisodes(state)
+      episodesStore.mutations.CLEAR_EPISODES(state)
+
+      episodesStore.mutations.ADD_EPISODE(state, {
+        id: 'episode-2',
+        name: 'E02',
+        status: 'running'
+      })
+
+      expect(episodesStore.cache.result.map(episode => episode?.id)).toEqual([
+        'episode-2'
+      ])
+    })
+
+    // The selected cells are keyed by their row.
+    test('moves down the selected cells below a live episode', () => {
+      const state = { episodes: [], displayedEpisodes: [], episodeSorting: [] }
+      loadListedEpisodes(state)
+      state.episodeSelectionGrid = new Set(['0-0', '1-0'])
+
+      episodesStore.mutations.ADD_EPISODE(state, {
+        id: 'episode-2',
+        name: 'E02',
+        status: 'running'
+      })
+
+      expect([...state.episodeSelectionGrid]).toEqual(['0-0', '2-0'])
+    })
   })
 
   describe('NEW_EPISODE_END', () => {
+    // The new row stays listed whatever the search: "Create tasks" on the
+    // listed rows must reach it.
+    test('lists a new episode in the search result', () => {
+      const state = { episodes: [], displayedEpisodes: [], episodeSorting: [] }
+      loadListedEpisodes(state, 'E03')
+
+      episodesStore.mutations.NEW_EPISODE_END(state, {
+        id: 'episode-2',
+        name: 'E02',
+        project_id: 'production-1'
+      })
+
+      expect(episodesStore.cache.result.map(({ id }) => id)).toEqual([
+        'episode-2',
+        'episode-3'
+      ])
+    })
+
     test('keeps the metadata typed in the creation form', () => {
       const state = { episodes: [], displayedEpisodes: [], episodeSorting: [] }
 
@@ -311,7 +402,11 @@ describe('Episodes store', () => {
     // socket handler inserts the episode first: the response must not
     // append a copy.
     test('does not duplicate an episode the socket handler already added', () => {
-      const state = { episodes: [], displayedEpisodes: [] }
+      const state = {
+        episodes: [],
+        displayedEpisodes: [],
+        episodeSelectionGrid: new Set()
+      }
       episodesStore.mutations.LOAD_EPISODES_END(state, {
         episodes: [{ id: 'episode-1', name: 'E01', status: 'running' }],
         routeEpisodeId: 'episode-1'
@@ -396,7 +491,11 @@ describe('Episodes store', () => {
     // A live-added episode carries no totals: summing it made both totals
     // NaN, and the footer, guarded on a positive total, disappeared.
     test('sums the totals over the episodes carrying one', () => {
-      const state = { episodes: [], displayedEpisodes: [] }
+      const state = {
+        episodes: [],
+        displayedEpisodes: [],
+        episodeSelectionGrid: new Set()
+      }
       episodesStore.mutations.LOAD_EPISODES_END(state, {
         episodes: [
           {
@@ -444,7 +543,11 @@ describe('Episodes store', () => {
     })
 
     test('keeps an episode added live', () => {
-      const state = { episodes: [], displayedEpisodes: [] }
+      const state = {
+        episodes: [],
+        displayedEpisodes: [],
+        episodeSelectionGrid: new Set()
+      }
       episodesStore.mutations.LOAD_EPISODES_END(state, {
         episodes: [
           { id: 'episode-1', name: 'E01', status: 'running' },
@@ -1234,6 +1337,7 @@ describe('Episodes store, through a store', () => {
 
         expect(rows.value).toEqual(['E02', 'E04', 'E01', 'E03'])
         expect(names(module.cache.episodes)).toEqual(rows.value)
+        expect(names(module.cache.result)).toEqual(rows.value)
       })
 
       test('moves a new episode to its place after a live row', async () => {
@@ -1570,6 +1674,59 @@ describe('Episodes store, through a store', () => {
     expect(deleteAllTasks.mock.calls.map(([, payload]) => payload)).toEqual([
       { projectId: 'p1', taskTypeId: 'tt-1', taskIds: ['t1'] },
       { projectId: 'p1', taskTypeId: 'tt-1', taskIds: undefined }
+    ])
+  })
+
+  // An episode received live comes without its tasks.
+  test('deletes the tasks of the selection once a search lists a live episode', async () => {
+    const deleteAllTasks = vi.fn()
+    const { store } = await buildStore({}, { deleteAllTasks })
+    loadEpisodes(store, [
+      { id: 'ep1', name: 'E01', validations: new Map([['tt-1', 't1']]) }
+    ])
+    store.commit('ADD_EPISODE', { id: 'ep2', name: 'E02' })
+    await store.dispatch('setEpisodeSearch', '')
+
+    await store.dispatch('deleteAllEpisodeTasks', {
+      projectId: 'p1',
+      taskTypeId: 'tt-1',
+      selectionOnly: true
+    })
+
+    expect(deleteAllTasks.mock.calls.map(([, payload]) => payload)).toEqual([
+      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: ['t1'] }
+    ])
+  })
+
+  // An edit puts a copy of the episode among the displayed rows, and a
+  // deleted task leaves the cached episode only.
+  test('sends no task deleted after an edit once a new episode joins the list', async () => {
+    const deleteAllTasks = vi.fn()
+    const { store } = await buildStore({}, { deleteAllTasks })
+    loadEpisodes(store, [
+      {
+        id: 'ep1',
+        name: 'E01',
+        tasks: ['t1'],
+        validations: new Map([['tt-1', 't1']])
+      }
+    ])
+    store.commit('EDIT_EPISODE_END', { id: 'ep1', name: 'E01' })
+    store.commit('DELETE_TASK_END', {
+      id: 't1',
+      entity_id: 'ep1',
+      task_type_id: 'tt-1'
+    })
+    store.commit('ADD_EPISODE', { id: 'ep2', name: 'E02' })
+
+    await store.dispatch('deleteAllEpisodeTasks', {
+      projectId: 'p1',
+      taskTypeId: 'tt-1',
+      selectionOnly: true
+    })
+
+    expect(deleteAllTasks.mock.calls.map(([, payload]) => payload)).toEqual([
+      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: [] }
     ])
   })
 
