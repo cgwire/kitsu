@@ -43,8 +43,8 @@
         :start-date="startDate"
         :zoom-level="zoomLevel"
         hide-man-days
+        readonly
         :with-milestones="false"
-        @item-changed="onScheduleItemChanged"
         @root-element-expanded="expandProductionElement"
       />
     </div>
@@ -171,18 +171,6 @@ const onUpdateSelectedEndDate = date => {
 
 const scrollScheduleToToday = () => {
   scheduleRef.value?.scrollToToday()
-}
-
-const onScheduleItemChanged = item => {
-  if (item.type !== 'Project') {
-    store.dispatch('saveScheduleItem', item)
-  } else {
-    store.dispatch('editProduction', {
-      id: item.id,
-      start_date: item.startDate.format('YYYY-MM-DD'),
-      end_date: item.endDate.format('YYYY-MM-DD')
-    })
-  }
 }
 
 // Watchers

@@ -527,6 +527,7 @@
                       class="timebar-left-hand"
                       @mousedown="moveTimebarLeftSide(rootElement, $event)"
                       @touchstart="moveTimebarLeftSide(rootElement, $event)"
+                      v-if="canMove(rootElement)"
                     ></div>
                     <div
                       class="timebar-center"
@@ -537,6 +538,7 @@
                       class="timebar-right-hand"
                       @mousedown="moveTimebarRightSide(rootElement, $event)"
                       @touchstart="moveTimebarRightSide(rootElement, $event)"
+                      v-if="canMove(rootElement)"
                     ></div>
                   </div>
                 </div>
@@ -771,6 +773,11 @@ const props = defineProps({
     default: true
   },
   multiline: {
+    type: Boolean,
+    default: false
+  },
+  // shows the bars without letting them move
+  readonly: {
     type: Boolean,
     default: false
   },
@@ -1897,12 +1904,14 @@ const syncSelection = pressedItem => {
   if (isChanged) resetSelection(synced)
 }
 
+const canMove = timeElement => timeElement.editable && !props.readonly
+
 const moveTimebar = (timeElement, event) => {
   event.preventDefault() // avoid scroll of schedule on touch
   if (
     !isChangeStartDate.value &&
     !isChangeEndDate.value &&
-    timeElement.editable
+    canMove(timeElement)
   ) {
     isChangeDates.value = true
     isChangeStartDate.value = false
@@ -1927,7 +1936,7 @@ const moveTimebar = (timeElement, event) => {
 
 const moveTimebarLeftSide = (timeElement, event) => {
   event.preventDefault() // avoid scroll of schedule on touch
-  if (!isChangeDates.value && !isChangeEndDate.value && timeElement.editable) {
+  if (!isChangeDates.value && !isChangeEndDate.value && canMove(timeElement)) {
     isChangeDates.value = false
     isChangeStartDate.value = true
     isChangeEndDate.value = false
@@ -1951,7 +1960,7 @@ const moveTimebarRightSide = (timeElement, event) => {
   if (
     !isChangeDates.value &&
     !isChangeStartDate.value &&
-    timeElement.editable
+    canMove(timeElement)
   ) {
     isChangeDates.value = false
     isChangeStartDate.value = false
@@ -2241,7 +2250,7 @@ const timebarStyle = (timeElement, root = false) => {
   const style = {
     left: `${getTimebarLeft(timeElement)}px`,
     width: `${getTimebarWidth(timeElement)}px`,
-    cursor: timeElement.editable
+    cursor: canMove(timeElement)
       ? !root && props.reassignable
         ? 'all-scroll'
         : 'ew-resize'
@@ -2284,7 +2293,7 @@ const timebarChildStyle = (
   return {
     left: !multiline && `${getTimebarLeft(timeElement)}px`,
     width: `${getTimebarWidth(timeElement)}px`,
-    cursor: timeElement.editable
+    cursor: canMove(timeElement)
       ? props.reassignable
         ? 'all-scroll'
         : 'ew-resize'
@@ -2319,7 +2328,7 @@ const timebarSubchildStyle = (
   return {
     left: `${getTimebarLeft(timeElement)}px`,
     width: `${getTimebarWidth(timeElement)}px`,
-    cursor: timeElement.editable
+    cursor: canMove(timeElement)
       ? props.reassignable
         ? 'all-scroll'
         : 'ew-resize'

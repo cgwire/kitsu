@@ -370,6 +370,35 @@ describe('Schedule widget - dragging a collapsed root row bar', () => {
 
     wrapper.unmount()
   })
+
+  test('a read-only schedule shows the bar but does not move it', async () => {
+    const rootElement = buildRootElement()
+    const wrapper = mountSchedule(
+      {
+        startDate: moment('2026-07-05'),
+        endDate: moment('2026-10-23'),
+        hierarchy: [rootElement],
+        readonly: true
+      },
+      { attachTo: document.body }
+    )
+
+    const bar = wrapper.find('.timebar-center')
+    expect(bar.exists()).toBe(true)
+    await dragBar(wrapper, bar, 500, 560)
+    // the resize handles would show a resize cursor on hover
+    expect(wrapper.find('.timebar-left-hand').exists()).toBe(false)
+    expect(wrapper.find('.timebar-right-hand').exists()).toBe(false)
+
+    expect(rootElement.startDate.isSame(moment('2026-08-15'))).toBe(true)
+    expect(rootElement.endDate.isSame(moment('2026-08-29'))).toBe(true)
+    expect(wrapper.emitted('item-changed')).toBeFalsy()
+    expect(wrapper.find('.timebar-wrapper').attributes('style')).toContain(
+      'cursor: default'
+    )
+
+    wrapper.unmount()
+  })
 })
 
 describe('Schedule widget - end of an interaction', () => {
