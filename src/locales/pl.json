@@ -559,7 +559,9 @@
         "title": "Filtruj według...",
         "union_and": "Pasuje do wszystkich poniższych filtrów",
         "union_or": "Pasuje do jednego z poniższych filtrów",
+        "with_task": "Z zadaniem",
         "with_thumbnail": "Z miniaturą",
+        "without_task": "Bez zadania",
         "without_thumbnail": "Bez miniatury"
       },
       "display_options": "Ustawienia wyświetlania",

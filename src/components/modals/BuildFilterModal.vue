@@ -68,12 +68,17 @@
           <combobox
             class="flexrow-item"
             locale-key-prefix="entities.build_filter."
-            :options="taskTypeOperatorOptions"
+            :options="
+              taskTypeFilter.id ? taskTypeOperatorOptions : operatorOptions
+            "
             :with-margin="false"
             @update:model-value="onOperatorChanged(taskTypeFilter)"
             v-model="taskTypeFilter.operator"
           />
-          <div class="flexrow-item flexrow value-column">
+          <div
+            class="flexrow-item flexrow value-column"
+            v-if="!isTaskPresence(taskTypeFilter.operator)"
+          >
             <combobox-status
               class="flexrow-item"
               :key="`task-type-value-${i}-${index}`"
@@ -369,7 +374,10 @@ const operatorOptions = [
   { label: 'in', value: 'in' },
   { label: 'not_in', value: 'notin' }
 ]
-const taskTypeOperatorOptions = operatorOptions
+const taskPresenceOptions = [
+  { label: 'without_task', value: 'empty' },
+  { label: 'with_task', value: '-empty' }
+]
 const booleanOptions = [
   { label: 'checked', value: 'true' },
   { label: 'not_checked', value: '-true' }
@@ -489,6 +497,12 @@ const isAssetsOnly = computed(
 const taskStatuses = computed(() =>
   productionTaskStatuses.value.filter(status => !status.for_concept)
 )
+// A status short-named empty wins over the keyword in the query parser.
+const taskTypeOperatorOptions = computed(() =>
+  taskStatuses.value.some(status => status.short_name.toLowerCase() === 'empty')
+    ? operatorOptions
+    : [...operatorOptions, ...taskPresenceOptions]
+)
 
 const validationColumnsByEntity = {
   asset: assetValidationColumns,
@@ -578,6 +592,8 @@ const getDescriptorChoiceOptions = (descriptorId, isChecklist) => {
   }))
 }
 
+const isTaskPresence = operator => ['empty', '-empty'].includes(operator)
+
 const isMultiple = operator => ['in', 'notin'].includes(operator)
 
 const getQueryOperator = operator =>
@@ -606,7 +622,9 @@ const applyTaskTypeChoice = query => {
     const taskType = isAllTaskTypes
       ? null
       : taskTypeMap.value.get(taskTypeFilter.id)
-    if (isAllTaskTypes || taskType) {
+    if (taskType && isTaskPresence(taskTypeFilter.operator)) {
+      query += ` [${taskType.name}]=${taskTypeFilter.operator}`
+    } else if (isAllTaskTypes || taskType) {
       const field = isAllTaskTypes ? 'status' : `[${taskType.name}]`
       query += ` ${field}${operator}${value}]`
     }
@@ -814,7 +832,9 @@ const removeDescriptorFilter = descriptorFilter => {
 }
 
 const onOperatorChanged = filter => {
-  if (!isMultiple(filter.operator)) {
+  if (!filter.values.length) {
+    filter.values = [taskStatuses.value[0].id]
+  } else if (!isMultiple(filter.operator)) {
     filter.values = [filter.values[0]]
   }
 }
@@ -857,6 +877,15 @@ const setFiltersFromStatusAnyQuery = filter => {
     id: '',
     operator,
     values: filter.taskStatuses
+  })
+}
+
+const setFiltersFromEmptyQuery = filter => {
+  taskTypeFilters.values.push({
+    localId: uuidv4(),
+    id: filter.taskType.id,
+    operator: filter.excluding ? '-empty' : 'empty',
+    values: []
   })
 }
 
@@ -929,6 +958,7 @@ const filterDispatchByType = {
   assettype: setFiltersFromAssetTypeQuery,
   status: setFiltersFromStatusQuery,
   statusAny: setFiltersFromStatusAnyQuery,
+  empty: setFiltersFromEmptyQuery,
   descriptor: setFiltersFromDescriptorQuery,
   assignation: setFiltersFromAssignationQuery,
   assignedto: setFiltersFromAssignedToQuery,
