@@ -189,6 +189,20 @@ describe('lists/ToCheckList', () => {
 
       wrapper.unmount()
     })
+
+    // A click on the entity link reached the row once the entity page had
+    // replaced the list and cleared the selection: that page opened with a
+    // selected task it did not show.
+    test('selects nothing once its list is gone', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = mountList({ selection })
+      const link = wrapper.find('tbody .entity-name')
+      link.element.addEventListener('click', () => wrapper.unmount())
+
+      await link.trigger('click')
+
+      expect(selection.selectedIds()).toEqual([])
+    })
   })
 
   // 2.05 hours make 122.99999999999999 minutes in floats.

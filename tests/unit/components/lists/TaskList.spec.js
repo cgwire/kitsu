@@ -113,6 +113,16 @@ const appendIconStroke = cell => {
   return stroke
 }
 
+// The status link of a row only serves middle click and the context menu:
+// every click goes on to the row.
+const appendStatusLink = cell => {
+  const link = document.createElement('a')
+  link.className = 'task-link'
+  link.href = '/tasks/task-1'
+  link.addEventListener('click', event => event.preventDefault())
+  cell.appendChild(link)
+}
+
 describe('lists/TaskList', () => {
   test('selects a task when its row is clicked', async () => {
     const wrapper = mountList()
@@ -133,6 +143,17 @@ describe('lists/TaskList', () => {
 
     expect(errorHandler).not.toHaveBeenCalled()
     expect(wrapper.emitted('task-selected')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  test('selects a task when its status link is clicked', async () => {
+    const wrapper = mountList()
+    appendStatusLink(wrapper.find('tbody .status').element)
+
+    await wrapper.find('tbody a.task-link').trigger('click')
+
+    expect(wrapper.emitted('task-selected')).toHaveLength(1)
 
     wrapper.unmount()
   })

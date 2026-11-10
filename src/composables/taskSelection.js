@@ -23,6 +23,7 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
   // --------------------------------------------------------------------------
   const lastSelection = ref(null)
   const selectionGrid = ref({})
+  let isUnmounted = false
 
   // Computed
   // --------------------------------------------------------------------------
@@ -57,6 +58,10 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
   }
 
   const applySelection = (event, index, task) => {
+    // The page a link of the row opens can replace the list, and clear the
+    // selection, before the click reaches the row: a task selected then
+    // would stay selected on that page, out of sight.
+    if (isUnmounted) return
     const isSelected = selectionGrid.value[task.id]
     const isManySelection = Object.keys(selectionGrid.value).length > 1
     if (!(event.ctrlKey || event.metaKey) && !event.shiftKey) {
@@ -145,6 +150,7 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
   })
 
   onBeforeUnmount(() => {
+    isUnmounted = true
     window.removeEventListener('keydown', onKeyDown)
   })
 
