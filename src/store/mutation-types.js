@@ -484,6 +484,7 @@ export const LOCK_EPISODE = 'LOCK_EPISODE'
 export const UNLOCK_EPISODE = 'UNLOCK_EPISODE'
 
 export const CHANGE_EPISODE_SORT = 'CHANGE_EPISODE_SORT'
+export const SORT_EPISODES = 'SORT_EPISODES'
 export const RESET_SEQUENCES = 'RESET_SEQUENCES'
 
 // Profile and auth

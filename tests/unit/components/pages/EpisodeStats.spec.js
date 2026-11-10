@@ -1,4 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { ref } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -67,7 +68,7 @@ const mountPage = async ({ getters = {}, query = {} } = {}) => {
       episodeRetakeStats: () => episodeRetakeStats,
       episodeSearchText: () => '',
       episodeStats: () => episodeStats,
-      episodeValidationColumns: () => ['layout', 'anim'],
+      episodeStatColumns: () => ['layout', 'anim'],
       clientAccess: () => ({ isTaskTypeVisible: () => true }),
       isCurrentUserClient: () => false,
       isPaperProduction: () => false,
@@ -222,6 +223,39 @@ describe('EpisodeStats page', () => {
     ])
     expect(listProps().entries).toEqual([e01, e02])
     expect(listProps().isFiltered).toBe(false)
+  })
+
+  test('lists the episodes by name, whatever the sort of the Episodes page', async () => {
+    const e03 = { id: 'e03', name: 'E03', status: 'running' }
+    const sortedRows = [e03, e02, e01]
+    await mountPage({ getters: { displayedEpisodes: () => sortedRows } })
+    expect(listProps().entries).toEqual([e01, e03])
+    await showAllEpisodes()
+    expect(listProps().entries).toEqual([e01, e02, e03])
+    expect(episodeFilter().props('options')).toEqual([
+      { label: 'E01', value: 'e01' },
+      { label: 'E02', value: 'e02' },
+      { label: 'E03', value: 'e03' }
+    ])
+    expect(sortedRows).toEqual([e03, e02, e01])
+  })
+
+  test('keeps the episodes by name when the list changes', async () => {
+    const e03 = { id: 'e03', name: 'E03', status: 'running' }
+    const rows = ref([{ ...e01 }, e03])
+    const rowIds = () => listProps().entries.map(({ id }) => id)
+    await mountPage({ getters: { displayedEpisodes: () => rows.value } })
+
+    rows.value = [
+      ...rows.value,
+      { id: 'e00', name: 'E00', status: 'running' }
+    ]
+    await flushPromises()
+    expect(rowIds()).toEqual(['e00', 'e01', 'e03'])
+
+    rows.value[0].name = 'E04'
+    await flushPromises()
+    expect(rowIds()).toEqual(['e00', 'e03', 'e01'])
   })
 
   test('takes a hidden episode out of the table, the totals and the URL', async () => {

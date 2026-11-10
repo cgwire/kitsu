@@ -1332,6 +1332,34 @@ describe('Sequences store, through a store', () => {
     ])
   })
 
+  // The Sequences page reloads its rows on each visit, then applies its sort
+  // again: the rows it renders take that order, and the arrows of the detail
+  // pages walk the cached list in it.
+  test('shows the rows in their sort after a reload', async () => {
+    const { module, store } = await buildStore()
+    const buildSequences = () =>
+      ['SQ01', 'SQ02', 'SQ03'].map((name, index) => ({
+        ...buildSequence(`sq${index + 1}`, name),
+        data: { difficulty: String([1, 3, 2][index]) }
+      }))
+    const rows = computed(() => names(store.getters.displayedSequences))
+    loadSequences(store, buildSequences())
+    await store.dispatch('changeSequenceSort', {
+      type: 'metadata',
+      column: 'difficulty',
+      data_type: 'number',
+      ascending: false
+    })
+    expect(rows.value).toEqual(['SQ02', 'SQ03', 'SQ01'])
+
+    loadSequences(store, buildSequences())
+    expect(rows.value).toEqual(['SQ01', 'SQ02', 'SQ03'])
+    await store.dispatch('setSequenceSearch', '')
+
+    expect(rows.value).toEqual(['SQ02', 'SQ03', 'SQ01'])
+    expect(names(module.cache.sequences)).toEqual(['SQ02', 'SQ03', 'SQ01'])
+  })
+
   test('narrows the sequences of the stats page to a search', async () => {
     const { store } = await buildStore()
     loadSequences(store, [

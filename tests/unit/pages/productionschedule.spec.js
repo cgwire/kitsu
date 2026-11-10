@@ -148,10 +148,11 @@ const people = [
   }
 ]
 
+// In the order of a list load, which sorts the assets by name.
 const propAssets = [
   { id: 'asset-1', name: 'Chair', asset_type_id: 'asset-type-props' },
-  { id: 'asset-2', name: 'Table', asset_type_id: 'asset-type-props' },
-  { id: 'asset-3', name: 'Lamp', asset_type_id: 'asset-type-props' }
+  { id: 'asset-2', name: 'Lamp', asset_type_id: 'asset-type-props' },
+  { id: 'asset-3', name: 'Table', asset_type_id: 'asset-type-props' }
 ]
 
 const day = date => moment.utc(date)
@@ -1594,6 +1595,22 @@ describe('ProductionSchedule page', () => {
       await pickEntityGroup(wrapper)
     }
 
+    // The Assets page sorts the cached list in place, and a partial load
+    // takes that list over: the panel keeps the order of the asset list.
+    it('lists the assets of a group by name, whatever the Assets page sort', async () => {
+      const { wrapper } = await mountAssignments({ nbAssets: 3 })
+      const [chair, lamp, table] = propAssets
+      assetStore.cache.assets = [table, chair, lamp]
+
+      await selectProps(wrapper)
+
+      const names = wrapper
+        .findAll('.side-list.entities li .name')
+        .map(item => item.text())
+      expect(names).toEqual(['Chair', 'Lamp', 'Table'])
+      expect(assetStore.cache.assets).toEqual([table, chair, lamp])
+    })
+
     // Monday 6 to Wednesday 8 April: three working days. A null start keeps
     // the one the panel opened with.
     const setRange = async (
@@ -2039,7 +2056,7 @@ describe('ProductionSchedule page', () => {
       await selectTask(wrapper, { id: 'asset-type-props', name: 'Props' }, task)
     }
 
-    // One working day, assigned to Alice: Chair on Monday 6 April, Table on
+    // One working day, assigned to Alice: Chair on Monday 6 April, Lamp on
     // Monday 13 April
     const buildTask = (asset, date) => ({
       id: `task-${asset.id}`,
@@ -2051,7 +2068,7 @@ describe('ProductionSchedule page', () => {
       endDate: day(date)
     })
     const buildChairTask = () => buildTask(propAssets[0], '2026-04-06')
-    const buildTableTask = () => buildTask(propAssets[1], '2026-04-13')
+    const buildLampTask = () => buildTask(propAssets[1], '2026-04-13')
 
     // A refused task save only reached the console: the panel kept the
     // typed values as if they were saved.
@@ -2108,7 +2125,7 @@ describe('ProductionSchedule page', () => {
     })
 
     it.each([
-      ['another task', wrapper => editTask(wrapper, buildTableTask())],
+      ['another task', wrapper => editTask(wrapper, buildLampTask())],
       [
         'the assign mode',
         async wrapper => {
@@ -2152,7 +2169,7 @@ describe('ProductionSchedule page', () => {
       await editTask(wrapper, buildChairTask())
       await apply(wrapper)
       const chairSaves = [...saves]
-      await editTask(wrapper, buildTableTask())
+      await editTask(wrapper, buildLampTask())
       await apply(wrapper)
 
       chairSaves.forEach(reject => reject(new Error('Bad request')))
@@ -2312,7 +2329,7 @@ describe('ProductionSchedule page', () => {
       })
       await editTask(wrapper, buildChairTask())
       await apply(wrapper)
-      await editTask(wrapper, buildTableTask())
+      await editTask(wrapper, buildLampTask())
 
       while (saves.length) {
         saves.shift()()

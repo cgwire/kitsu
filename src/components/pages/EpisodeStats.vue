@@ -97,6 +97,7 @@ import {
 } from '@/composables/statsPage'
 import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
+import { sortByName } from '@/lib/sorting'
 import { aggregateRetakeStats, omitRetakeStatsColumns } from '@/lib/stats'
 import stringHelpers from '@/lib/string'
 
@@ -142,9 +143,7 @@ const displayedEpisodes = computed(() => store.getters.displayedEpisodes)
 const episodeMap = computed(() => store.getters.episodeMap)
 const episodeRetakeStats = computed(() => store.getters.episodeRetakeStats)
 const episodeStats = computed(() => store.getters.episodeStats)
-const episodeValidationColumns = computed(
-  () => store.getters.episodeValidationColumns
-)
+const episodeStatColumns = computed(() => store.getters.episodeStatColumns)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isPaperProduction = computed(() => store.getters.isPaperProduction)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -157,10 +156,13 @@ const countModeOptions = computed(() => [
     : { label: 'frames', value: 'frames' }
 ])
 
+// displayedEpisodes carries the sort of the Episodes page, not shown here.
+const episodesByName = computed(() => sortByName([...displayedEpisodes.value]))
+
 const episodeEntries = computed(() =>
   statusMode.value === 'running'
-    ? displayedEpisodes.value.filter(episode => episode.status === 'running')
-    : displayedEpisodes.value
+    ? episodesByName.value.filter(episode => episode.status === 'running')
+    : episodesByName.value
 )
 
 // Zou refuses the retake stats to clients: they get the status mode only.
@@ -186,7 +188,7 @@ const {
   preferenceKey: 'stats:episode-display-mode',
   rowsParam: 'hiddenEpisodes',
   rows: episodeEntries,
-  columnIds: episodeValidationColumns
+  columnIds: episodeStatColumns
 })
 
 const displayedStats = computed(() => getDisplayedStats(episodeStats.value))

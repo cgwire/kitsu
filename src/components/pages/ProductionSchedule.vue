@@ -601,6 +601,7 @@ import {
   widenParents
 } from '@/lib/productionSchedule'
 import {
+  sortAssets,
   sortByName,
   sortPeople,
   sortTaskTypeScheduleItems
@@ -2007,8 +2008,9 @@ const selectTaskTypeElement = async (
           for_entity: taskType.for_entity,
           expanded: assetType.id === selectedEntityType?.object_id,
           entity_type_id: assetType.id,
-          children: assetStore.cache.assets
-            .filter(
+          // The Assets page sorts this list in place.
+          children: sortAssets(
+            assetStore.cache.assets.filter(
               asset =>
                 asset.asset_type_id === assetType.id &&
                 !asset.canceled &&
@@ -2016,12 +2018,10 @@ const selectTaskTypeElement = async (
                 assetInScope(asset) &&
                 taskEntityIds.has(asset.id)
             )
-            .map(asset => ({
-              ...asset,
-              assigned: taskType.entitiesByType[assetType.id]?.includes(
-                asset.id
-              )
-            }))
+          ).map(asset => ({
+            ...asset,
+            assigned: taskType.entitiesByType[assetType.id]?.includes(asset.id)
+          }))
         }
       })
   } else if (taskType.for_entity === 'Shot') {

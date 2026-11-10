@@ -229,6 +229,19 @@ describe('Episodes store', () => {
   })
 
   describe('NEW_EPISODE_END', () => {
+    test('keeps the metadata typed in the creation form', () => {
+      const state = { episodes: [], displayedEpisodes: [], episodeSorting: [] }
+
+      episodesStore.mutations.NEW_EPISODE_END(state, {
+        id: 'episode-new',
+        name: 'E04',
+        project_id: 'production-1',
+        data: { prod_order: '4' }
+      })
+
+      expect(state.displayedEpisodes[0].data).toEqual({ prod_order: '4' })
+    })
+
     // The displayed list is a search result: taking it for the whole
     // dataset dropped every episode the search filtered out, and the topbar
     // validates the route episode against that list.
@@ -721,11 +734,11 @@ describe('Episodes store, retake stats', () => {
   // Both stats count the same tasks: a retake load that is skipped or fails
   // must not empty the table.
   test('keeps the columns of the status stats', () => {
-    const state = { episodeValidationColumns: ['layout', 'anim'] }
+    const state = { episodeStatColumns: ['layout', 'anim'] }
     episodesStore.mutations.SET_EPISODE_RETAKE_STATS(state, {
       episodeRetakeStats: {}
     })
-    expect(state.episodeValidationColumns).toEqual(['layout', 'anim'])
+    expect(state.episodeStatColumns).toEqual(['layout', 'anim'])
     expect(state.episodeRetakeStats).toEqual({})
   })
 })
@@ -736,13 +749,14 @@ describe('Episodes store, through a store', () => {
   const buildStore = async (getters = {}, actions = {}) => {
     vi.resetModules()
     const { default: module } = await import('@/store/modules/episodes')
+    const { default: tasksStore } = await import('@/store/modules/tasks')
     const store = createStore({
       modules: { episodes: module },
       getters: {
         currentProduction: () => production,
         people: () => [],
         productionEpisodeTaskTypeIds: () => [],
-        taskMap: () => new Map(),
+        taskMap: () => tasksStore.state.taskMap,
         taskStatus: () => [],
         taskStatusMap: () => new Map(),
         taskTypeMap: () => new Map(),
@@ -757,6 +771,28 @@ describe('Episodes store, through a store', () => {
     store.commit('LOAD_EPISODES_END', { episodes, routeEpisodeId: null })
 
   const names = list => list.map(({ name }) => name)
+
+  const buildEpisodes = () => [
+    { id: 'ep1', name: 'E01', data: { prod_order: '2' }, tasks: [] },
+    { id: 'ep2', name: 'E02', data: { prod_order: '3' }, tasks: [] },
+    { id: 'ep3', name: 'E03', data: { prod_order: '1' }, tasks: [] }
+  ]
+
+  const loadWithTasks = (store, episodes) =>
+    store.commit('SET_EPISODES_WITH_TASKS', {
+      production,
+      episodes,
+      userFilters: {},
+      taskMap: store.getters.taskMap,
+      taskTypeMap: new Map(),
+      personMap: new Map(),
+      taskStatusMap: store.getters.taskStatusMap
+    })
+
+  const selectorLabels = store =>
+    store.getters.episodeOptionGroups.flatMap(({ episodeList }) =>
+      episodeList.map(({ label }) => label)
+    )
 
   beforeEach(() => {
     Object.values(client).forEach(fn => fn.mockReset())
@@ -1032,6 +1068,315 @@ describe('Episodes store, through a store', () => {
     ])
   })
 
+  describe('list sorted by the Episodes page', () => {
+    const sortInfo = {
+      type: 'metadata',
+      column: 'prod_order',
+      data_type: 'number',
+      ascending: true
+    }
+
+    // After a plain list load, the page and the topbar selector start from
+    // the same episodes: a sort of the page must stay on the page.
+    test('keeps the topbar selector by name', async () => {
+      const { store } = await buildStore()
+      loadEpisodes(store, buildEpisodes())
+      const labels = computed(() => selectorLabels(store))
+      expect(labels.value).toEqual(['E01', 'E02', 'E03'])
+
+      await store.dispatch('changeEpisodeSort', sortInfo)
+
+      expect(names(store.getters.displayedEpisodes)).toEqual([
+        'E03',
+        'E01',
+        'E02'
+      ])
+      expect(labels.value).toEqual(['E01', 'E02', 'E03'])
+    })
+
+    // The sort outlives the list: the next production gets it through the
+    // search the page applies on its arrival.
+    test('keeps the selector by name when a search reapplies the sort', async () => {
+      const { store } = await buildStore()
+      loadEpisodes(store, buildEpisodes())
+      await store.dispatch('changeEpisodeSort', sortInfo)
+      store.commit('CLEAR_EPISODES')
+      loadEpisodes(store, buildEpisodes())
+
+      await store.dispatch('setEpisodeSearch', '')
+
+      expect(selectorLabels(store)).toEqual(['E01', 'E02', 'E03'])
+    })
+
+    // The arrows of the episode and task pages walk the cached list.
+    test.each([
+      ['a plain list', loadEpisodes],
+      ['a list with tasks', loadWithTasks]
+    ])('keeps %s cached in the order of its rows', async (_, load) => {
+      const { module, store } = await buildStore()
+      load(store, buildEpisodes())
+
+      await store.dispatch('changeEpisodeSort', sortInfo)
+
+      expect(names(module.cache.episodes)).toEqual(['E03', 'E01', 'E02'])
+    })
+
+    describe.each([
+      [
+        'a new episode',
+        store =>
+          store.commit('NEW_EPISODE_END', {
+            id: 'ep0',
+            name: 'E00',
+            project_id: 'p1',
+            status: 'running',
+            data: { prod_order: '2' }
+          }),
+        ['E03', 'E00', 'E01', 'E02']
+      ],
+      [
+        'an episode from another session',
+        store =>
+          store.commit('ADD_EPISODE', {
+            id: 'ep0',
+            name: 'E00',
+            status: 'running',
+            data: { prod_order: '2' }
+          }),
+        ['E03', 'E00', 'E01', 'E02']
+      ]
+    ])('with %s', (_, addEpisode, sortedNames) => {
+      const addToSortedList = async () => {
+        const context = await buildStore()
+        const { store } = context
+        loadEpisodes(store, buildEpisodes())
+        loadWithTasks(store, buildEpisodes())
+        await store.dispatch('changeEpisodeSort', sortInfo)
+        addEpisode(store)
+        return context
+      }
+
+      test('keeps the rows and the cached list sorted', async () => {
+        const { module, store } = await addToSortedList()
+
+        expect(names(store.getters.displayedEpisodes)).toEqual(sortedNames)
+        expect(names(module.cache.episodes)).toEqual(sortedNames)
+      })
+
+      test('keeps the topbar selector by name', async () => {
+        const { store } = await addToSortedList()
+
+        expect(selectorLabels(store)).toEqual(['E00', 'E01', 'E02', 'E03'])
+      })
+    })
+
+    describe('with default tasks', () => {
+      const buildTask = (id, entityId, statusId) => ({
+        id,
+        entity_id: entityId,
+        task_type_id: 'tt-1',
+        task_status_id: statusId,
+        assignees: [],
+        duration: 0,
+        estimation: 0
+      })
+      const taskStatusMap = new Map([
+        ['ts-todo', { short_name: 'todo' }],
+        ['ts-wip', { short_name: 'wip' }]
+      ])
+
+      const buildStoreWithDefaultTask = () =>
+        buildStore(
+          {
+            productionEpisodeTaskTypeIds: () => ['tt-1'],
+            taskStatusMap: () => taskStatusMap
+          },
+          {
+            createEntityTasks: ({ commit, rootGetters }, { entityId }) => {
+              const task = buildTask(`t-${entityId}`, entityId, 'ts-todo')
+              rootGetters.taskMap.set(task.id, task)
+              commit('NEW_TASK_END', {
+                task,
+                production,
+                taskTypeMap: new Map(),
+                taskStatusMap
+              })
+            }
+          }
+        )
+
+      const sortByTaskType = store =>
+        store.dispatch('changeEpisodeSort', {
+          type: 'status',
+          column: 'tt-1',
+          name: 'Layout'
+        })
+
+      const createEpisode = (store, id, name) => {
+        client.ppost.mockResolvedValueOnce({ id, name, project_id: 'p1' })
+        return store.dispatch('newEpisode', { name, project_id: 'p1' })
+      }
+
+      // Its tasks come once the episode has joined the list, and they decide
+      // its place under a task type sort.
+      test('moves a new episode to its place once it holds its tasks', async () => {
+        const { module, store } = await buildStoreWithDefaultTask()
+        loadWithTasks(store, [
+          { ...buildEpisodes()[0], tasks: [buildTask('t1', 'ep1', 'ts-wip')] },
+          { ...buildEpisodes()[1], tasks: [buildTask('t2', 'ep2', 'ts-todo')] },
+          { ...buildEpisodes()[2], tasks: [buildTask('t3', 'ep3', 'ts-wip')] }
+        ])
+        await sortByTaskType(store)
+        const rows = computed(() => names(store.getters.displayedEpisodes))
+        expect(rows.value).toEqual(['E02', 'E01', 'E03'])
+
+        await createEpisode(store, 'ep4', 'E04')
+
+        expect(rows.value).toEqual(['E02', 'E04', 'E01', 'E03'])
+        expect(names(module.cache.episodes)).toEqual(rows.value)
+      })
+
+      test('moves a new episode to its place after a live row', async () => {
+        const { store } = await buildStoreWithDefaultTask()
+        loadWithTasks(store, [
+          { ...buildEpisodes()[0], tasks: [buildTask('t1', 'ep1', 'ts-wip')] },
+          { ...buildEpisodes()[1], tasks: [buildTask('t2', 'ep2', 'ts-todo')] }
+        ])
+        await sortByTaskType(store)
+        store.commit('ADD_EPISODE', { id: 'ep9', name: 'E09', data: {} })
+
+        await createEpisode(store, 'ep4', 'E04')
+
+        expect(names(store.getters.displayedEpisodes)).toEqual([
+          'E09',
+          'E02',
+          'E04',
+          'E01'
+        ])
+      })
+
+      // The sort outlives its production, Episode Stats applies it through its
+      // search at each visit, and the rows of a plain list hold no tasks.
+      test('keeps a plain list by name', async () => {
+        const { module, store } = await buildStoreWithDefaultTask()
+        loadWithTasks(store, buildEpisodes())
+        await sortByTaskType(store)
+        store.commit('CLEAR_EPISODES')
+        loadEpisodes(store, buildEpisodes())
+        await store.dispatch('setEpisodeSearch', '')
+
+        await createEpisode(store, 'ep4', 'E02B')
+        await createEpisode(store, 'ep5', 'E02C')
+
+        const expected = ['E01', 'E02', 'E02B', 'E02C', 'E03']
+        expect(names(store.getters.displayedEpisodes)).toEqual(expected)
+        expect(names(module.cache.episodes)).toEqual(expected)
+      })
+
+      test('keeps a new episode its search does not find', async () => {
+        const { store } = await buildStoreWithDefaultTask()
+        loadWithTasks(store, buildEpisodes())
+        await store.dispatch('setEpisodeSearch', 'E01')
+
+        await createEpisode(store, 'ep4', 'E04')
+
+        expect(names(store.getters.displayedEpisodes)).toEqual(['E01', 'E04'])
+      })
+    })
+
+    test('sorts a live episode when the plain list landed last', async () => {
+      const { module, store } = await buildStore()
+      loadWithTasks(store, buildEpisodes())
+      loadEpisodes(store, buildEpisodes())
+      await store.dispatch('changeEpisodeSort', sortInfo)
+
+      store.commit('ADD_EPISODE', {
+        id: 'ep0',
+        name: 'E00',
+        data: { prod_order: '2' }
+      })
+
+      const sorted = ['E03', 'E00', 'E01', 'E02']
+      expect(names(store.getters.displayedEpisodes)).toEqual(sorted)
+      expect(names(module.cache.episodes)).toEqual(sorted)
+    })
+
+    // The sort outlives its production, and the Shots page adds episodes to
+    // a plain list.
+    test('keeps a plain list by name under a sort', async () => {
+      const { store } = await buildStore()
+      await store.dispatch('changeEpisodeSort', sortInfo)
+      loadEpisodes(store, buildEpisodes())
+
+      store.commit('ADD_EPISODE', { id: 'ep4', name: 'E04', data: {} })
+
+      expect(names(store.getters.displayedEpisodes)).toEqual([
+        'E01',
+        'E02',
+        'E03',
+        'E04'
+      ])
+    })
+
+    test('shows a sort reapplied to a list loaded with tasks', async () => {
+      const { store } = await buildStore()
+      await store.dispatch('changeEpisodeSort', sortInfo)
+      loadWithTasks(store, buildEpisodes())
+      const rows = computed(() => names(store.getters.displayedEpisodes))
+      expect(rows.value).toEqual(['E01', 'E02', 'E03'])
+
+      await store.dispatch('setEpisodeSearch', '')
+
+      expect(rows.value).toEqual(['E03', 'E01', 'E02'])
+    })
+  })
+
+  // The topbar keeps its own copies of the episodes, without their tasks: the
+  // search must keep finding the rows of the page.
+  test.each([
+    [
+      'an edit',
+      store =>
+        store.commit('EDIT_EPISODE_END', { id: 'ep1', name: 'E01', data: {} })
+    ],
+    [
+      'an update from another session',
+      store => store.commit('UPDATE_EPISODE', { id: 'ep1', description: 'New' })
+    ]
+  ])('finds the rows with their tasks after %s', async (_, update) => {
+    const { store } = await buildStore()
+    loadEpisodes(store, buildEpisodes())
+    loadWithTasks(store, buildEpisodes())
+
+    update(store)
+    await store.dispatch('setEpisodeSearch', 'E02')
+
+    const rows = store.getters.displayedEpisodes
+    expect(names(rows)).toEqual(['E02'])
+    expect(rows[0].validations).toBeInstanceOf(Map)
+  })
+
+  test.each([
+    [
+      'an edit',
+      store =>
+        store.commit('EDIT_EPISODE_END', { id: 'ep3', name: 'E00', data: {} })
+    ],
+    [
+      'an update from another session',
+      store => store.commit('UPDATE_EPISODE', { id: 'ep3', name: 'E00' })
+    ]
+  ])('keeps the topbar selector by name after %s', async (_, rename) => {
+    const { store } = await buildStore()
+    loadEpisodes(store, buildEpisodes())
+    const labels = computed(() => selectorLabels(store))
+    expect(labels.value).toEqual(['E01', 'E02', 'E03'])
+
+    rename(store)
+
+    expect(labels.value).toEqual(['E00', 'E01', 'E02'])
+  })
+
   test('loads the episode stats and their task type columns', async () => {
     const taskTypeMap = new Map([
       ['tt-anim', { id: 'tt-anim', name: 'Animation', priority: 2 }],
@@ -1054,10 +1399,30 @@ describe('Episodes store, through a store', () => {
       '/api/data/projects/p1/episodes/stats'
     )
     expect(store.getters.episodeStats).toEqual(episodeStats)
-    expect(store.getters.episodeValidationColumns).toEqual([
-      'tt-layout',
-      'tt-anim'
-    ])
+    expect(store.getters.episodeStatColumns).toEqual(['tt-layout', 'tt-anim'])
+  })
+
+  // The stats count the tasks of the shots: their columns are not the ones
+  // of the Episodes page, which takes its own for a list already loaded.
+  test('leaves the columns of the list to the list', async () => {
+    const { store } = await buildStore()
+    store.state.episodes.episodeValidationColumns = ['tt-storyboard']
+    client.pget.mockResolvedValueOnce({
+      all: { all: { name: 'All' }, 'tt-anim': { done: 1 } }
+    })
+
+    await store.dispatch('loadEpisodeStats', 'p1')
+
+    expect(store.getters.episodeValidationColumns).toEqual(['tt-storyboard'])
+  })
+
+  test('forgets the columns of the list with the list', async () => {
+    const { store } = await buildStore()
+    store.state.episodes.episodeValidationColumns = ['tt-storyboard']
+
+    await store.dispatch('clearEpisodes')
+
+    expect(store.getters.episodeValidationColumns).toEqual([])
   })
 
   test('reloads the stats of a TV show', async () => {

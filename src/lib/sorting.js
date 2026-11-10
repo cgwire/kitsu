@@ -11,9 +11,12 @@ import {
 const collator = new Intl.Collator(undefined, { numeric: true })
 
 const sortByEpisode = (a, b) => {
-  if (a.episode_name) {
+  if (a.episode_name && b.episode_name) {
     return collator.compare(a.episode_name, b.episode_name)
   }
+  // The same answer from either side: the rows without an episode go last.
+  if (a.episode_name) return -1
+  if (b.episode_name) return 1
   return 0
 }
 
@@ -306,7 +309,8 @@ const sortByField = (sortInfo, taskTypeMap, episodeMap) => (a, b) => {
   return collator.compare(String(dataA), String(dataB))
 }
 
-// Sorts a copy: the list given is often the one of the topbar menus (#2322).
+// Sorts in place: the arrows of the detail pages walk the cached list in the
+// order of its list page.
 const sortEntityResult = (
   result,
   sorting,
@@ -332,9 +336,9 @@ const sortEntityResult = (
     for (const step of thenBySteps) {
       sorter = sorter.thenBy(step)
     }
-    result = [...result].sort(sorter)
+    result = result.sort(sorter)
   } else {
-    result = defaultSort([...result])
+    result = defaultSort(result)
   }
   return result
 }
@@ -426,6 +430,16 @@ const parseChecklist = value => {
   }
 }
 
+// The first items weigh the most. Each cell scores on its own items, so a row
+// keeps one score whatever row it meets, even if the column changed since.
+const getChecklistScore = checklist => {
+  const keys = Object.keys(checklist)
+  return keys.reduce(
+    (score, key, index) => score + (checklist[key] ? keys.length - index : 0),
+    0
+  )
+}
+
 const getMetadataValues = (sortInfo, a, b, defaultValue = '') => {
   let dataA = a.data?.[sortInfo.column] ?? defaultValue
   let dataB = b.data?.[sortInfo.column] ?? defaultValue
@@ -448,8 +462,11 @@ export const sortByMetadata = sortInfo => {
   } else if (sortInfo.data_type === 'boolean') {
     return (a, b) => {
       const { dataA, dataB } = getMetadataValues(sortInfo, a, b, 'false')
-      if (dataA === dataB) return 0
-      return dataA === 'true' ? 1 : -1
+      // Any value but "true" is unticked, an empty one included.
+      const isTickedA = dataA === 'true'
+      const isTickedB = dataB === 'true'
+      if (isTickedA === isTickedB) return 0
+      return isTickedA ? 1 : -1
     }
   } else if (sortInfo.data_type === 'checklist') {
     return (a, b) => {
@@ -457,17 +474,10 @@ export const sortByMetadata = sortInfo => {
       if (dataA === dataB) return 0
       if (!dataB) return -1
       if (!dataA) return 1
-      const checklistA = parseChecklist(dataA)
-      const checklistB = parseChecklist(dataB)
-      let resultA = 0
-      let resultB = 0
-      const length = Object.keys(checklistA).length
-      Object.keys(checklistA).forEach((key, index) => {
-        const points = length - index
-        resultA += checklistA[key] ? points : 0
-        resultB += checklistB[key] ? points : 0
-      })
-      return resultA <= resultB ? 1 : -1
+      const resultA = getChecklistScore(parseChecklist(dataA))
+      const resultB = getChecklistScore(parseChecklist(dataB))
+      if (resultA === resultB) return 0
+      return resultA < resultB ? 1 : -1
     }
   } else if (sortInfo.data_type === 'taglist') {
     return (a, b) => {
@@ -491,6 +501,7 @@ export const sortByMetadata = sortInfo => {
 const sortByTaskType = (taskMap, sortInfo) => (a, b) => {
   const taskA = a.validations?.get(sortInfo.column)
   const taskB = b.validations?.get(sortInfo.column)
+  if (!taskA && !taskB) return 0
   if (!taskA) return -1
   if (!taskB) return 1
   const taskStatusA = taskMap.get(taskA)?.task_status_short_name || ''

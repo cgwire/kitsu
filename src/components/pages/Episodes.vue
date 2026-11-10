@@ -251,8 +251,7 @@ const episodeSorting = computed(() => store.getters.episodeSorting)
 const episodeValidationColumns = computed(
   () => store.getters.episodeValidationColumns
 )
-// After a failed load, the store still holds the columns of the production
-// left.
+// After a failed load, the store still holds the columns of the previous one.
 const validationColumns = computed(() =>
   isLoadingError.value ? [] : episodeValidationColumns.value
 )
@@ -265,6 +264,11 @@ const user = computed(() => store.getters.user)
 
 // Functions
 // --------------------------------------------------------------------------
+
+// The map also holds the plain list of the topbar, and an episode created
+// from the Shots page gives such a list task columns.
+const hasRowsWithoutTasks = () =>
+  [...episodeMap.value.values()].some(episode => !episode.validations)
 
 const loadList = () => {
   const loadId = ++lastLoadId
@@ -431,6 +435,7 @@ onMounted(() => {
   if (
     episodeMap.value.size < 1 ||
     episodeValidationColumns.value.length === 0 ||
+    hasRowsWithoutTasks() ||
     episodeMap.value.values().next().value?.project_id !==
       currentProduction.value.id
   ) {

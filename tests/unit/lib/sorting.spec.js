@@ -145,6 +145,69 @@ describe('lib/sorting', () => {
     expect(results.map(entry => entry.id)).toEqual([2, 3, 1, 4])
   })
 
+  // A pair answered the same from both sides decided the order by the order
+  // the rows came in.
+  it('sortByMetadata ties two checklists of the same score', () => {
+    const compare = sortByMetadata({ column: 'steps', data_type: 'checklist' })
+    const first = { data: { steps: '{"Model":true,"Rig":false,"Anim":false}' } }
+    const second = { data: { steps: '{"Model":false,"Rig":true,"Anim":true}' } }
+
+    expect(compare(first, second)).toBe(0)
+    expect(compare(second, first)).toBe(0)
+  })
+
+  // An item added to the column after a cell was saved, or renamed.
+  it('sortByMetadata answers both ways for checklists of other items', () => {
+    const compare = sortByMetadata({ column: 'steps', data_type: 'checklist' })
+    const chair = { data: { steps: '{"Model":true,"Rig":false}' } }
+    const table = { data: { steps: '{"Model":true,"Rig":false,"Anim":true}' } }
+    const lamp = { data: { steps: '{"Shade":true}' } }
+
+    expect(compare(chair, table)).toBe(1)
+    expect(compare(table, chair)).toBe(-1)
+    expect(compare(chair, lamp)).toBe(-compare(lamp, chair))
+    expect(compare(chair, lamp)).not.toBe(0)
+  })
+
+  it('sortEpisodeResult gives checklists of other items one order', () => {
+    const episodes = [
+      { name: 'E01', data: { steps: '{"a":true,"b":false,"c":false}' } },
+      { name: 'E02', data: { steps: '{"a":false,"b":true,"c":true}' } },
+      { name: 'E03', data: { steps: '{"a":false,"b":true,"c":false,"d":true}' } }
+    ].map(episode => ({ ...episode, canceled: false }))
+    const sorting = [
+      { type: 'metadata', column: 'steps', data_type: 'checklist' }
+    ]
+    const orders = [
+      [0, 1, 2],
+      [0, 2, 1],
+      [1, 0, 2],
+      [1, 2, 0],
+      [2, 0, 1],
+      [2, 1, 0]
+    ].map(order =>
+      sortEpisodeResult(
+        order.map(index => episodes[index]),
+        sorting,
+        taskTypeMap,
+        new Map()
+      )
+        .map(episode => episode.name)
+        .join(' ')
+    )
+
+    expect(new Set(orders)).toEqual(new Set(['E03 E01 E02']))
+  })
+
+  it('sortByMetadata ties an empty boolean and a false one', () => {
+    const compare = sortByMetadata({ column: 'approved', data_type: 'boolean' })
+    const empty = { data: { approved: '' } }
+    const unticked = { data: { approved: 'false' } }
+
+    expect(compare(empty, unticked)).toBe(0)
+    expect(compare(unticked, empty)).toBe(0)
+  })
+
   it('sortByMetadata sorts tag lists by their text, the empty ones last', () => {
     const entries = [
       { id: 1, data: { tags: 'hero,night' } },
@@ -215,6 +278,25 @@ describe('lib/sorting', () => {
         }
       ])
     ).toEqual([4, 1, 2, 3])
+  })
+
+  it('sortEditResult puts a tied edit without an episode last, whatever the order', () => {
+    const withEpisode = {
+      id: 1,
+      name: 'edit 2',
+      episode_name: 'E01',
+      canceled: false,
+      data: {}
+    }
+    const withoutEpisode = { id: 2, name: 'edit 1', canceled: false, data: {} }
+    const sorting = [{ type: 'metadata', column: 'cut', data_type: 'string' }]
+    const sortIds = entries =>
+      sortEditResult(entries, sorting, taskTypeMap, new Map()).map(
+        edit => edit.id
+      )
+
+    expect(sortIds([withEpisode, withoutEpisode])).toEqual([1, 2])
+    expect(sortIds([withoutEpisode, withEpisode])).toEqual([1, 2])
   })
 
   it('sortByName', () => {
@@ -955,22 +1037,44 @@ describe('lib/sorting', () => {
     expect(results).toHaveLength(2)
   })
 
-  // The list given is the episode list of the topbar (#2322).
-  it('sortEpisodeResult leaves the given list in its order', () => {
+  // The arrows of the detail pages walk the cached list a list page sorts:
+  // sorted as a copy, it would keep its load order.
+  it('sortEpisodeResult sorts the given list in place', () => {
     const episodes = [
       { id: 'ep-1', name: 'E01', canceled: false, data: { order: '2' } },
       { id: 'ep-2', name: 'E02', canceled: false, data: { order: '1' } }
     ]
 
-    const results = sortEpisodeResult(
+    const sorted = sortEpisodeResult(
       episodes,
       [{ type: 'metadata', column: 'order', ascending: true }],
       taskTypeMap,
       new Map()
     )
+    expect(sorted).toBe(episodes)
+    expect(episodes.map(e => e.id)).toEqual(['ep-2', 'ep-1'])
 
-    expect(results.map(e => e.id)).toEqual(['ep-2', 'ep-1'])
+    const unsorted = sortEpisodeResult(episodes, [], taskTypeMap, new Map())
+    expect(unsorted).toBe(episodes)
     expect(episodes.map(e => e.id)).toEqual(['ep-1', 'ep-2'])
+  })
+
+  // Each row answered "before the other", which reversed them at every sort.
+  it('sortEpisodeResult keeps the entries without the task by name', () => {
+    const episodes = [
+      { id: 'ep-2', name: 'E02', canceled: false },
+      { id: 'ep-3', name: 'E03', canceled: false },
+      { id: 'ep-1', name: 'E01', canceled: false }
+    ]
+
+    const results = sortEpisodeResult(
+      episodes,
+      [{ type: 'task_type', column: 'valid' }],
+      taskTypeMap,
+      new Map()
+    )
+
+    expect(results.map(entry => entry.id)).toEqual(['ep-1', 'ep-2', 'ep-3'])
   })
 
   it('sortByPersonName', () => {
