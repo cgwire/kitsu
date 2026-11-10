@@ -541,7 +541,9 @@ export default {
       title: 'Filter on...',
       union_and: 'Match all the following filters',
       union_or: 'Match one of the following filters',
+      with_task: 'With a task',
       with_thumbnail: 'With thumbnail',
+      without_task: 'Without a task',
       without_thumbnail: 'Without thumbnail'
     },
 

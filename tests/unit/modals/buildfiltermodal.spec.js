@@ -333,6 +333,17 @@ describe('BuildFilterModal', () => {
             const query = wrapper.vm.buildFilter()
             expect(query).toBe('[Modeling]=[-WIP,WFA]')
           })
+          it.each([
+            ['empty', '[Modeling]=empty'],
+            ['-empty', '[Modeling]=-empty']
+          ])('task presence %s', (operator, expected) => {
+            setState({
+              taskTypeFilters: {
+                values: [{ id: 'task-type-1', operator, values: [] }]
+              }
+            })
+            expect(wrapper.vm.buildFilter()).toBe(expected)
+          })
         })
         describe('descriptors', () => {
           it('descriptor is', () => {
@@ -537,6 +548,13 @@ describe('BuildFilterModal', () => {
                 operator: 'notin',
                 values: ['task-status-2', 'task-status-1']
               }
+            ])
+          })
+          it.each(['empty', '-empty'])('task presence %s', operator => {
+            changeSearch(`Modeling=${operator}`)
+            wrapper.vm.setFiltersFromCurrentQuery()
+            expect(wrapper.vm.taskTypeFilters.values).toMatchObject([
+              { id: 'task-type-1', operator }
             ])
           })
         })
