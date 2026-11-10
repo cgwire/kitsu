@@ -103,6 +103,11 @@ const helpers = {
     })
   },
 
+  showInfoColumns(state, episode) {
+    if (episode.description) state.isEpisodeDescription = true
+    if (episode.data?.resolution) state.isEpisodeResolution = true
+  },
+
   // A row joining a sorted list takes its place in the order of that list.
   sortList(state, episodes) {
     return sortEpisodeResult(
@@ -754,6 +759,7 @@ const mutations = {
       state.episodeSelectionGrid,
       state.displayedEpisodes.indexOf(episode)
     )
+    helpers.showInfoColumns(state, episode)
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
     state.displayedEpisodesLength = state.displayedEpisodes.length
   },
@@ -826,6 +832,7 @@ const mutations = {
       helpers.setListedRows(state)
     }
 
+    helpers.showInfoColumns(state, episode)
     helpers.setListStats(state, state.displayedEpisodes)
     state.episodeFilledColumns = getFilledColumns(state.displayedEpisodes)
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
@@ -851,12 +858,7 @@ const mutations = {
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
     // A renamed episode moves in the topbar selector.
     state.episodes = sortByName([...state.episodes])
-    if (episode.description && !state.isEpisodeDescription) {
-      state.isEpisodeDescription = true
-    }
-    if (episode.data.resolution && !state.isEpisodeResolution) {
-      state.isEpisodeResolution = true
-    }
+    helpers.showInfoColumns(state, episode)
   },
 
   [LOAD_EPISODES_END](state, { episodes, routeEpisodeId }) {

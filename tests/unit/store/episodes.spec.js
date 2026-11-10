@@ -919,6 +919,29 @@ describe('Episodes store, through a store', () => {
 
     expect(store.getters.isEpisodeResolution).toBe(true)
   })
+
+  // The creation form offers both fields, and another user may fill them.
+  test.each([
+    ['description', 'a new', { description: 'Pilot' }],
+    ['resolution', 'a new', { data: { resolution: '1920x1080' } }],
+    ['description', 'a live', { description: 'Pilot' }],
+    ['resolution', 'a live', { data: { resolution: '1920x1080' } }]
+  ])('shows the %s column once %s episode has one', async (_, kind, fields) => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: {} }])
+    const episode = { id: 'ep2', name: 'E02', data: {}, ...fields }
+
+    if (kind === 'a new') {
+      client.ppost.mockResolvedValueOnce({ ...episode, project_id: 'p1' })
+      await store.dispatch('newEpisode', { ...episode, project_id: 'p1' })
+    } else {
+      store.commit('ADD_EPISODE', episode)
+    }
+
+    expect(store.getters.isEpisodeDescription).toBe(Boolean(fields.description))
+    expect(store.getters.isEpisodeResolution).toBe(Boolean(fields.data))
+  })
+
   test('locks an edited episode until a while after its save', async () => {
     const { store } = await buildStore()
     loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: { fps: '24' } }])
