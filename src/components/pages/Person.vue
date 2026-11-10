@@ -1151,6 +1151,10 @@ useHead({ title: computed(() => `${person.value?.name || '...'} - Kitsu`) })
 
 // The schedule positions its grid absolutely: it takes the panel height
 .schedule-panel {
+  // the schedule hides the grid scrolling under its total and its month
+  // names with the page background, which the panel replaces here
+  --background: var(--background-panel-raised);
+
   display: flex;
   flex: 1;
   flex-direction: column;
