@@ -140,6 +140,48 @@ describe('players/ObjectViewer with WebGL2', () => {
     wrapper.unmount()
   })
 
+  // A source replaced while it was loading still fires load, even before the
+  // viewer has any model: the load of the new source brings it.
+  test('waits for a model when a replaced source fires load first', async () => {
+    const errorHandler = vi.fn()
+    const wrapper = mount(ObjectViewer, {
+      props: { previewUrl },
+      global: { config: { errorHandler } }
+    })
+    await flushPromises()
+    const viewer = wrapper.find('model-viewer').element
+
+    viewer.dispatchEvent(new Event('load'))
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(wrapper.emitted('model-loaded')).toBeUndefined()
+
+    const model = loadModel(viewer)
+
+    expect(model.createMaterialInstanceForVariant).toHaveBeenCalledTimes(1)
+    expect(wrapper.emitted('model-loaded')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  // Once a model is there, the load of a replaced source carries it again.
+  test('handles each model once when a replaced source fires load', async () => {
+    const wrapper = mount(ObjectViewer, { props: { previewUrl } })
+    await flushPromises()
+    const viewer = wrapper.find('model-viewer').element
+    const firstModel = loadModel(viewer)
+
+    viewer.dispatchEvent(new Event('load'))
+
+    expect(firstModel.createMaterialInstanceForVariant).toHaveBeenCalledTimes(1)
+    expect(wrapper.emitted('model-loaded')).toHaveLength(1)
+
+    const nextModel = loadModel(viewer)
+
+    expect(nextModel.createMaterialInstanceForVariant).toHaveBeenCalledTimes(1)
+    expect(wrapper.emitted('model-loaded')).toHaveLength(2)
+    wrapper.unmount()
+  })
+
   // The model can finish loading right after the viewer closed.
   test('ignores a model loaded once closed', async () => {
     const wrapper = mount(ObjectViewer, { props: { previewUrl } })

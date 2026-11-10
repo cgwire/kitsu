@@ -131,6 +131,7 @@ let lockOrbit = null
 let lockCameraTarget = null
 let skyboxAngle = 0
 let radiansPerPixel = 0
+let handledModel = null
 
 // Build the wireframe variant once per loaded model. Called from
 // @load — running it on @before-render (the previous wiring) mutated
@@ -166,7 +167,13 @@ const createWireframeVariant = model => {
 const onModelLoaded = event => {
   // A model loaded right after the close finds its scene disposed.
   if (!modelViewer.value) return
-  createWireframeVariant(event.target.model)
+  // model-viewer also fires load for a source replaced while it was loading,
+  // with the model the viewer had before, or none before the first one.
+  // Each source that loads gets a new model.
+  const { model } = event.target
+  if (!model || model === handledModel) return
+  handledModel = model
+  createWireframeVariant(model)
   if (props.isWireframe) {
     // model-viewer only re-applies a variant when `variantName` changes; a new
     // model leaves it unchanged, so re-trigger it to keep the wireframe active.
