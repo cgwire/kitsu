@@ -112,7 +112,7 @@ import { useStore } from 'vuex'
 
 import { isBehindModal } from '@/composables/modal'
 import { useTime } from '@/composables/time'
-import { isFreeEscape } from '@/lib/keyboard'
+import { isCaretMoveOnMac, isFreeEscape } from '@/lib/keyboard'
 import {
   formatFullDateWithRevertedTimezone,
   formatFullDateWithTimezone,
@@ -368,6 +368,8 @@ const onKeyDown = event => {
   }
   // A modal may be asking about the task shown, which stays as it is.
   if (isBehindModal(body.value)) return
+  // A field keeps the caret moves of macOS.
+  if (isCaretMoveOnMac(event)) return
   if (newsList.value && newsList.value.length > 0 && event.altKey) {
     let index = newsList.value.findIndex(news => news.id === selectedNewsId)
     if ([37, 38].includes(event.keyCode)) {

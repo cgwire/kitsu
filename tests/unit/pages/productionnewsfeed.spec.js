@@ -27,6 +27,7 @@ import ProductionNewsFeed from '@/components/pages/ProductionNewsFeed.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 import { openModalHost } from '../fixtures/modal-host'
+import { addTextField, onPlatform, pressAltArrow } from '../fixtures/platform'
 
 const production = { id: 'production-1', name: 'Caminandes' }
 
@@ -525,6 +526,30 @@ describe('pages/ProductionNewsFeed', () => {
 
       closeModal()
       await pressAltDown()
+
+      expect(loadTask).toHaveBeenCalledTimes(1)
+    })
+
+    // macOS moves the caret of the field by word on Option and an arrow.
+    it('leaves Option+Down to a field on macOS', async () => {
+      onPlatform('MacIntel')
+      const loadTask = vi.fn((_, { taskId }) => ({ id: taskId }))
+      await mountPage(`/productions/${production.id}/news-feed`, { loadTask })
+
+      pressAltArrow(addTextField('textarea', 'A draft'), 40)
+      await flushPromises()
+
+      expect(loadTask).not.toHaveBeenCalled()
+    })
+
+    // An empty field has no caret to move.
+    it('walks the news from an empty field on macOS', async () => {
+      onPlatform('MacIntel')
+      const loadTask = vi.fn((_, { taskId }) => ({ id: taskId }))
+      await mountPage(`/productions/${production.id}/news-feed`, { loadTask })
+
+      pressAltArrow(addTextField('textarea', ''), 40)
+      await flushPromises()
 
       expect(loadTask).toHaveBeenCalledTimes(1)
     })

@@ -116,6 +116,26 @@ describe('startup language', () => {
     expect(localStorage.getItem('locale')).toBe('fr_FR')
   })
 
+  test('rememberLocale keeps a language without showing it', async () => {
+    await lang.setLocale('en_US')
+
+    lang.rememberLocale('fr_FR')
+
+    expect(localStorage.getItem('locale')).toBe('fr_FR')
+    expect(i18n.global.locale.value).toBe('en')
+  })
+
+  test('applyLocale shows a language without remembering it', async () => {
+    localStorage.setItem('locale', 'en_US')
+
+    await lang.applyLocale('fr_FR')
+
+    expect(i18n.global.locale.value).toBe('fr')
+    expect(localeCode.value).toBe('fr')
+    expect(moment.locale()).toBe('fr')
+    expect(localStorage.getItem('locale')).toBe('en_US')
+  })
+
   test('starts in the last language used in this browser', async () => {
     localStorage.setItem('locale', 'de_DE')
 

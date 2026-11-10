@@ -210,7 +210,9 @@
             <input
               id="input-revision"
               class="input flexrow-item column preview-revision"
-              :class="{ 'below-current': isRevisionBelowCurrent }"
+              :class="{
+                'below-current': isRevisionBelowCurrent || isRevisionTaken
+              }"
               type="number"
               :min="0"
               pattern="[0-9]"
@@ -371,6 +373,15 @@
         </div>
         <div class="error pull-right" v-if="isMaxRetakesError">
           <em>{{ $t('comments.max_retakes_error') }}</em>
+        </div>
+        <div class="error pull-right" v-if="isRevisionTaken">
+          <em>
+            {{
+              $t('comments.revision_taken_error', {
+                revision: Number(nextRevision)
+              })
+            }}
+          </em>
         </div>
         <div class="error pull-right" v-if="errors.unknownStatus">
           <em>{{ $t('comments.unknown_status_error') }}</em>
@@ -683,11 +694,22 @@ const isConcept = computed(() => {
   return route.path.includes('concept')
 })
 
+// Zou refuses a revision in use only once the comment is out, with its
+// notifications and its status change. The publication of this box joins the
+// store before its last file is up.
+const isRevisionTaken = computed(() => {
+  const value = nextRevision.value
+  if (mode.value !== 'publish' || props.isLoading) return false
+  if (value === undefined || value === '') return false
+  return store.getters.isTaskRevisionTaken(props.task?.id, Number(value))
+})
+
 const isValidForm = computed(() => {
   return Boolean(
     mode.value === 'status' ||
     (mode.value === 'publish' &&
       props.previewForms.length &&
+      !isRevisionTaken.value &&
       (nextRevision.value === undefined ||
         nextRevision.value === '' ||
         nextRevision.value > -1) &&

@@ -3,6 +3,7 @@ import { useStore } from 'vuex'
 
 import { pauseEvent } from '@/composables/dom'
 import { isBehindModal } from '@/composables/modal'
+import { isCaretMoveOnMac } from '@/lib/keyboard'
 import { range } from '@/lib/time'
 
 /*
@@ -22,6 +23,7 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
   // --------------------------------------------------------------------------
   const lastSelection = ref(null)
   const selectionGrid = ref({})
+  let isUnmounted = false
 
   // Computed
   // --------------------------------------------------------------------------
@@ -56,6 +58,10 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
   }
 
   const applySelection = (event, index, task) => {
+    // The page a link of the row opens can replace the list, and clear the
+    // selection, before the click reaches the row: a task selected then
+    // would stay selected on that page, out of sight.
+    if (isUnmounted) return
     const isSelected = selectionGrid.value[task.id]
     const isManySelection = Object.keys(selectionGrid.value).length > 1
     if (!(event.ctrlKey || event.metaKey) && !event.shiftKey) {
@@ -100,6 +106,10 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
       } else {
         return
       }
+      // A field out of the list keeps the caret moves of macOS.
+      if (isCaretMoveOnMac(event) && !body.value?.contains(event.target)) {
+        return
+      }
       // A modal may be asking about the selection, which stays as it is. The
       // key stays caught: Alt+Left would leave the page.
       if (isBehindModal(body.value)) {
@@ -140,6 +150,7 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
   })
 
   onBeforeUnmount(() => {
+    isUnmounted = true
     window.removeEventListener('keydown', onKeyDown)
   })
 

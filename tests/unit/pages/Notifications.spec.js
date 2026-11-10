@@ -20,6 +20,8 @@ vi.mock('@/lib/render', () => ({ renderComment: () => '' }))
 import '@/lib/auth'
 
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
+import notificationsApi from '@/store/api/notifications'
+import notificationsStore from '@/store/modules/notifications'
 import NotificationsPage from '@/components/pages/Notifications.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import BooleanField from '@/components/widgets/BooleanField.vue'
@@ -29,6 +31,17 @@ import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 const ButtonSimpleStub = {
   template: '<button v-bind="$attrs"><slot /></button>',
   inheritAttrs: true
+}
+
+const contextGetters = {
+  departmentMap: () => new Map(),
+  organisation: () => ({ name: 'My Studio' }),
+  personMap: () => new Map(),
+  productionMap: () => new Map(),
+  taskStatus: () => [],
+  taskTypes: () => [],
+  taskTypeMap: () => new Map(),
+  user: () => ({ id: 'user-1' })
 }
 
 const makeStore = (getterOverrides = {}) => {
@@ -45,14 +58,7 @@ const makeStore = (getterOverrides = {}) => {
     state: () => ({}),
     getters: {
       notifications: () => [],
-      departmentMap: () => new Map(),
-      organisation: () => ({ name: 'My Studio' }),
-      personMap: () => new Map(),
-      productionMap: () => new Map(),
-      taskStatus: () => [],
-      taskTypes: () => [],
-      taskTypeMap: () => new Map(),
-      user: () => ({ id: 'user-1' }),
+      ...contextGetters,
       ...getterOverrides
     },
     actions
@@ -65,8 +71,9 @@ describe('Notifications.vue', () => {
   let dismissBannerMock, setPreferenceEnabledMock, showNotificationMock
   let shouldShowBanner, permission, isActive, preferenceEnabled
 
+  // The handler of the page mounted last: a test may mount its own.
   const getSocketHandler = event =>
-    socketMock.on.mock.calls.find(([e]) => e === event)?.[1]
+    socketMock.on.mock.calls.findLast(([e]) => e === event)?.[1]
 
   const mountPage = store => {
     const router = createRouter({
@@ -197,6 +204,128 @@ describe('Notifications.vue', () => {
       await flushPromises()
 
       expect(actions.toggleNotificationReadStatus).toHaveBeenCalled()
+      expect(consoleError).toHaveBeenCalledWith(error)
+    })
+  })
+
+  // Zou deletes a notification with its comment or its reply, and no event
+  // names it. Only the API is simulated here: the store module is the real one.
+  describe('notifications deleted on the server', () => {
+    const rowOf = (id, commentId) => ({
+      id,
+      author_id: 'person-1',
+      comment_id: commentId,
+      created_at: '2026-09-21T10:00:00',
+      notification_type: 'comment',
+      project_id: 'production-1',
+      read: false,
+      task_id: 'task-1',
+      task_type_id: 'task-type-1'
+    })
+
+    const mountWithRows = async rows => {
+      wrapper.unmount()
+      vi.spyOn(notificationsApi, 'getNotifications').mockResolvedValue(rows)
+      store = createStore({
+        getters: contextGetters,
+        actions: { loadTask: () => Promise.resolve({ id: 'task-1' }) },
+        modules: { notifications: notificationsStore }
+      })
+      store.commit('RESET_ALL')
+      wrapper = mountPage(store)
+      await flushPromises()
+    }
+
+    const listedIds = () => store.getters.notifications.map(({ id }) => id)
+
+    const clickRead = async rowIndex => {
+      wrapper.findAllComponents(BooleanField)[rowIndex].vm.$emit('click', 'true')
+      await flushPromises()
+    }
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('removes the rows of a comment deleted meanwhile', async () => {
+      await mountWithRows([
+        rowOf('comment', 'comment-1'),
+        rowOf('mention', 'comment-1'),
+        rowOf('other', 'comment-2'),
+        rowOf('assignation', null)
+      ])
+      expect(wrapper.findAll('.notification')).toHaveLength(4)
+
+      getSocketHandler('comment:delete')?.({
+        comment_id: 'comment-1',
+        task_id: 'task-1'
+      })
+      await nextTick()
+
+      expect(listedIds()).toEqual(['other', 'assignation'])
+      expect(wrapper.findAll('.notification')).toHaveLength(2)
+    })
+
+    it('keeps the task in the panel when its row goes away', async () => {
+      await mountWithRows([rowOf('comment', 'comment-1')])
+      await wrapper.find('.notification').trigger('click')
+      await flushPromises()
+      expect(wrapper.findComponent(TaskInfo).props('task')?.id).toBe('task-1')
+
+      getSocketHandler('comment:delete')?.({ comment_id: 'comment-1' })
+      await nextTick()
+
+      expect(listedIds()).toEqual([])
+      expect(wrapper.findComponent(TaskInfo).props('task')?.id).toBe('task-1')
+    })
+
+    it('stops following deleted comments once the page is gone', async () => {
+      const handler = getSocketHandler('comment:delete')
+      expect(handler).toBeInstanceOf(Function)
+
+      wrapper.unmount()
+
+      expect(socketMock.off).toHaveBeenCalledWith('comment:delete', handler)
+      wrapper = mountPage(store)
+    })
+
+    it('removes a row the server no longer knows on a click on read', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      vi.spyOn(
+        notificationsApi,
+        'updateNotificationReadStatus'
+      ).mockRejectedValueOnce(
+        Object.assign(new Error('NOT FOUND'), { status: 404 })
+      )
+      await mountWithRows([
+        rowOf('gone', 'comment-1'),
+        rowOf('kept', 'comment-2')
+      ])
+
+      await clickRead(0)
+
+      expect(listedIds()).toEqual(['kept'])
+      expect(wrapper.findAll('.notification')).toHaveLength(1)
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    it('keeps the row unread and logs when the save fails otherwise', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const error = Object.assign(new Error('Server error'), { status: 500 })
+      vi.spyOn(
+        notificationsApi,
+        'updateNotificationReadStatus'
+      ).mockRejectedValueOnce(error)
+      await mountWithRows([rowOf('kept', 'comment-1')])
+
+      await clickRead(0)
+
+      expect(listedIds()).toEqual(['kept'])
+      expect(wrapper.find('.notification').classes()).toContain('unread')
       expect(consoleError).toHaveBeenCalledWith(error)
     })
   })

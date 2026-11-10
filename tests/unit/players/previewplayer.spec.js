@@ -1655,6 +1655,97 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  // A colleague may delete the revision compared: the store drops it from the
+  // list the player gets.
+  describe('once the compared revision goes', () => {
+    const revision = number => ({
+      ...moviePreview,
+      id: `preview-r${number}`,
+      revision: number
+    })
+    const stubs = {
+      PreviewViewer: {
+        name: 'PreviewViewer',
+        template: '<div />',
+        props: { preview: Object },
+        methods: viewer
+      }
+    }
+    const comparisonBar = () =>
+      wrapper.findComponent({ name: 'PlayerComparisonBar' })
+    const comparedPreview = () =>
+      wrapper.findAllComponents({ name: 'PreviewViewer' })[1]?.props('preview')
+
+    it('compares with another revision', async () => {
+      wrapper = mountPlayer({
+        props: {
+          previews: [revision(2)],
+          entityPreviewFiles: {
+            [task.task_type_id]: [revision(3), revision(2), revision(1)]
+          },
+          taskTypeMap: new Map([
+            [task.task_type_id, { id: task.task_type_id, name: 'Animation' }]
+          ])
+        },
+        stubs
+      })
+      await nextTick()
+      comparisonBar().vm.$emit('compare-clicked')
+      await flushPromises()
+      expect(comparedPreview().id).toBe('preview-r3')
+
+      await wrapper.setProps({
+        entityPreviewFiles: {
+          [task.task_type_id]: [revision(2), revision(1)]
+        }
+      })
+      await flushPromises()
+
+      expect(comparedPreview().id).toBe('preview-r1')
+    })
+
+    // The store keeps the emptied list of a task type, a reload leaves it out.
+    it.each([
+      ['emptied', { 'task-type-2': [] }],
+      ['left out', {}]
+    ])(
+      'moves to the task type of the revision shown once the compared one is %s',
+      async (_, comparedTaskType) => {
+        wrapper = mountPlayer({
+          props: {
+            previews: [revision(2)],
+            entityPreviewFiles: {
+              [task.task_type_id]: [revision(2), revision(1)],
+              'task-type-2': [{ ...moviePreview, id: 'preview-other' }]
+            },
+            taskTypeMap: new Map([
+              [task.task_type_id, { id: task.task_type_id, name: 'Layout' }],
+              ['task-type-2', { id: 'task-type-2', name: 'Animation' }]
+            ])
+          },
+          stubs
+        })
+        await nextTick()
+        comparisonBar().vm.$emit('compare-clicked')
+        await flushPromises()
+        comparisonBar().vm.$emit('update:taskTypeId', 'task-type-2')
+        await flushPromises()
+        expect(comparedPreview().id).toBe('preview-other')
+
+        await wrapper.setProps({
+          entityPreviewFiles: {
+            [task.task_type_id]: [revision(2), revision(1)],
+            ...comparedTaskType
+          }
+        })
+        await flushPromises()
+
+        expect(comparisonBar().props('taskTypeId')).toBe(task.task_type_id)
+        expect(comparedPreview()?.id).toBe('preview-r1')
+      }
+    )
+  })
+
   // The comment box waits for the snapshots, and each of them waits 500 ms
   // for its frame or picture: the player can close in between.
   describe('annotation snapshots', () => {

@@ -1112,6 +1112,9 @@ describe('App', () => {
   // overlays rename the shots to NFTs or to maps.
   describe('English overlays', () => {
     afterEach(async () => {
+      // First: a mounted App would apply the vocabulary again over the reset.
+      wrapper?.unmount()
+      wrapper = null
       await lang.setLocale('en_US')
       localStorage.removeItem('locale')
       i18n.global.fallbackWarn = true
@@ -1147,6 +1150,45 @@ describe('App', () => {
           user: () => null
         }
       })
+
+      expect(i18n.global.locale.value).toBe('en_nft')
+    })
+
+    // A guard applies the language of the user on the way through the home page.
+    it('stays when the language is applied again', async () => {
+      await mountApp({
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            production_style: 'nft'
+          }),
+          user: () => ({ id: 'user-1', locale: 'en_US' })
+        }
+      })
+
+      await lang.setLocale('en_US')
+      await flushPromises()
+
+      expect(i18n.global.locale.value).toBe('en_nft')
+    })
+
+    it('comes back after a language tried in the profile', async () => {
+      await mountApp({
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            production_style: 'nft'
+          }),
+          user: () => ({ id: 'user-1', locale: 'en_US' })
+        }
+      })
+
+      await lang.applyLocale('fr_FR')
+      await flushPromises()
+      expect(i18n.global.locale.value).toBe('fr')
+
+      await lang.applyLocale('en_US')
+      await flushPromises()
 
       expect(i18n.global.locale.value).toBe('en_nft')
     })

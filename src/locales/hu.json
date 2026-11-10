@@ -156,6 +156,7 @@
       "for_client_off": "A szöveg nem látható az ügyfelek számára. Kattints, hogy láthatóvá tedd az ügyfelek számára",
       "for_client_on": "A szöveg látható az ügyfelek számára. Kattints, hogy elrejtsd az ügyfelek elől",
       "max_retakes_error": "Nem adhatsz több javítást ehhez a feladathoz.",
+      "revision_taken_error": "A(z) {revision}. revízió már létezik. Válassz másik számot.",
       "unknown_status_error": "A kiválasztott feladat állapot már nem érhető el. Kérlek töltsd újra az oldalt és próbáld újra.",
       "move_modal": {
         "error": "Nem sikerült áthelyezni a hozzászólást. Kérlek keresd fel a támogató csapatunkat.",

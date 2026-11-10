@@ -1,5 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { nextTick, ref, watch } from 'vue'
+import { h, nextTick, ref, watch } from 'vue'
 
 import { isBehindModal, isModalOpenIn, useModal } from '@/composables/modal'
 
@@ -119,6 +119,76 @@ describe('composables/modal', () => {
       expect.any(Function)
     )
     removeSpy.mockRestore()
+  })
+
+  // The button that opens a modal gets the first click of a double click, and
+  // the background the second.
+  describe('second click of a double click', () => {
+    const mountHost = (active = true) => {
+      const onBackgroundClick = vi.fn()
+      const onButtonClick = vi.fn()
+      const wrapper = mount(
+        {
+          setup() {
+            useModal(ref(active), vi.fn())
+            return () =>
+              h('div', [
+                h('div', {
+                  class: 'modal-background',
+                  onClick: onBackgroundClick
+                }),
+                h('button', { onClick: onButtonClick })
+              ])
+          }
+        },
+        { attachTo: document.body }
+      )
+      return { onBackgroundClick, onButtonClick, wrapper }
+    }
+
+    // `trigger` cannot set the click count: `detail` is read-only on its event.
+    const click = (wrapper, selector, clickCount) =>
+      wrapper
+        .find(selector)
+        .element.dispatchEvent(
+          new MouseEvent('click', { bubbles: true, detail: clickCount })
+        )
+
+    it('never reaches the background', () => {
+      const { onBackgroundClick, wrapper } = mountHost()
+
+      click(wrapper, '.modal-background', 2)
+
+      expect(onBackgroundClick).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('leaves a single click on the background alone', () => {
+      const { onBackgroundClick, wrapper } = mountHost()
+
+      click(wrapper, '.modal-background', 1)
+
+      expect(onBackgroundClick).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('leaves the rest of the modal alone', () => {
+      const { onButtonClick, wrapper } = mountHost()
+
+      click(wrapper, 'button', 2)
+
+      expect(onButtonClick).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('leaves a closed modal alone', () => {
+      const { onBackgroundClick, wrapper } = mountHost(false)
+
+      click(wrapper, '.modal-background', 2)
+
+      expect(onBackgroundClick).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
   })
 
   describe('focus management (CLEAN-4)', () => {

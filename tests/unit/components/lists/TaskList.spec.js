@@ -4,6 +4,11 @@ import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
 import { openModalHost } from '../../fixtures/modal-host'
+import {
+  addTextField,
+  onPlatform,
+  pressAltArrow
+} from '../../fixtures/platform'
 import { buildRefusal } from '../../fixtures/refusal'
 import { trackTaskSelection } from '../../fixtures/task-selection'
 
@@ -108,6 +113,16 @@ const appendIconStroke = cell => {
   return stroke
 }
 
+// The status link of a row only serves middle click and the context menu:
+// every click goes on to the row.
+const appendStatusLink = cell => {
+  const link = document.createElement('a')
+  link.className = 'task-link'
+  link.href = '/tasks/task-1'
+  link.addEventListener('click', event => event.preventDefault())
+  cell.appendChild(link)
+}
+
 describe('lists/TaskList', () => {
   test('selects a task when its row is clicked', async () => {
     const wrapper = mountList()
@@ -128,6 +143,17 @@ describe('lists/TaskList', () => {
 
     expect(errorHandler).not.toHaveBeenCalled()
     expect(wrapper.emitted('task-selected')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  test('selects a task when its status link is clicked', async () => {
+    const wrapper = mountList()
+    appendStatusLink(wrapper.find('tbody .status').element)
+
+    await wrapper.find('tbody a.task-link').trigger('click')
+
+    expect(wrapper.emitted('task-selected')).toHaveLength(1)
 
     wrapper.unmount()
   })
@@ -233,6 +259,52 @@ describe('lists/TaskList', () => {
     expect(selection.selectedIds()).toEqual(['task-1'])
 
     wrapper.unmount()
+  })
+
+  // In the page, the keys of a field of the list reach the window.
+  const mountOnFirstTask = async () => {
+    const tasks = ['task-1', 'task-2'].map(id => ({ ...task, id }))
+    const selection = trackTaskSelection()
+    const wrapper = mountList(undefined, {
+      selection,
+      props: { tasks },
+      attachTo: document.body
+    })
+    onTestFinished(() => wrapper.unmount())
+    await wrapper.find('tbody td.name').trigger('click')
+    return { wrapper, selection }
+  }
+
+  // macOS moves the caret of a field by word on Option and an arrow.
+  test('leaves Option+Down to a field out of the list on macOS', async () => {
+    onPlatform('MacIntel')
+    const { wrapper, selection } = await mountOnFirstTask()
+
+    const event = pressAltArrow(addTextField('input', 'Shot'), 40)
+    await nextTick()
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(selection.selectedIds()).toEqual(['task-1'])
+
+    // A field of the list keeps walking it.
+    const rowField = document.createElement('input')
+    rowField.value = 'Shot'
+    wrapper.find('tbody').element.append(rowField)
+    pressAltArrow(rowField, 40)
+    await nextTick()
+
+    expect(selection.selectedIds()).toEqual(['task-2'])
+  })
+
+  // An empty field has no caret to move.
+  test('walks from an empty field out of the list on macOS', async () => {
+    onPlatform('MacIntel')
+    const { selection } = await mountOnFirstTask()
+
+    pressAltArrow(addTextField('input', ''), 40)
+    await nextTick()
+
+    expect(selection.selectedIds()).toEqual(['task-2'])
   })
 
   // Confirming in a modal sent the change to the row Alt+Down had reached.

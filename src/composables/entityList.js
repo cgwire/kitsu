@@ -35,6 +35,7 @@ import {
 import { isBehindModal } from '@/composables/modal'
 import colors from '@/lib/colors'
 import { getMetadataEventValue, getMetadataFieldValue } from '@/lib/descriptors'
+import { isCaretMoveOnMac } from '@/lib/keyboard'
 import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
 import assetStore from '@/store/modules/assets'
@@ -819,6 +820,8 @@ export const useEntityList = ({
   const onKeyDown = event => {
     shiftKeyPressed.value = event.shiftKey
     if (!event.altKey || ![37, 38, 39, 40].includes(event.keyCode)) return
+    // A field out of the list keeps the caret moves of macOS.
+    if (isCaretMoveOnMac(event) && !getBody()?.contains(event.target)) return
     // A modal may be asking about the selection, which stays as it is. The key
     // stays caught: Alt+Left would leave the page.
     if (isBehindModal(getBody())) {

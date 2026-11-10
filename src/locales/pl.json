@@ -274,6 +274,7 @@
       "edit_error": "Wystąpił błąd podczas edycji komentarza. Skontaktuj się z naszym zespołem wsparcia.",
       "error": "Wystąpił błąd podczas dodawania komentarza",
       "max_retakes_error": "Nie możesz już dodawać poprawek do tego zadania.",
+      "revision_taken_error": "Wersja {revision} już istnieje. Wybierz inny numer.",
       "unknown_status_error": "Wybrany status zadania nie jest już dostępny. Odśwież stronę i spróbuj ponownie.",
       "no_attachments": "Ten komentarz nie ma załączników.",
       "pin": "Przypnij",

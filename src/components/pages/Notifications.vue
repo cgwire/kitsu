@@ -745,6 +745,11 @@ const onPreviewFileAdd = eventData => {
   })
 }
 
+// Zou deletes the notifications of a comment with it, and no event names them.
+const onCommentDelete = eventData => {
+  store.commit('REMOVE_COMMENT_NOTIFICATIONS', eventData.comment_id)
+}
+
 // Watchers
 
 watch(parameters, () => {
@@ -762,11 +767,13 @@ onMounted(() => {
   reloadData()
   socket.on('notification:new', onNewNotification)
   socket.on('preview-file:add-file', onPreviewFileAdd)
+  socket.on('comment:delete', onCommentDelete)
 })
 
 onBeforeUnmount(() => {
   socket.off('notification:new', onNewNotification)
   socket.off('preview-file:add-file', onPreviewFileAdd)
+  socket.off('comment:delete', onCommentDelete)
 })
 
 // Head

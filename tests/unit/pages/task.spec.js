@@ -28,6 +28,7 @@ import drafts from '@/lib/drafts'
 import { DEFAULT_FPS } from '@/lib/video'
 import sequencesStore from '@/store/modules/sequences'
 import shotsStore from '@/store/modules/shots'
+import tasksStore from '@/store/modules/tasks'
 
 import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
 import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
@@ -579,6 +580,390 @@ describe('Task.vue preview selection', () => {
     // A stale id in the url must not blank the player out.
     expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
     expect(playerPreviews(wrapper)).toEqual(['from-3'])
+  })
+
+  // The real mutations hold the revisions here: the order of the events of a
+  // deletion decides what is left.
+  describe('once a comment is deleted', () => {
+    const { mutations } = tasksStore
+
+    const buildComment = revision => ({
+      id: `comment-${revision}`,
+      person: { id: 'user-1', first_name: 'Ann', last_name: 'Lee' },
+      person_id: 'user-1',
+      previews: [{ id: `preview-${revision}`, revision, extension: 'png' }],
+      task_status: {}
+    })
+
+    const mountOnRevisions = async (revisions, options = {}) => {
+      const state = {
+        taskComments: {},
+        taskEntityPreviews: {},
+        taskMap: new Map(),
+        taskPreviews: {}
+      }
+      mutations.LOAD_TASK_COMMENTS_END(state, {
+        taskId: TASK_ID,
+        comments: revisions.map(buildComment)
+      })
+      const page = await mountPage({
+        ...options,
+        getterOverrides: {
+          ...options.getterOverrides,
+          getTaskComment: () => (taskId, commentId) =>
+            state.taskComments[taskId]?.find(({ id }) => id === commentId),
+          getTaskComments: () => id => state.taskComments[id] ?? [],
+          getTaskPreviews: () => id => state.taskPreviews[id] ?? []
+        }
+      })
+      page.store.commit.mockImplementation((type, payload) => {
+        if (['ADD_PREVIEW_END', 'REMOVE_TASK_COMMENT'].includes(type)) {
+          mutations[type](state, payload)
+        }
+      })
+      return { ...page, state }
+    }
+
+    const previewCombo = wrapper =>
+      wrapper
+        .findAllComponents(ComboboxStyled)
+        .find(combo => combo.classes().includes('preview-combo'))
+
+    const options = wrapper =>
+      previewCombo(wrapper)
+        .props('options')
+        .map(({ value }) => value)
+
+    const shownFiles = wrapper => playerPreviews(wrapper).map(({ id }) => id)
+
+    // A comment and its first file, as the events bring them.
+    const publish = ({ state, socket }, revision, previewId) => {
+      mutations.NEW_TASK_COMMENT_END(state, {
+        comment: { ...buildComment(revision), previews: [] },
+        taskId: TASK_ID
+      })
+      const [, onPreviewAdded] = socket.on.mock.calls.find(
+        ([event]) => event === 'preview-file:add-file'
+      )
+      onPreviewAdded({
+        task_id: TASK_ID,
+        comment_id: `comment-${revision}`,
+        preview_file_id: previewId ?? `preview-${revision}`,
+        revision,
+        extension: 'png',
+        status: 'ready'
+      })
+      return flushPromises()
+    }
+
+    const emitDeletion = ({ socket }, revision) => {
+      const [, onCommentDelete] = socket.on.mock.calls.find(
+        ([event]) => event === 'comment:delete'
+      )
+      onCommentDelete({ comment_id: `comment-${revision}`, task_id: TASK_ID })
+      return flushPromises()
+    }
+
+    it('leaves a revision deleted elsewhere', async () => {
+      const page = await mountOnRevisions([2, 1])
+
+      await emitDeletion(page, 2)
+
+      expect(options(page.wrapper)).toEqual(['preview-1'])
+      expect(shownFiles(page.wrapper)).toEqual(['preview-1'])
+    })
+
+    it('keeps the revision of its URL when another one goes', async () => {
+      const page = await mountOnRevisions([3, 2, 1], { previewId: 'preview-2' })
+
+      await emitDeletion(page, 3)
+
+      expect(options(page.wrapper)).toEqual(['preview-2', 'preview-1'])
+      expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+    })
+
+    it('shows no player once the only revision goes', async () => {
+      const page = await mountOnRevisions([1])
+
+      await emitDeletion(page, 1)
+
+      expect(page.wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+    })
+
+    // The comparison of the player lists the revisions of the other tasks of
+    // the entity too.
+    it('refreshes the revisions compared once a comment goes on another task', async () => {
+      const page = await mountOnRevisions([2, 1])
+      const [, onCommentDelete] = page.socket.on.mock.calls.find(
+        ([event]) => event === 'comment:delete'
+      )
+
+      onCommentDelete({ comment_id: 'comment-elsewhere', task_id: 'task-2' })
+      await flushPromises()
+
+      expect(page.store.dispatch).toHaveBeenCalledWith(
+        'refreshTaskEntityPreviewFiles',
+        { entityId: buildTask().entity_id, taskId: 'task-2' }
+      )
+    })
+
+    it('refreshes nothing for a comment of its own task', async () => {
+      const page = await mountOnRevisions([2, 1])
+      const [, onCommentDelete] = page.socket.on.mock.calls.find(
+        ([event]) => event === 'comment:delete'
+      )
+
+      await emitDeletion(page, 2)
+      onCommentDelete({ comment_id: 'comment-unknown', task_id: TASK_ID })
+      await flushPromises()
+
+      expect(page.dispatched).not.toContain('refreshTaskEntityPreviewFiles')
+    })
+
+    // The options go by number, the list by date of publication.
+    it('names the revision it shows when a lower number came last', async () => {
+      const { wrapper } = await mountOnRevisions([3, 5])
+
+      expect(shownFiles(wrapper)).toEqual(['preview-3'])
+      expect(previewCombo(wrapper).props('modelValue')).toBe('preview-3')
+    })
+
+    it('names the revision it shows from a URL naming one gone', async () => {
+      const page = await mountOnRevisions([3, 5, 1], {
+        previewId: 'preview-1'
+      })
+
+      await emitDeletion(page, 1)
+
+      expect(shownFiles(page.wrapper)).toEqual(['preview-3'])
+      expect(previewCombo(page.wrapper).props('modelValue')).toBe('preview-3')
+    })
+
+    it('opens the revision picked in its list', async () => {
+      const page = await mountOnRevisions([2, 1])
+
+      previewCombo(page.wrapper).vm.$emit('update:model-value', 'preview-1')
+      await flushPromises()
+
+      expect(shownFiles(page.wrapper)).toEqual(['preview-1'])
+      expect(page.router.currentRoute.value.params.preview_id).toBe('preview-1')
+    })
+
+    // The list may change behind a modal of the player.
+    describe('with a modal of the player open', () => {
+      const previewForm = () => {
+        const form = new FormData()
+        form.append('file', new File(['frame'], 'sh010-alt.png'))
+        return form
+      }
+
+      const confirmExtraFile = async wrapper => {
+        wrapper
+          .findComponent({ ref: 'add-extra-preview-modal' })
+          .vm.$emit('confirm', [previewForm()])
+        await flushPromises()
+      }
+
+      // The page shows the last file of the revision once the upload ends.
+      const stubs = {
+        PreviewPlayer: {
+          props: ['previews'],
+          template: '<div />',
+          methods: { displayLast: () => {}, focus: () => {} }
+        }
+      }
+
+      it('adds a file to the revision it opened on, once a new one is published', async () => {
+        const page = await mountOnRevisions([2, 1], { stubs })
+        page.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+
+        await publish(page, 3)
+        await confirmExtraFile(page.wrapper)
+
+        expect(page.store.dispatch).toHaveBeenCalledWith(
+          'addCommentExtraPreview',
+          expect.objectContaining({
+            commentId: 'comment-2',
+            previewId: 'preview-2'
+          })
+        )
+      })
+
+      it('adds a file to no other revision once its own goes', async () => {
+        const page = await mountOnRevisions([2, 1], { stubs })
+        page.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+
+        await emitDeletion(page, 2)
+        await confirmExtraFile(page.wrapper)
+
+        expect(page.store.dispatch).toHaveBeenCalledWith(
+          'addCommentExtraPreview',
+          expect.objectContaining({
+            commentId: undefined,
+            previewId: 'preview-2'
+          })
+        )
+      })
+
+      // The way back in the browser leaves the modal open.
+      it('adds a file to the revision shown once the task changes', async () => {
+        const otherTask = buildTask({ id: 'task-2' })
+        const page = await mountOnRevisions([2, 1], {
+          stubs,
+          getterOverrides: {
+            taskMap: () =>
+              new Map([
+                [TASK_ID, buildTask()],
+                [otherTask.id, otherTask]
+              ])
+          }
+        })
+        mutations.LOAD_TASK_COMMENTS_END(page.state, {
+          taskId: otherTask.id,
+          comments: [buildComment(5)]
+        })
+        page.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+
+        await page.router.push({
+          name: 'task',
+          params: { ...TASK_ROUTE_PARAMS, task_id: otherTask.id }
+        })
+        await flushPromises()
+        await confirmExtraFile(page.wrapper)
+
+        expect(page.store.dispatch).toHaveBeenCalledWith(
+          'addCommentExtraPreview',
+          expect.objectContaining({
+            taskId: otherTask.id,
+            commentId: 'comment-5',
+            previewId: 'preview-5'
+          })
+        )
+      })
+
+      // The trash can take the only file during the upload of another one.
+      it('shows a file that starts over a revision the trash emptied', async () => {
+        const page = await mountOnRevisions([1], { stubs })
+        page.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+        page.store.dispatch.mockImplementation(async type => {
+          if (type !== 'addCommentExtraPreview') return
+          mutations.DELETE_PREVIEW_END(page.state, {
+            taskId: TASK_ID,
+            previewId: 'preview-1'
+          })
+          mutations.ADD_PREVIEW_END(page.state, {
+            preview: { id: 'preview-1b', revision: 1, extension: 'png' },
+            taskId: TASK_ID,
+            commentId: 'comment-1',
+            comment: page.state.taskComments[TASK_ID][0]
+          })
+        })
+
+        await confirmExtraFile(page.wrapper)
+
+        expect(shownFiles(page.wrapper)).toEqual(['preview-1b'])
+      })
+
+      it('tells a trash Zou refuses once the only revision went', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const page = await mountOnRevisions([1])
+        page.wrapper
+          .findComponent(PreviewPlayer)
+          .vm.$emit('remove-extra-preview', { id: 'preview-1' })
+        await flushPromises()
+        const refusal = new Error('Not Found')
+        page.store.dispatch.mockImplementation(type =>
+          type === 'deleteTaskPreview'
+            ? Promise.reject(refusal)
+            : Promise.resolve()
+        )
+        await emitDeletion(page, 1)
+
+        const modal = page.wrapper
+          .findAllComponents(DeleteModal)
+          .find(deleteModal => deleteModal.props('active'))
+        modal.vm.$emit('confirm')
+        await flushPromises()
+
+        expect(consoleError).toHaveBeenCalledWith(refusal)
+        expect(modal.props('isLoading')).toBe(false)
+        expect(modal.props('isError')).toBe(true)
+        consoleError.mockRestore()
+      })
+    })
+
+    // Zou sends the event before it answers the request: the local stack gave
+    // that order on every run, nothing says a production server does.
+    describe.each([
+      ['the event comes first', true],
+      ['the answer comes first', false]
+    ])('deleted from the page, %s', (_, isEventFirst) => {
+      const deleteFromPage = async (page, revision) => {
+        const { state, store, wrapper } = page
+        store.dispatch.mockImplementation(async (type, payload) => {
+          if (type !== 'deleteTaskComment') return
+          if (isEventFirst) await emitDeletion(page, revision)
+          mutations.DELETE_COMMENT_END(state, {
+            taskId: TASK_ID,
+            commentId: payload.commentId,
+            taskStatusMap: new Map(),
+            todoStatus: {}
+          })
+        })
+        wrapper
+          .findAllComponents(Comment)
+          .find(comment => comment.props('comment').id === `comment-${revision}`)
+          .vm.$emit('delete-comment', { id: `comment-${revision}` })
+        await flushPromises()
+        wrapper
+          .findAllComponents(DeleteModal)
+          .find(modal => modal.props('active'))
+          .vm.$emit('confirm')
+        await flushPromises()
+      }
+
+      it('moves to the latest revision from its URL', async () => {
+        const page = await mountOnRevisions([2, 1], { previewId: 'preview-2' })
+
+        await deleteFromPage(page, 2)
+
+        expect(options(page.wrapper)).toEqual(['preview-1'])
+        expect(shownFiles(page.wrapper)).toEqual(['preview-1'])
+      })
+
+      it('stays on the older revision its URL names', async () => {
+        const page = await mountOnRevisions([3, 2, 1], {
+          previewId: 'preview-1'
+        })
+
+        await deleteFromPage(page, 3)
+
+        expect(options(page.wrapper)).toEqual(['preview-2', 'preview-1'])
+        expect(shownFiles(page.wrapper)).toEqual(['preview-1'])
+        expect(page.router.currentRoute.value.params.preview_id).toBe(
+          'preview-1'
+        )
+      })
+
+      // Nobody picked the revision left: the next publication shows.
+      it.each([
+        ['without a revision', undefined],
+        ['naming the revision that goes', 'preview-2']
+      ])('shows the next publication from a URL %s', async (_, previewId) => {
+        const page = await mountOnRevisions([2, 1], { previewId })
+
+        await deleteFromPage(page, 2)
+        await publish(page, 2, 'preview-2-again')
+
+        expect(options(page.wrapper)).toEqual(['preview-2-again', 'preview-1'])
+        expect(shownFiles(page.wrapper)).toEqual(['preview-2-again'])
+        expect(previewCombo(page.wrapper).props('modelValue')).toBe(
+          'preview-2-again'
+        )
+      })
+    })
   })
 })
 

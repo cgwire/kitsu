@@ -2,9 +2,15 @@ import { nextTick, reactive } from 'vue'
 import { createStore } from 'vuex'
 import { createRouter, createWebHistory } from 'vue-router'
 
+import tasksStore from '@/store/modules/tasks'
+
 import AddComment from '@/components/widgets/AddComment.vue'
 
 import { shallowMountWithI18n } from '../fixtures/i18n'
+
+// The tasks module pulls in the root store (lib/models, timezone, @/store),
+// which this spec does not need built.
+vi.mock('@/store', () => ({ default: {} }))
 
 const router = createRouter({
   history: createWebHistory(),
@@ -62,12 +68,17 @@ describe('AddComment', () => {
     project_id: 'production-1'
   }
 
-  const mountComment = async (getterOverrides = {}, stubs = {}) => {
+  const mountComment = async (
+    getterOverrides = {},
+    stubs = {},
+    storeOptions = {}
+  ) => {
     draftComment = makeDraftComment()
     clearedProgress = []
 
     store = createStore({
       strict: true,
+      state: storeOptions.state,
       getters: {
         isDarkTheme: () => false,
         isCurrentUserAdmin: () => false,
@@ -76,6 +87,7 @@ describe('AddComment', () => {
         isCurrentUserManager: () => false,
         currentUserRoleForProduction: () => () => null,
         departmentMap: () => new Map(),
+        isTaskRevisionTaken: () => () => false,
         productionDepartmentIds: () => [],
         productionMap: () =>
           new Map([
@@ -99,7 +111,8 @@ describe('AddComment', () => {
         ...getterOverrides
       },
       mutations: {
-        CLEAR_UPLOAD_PROGRESS: (state, names) => clearedProgress.push(names)
+        CLEAR_UPLOAD_PROGRESS: (state, names) => clearedProgress.push(names),
+        ...storeOptions.mutations
       }
     })
 
@@ -334,6 +347,222 @@ describe('AddComment', () => {
       await wrapper.setProps({ previewForms: [makeFormWithFile('shot.png')] })
       await wrapper.vm.$nextTick()
       expect(draftComment.nextRevision).toBeUndefined()
+    })
+  })
+
+  // Zou refuses such a revision once the comment is out with its notifications
+  // and its status change: nothing may leave the comment box.
+  describe('revision the task already has', () => {
+    const {
+      ADD_PREVIEW_END,
+      DELETE_PREVIEW_END,
+      LOAD_TASK_COMMENTS_END,
+      NEW_TASK_COMMENT_END,
+      REMOVE_TASK_COMMENT
+    } = tasksStore.mutations
+
+    const takenMessage = () => wrapper.find('.error em')
+    const selectFile = name =>
+      wrapper.setProps({ previewForms: [makeFormWithFile(name)] })
+    const publish = () => wrapper.find('.post-button').trigger('click')
+    const publishedRevision = () => wrapper.emitted('add-comment')[0][4]
+
+    const makeComment = (id, previews = []) => ({
+      id,
+      person: { id: 'person-1', first_name: 'Ann', last_name: 'Lee' },
+      person_id: 'person-1',
+      previews,
+      task_status: {}
+    })
+
+    const storedComment = id =>
+      store.state.taskComments[task.id].find(comment => comment.id === id)
+
+    const loadRevision = (revision, taskId = task.id) =>
+      store.commit('LOAD_TASK_COMMENTS_END', {
+        taskId,
+        comments: [
+          makeComment(`comment-${revision}`, [
+            { id: `preview-${revision}`, revision }
+          ])
+        ]
+      })
+
+    const receiveRevision = revision => {
+      const commentId = `comment-${revision}`
+      store.commit('NEW_TASK_COMMENT_END', {
+        comment: makeComment(commentId),
+        taskId: task.id
+      })
+      store.commit('ADD_PREVIEW_END', {
+        preview: { id: `preview-${revision}`, revision },
+        taskId: task.id,
+        commentId,
+        comment: storedComment(commentId)
+      })
+    }
+
+    beforeEach(async () => {
+      wrapper.unmount()
+      await mountComment(
+        { isTaskRevisionTaken: tasksStore.getters.isTaskRevisionTaken },
+        {},
+        {
+          state: {
+            taskComments: {},
+            taskEntityPreviews: {},
+            taskMap: new Map(),
+            taskPreviews: {}
+          },
+          mutations: {
+            ADD_PREVIEW_END,
+            DELETE_PREVIEW_END,
+            LOAD_TASK_COMMENTS_END,
+            NEW_TASK_COMMENT_END,
+            REMOVE_TASK_COMMENT
+          }
+        }
+      )
+      loadRevision(3)
+      draftComment.mode = 'publish'
+      await nextTick()
+    })
+
+    it('refuses the number read from the file name', async () => {
+      await selectFile('sh010_v003.mov')
+
+      expect(takenMessage().text()).toBe(
+        'Revision 3 already exists. Choose another number.'
+      )
+      expect(wrapper.find('#input-revision').classes()).toContain(
+        'below-current'
+      )
+      expect(wrapper.find('.post-button').attributes('disabled')).toBe('true')
+
+      await publish()
+
+      expect(wrapper.emitted('add-comment')).toBeUndefined()
+    })
+
+    it('refuses a number typed in the field', async () => {
+      await selectFile('sh010_v004.mov')
+      expect(takenMessage().exists()).toBe(false)
+
+      await wrapper.find('#input-revision').setValue(3)
+
+      expect(takenMessage().text()).toContain('Revision 3 ')
+      await publish()
+      expect(wrapper.emitted('add-comment')).toBeUndefined()
+    })
+
+    it('takes revision 0 for a revision', async () => {
+      loadRevision(0)
+
+      await selectFile('sh010_v000.mov')
+      expect(takenMessage().text()).toContain('Revision 0 ')
+
+      await wrapper.find('#input-revision').setValue(4)
+      expect(takenMessage().exists()).toBe(false)
+
+      await wrapper.find('#input-revision').setValue(0)
+      expect(takenMessage().text()).toContain('Revision 0 ')
+    })
+
+    it('publishes a number the task does not have', async () => {
+      await selectFile('sh010_v004.mov')
+
+      expect(takenMessage().exists()).toBe(false)
+      await publish()
+      expect(publishedRevision()).toBe(4)
+    })
+
+    it('publishes under the next number once the field is cleared', async () => {
+      await selectFile('sh010_v003.mov')
+
+      await wrapper.find('.preview-delete-revision').trigger('click')
+
+      expect(takenMessage().exists()).toBe(false)
+      await publish()
+      expect(publishedRevision()).toBeUndefined()
+    })
+
+    // Number('') is 0, a revision like any other.
+    it('reads an emptied field as the next number', async () => {
+      loadRevision(0)
+      await selectFile('sh010_v004.mov')
+
+      await wrapper.find('#input-revision').setValue('')
+
+      expect(takenMessage().exists()).toBe(false)
+      await publish()
+      expect(publishedRevision()).toBeUndefined()
+    })
+
+    it('ignores the revisions of another task', async () => {
+      loadRevision(7, 'task-2')
+
+      await selectFile('sh010_v007.mov')
+
+      expect(takenMessage().exists()).toBe(false)
+    })
+
+    it('follows a revision published by someone else meanwhile', async () => {
+      await selectFile('sh010_v004.mov')
+
+      receiveRevision(4)
+      await nextTick()
+
+      expect(takenMessage().text()).toContain('Revision 4 ')
+    })
+
+    it('gives back the revision of a comment deleted meanwhile', async () => {
+      await selectFile('sh010_v003.mov')
+
+      store.commit('REMOVE_TASK_COMMENT', {
+        task,
+        comment: storedComment('comment-3')
+      })
+      await nextTick()
+
+      expect(takenMessage().exists()).toBe(false)
+      await publish()
+      expect(publishedRevision()).toBe(3)
+    })
+
+    // The trash of the player leaves the entry of the revision in the store.
+    it('gives back a revision whose files were all deleted', async () => {
+      await selectFile('sh010_v003.mov')
+
+      store.commit('DELETE_PREVIEW_END', {
+        taskId: task.id,
+        previewId: 'preview-3'
+      })
+      await nextTick()
+
+      expect(takenMessage().exists()).toBe(false)
+      await publish()
+      expect(publishedRevision()).toBe(3)
+    })
+
+    // Its first file joins the store while the next ones still upload.
+    it('stays quiet during its own publication', async () => {
+      await selectFile('sh010_v004.mov')
+      await wrapper.setProps({ isLoading: true })
+
+      receiveRevision(4)
+      await nextTick()
+
+      expect(takenMessage().exists()).toBe(false)
+    })
+
+    it('leaves a plain comment alone', async () => {
+      draftComment.mode = 'status'
+      draftComment.nextRevision = '3'
+      await nextTick()
+
+      expect(takenMessage().exists()).toBe(false)
+      await publish()
+      expect(wrapper.emitted('add-comment')).toHaveLength(1)
     })
   })
 

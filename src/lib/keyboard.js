@@ -20,9 +20,14 @@ const OPEN_LAYER_SELECTOR = [
   '[role="combobox"][aria-expanded="true"]'
 ].join(', ')
 
+const ARROW_KEYS = ['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown']
+const ARROW_KEY_CODES = [37, 38, 39, 40]
+
 const isTextField = element =>
   element.tagName === 'TEXTAREA' ||
   (element.tagName === 'INPUT' && !TEXTLESS_INPUT_TYPES.includes(element.type))
+
+const isMacOS = () => /Mac|iPhone|iPad|iPod/.test(navigator.platform)
 
 // A field keeps the Escape while it holds text that the page acting on the
 // key could drop, like a comment draft. An empty field does not (the
@@ -43,6 +48,15 @@ export const isFreeEscape = event =>
   !event.defaultPrevented &&
   !isHoldingText(event.target) &&
   !document.querySelector(OPEN_LAYER_SELECTOR)
+
+// On macOS, Option and an arrow move the caret of a field holding text (by
+// word, or to an end of the line), and Alt and Left leaves no page: a list
+// walked with Alt and the arrows leaves such a key to that field.
+export const isCaretMoveOnMac = event =>
+  event.altKey &&
+  (ARROW_KEYS.includes(event.key) || ARROW_KEY_CODES.includes(event.keyCode)) &&
+  isHoldingText(event.target) &&
+  isMacOS()
 
 // Ctrl+Alt+F, or Cmd+Alt+F on macOS. The f is read from the typed key so that
 // layouts placing it elsewhere (bépo) work, falling back to the physical key

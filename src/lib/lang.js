@@ -123,6 +123,11 @@ export const pageLocaleCode = computed(
   () => parseLocale(getListedLanguage(displayedCode.value).value).code
 )
 
+/**
+ * Show a language without remembering it, as a language tried in the profile
+ * until it is saved.
+ * @param {string} locale
+ */
 const applyLocale = async locale => {
   const { language, code } = parseLocale(locale)
 
@@ -146,6 +151,15 @@ const applyLocale = async locale => {
 }
 
 /**
+ * Keep a language for the pages shown before the user is known, without
+ * changing the screen.
+ * @param {string} locale
+ */
+const rememberLocale = locale => {
+  if (locale) localPreferences.setPreference(LOCALE_PREFERENCE, locale)
+}
+
+/**
  * Set the locale for the application (vue-i18n + moment.js) and remember it
  * for the pages shown before the user is known. Translation chunks load on
  * demand, so the vue-i18n locale flips once the messages are registered;
@@ -153,11 +167,13 @@ const applyLocale = async locale => {
  * @param {string} locale
  */
 const setLocale = locale => {
-  if (locale) localPreferences.setPreference(LOCALE_PREFERENCE, locale)
+  rememberLocale(locale)
   return applyLocale(locale)
 }
 
 export default {
+  applyLocale,
+  rememberLocale,
   setLocale,
 
   /**

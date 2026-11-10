@@ -146,6 +146,7 @@
       "attachments": "Pièces jointes",
       "attachments_to_add": "Ajouter des pièces jointes",
       "max_retakes_error": "Vous ne pouvez plus faire de retakes sur cette tâche.",
+      "revision_taken_error": "La révision {revision} existe déjà. Choisissez un autre numéro.",
       "unknown_status_error": "Le statut de tâche sélectionné n'est plus disponible. Veuillez recharger la page et réessayer.",
       "previews": "Fichiers de preview à publier comme nouvelle révision",
       "selected_files": "Fichiers sélectionnés",

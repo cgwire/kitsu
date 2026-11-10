@@ -22,6 +22,7 @@ import {
   taskTypeId
 } from '../fixtures/entity-list'
 import { openModalHost } from '../fixtures/modal-host'
+import { addTextField, onPlatform, pressAltArrow } from '../fixtures/platform'
 
 enableAutoUnmount(afterEach)
 
@@ -1030,6 +1031,64 @@ describe('entity list keyboard selection', () => {
     pressKey('keydown', { altKey: true }, 39)
 
     expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  describe('from a text field', () => {
+    const mountFromCell = async (text = 'Shot') => {
+      const wrapper = await mountHost({}, { cells: grid })
+      const onClick = vi.fn()
+      wrapper.vm.$refs['validation-0-1'][0].$el.addEventListener(
+        'click',
+        onClick
+      )
+      wrapper.vm.list.onTaskSelected(
+        { x: 0, y: 0, task: grid[0][0].task, isUserClick: true },
+        true
+      )
+      const field = addTextField('input', text)
+      return { wrapper, onClick, field }
+    }
+
+    // macOS moves the caret of the field by word on Option and an arrow.
+    test('leaves the key to a field out of the list on macOS', async () => {
+      onPlatform('MacIntel')
+      const { onClick, field } = await mountFromCell()
+
+      expect(pressAltArrow(field, 39).defaultPrevented).toBe(false)
+      expect(onClick).not.toHaveBeenCalled()
+    })
+
+    // An empty field has no caret to move.
+    test('walks from an empty field out of the list on macOS', async () => {
+      onPlatform('MacIntel')
+      const { onClick, field } = await mountFromCell('')
+
+      expect(pressAltArrow(field, 39).defaultPrevented).toBe(true)
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
+    test('keeps walking from a field of the list on macOS', async () => {
+      onPlatform('MacIntel')
+      const { wrapper, onClick } = await mountFromCell()
+      // In the page, the keys of the list reach the window.
+      document.body.append(wrapper.element)
+      onTestFinished(() => wrapper.element.remove())
+      const cellField = document.createElement('input')
+      cellField.value = 'Shot'
+      wrapper.vm.$refs.body.append(cellField)
+
+      expect(pressAltArrow(cellField, 39).defaultPrevented).toBe(true)
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
+    // Alt and Left would leave the page there.
+    test('keeps the key from any field on another system', async () => {
+      onPlatform('Win32')
+      const { onClick, field } = await mountFromCell()
+
+      expect(pressAltArrow(field, 39).defaultPrevented).toBe(true)
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
   })
 
   test('moves from the row of the last click, moved by a new row', async () => {

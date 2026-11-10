@@ -748,8 +748,9 @@ watch(
   { immediate: true }
 )
 
+// The production stays when a guard or the Profile page applies English.
 watch(
-  currentProduction,
+  [currentProduction, i18n.global.locale],
   () => {
     if (localeCode.value !== 'en') return
     const variant = currentProduction.value?.production_style
