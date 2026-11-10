@@ -243,6 +243,21 @@ const projectDescriptorToForm = descriptor => ({
 // per-keystroke metadata-changed events can't create duplicate descriptors.
 const pendingProjectDescriptorCreations = new Map()
 
+// Someone else may have changed the role of the user in the production: a
+// project update announces it, and a page listing the team reads it again in
+// case the socket missed that update.
+const loadTeamWithUserRole = async (commit, rootState, productionId) => {
+  const team = await productionsApi.getTeam(productionId)
+  commit(TEAM_ROLES_LOADED, { productionId, team })
+  const userId = rootState.user.user?.id
+  const member = team.find(person => person.id === userId)
+  commit(SET_USER_PROJECT_ROLE, {
+    projectId: productionId,
+    role: member?.project_role ?? null
+  })
+  return team
+}
+
 const getters = {
   productions: state => state.productions,
   productionMap: state => state.productionMap,
@@ -626,11 +641,8 @@ const actions = {
     return productionsApi.addPersonToTeam(state.currentProduction.id, person.id)
   },
 
-  async loadProductionTeam({ commit, state }) {
-    const productionId = state.currentProduction.id
-    const team = await productionsApi.getTeam(productionId)
-    commit(TEAM_ROLES_LOADED, { productionId, team })
-    return team
+  async loadProductionTeam({ commit, state, rootState }) {
+    return loadTeamWithUserRole(commit, rootState, state.currentProduction.id)
   },
 
   // For the pages that read the roles without listing the team, such as the
@@ -642,15 +654,8 @@ const actions = {
     commit(TEAM_ROLES_LOADED, { productionId, team })
   },
 
-  async reloadTeamRoles({ commit, rootState }, productionId) {
-    const team = await productionsApi.getTeam(productionId)
-    commit(TEAM_ROLES_LOADED, { productionId, team })
-    const userId = rootState.user.user?.id
-    const member = team.find(person => person.id === userId)
-    commit(SET_USER_PROJECT_ROLE, {
-      projectId: productionId,
-      role: member?.project_role ?? null
-    })
+  reloadTeamRoles({ commit, rootState }, productionId) {
+    return loadTeamWithUserRole(commit, rootState, productionId)
   },
 
   async setTeamMemberRole({ commit, state, rootState }, { personId, role }) {

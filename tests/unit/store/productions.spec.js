@@ -778,15 +778,30 @@ describe('Productions store', () => {
         productionApi.getTeam = vi.fn(() => Promise.resolve(team))
       })
 
-      test('loadProductionTeam loads those of the current production', async () => {
+      // A team page opened after a missed socket event must not keep the
+      // controls of a role the user lost.
+      test('loadProductionTeam loads those of the current production with the role of the user', async () => {
         const commit = vi.fn()
         const state = { currentProduction: { id: '123' }, teamRoles: {} }
-        await store.actions.loadProductionTeam({ commit, state })
+        const rootState = { user: { user: { id: '456' } } }
+        await store.actions.loadProductionTeam({ commit, state, rootState })
         expect(productionApi.getTeam).toHaveBeenCalledWith('123')
-        expect(commit).toHaveBeenCalledWith('TEAM_ROLES_LOADED', {
-          productionId: '123',
-          team
-        })
+        expect(commit.mock.calls).toEqual([
+          ['TEAM_ROLES_LOADED', { productionId: '123', team }],
+          ['SET_USER_PROJECT_ROLE', { projectId: '123', role: 'client' }]
+        ])
+      })
+
+      // The pages catch its failure on the promise it returns.
+      test('loadProductionTeam rejects without a current production', async () => {
+        const commit = vi.fn()
+        const state = { currentProduction: null, teamRoles: {} }
+        const rootState = { user: { user: { id: '456' } } }
+        await expect(
+          store.actions.loadProductionTeam({ commit, state, rootState })
+        ).rejects.toThrow()
+        expect(productionApi.getTeam).not.toHaveBeenCalled()
+        expect(commit).not.toHaveBeenCalled()
       })
 
       test('loadTeamRolesOnce loads those of given production', async () => {
