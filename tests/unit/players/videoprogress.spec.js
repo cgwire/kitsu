@@ -140,6 +140,135 @@ describe('players/VideoProgress', () => {
     })
   })
 
+  describe('marker gestures', () => {
+    // 100 frames on 1000px: 10px per frame.
+    const annotationAt = (frame, objects) => ({
+      time: Number((frame * FRAME_DURATION).toFixed(4)),
+      drawing: { objects }
+    })
+    const mine = { id: 'a', createdBy: 'me' }
+    const theirs = { id: 'b', createdBy: 'them' }
+
+    const mountMarkers = (annotations, props = {}) => {
+      vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(
+        { left: 0, top: 0, width: 1000, height: 28 }
+      )
+      return mountProgress({
+        nbFrames: 100,
+        annotations,
+        editableMarkers: true,
+        currentUserId: 'me',
+        ...props
+      })
+    }
+
+    const drag = async (wrapper, modifiers, fromX, toX) => {
+      const mark = wrapper.find('.annotation-mark')
+      await mark.trigger('mousedown', { clientX: fromX, ...modifiers })
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: toX }))
+      await wrapper.vm.$nextTick()
+      document.dispatchEvent(new MouseEvent('mouseup', { clientX: toX }))
+      await mark.trigger('click', { clientX: toX })
+    }
+
+    it('moves the marker by the dragged frames with Ctrl', async () => {
+      const annotation = annotationAt(10, [mine])
+      const wrapper = mountMarkers([annotation])
+      await drag(wrapper, { ctrlKey: true }, 105, 305)
+      expect(wrapper.emitted('annotation-moved')).toEqual([
+        [{ annotation, frame: 30 }]
+      ])
+      expect(wrapper.emitted('progress-changed')).toBeUndefined()
+      expect(wrapper.emitted('start-scrub')).toBeUndefined()
+    })
+
+    it('moves with Cmd too', async () => {
+      const wrapper = mountMarkers([annotationAt(10, [mine])])
+      await drag(wrapper, { metaKey: true }, 105, 205)
+      expect(wrapper.emitted('annotation-moved')[0][0].frame).toBe(20)
+    })
+
+    it('holds the drawing up to the dragged frame with Shift', async () => {
+      const annotation = annotationAt(10, [mine])
+      const wrapper = mountMarkers([annotation])
+      await drag(wrapper, { shiftKey: true }, 105, 405)
+      expect(wrapper.emitted('annotation-hold-changed')).toEqual([
+        [{ annotation, holdFrames: 30 }]
+      ])
+      expect(wrapper.emitted('progress-changed')).toBeUndefined()
+    })
+
+    it('never holds before the marker frame', async () => {
+      const annotation = annotationAt(10, [{ ...mine, holdFrames: 5 }])
+      const wrapper = mountMarkers([annotation])
+      await drag(wrapper, { shiftKey: true }, 155, 20)
+      expect(wrapper.emitted('annotation-hold-changed')).toEqual([
+        [{ annotation, holdFrames: 0 }]
+      ])
+    })
+
+    it('emits nothing when dropped where it started', async () => {
+      const wrapper = mountMarkers([annotationAt(10, [mine])])
+      await drag(wrapper, { ctrlKey: true }, 105, 107)
+      expect(wrapper.emitted('annotation-moved')).toBeUndefined()
+      expect(wrapper.emitted('progress-changed')).toBeUndefined()
+    })
+
+    it('scrubs as before on a plain drag', async () => {
+      const wrapper = mountMarkers([annotationAt(10, [mine])])
+      await drag(wrapper, {}, 105, 305)
+      expect(wrapper.emitted('annotation-moved')).toBeUndefined()
+      expect(wrapper.emitted('progress-changed')).toEqual([[30], [10]])
+    })
+
+    it('scrubs when the frame holds no drawing of the user', async () => {
+      const wrapper = mountMarkers([annotationAt(10, [theirs])])
+      await drag(wrapper, { ctrlKey: true }, 105, 305)
+      expect(wrapper.emitted('annotation-moved')).toBeUndefined()
+      expect(wrapper.emitted('progress-changed')).toEqual([[30], [10]])
+    })
+
+    it('ignores the modifiers when the markers are not editable', async () => {
+      const wrapper = mountMarkers([annotationAt(10, [mine])], {
+        editableMarkers: false
+      })
+      await drag(wrapper, { shiftKey: true }, 105, 305)
+      expect(wrapper.emitted('annotation-hold-changed')).toBeUndefined()
+    })
+
+    it('spans the held frames', async () => {
+      const wrapper = mountMarkers([
+        annotationAt(10, [mine, { ...theirs, holdFrames: 4 }])
+      ])
+      await wrapper.vm.$nextTick()
+      const style = wrapper.find('.annotation-mark').attributes('style')
+      expect(style).toContain('left: 100px')
+      expect(style).toContain('width: 49px')
+    })
+
+    it('seeks to the clicked frame inside the held part of a marker', async () => {
+      const wrapper = mountMarkers([
+        annotationAt(10, [{ ...mine, holdFrames: 20 }])
+      ])
+      const mark = wrapper.find('.annotation-mark')
+      await mark.trigger('click', { clientX: 105 })
+      await mark.trigger('click', { clientX: 255 })
+      expect(wrapper.emitted('progress-changed')).toEqual([[10], [25]])
+    })
+
+    it('shows the authors label while hovering a marker', async () => {
+      const annotation = annotationAt(10, [mine, theirs])
+      const getAnnotationLabel = vi.fn(() => 'Me, Them')
+      const wrapper = mountMarkers([annotation], { getAnnotationLabel })
+      const mark = wrapper.find('.annotation-mark')
+      await mark.trigger('mouseenter')
+      expect(getAnnotationLabel).toHaveBeenCalledWith(annotation)
+      expect(wrapper.find('.annotation-authors').text()).toBe('Me, Them')
+      await mark.trigger('mouseleave')
+      expect(wrapper.find('.annotation-authors').exists()).toBe(false)
+    })
+  })
+
   describe('trim handles', () => {
     const dragHandleIn = async wrapper => {
       await wrapper.find('.handle-in').trigger('mousedown')

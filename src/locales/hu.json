@@ -360,6 +360,8 @@
       "previous_frame": "Előző képkocka",
       "rotate_hdr": "Környezeti térkép forgatása",
       "scrub_anywhere": "Az idővonal görgetése a lejátszó bármely pontjáról",
+      "move_annotation_marker": "Idővonal-jelölőn: rajzaid áthelyezése egy másik képkockára",
+      "hold_annotation_marker": "Idővonal-jelölőn: rajzaid láthatók maradnak a következő képkockákon",
       "focus_comment": "Fókusz váltása a lejátszó és a hozzászólás mező között",
       "first_frame": "Ugrás az első képkockára",
       "last_frame": "Ugrás az utolsó képkockára",
