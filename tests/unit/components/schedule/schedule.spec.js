@@ -1435,8 +1435,8 @@ describe('Schedule widget - selected bars and their objects', () => {
     wrapper.unmount()
   })
 
-  // The person page builds its rows in a computed, as plain objects, while
-  // the selection holds reactive proxies of them. mount() would make rows
+  // A page can build its rows in a computed, as plain objects, while the
+  // selection holds reactive proxies of them. mount() would make rows
   // passed as props reactive, so a parent component passes them.
   const mountPlainRows = rows =>
     mount(

@@ -1,8 +1,9 @@
 import moment from 'moment-timezone'
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-i18n', async importOriginal => ({
@@ -558,6 +559,113 @@ describe('Person page', () => {
         'is-attached'
       )
       wrapper.unmount()
+    })
+  })
+
+  // The page builds the rows of its schedule from the tasks of the person,
+  // and the widget moves a bar by setting the dates of its row.
+  describe('schedule tab', () => {
+    let rafSpy
+
+    beforeEach(() => {
+      rafSpy = vi
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation(callback => {
+          callback()
+          return 0
+        })
+    })
+
+    afterEach(() => {
+      rafSpy.mockRestore()
+    })
+
+    const plannedTask = {
+      id: 'task-1',
+      project_id: 'production-1',
+      task_type_id: 'type-1',
+      task_status_id: 'status-1',
+      full_entity_name: 'SH01',
+      estimation: 0,
+      start_date: '2026-08-03',
+      due_date: '2026-08-05'
+    }
+
+    const mountSchedule = () =>
+      mountPage({
+        actions: { updateTask: vi.fn(() => Promise.resolve()) },
+        getters: {
+          currentProduction: () => null,
+          dateFormat: () => 'YYYY-MM-DD',
+          departmentMap: () => new Map(),
+          isCurrentUserManager: () => true,
+          isCurrentUserProductionManager: () => true,
+          isDarkTheme: () => false,
+          milestonesByDate: () => ({}),
+          organisation: () => ({ hours_by_day: 8 }),
+          productionMap: () =>
+            new Map([
+              ['production-1', { id: 'production-1', name: 'Production' }]
+            ]),
+          taskTypeMap: () =>
+            new Map([['type-1', { ...modeling, color: '#4a90e2' }]])
+        },
+        query: { section: 'schedule' },
+        stubs: { Schedule: false, ScheduleEntityRow: false },
+        tasks: [plannedTask]
+      })
+
+    const taskBar = wrapper =>
+      wrapper
+        .findAll('.child-line .timebar')
+        .find(bar => bar.find('.timebar-center').exists())
+
+    // zoom level 1 is 20px a day: a 60px drag is 3 days
+    it('moves the dragged bar along with the mouse', async () => {
+      const wrapper = await mountSchedule()
+      expect(taskBar(wrapper).attributes('title')).toContain('(2026-08-03 - ')
+
+      await taskBar(wrapper)
+        .find('.timebar-center')
+        .trigger('mousedown', { clientX: 300 })
+      document.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
+      )
+      await nextTick()
+
+      const title = taskBar(wrapper).attributes('title')
+      document.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, clientX: 360 })
+      )
+      wrapper.unmount()
+      expect(title).toContain('(2026-08-06 - ')
+    })
+
+    // The range of the schedule frames the first and last tasks: read from
+    // the rows the drag changes, it slid the whole timeline under the mouse.
+    it('keeps the range of the schedule during a drag', async () => {
+      const wrapper = await mountSchedule()
+      const rangeStart = () =>
+        wrapper
+          .findComponent({ name: 'Schedule' })
+          .props('startDate')
+          .format('YYYY-MM-DD')
+      const start = rangeStart()
+
+      await taskBar(wrapper)
+        .find('.timebar-center')
+        .trigger('mousedown', { clientX: 300 })
+      document.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
+      )
+      await nextTick()
+
+      const startDuringDrag = rangeStart()
+      document.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, clientX: 360 })
+      )
+      wrapper.unmount()
+      expect(startDuringDrag).toBe(start)
     })
   })
 

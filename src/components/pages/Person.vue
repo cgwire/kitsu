@@ -292,7 +292,9 @@ import {
   onBeforeUnmount,
   onMounted,
   onUnmounted,
+  reactive,
   ref,
+  toRaw,
   useTemplateRef,
   watch
 } from 'vue'
@@ -494,8 +496,10 @@ const tasksEndDate = computed(() =>
     : moment().add(15, 'days')
 )
 
+// read raw: a drag changes the dates of the rows, and the range would
+// slide the timeline under the mouse
 const scheduleTasks = computed(() =>
-  scheduleItems.value.flatMap(item => item.children)
+  toRaw(scheduleItems.value).flatMap(item => item.children)
 )
 
 const scheduleItems = computed(() => {
@@ -529,7 +533,8 @@ const scheduleItems = computed(() => {
       daysOff: daysOff.value
     })
   })
-  return rootElements
+  // reactive, so that a bar follows the mouse while the widget drags it
+  return reactive(rootElements)
 })
 
 const productionList = computed(() => [
