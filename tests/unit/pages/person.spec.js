@@ -64,7 +64,7 @@ const mountPage = async ({
 } = {}) => {
   const store = createStore({
     getters: {
-      currentUserRoleForProduction: () => () => 'user',
+      canReadDaysOff: () => () => true,
       displayedPersonDoneTasks: () => [],
       displayedPersonTasks: () => tasks,
       getProductionTaskStatuses: () => () => [],
@@ -1087,12 +1087,6 @@ describe('Person page', () => {
       expect(timeSpents).toEqual([])
     })
 
-    const onProduction = (role, team = [person.id, otherUser.id]) => ({
-      currentUserRoleForProduction: () => () => role,
-      openProductions: () => [{ id: 'prod-1', name: 'Prod', team }],
-      user: () => otherUser
-    })
-
     const daysOffRead = async getters => {
       const loadAggregatedPersonDaysOff = vi.fn(() => [])
       const wrapper = await mountPage({
@@ -1103,21 +1097,31 @@ describe('Person page', () => {
       return loadAggregatedPersonDaysOff
     }
 
-    it.each([
-      ['the person', {}],
-      ['a manager of a production of the person', onProduction('manager')],
-      ['a supervisor of a production of the person', onProduction('supervisor')]
-    ])('reads the days off for %s', async (_, getters) => {
-      expect((await daysOffRead(getters)).mock.calls[0][1]).toEqual({
+    // the user store holds the rule of Zou
+    it('reads the days off of the person for a viewer the rule allows', async () => {
+      const canReadDaysOff = vi.fn(personId => personId === person.id)
+      const loadAggregatedPersonDaysOff = await daysOffRead({
+        canReadDaysOff: () => canReadDaysOff,
+        user: () => otherUser
+      })
+      expect(canReadDaysOff).toHaveBeenCalledWith(person.id)
+      expect(loadAggregatedPersonDaysOff.mock.calls[0][1]).toEqual({
         personId: person.id
       })
     })
 
-    it.each([
-      ['an artist of a production of the person', onProduction('user')],
-      ['a manager of another production', onProduction('manager', [otherUser.id])]
-    ])('reads no days off for %s', async (_, getters) => {
-      expect(await daysOffRead(getters)).not.toHaveBeenCalled()
+    // with the role and the team alone, the page would read them: it
+    // follows the rule
+    it('reads no days off for a supervisor of a production of the person the rule refuses', async () => {
+      const loadAggregatedPersonDaysOff = await daysOffRead({
+        canReadDaysOff: () => () => false,
+        currentUserRoleForProduction: () => () => 'supervisor',
+        openProductions: () => [
+          { id: 'prod-1', name: 'Prod', team: [person.id, otherUser.id] }
+        ],
+        user: () => otherUser
+      })
+      expect(loadAggregatedPersonDaysOff).not.toHaveBeenCalled()
     })
   })
 
