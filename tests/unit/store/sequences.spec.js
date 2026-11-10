@@ -1477,6 +1477,27 @@ describe('Sequences store, through a store', () => {
     ])
   })
 
+  test('deletes the tasks of the selection once a search lists a live sequence', async () => {
+    const deleteAllTasks = vi.fn()
+    const { store } = await buildStore({}, { deleteAllTasks })
+    loadSequences(store, [buildSequence('sq1', 'SQ01')])
+    store.commit('ADD_SEQUENCE', {
+      sequence: { id: 'sq2', name: 'SQ02', data: {} },
+      episodeMap: new Map()
+    })
+    await store.dispatch('setSequenceSearch', '')
+
+    await store.dispatch('deleteAllSequenceTasks', {
+      projectId: 'p1',
+      taskTypeId: 'tt-1',
+      selectionOnly: true
+    })
+
+    expect(deleteAllTasks.mock.calls.map(([, payload]) => payload)).toEqual([
+      { projectId: 'p1', taskTypeId: 'tt-1', taskIds: ['task-sq1'] }
+    ])
+  })
+
   test('shows the last search result again', async () => {
     const { store } = await buildStore()
     loadSequences(store, [
