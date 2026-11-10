@@ -447,7 +447,7 @@
                 }}
               </em>
             </p>
-            <div class="mt2 has-text-right">
+            <div class="apply mt2">
               <button-simple
                 :disabled="!hasDraggedEntities || !availablePersons.length"
                 :is-loading="assignments.saving"
@@ -3183,6 +3183,9 @@ useHead({
     height: 100%;
     overflow-y: auto;
     padding: 1em;
+    // room to scroll the Apply button above the support chat bubble, fixed
+    // at the bottom right of the screen
+    padding-bottom: 70px;
   }
 
   .side-header {
@@ -3333,6 +3336,12 @@ useHead({
     &:hover {
       opacity: 1;
     }
+  }
+
+  .apply :deep(.button) {
+    height: 42px;
+    justify-content: center;
+    width: 100%;
   }
 
   .estimation {
