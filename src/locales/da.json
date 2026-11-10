@@ -1106,6 +1106,9 @@
       },
       "title": "Produktioner",
       "home": {
+        "access_failed": "Den ønskede produktion kunne ikke indlæses. Prøv venligst igen.",
+        "access_forbidden": "Du har ikke adgang til den ønskede produktion. Kontakt din systemadministrator for at få adgang.",
+        "access_missing": "Den ønskede produktion blev ikke fundet.",
         "all_playlists": "Alle playlister",
         "all_stats": "Alle statistikker",
         "create_new": "Opret en ny produktion",

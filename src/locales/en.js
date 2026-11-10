@@ -1638,6 +1638,9 @@ export default {
     },
 
     home: {
+      access_failed: 'Could not load the requested production. Please try again.',
+      access_forbidden: 'You don\'t have access to the requested production. Contact your site admin to obtain access.',
+      access_missing: 'The requested production was not found.',
       all_playlists: 'All playlists',
       all_stats: 'All statistics',
       create_new: 'Create a new production',

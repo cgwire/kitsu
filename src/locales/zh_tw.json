@@ -1106,6 +1106,9 @@
       },
       "title": "製作項目",
       "home": {
+        "access_failed": "無法載入所要求的製作項目。請再試一次。",
+        "access_forbidden": "您無權存取所要求的製作項目。請聯絡您的網站管理員以取得存取權限。",
+        "access_missing": "找不到所要求的製作項目。",
         "all_playlists": "所有播放清單",
         "all_stats": "所有統計",
         "create_new": "建立新製作項目",

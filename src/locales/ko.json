@@ -1106,6 +1106,9 @@
       },
       "title": "프로덕션",
       "home": {
+        "access_failed": "요청한 프로덕션을 로드할 수 없습니다. 다시 시도해 주세요.",
+        "access_forbidden": "요청한 프로덕션에 접근할 수 없습니다. 접근 권한을 얻으려면 사이트 관리자에게 문의하십시오.",
+        "access_missing": "요청한 프로덕션을 찾을 수 없습니다.",
         "all_playlists": "모든 재생 목록",
         "all_stats": "모든 통계",
         "create_new": "새 프로덕션 생성",

@@ -1583,6 +1583,9 @@
         "type": "Typ"
       },
       "home": {
+        "access_failed": "Nie udało się wczytać żądanej produkcji. Spróbuj ponownie.",
+        "access_forbidden": "Nie masz dostępu do żądanej produkcji. Skontaktuj się z administratorem, aby uzyskać dostęp.",
+        "access_missing": "Żądana produkcja nie została znaleziona.",
         "all_playlists": "Wszystkie playlisty",
         "all_stats": "Wszystkie statystyki",
         "create_new": "Utwórz nową produkcję",

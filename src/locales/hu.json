@@ -1106,6 +1106,9 @@
       },
       "title": "Produkciók",
       "home": {
+        "access_failed": "Nem sikerült betölteni a kért produkciót. Kérlek próbáld újra.",
+        "access_forbidden": "Nincs hozzáférésed a kért produkcióhoz. Lépj kapcsolatba a stúdió adminisztrátorával a hozzáférés megszerzéséhez.",
+        "access_missing": "A kért produkció nem található.",
         "all_playlists": "Összes lejátszási lista",
         "all_stats": "Összes statisztika",
         "create_new": "Új produkció létrehozása",

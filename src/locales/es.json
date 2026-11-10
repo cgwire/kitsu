@@ -1106,6 +1106,9 @@
       },
       "title": "Producciones",
       "home": {
+        "access_failed": "No se ha podido cargar la producción solicitada. Por favor, inténtelo de nuevo.",
+        "access_forbidden": "No tiene acceso a la producción solicitada. Póngase en contacto con el administrador del sitio para obtener acceso.",
+        "access_missing": "No se encontró la producción solicitada.",
         "all_playlists": "Todas las listas de reproducción",
         "all_stats": "Todas las estadísticas",
         "create_new": "Crear una nueva producción",

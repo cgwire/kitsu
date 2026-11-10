@@ -1106,6 +1106,9 @@
       },
       "title": "Producties",
       "home": {
+        "access_failed": "Kon de gevraagde productie niet laden. Probeer het opnieuw.",
+        "access_forbidden": "Je hebt geen toegang tot de gevraagde productie. Neem contact op met je sitebeheerder om toegang te krijgen.",
+        "access_missing": "De gevraagde productie is niet gevonden.",
         "all_playlists": "Alle afspeellijsten",
         "all_stats": "Alle statistieken",
         "create_new": "Een nieuwe productie toevoegen",

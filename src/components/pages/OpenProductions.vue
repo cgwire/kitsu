@@ -3,6 +3,28 @@
     class="open-productions page"
     :class="{ 'is-client': isCurrentUserClient }"
   >
+    <div class="access-error" v-if="accessError">
+      <p role="alert">
+        {{ $t(ACCESS_ERROR_TEXTS[accessError.reason]) }}
+        <router-link
+          :to="accessError.path"
+          v-if="accessError.reason === 'failed'"
+        >
+          {{ $t('main.reload') }}
+        </router-link>
+      </p>
+      <span
+        class="close-access-error"
+        role="button"
+        tabindex="0"
+        :aria-label="$t('main.close')"
+        @click="hideAccessError"
+        @keydown.enter.prevent="hideAccessError"
+        @keydown.space.prevent="hideAccessError"
+      >
+        <x-icon :size="14" />
+      </span>
+    </div>
     <div
       class="social-contributions"
       v-if="isContributions && !isCurrentUserClient"
@@ -216,6 +238,15 @@ import preferences from '@/lib/preferences'
 import ProductionOverview from '@/components/widgets/ProductionOverview.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 
+// Constants
+// --------------------------------------------------------------------------
+
+const ACCESS_ERROR_TEXTS = {
+  failed: 'productions.home.access_failed',
+  forbidden: 'productions.home.access_forbidden',
+  missing: 'productions.home.access_missing'
+}
+
 // Composables
 // --------------------------------------------------------------------------
 
@@ -228,6 +259,9 @@ const store = useStore()
 
 const searchFieldRef = useTemplateRef('searchField')
 
+// Why a production page sent the user here, and that page: told until the
+// page is left.
+const accessError = ref(store.getters.productionAccessError)
 const filteredProductions = ref([])
 const isContributionsHidden = ref(
   preferences.getPreference('open-productions:contributions') === 'false'
@@ -354,6 +388,10 @@ const hideWelcome = () => {
   preferences.setPreference('open-productions:client-welcome', false)
 }
 
+const hideAccessError = () => {
+  accessError.value = null
+}
+
 // Watchers
 // --------------------------------------------------------------------------
 
@@ -374,6 +412,7 @@ onMounted(() => {
   isWelcome.value =
     isCurrentUserClient.value &&
     preferences.getPreference('open-productions:client-welcome') !== 'false'
+  if (accessError.value) store.dispatch('setProductionAccessError', null)
 })
 
 // Head
@@ -531,6 +570,33 @@ a.secondary:hover {
   }
 }
 
+.access-error {
+  background: rgba($orange-carrot, 0.08);
+  border: 1px solid $orange-carrot;
+  border-radius: 10px;
+  // The light --text grey falls below 4.5:1 on the tint.
+  color: var(--text-strong);
+  margin: 1.5em auto 0;
+  max-width: 800px;
+  padding: 1em 3.5em 1em 1.5em;
+  position: relative;
+
+  p {
+    margin: 0;
+  }
+
+  a {
+    color: var(--text-strong);
+    text-decoration: underline;
+  }
+}
+
+// As wide as the production overviews of a client.
+.is-client .access-error {
+  max-width: 1100px;
+}
+
+.close-access-error,
 .close-contributions,
 .close-welcome {
   align-items: center;
@@ -748,6 +814,17 @@ a.secondary:hover {
   .client-welcome {
     margin: 1em 0.5em 0;
     padding: 1.2em 2.5em 1.2em 1.2em;
+  }
+
+  // The right padding clears the close control, the top margin the topbar:
+  // only the client home pads the page enough for it.
+  .access-error {
+    margin: 2em 0.5em 0;
+    padding: 1em 3.5em 1em 1em;
+  }
+
+  .is-client .access-error {
+    margin-top: 1em;
   }
 
   .open-productions-header,

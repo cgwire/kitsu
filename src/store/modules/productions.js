@@ -56,6 +56,7 @@ import {
   CLEAR_ASSETS,
   CLEAR_EDITS,
   SAVE_LAST_PRODUCTION_ROUTE,
+  SET_PRODUCTION_ACCESS_ERROR,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -82,7 +83,10 @@ const initialState = {
   isProductionsLoading: false,
   isProductionsLoadingError: false,
 
-  lastProductionRoute: { name: 'open-productions' }
+  lastProductionRoute: { name: 'open-productions' },
+  // Why a production page sent the user to the home page, which tells it
+  // once: { reason: 'forbidden', 'missing' or 'failed', path: of that page }.
+  productionAccessError: null
 }
 
 const state = { ...initialState }
@@ -280,6 +284,7 @@ const getters = {
     helpers.getSectionPath(getters, rootGetters, 'team', false),
 
   lastProductionRoute: state => state.lastProductionRoute,
+  productionAccessError: state => state.productionAccessError,
 
   productionAssetTypes: (state, getters, rootState) => {
     if (!state.currentProduction) return []
@@ -1082,6 +1087,10 @@ const actions = {
 
   saveLastProductionRoute({ commit }, route) {
     this.commit(SAVE_LAST_PRODUCTION_ROUTE, route)
+  },
+
+  setProductionAccessError({ commit }, error) {
+    commit(SET_PRODUCTION_ACCESS_ERROR, error)
   }
 }
 
@@ -1419,6 +1428,10 @@ const mutations = {
 
   [SAVE_LAST_PRODUCTION_ROUTE](state, route) {
     state.lastProductionRoute = route
+  },
+
+  [SET_PRODUCTION_ACCESS_ERROR](state, error) {
+    state.productionAccessError = error
   },
 
   [RESET_ALL](state) {

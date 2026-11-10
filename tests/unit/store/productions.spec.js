@@ -1425,6 +1425,17 @@ describe('Productions store', () => {
       expect(state.teamRoles).toEqual({})
     })
 
+    test('RESET_ALL forgets the production access error', () => {
+      store.mutations.SET_PRODUCTION_ACCESS_ERROR(state, {
+        reason: 'forbidden',
+        path: '/productions/production-1/playlists'
+      })
+
+      store.mutations.RESET_ALL(state)
+
+      expect(state.productionAccessError).toBeNull()
+    })
+
     test('TEAM_MEMBER_ROLE_UPDATED', () => {
       state.currentProduction = { id: 'production-1' }
       state.teamRoles = { 'production-1': { 123: 'supervisor' } }
@@ -2264,5 +2275,36 @@ describe('Productions store, asset type workflow', () => {
     const { isInAssetTypeWorkflow } = vuexStore.getters
     expect(isInAssetTypeWorkflow('character', 'modeling')).toBe(true)
     expect(isInAssetTypeWorkflow('character', 'rigging')).toBe(false)
+  })
+})
+
+// A production page whose production cannot be loaded sends the user to the
+// home page, which tells why.
+describe('Productions store, production access error', () => {
+  let vuexStore
+
+  beforeEach(() => {
+    vuexStore = createStore({
+      modules: {
+        productions: {
+          state: { productionAccessError: null },
+          getters: store.getters,
+          mutations: store.mutations,
+          actions: store.actions
+        }
+      }
+    })
+  })
+
+  test('keeps the reason until the home page clears it', async () => {
+    const accessError = {
+      reason: 'failed',
+      path: '/productions/production-1/playlists'
+    }
+    await vuexStore.dispatch('setProductionAccessError', accessError)
+    expect(vuexStore.getters.productionAccessError).toEqual(accessError)
+
+    await vuexStore.dispatch('setProductionAccessError', null)
+    expect(vuexStore.getters.productionAccessError).toBeNull()
   })
 })
