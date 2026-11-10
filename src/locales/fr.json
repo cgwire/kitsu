@@ -790,6 +790,7 @@
       "no_task_assigned": "Il n'y a aucune tâche en cours assignée.",
       "no_task_done": "Vous n'avez encore aucune tâche validée",
       "no_task_pending": "Aucune tâche n'attend de retour",
+      "own_email_hint": "Modifiez votre propre adresse e-mail depuis votre page de profil.",
       "persons": "utilisateur | utilisateurs",
       "project_role": "Rôle projet",
       "select_person": "Sélectionner un utilisateur...",
@@ -1320,7 +1321,8 @@
       },
       "save": {
         "button": "Enregistrer les changements",
-        "error": "Une erreur est survenue pendant l'enregistrement de vos changements."
+        "error": "Une erreur est survenue pendant l'enregistrement de vos changements.",
+        "error_email": "Votre adresse e-mail n'a pas été modifiée. Veuillez vérifier votre mot de passe actuel."
       },
       "notifications_mattermost_enabled": "Notifications Mattermost activées",
       "notifications_mattermost_user": "Nom d'utilisateur Mattermost",

@@ -209,6 +209,25 @@ describe('store/api endpoints', () => {
     })
   })
 
+  // Zou asks for the current password to change one's own email.
+  describe('people credentials', () => {
+    test('updatePerson sends them next to the profile', () => {
+      peopleApi.updatePerson(
+        { id: 'person-1', email: 'new@example.com' },
+        { current_password: 'secret', totp: '123456' }
+      )
+
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/persons/person-1',
+        expect.objectContaining({
+          email: 'new@example.com',
+          current_password: 'secret',
+          totp: '123456'
+        })
+      )
+    })
+  })
+
   // The end field of the day-off form can be cleared: the day off then ends
   // on its start day
   describe('people day offs', () => {

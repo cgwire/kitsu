@@ -19,7 +19,8 @@
         :errored="form.email && !isValidEmail"
         :error-text="emailErrorText"
         :label="$t('people.fields.email')"
-        :disabled="personToEdit.is_generated_from_ldap"
+        :description="isCurrentUser ? $t('people.own_email_hint') : ''"
+        :disabled="personToEdit.is_generated_from_ldap || isCurrentUser"
         v-model.trim="form.email"
         @update:model-value="$emit('reset-error', 'email')"
         v-if="!isBot"
@@ -330,6 +331,12 @@ const people = computed(() => store.getters.people)
 const user = computed(() => store.getters.user)
 
 const isEditing = computed(() => Boolean(props.personToEdit?.id))
+
+// Zou asks for the current password to change one's own email: the profile
+// page does that.
+const isCurrentUser = computed(
+  () => isEditing.value && props.personToEdit.id === user.value.id
+)
 
 // Country feeds the carbon footprint calculation; hidden for bots/clients (guests never reach this modal).
 const showCountryField = computed(

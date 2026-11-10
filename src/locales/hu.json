@@ -790,6 +790,7 @@
       "no_task_assigned": "Nincs neked kiosztott folyamatban lévő feladat",
       "no_task_done": "Még nincs jóváhagyott feladatod",
       "no_task_pending": "Egy feladat sem vár visszajelzésre",
+      "own_email_hint": "A saját e-mail-címedet a profiloldaladon módosíthatod.",
       "persons": "felhasználó | felhasználó",
       "project_role": "Projektszerep",
       "select_person": "Felhasználó kiválasztása",
@@ -1323,7 +1324,8 @@
       },
       "save": {
         "button": "Változások mentése",
-        "error": "Hiba történt a változások mentésekor"
+        "error": "Hiba történt a változások mentésekor",
+        "error_email": "Az e-mail-címed nem változott meg. Kérlek ellenőrizd a jelenlegi jelszót."
       },
       "clear_avatar": "Avatár eltávolítása",
       "notifications_title": "Értesítések",

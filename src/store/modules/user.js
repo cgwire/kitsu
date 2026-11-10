@@ -312,8 +312,14 @@ const actions = {
 
   saveProfile({ commit, state }, payload) {
     commit(USER_SAVE_PROFILE_LOADING)
+    const credentials = payload.currentPassword
+      ? {
+          current_password: payload.currentPassword,
+          ...coerceTwoFactorPayload(payload.twoFactorPayload)
+        }
+      : undefined
     return peopleApi
-      .updatePerson(payload.form)
+      .updatePerson(payload.form, credentials)
       .then(() => {
         payload.form.id = state.user.id
         commit(USER_SAVE_PROFILE_SUCCESS, payload.form)

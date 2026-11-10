@@ -10,6 +10,7 @@ vi.mock('@/store/api/people', () => ({
     loadTasksToCheck: vi.fn(),
     loadTimeSpents: vi.fn(),
     unregisterFIDO: vi.fn(),
+    updatePerson: vi.fn(),
     updatePersonLocale: vi.fn()
   }
 }))
@@ -602,6 +603,39 @@ describe('User store', () => {
           'USER_UNREGISTER_FIDO_SUCCESS',
           'Yubikey'
         )
+      })
+    })
+
+    // Zou asks for the current password to change one's own email.
+    describe('saveProfile', () => {
+      const context = () => ({
+        commit: vi.fn(),
+        state: { user: { id: 'person-1' } }
+      })
+
+      test('sends the password and the 2FA code with a new email', async () => {
+        peopleApi.updatePerson.mockResolvedValue({})
+        const form = { email: 'new@example.com' }
+
+        await store.actions.saveProfile(context(), {
+          form,
+          currentPassword: 'secret',
+          twoFactorPayload: { totp: '123456' }
+        })
+
+        expect(peopleApi.updatePerson).toHaveBeenCalledWith(form, {
+          current_password: 'secret',
+          totp: '123456'
+        })
+      })
+
+      test('sends no credentials with the rest of the profile', async () => {
+        peopleApi.updatePerson.mockResolvedValue({})
+        const form = { phone: '0102030405' }
+
+        await store.actions.saveProfile(context(), { form })
+
+        expect(peopleApi.updatePerson).toHaveBeenCalledWith(form, undefined)
       })
     })
 

@@ -91,7 +91,9 @@ export default {
     return client.pput(`/api/data/persons/${personId}`, { active })
   },
 
-  updatePerson(person) {
+  // Zou asks for credentials (current password, 2FA code) to change one's
+  // own email.
+  updatePerson(person, credentials) {
     const data = {
       first_name: person.first_name,
       last_name: person.last_name,
@@ -120,7 +122,8 @@ export default {
       studio_id: person.studio_id,
       country: person.country,
       use_12_hour_clock: toBool(person.use_12_hour_clock),
-      display_date_format: person.display_date_format
+      display_date_format: person.display_date_format,
+      ...credentials
     }
     return client.pput(`/api/data/persons/${person.id}`, data)
   },

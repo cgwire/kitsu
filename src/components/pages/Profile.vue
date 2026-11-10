@@ -25,7 +25,7 @@
 
       <card
         :title="$t('profile.info_title')"
-        :error="errors.info ? $t('profile.save.error') : ''"
+        :error="infoError"
         :save-label="$t('profile.save.button')"
         :loading="loading.info"
         @save="saveInfo"
@@ -47,7 +47,26 @@
             v-model="form.email"
           />
           <text-field :label="$t('people.fields.phone')" v-model="form.phone" />
+          <text-field
+            autocomplete="current-password"
+            :label="$t('people.fields.old_password')"
+            type="password"
+            v-model="currentPassword"
+            v-if="isEmailChanged"
+          />
         </div>
+        <two-factor-authentication
+          v-if="emailNeedTwoFA"
+          :preferred-two-fa="user.preferred_two_factor_authentication"
+          :two-fas-enabled="twoFAsEnabled"
+          :is-loading="loading.info"
+          :email="user.email"
+          :text-validate-button="$t('profile.save.button')"
+          :is-wrong-otp="isWrongOTP"
+          :is-profile="true"
+          @validate="saveInfo"
+          @changed-two-fa="isWrongOTP = false"
+        />
         <div class="grid-two">
           <combobox
             :label="$t('profile.timezone')"
@@ -196,7 +215,7 @@
 
 <script setup>
 import moment from 'moment-timezone'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@unhead/vue'
 import { useStore } from 'vuex'
@@ -211,6 +230,7 @@ import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import TextField from '@/components/widgets/TextField.vue'
+import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 import TwoFactorAuthenticationSetup from '@/components/widgets/TwoFactorAuthenticationSetup.vue'
 
 const { t } = useI18n()
@@ -253,10 +273,32 @@ const changeAvatar = reactive({
 const loading = reactive({ info: false, notifications: false })
 const errors = reactive({ info: false, notifications: false })
 
+// Zou asks for the current password to change one's own email, and for a
+// 2FA code when the account has a method enabled.
+const currentPassword = ref('')
+const emailNeedTwoFA = ref(false)
+const isWrongOTP = ref(false)
+
 // Computed
 
 const user = computed(() => store.getters.user)
 const changePassword = computed(() => store.getters.changePassword)
+
+const isEmailChanged = computed(() => form.value.email !== user.value.email)
+
+const twoFAsEnabled = computed(() => {
+  const enabled = ['fido', 'totp', 'email_otp'].filter(
+    method => user.value[`${method}_enabled`]
+  )
+  return enabled.length ? [...enabled, 'recovery_code'] : []
+})
+
+const infoError = computed(() => {
+  if (!errors.info) return ''
+  return isEmailChanged.value
+    ? t('profile.save.error_email')
+    : t('profile.save.error')
+})
 
 const timezoneOptions = computed(() =>
   moment.tz
@@ -291,23 +333,44 @@ const syncFormFromUser = () => {
   )
 }
 
-const saveSection = async section => {
+const saveSection = async (section, twoFactorPayload) => {
+  // The email is saved with its own card only: the form is shared, and the
+  // other card has no password to send with it.
+  const changesEmail = section === 'info' && isEmailChanged.value
+  if (changesEmail && twoFAsEnabled.value.length && !twoFactorPayload) {
+    emailNeedTwoFA.value = true
+    return
+  }
   loading[section] = true
   errors[section] = false
+  isWrongOTP.value = false
   // The form stays open during the request: only what was sent counts.
-  const sent = { ...form.value }
+  const sent = changesEmail
+    ? { ...form.value }
+    : { ...form.value, email: user.value.email }
   try {
-    await store.dispatch('saveProfile', { form: sent })
+    await store.dispatch('saveProfile', {
+      form: sent,
+      currentPassword: changesEmail ? currentPassword.value : undefined,
+      twoFactorPayload
+    })
     // Not applied: a save leaves the screen as it is, a language tried during
     // the request included.
     lang.rememberLocale(sent.locale)
-  } catch {
-    errors[section] = true
+    if (changesEmail) {
+      currentPassword.value = ''
+      emailNeedTwoFA.value = false
+    }
+  } catch (err) {
+    // The password was right when zou gets to the code: only the code is
+    // asked again.
+    isWrongOTP.value = Boolean(err.body?.data?.wrong_OTP)
+    errors[section] = !isWrongOTP.value
   }
   loading[section] = false
 }
 
-const saveInfo = () => saveSection('info')
+const saveInfo = twoFactorPayload => saveSection('info', twoFactorPayload)
 const saveNotifications = () => saveSection('notifications')
 
 const localeChanged = value => {
@@ -357,11 +420,8 @@ const removeAvatar = () => {
 
 // Watchers
 
-watch(user, syncFormFromUser)
-
-// Lifecycle
-
-onMounted(syncFormFromUser)
+// Filled before the first render: an empty form reads as an edited email.
+watch(user, syncFormFromUser, { immediate: true })
 
 // Head
 

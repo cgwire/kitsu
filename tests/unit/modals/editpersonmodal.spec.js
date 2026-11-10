@@ -55,6 +55,20 @@ describe('EditPersonModal', () => {
       const wrapper = mountModal({ id: 'p1', first_name: 'Jane', email })
       expect(emailField(wrapper).props('errored')).toBe(true)
     })
+
+    // Zou asks for the current password to change one's own email: the
+    // profile page does that.
+    it('locks the email of the person logged in', () => {
+      const own = mountModal({ id: 'admin-1', email: 'ada@studio.com' })
+      const other = mountModal({ id: 'p1', email: 'jdoe@studio.com' })
+
+      expect(emailField(own).props('disabled')).toBe(true)
+      expect(emailField(own).props('description')).toBe(
+        'people.own_email_hint'
+      )
+      expect(emailField(other).props('disabled')).toBe(false)
+      expect(emailField(other).props('description')).toBe('')
+    })
   })
 
   describe('departments', () => {
