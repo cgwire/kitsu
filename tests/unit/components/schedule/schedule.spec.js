@@ -401,6 +401,21 @@ describe('Schedule widget - dragging a collapsed root row bar', () => {
   })
 })
 
+describe('Schedule widget - root row name', () => {
+  test('a click on the name unfolds the row like its chevron', async () => {
+    const rootElement = buildRootElement()
+    const wrapper = mountRootBar(rootElement)
+
+    await wrapper.find('.root-element-name').trigger('click')
+
+    expect(wrapper.emitted('root-element-expanded')[0][0]).toStrictEqual(
+      rootElement
+    )
+
+    wrapper.unmount()
+  })
+})
+
 describe('Schedule widget - end of an interaction', () => {
   // An outside script can take the body out of the page: only the end of a
   // move, a resize or a grab resets its cursor.

@@ -90,6 +90,7 @@
                     : `4px solid ${rootElement.color}`
                 }"
                 :title="rootElement.name"
+                @click="expandRootElement(rootElement)"
               >
                 {{ rootElement.name }}
               </span>
@@ -3639,6 +3640,7 @@ defineExpose({
 }
 
 .root-element-name {
+  cursor: pointer;
   padding-left: 10px;
   white-space: nowrap;
   color: var(--text-strong);
