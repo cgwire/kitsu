@@ -268,6 +268,7 @@
       />
       <people-timesheet-info
         :with-person="false"
+        :with-days-off="productivityWithDaysOff"
         :close-route="productivityCloseRoute"
         :day-offs="productivityDaysOff"
         :is-loading="isProductivityInfoLoading"
@@ -582,6 +583,7 @@ const {
   productivityQuotaShots,
   productivityTasks,
   productivityTimeSpents,
+  productivityWithDaysOff,
   productivityYear
 } = useProductivity({
   personId: computed(() => person.value?.id),

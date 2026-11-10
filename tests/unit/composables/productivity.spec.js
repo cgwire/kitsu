@@ -387,6 +387,35 @@ describe('useProductivity', () => {
       expect(productivity.isProductivityInfoLoading.value).toBe(false)
     })
 
+    // the rule can change under an open panel, as when the viewer gets a
+    // new role, even during a load: the panel shows the days off count of
+    // its own load
+    test('shows the days off count once a load reads them', async () => {
+      const canReadDaysOff = ref(false)
+      const { productivity } = run({
+        query: { view: 'week', year: '2026', period: '12' },
+        canReadDaysOff
+      })
+      const time = deferred()
+      actions.loadAggregatedPersonTimeSpents = vi.fn(() => time.promise)
+      route.query = { ...route.query, period: '13' }
+      await flush()
+
+      canReadDaysOff.value = true
+      time.resolve([])
+      await flush()
+
+      expect(productivity.productivityWithDaysOff.value).toBe(false)
+      expect(dispatched('loadAggregatedPersonDaysOff')).toEqual([])
+
+      actions.loadAggregatedPersonTimeSpents = vi.fn(() => [])
+      route.query = { ...route.query, period: '14' }
+      await flush()
+
+      expect(productivity.productivityWithDaysOff.value).toBe(true)
+      expect(dispatched('loadAggregatedPersonDaysOff')).toHaveLength(1)
+    })
+
     // Zou refuses the days off of a person to some viewers
     test('loads the time spents alone for a viewer refused the days off', async () => {
       const { productivity } = run({

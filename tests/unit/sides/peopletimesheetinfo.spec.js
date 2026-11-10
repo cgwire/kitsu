@@ -75,4 +75,16 @@ describe('sides/PeopleTimesheetInfo', () => {
       false
     )
   })
+
+  // a viewer Zou refuses the days off to would read a count of zero
+  test('leaves the days off out when asked to', async () => {
+    const dayOffStats = () =>
+      wrapper
+        .findAll('.info-stat-label')
+        .filter(label => label.text() === 'days_off.nb_days_off')
+    expect(dayOffStats()).toHaveLength(1)
+    await wrapper.setProps({ withDaysOff: false })
+    expect(dayOffStats()).toHaveLength(0)
+    expect(wrapper.findAll('.info-stat')).toHaveLength(1)
+  })
 })

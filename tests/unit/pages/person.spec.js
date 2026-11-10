@@ -1,6 +1,6 @@
 import moment from 'moment-timezone'
 import { flushPromises, shallowMount } from '@vue/test-utils'
-import { nextTick, reactive } from 'vue'
+import { nextTick, reactive, ref } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -923,7 +923,8 @@ describe('Person page', () => {
       expect(panel.props()).toMatchObject({
         person,
         day: 5,
-        tasks: [{ id: 'task-1', duration: 60 }]
+        tasks: [{ id: 'task-1', duration: 60 }],
+        withDaysOff: true
       })
       wrapper.unmount()
     })
@@ -958,7 +959,48 @@ describe('Person page', () => {
         month: 10,
         dayOffs: [],
         isLoadingError: false,
-        tasks: [{ id: 'task-1', duration: 60 }]
+        tasks: [{ id: 'task-1', duration: 60 }],
+        withDaysOff: false
+      })
+      wrapper.unmount()
+    })
+
+    // the rule can change under an open panel, as when the viewer gets a
+    // new role: the panel shows the days off count of its own load
+    it('shows the days off count once a load reads them', async () => {
+      const isAllowed = ref(false)
+      const loadAggregatedPersonDaysOff = vi.fn(() => [])
+      const wrapper = await mountPage({
+        actions: {
+          loadAggregatedPersonDaysOff,
+          loadAggregatedPersonTimeSpents: vi.fn(() => []),
+          loadPersonTimeSpentsByPeriod: vi.fn(() => [])
+        },
+        getters: {
+          canReadDaysOff: () => () => isAllowed.value,
+          isCurrentUserSupervisor: () => true,
+          user: () => otherUser
+        },
+        query: { section: 'productivity', view: 'month', year: '2026' }
+      })
+      const chart = wrapper.findComponent(ProductivityChart)
+      chart.vm.$emit('column-selected', 10)
+      await flushPromises()
+      const panel = wrapper.findComponent(PeopleTimesheetInfo)
+
+      isAllowed.value = true
+      await flushPromises()
+
+      expect(panel.props('withDaysOff')).toBe(false)
+      expect(loadAggregatedPersonDaysOff).not.toHaveBeenCalled()
+
+      chart.vm.$emit('column-selected', 9)
+      await flushPromises()
+
+      expect(panel.props('withDaysOff')).toBe(true)
+      expect(loadAggregatedPersonDaysOff.mock.calls[0][1]).toMatchObject({
+        personId: person.id,
+        month: 9
       })
       wrapper.unmount()
     })
