@@ -306,6 +306,34 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
       expect(findCodeCheck(wrapper).props('isWrongOtp')).toBe(true)
       expect(wrapper.find('.otp-input').element.value).toBe('Yubikey')
     })
+
+    // The setup that loads opens next to the removal: the code typed for
+    // the removal must not enable the method being set up.
+    it('removes a method while the setup of another one loads', async () => {
+      let openSetup = null
+      const preEnableTOTP = () =>
+        new Promise(resolve => {
+          openSetup = resolve
+        })
+      const enableTOTP = vi.fn()
+      const disableEmailOTP = vi.fn()
+      const wrapper = mountSetup(
+        { email_otp_enabled: true },
+        { preEnableTOTP, enableTOTP, disableEmailOTP }
+      )
+      await findButton(wrapper, label('totp.button_enable')).trigger('click')
+      await findButton(wrapper, label('email_otp.button_disable')).trigger(
+        'click'
+      )
+      openSetup({ totp_provisionning_uri: 'otpauth://x', otp_secret: 'ABC' })
+      await flushPromises()
+
+      findCodeCheck(wrapper).vm.$emit('validate', twoFactorPayload)
+      await flushPromises()
+
+      expect(enableTOTP).not.toHaveBeenCalled()
+      expect(disableEmailOTP.mock.calls[0][1]).toEqual(twoFactorPayload)
+    })
   })
 
   // Zou checks a 2FA code before it removes a key.

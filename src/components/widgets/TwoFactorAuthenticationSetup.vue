@@ -856,10 +856,13 @@ const nextEnable = () => {
 }
 
 const nextWithPayload = payload => {
-  if (twoFA.TOTPPreEnabled) enableTOTPRequested(payload)
-  else if (twoFA.emailOTPPreEnabled) enableEmailOTPRequested(payload)
-  else if (twoFA.FIDOPreRegistered) registerFIDORequested(payload)
-  else if (twoFA.TOTPNeedTwoFA) disableTOTPRequested(payload)
+  // A setup can open next to a removal, when its request was still running:
+  // only the factor asked by a setup sends the code to that setup.
+  if (twoFA.enableNeedTwoFA) {
+    if (twoFA.TOTPPreEnabled) enableTOTPRequested(payload)
+    else if (twoFA.emailOTPPreEnabled) enableEmailOTPRequested(payload)
+    else if (twoFA.FIDOPreRegistered) registerFIDORequested(payload)
+  } else if (twoFA.TOTPNeedTwoFA) disableTOTPRequested(payload)
   else if (twoFA.emailOTPNeedTwoFA) disableEmailOTPRequested(payload)
   else if (twoFA.newRecoveryCodesNeedTwoFA) newRecoveryCodesRequested(payload)
   else if (twoFA.FIDOUnregisterDeviceName) unregisterFIDOConfirmed(payload)
