@@ -209,7 +209,8 @@ describe('store/api endpoints', () => {
     })
   })
 
-  // Zou asks for the current password to change one's own email.
+  // Zou asks for the current password to change one's own email, and for a
+  // factor already enabled to add a 2FA method.
   describe('people credentials', () => {
     test('updatePerson sends them next to the profile', () => {
       peopleApi.updatePerson(
@@ -225,6 +226,36 @@ describe('store/api endpoints', () => {
           totp: '123456'
         })
       )
+    })
+
+    test.each([
+      {
+        name: 'enableTOTP',
+        args: ['111111'],
+        path: '/api/auth/totp',
+        body: { totp: '111111' }
+      },
+      {
+        name: 'enableEmailOTP',
+        args: ['222222'],
+        path: '/api/auth/email-otp',
+        body: { email_otp: '222222' }
+      },
+      {
+        name: 'registerFIDO',
+        args: [{ id: 'key' }, 'Yubikey'],
+        path: '/api/auth/fido',
+        body: { registration_response: { id: 'key' }, device_name: 'Yubikey' }
+      }
+    ])('$name sends the code of an enabled factor', ({ name, args, path, body }) => {
+      client.ppost.mockResolvedValueOnce({})
+
+      peopleApi[name](...args, { recovery_code: 'abcd' })
+
+      expect(client.ppost).toHaveBeenCalledWith(path, {
+        ...body,
+        recovery_code: 'abcd'
+      })
     })
   })
 
