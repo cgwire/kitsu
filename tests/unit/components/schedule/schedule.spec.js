@@ -651,7 +651,9 @@ describe('Schedule widget - estimation field', () => {
 })
 
 // Production schedule shape: a task type row, entity rows below it, and one
-// person row per assignee holding the task bars.
+// person row per assignee holding the task bars. The dates are UTC midnights,
+// as the pages parse them: a drag snaps a bar to a UTC midnight, which a
+// local moment reads as the day before west of UTC.
 const buildSubchildrenHierarchy = (nbEntities = 3) => {
   const root = {
     id: 'tt-1',
@@ -663,8 +665,8 @@ const buildSubchildrenHierarchy = (nbEntities = 3) => {
     loading: false,
     man_days: 0,
     daysOff: [],
-    startDate: moment('2026-08-03'),
-    endDate: moment('2026-10-23'),
+    startDate: moment.utc('2026-08-03'),
+    endDate: moment.utc('2026-10-23'),
     people: { 'person-1': { ...person, daysOff: [] } },
     children: []
   }
@@ -677,8 +679,8 @@ const buildSubchildrenHierarchy = (nbEntities = 3) => {
       editable: true,
       expanded: true,
       loading: false,
-      startDate: moment('2026-08-03'),
-      endDate: moment('2026-10-23'),
+      startDate: moment.utc('2026-08-03'),
+      endDate: moment.utc('2026-10-23'),
       parentElement: root,
       children: new Map()
     }
@@ -688,8 +690,8 @@ const buildSubchildrenHierarchy = (nbEntities = 3) => {
       entity_id: `shot-${e}`,
       entity: { name: `SH${e}` },
       assignees: ['person-1'],
-      startDate: moment('2026-08-10').add(e * 7, 'days'),
-      endDate: moment('2026-08-14').add(e * 7, 'days'),
+      startDate: moment.utc('2026-08-10').add(e * 7, 'days'),
+      endDate: moment.utc('2026-08-14').add(e * 7, 'days'),
       editable: true,
       unresizable: false,
       line: 0,
@@ -704,8 +706,8 @@ const buildSubchildrenHierarchy = (nbEntities = 3) => {
 const mountSubchildren = (hierarchy, props = {}) =>
   mountSchedule(
     {
-      startDate: moment('2026-08-01'),
-      endDate: moment('2026-10-31'),
+      startDate: moment.utc('2026-08-01'),
+      endDate: moment.utc('2026-10-31'),
       hierarchy,
       reassignable: true,
       subchildren: true,
@@ -793,8 +795,8 @@ describe('Schedule widget - person rows', () => {
       id: 'task-shared',
       entity: { name: 'SH9' },
       assignees: ['person-1', 'person-2'],
-      startDate: moment('2026-08-12'),
-      endDate: moment('2026-08-18')
+      startDate: moment.utc('2026-08-12'),
+      endDate: moment.utc('2026-08-18')
     }
     root.people['person-2'] = { ...person, id: 'person-2', daysOff: [] }
     row.children = new Map([
@@ -841,7 +843,7 @@ describe('Schedule widget - person rows', () => {
     await dragFrom(wrapper, wrapper.find('.subchild .timebar-right-hand'), 300, 360)
 
     // sanity check: the resize happened
-    expect(task.endDate.isSame(moment('2026-08-14'))).toBe(false)
+    expect(task.endDate.isSame(moment.utc('2026-08-14'))).toBe(false)
     expect(wrapper.vm.selection).toBe(selection)
     wrapper.unmount()
   })
@@ -881,8 +883,8 @@ describe('Schedule widget - person rows', () => {
     const { counts, mixin, reset } = countUpdates()
     const wrapper = mountSchedule(
       {
-        startDate: moment('2026-08-01'),
-        endDate: moment('2026-10-31'),
+        startDate: moment.utc('2026-08-01'),
+        endDate: moment.utc('2026-10-31'),
         hierarchy,
         reassignable: true,
         subchildren: true,
@@ -1003,7 +1005,7 @@ describe('Schedule widget - dragging an entity bar over its task rows', () => {
     const hierarchy = buildSubchildrenHierarchy(1)
     const [root] = hierarchy
     const [row] = root.children
-    row.endDate = moment('2026-09-30')
+    row.endDate = moment.utc('2026-09-30')
     const wrapper = mountSubchildren(hierarchy)
 
     // the entity bar sits between the root bar and the task bars
@@ -1065,7 +1067,7 @@ describe('Schedule widget - drag with tasks', () => {
     const [root] = hierarchy
     const [row] = root.children
     const [task] = row.children.get('person-1')
-    row.endDate = moment('2026-09-30')
+    row.endDate = moment.utc('2026-09-30')
     const wrapper = mountSubchildren(hierarchy)
 
     const bar = wrapper
@@ -1093,7 +1095,7 @@ describe('Schedule widget - drag with tasks', () => {
     const [row] = root.children
     const [task] = row.children.get('person-1')
     const taskDates = [fmt(task.startDate), fmt(task.endDate)]
-    row.endDate = moment('2026-09-30')
+    row.endDate = moment.utc('2026-09-30')
     const wrapper = mountSubchildren(hierarchy)
 
     const bar = wrapper
@@ -1114,8 +1116,8 @@ describe('Schedule widget - drag with tasks', () => {
     const [root] = hierarchy
     const [first, second] = root.children
     const [firstTask] = first.children.get('person-1')
-    first.endDate = moment('2026-09-30')
-    second.endDate = moment('2026-09-30')
+    first.endDate = moment.utc('2026-09-30')
+    second.endDate = moment.utc('2026-09-30')
     const wrapper = mountSubchildren(hierarchy)
 
     const [firstBar, secondBar] = wrapper
@@ -1126,8 +1128,8 @@ describe('Schedule widget - drag with tasks', () => {
       )
     await selectBar(wrapper, firstBar)
     // the page snapped the task to a working day since the selection
-    firstTask.startDate = moment('2026-08-11')
-    firstTask.endDate = moment('2026-08-15')
+    firstTask.startDate = moment.utc('2026-08-11')
+    firstTask.endDate = moment.utc('2026-08-15')
     await nextTick()
     await secondBar.trigger('mousedown', {
       clientX: 300,
@@ -1154,7 +1156,7 @@ describe('Schedule widget - drag with tasks', () => {
     const [root] = hierarchy
     const [first, second] = root.children
     const [task] = second.children.get('person-1')
-    root.endDate = moment('2026-09-30')
+    root.endDate = moment.utc('2026-09-30')
     const wrapper = mountSubchildren(hierarchy)
 
     await dragBar(wrapper.find('.root-element .timebar-center'))
@@ -1284,8 +1286,8 @@ describe('Schedule widget - entity rows', () => {
       loading: false,
       man_days: 0,
       daysOff: [],
-      startDate: moment('2026-08-03'),
-      endDate: moment('2026-10-23'),
+      startDate: moment.utc('2026-08-03'),
+      endDate: moment.utc('2026-10-23'),
       children: []
     }
     for (let e = 0; e < nbEntities; e++) {
@@ -1299,8 +1301,8 @@ describe('Schedule widget - entity rows', () => {
         expanded: true,
         loading: false,
         man_days: 0,
-        startDate: moment('2026-08-10').add(e * 7, 'days'),
-        endDate: moment('2026-08-14').add(e * 7, 'days'),
+        startDate: moment.utc('2026-08-10').add(e * 7, 'days'),
+        endDate: moment.utc('2026-08-14').add(e * 7, 'days'),
         parentElement: root
       })
     }
@@ -1344,7 +1346,7 @@ describe('Schedule widget - entity rows', () => {
     const { wrapper } = mountCounted(hierarchy)
     const [root] = hierarchy
     const [row] = root.children
-    root.endDate = moment('2026-09-30')
+    root.endDate = moment.utc('2026-09-30')
 
     await dragRootBar(wrapper, 500, { shiftKey: true })
 
@@ -1359,7 +1361,7 @@ describe('Schedule widget - entity rows', () => {
   it('lays the multiline rows out again once the root bar clipped them', async () => {
     const hierarchy = buildEntityHierarchy(3)
     const [root] = hierarchy
-    root.endDate = moment('2026-09-30')
+    root.endDate = moment.utc('2026-09-30')
     const wrapper = mountSchedule(
       { hierarchy, clipChildren: true, multiline: true },
       { attachTo: document.body }
@@ -1383,7 +1385,7 @@ describe('Schedule widget - entity rows', () => {
       const hierarchy = buildEntityHierarchy(0)
       const [root] = hierarchy
       root.expanded = false
-      root.endDate = moment('2026-09-30')
+      root.endDate = moment.utc('2026-09-30')
       const wrapper = mountSchedule(
         { hierarchy, clipChildren: true, multiline: true },
         { attachTo: document.body }
@@ -1394,15 +1396,15 @@ describe('Schedule widget - entity rows', () => {
         {
           id: 'row-1',
           name: 'E01',
-          startDate: moment('2026-08-03'),
-          endDate: moment('2026-08-07'),
+          startDate: moment.utc('2026-08-03'),
+          endDate: moment.utc('2026-08-07'),
           parentElement: root
         },
         {
           id: 'row-2',
           name: 'E02',
-          startDate: moment('2026-08-04'),
-          endDate: moment('2026-08-07'),
+          startDate: moment.utc('2026-08-04'),
+          endDate: moment.utc('2026-08-07'),
           parentElement: root
         }
       ]
@@ -1436,7 +1438,7 @@ describe('Schedule widget - entity rows', () => {
     const { wrapper } = mountCounted(hierarchy)
     const [root] = hierarchy
     const [first, second] = root.children
-    root.endDate = moment('2026-09-30')
+    root.endDate = moment.utc('2026-09-30')
 
     await dragRootBar(wrapper, 500)
 
@@ -1454,7 +1456,7 @@ describe('Schedule widget - entity rows', () => {
     const hierarchy = buildEntityHierarchy(1)
     const [root] = hierarchy
     const [row] = root.children
-    root.endDate = moment('2026-09-30')
+    root.endDate = moment.utc('2026-09-30')
     const wrapper = mountSchedule(
       { hierarchy, zoomLevel: 0, clipChildren: true },
       { attachTo: document.body }
