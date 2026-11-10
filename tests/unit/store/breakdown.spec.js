@@ -769,15 +769,16 @@ describe('Breakdown store, through a store', () => {
   })
 
   describe('saved searches', () => {
-    test('saves a search once', async () => {
+    test('saves a search', async () => {
       const store = buildStore()
       const query = { id: 'f1', name: 'props' }
       client.ppost.mockResolvedValueOnce(query)
 
-      await store.dispatch('saveBreakdownSearch', 'props')
-      await store.dispatch('saveBreakdownSearch', 'props')
+      await store.dispatch('saveBreakdownSearch', {
+        name: 'props',
+        search_query: 'props'
+      })
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
         list_type: 'breakdown',
         name: 'props',
@@ -794,8 +795,10 @@ describe('Breakdown store, through a store', () => {
         .mockResolvedValueOnce({ id: 'f1', name: 'sets' })
         .mockResolvedValueOnce({ id: 'f2', name: 'props' })
 
-      await store.dispatch('saveBreakdownSearch', 'sets')
-      await store.dispatch('saveBreakdownSearch', 'props')
+      const save = name =>
+        store.dispatch('saveBreakdownSearch', { name, search_query: name })
+      await save('sets')
+      await save('props')
 
       expect(names(store.getters.breakdownSearchQueries)).toEqual([
         'props',
@@ -817,7 +820,7 @@ describe('Breakdown store, through a store', () => {
       expect(names(store.getters.breakdownSearchQueries)).toEqual(['sets'])
     })
 
-    test('saves a filter group once', async () => {
+    test('saves a filter group', async () => {
       const store = buildStore()
       const group = {
         name: 'Layout',
@@ -828,9 +831,7 @@ describe('Breakdown store, through a store', () => {
       client.ppost.mockResolvedValueOnce({ id: 'g1', ...group })
 
       await store.dispatch('saveBreakdownSearchFilterGroup', group)
-      await store.dispatch('saveBreakdownSearchFilterGroup', group)
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith(
         '/api/data/user/filter-groups',
         {

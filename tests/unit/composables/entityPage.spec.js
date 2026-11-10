@@ -138,40 +138,15 @@ describe('useEntityPage', () => {
       expect(searchField.focus).toHaveBeenCalledWith({ preventScroll: true })
     })
 
-    it('saves a search once at a time', async () => {
-      let endSave
-      const { page, store } = await mountPage()
-      store.dispatch.mockImplementation(
-        () => new Promise(resolve => (endSave = resolve))
-      )
+    it('opens the search filter modal on the search to save', async () => {
+      const addSearch = vi.fn()
+      const { page } = await mountPage({
+        options: { searchQueryListRef: ref({ addSearch }) }
+      })
 
-      const saving = page.saveSearchQuery('mood=happy')
-      expect(page.loading.savingSearch).toBe(true)
-      page.saveSearchQuery('mood=sad')
-      endSave()
-      await saving
+      page.saveSearchQuery('mood=happy')
 
-      expect(dispatched(store, 'saveShotSearch')).toEqual([
-        ['saveShotSearch', 'mood=happy']
-      ])
-      expect(page.loading.savingSearch).toBe(false)
-    })
-
-    // The search list removes its searches itself.
-    it('logs a search Zou refuses to save', async () => {
-      const error = new Error('refused')
-      const consoleError = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {})
-      const { page, store } = await mountPage()
-      store.dispatch.mockImplementation(() => Promise.reject(error))
-
-      await page.saveSearchQuery('mood=happy')
-      await flushPromises()
-
-      expect(consoleError.mock.calls).toEqual([[error]])
-      expect(page.loading.savingSearch).toBe(false)
-      consoleError.mockRestore()
+      expect(addSearch).toHaveBeenCalledWith('mood=happy')
     })
   })
 

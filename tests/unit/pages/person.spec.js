@@ -25,6 +25,8 @@ import ProductivityChart from '@/components/widgets/ProductivityChart.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import UserCalendar from '@/components/widgets/UserCalendar.vue'
 
+import { buildSearchQueryListStub } from '../fixtures/search-query-list'
+
 const person = { id: 'person-1', name: 'Jane Doe', is_bot: false }
 const otherUser = { id: 'user-2', name: 'John Doe' }
 
@@ -56,6 +58,7 @@ const mountPage = async ({
   getters = {},
   onRouter = () => {},
   query = {},
+  stubs = {},
   tasks = []
 } = {}) => {
   const store = createStore({
@@ -114,7 +117,11 @@ const mountPage = async ({
           }
         }
       ],
-      stubs: { SearchField: SearchFieldStub, TodosList: TodosListStub }
+      stubs: {
+        SearchField: SearchFieldStub,
+        TodosList: TodosListStub,
+        ...stubs
+      }
     }
   })
   await flushPromises()
@@ -134,6 +141,18 @@ describe('Person page', () => {
   afterEach(() => {
     localStorage.removeItem('person:filters')
     localStorage.removeItem('person:section')
+  })
+
+  describe('saved searches', () => {
+    it('opens the search filter modal on Save', async () => {
+      const SearchQueryList = buildSearchQueryListStub()
+      const wrapper = await mountPage({ stubs: { SearchQueryList } })
+
+      wrapper.findComponent(SearchFieldStub).vm.$emit('save', 'late')
+
+      expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('late')
+      wrapper.unmount()
+    })
   })
 
   describe('filters panel', () => {
@@ -163,6 +182,29 @@ describe('Person page', () => {
         schedule.find('.todos-filters').element.contains(zoom.element)
       ).toBe(true)
       schedule.unmount()
+    })
+
+    // Folded, they hide the list that holds the search filter modal.
+    it('unfolds the filters on Save', async () => {
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({
+          matches: true,
+          addEventListener: () => {},
+          removeEventListener: () => {}
+        }))
+      )
+      const wrapper = await mountPage({
+        stubs: { SearchQueryList: buildSearchQueryListStub() }
+      })
+
+      await wrapper.findComponent(SearchFieldStub).vm.$emit('save', 'late')
+
+      expect(wrapper.find('.todos-filters').classes()).not.toContain(
+        'collapsed'
+      )
+      wrapper.unmount()
+      vi.unstubAllGlobals()
     })
 
     it('folds the filters on a phone until the funnel opens them', async () => {

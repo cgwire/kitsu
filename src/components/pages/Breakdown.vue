@@ -320,6 +320,7 @@
         </div>
         <div class="query-list">
           <search-query-list
+            ref="search-query-list"
             :groups="breakdownSearchFilterGroups"
             :is-group-enabled="true"
             :queries="breakdownSearchQueries"
@@ -515,6 +516,7 @@ const assetListRef = useTemplateRef('asset-list')
 const editAssetModalRef = useTemplateRef('edit-asset-modal')
 const importModalRef = useTemplateRef('import-modal')
 const searchFieldRef = useTemplateRef('search-field')
+const searchQueryListRef = useTemplateRef('search-query-list')
 
 const assetToEdit = ref({})
 const assetTypeId = ref('')
@@ -555,7 +557,6 @@ const loading = reactive({
   editLabel: false,
   importing: false,
   remove: false,
-  savingSearch: false,
   stay: false
 })
 
@@ -1433,15 +1434,8 @@ const exportViewToCsv = () => {
   csv.buildCsvFile(getCsvFileName(), [getCsvFileHeaders(), ...getCsvEntries()])
 }
 
-const saveSearchQuery = async searchQuery => {
-  if (loading.savingSearch) return
-  loading.savingSearch = true
-  try {
-    await store.dispatch('saveBreakdownSearch', searchQuery)
-  } catch (err) {
-    console.error(err)
-  }
-  loading.savingSearch = false
+const saveSearchQuery = searchQuery => {
+  searchQueryListRef.value?.addSearch(searchQuery)
 }
 
 // The knob is a direct child of the header it resizes.

@@ -53,6 +53,7 @@
 
     <div class="query-list mt1" v-if="!isCurrentUserClient">
       <search-query-list
+        ref="sequence-search-query-list"
         :queries="sequenceSearchQueries"
         type="sequenceStat"
         :production-id="currentProduction?.id"
@@ -106,10 +107,10 @@ const store = useStore()
 // State
 // --------------------------------------------------------------------------
 const searchFieldRef = useTemplateRef('sequence-search-field')
+const searchQueryListRef = useTemplateRef('sequence-search-query-list')
 
 const countMode = ref('count')
 const initialLoading = ref(true)
-const isSavingSearch = ref(false)
 
 // Computed
 // --------------------------------------------------------------------------
@@ -200,15 +201,8 @@ const onSearchChange = () => {
   store.dispatch('setSequenceStatsSearch', searchQuery)
 }
 
-const saveSearchQuery = async searchQuery => {
-  if (isSavingSearch.value) return
-  isSavingSearch.value = true
-  try {
-    await store.dispatch('saveSequenceSearch', searchQuery)
-  } catch (err) {
-    console.error(err)
-  }
-  isSavingSearch.value = false
+const saveSearchQuery = searchQuery => {
+  searchQueryListRef.value?.addSearch(searchQuery)
 }
 
 const exportStatisticsToCsv = () => {

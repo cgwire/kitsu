@@ -80,7 +80,7 @@
             <div class="flexrow-item search-options">
               <search-field
                 ref="task-search-field"
-                :can-save="true"
+                :can-save="!loading.entities"
                 :focus-options="{ preventScroll: true }"
                 @change="onSearchChange"
                 @save="saveSearchQuery"
@@ -265,9 +265,12 @@
         </div>
         <div
           class="query-list"
-          v-if="!loading.entities && searchQueries.length"
+          :class="{ empty: !searchQueries.length }"
+          v-if="!loading.entities"
         >
           <search-query-list
+            ref="task-search-query-list"
+            :entity-type="entityType"
             :queries="searchQueries"
             type="taskType"
             :production-id="currentProduction?.id"
@@ -678,8 +681,7 @@ const loading = reactive({
   addMetadata: false,
   deleteMetadata: false,
   entities: false,
-  importing: false,
-  savingSearch: false
+  importing: false
 })
 
 const modals = reactive({
@@ -707,6 +709,7 @@ const schedule = reactive({
 const importModalRef = useTemplateRef('import-modal')
 const scheduleWidgetRef = useTemplateRef('schedule-widget')
 const searchFieldRef = useTemplateRef('task-search-field')
+const searchQueryListRef = useTemplateRef('task-search-query-list')
 const taskListRef = useTemplateRef('task-list')
 
 // Computed
@@ -1214,16 +1217,7 @@ const onSearchChange = query => {
 }
 
 const saveSearchQuery = searchQuery => {
-  if (loading.savingSearch) {
-    return
-  }
-  loading.savingSearch = true
-  store
-    .dispatch('saveTaskSearch', { searchQuery, entityType: entityType.value })
-    .catch(console.error)
-    .finally(() => {
-      loading.savingSearch = false
-    })
+  searchQueryListRef.value?.addSearch(searchQuery)
 }
 
 const updateUrlParams = () => {
@@ -2327,6 +2321,10 @@ useHead({ title: computed(() => `${title.value} - Kitsu`) })
 .query-list {
   margin-bottom: 0;
   margin-top: 0.5em;
+
+  &.empty {
+    margin-top: 0;
+  }
 }
 
 .task-type-schedule {

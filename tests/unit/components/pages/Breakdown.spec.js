@@ -45,6 +45,7 @@ import ErrorText from '@/components/widgets/ErrorText.vue'
 
 import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
 import { buildRefusal } from '../../fixtures/refusal'
+import { buildSearchQueryListStub } from '../../fixtures/search-query-list'
 
 const production = { id: 'p1', production_type: 'tvshow' }
 
@@ -928,6 +929,17 @@ describe('Breakdown page, paste and undo', () => {
     wrapper.vm.resetSelection()
 
     expect(wrapper.vm.canUndo).toBe(false)
+  })
+})
+
+describe('Breakdown page, saved searches', () => {
+  test('opens the search filter modal on Save', async () => {
+    const SearchQueryList = buildSearchQueryListStub()
+    const { wrapper } = mountPage({ stubs: { SearchQueryList } })
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('save', 'hero')
+
+    expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('hero')
   })
 })
 

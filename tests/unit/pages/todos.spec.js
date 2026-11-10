@@ -44,6 +44,8 @@ import ProductivityChart from '@/components/widgets/ProductivityChart.vue'
 import UserCalendar from '@/components/widgets/UserCalendar.vue'
 import Todos from '@/components/pages/Todos.vue'
 
+import { buildSearchQueryListStub } from '../fixtures/search-query-list'
+
 const feedbackStatus = { id: 'status-1', is_feedback_request: true }
 const wipStatus = { id: 'status-2', is_feedback_request: false }
 
@@ -327,6 +329,21 @@ describe('Todos page', () => {
       expect(toggle.props('icon')).toBe('funnel')
       await toggle.vm.$emit('click')
       expect(filters.classes()).not.toContain('collapsed')
+      wrapper.unmount()
+    })
+
+    // Folded, they hide the list that holds the search filter modal.
+    it('unfolds the filters on Save', async () => {
+      mockPhone(true)
+      const wrapper = await mountPage([], {
+        stubs: { SearchQueryList: buildSearchQueryListStub() }
+      })
+
+      await wrapper.findComponent(SearchFieldStub).vm.$emit('save', 'late')
+
+      expect(wrapper.find('.todos-filters').classes()).not.toContain(
+        'collapsed'
+      )
       wrapper.unmount()
     })
   })
@@ -1301,5 +1318,17 @@ describe('Todos page', () => {
       expect(localStorage.getItem('todos:section')).toBe('daysoff')
       wrapper.unmount()
     })
+  })
+})
+
+describe('Todos page, saved searches', () => {
+  it('opens the search filter modal on Save', async () => {
+    const SearchQueryList = buildSearchQueryListStub()
+    const wrapper = await mountPage([], { stubs: { SearchQueryList } })
+
+    wrapper.findComponent(SearchFieldStub).vm.$emit('save', 'late')
+
+    expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('late')
+    wrapper.unmount()
   })
 })

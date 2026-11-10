@@ -1065,13 +1065,15 @@ const actions = {
     commit(REMOVE_SELECTED_TASK, task)
   },
 
-  saveTaskSearch({ commit, rootGetters }, { searchQuery, entityType }) {
-    if (state.taskSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveTaskSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter('task', searchQuery, searchQuery, production.id, entityType)
+      .createFilter(
+        'task',
+        searchFilter,
+        production.id,
+        searchFilter.entity_type
+      )
       .then(searchQuery => {
         commit(SAVE_TASK_SEARCH_END, { searchQuery, production })
         return searchQuery
@@ -1705,7 +1707,7 @@ const mutations = {
 
   [REMOVE_TASK_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.taskSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.taskSearchQueries.splice(queryIndex, 1)

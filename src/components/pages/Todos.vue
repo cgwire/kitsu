@@ -89,7 +89,11 @@
             class="query-list collapsible"
             v-show="!isActiveTab('productivity')"
           >
-            <search-query-list :queries="todoSearchQueries" type="todo" />
+            <search-query-list
+              ref="todo-search-query-list"
+              :queries="todoSearchQueries"
+              type="todo"
+            />
           </div>
         </div>
 
@@ -343,11 +347,11 @@ const calendarTimeSpents = ref([])
 const selectedDate = ref(moment().format('YYYY-MM-DD'))
 const loading = reactive({
   doneTasks: false,
-  timesheets: false,
-  savingSearch: false
+  timesheets: false
 })
 
 const searchFieldRef = useTemplateRef('todos-search-field')
+const searchQueryListRef = useTemplateRef('todo-search-query-list')
 const todoListRef = useTemplateRef('todo-list')
 const doneListRef = useTemplateRef('done-list')
 const timesheetListRef = useTemplateRef('timesheet-list')
@@ -624,15 +628,10 @@ const onSearchChange = () => {
   }
 }
 
-const saveSearchQuery = async searchQuery => {
-  if (loading.savingSearch) return
-  loading.savingSearch = true
-  try {
-    await store.dispatch('saveTodoSearch', searchQuery)
-  } catch (error) {
-    console.error(error)
-  }
-  loading.savingSearch = false
+// Folded on a phone, the filters hide the list that holds the modal.
+const saveSearchQuery = searchQuery => {
+  areFiltersFolded.value = false
+  searchQueryListRef.value?.addSearch(searchQuery)
 }
 
 const setTodoListScrollPosition = position =>

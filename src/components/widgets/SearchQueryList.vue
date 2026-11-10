@@ -23,10 +23,7 @@
       @keydown.enter.prevent="isEditing = !isEditing"
       @keydown.space.prevent="isEditing = !isEditing"
       :title="$t('main.edit_mode_on')"
-      v-if="
-        userFilters.length > 0 ||
-        (isGroupEnabled && userFilterGroups.length > 0)
-      "
+      v-if="hasChangeableRow"
     >
       <pencil-icon :size="12" />
     </span>
@@ -56,7 +53,9 @@
             :title="getDepartment(group)?.name"
             v-if="group.is_shared && group.department_id"
           ></span>
-          <span>{{ group.name }}</span>
+          <span class="filter-label" :title="group.name">
+            {{ group.name }}
+          </span>
           <chevron-down-icon
             class="chevron ml05"
             :size="12"
@@ -67,7 +66,7 @@
             class="edit"
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="editGroup(group)"
-            v-if="!group.is_shared || isCurrentUserManager"
+            v-if="canChange(group)"
           >
             <edit2-icon :size="8" />
           </button>
@@ -75,10 +74,7 @@
             class="del"
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="confirmRemoveGroup(group)"
-            v-if="
-              !group.queries.length &&
-              (!group.is_shared || isCurrentUserManager)
-            "
+            v-if="!group.queries.length && canChange(group)"
           >
             <trash2-icon :size="8" />
           </button>
@@ -108,7 +104,7 @@
                 class="flexrow filter-name"
                 :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
               >
-                {{ searchQuery.name }}
+                <span class="filter-label">{{ searchQuery.name }}</span>
               </router-link>
               <button
                 class="edit"
@@ -116,7 +112,7 @@
                   backgroundColor: `${group.color}53`
                 }"
                 @click.stop="editSearch(searchQuery)"
-                v-if="!searchQuery.is_shared || isCurrentUserManager"
+                v-if="canChange(searchQuery)"
               >
                 <edit2-icon :size="8" />
               </button>
@@ -124,7 +120,7 @@
                 class="del"
                 :style="{ backgroundColor: `${group.color}53` }"
                 @click.stop="confirmRemoveSearch(searchQuery)"
-                v-if="!searchQuery.is_shared || isCurrentUserManager"
+                v-if="canChange(searchQuery)"
               >
                 <trash2-icon :size="8" />
               </button>
@@ -154,19 +150,19 @@
           :title="getDepartment(searchQuery)?.name"
           v-if="searchQuery.is_shared && searchQuery.department_id"
         ></span>
-        {{ searchQuery.name }}
+        <span class="filter-label">{{ searchQuery.name }}</span>
       </router-link>
       <button
         class="edit"
         @click.stop="editSearch(searchQuery)"
-        v-if="!searchQuery.is_shared || isCurrentUserManager"
+        v-if="canChange(searchQuery)"
       >
         <edit2-icon :size="8" />
       </button>
       <button
         class="del"
         @click.stop="confirmRemoveSearch(searchQuery)"
-        v-if="!searchQuery.is_shared || isCurrentUserManager"
+        v-if="canChange(searchQuery)"
       >
         <trash2-icon :size="8" />
       </button>
@@ -191,6 +187,7 @@
       :is-error="errors.edit"
       :is-group-enabled="isGroupEnabled"
       :production-id="productionId"
+      :queries="sortedFilters"
       :search-query-to-edit="searchQueryToEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditSearch"
@@ -201,6 +198,7 @@
       active
       :is-loading="loading.group"
       :is-error="errors.group"
+      :groups="userFilterGroups"
       :group-to-edit="groupToEdit"
       @cancel="modals.group = false"
       @confirm="confirmEditFilterGroup"
@@ -230,6 +228,13 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
 import EditSearchFilterGroupModal from '@/components/modals/EditSearchFilterGroupModal.vue'
 
+// The lists whose search saving action is not save<Type>Search.
+const SAVE_SEARCH_ACTIONS = {
+  person: 'savePersonTasksSearch',
+  sequenceStat: 'saveSequenceSearch',
+  taskType: 'saveTaskSearch'
+}
+
 // The lists whose search removal action is not remove<Type>Search.
 const REMOVE_SEARCH_ACTIONS = {
   person: 'removePersonTasksSearch',
@@ -254,6 +259,11 @@ const props = defineProps({
   isGroupEnabled: {
     type: Boolean,
     default: false
+  },
+  // Entity type of a list that saves its searches per entity type.
+  entityType: {
+    type: String,
+    default: null
   },
   type: {
     type: String,
@@ -289,18 +299,24 @@ const modals = reactive({
   group: false,
   remove: false
 })
+// Each opening of a modal starts a session of its own: a request still running
+// for a closed one keeps the next one waiting, then leaves it alone unless it
+// changed the row of that one.
+const sessions = { edit: 0, group: 0, remove: 0 }
 const toggleGroupId = ref(null)
 
 const departmentMap = computed(() => store.getters.departmentMap)
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(() =>
   props.productionId
-    ? store.getters.isCurrentUserAdmin ||
+    ? isCurrentUserAdmin.value ||
       store.getters.currentUserRoleForProduction(props.productionId) ===
         'manager'
     : store.getters.isCurrentUserManager
 )
 const personMap = computed(() => store.getters.personMap)
+const user = computed(() => store.getters.user)
 
 const sortedFilters = computed(() => {
   const queries = props.queries.filter(
@@ -338,6 +354,21 @@ const userFilterGroups = computed(() => {
     )
   }))
 })
+
+// Zou takes a change only from the owner of a row or an admin. A row can be in
+// the list of someone else: a filter of a shared group that turned private
+// stays there until a reload.
+const canChange = row =>
+  isCurrentUserAdmin.value ||
+  (row.person_id === user.value?.id &&
+    (!row.is_shared || isCurrentUserManager.value))
+
+const hasChangeableRow = computed(() =>
+  [
+    ...userFilters.value,
+    ...userFilterGroups.value.flatMap(group => [group, ...group.queries])
+  ].some(canChange)
+)
 
 const groupOptions = computed(() => {
   return [
@@ -384,96 +415,130 @@ const queryRoute = searchQuery => {
   }
 }
 
+const openModal = kind => {
+  sessions[kind]++
+  errors[kind] = false
+  modals[kind] = true
+}
+
+// One request at a time for each kind of modal, so that nothing is saved or
+// removed twice. Its end closes or marks its modal only if it was not opened
+// again since; onLateSuccess handles a modal opened again on the same row.
+const runInModal = async (kind, request, onLateSuccess) => {
+  if (loading[kind]) return
+  const session = sessions[kind]
+  const isCurrent = () => session === sessions[kind]
+  loading[kind] = true
+  errors[kind] = false
+  try {
+    await request()
+    if (isCurrent()) modals[kind] = false
+    else onLateSuccess?.()
+  } catch (err) {
+    console.error(err)
+    if (isCurrent()) errors[kind] = true
+  } finally {
+    loading[kind] = false
+  }
+}
+
 const editGroup = (group = {}) => {
   groupToEdit.value = group
-  modals.group = true
+  openModal('group')
 }
 
 const editSearch = searchQuery => {
   searchQueryToEdit.value = searchQuery
-  modals.edit = true
+  openModal('edit')
+}
+
+const addSearch = searchQuery => {
+  editSearch({ name: searchQuery, search_query: searchQuery })
 }
 
 const navigateToSearchQuery = searchQuery => {
   router.push(queryPaths.value[searchQuery.id] || { name: 'open-productions' })
 }
 
-const confirmEditFilterGroup = async filterGroup => {
-  try {
-    loading.group = true
-    errors.group = false
-    filterGroup.project_id = props.productionId
-    if (!filterGroup.id) {
-      await store.dispatch(
+const confirmEditFilterGroup = filterGroup =>
+  runInModal(
+    'group',
+    () => {
+      filterGroup.project_id = props.productionId
+      if (filterGroup.id) {
+        return store.dispatch('updateSearchFilterGroup', filterGroup)
+      }
+      return store.dispatch(
         `save${stringHelpers.capitalize(props.type)}SearchFilterGroup`,
         filterGroup
       )
-    } else {
-      await store.dispatch('updateSearchFilterGroup', filterGroup)
+    },
+    // The modal opened again on this group shows it as saved.
+    () => {
+      const saved = props.groups.find(({ id }) => id === filterGroup.id)
+      if (saved && groupToEdit.value.id === saved.id) {
+        groupToEdit.value = { ...saved }
+      }
     }
-    modals.group = false
-  } catch (err) {
-    console.error(err)
-    errors.group = true
-  } finally {
-    loading.group = false
-  }
-}
+  )
 
-const confirmEditSearch = async searchFilter => {
-  try {
-    loading.edit = true
-    errors.edit = false
-    searchFilter.project_id = props.productionId
-    await store.dispatch('updateSearchFilter', searchFilter)
-    modals.edit = false
-  } catch (err) {
-    console.error(err)
-    errors.edit = true
-  } finally {
-    loading.edit = false
-  }
-}
+const confirmEditSearch = searchFilter =>
+  runInModal(
+    'edit',
+    () => {
+      if (searchFilter.id) {
+        searchFilter.project_id = props.productionId
+        return store.dispatch('updateSearchFilter', searchFilter)
+      }
+      const type = stringHelpers.capitalize(props.type)
+      return store.dispatch(
+        SAVE_SEARCH_ACTIONS[props.type] || `save${type}Search`,
+        { ...searchFilter, entity_type: props.entityType }
+      )
+    },
+    // The modal opened again on this filter shows it as saved: the store
+    // changed the row in place, and the modal fills its form from a new one.
+    () => {
+      const saved = props.queries.find(({ id }) => id === searchFilter.id)
+      if (saved && searchQueryToEdit.value.id === saved.id) {
+        searchQueryToEdit.value = { ...saved }
+      }
+    }
+  )
 
 const confirmRemoveSearch = searchQuery => {
   searchQueryToRemove.value = searchQuery
   groupToRemove.value = {}
-  errors.remove = false
-  modals.remove = true
+  openModal('remove')
 }
 
 const confirmRemoveGroup = filterGroup => {
   groupToRemove.value = filterGroup
   searchQueryToRemove.value = {}
-  errors.remove = false
-  modals.remove = true
+  openModal('remove')
 }
 
 // The confirmation stays open until the removal ends, with its error when it
 // fails.
-const removeSearch = async () => {
+const removeSearch = () => {
   const type = stringHelpers.capitalize(props.type)
-  loading.remove = true
-  errors.remove = false
-  try {
-    if (searchQueryToRemove.value.id) {
-      await store.dispatch(
-        REMOVE_SEARCH_ACTIONS[props.type] || `remove${type}Search`,
-        searchQueryToRemove.value
-      )
-    } else {
-      await store.dispatch(
-        `remove${type}SearchFilterGroup`,
-        groupToRemove.value
-      )
+  const isSearch = Boolean(searchQueryToRemove.value.id)
+  const row = isSearch ? searchQueryToRemove.value : groupToRemove.value
+  return runInModal(
+    'remove',
+    () =>
+      isSearch
+        ? store.dispatch(
+            REMOVE_SEARCH_ACTIONS[props.type] || `remove${type}Search`,
+            row
+          )
+        : store.dispatch(`remove${type}SearchFilterGroup`, row),
+    // A confirmation opened again for this row has nothing left to remove.
+    () => {
+      const shown = searchQueryToRemove.value.id || groupToRemove.value.id
+      if (shown === row.id) modals.remove = false
     }
-    modals.remove = false
-  } catch (err) {
-    console.error(err)
-    errors.remove = true
-  } finally {
-    loading.remove = false
-  }
+  )
 }
 
 const toggleFilterGroup = group => {
@@ -482,10 +547,11 @@ const toggleFilterGroup = group => {
 
 const getSearchQueryTitle = searchQuery => {
   if (!searchQuery.is_shared) {
-    return
+    return searchQuery.name
   }
   const person = personMap.value.get(searchQuery.person_id)
-  return t('main.shared_by', { name: person?.full_name })
+  const sharedBy = t('main.shared_by', { name: person?.full_name })
+  return `${searchQuery.name}\n${sharedBy}`
 }
 
 const getDepartment = group => {
@@ -499,7 +565,7 @@ onMounted(() => {
 })
 
 watch(
-  () => props.queries.length,
+  () => props.queries.map(query => query.search_query),
   () => {
     nextTick(() => {
       setQueryPaths()
@@ -510,6 +576,14 @@ watch(
 watch(route, () => {
   setQueryPaths()
 })
+
+// The pencil hides once no row is left to change: the edit mode goes with it,
+// rather than coming back on with the next row saved.
+watch(hasChangeableRow, isChangeable => {
+  if (!isChangeable) isEditing.value = false
+})
+
+defineExpose({ addSearch })
 </script>
 
 <style lang="scss" scoped>
@@ -634,6 +708,15 @@ watch(route, () => {
 
 .filter-name {
   color: var(--text);
+}
+
+.filter-label {
+  display: inline-block;
+  max-width: 30em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
 }
 
 .search-queries .tag.active {

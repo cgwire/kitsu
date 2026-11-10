@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils'
+import { nextTick, ref } from 'vue'
 
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
@@ -19,6 +20,7 @@ import {
   production,
   reimportExport
 } from '../../fixtures/entity-page'
+import { buildSearchQueryListStub } from '../../fixtures/search-query-list'
 
 // Two shots with their tasks in the cache: the page decides on mount
 // whether their scope (episode) is the displayed one.
@@ -407,5 +409,67 @@ describe('Shots page, thumbnails import', () => {
     await modal().vm.$emit('cancel')
     await importButton.vm.$emit('click')
     expect(modal().props('isError')).toBe(false)
+  })
+})
+
+describe('Shots page, saved searches', () => {
+  const searchField = wrapper => wrapper.findComponent({ name: 'SearchField' })
+
+  test('opens the search filter modal on Save', async () => {
+    const SearchQueryList = buildSearchQueryListStub()
+    const { wrapper } = await mountPage({ stubs: { SearchQueryList } })
+
+    searchField(wrapper).vm.$emit('save', 'layout')
+
+    expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('layout')
+  })
+
+  // The list that opens the modal shows once the shots are loaded.
+  test('offers the Save button once the shots are loaded', async () => {
+    const loading = await mountPage({ getters: { isShotsLoading: true } })
+    const loaded = await mountPage()
+
+    expect(searchField(loading.wrapper).props('canSave')).toBe(false)
+    expect(searchField(loaded.wrapper).props('canSave')).toBe(true)
+  })
+
+  test('waits for the first load to offer the Save button', async () => {
+    shotStore.cache.shotMap.clear()
+    let endLoad
+    const { wrapper } = await mountPage({
+      actions: {
+        loadShots: () =>
+          new Promise(resolve => {
+            endLoad = resolve
+          })
+      }
+    })
+    expect(searchField(wrapper).props('canSave')).toBe(false)
+
+    endLoad()
+    await flushPromises()
+
+    expect(searchField(wrapper).props('canSave')).toBe(true)
+  })
+
+  test('takes the Save button back during a reload', async () => {
+    const isLoading = ref(false)
+    const { wrapper } = await mountEntityPage(Shots, {
+      listName: 'ShotList',
+      getters: {
+        shotValidationColumns: ['task-type-1'],
+        isCurrentUserProductionManager: true,
+        get isShotsLoading() {
+          return isLoading.value
+        }
+      }
+    })
+    await flushPromises()
+    expect(searchField(wrapper).props('canSave')).toBe(true)
+
+    isLoading.value = true
+    await nextTick()
+
+    expect(searchField(wrapper).props('canSave')).toBe(false)
   })
 })

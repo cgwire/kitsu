@@ -945,14 +945,15 @@ describe('Episodes store, through a store', () => {
     expect(episode.id).toBe('ep2')
   })
 
-  test('saves an episode search once, then removes it', async () => {
+  test('saves an episode search, then removes it', async () => {
     const { store } = await buildStore()
     client.ppost.mockResolvedValueOnce({ id: 'f1', name: 'wip' })
 
-    await store.dispatch('saveEpisodeSearch', 'wip')
-    await store.dispatch('saveEpisodeSearch', 'wip')
+    await store.dispatch('saveEpisodeSearch', {
+      name: 'wip',
+      search_query: 'wip'
+    })
 
-    expect(client.ppost).toHaveBeenCalledTimes(1)
     expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
       list_type: 'episode',
       name: 'wip',
@@ -975,8 +976,10 @@ describe('Episodes store, through a store', () => {
       .mockResolvedValueOnce({ id: 'f1', name: 'wip' })
       .mockResolvedValueOnce({ id: 'f2', name: 'done' })
 
-    await store.dispatch('saveEpisodeSearch', 'wip')
-    await store.dispatch('saveEpisodeSearch', 'done')
+    const save = name =>
+      store.dispatch('saveEpisodeSearch', { name, search_query: name })
+    await save('wip')
+    await save('done')
 
     expect(names(store.getters.episodeSearchQueries)).toEqual(['done', 'wip'])
   })

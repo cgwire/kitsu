@@ -299,19 +299,10 @@ const actions = {
     })
   },
 
-  saveSequenceSearch({ commit, rootGetters }, searchQuery) {
-    if (state.sequenceSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveSequenceSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter(
-        'sequence',
-        searchQuery,
-        searchQuery,
-        production.id,
-        'Sequence'
-      )
+      .createFilter('sequence', searchFilter, production.id, 'Sequence')
       .then(searchQuery => {
         commit(SAVE_SEQUENCE_SEARCH_END, { searchQuery, production })
         return searchQuery
@@ -615,7 +606,7 @@ const mutations = {
 
   [REMOVE_SEQUENCE_SEARCH](state, searchQuery) {
     const queryIndex = state.sequenceSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.sequenceSearchQueries.splice(queryIndex, 1)

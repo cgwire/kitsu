@@ -3,7 +3,10 @@
     <form @submit.prevent>
       <text-field
         ref="nameField"
+        :errored="isNameTaken"
+        :error-text="$t('main.filter_name_taken')"
         :label="$t('assets.fields.name')"
+        :maxlength="NAME_MAX_LENGTH"
         v-model.trim="form.name"
         @enter="runConfirmation"
         v-focus
@@ -33,6 +36,7 @@
 
     <modal-footer
       :error-text="$t('main.filter_group_error')"
+      :is-disabled="isNameTaken"
       :is-error="isError"
       :is-loading="isLoading"
       @confirm="runConfirmation"
@@ -57,6 +61,9 @@ import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
+// The length of the Zou column.
+const NAME_MAX_LENGTH = 200
+
 const { t } = useI18n()
 const store = useStore()
 
@@ -64,6 +71,7 @@ const store = useStore()
 
 const props = defineProps({
   active: { type: Boolean, default: false },
+  groups: { type: Array, default: () => [] },
   groupToEdit: { type: Object, default: () => ({}) },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false }
@@ -82,6 +90,13 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const personMap = computed(() => store.getters.personMap)
 
+// As in Zou, a group keeping its name passes, duplicate or not.
+const isNameTaken = computed(() => {
+  const { id, name } = props.groupToEdit
+  if (id && form.value.name === name) return false
+  return props.groups.some(group => group.name === form.value.name)
+})
+
 const modalTitle = computed(() =>
   props.groupToEdit?.id
     ? `${t('main.filter_group_edit')} "${props.groupToEdit.name}"`
@@ -90,15 +105,20 @@ const modalTitle = computed(() =>
 
 // Functions
 
+// The Enter key of the field does not go through the footer, which stops a
+// confirmation during a save.
 const runConfirmation = event => {
+  if (props.isLoading || isNameTaken.value) return
   if (!form.value.name.length) {
     nameField.value?.focus()
     return
   }
   if (!event || event.keyCode === 13 || !event.keyCode) {
+    const isShared = form.value.is_shared === 'true'
     emit('confirm', {
       ...form.value,
-      is_shared: form.value.is_shared === 'true'
+      is_shared: isShared,
+      department_id: isShared ? form.value.department_id : null
     })
   }
 }

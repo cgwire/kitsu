@@ -149,6 +149,25 @@ const removeFromFilters = (filters, listType, entry) => {
   })
 }
 
+// A list keeps the rows of its last load until the next one, which a page with
+// its data in cache does not make: a new context updates these rows rather than
+// replacing them, or the list would miss the later edits.
+const reuseRows = (previousLists, lists) => {
+  const listsOf = filters =>
+    Object.values(filters).flatMap(projectLists => Object.values(projectLists))
+  const rows = new Map(
+    listsOf(previousLists)
+      .flat()
+      .map(row => [row.id, row])
+  )
+  listsOf(lists).forEach(list => {
+    list.forEach((row, index) => {
+      if (rows.has(row.id)) list[index] = Object.assign(rows.get(row.id), row)
+    })
+  })
+  return lists
+}
+
 const initialState = {
   user: null,
   isAuthenticated: false,
@@ -460,13 +479,13 @@ const actions = {
   },
 
   async updateSearchFilterGroup({ commit }, searchFilterGroup) {
-    await peopleApi.updateFilterGroup(searchFilterGroup)
-    commit(UPDATE_USER_FILTER_GROUP, searchFilterGroup)
+    const saved = await peopleApi.updateFilterGroup(searchFilterGroup)
+    commit(UPDATE_USER_FILTER_GROUP, { ...searchFilterGroup, ...saved })
   },
 
   async updateSearchFilter({ commit }, searchFilter) {
-    await peopleApi.updateFilter(searchFilter)
-    commit(UPDATE_USER_FILTER, searchFilter)
+    const saved = await peopleApi.updateFilter(searchFilter)
+    commit(UPDATE_USER_FILTER, { ...searchFilter, ...saved })
   },
 
   async loadUserSearchFilters({ commit }) {
@@ -480,12 +499,9 @@ const actions = {
     }
   },
 
-  saveTodoSearch({ commit, rootGetters }, searchQuery) {
-    if (state.todoSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveTodoSearch({ commit }, searchFilter) {
     return peopleApi
-      .createFilter('todos', searchQuery, searchQuery, null, null)
+      .createFilter('todos', searchFilter, null, null)
       .then(searchQuery => {
         commit(SAVE_TODO_SEARCH_END, { searchQuery })
         return searchQuery
@@ -797,7 +813,7 @@ const mutations = {
 
   [REMOVE_TODO_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.todoSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.todoSearchQueries.splice(queryIndex, 1)
@@ -838,7 +854,7 @@ const mutations = {
 
   [LOAD_USER_FILTERS_ERROR](state) {},
   [LOAD_USER_FILTERS_END](state, userFilters) {
-    state.userFilters = userFilters
+    state.userFilters = reuseRows(state.userFilters, userFilters)
   },
   [UPDATE_USER_FILTER](state, userFilter) {
     Object.keys(state.userFilters).forEach(typeName => {
@@ -854,7 +870,7 @@ const mutations = {
 
   [LOAD_USER_FILTER_GROUPS_ERROR](state) {},
   [LOAD_USER_FILTER_GROUPS_END](state, userFilterGroups) {
-    state.userFilterGroups = userFilterGroups
+    state.userFilterGroups = reuseRows(state.userFilterGroups, userFilterGroups)
   },
   [UPDATE_USER_FILTER_GROUP](state, userFilterGroup) {
     Object.keys(state.userFilterGroups).forEach(typeName => {
@@ -864,12 +880,16 @@ const mutations = {
           f => f.id === userFilterGroup.id
         )
         if (filterGroup) {
+          const { department_id: formerDepartmentId } = filterGroup
           Object.assign(filterGroup, userFilterGroup)
-          // update the shared status of filters in group: a production can
-          // hold a group before any search of its list
+          // update the filters in group, as Zou does: a production can hold a
+          // group before any search of its list
           state.userFilters?.[typeName]?.[projectId]?.forEach(filter => {
             if (filter.search_filter_group_id === userFilterGroup.id) {
               filter.is_shared = userFilterGroup.is_shared
+              if (filter.department_id === formerDepartmentId) {
+                filter.department_id = filterGroup.department_id
+              }
             }
           })
         }

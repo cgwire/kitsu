@@ -59,6 +59,11 @@
       background: var(--background);
     }
 
+    // Bulma's tag grey is the grey of this panel
+    :deep(.search-queries .tag) {
+      background-color: var(--background-panel-tag);
+    }
+
     // the dark background of the comboboxes next to it
     .dark & .search-field-wrapper,
     .dark & :deep(.task-type-combo),

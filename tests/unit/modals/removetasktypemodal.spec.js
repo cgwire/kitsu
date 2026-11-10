@@ -15,6 +15,11 @@ const mountModal = (props = {}) =>
     props: { active: true, nbTasks: 3, taskType, ...props }
   })
 
+const pressEnter = async input => {
+  await input.trigger('keydown.enter')
+  await input.trigger('keyup.enter')
+}
+
 describe('RemoveTaskTypeModal', () => {
   it('tells the remaining tasks stay once the task type is removed', () => {
     const text = nbTasks =>
@@ -57,7 +62,7 @@ describe('RemoveTaskTypeModal', () => {
     await wrapper.get('input.input').setValue('Model')
     expect(footer.props('isDisabled')).toBe(true)
     // Enter in the field confirms too, past the disabled button.
-    await wrapper.get('input.input').trigger('keyup.enter')
+    await pressEnter(wrapper.get('input.input'))
     expect(wrapper.emitted('confirm')).toBeUndefined()
 
     await wrapper.get('input.input').setValue('Modeling')
@@ -125,7 +130,7 @@ describe('RemoveTaskTypeModal', () => {
     const input = field.get('input')
 
     await input.setValue('Mod')
-    await input.trigger('keyup.enter')
+    await pressEnter(input)
     expect(input.attributes('aria-invalid')).toBe('true')
     expect(field.get('p.error').text()).toBe('The name does not match.')
     const modal = wrapper.findComponent(RemoveTaskTypeModal)
@@ -140,7 +145,7 @@ describe('RemoveTaskTypeModal', () => {
     const checkbox = wrapper.get('input[type=checkbox]')
 
     await checkbox.setValue(true)
-    await wrapper.get('input.input').trigger('keyup.enter')
+    await pressEnter(wrapper.get('input.input'))
     expect(wrapper.get('input.input').attributes('aria-invalid')).toBe('true')
 
     await checkbox.setValue(false)
@@ -154,10 +159,10 @@ describe('RemoveTaskTypeModal', () => {
     const wrapper = mountModal()
     await wrapper.get('input[type=checkbox]').setValue(true)
     await wrapper.get('input.input').setValue('Modeling')
-    await wrapper.get('input.input').trigger('keyup.enter')
+    await pressEnter(wrapper.get('input.input'))
     await wrapper.setProps({ isLoading: true })
 
-    await wrapper.get('input.input').trigger('keyup.enter')
+    await pressEnter(wrapper.get('input.input'))
 
     expect(wrapper.emitted('confirm')).toEqual([[true]])
   })

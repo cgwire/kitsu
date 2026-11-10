@@ -489,13 +489,10 @@ const actions = {
     })
   },
 
-  saveEditSearch({ commit, rootGetters }, searchQuery) {
-    if (state.editSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveEditSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter('edit', searchQuery, searchQuery, production.id, null)
+      .createFilter('edit', searchFilter, production.id, null)
       .then(searchQuery => {
         commit(SAVE_EDIT_SEARCH_END, { searchQuery, production })
         return searchQuery
@@ -760,7 +757,7 @@ const mutations = {
 
   [REMOVE_EDIT_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.editSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.editSearchQueries.splice(queryIndex, 1)

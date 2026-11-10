@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils'
+import { nextTick, ref } from 'vue'
 
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
@@ -18,6 +19,7 @@ import {
   production,
   reimportExport
 } from '../../fixtures/entity-page'
+import { buildSearchQueryListStub } from '../../fixtures/search-query-list'
 
 // Two edits with their tasks in the store: the page decides on mount
 // whether their scope (episode) is the displayed one.
@@ -398,5 +400,71 @@ describe('Edits page, thumbnails import', () => {
 
     expect(modalStub.methods.markLoading).toHaveBeenCalledWith('edit-1')
     expect(modalStub.methods.markUploaded).toHaveBeenCalledWith('edit-1')
+  })
+})
+
+describe('Edits page, saved searches', () => {
+  afterEach(() => vi.useRealTimers())
+
+  const searchField = wrapper => wrapper.findComponent({ name: 'SearchField' })
+
+  test('opens the search filter modal on Save', async () => {
+    const SearchQueryList = buildSearchQueryListStub()
+    const { wrapper } = await mountPage({ stubs: { SearchQueryList } })
+
+    searchField(wrapper).vm.$emit('save', 'opening')
+
+    expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('opening')
+  })
+
+  // The list that opens the modal shows once the edits are loaded.
+  test('offers the Save button once the edits are loaded', async () => {
+    const loading = await mountPage({ getters: { isEditsLoading: true } })
+    const loaded = await mountPage()
+
+    expect(searchField(loading.wrapper).props('canSave')).toBe(false)
+    expect(searchField(loaded.wrapper).props('canSave')).toBe(true)
+  })
+
+  test('waits for the first load to offer the Save button', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    let endLoad
+    const { wrapper } = await mountPage({
+      getters: { editMap: new Map() },
+      actions: {
+        loadEdits: () =>
+          new Promise(resolve => {
+            endLoad = resolve
+          })
+      }
+    })
+    await vi.advanceTimersByTimeAsync(300)
+    expect(searchField(wrapper).props('canSave')).toBe(false)
+
+    endLoad()
+    await vi.advanceTimersByTimeAsync(300)
+
+    expect(searchField(wrapper).props('canSave')).toBe(true)
+  })
+
+  test('takes the Save button back during a reload', async () => {
+    const isLoading = ref(false)
+    const { wrapper } = await mountEntityPage(Edits, {
+      listName: 'EditList',
+      getters: {
+        editMap,
+        editValidationColumns: ['task-type-1'],
+        get isEditsLoading() {
+          return isLoading.value
+        }
+      }
+    })
+    await flushPromises()
+    expect(searchField(wrapper).props('canSave')).toBe(true)
+
+    isLoading.value = true
+    await nextTick()
+
+    expect(searchField(wrapper).props('canSave')).toBe(false)
   })
 })

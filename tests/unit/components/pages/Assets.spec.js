@@ -20,6 +20,7 @@ import {
   reimportExport
 } from '../../fixtures/entity-page'
 import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
+import { buildSearchQueryListStub } from '../../fixtures/search-query-list'
 
 // Two assets with their tasks in the store: the page decides on mount
 // whether their scope (episode) is the displayed one.
@@ -413,5 +414,20 @@ describe('Assets page, client access', () => {
       getters: { ...open, ...hideTaskTypeAndPanel }
     })
     expect(hidden.wrapper.find('#side-column').isVisible()).toBe(false)
+  })
+})
+
+describe('Assets page, saved searches', () => {
+  test('opens the search filter modal on Save', async () => {
+    const SearchQueryList = buildSearchQueryListStub()
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { assetMap, assetValidationColumns: ['task-type-1'] },
+      stubs: { SearchQueryList }
+    })
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('save', 'props')
+
+    expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('props')
   })
 })

@@ -6,7 +6,7 @@
           <div class="flexrow">
             <search-field
               ref="episode-search-field"
-              :can-save="true"
+              :can-save="!isLoading && !initialLoading && !isLoadingError"
               @change="onSearchChange"
               @save="saveSearchQuery"
               placeholder="ex: e01 episode=wip"
@@ -45,6 +45,7 @@
 
           <div class="query-list mt1">
             <search-query-list
+              ref="episode-search-query-list"
               :queries="episodeSearchQueries"
               type="episode"
               :production-id="currentProduction?.id"
@@ -230,6 +231,7 @@ const type = 'episode'
 
 const listRef = useTemplateRef('episode-list')
 const searchFieldRef = useTemplateRef('episode-search-field')
+const searchQueryListRef = useTemplateRef('episode-search-query-list')
 
 const initialLoading = ref(true)
 // No store action flags a load of this list or its failure.
@@ -336,6 +338,7 @@ const {
   pageName: 'Episodes',
   listRef,
   searchFieldRef,
+  searchQueryListRef,
   reset
 })
 

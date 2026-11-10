@@ -1809,16 +1809,17 @@ describe('Shots store, through a store', () => {
       expect(names(store.getters.displayedShots)).toEqual(['SH020', 'SH030'])
     })
 
-    test('saves a search once, then removes it', async () => {
+    test('saves a search, then removes it', async () => {
       const store = buildStore()
       load(store, [])
       client.ppost.mockResolvedValueOnce({ id: 'f2', name: 'layout' })
       client.pdel.mockResolvedValueOnce()
 
-      await store.dispatch('saveShotSearch', 'layout')
-      await store.dispatch('saveShotSearch', 'layout')
+      await store.dispatch('saveShotSearch', {
+        name: 'layout',
+        search_query: 'layout'
+      })
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
         list_type: 'shot',
         name: 'layout',
@@ -1834,7 +1835,7 @@ describe('Shots store, through a store', () => {
       expect(store.getters.shotSearchQueries).toEqual([])
     })
 
-    test('saves a filter group once, then removes it', async () => {
+    test('saves a filter group, then removes it', async () => {
       const store = buildStore()
       load(store, [])
       const group = {
@@ -1847,9 +1848,7 @@ describe('Shots store, through a store', () => {
       client.pdel.mockResolvedValueOnce()
 
       await store.dispatch('saveShotSearchFilterGroup', group)
-      await store.dispatch('saveShotSearchFilterGroup', group)
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith(
         '/api/data/user/filter-groups',
         {
@@ -1877,18 +1876,22 @@ describe('Shots store, through a store', () => {
     test('keeps the saved searches and groups sorted, once each', () => {
       const store = buildStore()
       load(store, [])
-      const group = { name: 'Lighting' }
+      const group = { id: 'g2', name: 'Lighting' }
 
-      store.commit(SAVE_SHOT_SEARCH_END, { searchQuery: { name: 'wip' } })
-      store.commit(SAVE_SHOT_SEARCH_END, { searchQuery: { name: 'done' } })
-      store.commit(REMOVE_SHOT_SEARCH_END, { searchQuery: { name: 'other' } })
+      const saveSearch = searchQuery =>
+        store.commit(SAVE_SHOT_SEARCH_END, { searchQuery })
+      saveSearch({ id: 'f1', name: 'wip' })
+      saveSearch({ id: 'f2', name: 'done' })
+      store.commit(REMOVE_SHOT_SEARCH_END, {
+        searchQuery: { id: 'f9', name: 'wip' }
+      })
       store.commit(SAVE_SHOT_SEARCH_FILTER_GROUP_END, {
-        filterGroup: { name: 'Layout' }
+        filterGroup: { id: 'g1', name: 'Layout' }
       })
       store.commit(SAVE_SHOT_SEARCH_FILTER_GROUP_END, { filterGroup: group })
       store.commit(SAVE_SHOT_SEARCH_FILTER_GROUP_END, { filterGroup: group })
       store.commit(REMOVE_SHOT_SEARCH_FILTER_GROUP_END, {
-        filterGroup: { name: 'other' }
+        filterGroup: { id: 'g9', name: 'Layout' }
       })
 
       expect(names(store.getters.shotSearchQueries)).toEqual(['done', 'wip'])

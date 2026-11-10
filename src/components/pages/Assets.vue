@@ -65,6 +65,7 @@
           </div>
           <div class="query-list">
             <search-query-list
+              ref="asset-search-query-list"
               :groups="productionAssetFilterGroups"
               :is-group-enabled="true"
               :queries="productionAssetSearchQueries"
@@ -306,6 +307,7 @@ const editAssetModalRef = useTemplateRef('edit-asset-modal')
 const importModalRef = useTemplateRef('import-modal')
 const listRef = useTemplateRef('asset-list')
 const searchFieldRef = useTemplateRef('asset-search-field')
+const searchQueryListRef = useTemplateRef('asset-search-query-list')
 
 const initialLoading = ref(true)
 
@@ -467,6 +469,7 @@ const {
   pageName: 'Assets',
   listRef,
   searchFieldRef,
+  searchQueryListRef,
   addThumbnailsModalRef,
   importModalRef,
   reset,

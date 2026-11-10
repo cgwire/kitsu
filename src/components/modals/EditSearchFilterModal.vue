@@ -1,20 +1,25 @@
 <template>
-  <base-modal
-    :active="active"
-    :title="$t('main.search_query_edit')"
-    @cancel="$emit('cancel')"
-  >
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
     <form @submit.prevent>
       <text-field
         ref="nameField"
+        :errored="isNameTaken"
+        :error-text="$t('main.filter_name_taken')"
         :label="$t('assets.fields.name')"
+        :maxlength="NAME_MAX_LENGTH"
         v-model.trim="form.name"
         @enter="runConfirmation"
         v-focus
       />
 
       <text-field
+        ref="queryField"
+        :errored="isQueryTooLong"
+        :error-text="
+          $t('main.search_query_too_long', { count: QUERY_MAX_LENGTH })
+        "
         :label="$t('main.search_query')"
+        :maxlength="QUERY_MAX_LENGTH"
         v-model.trim="form.search_query"
         @enter="runConfirmation"
       />
@@ -49,7 +54,12 @@
     </div>
 
     <modal-footer
-      :error-text="$t('main.search_query_edit_error')"
+      :error-text="
+        searchQueryToEdit?.id
+          ? $t('main.search_query_edit_error')
+          : $t('main.search_query_add_error')
+      "
+      :is-disabled="isInvalid"
       :is-error="isError"
       :is-loading="isLoading"
       @confirm="runConfirmation"
@@ -64,7 +74,10 @@
  * filter label when it's too complex to read or too long.
  */
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
+
+import stringHelpers from '@/lib/string'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
@@ -74,6 +87,11 @@ import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
+// The lengths of the Zou columns.
+const NAME_MAX_LENGTH = 200
+const QUERY_MAX_LENGTH = 500
+
+const { t } = useI18n()
 const store = useStore()
 
 // Props / Emits
@@ -85,6 +103,7 @@ const props = defineProps({
   isGroupEnabled: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   productionId: { type: String, default: null },
+  queries: { type: Array, default: () => [] },
   searchQueryToEdit: { type: Object, default: () => ({}) }
 })
 
@@ -100,11 +119,36 @@ const form = ref({
   is_shared: 'false'
 })
 const nameField = ref(null)
+const queryField = ref(null)
 
 // Computed
 
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const personMap = computed(() => store.getters.personMap)
+
+const modalTitle = computed(() =>
+  props.searchQueryToEdit?.id
+    ? t('main.search_query_edit')
+    : t('main.search_query_add')
+)
+
+const isQueryTooLong = computed(
+  () => Array.from(form.value.search_query).length > QUERY_MAX_LENGTH
+)
+
+// As in Zou, a filter keeping its name passes, duplicate or not.
+const isNameTaken = computed(() => {
+  const { id, name } = props.searchQueryToEdit
+  if (id && form.value.name === name) return false
+  return props.queries.some(
+    query =>
+      query.name === form.value.name &&
+      (query.search_filter_group_id || null) ===
+        (form.value.search_filter_group_id || null)
+  )
+})
+
+const isInvalid = computed(() => isNameTaken.value || isQueryTooLong.value)
 
 const allowedGroups = computed(() =>
   props.groupOptions.filter(
@@ -116,16 +160,25 @@ const allowedGroups = computed(() =>
 
 // Functions
 
+// The Enter key of a field does not go through the footer, which stops a
+// confirmation during a save.
 const runConfirmation = event => {
+  if (props.isLoading || isInvalid.value) return
   if (!form.value.name.length) {
     nameField.value?.focus()
     return
   }
+  if (!form.value.search_query.length) {
+    queryField.value?.focus()
+    return
+  }
   if (!event || event.keyCode === 13 || !event.keyCode) {
+    const isShared = form.value.is_shared === 'true'
     emit('confirm', {
       id: props.searchQueryToEdit.id,
       ...form.value,
-      is_shared: form.value.is_shared === 'true'
+      is_shared: isShared,
+      department_id: isShared ? form.value.department_id : null
     })
   }
 }
@@ -145,11 +198,13 @@ watch(
         department_id: searchQuery.department_id
       }
     } else {
+      const name = searchQuery?.name || ''
       form.value = {
         id: null,
-        name: '',
+        // A max length does not hold on a value set by script.
+        name: stringHelpers.cutToLength(name, NAME_MAX_LENGTH).trim(),
         search_filter_group_id: null,
-        search_query: '',
+        search_query: searchQuery?.search_query || '',
         is_shared: 'false',
         department_id: null
       }

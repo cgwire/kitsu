@@ -2738,17 +2738,18 @@ describe('Assets store, list workflow', () => {
       expect(names(store.getters.displayedAssets)).toEqual(['Rock', 'Tree'])
     })
 
-    test('saves a search once, then removes it', async () => {
+    test('saves a search, then removes it', async () => {
       const store = buildStore()
       load(store, [buildAsset('a1', 'Rock')])
       const filter = { id: 'f1', name: 'props', search_query: 'props' }
       client.ppost.mockResolvedValueOnce(filter)
       client.pdel.mockResolvedValue()
 
-      await store.dispatch('saveAssetSearch', 'props')
-      await store.dispatch('saveAssetSearch', 'props')
+      await store.dispatch('saveAssetSearch', {
+        name: 'props',
+        search_query: 'props'
+      })
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith('/api/data/user/filters', {
         list_type: 'asset',
         name: 'props',
@@ -2758,7 +2759,7 @@ describe('Assets store, list workflow', () => {
       })
       expect(store.state.assets.assetSearchQueries).toEqual([filter])
 
-      await store.dispatch('removeAssetSearch', { id: 'f9', name: 'other' })
+      await store.dispatch('removeAssetSearch', { id: 'f9', name: 'props' })
       expect(store.state.assets.assetSearchQueries).toEqual([filter])
 
       await store.dispatch('removeAssetSearch', filter)
@@ -2766,7 +2767,7 @@ describe('Assets store, list workflow', () => {
       expect(store.state.assets.assetSearchQueries).toEqual([])
     })
 
-    test('saves a filter group once, then removes it', async () => {
+    test('saves a filter group, then removes it', async () => {
       const store = buildStore()
       load(store, [buildAsset('a1', 'Rock')])
       const group = { id: 'g1', name: 'Mine', color: '#f00' }
@@ -2779,9 +2780,7 @@ describe('Assets store, list workflow', () => {
         is_shared: false,
         department_id: null
       })
-      await store.dispatch('saveAssetSearchFilterGroup', { name: 'Mine' })
 
-      expect(client.ppost).toHaveBeenCalledTimes(1)
       expect(client.ppost).toHaveBeenCalledWith(
         '/api/data/user/filter-groups',
         {
@@ -2797,7 +2796,7 @@ describe('Assets store, list workflow', () => {
 
       await store.dispatch('removeAssetSearchFilterGroup', {
         id: 'g9',
-        name: 'Other'
+        name: 'Mine'
       })
       expect(store.state.assets.assetSearchFilterGroups).toEqual([group])
 

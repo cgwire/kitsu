@@ -705,27 +705,17 @@ const actions = {
     })
   },
 
-  saveShotSearch({ commit, rootGetters }, searchQuery) {
-    if (state.shotSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveShotSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter('shot', searchQuery, searchQuery, production.id, null)
+      .createFilter('shot', searchFilter, production.id, null)
       .then(searchQuery => {
         commit(SAVE_SHOT_SEARCH_END, { searchQuery, production })
         return searchQuery
       })
   },
 
-  saveShotSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
-    const groupExist = state.shotSearchFilterGroups.some(
-      query => query.name === filterGroup.name
-    )
-    if (groupExist) {
-      return
-    }
-
+  saveShotSearchFilterGroup({ commit, rootGetters }, filterGroup) {
     const production = rootGetters.currentProduction
     return peopleApi
       .createFilterGroup(
@@ -1110,7 +1100,7 @@ const mutations = {
 
   [REMOVE_SHOT_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.shotSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.shotSearchQueries.splice(queryIndex, 1)
@@ -1119,7 +1109,7 @@ const mutations = {
 
   [REMOVE_SHOT_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
     const groupIndex = state.shotSearchFilterGroups.findIndex(
-      query => query.name === filterGroup.name
+      query => query.id === filterGroup.id
     )
     if (groupIndex >= 0) {
       state.shotSearchFilterGroups.splice(groupIndex, 1)

@@ -278,29 +278,17 @@ const actions = {
     })
   },
 
-  saveBreakdownSearch({ commit, rootGetters }, searchQuery) {
-    if (
-      state.breakdownSearchQueries.some(query => query.name === searchQuery)
-    ) {
-      return
-    }
+  saveBreakdownSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter('breakdown', searchQuery, searchQuery, production.id, null)
+      .createFilter('breakdown', searchFilter, production.id, null)
       .then(searchQuery => {
         commit(SAVE_BREAKDOWN_SEARCH_END, { searchQuery, production })
         return searchQuery
       })
   },
 
-  saveBreakdownSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
-    const groupExist = state.breakdownSearchFilterGroups.some(
-      query => query.name === filterGroup.name
-    )
-    if (groupExist) {
-      return
-    }
-
+  saveBreakdownSearchFilterGroup({ commit, rootGetters }, filterGroup) {
     const production = rootGetters.currentProduction
     return peopleApi
       .createFilterGroup(
@@ -612,7 +600,7 @@ const mutations = {
 
   [REMOVE_BREAKDOWN_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.breakdownSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.breakdownSearchQueries.splice(queryIndex, 1)
@@ -621,7 +609,7 @@ const mutations = {
 
   [REMOVE_BREAKDOWN_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
     const groupIndex = state.breakdownSearchFilterGroups.findIndex(
-      query => query.name === filterGroup.name
+      query => query.id === filterGroup.id
     )
     if (groupIndex >= 0) {
       state.breakdownSearchFilterGroups.splice(groupIndex, 1)

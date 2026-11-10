@@ -733,27 +733,17 @@ const actions = {
     commit(SET_SHARED_ASSET_SEARCH, { assetSearch })
   },
 
-  saveAssetSearch({ commit, state, rootGetters }, searchQuery) {
-    if (state.assetSearchQueries.some(query => query.name === searchQuery)) {
-      return
-    }
+  saveAssetSearch({ commit, rootGetters }, searchFilter) {
     const production = rootGetters.currentProduction
     return peopleApi
-      .createFilter('asset', searchQuery, searchQuery, production.id, null)
+      .createFilter('asset', searchFilter, production.id, null)
       .then(searchQuery => {
         commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
         return searchQuery
       })
   },
 
-  saveAssetSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
-    const groupExist = state.assetSearchFilterGroups.some(
-      query => query.name === filterGroup.name
-    )
-    if (groupExist) {
-      return
-    }
-
+  saveAssetSearchFilterGroup({ commit, rootGetters }, filterGroup) {
     const production = rootGetters.currentProduction
     return peopleApi
       .createFilterGroup(
@@ -1423,7 +1413,7 @@ const mutations = {
 
   [REMOVE_ASSET_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.assetSearchQueries.findIndex(
-      query => query.name === searchQuery.name
+      query => query.id === searchQuery.id
     )
     if (queryIndex >= 0) {
       state.assetSearchQueries.splice(queryIndex, 1)
@@ -1432,7 +1422,7 @@ const mutations = {
 
   [REMOVE_ASSET_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
     const groupIndex = state.assetSearchFilterGroups.findIndex(
-      query => query.name === filterGroup.name
+      query => query.id === filterGroup.id
     )
     if (groupIndex >= 0) {
       state.assetSearchFilterGroups.splice(groupIndex, 1)
