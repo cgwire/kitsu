@@ -249,5 +249,120 @@ describe('Timesheets', () => {
         consoleError.mockRestore()
       }
     })
+
+    // Alice's time answers after the whole load of Bob, picked meanwhile
+    test('keeps the panel on the person picked last', async () => {
+      let answerAlice
+      const aliceTime = new Promise(resolve => (answerAlice = resolve))
+      const bobTasks = [{ task_id: 'task-bob', duration: 30 }]
+      const loadAggregatedPersonDaysOff = vi.fn(() => [])
+      await mountPage(path, {
+        actions: {
+          loadAggregatedPersonDaysOff,
+          loadAggregatedPersonTimeSpents: ({ personId }) =>
+            personId === alice.id ? aliceTime : bobTasks
+        },
+        getters: twoPeople
+      })
+
+      await router.push(`/timesheets/month/2026/10/persons/${bob.id}`)
+      await flushPromises()
+      answerAlice([{ task_id: 'task-alice', duration: 60 }])
+      await flushPromises()
+
+      expect(wrapper.findComponent(PeopleTimesheetInfo).props()).toMatchObject(
+        { isLoading: false, tasks: bobTasks }
+      )
+      expect(
+        loadAggregatedPersonDaysOff.mock.calls.map(([{ personId }]) => personId)
+      ).toEqual([bob.id])
+    })
+
+    // Alice's days off answer after the whole load of Bob, picked meanwhile
+    test('keeps the days off of the person picked last', async () => {
+      let answerAlice
+      const aliceDayOffs = new Promise(resolve => (answerAlice = resolve))
+      await mountPage(path, {
+        actions: {
+          loadAggregatedPersonDaysOff: ({ personId }) =>
+            personId === alice.id ? aliceDayOffs : [{ date: '2026-10-06' }],
+          loadAggregatedPersonTimeSpents: () => tasks
+        },
+        getters: twoPeople
+      })
+
+      await router.push(`/timesheets/month/2026/10/persons/${bob.id}`)
+      await flushPromises()
+      answerAlice([{ date: '2026-10-05' }])
+      await flushPromises()
+
+      expect(wrapper.findComponent(PeopleTimesheetInfo).props()).toMatchObject(
+        { dayOffs: [{ date: '2026-10-06' }], isLoading: false }
+      )
+    })
+
+    // Alice's time read fails after the whole load of Bob, picked meanwhile
+    test('drops the error of the person shown before', async () => {
+      const error = new Error('Server error')
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      try {
+        let failAlice
+        const aliceTime = new Promise((resolve, reject) => (failAlice = reject))
+        const bobTasks = [{ task_id: 'task-bob', duration: 30 }]
+        await mountPage(path, {
+          actions: {
+            loadAggregatedPersonDaysOff: () => [],
+            loadAggregatedPersonTimeSpents: ({ personId }) =>
+              personId === alice.id ? aliceTime : bobTasks
+          },
+          getters: twoPeople
+        })
+
+        await router.push(`/timesheets/month/2026/10/persons/${bob.id}`)
+        await flushPromises()
+        failAlice(error)
+        await flushPromises()
+
+        expect(
+          wrapper.findComponent(PeopleTimesheetInfo).props()
+        ).toMatchObject({
+          isLoading: false,
+          isLoadingError: false,
+          tasks: bobTasks
+        })
+        expect(consoleError).toHaveBeenCalledWith(error)
+      } finally {
+        consoleError.mockRestore()
+      }
+    })
+
+    // the unfiltered time answers after the time of the filter picked
+    // meanwhile
+    test.each(['productionId', 'studioId'])(
+      'keeps the panel on the %s picked last',
+      async filter => {
+        let answerFirst
+        const firstTime = new Promise(resolve => (answerFirst = resolve))
+        const filteredTasks = [{ task_id: 'task-filtered', duration: 30 }]
+        await mountPage(path, {
+          actions: {
+            loadAggregatedPersonDaysOff: () => [],
+            loadAggregatedPersonTimeSpents: payload =>
+              payload[filter] ? filteredTasks : firstTime
+          }
+        })
+
+        await router.push({ path, query: { [filter]: 'filter-1' } })
+        await flushPromises()
+        answerFirst([{ task_id: 'task-all', duration: 60 }])
+        await flushPromises()
+
+        expect(
+          wrapper.findComponent(PeopleTimesheetInfo).props()
+        ).toMatchObject({ isLoading: false, tasks: filteredTasks })
+      }
+    )
   })
 })

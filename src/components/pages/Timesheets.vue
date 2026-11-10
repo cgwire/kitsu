@@ -403,7 +403,21 @@ const reloadTimesheet = async () => {
   isLoading.value = false
 }
 
+// The inputs of the panel, as its watcher reads them: a load whose inputs
+// changed meanwhile drops its answers, which would show under the next one.
+const getAggregateKey = () =>
+  JSON.stringify([route.path, productionId.value, studioId.value])
+
 const loadAggregate = async () => {
+  const key = getAggregateKey()
+  const isStale = () => key !== getAggregateKey()
+  const period = {
+    personId: route.params.person_id,
+    detailLevel: detailLevel.value,
+    year: route.params.year,
+    month: route.params.month,
+    week: route.params.week
+  }
   const withDaysOff = canReadDaysOff.value
   isInfoLoading.value = true
   isInfoLoadingError.value = false
@@ -414,28 +428,22 @@ const loadAggregate = async () => {
     const aggregatedTasks = await store.dispatch(
       'loadAggregatedPersonTimeSpents',
       {
-        personId: route.params.person_id,
-        detailLevel: detailLevel.value,
-        year: route.params.year,
-        month: route.params.month,
-        week: route.params.week,
+        ...period,
         day: route.params.day,
         productionId: productionId.value,
         studioId: studioId.value
       }
     )
+    if (isStale()) return
     tasks.value = aggregatedTasks.filter(task => task.duration > 0)
-    dayOffs.value = withDaysOff
-      ? await store.dispatch('loadAggregatedPersonDaysOff', {
-          personId: route.params.person_id,
-          detailLevel: detailLevel.value,
-          year: route.params.year,
-          month: route.params.month,
-          week: route.params.week
-        })
+    const periodDayOffs = withDaysOff
+      ? await store.dispatch('loadAggregatedPersonDaysOff', period)
       : []
+    if (isStale()) return
+    dayOffs.value = periodDayOffs
   } catch (error) {
     console.error(error)
+    if (isStale()) return
     isInfoLoadingError.value = true
   }
   isInfoLoading.value = false
