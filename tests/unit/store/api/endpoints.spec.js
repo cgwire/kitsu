@@ -209,6 +209,56 @@ describe('store/api endpoints', () => {
     })
   })
 
+  // Zou asks for the current password to change one's own email, and for a
+  // factor already enabled to add a 2FA method.
+  describe('people credentials', () => {
+    test('updatePerson sends them next to the profile', () => {
+      peopleApi.updatePerson(
+        { id: 'person-1', email: 'new@example.com' },
+        { current_password: 'secret', totp: '123456' }
+      )
+
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/persons/person-1',
+        expect.objectContaining({
+          email: 'new@example.com',
+          current_password: 'secret',
+          totp: '123456'
+        })
+      )
+    })
+
+    test.each([
+      {
+        name: 'enableTOTP',
+        args: ['111111'],
+        path: '/api/auth/totp',
+        body: { totp: '111111' }
+      },
+      {
+        name: 'enableEmailOTP',
+        args: ['222222'],
+        path: '/api/auth/email-otp',
+        body: { email_otp: '222222' }
+      },
+      {
+        name: 'registerFIDO',
+        args: [{ id: 'key' }, 'Yubikey'],
+        path: '/api/auth/fido',
+        body: { registration_response: { id: 'key' }, device_name: 'Yubikey' }
+      }
+    ])('$name sends the code of an enabled factor', ({ name, args, path, body }) => {
+      client.ppost.mockResolvedValueOnce({})
+
+      peopleApi[name](...args, { recovery_code: 'abcd' })
+
+      expect(client.ppost).toHaveBeenCalledWith(path, {
+        ...body,
+        recovery_code: 'abcd'
+      })
+    })
+  })
+
   // The end field of the day-off form can be cleared: the day off then ends
   // on its start day
   describe('people day offs', () => {

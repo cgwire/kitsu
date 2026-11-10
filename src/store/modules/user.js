@@ -312,8 +312,14 @@ const actions = {
 
   saveProfile({ commit, state }, payload) {
     commit(USER_SAVE_PROFILE_LOADING)
+    const credentials = payload.currentPassword
+      ? {
+          current_password: payload.currentPassword,
+          ...coerceTwoFactorPayload(payload.twoFactorPayload)
+        }
+      : undefined
     return peopleApi
-      .updatePerson(payload.form)
+      .updatePerson(payload.form, credentials)
       .then(() => {
         payload.form.id = state.user.id
         commit(USER_SAVE_PROFILE_SUCCESS, payload.form)
@@ -343,11 +349,13 @@ const actions = {
     return peopleApi.preEnableTOTP()
   },
 
-  enableTOTP({ commit }, totp) {
-    return peopleApi.enableTOTP(totp).then(OTPRecoveryCodes => {
-      commit(USER_ENABLE_TOTP_SUCCESS)
-      return OTPRecoveryCodes
-    })
+  enableTOTP({ commit }, { totp, twoFactorPayload }) {
+    return peopleApi
+      .enableTOTP(totp, coerceTwoFactorPayload(twoFactorPayload))
+      .then(OTPRecoveryCodes => {
+        commit(USER_ENABLE_TOTP_SUCCESS)
+        return OTPRecoveryCodes
+      })
   },
 
   disableTOTP({ commit, state }, twoFactorPayload) {
@@ -362,11 +370,13 @@ const actions = {
     return peopleApi.preEnableEmailOTP()
   },
 
-  enableEmailOTP({ commit, state }, otp) {
-    return peopleApi.enableEmailOTP(otp).then(OTPRecoveryCodes => {
-      commit(USER_ENABLE_EMAIL_OTP_SUCCESS)
-      return OTPRecoveryCodes
-    })
+  enableEmailOTP({ commit, state }, { otp, twoFactorPayload }) {
+    return peopleApi
+      .enableEmailOTP(otp, coerceTwoFactorPayload(twoFactorPayload))
+      .then(OTPRecoveryCodes => {
+        commit(USER_ENABLE_EMAIL_OTP_SUCCESS)
+        return OTPRecoveryCodes
+      })
   },
 
   sendEmailOTP({ commit, state }, email) {
@@ -387,11 +397,15 @@ const actions = {
       .then(body => coercePublicKeyFromJSON(body))
   },
 
-  registerFIDO({ commit, state }, { registrationResponse, deviceName }) {
+  registerFIDO(
+    { commit, state },
+    { registrationResponse, deviceName, twoFactorPayload }
+  ) {
     return peopleApi
       .registerFIDO(
         coerceCredentialInfoToJSON(registrationResponse),
-        deviceName
+        deviceName,
+        coerceTwoFactorPayload(twoFactorPayload)
       )
       .then(OTPRecoveryCodes => {
         commit(USER_REGISTER_FIDO_SUCCESS, deviceName)

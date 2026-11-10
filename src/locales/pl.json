@@ -1198,6 +1198,7 @@
       "no_task_assigned": "Nie masz przypisanych żadnych bieżących zadań",
       "no_task_done": "Nie masz jeszcze zatwierdzonych zadań",
       "no_task_pending": "Żadne zadanie nie czeka na opinię",
+      "own_email_hint": "Zmień własny e-mail na stronie swojego profilu.",
       "persons": "użytkownik | użytkowników",
       "project_role": "Rola w produkcji",
       "seats_remaining": "brak wolnych miejsc | pozostało {count} miejsce | pozostało miejsc: {count}",
@@ -1779,7 +1780,8 @@
       },
       "save": {
         "button": "Zapisz zmiany",
-        "error": "Wystąpił błąd podczas zapisywania zmian"
+        "error": "Wystąpił błąd podczas zapisywania zmian",
+        "error_email": "Twój e-mail nie został zmieniony. Sprawdź swoje obecne hasło."
       }
     },
     "settings": {

@@ -792,6 +792,7 @@
       "no_task_assigned": "沒有分配給您正在執行的任務",
       "no_task_done": "您還沒有已通過的任務",
       "no_task_pending": "沒有等待回饋的任務",
+      "own_email_hint": "請在個人檔案頁面變更您自己的電子郵件。",
       "persons": "使用者 | 使用者",
       "project_role": "製作項目角色",
       "select_person": "選擇使用者",
@@ -1321,7 +1322,8 @@
       },
       "save": {
         "button": "儲存更改",
-        "error": "儲存更改時出現錯誤"
+        "error": "儲存更改時出現錯誤",
+        "error_email": "您的電子郵件未變更。請確認您目前的密碼。"
       },
       "notifications_mattermost_enabled": "啟用 Mattermost 通知",
       "notifications_mattermost_user": "Mattermost 使用者名稱",

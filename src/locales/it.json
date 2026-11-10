@@ -792,6 +792,7 @@
       "no_task_assigned": "Non ci sono task in corso assegnati a te",
       "no_task_done": "Non hai ancora task validati",
       "no_task_pending": "Nessun task è in attesa di un feedback",
+      "own_email_hint": "Modifica la tua email dalla pagina del tuo profilo.",
       "persons": "utente | utenti",
       "project_role": "Ruolo di progetto",
       "select_person": "Seleziona un utente...",
@@ -1322,7 +1323,8 @@
       },
       "save": {
         "button": "Salva le modifiche",
-        "error": "Si è verificato un errore durante il salvataggio delle modifiche"
+        "error": "Si è verificato un errore durante il salvataggio delle modifiche",
+        "error_email": "La tua email non è stata modificata. Verifica la password attuale."
       },
       "notifications_mattermost_enabled": "Notifiche Mattermost attivate",
       "notifications_mattermost_user": "Nome utente Mattermost",

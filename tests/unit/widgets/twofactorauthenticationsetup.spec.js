@@ -188,6 +188,154 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
     })
   })
 
+  // Zou asks for a factor already enabled before it adds a method.
+  describe('with a method already enabled', () => {
+    const twoFactorPayload = { recovery_code: 'abcd' }
+    const findCodeCheck = wrapper =>
+      wrapper.findComponent(TwoFactorAuthentication)
+
+    const fillSetup = async (wrapper, open, value) => {
+      await findButton(wrapper, label(open)).trigger('click')
+      await flushPromises()
+      const field = wrapper.find('.otp-input')
+      await field.setValue(value)
+      await field.trigger('keyup', { key: 'Enter' })
+    }
+
+    afterEach(() => vi.unstubAllGlobals())
+
+    it.each([
+      {
+        name: 'TOTP',
+        user: { email_otp_enabled: true },
+        open: 'totp.button_enable',
+        action: 'enableTOTP',
+        sent: { totp: '123456' }
+      },
+      {
+        name: 'OTP via email',
+        user: { totp_enabled: true },
+        open: 'email_otp.button_enable',
+        action: 'enableEmailOTP',
+        sent: { otp: '123456' }
+      }
+    ])('asks for its code before it enables $name', async scenario => {
+      const { user, open, action, sent } = scenario
+      const enable = vi.fn()
+      const wrapper = mountSetup(user, {
+        preEnableEmailOTP: () => {},
+        [action]: enable
+      })
+
+      await fillSetup(wrapper, open, '123456')
+
+      expect(enable).not.toHaveBeenCalled()
+      expect(findCodeCheck(wrapper).props('textValidateButton')).toBe(
+        label(open.replace('button_enable', 'button_validate'))
+      )
+
+      findCodeCheck(wrapper).vm.$emit('validate', twoFactorPayload)
+      await flushPromises()
+
+      expect(enable.mock.calls[0][1]).toEqual({ ...sent, twoFactorPayload })
+      expect(findCodeCheck(wrapper).exists()).toBe(false)
+    })
+
+    it('asks for its code before it registers a FIDO device', async () => {
+      vi.stubGlobal('navigator', {
+        credentials: { create: () => Promise.resolve('credential') }
+      })
+      const preRegisterFIDO = vi.fn(() => 'publicKey')
+      const registerFIDO = vi.fn()
+      const wrapper = mountSetup(
+        { totp_enabled: true },
+        { preRegisterFIDO, registerFIDO }
+      )
+
+      await fillSetup(wrapper, 'fido.button_register', 'Yubikey')
+
+      expect(preRegisterFIDO).not.toHaveBeenCalled()
+
+      findCodeCheck(wrapper).vm.$emit('validate', twoFactorPayload)
+      await flushPromises()
+
+      expect(registerFIDO.mock.calls[0][1]).toEqual({
+        registrationResponse: 'credential',
+        deviceName: 'Yubikey',
+        twoFactorPayload
+      })
+      expect(findCodeCheck(wrapper).exists()).toBe(false)
+    })
+
+    // Zou tells which of the two codes it refused: only that one is wrong.
+    it.each([
+      { name: 'new code', flag: 'wrong_OTP', isNewCodeWrong: true },
+      { name: 'enabled factor', flag: 'wrong_existing_OTP' }
+    ])('keeps the setup open when the $name is refused', async scenario => {
+      const { flag, isNewCodeWrong = false } = scenario
+      const enableTOTP = vi.fn(() => Promise.reject({ body: { [flag]: true } }))
+      const wrapper = mountSetup({ email_otp_enabled: true }, { enableTOTP })
+      await fillSetup(wrapper, 'totp.button_enable', '123456')
+
+      findCodeCheck(wrapper).vm.$emit('validate', twoFactorPayload)
+      await flushPromises()
+
+      expect(wrapper.find('.two-fa-flow > .show-message-2fa').exists()).toBe(
+        isNewCodeWrong
+      )
+      expect(findCodeCheck(wrapper).props('isWrongOtp')).toBe(!isNewCodeWrong)
+      expect(wrapper.find('.otp-input').element.value).toBe('123456')
+    })
+
+    it('keeps a FIDO registration open when the factor is refused', async () => {
+      vi.stubGlobal('navigator', {
+        credentials: { create: () => Promise.resolve('credential') }
+      })
+      const registerFIDO = vi.fn(() =>
+        Promise.reject({ body: { wrong_existing_OTP: true } })
+      )
+      const wrapper = mountSetup(
+        { totp_enabled: true },
+        { preRegisterFIDO: () => 'publicKey', registerFIDO }
+      )
+      await fillSetup(wrapper, 'fido.button_register', 'Yubikey')
+
+      findCodeCheck(wrapper).vm.$emit('validate', twoFactorPayload)
+      await flushPromises()
+
+      expect(findCodeCheck(wrapper).props('isWrongOtp')).toBe(true)
+      expect(wrapper.find('.otp-input').element.value).toBe('Yubikey')
+    })
+
+    // The setup that loads opens next to the removal: the code typed for
+    // the removal must not enable the method being set up.
+    it('removes a method while the setup of another one loads', async () => {
+      let openSetup = null
+      const preEnableTOTP = () =>
+        new Promise(resolve => {
+          openSetup = resolve
+        })
+      const enableTOTP = vi.fn()
+      const disableEmailOTP = vi.fn()
+      const wrapper = mountSetup(
+        { email_otp_enabled: true },
+        { preEnableTOTP, enableTOTP, disableEmailOTP }
+      )
+      await findButton(wrapper, label('totp.button_enable')).trigger('click')
+      await findButton(wrapper, label('email_otp.button_disable')).trigger(
+        'click'
+      )
+      openSetup({ totp_provisionning_uri: 'otpauth://x', otp_secret: 'ABC' })
+      await flushPromises()
+
+      findCodeCheck(wrapper).vm.$emit('validate', twoFactorPayload)
+      await flushPromises()
+
+      expect(enableTOTP).not.toHaveBeenCalled()
+      expect(disableEmailOTP.mock.calls[0][1]).toEqual(twoFactorPayload)
+    })
+  })
+
   // Zou checks a 2FA code before it removes a key.
   describe('FIDO key removal', () => {
     const user = {

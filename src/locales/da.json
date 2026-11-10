@@ -792,6 +792,7 @@
       "no_task_assigned": "Der er ingen igangværende opgaver tildelt til dig",
       "no_task_done": "Du har endnu ingen godkendte opgaver",
       "no_task_pending": "Ingen opgaver venter på feedback",
+      "own_email_hint": "Skift din egen e-mail på din profilside.",
       "persons": "bruger | brugere",
       "project_role": "Projektrolle",
       "select_person": "Vælg en bruger...",
@@ -1321,7 +1322,8 @@
       },
       "save": {
         "button": "Gem ændringer",
-        "error": "Der opstod en fejl under gemning af ændringerne"
+        "error": "Der opstod en fejl under gemning af ændringerne",
+        "error_email": "Din e-mail blev ikke ændret. Kontrollér venligst din nuværende adgangskode."
       },
       "notifications_mattermost_enabled": "Mattermost-notifikationer aktiveret",
       "notifications_mattermost_user": "Mattermost-brugernavn",

@@ -792,6 +792,7 @@
       "no_task_assigned": "No hay tareas en ejecución asignadas a usted",
       "no_task_done": "Todavía no tiene tareas validadas",
       "no_task_pending": "Ninguna tarea está esperando una revisión",
+      "own_email_hint": "Cambie su propio correo electrónico desde su página de perfil.",
       "persons": "usuario | usuarios",
       "project_role": "Rol de proyecto",
       "select_person": "Seleccione un usuario...",
@@ -1321,7 +1322,8 @@
       },
       "save": {
         "button": "Guardar cambios",
-        "error": "Se ha producido un error al guardar los cambios"
+        "error": "Se ha producido un error al guardar los cambios",
+        "error_email": "Su correo electrónico no se ha cambiado. Por favor, verifique su contraseña actual."
       },
       "notifications_mattermost_enabled": "Notificaciones de Mattermost activadas",
       "notifications_mattermost_user": "Usuario de Mattermost",

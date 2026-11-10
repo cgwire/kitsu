@@ -792,6 +792,7 @@
       "no_task_assigned": "没有分配给您正在执行的任务",
       "no_task_done": "您还没有已通过的任务",
       "no_task_pending": "没有等待反馈的任务",
+      "own_email_hint": "请在个人资料页面更改您自己的电子邮箱。",
       "persons": "用户 | 用户",
       "project_role": "项目角色",
       "select_person": "选择用户...",
@@ -1321,7 +1322,8 @@
       },
       "save": {
         "button": "保存更改",
-        "error": "保存更改时出现错误"
+        "error": "保存更改时出现错误",
+        "error_email": "您的电子邮箱未更改。请核实您当前的密码。"
       },
       "notifications_mattermost_enabled": "Mattermost 通知已启用",
       "notifications_mattermost_user": "Mattermost 用户名",

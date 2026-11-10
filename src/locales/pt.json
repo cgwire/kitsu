@@ -792,6 +792,7 @@
       "no_task_assigned": "Não há tarefas em execução atribuídas a você",
       "no_task_done": "Você ainda não tem tarefas validadas",
       "no_task_pending": "Nenhuma tarefa está aguardando um feedback",
+      "own_email_hint": "Altere seu próprio e-mail na página do seu perfil.",
       "persons": "usuário | usuários",
       "project_role": "Papel do projeto",
       "select_person": "Selecione um usuário...",
@@ -1321,7 +1322,8 @@
       },
       "save": {
         "button": "Salvar alterações",
-        "error": "Ocorreu um erro ao salvar as alterações"
+        "error": "Ocorreu um erro ao salvar as alterações",
+        "error_email": "Seu e-mail não foi alterado. Por favor, verifique sua senha atual."
       },
       "notifications_mattermost_enabled": "Notificações do Mattermost ativadas",
       "notifications_mattermost_user": "Nome de usuário do Mattermost",

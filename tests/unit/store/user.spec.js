@@ -6,10 +6,14 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@/lib/auth', () => ({ default: { logIn: vi.fn(), logOut: vi.fn() } }))
 vi.mock('@/store/api/people', () => ({
   default: {
+    enableEmailOTP: vi.fn(),
+    enableTOTP: vi.fn(),
     loadDone: vi.fn(),
     loadTasksToCheck: vi.fn(),
     loadTimeSpents: vi.fn(),
+    registerFIDO: vi.fn(),
     unregisterFIDO: vi.fn(),
+    updatePerson: vi.fn(),
     updatePersonLocale: vi.fn()
   }
 }))
@@ -602,6 +606,83 @@ describe('User store', () => {
           'USER_UNREGISTER_FIDO_SUCCESS',
           'Yubikey'
         )
+      })
+    })
+
+    // Zou asks for a factor already enabled before it adds a method.
+    describe('2FA method setup', () => {
+      const twoFactorPayload = { recovery_code: 'abcd' }
+      const credential = {
+        id: 'key',
+        rawId: new Uint8Array([1]).buffer,
+        type: 'public-key',
+        response: { clientDataJSON: new Uint8Array([2]).buffer }
+      }
+
+      afterEach(() => vi.unstubAllGlobals())
+
+      test.each([
+        { action: 'enableTOTP', payload: { totp: '111111' }, sent: ['111111'] },
+        {
+          action: 'enableEmailOTP',
+          payload: { otp: '222222' },
+          sent: ['222222']
+        },
+        {
+          action: 'registerFIDO',
+          payload: { registrationResponse: credential, deviceName: 'Yubikey' },
+          sent: [expect.objectContaining({ id: 'key' }), 'Yubikey']
+        }
+      ])(
+        '$action sends the code of an enabled factor',
+        async ({ action, payload, sent }) => {
+          // The credential of a FIDO device is encoded with window.btoa.
+          vi.stubGlobal('window', globalThis)
+          peopleApi[action].mockResolvedValue(['recovery'])
+
+          await store.actions[action](
+            { commit: vi.fn() },
+            { ...payload, twoFactorPayload }
+          )
+
+          expect(peopleApi[action]).toHaveBeenCalledWith(
+            ...sent,
+            twoFactorPayload
+          )
+        }
+      )
+    })
+
+    // Zou asks for the current password to change one's own email.
+    describe('saveProfile', () => {
+      const context = () => ({
+        commit: vi.fn(),
+        state: { user: { id: 'person-1' } }
+      })
+
+      test('sends the password and the 2FA code with a new email', async () => {
+        peopleApi.updatePerson.mockResolvedValue({})
+        const form = { email: 'new@example.com' }
+
+        await store.actions.saveProfile(context(), {
+          form,
+          currentPassword: 'secret',
+          twoFactorPayload: { totp: '123456' }
+        })
+
+        expect(peopleApi.updatePerson).toHaveBeenCalledWith(form, {
+          current_password: 'secret',
+          totp: '123456'
+        })
+      })
+
+      test('sends no credentials with the rest of the profile', async () => {
+        peopleApi.updatePerson.mockResolvedValue({})
+        const form = { phone: '0102030405' }
+
+        await store.actions.saveProfile(context(), { form })
+
+        expect(peopleApi.updatePerson).toHaveBeenCalledWith(form, undefined)
       })
     })
 

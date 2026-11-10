@@ -792,6 +792,7 @@
       "no_task_assigned": "Er zijn geen lopende taken aan jou toegewezen",
       "no_task_done": "Je hebt nog geen goedgekeurde taken",
       "no_task_pending": "Er wacht geen taak op feedback",
+      "own_email_hint": "Wijzig je eigen e-mail op je profielpagina.",
       "persons": "gebruiker | gebruikers",
       "project_role": "Projectrol",
       "select_person": "Kies een gebruiker...",
@@ -1321,7 +1322,8 @@
       },
       "save": {
         "button": "Wijzigingen opslaan",
-        "error": "Er is een fout opgetreden bij het opslaan van wijzigingen"
+        "error": "Er is een fout opgetreden bij het opslaan van wijzigingen",
+        "error_email": "Je e-mail is niet gewijzigd. Gelieve je huidige wachtwoord te verifiëren."
       },
       "notifications_mattermost_enabled": "Mattermost-meldingen ingeschakeld",
       "notifications_mattermost_user": "Mattermost gebruikersnaam",

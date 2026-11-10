@@ -792,6 +792,7 @@
       "no_task_assigned": "Es gibt keine laufenden Aufgaben, die Ihnen zugewiesen sind.",
       "no_task_done": "Sie haben noch keine freigegebenen Aufgaben",
       "no_task_pending": "Keine Aufgabe wartet auf Feedback",
+      "own_email_hint": "Ändern Sie Ihre eigene E-Mail auf Ihrer Profilseite.",
       "persons": "Person | Personen",
       "project_role": "Projektrolle",
       "select_person": "Eine Person auswählen...",
@@ -1321,7 +1322,8 @@
       },
       "save": {
         "button": "Änderungen speichern",
-        "error": "Beim Speichern von Änderungen ist ein Fehler aufgetreten."
+        "error": "Beim Speichern von Änderungen ist ein Fehler aufgetreten.",
+        "error_email": "Ihre E-Mail wurde nicht geändert. Bitte überprüfen Sie Ihr aktuelles Passwort."
       },
       "notifications_mattermost_enabled": "Mattermost-Benachrichtigungen aktiviert",
       "notifications_mattermost_user": "Mattermost-Benutzername",

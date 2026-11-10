@@ -1245,6 +1245,7 @@ export default {
     no_task_assigned: 'There are no running tasks assigned to you',
     no_task_done: 'You have no validated task yet',
     no_task_pending: 'No task is waiting for feedback',
+    own_email_hint: 'Change your own email from your profile page.',
     persons: 'user | users',
     project_role: 'Project role',
     seats_remaining: 'no seats remaining | {count} seat remaining | {count} seats remaining',
@@ -1849,7 +1850,8 @@ export default {
     },
     save: {
       button: 'Save changes',
-      error: 'An error occurred while saving changes'
+      error: 'An error occurred while saving changes',
+      error_email: 'Your email was not changed. Please verify your current password.'
     }
   },
 

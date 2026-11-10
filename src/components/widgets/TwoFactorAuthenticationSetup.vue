@@ -122,6 +122,18 @@
           <p class="show-message-2fa error" v-if="twoFA.error.isWrongOTP">
             {{ textWrongOTPError }}
           </p>
+          <two-factor-authentication
+            v-if="twoFA.enableNeedTwoFA"
+            :preferred-two-fa="user.preferred_two_factor_authentication"
+            :two-fas-enabled="twoFAsEnabled"
+            :is-loading="twoFA.loadingAction === 'enableTOTP'"
+            :email="user.email"
+            :text-validate-button="textValidateTwoFA"
+            :is-wrong-otp="twoFA.error.isWrongEnabledFactor"
+            :is-profile="true"
+            @validate="nextWithPayload"
+            @changed-two-fa="changedTwoFA"
+          />
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
@@ -130,6 +142,7 @@
               {{ $t('main.cancel') }}
             </button>
             <button
+              v-if="!twoFA.enableNeedTwoFA"
               class="button save-button"
               :class="{ 'is-loading': twoFA.loadingAction === 'enableTOTP' }"
               @click="nextEnable()"
@@ -221,6 +234,18 @@
           <p class="show-message-2fa error" v-if="twoFA.error.isWrongOTP">
             {{ textWrongOTPError }}
           </p>
+          <two-factor-authentication
+            v-if="twoFA.enableNeedTwoFA"
+            :preferred-two-fa="user.preferred_two_factor_authentication"
+            :two-fas-enabled="twoFAsEnabled"
+            :is-loading="twoFA.loadingAction === 'enableEmailOTP'"
+            :email="user.email"
+            :text-validate-button="textValidateTwoFA"
+            :is-wrong-otp="twoFA.error.isWrongEnabledFactor"
+            :is-profile="true"
+            @validate="nextWithPayload"
+            @changed-two-fa="changedTwoFA"
+          />
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
@@ -229,6 +254,7 @@
               {{ $t('main.cancel') }}
             </button>
             <button
+              v-if="!twoFA.enableNeedTwoFA"
               class="button save-button"
               :class="{
                 'is-loading': twoFA.loadingAction === 'enableEmailOTP'
@@ -316,7 +342,7 @@
                 class="input is-medium otp-input"
                 type="text"
                 v-model.trim="twoFA.FIDONewDeviceName"
-                @keyup.enter="registerFIDORequested"
+                @keyup.enter="registerFIDORequested()"
                 :placeholder="
                   $t('profile.two_factor_authentication.fido.device_name')
                 "
@@ -330,6 +356,18 @@
           <p class="show-message-2fa error" v-if="twoFA.error.registerFIDO">
             {{ $t('profile.two_factor_authentication.fido.error_register') }}
           </p>
+          <two-factor-authentication
+            v-if="twoFA.enableNeedTwoFA"
+            :preferred-two-fa="user.preferred_two_factor_authentication"
+            :two-fas-enabled="twoFAsEnabled"
+            :is-loading="twoFA.loadingAction === 'registerFIDO'"
+            :email="user.email"
+            :text-validate-button="textValidateTwoFA"
+            :is-wrong-otp="twoFA.error.isWrongEnabledFactor"
+            :is-profile="true"
+            @validate="nextWithPayload"
+            @changed-two-fa="changedTwoFA"
+          />
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
@@ -338,6 +376,7 @@
               {{ $t('main.cancel') }}
             </button>
             <button
+              v-if="!twoFA.enableNeedTwoFA"
               class="button save-button"
               :class="{ 'is-loading': twoFA.loadingAction === 'registerFIDO' }"
               @click="registerFIDORequested()"
@@ -467,9 +506,13 @@ const twoFA = reactive({
   FIDOPreRegistered: false,
   FIDOUnregisterDeviceName: '',
   newRecoveryCodesNeedTwoFA: false,
+  // Zou asks for a factor already enabled before it adds a method.
+  enableNeedTwoFA: false,
   validationOTP: '',
   error: {
     isWrongOTP: false,
+    // The factor already enabled, asked next to the code of a new method.
+    isWrongEnabledFactor: false,
     enableTOTP: false,
     disableTOTP: false,
     enableEmailOTP: false,
@@ -519,6 +562,11 @@ const textValidateNewTwoFA = computed(() => {
 })
 
 const textValidateTwoFA = computed(() => {
+  if (twoFA.enableNeedTwoFA) {
+    return twoFA.FIDOPreRegistered
+      ? t('profile.two_factor_authentication.fido.button_register')
+      : textValidateNewTwoFA.value
+  }
   if (twoFA.TOTPNeedTwoFA) {
     return t('profile.two_factor_authentication.totp.button_validate_disable')
   } else if (twoFA.emailOTPNeedTwoFA) {
@@ -556,6 +604,7 @@ const textWrongOTPError = computed(() => {
 
 const removeTwoFactorErrors = () => {
   twoFA.error.isWrongOTP = false
+  twoFA.error.isWrongEnabledFactor = false
   twoFA.error.enableTOTP = false
   twoFA.error.disableTOTP = false
   twoFA.error.enableEmailOTP = false
@@ -566,22 +615,38 @@ const removeTwoFactorErrors = () => {
   twoFA.OTPRecoveryCodes = null
 }
 
-const enableTOTPRequested = () => {
+// The setup of a method stops here until a factor already enabled is given.
+const askEnabledFactor = twoFactorPayload => {
+  if (!twoFAEnabled.value || twoFactorPayload) return false
+  removeTwoFactorErrors()
+  twoFA.enableNeedTwoFA = true
+  return true
+}
+
+// Zou tells the code of the new method (wrong_OTP) from the factor already
+// enabled (wrong_existing_OTP): only the refused one is asked again.
+const showSetupError = (err, action) => {
+  twoFA.error.isWrongOTP = Boolean(err.body?.wrong_OTP)
+  twoFA.error.isWrongEnabledFactor = Boolean(err.body?.wrong_existing_OTP)
+  twoFA.error[action] =
+    !twoFA.error.isWrongOTP && !twoFA.error.isWrongEnabledFactor
+}
+
+const enableTOTPRequested = twoFactorPayload => {
+  if (askEnabledFactor(twoFactorPayload)) return
   removeTwoFactorErrors()
   twoFA.loadingAction = 'enableTOTP'
   store
-    .dispatch('enableTOTP', twoFA.validationOTP)
+    .dispatch('enableTOTP', { totp: twoFA.validationOTP, twoFactorPayload })
     .then(OTPRecoveryCodes => {
       if (OTPRecoveryCodes) twoFA.OTPRecoveryCodes = OTPRecoveryCodes
       twoFA.TOTPPreEnabled = false
+      twoFA.enableNeedTwoFA = false
       twoFA.validationOTP = ''
       twoFA.error.isWrongOTP = false
       twoFA.OTPSecret = ''
     })
-    .catch(err => {
-      if (err.body && err.body.wrong_OTP) twoFA.error.isWrongOTP = true
-      else twoFA.error.enableTOTP = true
-    })
+    .catch(err => showSetupError(err, 'enableTOTP'))
     .finally(() => {
       twoFA.loadingAction = null
     })
@@ -630,21 +695,20 @@ const disableTOTPRequested = payload => {
   }
 }
 
-const enableEmailOTPRequested = () => {
+const enableEmailOTPRequested = twoFactorPayload => {
+  if (askEnabledFactor(twoFactorPayload)) return
   removeTwoFactorErrors()
   twoFA.loadingAction = 'enableEmailOTP'
   store
-    .dispatch('enableEmailOTP', twoFA.validationOTP)
+    .dispatch('enableEmailOTP', { otp: twoFA.validationOTP, twoFactorPayload })
     .then(OTPRecoveryCodes => {
       if (OTPRecoveryCodes) twoFA.OTPRecoveryCodes = OTPRecoveryCodes
       twoFA.emailOTPPreEnabled = false
+      twoFA.enableNeedTwoFA = false
       twoFA.validationOTP = ''
       twoFA.error.isWrongOTP = false
     })
-    .catch(err => {
-      if (err.body && err.body.wrong_OTP) twoFA.error.isWrongOTP = true
-      else twoFA.error.enableEmailOTP = true
-    })
+    .catch(err => showSetupError(err, 'enableEmailOTP'))
     .finally(() => {
       twoFA.loadingAction = null
     })
@@ -698,8 +762,9 @@ const preRegisterFIDORequested = () => {
   twoFA.FIDOPreRegistered = true
 }
 
-const registerFIDORequested = () => {
+const registerFIDORequested = twoFactorPayload => {
   if (!twoFA.FIDONewDeviceName || twoFA.loadingAction) return
+  if (askEnabledFactor(twoFactorPayload)) return
 
   removeTwoFactorErrors()
   twoFA.loadingAction = 'registerFIDO'
@@ -709,7 +774,8 @@ const registerFIDORequested = () => {
     .then(newCredentialResponse =>
       store.dispatch('registerFIDO', {
         registrationResponse: newCredentialResponse,
-        deviceName: twoFA.FIDONewDeviceName
+        deviceName: twoFA.FIDONewDeviceName,
+        twoFactorPayload
       })
     )
     .then(OTPRecoveryCodes => {
@@ -717,11 +783,14 @@ const registerFIDORequested = () => {
     })
     .catch(err => {
       if (err instanceof DOMException) console.error(err)
-      twoFA.error.registerFIDO = true
+      showSetupError(err, 'registerFIDO')
     })
     .finally(() => {
-      twoFA.FIDOPreRegistered = false
       twoFA.loadingAction = null
+      // A refused factor leaves the registration open for another one.
+      if (twoFA.error.isWrongEnabledFactor) return
+      twoFA.FIDOPreRegistered = false
+      twoFA.enableNeedTwoFA = false
       twoFA.FIDONewDeviceName = ''
     })
 }
@@ -787,7 +856,13 @@ const nextEnable = () => {
 }
 
 const nextWithPayload = payload => {
-  if (twoFA.TOTPNeedTwoFA) disableTOTPRequested(payload)
+  // A setup can open next to a removal, when its request was still running:
+  // only the factor asked by a setup sends the code to that setup.
+  if (twoFA.enableNeedTwoFA) {
+    if (twoFA.TOTPPreEnabled) enableTOTPRequested(payload)
+    else if (twoFA.emailOTPPreEnabled) enableEmailOTPRequested(payload)
+    else if (twoFA.FIDOPreRegistered) registerFIDORequested(payload)
+  } else if (twoFA.TOTPNeedTwoFA) disableTOTPRequested(payload)
   else if (twoFA.emailOTPNeedTwoFA) disableEmailOTPRequested(payload)
   else if (twoFA.newRecoveryCodesNeedTwoFA) newRecoveryCodesRequested(payload)
   else if (twoFA.FIDOUnregisterDeviceName) unregisterFIDOConfirmed(payload)
@@ -806,6 +881,7 @@ const saveRecoveryCodesToFile = () => {
 
 const changedTwoFA = () => {
   twoFA.error.isWrongOTP = false
+  twoFA.error.isWrongEnabledFactor = false
 }
 
 const cancelCurrentTwoFactorAuthAction = () => {
@@ -814,12 +890,14 @@ const cancelCurrentTwoFactorAuthAction = () => {
   twoFA.emailOTPPreEnabled = false
   twoFA.emailOTPNeedTwoFA = false
   twoFA.newRecoveryCodesNeedTwoFA = false
+  twoFA.enableNeedTwoFA = false
   twoFA.FIDOPreRegistered = false
   twoFA.FIDONewDeviceName = ''
   twoFA.FIDOUnregisterDeviceName = ''
   twoFA.loadingAction = null
   twoFA.validationOTP = ''
   twoFA.error.isWrongOTP = false
+  twoFA.error.isWrongEnabledFactor = false
   twoFA.error.enableTOTP = false
   twoFA.error.disableTOTP = false
   twoFA.error.enableEmailOTP = false

@@ -91,7 +91,9 @@ export default {
     return client.pput(`/api/data/persons/${personId}`, { active })
   },
 
-  updatePerson(person) {
+  // Zou asks for credentials (current password, 2FA code) to change one's
+  // own email.
+  updatePerson(person, credentials) {
     const data = {
       first_name: person.first_name,
       last_name: person.last_name,
@@ -120,7 +122,8 @@ export default {
       studio_id: person.studio_id,
       country: person.country,
       use_12_hour_clock: toBool(person.use_12_hour_clock),
-      display_date_format: person.display_date_format
+      display_date_format: person.display_date_format,
+      ...credentials
     }
     return client.pput(`/api/data/persons/${person.id}`, data)
   },
@@ -173,9 +176,10 @@ export default {
     return client.pput('/api/auth/totp', {})
   },
 
-  enableTOTP(totp) {
+  // Zou asks for a factor already enabled to add a method: twoFactorPayload.
+  enableTOTP(totp, twoFactorPayload) {
     return client
-      .ppost('/api/auth/totp', { totp: totp })
+      .ppost('/api/auth/totp', { ...twoFactorPayload, totp })
       .then(body => body.otp_recovery_codes)
   },
 
@@ -191,9 +195,12 @@ export default {
     return client.pput('/api/auth/email-otp', {})
   },
 
-  enableEmailOTP(emailOTP) {
+  enableEmailOTP(emailOTP, twoFactorPayload) {
     return client
-      .ppost('/api/auth/email-otp', { email_otp: emailOTP })
+      .ppost('/api/auth/email-otp', {
+        ...twoFactorPayload,
+        email_otp: emailOTP
+      })
       .then(body => body.otp_recovery_codes)
   },
 
@@ -205,9 +212,10 @@ export default {
     return client.pput('/api/auth/fido', {})
   },
 
-  registerFIDO(registrationResponse, deviceName) {
+  registerFIDO(registrationResponse, deviceName, twoFactorPayload) {
     return client
       .ppost('/api/auth/fido', {
+        ...twoFactorPayload,
         registration_response: registrationResponse,
         device_name: deviceName
       })
