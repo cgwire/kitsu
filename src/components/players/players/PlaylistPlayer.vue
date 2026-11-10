@@ -560,7 +560,8 @@
         :max-duration="playbackMaxDuration"
         :nb-frames="nbFrames"
         :phone="isPhone"
-        v-model:current-3-d-animation="objectModel.currentAnimation"
+        :current-3-d-animation="objectModel.currentAnimation"
+        @update:current-3-d-animation="onAnimationSelected"
         v-model:is-hd="isHd"
         v-model:is-muted="isMuted"
         v-model:is-show-annotations-while-playing="
@@ -4156,11 +4157,19 @@ const onModelLoaded = () => {
     objectModel.value.currentAnimation = animations[0]
     // A model left while it loaded lands in the hidden viewer. Its
     // animations stay for a return, which fires no load.
-    if (isCurrentPreviewModel.value) nextTick(() => playModel())
+    if (isPlaying.value && isCurrentPreviewModel.value) {
+      nextTick(() => playModel())
+    }
   } else {
     objectModel.value.availableAnimations = []
     objectModel.value.currentAnimation = null
   }
+}
+
+// Another animation picked in the bar plays, even in a paused playlist.
+const onAnimationSelected = animation => {
+  objectModel.value.currentAnimation = animation
+  playModel()
 }
 
 const onPreviewChanged = ({ entity, previewFile, previousPreviewFileId }) => {
@@ -5075,15 +5084,6 @@ watch(isDrawing, () => {
 watch(isTyping, () => {
   if (!isAnnotationsDisplayed.value) isAnnotationsDisplayed.value = true
 })
-
-watch(
-  () => objectModel.value.currentAnimation,
-  () => {
-    if (isCurrentPreviewModel.value && objectModel.value.isAnimation) {
-      playModel()
-    }
-  }
-)
 
 watch(isShowAnnotationsWhilePlaying, () => {
   lastShownWhilePlaying = null

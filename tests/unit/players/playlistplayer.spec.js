@@ -1444,9 +1444,9 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
-  // A 3D model left while it loaded still lands in the hidden viewer, with
-  // something else on screen.
-  describe('3D model loaded while another preview is shown', () => {
+  // A 3D model loads on screen, or in the hidden viewer when the playlist
+  // left it while it loaded.
+  describe('3D model animation', () => {
     const model = {
       id: 'shot-5',
       preview_file_id: 'preview-5',
@@ -1473,7 +1473,7 @@ describe('PlaylistPlayer.vue', () => {
         entities,
         stubs: {
           ObjectViewer: withMethods(['pause', 'play'], {
-            getAnimations: () => ['walk']
+            getAnimations: () => ['walk', 'run']
           }),
           SoundViewer: { ...withMethods(['pause', 'play']), name: 'SoundViewer' }
         }
@@ -1500,21 +1500,39 @@ describe('PlaylistPlayer.vue', () => {
     const soundViewer = () => wrapper.findComponent({ name: 'SoundViewer' })
     const soundShown = () => soundViewer().exists()
 
-    // Back on a model shown before, the viewer loads it again. Its animation
-    // keeps its name: only the load can start it.
-    it('plays the animation of a model loaded on screen', async () => {
+    it('keeps a model loaded on screen still while paused', async () => {
       await mountOnModel()
+      const play = vi.spyOn(modelViewer().vm, 'play')
+
       await landModel()
-      playbackBar().vm.$emit('play-pause-clicked')
-      await goToPicture()
-      await goBackToModel()
+
       expect(playbackBar().props('isPlaying')).toBe(false)
+      expect(play).not.toHaveBeenCalled()
+    })
+
+    it('plays the animation of a model loaded while playing', async () => {
+      await mountOnModel()
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
       const play = vi.spyOn(modelViewer().vm, 'play')
 
       await landModel()
 
       expect(playbackBar().props('isPlaying')).toBe(true)
       expect(play).toHaveBeenCalledWith('walk')
+    })
+
+    it('plays the animation picked in the bar while paused', async () => {
+      await mountOnModel()
+      await landModel()
+      expect(playbackBar().props('isPlaying')).toBe(false)
+      const play = vi.spyOn(modelViewer().vm, 'play')
+
+      playbackBar().vm.$emit('update:current3DAnimation', 'run')
+      await flushPromises()
+
+      expect(playbackBar().props('isPlaying')).toBe(true)
+      expect(play).toHaveBeenCalledWith('run')
     })
 
     // Back on the model, no load comes: its animations are kept for then.
@@ -1528,7 +1546,8 @@ describe('PlaylistPlayer.vue', () => {
       expect(playbackBar().props('isPlaying')).toBe(false)
       expect(play).not.toHaveBeenCalled()
       expect(playbackBar().props('available3DAnimations')).toEqual([
-        { label: 'walk', value: 'walk' }
+        { label: 'walk', value: 'walk' },
+        { label: 'run', value: 'run' }
       ])
     })
 
