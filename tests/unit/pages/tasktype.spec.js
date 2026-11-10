@@ -51,6 +51,7 @@ const ScheduleStub = {
   name: 'Schedule',
   props: { hierarchy: { type: Array, default: () => [] } },
   template: '<div />',
+  data: () => ({ isEditingDates: false }),
   methods: {
     scrollToDate: () => {},
     scrollToToday: () => {}
@@ -617,6 +618,30 @@ describe('TaskType page', () => {
       await vi.advanceTimersByTimeAsync(400)
 
       expect(loadProductionTimeSpents).not.toHaveBeenCalled()
+    })
+
+    // A rebuild replaces the bars: the widget went on moving the pressed one,
+    // no longer shown, and the bar jumped back to its dates until the drop.
+    it('waits for the drop to rebuild the rows on a remote update', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      await mountSchedule({ socket })
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      const schedule = wrapper.findComponent({ name: 'Schedule' })
+      const rows = schedule.props('hierarchy')
+
+      schedule.vm.isEditingDates = true
+      onTaskUpdate({ task_id: scheduleTask.id })
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+      const rowsDuringDrag = schedule.props('hierarchy')
+      schedule.vm.isEditingDates = false
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+
+      expect(rowsDuringDrag).toBe(rows)
+      expect(schedule.props('hierarchy')).not.toBe(rows)
     })
   })
 

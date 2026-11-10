@@ -502,7 +502,17 @@ const scheduleTasks = computed(() =>
   toRaw(scheduleItems.value).flatMap(item => item.children)
 )
 
-const scheduleItems = computed(() => {
+// a task reloads on each task:update event, and the bar a drag moves has to
+// stay in the rows until the drop
+const scheduleItems = computed(previous =>
+  previous && scheduleWidgetRef.value?.isEditingDates
+    ? previous
+    : storeScheduleItems.value
+)
+
+// apart from scheduleItems: built there, after its read of the flag, the rows
+// would be rebuilt at each release, a plain click included
+const storeScheduleItems = computed(() => {
   const rootMap = new Map()
   sortedAllTasks.value.forEach(task => {
     if (!rootMap.get(task.project_id)) {

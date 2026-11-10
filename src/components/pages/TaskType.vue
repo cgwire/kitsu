@@ -1451,6 +1451,11 @@ const setDefaultBeforeAfterTaskTypes = () => {
 }
 
 const resetScheduleItems = async (resetScroll = false) => {
+  // new rows would no longer hold the bar a drag moves: wait for the drop
+  if (scheduleWidgetRef.value?.isEditingDates) {
+    resetScheduleItemsDebounced(resetScroll)
+    return
+  }
   if (isActiveTab('schedule')) {
     await resetScheduleItemsForScheduleTab()
   } else if (isActiveTab('tasks') && isScheduleVisible.value) {

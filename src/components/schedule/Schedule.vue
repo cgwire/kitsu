@@ -962,6 +962,12 @@ const openProductions = computed(() => store.getters.openProductions)
 const organisation = computed(() => store.getters.organisation)
 const taskStatuses = computed(() => store.getters.taskStatuses)
 
+// from the press on a bar to its drop: rows a page rebuilds meanwhile no longer
+// hold the objects the move changes, and the bar jumps back to its dates
+const isEditingDates = computed(
+  () => isChangeDates.value || isChangeStartDate.value || isChangeEndDate.value
+)
+
 const isDurationInHours = computed(() => {
   return organisation.value.format_duration_in_hours
 })
@@ -2867,6 +2873,7 @@ provide('scheduleRowHelpers', {
 defineExpose({
   applyMoveToLoadedRows,
   exportData,
+  isEditingDates,
   refreshAllItemPositions,
   refreshItemPositions,
   refreshManDays,

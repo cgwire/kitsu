@@ -7,6 +7,7 @@ import {
   isReactive,
   nextTick,
   reactive,
+  ref,
   toRaw
 } from 'vue'
 
@@ -389,6 +390,43 @@ describe('Schedule widget - end of an interaction', () => {
       window.removeEventListener('error', onError)
       expect(onError).not.toHaveBeenCalled()
       wrapper.unmount()
+    }
+  )
+
+  // A page that rebuilds its rows during a move or a resize replaces the bar
+  // the widget changes: it reads this flag through its template ref to wait
+  // for the drop.
+  test.each(['.timebar-center', '.timebar-left-hand', '.timebar-right-hand'])(
+    'flags a date edit from the press on %s to the drop',
+    async handle => {
+      const widget = ref(null)
+      const host = {
+        render: () =>
+          h(Schedule, {
+            ref: widget,
+            startDate: moment('2026-07-05'),
+            endDate: moment('2026-10-23'),
+            hierarchy: [buildRootElement()],
+            zoomLevel: 1,
+            withMilestones: false,
+            isLoading: false
+          })
+      }
+      const wrapper = mount(host, {
+        global: { stubs: { RouterLink: true } },
+        attachTo: document.body
+      })
+
+      await wrapper.find(handle).trigger('mousedown', { clientX: 500 })
+      const isEditingBeforeDrop = widget.value.isEditingDates
+      document.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, clientX: 500 })
+      )
+
+      const isEditingAfterDrop = widget.value.isEditingDates
+      wrapper.unmount()
+      expect(isEditingBeforeDrop).toBe(true)
+      expect(isEditingAfterDrop).toBe(false)
     }
   )
 

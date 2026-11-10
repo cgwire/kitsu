@@ -1,6 +1,6 @@
 import moment from 'moment-timezone'
 import { flushPromises, shallowMount } from '@vue/test-utils'
-import { nextTick } from 'vue'
+import { nextTick, reactive } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -591,13 +591,14 @@ describe('Person page', () => {
       due_date: '2026-08-05'
     }
 
-    const mountSchedule = () =>
+    const mountSchedule = ({ tasks = [plannedTask], doneTasks = [] } = {}) =>
       mountPage({
         actions: { updateTask: vi.fn(() => Promise.resolve()) },
         getters: {
           currentProduction: () => null,
           dateFormat: () => 'YYYY-MM-DD',
           departmentMap: () => new Map(),
+          displayedPersonDoneTasks: () => doneTasks,
           isCurrentUserManager: () => true,
           isCurrentUserProductionManager: () => true,
           isDarkTheme: () => false,
@@ -612,13 +613,17 @@ describe('Person page', () => {
         },
         query: { section: 'schedule' },
         stubs: { Schedule: false, ScheduleEntityRow: false },
-        tasks: [plannedTask]
+        tasks
       })
 
-    const taskBar = wrapper =>
+    const taskBar = (wrapper, name = '') =>
       wrapper
         .findAll('.child-line .timebar')
-        .find(bar => bar.find('.timebar-center').exists())
+        .find(
+          bar =>
+            bar.find('.timebar-center').exists() &&
+            bar.attributes('title').includes(name)
+        )
 
     // zoom level 1 is 20px a day: a 60px drag is 3 days
     it('moves the dragged bar along with the mouse', async () => {
@@ -666,6 +671,120 @@ describe('Person page', () => {
       )
       wrapper.unmount()
       expect(startDuringDrag).toBe(start)
+    })
+
+    // Each task:update event reloads its task, the echo of the previous save
+    // included: rows rebuilt from the store no longer held the bar the widget
+    // moves, and the bar jumped back to its dates until the drop.
+    it('keeps the dragged bar when a task reloads during the drag', async () => {
+      const tasks = reactive([{ ...plannedTask }])
+      const wrapper = await mountSchedule({ tasks })
+
+      await taskBar(wrapper)
+        .find('.timebar-center')
+        .trigger('mousedown', { clientX: 300 })
+      document.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
+      )
+      // Zou sends the dates as datetimes
+      Object.assign(tasks[0], {
+        start_date: '2026-08-03T00:00:00',
+        due_date: '2026-08-05T00:00:00'
+      })
+      await nextTick()
+      document.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, clientX: 400 })
+      )
+      await nextTick()
+
+      const title = taskBar(wrapper).attributes('title')
+      document.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, clientX: 400 })
+      )
+      wrapper.unmount()
+      expect(title).toContain('(2026-08-08 - ')
+    })
+
+    // A drop saves through the tasks module, whose map holds the to-do tasks
+    // only: the store copy of a done task keeps its former dates, and rows
+    // rebuilt at the drop put its bar back there.
+    it('keeps a dropped done task bar until the rows are rebuilt', async () => {
+      const wrapper = await mountSchedule({ tasks: [], doneTasks: [plannedTask] })
+
+      await taskBar(wrapper)
+        .find('.timebar-center')
+        .trigger('mousedown', { clientX: 300 })
+      document.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
+      )
+      await nextTick()
+      document.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, clientX: 360 })
+      )
+      await nextTick()
+
+      const title = taskBar(wrapper).attributes('title')
+      wrapper.unmount()
+      expect(title).toContain('(2026-08-06 - ')
+    })
+
+    // a click selects a bar: rebuilding every row for it would lag on people
+    // with hundreds of tasks
+    it('keeps the rows on a click on a bar', async () => {
+      const wrapper = await mountSchedule()
+      const rows = () =>
+        wrapper.findComponent({ name: 'Schedule' }).props('hierarchy')
+      const rowsBefore = rows()
+
+      await taskBar(wrapper)
+        .find('.timebar-center')
+        .trigger('mousedown', { clientX: 300 })
+      document.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, clientX: 300 })
+      )
+      await nextTick()
+
+      const rowsAfter = rows()
+      wrapper.unmount()
+      expect(rowsAfter).toBe(rowsBefore)
+    })
+
+    // a reload during the drag waits for the drop, and is not lost
+    it('shows a task reloaded during the drag once the bar is dropped', async () => {
+      const tasks = reactive([
+        { ...plannedTask },
+        {
+          ...plannedTask,
+          id: 'task-2',
+          full_entity_name: 'SH02',
+          start_date: '2026-08-10',
+          due_date: '2026-08-12'
+        }
+      ])
+      const wrapper = await mountSchedule({ tasks })
+
+      await taskBar(wrapper, 'SH01')
+        .find('.timebar-center')
+        .trigger('mousedown', { clientX: 300 })
+      document.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
+      )
+      await nextTick()
+      Object.assign(tasks[1], {
+        start_date: '2026-08-17T00:00:00',
+        due_date: '2026-08-19T00:00:00'
+      })
+      await nextTick()
+      const titleDuringDrag = taskBar(wrapper, 'SH02').attributes('title')
+      document.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, clientX: 360 })
+      )
+      await nextTick()
+
+      const titleAfterDrop = taskBar(wrapper, 'SH02').attributes('title')
+      wrapper.unmount()
+      expect(titleDuringDrag).toContain('(2026-08-10 - ')
+      expect(titleAfterDrop).toContain('(2026-08-17 - ')
     })
   })
 
