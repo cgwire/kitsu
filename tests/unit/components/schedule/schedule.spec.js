@@ -10,10 +10,13 @@ import {
   toRaw
 } from 'vue'
 
-const { milestonesByDate, organisation } = vi.hoisted(() => ({
+const { commit, milestonesByDate, organisation, taskMap } = vi.hoisted(() => ({
+  commit: vi.fn(),
   // mutated by the milestone tests: the milestones of each date
   milestonesByDate: {},
-  organisation: { hours_by_day: 8, format_duration_in_hours: false }
+  organisation: { hours_by_day: 8, format_duration_in_hours: false },
+  // filled by the test of a press on a task bar
+  taskMap: new Map()
 }))
 
 vi.mock('vuex', () => ({
@@ -35,9 +38,10 @@ vi.mock('vuex', () => ({
       milestonesByDate,
       openProductions: [{ id: 'production-1', team: ['person-1'] }],
       organisation,
-      taskMap: new Map(),
+      taskMap,
       taskStatuses: []
     },
+    commit,
     dispatch: vi.fn()
   })
 }))
@@ -1488,6 +1492,25 @@ describe('Schedule widget - selected bars and their objects', () => {
 
     expect(wrapper.findAll('.timebar.selected')).toHaveLength(0)
     wrapper.unmount()
+  })
+
+  // A press marked the store task with the time of the press: a page that
+  // copies its tasks in a computed, the person page, then rebuilt its rows
+  // under the drag.
+  it('leaves the store task alone on a press of its bar', async () => {
+    const rows = buildTaskListRows()
+    const [task] = rows[0].children
+    task.task_type_id = 'type-1'
+    taskMap.set(task.id, { id: task.id })
+    const wrapper = mountTaskList(rows)
+
+    await selectBar(wrapper, taskBars(wrapper)[0])
+
+    const commits = commit.mock.calls.map(([type]) => type)
+    taskMap.clear()
+    commit.mockClear()
+    wrapper.unmount()
+    expect(commits).toEqual([])
   })
 
   it('keeps each selected bar in its row once the page rebuilt them', async () => {

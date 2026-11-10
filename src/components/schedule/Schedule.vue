@@ -700,7 +700,6 @@ import {
   daysToMinutes,
   durationToMinutes,
   formatDisplayDate,
-  formatFullDate,
   getBusinessDays,
   getDayOffRange,
   minutesToDays,
@@ -961,7 +960,6 @@ const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const milestonesByDate = computed(() => store.getters.milestonesByDate)
 const openProductions = computed(() => store.getters.openProductions)
 const organisation = computed(() => store.getters.organisation)
-const taskMap = computed(() => store.getters.taskMap)
 const taskStatuses = computed(() => store.getters.taskStatuses)
 
 const isDurationInHours = computed(() => {
@@ -2803,18 +2801,6 @@ watch(
     nextTick(resetScheduleSize)
   }
 )
-
-watch(currentElement, () => {
-  if (currentElement.value && currentElement.value.task_type_id) {
-    const task = taskMap.value.get(currentElement.value.id)
-    if (task) {
-      store.commit('UPDATE_TASK', {
-        task,
-        updatedAt: formatFullDate(moment())
-      })
-    }
-  }
-})
 
 watch(
   currentProduction,
