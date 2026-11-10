@@ -704,6 +704,7 @@
       <player-annotation-bar
         v-if="!isFullMode"
         :background-options="backgroundOptions"
+        :can-comment="canComment"
         :full-screen="fullScreen"
         :is-3-d-model="isCurrentPreviewModel"
         :is-annotations-displayed="
@@ -1007,6 +1008,7 @@ import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { useTouchNavigation } from '@/composables/players/touchNavigation'
 import { usePlayerTransport } from '@/composables/players/transport'
 import { usePreviewRoom } from '@/composables/previewRoom'
+import { isSupervisorInDepartments } from '@/lib/descriptors'
 import { isValidRoomId } from '@/lib/players/events'
 import { scrubFrame } from '@/lib/players/scrub'
 import { warmPlaylistMovies } from '@/lib/playlist'
@@ -1271,9 +1273,6 @@ const editMap = computed(() => store.getters.editMap)
 const episodeMap = computed(() => store.getters.episodeMap)
 const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
-// Same intent as PreviewPlayer's readOnly prop: artists may watch
-// playlists but must not annotate or save.
-const readOnly = computed(() => isCurrentUserArtist.value)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 // Playlist-wide actions (share, notify clients, save, build) keep the
 // global role: playlists are read-only apart from comments/annotations,
@@ -1367,6 +1366,57 @@ const isCurrentTaskSupervisor = computed(() =>
     ? store.getters.currentUserRoleForProduction(task.value.project_id) ===
       'supervisor'
     : isCurrentUserSupervisor.value
+)
+const isCurrentTaskClient = computed(() =>
+  task.value?.project_id
+    ? store.getters.currentUserRoleForProduction(task.value.project_id) ===
+      'client'
+    : isCurrentUserClient.value
+)
+
+// The task type of the preview shown: its group in the playlist, as the
+// thumbnails read it, else its task once loaded.
+const currentPreviewTaskTypeId = computed(() => {
+  const entity = currentEntity.value
+  const groups = entity?.preview_files || {}
+  return (
+    Object.keys(groups).find(taskTypeId =>
+      groups[taskTypeId].some(
+        previewFile => previewFile.id === entity.preview_file_id
+      )
+    ) || task.value?.task_type_id
+  )
+})
+
+// The right to annotate, as in the task panel and in zou: managers, clients,
+// and the supervisors of the department of the task type. Artists watch.
+const readOnly = computed(
+  () =>
+    !(
+      isCurrentTaskManager.value ||
+      isCurrentTaskClient.value ||
+      isSupervisorInDepartments(
+        user.value,
+        isCurrentTaskSupervisor.value,
+        taskTypeMap.value.get(currentPreviewTaskTypeId.value)?.department_id
+      )
+    )
+)
+
+// Commenting is a right of its own, which artists do not get here.
+const canComment = computed(() => !isCurrentUserArtist.value)
+
+// A tool draws on a movie or a picture, for a user who may annotate it.
+const canAnnotateCurrentPreview = computed(
+  () => isCurrentPreviewAnnotatable.value && !readOnly.value
+)
+
+// The laser of a review room turns the pencil on for everyone and saves
+// nothing: on a movie or a picture, the pencil stays until the laser stops.
+const canKeepTools = computed(
+  () =>
+    canAnnotateCurrentPreview.value ||
+    (isLaserModeOn.value && isCurrentPreviewAnnotatable.value)
 )
 
 // Zou refuses the trim to artists, clients and department supervisors: their
@@ -1998,11 +2048,14 @@ const { isAltHeld } = usePreviewShortcuts({
   onPlayPause: () => togglePlayPause(),
   onPrevAnnotation: () => onPreviousDrawingClicked(),
   onNextAnnotation: () => onNextDrawingClicked(),
+  // A tool the user may not use still turns off.
   onAnnotate: () => {
-    if (isCurrentPreviewAnnotatable.value) onAnnotateClicked()
+    if (isDrawing.value || canAnnotateCurrentPreview.value) onAnnotateClicked()
   },
   onErase: () => {
-    if (isCurrentPreviewAnnotatable.value) onEraseClicked()
+    if (isEraserModeOn.value || canAnnotateCurrentPreview.value) {
+      onEraseClicked()
+    }
   },
   onUndo: () => undoLastAction(),
   onRedo: () => redoLastAction(),
@@ -2010,7 +2063,7 @@ const { isAltHeld } = usePreviewShortcuts({
   onNextPreview: () => onPlayNextEntityClicked(),
   onCopy: () => copyAnnotations(),
   onPaste: () => {
-    if (isCurrentPreviewAnnotatable.value) pasteAnnotations()
+    if (canAnnotateCurrentPreview.value) pasteAnnotations()
   },
   onToggleOverlay: () => toggleFullOverlayComparison()
 })
@@ -2505,7 +2558,7 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
     // stays off.
     if (wasDrawing && isPicturePreview(entity?.preview_file_extension)) {
       setPlayerTimeout(() => {
-        if (!isCurrentPreviewAnnotatable.value) return
+        if (!canAnnotateCurrentPreview.value) return
         isDrawing.value = true
         setAnnotationDrawingMode(true)
       }, 100)
@@ -3660,7 +3713,7 @@ const onFocusToggle = event => {
     if (
       fullScreen.value &&
       isCommentsHidden.value &&
-      !readOnly.value &&
+      (!readOnly.value || canComment.value) &&
       !isFullMode.value
     ) {
       event.preventDefault()
@@ -4981,12 +5034,13 @@ watch(isAnnotationsDisplayed, () => {
 })
 
 // A tool left on by a movie would draw over a sound or a document, where
-// nothing shows the drawing again. It waits for the render: the next entity
+// nothing shows the drawing again, or over a preview the user may not
+// annotate, where nothing saves it. It waits for the render: the next entity
 // shows no file until the file index of the previous one goes back to 0.
 watch(
-  isCurrentPreviewAnnotatable,
+  canKeepTools,
   () => {
-    if (isCurrentPreviewAnnotatable.value) return
+    if (canKeepTools.value) return
     if (isDrawing.value) onAnnotateClicked()
     else if (isTyping.value) onTypeClicked()
     else if (isEraserModeOn.value) onEraseClicked()
@@ -5333,8 +5387,13 @@ watch(isWaveformDisplayed, () => {
   nextTick(() => updateRoomStatus())
 })
 
+// The pencil the laser turned on goes off with it where the user may not keep
+// the tools, such as a document the laser started over.
 watch(isLaserModeOn, () => {
   if (!isDrawing.value && isLaserModeOn.value) onAnnotateClicked()
+  else if (isDrawing.value && !isLaserModeOn.value && !canKeepTools.value) {
+    onAnnotateClicked()
+  }
   updateRoomStatus()
 })
 

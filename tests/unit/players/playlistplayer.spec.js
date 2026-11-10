@@ -81,28 +81,32 @@ const mountPlayer = ({
   canEditShotTrim = () => true,
   isArtist = false,
   isClient = false,
+  isManager = true,
+  isSupervisor = false,
   organisation = {},
   props = {},
   previewFileMap = new Map(),
   previewFileStatusMap,
+  roleForProduction = () => 'manager',
   shotMap = new Map(),
   taskMap = new Map(),
   taskTypeMap = new Map(),
+  user = { id: 'user-1', timezone: 'Europe/Paris', departments: [] },
   stubs = {}
 } = {}) => {
   const store = createStore({
     getters: {
       canEditShotTrim: () => canEditShotTrim,
       currentProduction: () => ({ id: 'production-1', fps: '25' }),
-      currentUserRoleForProduction: () => () => 'manager',
+      currentUserRoleForProduction: () => roleForProduction,
       dateFormat: () => 'yyyy-MM-dd',
       editMap: () => new Map(),
       episodeMap: () => new Map(),
       isCurrentUserAdmin: () => false,
       isCurrentUserArtist: () => isArtist,
       isCurrentUserClient: () => isClient,
-      isCurrentUserManager: () => true,
-      isCurrentUserSupervisor: () => false,
+      isCurrentUserManager: () => isManager,
+      isCurrentUserSupervisor: () => isSupervisor,
       organisation: () => organisation,
       personMap: () => new Map(),
       previewFileMap: () => previewFileMap,
@@ -118,7 +122,7 @@ const mountPlayer = ({
       taskStatusMap: () => new Map(),
       taskTypeMap: () => taskTypeMap,
       use12HourClock: () => false,
-      user: () => ({ id: 'user-1', timezone: 'Europe/Paris' })
+      user: () => user
     }
   })
   store.dispatch = vi.fn(() => Promise.resolve())
@@ -3548,8 +3552,8 @@ describe('PlaylistPlayer.vue', () => {
     })
 
     // Like the comments button, which an artist does not get.
-    it('leaves the comments closed for an artist', async () => {
-      wrapper = mountPlayer({ isArtist: true })
+    it('leaves the comments closed for an artist who may not annotate', async () => {
+      wrapper = mountPlayer({ isArtist: true, isManager: false })
       await flushPromises()
       await goFullScreen()
 
@@ -3558,6 +3562,61 @@ describe('PlaylistPlayer.vue', () => {
 
       expect(event.defaultPrevented).toBe(false)
       expect(isPanelShown()).toBe(false)
+    })
+
+    // Commenting is a right of its own.
+    it('opens the comments of a preview a supervisor may not annotate', async () => {
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_files: { 'tt-comp': [{ id: 'preview-1' }] } }],
+        isManager: false,
+        isSupervisor: true,
+        taskTypeMap: new Map([['tt-comp', { id: 'tt-comp', department_id: 'comp' }]]),
+        user: { id: 'user-1', timezone: 'Europe/Paris', departments: ['anim'] }
+      })
+      await flushPromises()
+      await goFullScreen()
+
+      const event = pressShiftTab()
+      await flushPromises()
+
+      expect(event.defaultPrevented).toBe(true)
+      expect(isPanelShown()).toBe(true)
+    })
+
+    // A temporary playlist can mix productions.
+    it('opens the comments of a preview an artist may annotate elsewhere', async () => {
+      wrapper = mountPlayer({
+        entities: [
+          {
+            ...entity,
+            preview_file_task_id: 'task-2',
+            preview_files: { 'tt-anim': [{ id: 'preview-1' }] }
+          }
+        ],
+        isArtist: true,
+        isManager: false,
+        roleForProduction: productionId =>
+          productionId === 'production-2' ? 'supervisor' : 'user',
+        taskMap: new Map([
+          [
+            'task-2',
+            { id: 'task-2', project_id: 'production-2', task_type_id: 'tt-anim' }
+          ]
+        ]),
+        taskTypeMap: new Map([['tt-anim', { id: 'tt-anim', department_id: 'anim' }]]),
+        user: { id: 'user-1', timezone: 'Europe/Paris', departments: ['anim'] }
+      })
+      await flushPromises()
+      const bar = wrapper.findComponent({ name: 'PlayerAnnotationBar' })
+      expect(bar.props('readOnly')).toBe(false)
+      expect(bar.props('canComment')).toBe(false)
+      await goFullScreen()
+
+      const event = pressShiftTab()
+      await flushPromises()
+
+      expect(event.defaultPrevented).toBe(true)
+      expect(isPanelShown()).toBe(true)
     })
 
     // Like the comments button, which the full mode of a build hides.
@@ -3613,5 +3672,245 @@ describe('PlaylistPlayer.vue', () => {
       expect(event.defaultPrevented).toBe(false)
       expect(isPanelShown()).toBe(true)
     })
+  })
+
+  // As the task panel and Zou: a supervisor annotates the previews of the
+  // task types of their departments only. Zou refused the others with a 403
+  // and the drawing was lost.
+  describe('annotations of a supervisor', () => {
+    const movieOf = (id, taskTypeId, extension = 'mp4') => ({
+      id,
+      preview_file_id: `${id}-preview`,
+      preview_file_task_id: `${id}-task`,
+      preview_file_extension: extension,
+      preview_files: {
+        [taskTypeId]: [{ id: `${id}-preview`, revision: 1, extension }]
+      }
+    })
+    const animationShot = movieOf('shot-1', 'tt-anim')
+    const compositingShot = movieOf('shot-2', 'tt-comp')
+    const taskTypeMap = new Map([
+      ['tt-anim', { id: 'tt-anim', name: 'Animation', department_id: 'anim' }],
+      ['tt-comp', { id: 'tt-comp', name: 'Compositing', department_id: 'comp' }]
+    ])
+    const animationSupervisor = {
+      id: 'user-1',
+      timezone: 'Europe/Paris',
+      departments: ['anim']
+    }
+
+    const annotationBar = () =>
+      wrapper.findComponent({ name: 'PlayerAnnotationBar' })
+    const press = init =>
+      window.dispatchEvent(new KeyboardEvent('keydown', init))
+
+    const mountAsSupervisor = async (entities, options = {}) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({
+        entities,
+        isManager: false,
+        isSupervisor: true,
+        taskTypeMap,
+        user: animationSupervisor,
+        stubs: { AnnotationCanvas: annotationCanvasStub(createFakeCanvas()) },
+        ...options
+      })
+      await flushPromises()
+    }
+
+    const goToNextShot = async () => {
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button =>
+            button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      // The pencil of a picture comes back after 100 ms.
+      await vi.advanceTimersByTimeAsync(100)
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+      clipboard.copyAnnotations([])
+    })
+
+    it('lets them annotate a preview of their department', async () => {
+      await mountAsSupervisor([animationShot])
+
+      expect(annotationBar().props('readOnly')).toBe(false)
+    })
+
+    it('keeps them from annotating a preview of another department', async () => {
+      await mountAsSupervisor([compositingShot])
+
+      expect(annotationBar().props('readOnly')).toBe(true)
+      // Commenting is a right of its own.
+      expect(annotationBar().props('canComment')).toBe(true)
+    })
+
+    it('lets a supervisor without department annotate any preview', async () => {
+      await mountAsSupervisor([compositingShot], {
+        user: { ...animationSupervisor, departments: [] }
+      })
+
+      expect(annotationBar().props('readOnly')).toBe(false)
+    })
+
+    // A temp playlist can mix productions.
+    it('reads the role held in the production of the task', async () => {
+      await mountAsSupervisor([compositingShot], {
+        isManager: true,
+        isSupervisor: false,
+        roleForProduction: productionId =>
+          productionId === 'production-2' ? 'supervisor' : 'manager',
+        taskMap: new Map([
+          [
+            'shot-2-task',
+            { id: 'shot-2-task', project_id: 'production-2', task_type_id: 'tt-comp' }
+          ]
+        ])
+      })
+
+      expect(annotationBar().props('readOnly')).toBe(true)
+    })
+
+    // The laser of a review room turns the pencil on for everyone.
+    it('turns the pencil off once the laser of the room stops', async () => {
+      await mountAsSupervisor([compositingShot])
+      annotationBar().vm.$emit('update:isLaserModeOn', true)
+      await flushPromises()
+      expect(annotationBar().props('isDrawing')).toBe(true)
+
+      annotationBar().vm.$emit('update:isLaserModeOn', false)
+      await flushPromises()
+
+      expect(annotationBar().props('isDrawing')).toBe(false)
+    })
+
+    it('keeps the laser of the room on a preview of another department', async () => {
+      await mountAsSupervisor([animationShot, compositingShot])
+      annotationBar().vm.$emit('update:isLaserModeOn', true)
+      await flushPromises()
+
+      await goToNextShot()
+
+      expect(wrapper.vm.playingEntityIndex).toBe(1)
+      expect(annotationBar().props('isLaserModeOn')).toBe(true)
+      expect(annotationBar().props('isDrawing')).toBe(true)
+
+      annotationBar().vm.$emit('update:isLaserModeOn', false)
+      await flushPromises()
+
+      expect(annotationBar().props('isDrawing')).toBe(false)
+    })
+
+    it('turns the laser off on a document after a preview of another department', async () => {
+      await mountAsSupervisor([
+        animationShot,
+        compositingShot,
+        movieOf('shot-3', 'tt-comp', 'pdf')
+      ])
+      annotationBar().vm.$emit('update:isLaserModeOn', true)
+      await flushPromises()
+      await goToNextShot()
+      expect(annotationBar().props('isDrawing')).toBe(true)
+
+      await goToNextShot()
+
+      expect(wrapper.vm.playingEntityIndex).toBe(2)
+      expect(annotationBar().props('isDrawing')).toBe(false)
+      expect(annotationBar().props('isLaserModeOn')).toBe(false)
+    })
+
+    it('keeps the pencil once the laser stops on a preview of their department', async () => {
+      await mountAsSupervisor([animationShot])
+      annotationBar().vm.$emit('update:isLaserModeOn', true)
+      await flushPromises()
+      annotationBar().vm.$emit('update:isLaserModeOn', false)
+      await flushPromises()
+
+      expect(annotationBar().props('isDrawing')).toBe(true)
+    })
+
+    it('turns the pencil off once the laser stops on a document', async () => {
+      await mountAsSupervisor([movieOf('shot-3', 'tt-comp', 'pdf')])
+      annotationBar().vm.$emit('update:isLaserModeOn', true)
+      await flushPromises()
+      expect(annotationBar().props('isDrawing')).toBe(true)
+
+      annotationBar().vm.$emit('update:isLaserModeOn', false)
+      await flushPromises()
+
+      expect(annotationBar().props('isDrawing')).toBe(false)
+    })
+
+    it('lets D turn the pencil off on a preview of another department', async () => {
+      await mountAsSupervisor([compositingShot])
+      annotationBar().vm.$emit('update:isLaserModeOn', true)
+      await flushPromises()
+
+      press({ key: 'd' })
+      await flushPromises()
+
+      expect(annotationBar().props('isDrawing')).toBe(false)
+    })
+
+    it('turns the pencil off on a preview of another department', async () => {
+      await mountAsSupervisor([animationShot, compositingShot])
+      annotationBar().vm.$emit('pencil-annotate-clicked')
+      await flushPromises()
+      expect(annotationBar().props('isDrawing')).toBe(true)
+
+      await goToNextShot()
+
+      expect(wrapper.vm.playingEntityIndex).toBe(1)
+      expect(annotationBar().props('isDrawing')).toBe(false)
+    })
+
+    it('keeps the pencil of a picture off on a picture of another department', async () => {
+      await mountAsSupervisor([
+        movieOf('shot-1', 'tt-anim', 'png'),
+        movieOf('shot-2', 'tt-comp', 'png')
+      ])
+      annotationBar().vm.$emit('pencil-annotate-clicked')
+      await flushPromises()
+
+      await goToNextShot()
+
+      expect(wrapper.vm.playingEntityIndex).toBe(1)
+      expect(annotationBar().props('isDrawing')).toBe(false)
+    })
+
+    it('pastes no annotation on a preview of another department', async () => {
+      const canvas = { ...createFakeCanvas(), setActiveObject: vi.fn() }
+      await mountAsSupervisor([compositingShot], {
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      clipboard.copyAnnotations({
+        mainObject: { clone: async () => ({ left: 0, top: 0, set: vi.fn() }) },
+        subObjects: []
+      })
+
+      press({ key: 'v', ctrlKey: true })
+      await flushPromises()
+
+      expect(canvas.add).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      ['d', 'isDrawing'],
+      ['e', 'isEraserModeOn']
+    ])(
+      'turns no tool on with the %s key on a preview of another department',
+      async (key, prop) => {
+        await mountAsSupervisor([compositingShot])
+
+        press({ key })
+        await flushPromises()
+
+        expect(annotationBar().props(prop)).toBe(false)
+      }
+    )
   })
 })
