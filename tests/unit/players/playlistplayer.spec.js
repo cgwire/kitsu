@@ -1408,6 +1408,189 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // A 3D model left while it loaded still lands in the hidden viewer, with
+  // something else on screen.
+  describe('3D model loaded while another preview is shown', () => {
+    const model = {
+      id: 'shot-5',
+      preview_file_id: 'preview-5',
+      preview_file_extension: 'glb'
+    }
+    const picture = {
+      id: 'shot-3',
+      preview_file_id: 'preview-3',
+      preview_file_extension: 'png'
+    }
+    const sound = {
+      id: 'shot-4',
+      preview_file_id: 'preview-4',
+      preview_file_extension: 'mp3'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountOnModel = async (entities = [model, picture, sound]) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({
+        entities,
+        stubs: {
+          ObjectViewer: withMethods(['pause', 'play'], {
+            getAnimations: () => ['walk']
+          }),
+          SoundViewer: { ...withMethods(['pause', 'play']), name: 'SoundViewer' }
+        }
+      })
+      await flushPromises()
+    }
+
+    const clickButton = async title => {
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('title') === title)
+        .vm.$emit('click')
+      await flushPromises()
+    }
+    const goToPicture = () => clickButton('playlists.actions.next_shot')
+    const goBackToModel = () => clickButton('playlists.actions.previous_shot')
+
+    const playbackBar = () => wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+    const modelViewer = () => wrapper.findComponent({ ref: 'object-player' })
+    const landModel = async () => {
+      modelViewer().vm.$emit('model-loaded')
+      await flushPromises()
+    }
+    const soundViewer = () => wrapper.findComponent({ name: 'SoundViewer' })
+    const soundShown = () => soundViewer().exists()
+
+    // Back on a model shown before, the viewer loads it again. Its animation
+    // keeps its name: only the load can start it.
+    it('plays the animation of a model loaded on screen', async () => {
+      await mountOnModel()
+      await landModel()
+      playbackBar().vm.$emit('play-pause-clicked')
+      await goToPicture()
+      await goBackToModel()
+      expect(playbackBar().props('isPlaying')).toBe(false)
+      const play = vi.spyOn(modelViewer().vm, 'play')
+
+      await landModel()
+
+      expect(playbackBar().props('isPlaying')).toBe(true)
+      expect(play).toHaveBeenCalledWith('walk')
+    })
+
+    // Back on the model, no load comes: its animations are kept for then.
+    it('stays paused when the model lands while a picture is shown', async () => {
+      await mountOnModel()
+      await goToPicture()
+      const play = vi.spyOn(modelViewer().vm, 'play')
+
+      await landModel()
+
+      expect(playbackBar().props('isPlaying')).toBe(false)
+      expect(play).not.toHaveBeenCalled()
+      expect(playbackBar().props('available3DAnimations')).toEqual([
+        { label: 'walk', value: 'walk' }
+      ])
+    })
+
+    // Paused, the return fires no load: the animation waits for Play.
+    it('stays paused back on a model that landed while hidden', async () => {
+      await mountOnModel()
+      await goToPicture()
+      await landModel()
+      const play = vi.spyOn(modelViewer().vm, 'play')
+
+      await goBackToModel()
+
+      expect(playbackBar().props('isPlaying')).toBe(false)
+      expect(play).not.toHaveBeenCalled()
+    })
+
+    it('goes on playing the picture when the model lands', async () => {
+      await mountOnModel()
+      await goToPicture()
+      playbackBar().vm.$emit('play-pause-clicked')
+      await vi.advanceTimersByTimeAsync(200)
+
+      await landModel()
+      await vi.advanceTimersByTimeAsync(2000)
+
+      expect(soundShown()).toBe(true)
+    })
+
+    it('plays the animation when the playlist comes back to the model', async () => {
+      await mountOnModel()
+      await goToPicture()
+      playbackBar().vm.$emit('play-pause-clicked')
+      await vi.advanceTimersByTimeAsync(200)
+      await landModel()
+      await vi.advanceTimersByTimeAsync(2000)
+      const play = vi.spyOn(modelViewer().vm, 'play')
+
+      soundViewer().vm.$emit('play-ended')
+      await flushPromises()
+
+      expect(playbackBar().props('isPlaying')).toBe(true)
+      expect(play).toHaveBeenCalledWith('walk')
+    })
+
+    it('stays on a model moved to by hand while a picture plays', async () => {
+      await mountOnModel()
+      await goToPicture()
+      playbackBar().vm.$emit('play-pause-clicked')
+      await vi.advanceTimersByTimeAsync(200)
+
+      await goBackToModel()
+      await vi.advanceTimersByTimeAsync(2000)
+
+      expect(wrapper.vm.playingEntityIndex).toBe(0)
+    })
+
+    it('stays paused when a pause follows the move to the model', async () => {
+      await mountOnModel()
+      await goToPicture()
+      await landModel()
+      playbackBar().vm.$emit('play-pause-clicked')
+      await vi.advanceTimersByTimeAsync(200)
+      const play = vi.spyOn(modelViewer().vm, 'play')
+
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button =>
+            button.attributes('title') === 'playlists.actions.previous_shot'
+        )
+        .vm.$emit('click')
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+
+      expect(playbackBar().props('isPlaying')).toBe(false)
+      expect(play).not.toHaveBeenCalled()
+    })
+
+    // A playlist of one entry comes back to it at the end of its picture.
+    it('keeps a hidden model still when the playlist comes back to its entry', async () => {
+      await mountOnModel([
+        {
+          ...model,
+          preview_file_previews: [{ id: 'preview-6', extension: 'png' }]
+        }
+      ])
+      await goToPicture()
+      expect(wrapper.vm.currentPreviewIndex).toBe(1)
+      await landModel()
+      const play = vi.spyOn(modelViewer().vm, 'play')
+
+      playbackBar().vm.$emit('play-pause-clicked')
+      await vi.advanceTimersByTimeAsync(2500)
+
+      expect(play).not.toHaveBeenCalled()
+    })
+  })
+
   // Like an entity without preview, it keeps its slot on the strip, 3 s
   // here, then the playlist moves on, repeat on or not.
   describe('movie that cannot be read', () => {

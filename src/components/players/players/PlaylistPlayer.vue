@@ -1017,6 +1017,7 @@ import {
   buildAnnotationSnapshotFilename,
   buildAnnotationSnapshotTitle,
   drawSnapshotTitle,
+  isModelPreview,
   isMoviePreview,
   isPicturePreview,
   isSoundPreview,
@@ -2576,6 +2577,13 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
         !entity.preview_file_id
       ) {
         playPicture()
+      } else if (isModelPreview(entity.preview_file_extension)) {
+        // The viewer gets the model on the next render. One that landed
+        // while hidden fires no load then: nothing else starts its animation.
+        // Back on the same entry, another of its files can still be on screen.
+        nextTick(() => {
+          if (isPlaying.value && isCurrentPreviewModel.value) playModel()
+        })
       }
     }
   }
@@ -4141,7 +4149,9 @@ const onModelLoaded = () => {
       value: a
     }))
     objectModel.value.currentAnimation = animations[0]
-    nextTick(() => playModel())
+    // A model left while it loaded lands in the hidden viewer. Its
+    // animations stay for a return, which fires no load.
+    if (isCurrentPreviewModel.value) nextTick(() => playModel())
   } else {
     objectModel.value.availableAnimations = []
     objectModel.value.currentAnimation = null
