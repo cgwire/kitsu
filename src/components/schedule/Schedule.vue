@@ -1842,8 +1842,12 @@ const addToSelection = itemToAdd => {
   selection.value.push(itemToAdd)
 }
 
+// the selection holds reactive proxies, and a page can pass plain objects
+// (the person page builds its rows in a computed)
 const removeFromSelection = itemToRemove => {
-  selection.value = selection.value.filter(item => item !== itemToRemove)
+  selection.value = selection.value.filter(
+    item => toRaw(item) !== toRaw(itemToRemove)
+  )
 }
 
 const resetSelection = value => {

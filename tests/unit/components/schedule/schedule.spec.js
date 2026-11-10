@@ -1,7 +1,14 @@
 import { mount } from '@vue/test-utils'
 import moment from 'moment'
 import { vi } from 'vitest'
-import { isReactive, nextTick, reactive, toRaw } from 'vue'
+import {
+  defineComponent,
+  h,
+  isReactive,
+  nextTick,
+  reactive,
+  toRaw
+} from 'vue'
 
 const { milestonesByDate, organisation } = vi.hoisted(() => ({
   // mutated by the milestone tests: the milestones of each date
@@ -1415,6 +1422,65 @@ describe('Schedule widget - selected bars and their objects', () => {
     expect(wrapper.findAll('.timebar.selected')).toHaveLength(2)
 
     await secondRowBar.trigger('mousedown', { clientX: 300, ctrlKey: true })
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 300, ctrlKey: true })
+    )
+    await nextTick()
+
+    expect(wrapper.findAll('.timebar.selected')).toHaveLength(0)
+    wrapper.unmount()
+  })
+
+  // The person page builds its rows in a computed, as plain objects, while
+  // the selection holds reactive proxies of them. mount() would make rows
+  // passed as props reactive, so a parent component passes them.
+  const mountPlainRows = rows =>
+    mount(
+      defineComponent({
+        render: () =>
+          h(Schedule, {
+            startDate: moment.utc('2026-08-01'),
+            endDate: moment.utc('2026-10-31'),
+            hierarchy: rows,
+            zoomLevel: 1,
+            isEstimationLinked: true,
+            withMilestones: false,
+            isLoading: false
+          })
+      }),
+      { global: { stubs: { RouterLink: true } }, attachTo: document.body }
+    )
+
+  const buildProjectRows = dates => {
+    const project = {
+      id: 'production-1',
+      name: 'Production',
+      color: '#4a90e2',
+      editable: false,
+      expanded: true,
+      loading: false,
+      startDate: moment.utc('2026-08-03'),
+      endDate: moment.utc('2026-08-31'),
+      daysOff: [],
+      children: []
+    }
+    project.children = dates.map((range, index) =>
+      buildTask(index, range, project)
+    )
+    return [project]
+  }
+
+  it('deselects a bar on a Ctrl+click when the page passes plain rows', async () => {
+    const wrapper = mountPlainRows(
+      buildProjectRows([['2026-08-03', '2026-08-03']])
+    )
+    const schedule = wrapper.findComponent(Schedule)
+    expect(isReactive(schedule.props('hierarchy'))).toBe(false)
+    const [bar] = taskBars(wrapper)
+    await selectBar(wrapper, bar)
+    expect(wrapper.findAll('.timebar.selected')).toHaveLength(1)
+
+    await bar.trigger('mousedown', { clientX: 300, ctrlKey: true })
     document.dispatchEvent(
       new MouseEvent('mouseup', { bubbles: true, clientX: 300, ctrlKey: true })
     )
