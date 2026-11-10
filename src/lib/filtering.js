@@ -505,7 +505,7 @@ export const getTaskTypeFilters = (taskTypes, taskStatuses, queryText) => {
             assigned: true,
             type: 'assignation'
           })
-        } else if (value === 'empty') {
+        } else if (value === 'empty' && !taskStatusShortNameIndex.empty) {
           results.push({
             taskType: matchedTaskTypes[0],
             taskTypes: matchedTaskTypes,

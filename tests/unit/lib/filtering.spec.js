@@ -369,6 +369,24 @@ describe('lib/filtering', () => {
           'shot-with-task'
         ])
       })
+
+      it('filters on a status named empty rather than the keyword', () => {
+        const filters = getFilters({
+          entryIndex,
+          assetTypes,
+          taskTypes: animTaskTypes,
+          taskStatuses: [
+            ...taskStatuses,
+            { id: 'task-status-empty', short_name: 'empty' }
+          ],
+          descriptors,
+          persons,
+          query: '[anim body]=empty'
+        })
+        expect(filters).toHaveLength(1)
+        expect(filters[0].type).toBe('status')
+        expect(filters[0].taskStatuses).toEqual(['task-status-empty'])
+      })
     })
 
     describe('archived task type sharing a live task type name', () => {
