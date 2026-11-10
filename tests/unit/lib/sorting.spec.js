@@ -1037,21 +1037,25 @@ describe('lib/sorting', () => {
     expect(results).toHaveLength(2)
   })
 
-  // The list given is the episode list of the topbar (#2322).
-  it('sortEpisodeResult leaves the given list in its order', () => {
+  // The arrows of the detail pages walk the cached list a list page sorts:
+  // sorted as a copy, it would keep its load order.
+  it('sortEpisodeResult sorts the given list in place', () => {
     const episodes = [
       { id: 'ep-1', name: 'E01', canceled: false, data: { order: '2' } },
       { id: 'ep-2', name: 'E02', canceled: false, data: { order: '1' } }
     ]
 
-    const results = sortEpisodeResult(
+    const sorted = sortEpisodeResult(
       episodes,
       [{ type: 'metadata', column: 'order', ascending: true }],
       taskTypeMap,
       new Map()
     )
+    expect(sorted).toBe(episodes)
+    expect(episodes.map(e => e.id)).toEqual(['ep-2', 'ep-1'])
 
-    expect(results.map(e => e.id)).toEqual(['ep-2', 'ep-1'])
+    const unsorted = sortEpisodeResult(episodes, [], taskTypeMap, new Map())
+    expect(unsorted).toBe(episodes)
     expect(episodes.map(e => e.id)).toEqual(['ep-1', 'ep-2'])
   })
 

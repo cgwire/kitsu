@@ -1032,6 +1032,91 @@ describe('Episodes store, through a store', () => {
     ])
   })
 
+  describe('list sorted by the Episodes page', () => {
+    const sortInfo = {
+      type: 'metadata',
+      column: 'prod_order',
+      data_type: 'number',
+      ascending: true
+    }
+    const buildEpisodes = () => [
+      { id: 'ep1', name: 'E01', data: { prod_order: '2' }, tasks: [] },
+      { id: 'ep2', name: 'E02', data: { prod_order: '3' }, tasks: [] },
+      { id: 'ep3', name: 'E03', data: { prod_order: '1' }, tasks: [] }
+    ]
+    const loadWithTasks = (store, episodes) =>
+      store.commit('SET_EPISODES_WITH_TASKS', {
+        production,
+        episodes,
+        userFilters: {},
+        taskMap: new Map(),
+        taskTypeMap: new Map(),
+        personMap: new Map(),
+        taskStatusMap: new Map()
+      })
+    const selectorLabels = store =>
+      store.getters.episodeOptionGroups.flatMap(({ episodeList }) =>
+        episodeList.map(({ label }) => label)
+      )
+
+    // After a plain list load, the page and the topbar selector start from
+    // the same episodes: a sort of the page must stay on the page.
+    test('keeps the topbar selector by name', async () => {
+      const { store } = await buildStore()
+      loadEpisodes(store, buildEpisodes())
+      const labels = computed(() => selectorLabels(store))
+      expect(labels.value).toEqual(['E01', 'E02', 'E03'])
+
+      await store.dispatch('changeEpisodeSort', sortInfo)
+
+      expect(names(store.getters.displayedEpisodes)).toEqual([
+        'E03',
+        'E01',
+        'E02'
+      ])
+      expect(labels.value).toEqual(['E01', 'E02', 'E03'])
+    })
+
+    // The sort outlives the list: the next production gets it through the
+    // search the page applies on its arrival.
+    test('keeps the selector by name when a search reapplies the sort', async () => {
+      const { store } = await buildStore()
+      loadEpisodes(store, buildEpisodes())
+      await store.dispatch('changeEpisodeSort', sortInfo)
+      store.commit('CLEAR_EPISODES')
+      loadEpisodes(store, buildEpisodes())
+
+      await store.dispatch('setEpisodeSearch', '')
+
+      expect(selectorLabels(store)).toEqual(['E01', 'E02', 'E03'])
+    })
+
+    // The arrows of the episode and task pages walk the cached list.
+    test.each([
+      ['a plain list', loadEpisodes],
+      ['a list with tasks', loadWithTasks]
+    ])('keeps %s cached in the order of its rows', async (_, load) => {
+      const { module, store } = await buildStore()
+      load(store, buildEpisodes())
+
+      await store.dispatch('changeEpisodeSort', sortInfo)
+
+      expect(names(module.cache.episodes)).toEqual(['E03', 'E01', 'E02'])
+    })
+
+    test('shows a sort reapplied to a list loaded with tasks', async () => {
+      const { store } = await buildStore()
+      await store.dispatch('changeEpisodeSort', sortInfo)
+      loadWithTasks(store, buildEpisodes())
+      const rows = computed(() => names(store.getters.displayedEpisodes))
+      expect(rows.value).toEqual(['E01', 'E02', 'E03'])
+
+      await store.dispatch('setEpisodeSearch', '')
+
+      expect(rows.value).toEqual(['E03', 'E01', 'E02'])
+    })
+  })
+
   test('loads the episode stats and their task type columns', async () => {
     const taskTypeMap = new Map([
       ['tt-anim', { id: 'tt-anim', name: 'Animation', priority: 2 }],

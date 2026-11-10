@@ -84,7 +84,8 @@ const helpers = {
     result = sortEpisodeResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
 
-    const displayedEpisodes = result
+    // A new array: the sort works in place, and the same one reaches no render.
+    const displayedEpisodes = [...result]
 
     helpers.setListStats(state, result)
     Object.assign(state, {
@@ -686,10 +687,10 @@ const mutations = {
   },
 
   [ADD_EPISODE](state, episode) {
-    // Each list copied from itself: after LOAD_EPISODES_END the lists are
-    // the same array, and pushing into each in place inserted the episode
-    // twice, while the Episodes page keeps its rows with tasks in
-    // cache.episodes only and must not get the plain list instead.
+    // Each list copied from itself: after LOAD_EPISODES_END state.episodes and
+    // the displayed list are the same array, and pushing into each in place
+    // inserted the episode twice, while the Episodes page keeps its rows with
+    // tasks in cache.episodes only and must not get the plain list instead.
     cache.episodeMap.set(episode.id, episode)
     state.episodes = sortByName([...state.episodes, episode])
     cache.episodes = sortByName([...cache.episodes, episode])
@@ -821,8 +822,10 @@ const mutations = {
     })
     state.episodes = sortByName(episodes)
 
-    cache.episodes = state.episodes
-    cache.result = state.episodes
+    // Its own array: the Episodes page sorts this one in place, and the topbar
+    // selector reads state.episodes.
+    cache.episodes = [...state.episodes]
+    cache.result = cache.episodes
     cache.episodeIndex = buildEpisodeIndex(state.episodes)
 
     state.displayedEpisodes = state.episodes

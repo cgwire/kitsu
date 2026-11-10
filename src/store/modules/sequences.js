@@ -86,7 +86,8 @@ const helpers = {
     result = sortSequenceResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
 
-    const displayedSequences = result
+    // A new array: the sort works in place, and the same one reaches no render.
+    const displayedSequences = [...result]
 
     helpers.setListStats(state, result)
     Object.assign(state, {
