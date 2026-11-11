@@ -30,12 +30,14 @@ vi.mock('@/store/api/tasks', () => ({
     deleteTaskComment: vi.fn(),
     getTask: vi.fn(),
     getTaskComment: vi.fn(),
+    getPreviewFile: vi.fn(),
     getTaskComments: vi.fn(),
     uploadPreview: vi.fn(),
     setLastTaskPreviewAsEntityThumbnail: vi.fn(),
     setPreview: vi.fn(),
     pinComment: vi.fn(),
     updatePreviewAnnotation: vi.fn(),
+    updatePreviewTrim: vi.fn(),
     updateTask: vi.fn(),
     unassignPersonFromTasks: vi.fn(() => Promise.resolve()),
     createEntityTasks: vi.fn(() =>
@@ -2585,5 +2587,112 @@ describe('Tasks store, refused task edits', () => {
     await Promise.all([first, second])
 
     expect(task.estimation).toBe(720)
+  })
+})
+
+// The extra previews of a revision keep their own in/out handles, and the
+// same preview file shows in the comments and in the revision previews.
+describe('Tasks store, extra preview trims', () => {
+  const buildStore = () => {
+    const store = createStore({
+      modules: { tasks: { ...tasksStore, state: { ...tasksStore.state } } }
+    })
+    store.commit('LOAD_TASK_COMMENTS_END', {
+      taskId: 'task-1',
+      comments: [
+        {
+          id: 'comment-1',
+          object_id: 'task-1',
+          person: {},
+          previews: [
+            { id: 'preview-1', task_id: 'task-1', revision: 1, position: 1 },
+            {
+              id: 'preview-2',
+              task_id: 'task-1',
+              revision: 1,
+              position: 2,
+              handle_in: 4,
+              handle_out: 40
+            }
+          ]
+        }
+      ]
+    })
+    return store
+  }
+
+  const subPreviews = store => [
+    ...store.state.tasks.taskComments['task-1'].flatMap(c => c.previews),
+    ...store.state.tasks.taskPreviews['task-1'].flatMap(p => p.previews)
+  ]
+  const trimsOf = (store, id) =>
+    subPreviews(store)
+      .filter(p => p.id === id)
+      .map(p => [p.handle_in, p.handle_out])
+
+  test('loads the trim of each revision preview', () => {
+    const store = buildStore()
+    const [revision] = store.state.tasks.taskPreviews['task-1']
+    expect(revision.previews.map(p => [p.handle_in, p.handle_out])).toEqual([
+      [null, null],
+      [4, 40]
+    ])
+  })
+
+  test('updatePreviewTrim sets the trim on every copy of the preview', async () => {
+    const store = buildStore()
+    tasksApi.updatePreviewTrim.mockResolvedValueOnce({})
+    const [revision] = store.state.tasks.taskPreviews['task-1']
+
+    await store.dispatch('updatePreviewTrim', {
+      preview: revision.previews[1],
+      trim: { handle_in: 8 }
+    })
+
+    expect(tasksApi.updatePreviewTrim).toHaveBeenCalledWith('preview-2', {
+      handle_in: 8
+    })
+    expect(trimsOf(store, 'preview-2').every(([i, o]) => i === 8 && o === 40)).toBe(
+      true
+    )
+  })
+
+  test('updatePreviewTrim puts the trim back when the save fails', async () => {
+    const store = buildStore()
+    const error = new Error('HTTP 403')
+    tasksApi.updatePreviewTrim.mockRejectedValueOnce(error)
+    const [revision] = store.state.tasks.taskPreviews['task-1']
+
+    await expect(
+      store.dispatch('updatePreviewTrim', {
+        preview: revision.previews[1],
+        trim: { handle_out: null }
+      })
+    ).rejects.toBe(error)
+
+    expect(trimsOf(store, 'preview-2').every(([i, o]) => i === 4 && o === 40)).toBe(
+      true
+    )
+  })
+
+  // Another user moved the handles.
+  test('refreshPreview takes the trim stored in the preview data', async () => {
+    const store = buildStore()
+    tasksApi.getPreviewFile.mockResolvedValueOnce({
+      id: 'preview-2',
+      task_id: 'task-1',
+      annotations: [],
+      status: 'ready',
+      data: { movie_prefixes: ['previews'], handle_in: 12 }
+    })
+
+    await store.dispatch('refreshPreview', {
+      taskId: 'task-1',
+      previewId: 'preview-2'
+    })
+
+    expect(
+      trimsOf(store, 'preview-2').every(([i, o]) => i === 12 && o === null)
+    ).toBe(true)
   })
 })

@@ -61,6 +61,7 @@ import {
   REMOVE_FAILED_COMMENT,
   CHANGE_PREVIEW_END,
   UPDATE_PREVIEW_ANNOTATION,
+  UPDATE_PREVIEW_TRIM,
   UPDATE_PREVIEW_VALIDATION_STATUS,
   ADD_SELECTED_TASK,
   ADD_SELECTED_TASKS,
@@ -1002,7 +1003,30 @@ const actions = {
         preview,
         annotations: preview.annotations
       })
+      // The trim of an extra preview lives in its data: another user may
+      // have moved its handles.
+      const data = preview.data || {}
+      commit(UPDATE_PREVIEW_TRIM, {
+        preview: { id: preview.id, task_id: taskId },
+        trim: {
+          handle_in: data.handle_in ?? null,
+          handle_out: data.handle_out ?? null
+        }
+      })
       return preview
+    })
+  },
+
+  // In/out handles of an extra preview of a revision. The main preview
+  // keeps using the trim of its shot.
+  updatePreviewTrim({ commit }, { preview, trim }) {
+    const previousTrim = Object.fromEntries(
+      Object.keys(trim).map(key => [key, preview[key] ?? null])
+    )
+    commit(UPDATE_PREVIEW_TRIM, { preview, trim })
+    return tasksApi.updatePreviewTrim(preview.id, trim).catch(err => {
+      commit(UPDATE_PREVIEW_TRIM, { preview, trim: previousTrim })
+      throw err
     })
   },
 
@@ -1265,7 +1289,9 @@ const mutations = {
               position: p.position,
               duration: p.duration,
               original_name: p.original_name,
-              validation_status: p.validation_status
+              validation_status: p.validation_status,
+              handle_in: p.handle_in ?? null,
+              handle_out: p.handle_out ?? null
             }
             return prev
           })
@@ -1491,6 +1517,20 @@ const mutations = {
     subPreviews
       .filter(p => p.id === previewFile.id)
       .forEach(p => (p.validation_status = status))
+  },
+
+  // The same preview file shows in the comments and in the revision
+  // previews of its task, and the player may hold yet another copy.
+  [UPDATE_PREVIEW_TRIM](state, { preview, trim }) {
+    const taskId = preview.task_id
+    const subPreviews = [
+      preview,
+      ...(state.taskComments[taskId] || []).flatMap(c => c.previews || []),
+      ...(state.taskPreviews[taskId] || []).flatMap(p => p.previews || [])
+    ]
+    subPreviews
+      .filter(p => p.id === preview.id)
+      .forEach(p => Object.assign(p, trim))
   },
 
   [UPDATE_PREVIEW_ANNOTATION](state, { taskId, preview, annotations }) {
