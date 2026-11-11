@@ -504,6 +504,47 @@ describe('TaskType page', () => {
       expect(list.props('tasks')).not.toBe(listedTasks)
     })
 
+    // The refresh empties the selection and expects an empty search field: it
+    // gives way to a task selected, or a search typed, after the update.
+    const refreshAfter = async (change, getters = {}) => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      const clearSelectedTasks = vi.fn()
+      await mountTasks('', getters, { actions: { clearSelectedTasks }, socket })
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      clearSelectedTasks.mockClear()
+
+      onTaskUpdate({ task_id: 'task-10' })
+      change()
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+      return clearSelectedTasks
+    }
+
+    it('keeps a task selected right after a remote update', async () => {
+      const nbSelected = ref(0)
+      const clearSelectedTasks = await refreshAfter(
+        () => (nbSelected.value = 1),
+        { nbSelectedTasks: () => nbSelected.value }
+      )
+
+      expect(clearSelectedTasks).not.toHaveBeenCalled()
+    })
+
+    it('skips the refresh of a search typed right after a remote update', async () => {
+      const getValue = vi.spyOn(SearchFieldStub.methods, 'getValue')
+      try {
+        const clearSelectedTasks = await refreshAfter(() =>
+          getValue.mockReturnValue('chair')
+        )
+
+        expect(clearSelectedTasks).not.toHaveBeenCalled()
+      } finally {
+        getValue.mockRestore()
+      }
+    })
+
     // The schedule resets its scroll each time it shows. A press on the bars
     // left from an earlier show, while the rows of a new range load, works
     // in the timeline as it is: the rows built after the drop keep its
