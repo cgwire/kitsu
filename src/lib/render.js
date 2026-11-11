@@ -1,4 +1,4 @@
-import { marked } from 'marked'
+import { Marked } from 'marked'
 import { markedEmoji } from 'marked-emoji'
 import sanitizeHTML from 'sanitize-html'
 
@@ -9,7 +9,20 @@ const markedEmojiOptions = {
   emojis,
   renderer: token => token.emoji
 }
-marked.use(markedEmoji(markedEmojiOptions))
+
+// A markdown escape drops the backslash before a punctuation mark, which
+// broke the Windows paths typed in comments (8_anim\_lib, \\server\share):
+// show it as typed. Markdown files keep the standard escapes (allowEscapes).
+const keepEscapeBackslash = {
+  walkTokens: token => {
+    if (token.type === 'escape') token.text = token.raw
+  }
+}
+const textMarked = new Marked(
+  markedEmoji(markedEmojiOptions),
+  keepEscapeBackslash
+)
+const fileMarked = new Marked(markedEmoji(markedEmojiOptions))
 
 export const TIME_CODE_REGEX = /v(\d+) (\d+:)?(\d+):(\d+)(\.|:)(\d+) \((\d+)\)/g
 
@@ -124,7 +137,8 @@ export const renderComment = (
 
 export const renderMarkdown = (input, options = {}) => {
   if (!input?.length) return ''
-  const html = marked.parse(input)
+  const parser = options.allowEscapes ? fileMarked : textMarked
+  const html = parser.parse(input)
   return sanitize(html, options)
 }
 

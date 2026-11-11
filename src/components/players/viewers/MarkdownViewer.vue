@@ -53,7 +53,7 @@ const rawContent = ref('')
 // Computed
 
 const renderedHtml = computed(() =>
-  renderMarkdown(rawContent.value, { allowChecklist: true })
+  renderMarkdown(rawContent.value, { allowChecklist: true, allowEscapes: true })
 )
 
 // Functions

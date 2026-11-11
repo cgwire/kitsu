@@ -125,6 +125,13 @@ describe('render', () => {
     )
   })
 
+  test.each([
+    String.raw`S:\3_WORK_IN_PROGRESS\8_anim\_lib\chars\BG_Characters.moho`,
+    String.raw`\\NAS01\projects\film\.config`
+  ])('renderComment keeps the backslashes of the path %s', path => {
+    expect(renderComment(path).trim()).toEqual(`<p>${path}</p>`)
+  })
+
   test('renderMarkdown - offensive script', () => {
     const input = 'Text **bold**<script>console.log(\'test\')</script>'
     const result = renderMarkdown(input)
@@ -217,10 +224,32 @@ describe('render', () => {
     expect(renderMarkdown('See https://a.test/:smile:/x').trim()).toEqual(
       '<p>See <a href="https://a.test/:smile:/x">https://a.test/:smile:/x</a></p>'
     )
-    expect(renderMarkdown('\\:smile\\:').trim()).toEqual('<p>:smile:</p>')
+    expect(renderMarkdown('\\:smile\\:').trim()).toEqual(
+      '<p>\\:smile\\:</p>'
+    )
+    expect(
+      renderMarkdown('\\:smile\\:', { allowEscapes: true }).trim()
+    ).toEqual('<p>:smile:</p>')
     expect(renderMarkdown(':unknown: at 10:30:00').trim()).toEqual(
       '<p>:unknown: at 10:30:00</p>'
     )
+  })
+
+  test('renderMarkdown - an escaped character keeps its backslash', () => {
+    expect(
+      renderMarkdown(String.raw`\*not italic\* but _italic_`).trim()
+    ).toEqual(String.raw`<p>\*not italic\* but <em>italic</em></p>`)
+    expect(renderMarkdown(String.raw`\<b>not bold\</b>`).trim()).toEqual(
+      String.raw`<p>\&lt;b&gt;not bold\&lt;/b&gt;</p>`
+    )
+  })
+
+  test('renderMarkdown - escapes drop their backslash with allowEscapes', () => {
+    expect(
+      renderMarkdown(String.raw`\*literal\* and \_lib`, {
+        allowEscapes: true
+      }).trim()
+    ).toEqual('<p>*literal* and _lib</p>')
   })
 
   test('renderFileSize', () => {
