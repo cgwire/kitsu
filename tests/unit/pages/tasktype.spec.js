@@ -357,7 +357,8 @@ describe('TaskType page', () => {
     const TaskListStub = {
       name: 'TaskList',
       props: { tasks: { type: Array, default: () => [] } },
-      template: '<div />',
+      // the tasks tab shows its schedule in the slot of the list
+      template: '<div><slot /></div>',
       methods: { resetSelection: () => {} }
     }
     const statusTasks = ['status-1', 'status-2', 'status-3'].map(
@@ -387,10 +388,15 @@ describe('TaskType page', () => {
 
     // The URL filters are read on the first load only, once the tasks
     // arrive: 100 ms after mounting, then 200 ms more.
-    const mountTasks = async (query, getters = {}) => {
+    const mountTasks = async (
+      query,
+      getters = {},
+      { actions = {}, socket } = {}
+    ) => {
       const page = await mountPage({
         section: 'tasks',
         query,
+        socket,
         stubs: { TaskList: TaskListStub },
         actions: {
           initTaskType: vi.fn(() => {
@@ -405,7 +411,8 @@ describe('TaskType page', () => {
               tasks: ['task-11', 'task-12']
             })
           }),
-          loadScheduleItems: vi.fn(() => [])
+          loadScheduleItems: vi.fn(() => []),
+          ...actions
         },
         getters: {
           assetValidationColumns: () => [],
@@ -466,6 +473,115 @@ describe('TaskType page', () => {
         .vm.$emit('update:model-value', [])
       await flushPromises()
       expect(listedTaskIds()).toEqual(['task-10', 'task-11', 'task-12'])
+    })
+
+    // The schedule of the tasks tab lines its rows up with the list, so the
+    // list waits for the drop as the rows do.
+    it('waits for the drop to refresh the list on a remote update', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      await mountTasks('', {}, { socket })
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('text') === 'schedule.title')
+        .vm.$emit('click')
+      await flushPromises()
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      const list = wrapper.findComponent(TaskListStub)
+      const listedTasks = list.props('tasks')
+
+      wrapper.findComponent({ name: 'Schedule' }).vm.isEditingDates = true
+      onTaskUpdate({ task_id: 'task-10' })
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+      const tasksDuringDrag = list.props('tasks')
+      wrapper.findComponent({ name: 'Schedule' }).vm.isEditingDates = false
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+
+      expect(tasksDuringDrag).toBe(listedTasks)
+      expect(list.props('tasks')).not.toBe(listedTasks)
+    })
+
+    // The schedule resets its scroll each time it shows. A press on the bars
+    // left from an earlier show, while the rows of a new range load, works
+    // in the timeline as it is: the rows built after the drop keep its
+    // scroll.
+    it('keeps the scroll of a press made while the schedule loads', async () => {
+      const scheduleItem = {
+        id: 'schedule-item-1',
+        task_type_id: 'task-type-1',
+        start_date: '2026-10-01',
+        end_date: '2026-10-30'
+      }
+      const loadProductionDaysOff = vi.fn(() => ({}))
+      await mountTasks(
+        '',
+        {
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            start_date: '2026-01-01',
+            end_date: '2026-12-31',
+            team: []
+          })
+        },
+        {
+          actions: {
+            loadProductionDaysOff,
+            loadScheduleItems: vi.fn(() => [scheduleItem])
+          }
+        }
+      )
+      const toggleSchedule = async () => {
+        await wrapper
+          .findAllComponents(ButtonSimple)
+          .find(button => button.props('text') === 'schedule.title')
+          .vm.$emit('click')
+        await flushPromises()
+      }
+      // the stub binds its methods when it mounts, at the first show
+      const scrollToDate = vi.spyOn(ScheduleStub.methods, 'scrollToDate')
+      const scrollToToday = vi.spyOn(ScheduleStub.methods, 'scrollToToday')
+      const nbScrolls = () =>
+        scrollToDate.mock.calls.length + scrollToToday.mock.calls.length
+      let nbScrollsOnShow
+      let leftoverRows
+      let rows
+      let nbScrollsAfterDrop
+      try {
+        await toggleSchedule()
+        nbScrollsOnShow = nbScrolls()
+        await toggleSchedule()
+        // shown again on a new range: its days off load again
+        scheduleItem.start_date = '2026-10-02'
+        let resolveDaysOff
+        loadProductionDaysOff.mockImplementationOnce(
+          () => new Promise(resolve => (resolveDaysOff = resolve))
+        )
+        const nbScrollsBeforePress = nbScrolls()
+        await toggleSchedule()
+        const schedule = wrapper.findComponent({ name: 'Schedule' })
+        leftoverRows = schedule.props('hierarchy')
+
+        schedule.vm.isEditingDates = true
+        resolveDaysOff({})
+        await flushPromises()
+        schedule.vm.isEditingDates = false
+        await vi.advanceTimersByTimeAsync(400)
+        await flushPromises()
+
+        rows = schedule.props('hierarchy')
+        nbScrollsAfterDrop = nbScrolls() - nbScrollsBeforePress
+      } finally {
+        scrollToDate.mockRestore()
+        scrollToToday.mockRestore()
+      }
+      expect(nbScrollsOnShow).toBe(1)
+      expect(leftoverRows[0].children).toHaveLength(3)
+      expect(rows).not.toBe(leftoverRows)
+      expect(nbScrollsAfterDrop).toBe(0)
     })
   })
 
@@ -640,6 +756,52 @@ describe('TaskType page', () => {
       await vi.advanceTimersByTimeAsync(400)
       await flushPromises()
 
+      expect(rowsDuringDrag).toBe(rows)
+      expect(schedule.props('hierarchy')).not.toBe(rows)
+    })
+
+    // A rebuild that loads the days off of a new range ends after a press
+    // made during that load: its rows wait for the drop too.
+    it('waits for the drop to apply a rebuild still loading at the press', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      const scheduleItem = {
+        id: 'schedule-item-1',
+        task_type_id: 'task-type-1',
+        start_date: '2026-10-01',
+        end_date: '2026-10-30'
+      }
+      const loadProductionDaysOff = vi.fn(() => ({}))
+      await mountSchedule({
+        actions: {
+          loadProductionDaysOff,
+          loadScheduleItems: vi.fn(() => [scheduleItem])
+        },
+        socket
+      })
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      const schedule = wrapper.findComponent({ name: 'Schedule' })
+      const rows = schedule.props('hierarchy')
+      const nbLoads = loadProductionDaysOff.mock.calls.length
+      let resolveDaysOff
+      loadProductionDaysOff.mockImplementationOnce(
+        () => new Promise(resolve => (resolveDaysOff = resolve))
+      )
+
+      // the range of the task type changed: its days off load again
+      scheduleItem.start_date = '2026-10-02'
+      onTaskUpdate({ task_id: scheduleTask.id })
+      await vi.advanceTimersByTimeAsync(400)
+      schedule.vm.isEditingDates = true
+      resolveDaysOff({})
+      await flushPromises()
+      const rowsDuringDrag = schedule.props('hierarchy')
+      schedule.vm.isEditingDates = false
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+
+      expect(loadProductionDaysOff).toHaveBeenCalledTimes(nbLoads + 1)
       expect(rowsDuringDrag).toBe(rows)
       expect(schedule.props('hierarchy')).not.toBe(rows)
     })

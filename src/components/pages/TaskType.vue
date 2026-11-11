@@ -1450,17 +1450,28 @@ const setDefaultBeforeAfterTaskTypes = () => {
   }
 }
 
+// from the press on a schedule bar to its drop
+const isEditingBarDates = () => scheduleWidgetRef.value?.isEditingDates
+
+// New rows would no longer hold the bar a drag moves: they wait for the
+// drop, checked before their loads and after them, since a press can come
+// while they run. The drag placed the timeline, so they keep its scroll.
 const resetScheduleItems = async (resetScroll = false) => {
-  // new rows would no longer hold the bar a drag moves: wait for the drop
-  if (scheduleWidgetRef.value?.isEditingDates) {
-    resetScheduleItemsDebounced(resetScroll)
+  if (isEditingBarDates()) {
+    resetScheduleItemsDebounced()
     return
   }
+  let scheduleItems = null
   if (isActiveTab('schedule')) {
-    await resetScheduleItemsForScheduleTab()
+    scheduleItems = await buildScheduleTabItems()
   } else if (isActiveTab('tasks') && isScheduleVisible.value) {
-    await resetScheduleItemsForTasksTab()
+    scheduleItems = await buildTasksTabItems()
   }
+  if (isEditingBarDates()) {
+    resetScheduleItemsDebounced()
+    return
+  }
+  if (scheduleItems) schedule.scheduleItems = scheduleItems
   if (resetScroll) {
     resetScheduleScroll()
   }
@@ -1501,8 +1512,8 @@ const prepareScheduleData = async () => {
   return taskAssignationMap
 }
 
-const resetScheduleItemsForScheduleTab = async () => {
-  if (!currentScheduleItem.value) return
+const buildScheduleTabItems = async () => {
+  if (!currentScheduleItem.value) return null
 
   const taskAssignationMap = await prepareScheduleData()
 
@@ -1525,11 +1536,11 @@ const resetScheduleItemsForScheduleTab = async () => {
       )
     )
   }
-  schedule.scheduleItems = scheduleItems
+  return scheduleItems
 }
 
-const resetScheduleItemsForTasksTab = async () => {
-  if (!currentScheduleItem.value) return
+const buildTasksTabItems = async () => {
+  if (!currentScheduleItem.value) return null
 
   await prepareScheduleData()
 
@@ -1558,7 +1569,7 @@ const resetScheduleItemsForTasksTab = async () => {
     scheduleItems[0].timesheet.push(...scheduleItem.timesheet)
   })
 
-  schedule.scheduleItems = scheduleItems
+  return scheduleItems
 }
 
 const buildAssignationMap = () => {
@@ -2075,9 +2086,14 @@ const resetScheduleScroll = () => {
 const resetScheduleItemsDebounced = func.debounce(resetScheduleItems, 400)
 
 // Same bursts, and this is the heavier half: onSearchChange walks every
-// entity, re-sorts the tasks and rebuilds the search index.
+// entity, re-sorts the tasks and rebuilds the search index. The schedule of
+// the tasks tab lines its rows up with the list, which waits for the drop too.
 const refreshTasksDebounced = func.debounce(() => {
-  if (searchFieldRef.value) onSearchChange(searchFieldRef.value.getValue())
+  if (isEditingBarDates()) {
+    refreshTasksDebounced()
+  } else if (searchFieldRef.value) {
+    onSearchChange(searchFieldRef.value.getValue())
+  }
 }, 400)
 
 const onRemoteTaskUpdate = eventData => {
