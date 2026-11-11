@@ -545,6 +545,166 @@ describe('TaskType page', () => {
       }
     })
 
+    // Rebuilds wait for their days off side by side: the one asked last sets
+    // its rows, with the scroll reset an earlier one asked for.
+    it('keeps the rows of the latest rebuild, scrolled as asked', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      const scheduleItem = {
+        id: 'schedule-item-1',
+        task_type_id: 'task-type-1',
+        start_date: '2026-10-01',
+        end_date: '2026-10-30'
+      }
+      const loadProductionDaysOff = vi.fn(() => ({}))
+      await mountTasks(
+        '',
+        {
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            start_date: '2026-01-01',
+            end_date: '2026-12-31',
+            team: []
+          })
+        },
+        {
+          actions: {
+            loadProductionDaysOff,
+            loadScheduleItems: vi.fn(() => [scheduleItem])
+          },
+          socket
+        }
+      )
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      let resolveDaysOff
+      loadProductionDaysOff.mockImplementationOnce(
+        () => new Promise(resolve => (resolveDaysOff = resolve))
+      )
+      // the stub binds its methods when it mounts, at the first show
+      const scrollToDate = vi.spyOn(ScheduleStub.methods, 'scrollToDate')
+      const scrollToToday = vi.spyOn(ScheduleStub.methods, 'scrollToToday')
+      let latestRows
+      let rows
+      let nbScrolls
+      try {
+        // shown: its rebuild waits for the days off of the range
+        await wrapper
+          .findAllComponents(ButtonSimple)
+          .find(button => button.props('text') === 'schedule.title')
+          .vm.$emit('click')
+        await flushPromises()
+        onTaskUpdate({ task_id: 'task-unknown' })
+        await vi.advanceTimersByTimeAsync(400)
+        await flushPromises()
+        const schedule = wrapper.findComponent({ name: 'Schedule' })
+        latestRows = schedule.props('hierarchy')
+        resolveDaysOff({})
+        await flushPromises()
+
+        rows = schedule.props('hierarchy')
+        nbScrolls =
+          scrollToDate.mock.calls.length + scrollToToday.mock.calls.length
+      } finally {
+        scrollToDate.mockRestore()
+        scrollToToday.mockRestore()
+      }
+      expect(latestRows[0].children).toHaveLength(3)
+      expect(rows).toBe(latestRows)
+      expect(nbScrolls).toBe(1)
+    })
+
+    // The show asks for a scroll reset, then a remote update asks for the
+    // rows that carry it. A press on a bar while both load works in the
+    // timeline as it is: nothing resets its scroll, wherever the drop falls.
+    it.each([
+      ['held while the first rebuild ends', ['press', 'first', 'drop', 'last']],
+      ['held while the last rebuild ends', ['press', 'first', 'last', 'drop']],
+      ['made once the first rebuild ended', ['first', 'press', 'drop', 'last']],
+      ['dropped before the rebuilds end', ['press', 'drop', 'first', 'last']]
+    ])('keeps the scroll of a press %s', async (_, steps) => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      const scheduleItem = {
+        id: 'schedule-item-1',
+        task_type_id: 'task-type-1',
+        start_date: '2026-10-01',
+        end_date: '2026-10-30'
+      }
+      const loadProductionDaysOff = vi.fn(() => ({}))
+      await mountTasks(
+        '',
+        {
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            start_date: '2026-01-01',
+            end_date: '2026-12-31',
+            team: []
+          })
+        },
+        {
+          actions: {
+            loadProductionDaysOff,
+            loadScheduleItems: vi.fn(() => [scheduleItem])
+          },
+          socket
+        }
+      )
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      const resolveDaysOff = {}
+      loadProductionDaysOff
+        .mockImplementationOnce(
+          () => new Promise(resolve => (resolveDaysOff.first = resolve))
+        )
+        .mockImplementationOnce(
+          () => new Promise(resolve => (resolveDaysOff.last = resolve))
+        )
+      // the stub binds its methods when it mounts, at the first show
+      const scrollToDate = vi.spyOn(ScheduleStub.methods, 'scrollToDate')
+      const scrollToToday = vi.spyOn(ScheduleStub.methods, 'scrollToToday')
+      const nbScrolls = () =>
+        scrollToDate.mock.calls.length + scrollToToday.mock.calls.length
+      let rows
+      let nbScrollsFromPress
+      try {
+        await wrapper
+          .findAllComponents(ButtonSimple)
+          .find(button => button.props('text') === 'schedule.title')
+          .vm.$emit('click')
+        await flushPromises()
+        onTaskUpdate({ task_id: 'task-unknown' })
+        await vi.advanceTimersByTimeAsync(400)
+        await flushPromises()
+        const schedule = wrapper.findComponent({ name: 'Schedule' })
+        const runStep = {
+          press: () => (schedule.vm.isEditingDates = true),
+          drop: () => (schedule.vm.isEditingDates = false),
+          first: () => resolveDaysOff.first({}),
+          last: () => resolveDaysOff.last({})
+        }
+        let nbScrollsBeforePress
+        for (const step of steps) {
+          if (step === 'press') nbScrollsBeforePress = nbScrolls()
+          runStep[step]()
+          await flushPromises()
+        }
+        // with any rebuild the press held, run 400 ms after the drop
+        await vi.advanceTimersByTimeAsync(400)
+        await flushPromises()
+
+        rows = schedule.props('hierarchy')
+        nbScrollsFromPress = nbScrolls() - nbScrollsBeforePress
+      } finally {
+        scrollToDate.mockRestore()
+        scrollToToday.mockRestore()
+      }
+      expect(rows[0].children).toHaveLength(3)
+      expect(nbScrollsFromPress).toBe(0)
+    })
+
     // The schedule resets its scroll each time it shows. A press on the bars
     // left from an earlier show, while the rows of a new range load, works
     // in the timeline as it is: the rows built after the drop keep its
