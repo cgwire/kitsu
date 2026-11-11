@@ -805,6 +805,45 @@ describe('TaskType page', () => {
       expect(rowsDuringDrag).toBe(rows)
       expect(schedule.props('hierarchy')).not.toBe(rows)
     })
+
+    // A rebuild held by a drag tries again every 400 ms: checked before its
+    // loads, it sends none of them until the drop.
+    it('waits for the drop to load the data of a held rebuild', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      const scheduleItem = {
+        id: 'schedule-item-1',
+        task_type_id: 'task-type-1',
+        start_date: '2026-10-01',
+        end_date: '2026-10-30'
+      }
+      const loadProductionDaysOff = vi.fn(() => ({}))
+      await mountSchedule({
+        actions: {
+          loadProductionDaysOff,
+          loadScheduleItems: vi.fn(() => [scheduleItem])
+        },
+        socket
+      })
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      const schedule = wrapper.findComponent({ name: 'Schedule' })
+      const nbLoads = loadProductionDaysOff.mock.calls.length
+
+      // the range of the task type changed: a rebuild loads its days off
+      scheduleItem.start_date = '2026-10-02'
+      schedule.vm.isEditingDates = true
+      onTaskUpdate({ task_id: scheduleTask.id })
+      await vi.advanceTimersByTimeAsync(1200)
+      await flushPromises()
+      const nbLoadsDuringDrag = loadProductionDaysOff.mock.calls.length
+      schedule.vm.isEditingDates = false
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+
+      expect(nbLoadsDuringDrag).toBe(nbLoads)
+      expect(loadProductionDaysOff).toHaveBeenCalledTimes(nbLoads + 1)
+    })
   })
 
   describe('CSV import', () => {
