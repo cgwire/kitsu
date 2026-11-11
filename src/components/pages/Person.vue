@@ -268,6 +268,7 @@
       />
       <people-timesheet-info
         :with-person="false"
+        :with-days-off="productivityWithDaysOff"
         :close-route="productivityCloseRoute"
         :day-offs="productivityDaysOff"
         :is-loading="isProductivityInfoLoading"
@@ -370,9 +371,6 @@ const scheduleWidgetRef = useTemplateRef('schedule-widget')
 
 // Computed
 // --------------------------------------------------------------------------
-const currentUserRoleForProduction = computed(
-  () => store.getters.currentUserRoleForProduction
-)
 const displayedPersonTasks = computed(() => store.getters.displayedPersonTasks)
 const displayedPersonDoneTasks = computed(
   () => store.getters.displayedPersonDoneTasks
@@ -447,19 +445,8 @@ const canSeeProductivity = computed(
     user.value.id === route.params.person_id
 )
 
-// Zou only shows the days off of someone else to the managers and
-// supervisors of their productions
-const canReadDaysOff = computed(
-  () =>
-    isCurrentUserAdmin.value ||
-    user.value.id === route.params.person_id ||
-    openProductions.value.some(
-      production =>
-        production.team.includes(route.params.person_id) &&
-        ['manager', 'supervisor'].includes(
-          currentUserRoleForProduction.value(production.id)
-        )
-    )
+const canReadDaysOff = computed(() =>
+  store.getters.canReadDaysOff(route.params.person_id)
 )
 
 const isTimelogShown = computed(
@@ -596,6 +583,7 @@ const {
   productivityQuotaShots,
   productivityTasks,
   productivityTimeSpents,
+  productivityWithDaysOff,
   productivityYear
 } = useProductivity({
   personId: computed(() => person.value?.id),
@@ -609,6 +597,7 @@ const {
       !person.value?.is_bot &&
       isCurrentUserAllowed.value
   ),
+  canReadDaysOff,
   sideColumn: useTemplateRef('productivity-side-column'),
   loadTimeSpents: ({ startDate, endDate }) =>
     store.dispatch('loadPersonTimeSpentsByPeriod', {

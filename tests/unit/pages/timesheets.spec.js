@@ -1,5 +1,6 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { ref } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -11,9 +12,11 @@ vi.mock('@/lib/download', () => ({ downloadBlob: vi.fn() }))
 import { downloadBlob } from '@/lib/download'
 
 import Timesheets from '@/components/pages/Timesheets.vue'
+import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
 const alice = { id: 'person-1', full_name: 'Alice', active: true }
+const bob = { id: 'person-2', full_name: 'Bob', active: true }
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -27,25 +30,34 @@ const router = createRouter({
       path: '/timesheets/week/:year',
       name: 'timesheets-week',
       component: Timesheets
+    },
+    {
+      path: '/timesheets/month/:year/:month/persons/:person_id',
+      name: 'timesheets-month-person',
+      component: Timesheets
     }
   ]
 })
 
 let wrapper
 
-const mountPage = async path => {
+const mountPage = async (path, { actions = {}, getters = {} } = {}) => {
   const store = createStore({
     getters: {
+      canReadDaysOff: () => () => true,
       firstTimesheetYear: () => 2024,
       isCurrentUserAdmin: () => false,
       organisation: () => ({ hours_by_day: 8 }),
       people: () => [alice],
       personMap: () => new Map([[alice.id, alice]]),
       productions: () => [],
-      timesheet: () => ({ 1: { [alice.id]: 120 } })
+      timesheet: () => ({ 1: { [alice.id]: 120 } }),
+      ...getters
     }
   })
-  store.dispatch = vi.fn(() => Promise.resolve())
+  store.dispatch = vi.fn((name, payload) =>
+    Promise.resolve(actions[name]?.(payload))
+  )
   await router.push(path)
   await router.isReady()
   wrapper = shallowMount(Timesheets, {
@@ -112,5 +124,245 @@ describe('Timesheets', () => {
       // 2025 has 52 ISO weeks, 2026 has 53.
       expect(headers.split(';')).toHaveLength(53)
     })
+  })
+
+  describe('person panel', () => {
+    const path = `/timesheets/month/2026/10/persons/${alice.id}`
+    const tasks = [{ task_id: 'task-1', duration: 60 }]
+
+    test('shows the time and days off of the period', async () => {
+      const loadAggregatedPersonDaysOff = vi.fn(() => [{ date: '2026-10-05' }])
+      await mountPage(path, {
+        actions: {
+          loadAggregatedPersonDaysOff,
+          loadAggregatedPersonTimeSpents: () => tasks
+        }
+      })
+
+      expect(loadAggregatedPersonDaysOff).toHaveBeenCalledWith(
+        expect.objectContaining({ personId: alice.id, detailLevel: 'month' })
+      )
+      expect(wrapper.findComponent(PeopleTimesheetInfo).props()).toMatchObject(
+        {
+          dayOffs: [{ date: '2026-10-05' }],
+          isLoadingError: false,
+          tasks,
+          withDaysOff: true
+        }
+      )
+    })
+
+    // the rule can change under an open panel, as when the viewer gets a
+    // new role, even during a load: the panel shows the days off count of
+    // its own load
+    test('shows the days off count once a load reads them', async () => {
+      const isAllowed = ref(false)
+      let answerTime
+      const loadAggregatedPersonDaysOff = vi.fn(() => [{ date: '2026-09-07' }])
+      await mountPage(path, {
+        actions: {
+          loadAggregatedPersonDaysOff,
+          loadAggregatedPersonTimeSpents: vi
+            .fn(() => tasks)
+            .mockReturnValueOnce(new Promise(resolve => (answerTime = resolve)))
+        },
+        getters: { canReadDaysOff: () => () => isAllowed.value }
+      })
+      const panel = wrapper.findComponent(PeopleTimesheetInfo)
+
+      isAllowed.value = true
+      answerTime(tasks)
+      await flushPromises()
+
+      expect(panel.props('withDaysOff')).toBe(false)
+      expect(loadAggregatedPersonDaysOff).not.toHaveBeenCalled()
+
+      await router.push(`/timesheets/month/2026/9/persons/${alice.id}`)
+      await flushPromises()
+
+      expect(panel.props()).toMatchObject({
+        dayOffs: [{ date: '2026-09-07' }],
+        withDaysOff: true
+      })
+    })
+
+    // Zou refuses the days off of a person to some viewers
+    test('shows the time of the period to a viewer refused the days off', async () => {
+      const canReadDaysOff = vi.fn(() => false)
+      const loadAggregatedPersonDaysOff = vi.fn(() =>
+        Promise.reject(new Error('Forbidden'))
+      )
+      await mountPage(path, {
+        actions: {
+          loadAggregatedPersonDaysOff,
+          loadAggregatedPersonTimeSpents: () => tasks
+        },
+        getters: { canReadDaysOff: () => canReadDaysOff }
+      })
+
+      expect(canReadDaysOff).toHaveBeenCalledWith(alice.id)
+      expect(loadAggregatedPersonDaysOff).not.toHaveBeenCalled()
+      expect(wrapper.findComponent(PeopleTimesheetInfo).props()).toMatchObject(
+        {
+          dayOffs: [],
+          isLoadingError: false,
+          tasks,
+          withDaysOff: false
+        }
+      )
+    })
+
+    const twoPeople = {
+      people: () => [alice, bob],
+      personMap: () => new Map([alice, bob].map(person => [person.id, person]))
+    }
+
+    // a failed read would leave the days off of the person shown before
+    test('drops the days off of the person shown before', async () => {
+      const error = new Error('Server error')
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      try {
+        await mountPage(path, {
+          actions: {
+            loadAggregatedPersonDaysOff: ({ personId }) =>
+              personId === alice.id
+                ? [{ date: '2026-10-05' }]
+                : Promise.reject(error),
+            loadAggregatedPersonTimeSpents: () => tasks
+          },
+          getters: twoPeople
+        })
+        const panel = wrapper.findComponent(PeopleTimesheetInfo)
+        expect(panel.props('dayOffs')).toEqual([{ date: '2026-10-05' }])
+
+        await router.push(`/timesheets/month/2026/10/persons/${bob.id}`)
+        await flushPromises()
+
+        expect(panel.props()).toMatchObject({
+          dayOffs: [],
+          isLoadingError: true
+        })
+        expect(consoleError).toHaveBeenCalledWith(error)
+      } finally {
+        consoleError.mockRestore()
+      }
+    })
+
+    // Alice's time answers after the whole load of Bob, picked meanwhile
+    test('keeps the panel on the person picked last', async () => {
+      let answerAlice
+      const aliceTime = new Promise(resolve => (answerAlice = resolve))
+      const bobTasks = [{ task_id: 'task-bob', duration: 30 }]
+      const loadAggregatedPersonDaysOff = vi.fn(() => [])
+      await mountPage(path, {
+        actions: {
+          loadAggregatedPersonDaysOff,
+          loadAggregatedPersonTimeSpents: ({ personId }) =>
+            personId === alice.id ? aliceTime : bobTasks
+        },
+        getters: twoPeople
+      })
+
+      await router.push(`/timesheets/month/2026/10/persons/${bob.id}`)
+      await flushPromises()
+      answerAlice([{ task_id: 'task-alice', duration: 60 }])
+      await flushPromises()
+
+      expect(wrapper.findComponent(PeopleTimesheetInfo).props()).toMatchObject(
+        { isLoading: false, tasks: bobTasks }
+      )
+      expect(
+        loadAggregatedPersonDaysOff.mock.calls.map(([{ personId }]) => personId)
+      ).toEqual([bob.id])
+    })
+
+    // Alice's days off answer after the whole load of Bob, picked meanwhile
+    test('keeps the days off of the person picked last', async () => {
+      let answerAlice
+      const aliceDayOffs = new Promise(resolve => (answerAlice = resolve))
+      await mountPage(path, {
+        actions: {
+          loadAggregatedPersonDaysOff: ({ personId }) =>
+            personId === alice.id ? aliceDayOffs : [{ date: '2026-10-06' }],
+          loadAggregatedPersonTimeSpents: () => tasks
+        },
+        getters: twoPeople
+      })
+
+      await router.push(`/timesheets/month/2026/10/persons/${bob.id}`)
+      await flushPromises()
+      answerAlice([{ date: '2026-10-05' }])
+      await flushPromises()
+
+      expect(wrapper.findComponent(PeopleTimesheetInfo).props()).toMatchObject(
+        { dayOffs: [{ date: '2026-10-06' }], isLoading: false }
+      )
+    })
+
+    // Alice's time read fails after the whole load of Bob, picked meanwhile
+    test('drops the error of the person shown before', async () => {
+      const error = new Error('Server error')
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      try {
+        let failAlice
+        const aliceTime = new Promise((resolve, reject) => (failAlice = reject))
+        const bobTasks = [{ task_id: 'task-bob', duration: 30 }]
+        await mountPage(path, {
+          actions: {
+            loadAggregatedPersonDaysOff: () => [],
+            loadAggregatedPersonTimeSpents: ({ personId }) =>
+              personId === alice.id ? aliceTime : bobTasks
+          },
+          getters: twoPeople
+        })
+
+        await router.push(`/timesheets/month/2026/10/persons/${bob.id}`)
+        await flushPromises()
+        failAlice(error)
+        await flushPromises()
+
+        expect(
+          wrapper.findComponent(PeopleTimesheetInfo).props()
+        ).toMatchObject({
+          isLoading: false,
+          isLoadingError: false,
+          tasks: bobTasks
+        })
+        expect(consoleError).toHaveBeenCalledWith(error)
+      } finally {
+        consoleError.mockRestore()
+      }
+    })
+
+    // the unfiltered time answers after the time of the filter picked
+    // meanwhile
+    test.each(['productionId', 'studioId'])(
+      'keeps the panel on the %s picked last',
+      async filter => {
+        let answerFirst
+        const firstTime = new Promise(resolve => (answerFirst = resolve))
+        const filteredTasks = [{ task_id: 'task-filtered', duration: 30 }]
+        await mountPage(path, {
+          actions: {
+            loadAggregatedPersonDaysOff: () => [],
+            loadAggregatedPersonTimeSpents: payload =>
+              payload[filter] ? filteredTasks : firstTime
+          }
+        })
+
+        await router.push({ path, query: { [filter]: 'filter-1' } })
+        await flushPromises()
+        answerFirst([{ task_id: 'task-all', duration: 60 }])
+        await flushPromises()
+
+        expect(
+          wrapper.findComponent(PeopleTimesheetInfo).props()
+        ).toMatchObject({ isLoading: false, tasks: filteredTasks })
+      }
+    )
   })
 })

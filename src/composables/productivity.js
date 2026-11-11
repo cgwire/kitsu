@@ -13,7 +13,10 @@ const quotaModes = ['weighted', 'feedback', 'weighteddone', 'done']
  * month, period, metric, quotaMode, countMode), and the chart and its side
  * panel load the time spents or the quotas of `personId`. `loadTimeSpents`
  * fetches the time spents of a { startDate, endDate } range, through the
- * route that fits the page. The other parameters are refs or getters.
+ * route that fits the page. The side panel reads the days off of the person
+ * only when `canReadDaysOff` (true by default) allows it, and
+ * `productivityWithDaysOff` tells whether its load read them. The other
+ * parameters are refs or getters.
  */
 export const useProductivity = ({
   personId,
@@ -21,6 +24,7 @@ export const useProductivity = ({
   taskTypeId,
   openProductions,
   isActive,
+  canReadDaysOff = true,
   loadTimeSpents,
   sideColumn
 }) => {
@@ -35,6 +39,8 @@ export const useProductivity = ({
   const isProductivityLoadingError = ref(false)
   const productivityAggregatedTasks = ref([])
   const productivityDaysOff = ref([])
+  // the rule can change while the panel is open
+  const productivityWithDaysOff = ref(false)
   const isProductivityInfoLoading = ref(false)
   const isProductivityInfoLoadingError = ref(false)
   const productivityQuotas = ref([])
@@ -267,9 +273,12 @@ export const useProductivity = ({
 
   const loadProductivityInfo = async () => {
     const key = getProductivityInfoKey()
+    const withDaysOff = toValue(canReadDaysOff)
     isProductivityInfoLoading.value = true
     isProductivityInfoLoadingError.value = false
+    productivityWithDaysOff.value = withDaysOff
     productivityAggregatedTasks.value = []
+    productivityDaysOff.value = []
     const period = {
       personId: toValue(personId),
       detailLevel: productivityLevel.value,
@@ -285,10 +294,9 @@ export const useProductivity = ({
       productivityAggregatedTasks.value = tasks.filter(
         task => task.duration > 0
       )
-      const daysOff = await store.dispatch(
-        'loadAggregatedPersonDaysOff',
-        period
-      )
+      const daysOff = withDaysOff
+        ? await store.dispatch('loadAggregatedPersonDaysOff', period)
+        : []
       if (isStale()) return
       productivityDaysOff.value = daysOff
     } catch (err) {
@@ -382,6 +390,7 @@ export const useProductivity = ({
     productivityQuotaShots,
     productivityTasks,
     productivityTimeSpents,
+    productivityWithDaysOff,
     productivityYear
   }
 }

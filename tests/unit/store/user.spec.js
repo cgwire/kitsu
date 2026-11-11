@@ -1,6 +1,8 @@
 // @vitest-environment node
 
 import { vi } from 'vitest'
+import { computed } from 'vue'
+import { createStore } from 'vuex'
 
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@/lib/auth', () => ({ default: { logIn: vi.fn(), logOut: vi.fn() } }))
@@ -19,6 +21,7 @@ vi.mock('@/store/api/people', () => ({
 }))
 
 import peopleApi from '@/store/api/people'
+import peopleStore from '@/store/modules/people'
 import store from '@/store/modules/user'
 import taskStatusStore from '@/store/modules/taskstatus'
 
@@ -237,6 +240,128 @@ describe('User store', () => {
       const rootGetters = { productionMap: new Map() }
       expect(
         store.getters.canEditShotTrim({ user: null }, {}, {}, rootGetters)(task)
+      ).toBe(false)
+    })
+  })
+
+  describe('canReadDaysOff', () => {
+    const colleague = { id: 'person-2', departments: ['dep-1'], is_bot: false }
+    const call = (role, departments, options = {}) => {
+      const {
+        person = colleague,
+        projectRoles = {},
+        productions = [{ id: 'production-1', team: ['person-1', person.id] }]
+      } = options
+      const state = { user: { id: 'person-1', role, departments }, projectRoles }
+      return store.getters.canReadDaysOff(
+        state,
+        {
+          currentUserRoleForProduction:
+            store.getters.currentUserRoleForProduction(state)
+        },
+        { people: { personMapVersion: 0 } },
+        {
+          openProductions: productions,
+          personMap: new Map([[person.id, person]])
+        }
+      )(person.id)
+    }
+
+    test('admins and the person read them', () => {
+      expect(call('admin', [], { productions: [] })).toBe(true)
+      const self = { id: 'person-1', departments: [] }
+      expect(call('user', [], { person: self, productions: [] })).toBe(true)
+    })
+
+    test('managers of a production of the person read them', () => {
+      expect(call('manager', ['dep-2'])).toBe(true)
+      const projectRoles = { 'production-1': 'manager' }
+      expect(call('user', [], { projectRoles })).toBe(true)
+    })
+
+    test('supervisors of a production of the person are held to their departments', () => {
+      expect(call('supervisor', [])).toBe(true)
+      expect(call('supervisor', ['dep-2', 'dep-1'])).toBe(true)
+      expect(call('supervisor', ['dep-2'])).toBe(false)
+      const newcomer = { id: 'person-2', departments: [] }
+      expect(call('supervisor', ['dep-2'], { person: newcomer })).toBe(false)
+      const projectRoles = { 'production-1': 'supervisor' }
+      expect(call('user', ['dep-1'], { projectRoles })).toBe(true)
+    })
+
+    test('a manager role on another production of the person wins', () => {
+      const team = ['person-1', 'person-2']
+      const productions = [
+        { id: 'production-1', team },
+        { id: 'production-2', team }
+      ]
+      const projectRoles = { 'production-2': 'manager' }
+      expect(
+        call('supervisor', ['dep-2'], { productions, projectRoles })
+      ).toBe(true)
+    })
+
+    test('artists, clients, and roles outside the productions of the person do not', () => {
+      expect(call('user', ['dep-1'])).toBe(false)
+      expect(call('client', [])).toBe(false)
+      const productions = [{ id: 'production-1', team: ['person-1'] }]
+      expect(call('manager', [], { productions })).toBe(false)
+      expect(call('supervisor', [], { productions })).toBe(false)
+    })
+
+    test('nobody reads the days off of a bot', () => {
+      const bot = { id: 'person-2', departments: [], is_bot: true }
+      expect(call('admin', [], { person: bot })).toBe(false)
+      expect(call('manager', [], { person: bot })).toBe(false)
+    })
+
+    // the person map keeps its identity when a person changes
+    test('a computed over the rule follows the departments of the person', () => {
+      const realStore = createStore({
+        modules: {
+          people: {
+            state: { personMapVersion: 0 },
+            getters: peopleStore.getters,
+            mutations: peopleStore.mutations
+          },
+          productions: {
+            state: {
+              openProductions: [
+                { id: 'production-1', team: ['person-1', colleague.id] }
+              ]
+            },
+            getters: { openProductions: state => state.openProductions }
+          },
+          user: {
+            state: {
+              user: { id: 'person-1', role: 'supervisor', departments: ['dep-1'] },
+              projectRoles: {}
+            },
+            getters: store.getters
+          }
+        }
+      })
+      const person = { ...colleague, first_name: 'Ada' }
+      realStore.commit('EDIT_PEOPLE_END', person)
+      const canRead = computed(() =>
+        realStore.getters.canReadDaysOff(person.id)
+      )
+      expect(canRead.value).toBe(true)
+
+      realStore.commit('EDIT_PEOPLE_END', { ...person, departments: ['dep-2'] })
+
+      expect(canRead.value).toBe(false)
+    })
+
+    test('nobody reads them without a user', () => {
+      const rootGetters = { openProductions: [], personMap: new Map() }
+      expect(
+        store.getters.canReadDaysOff(
+          { user: null },
+          {},
+          {},
+          rootGetters
+        )('person-2')
       ).toBe(false)
     })
   })

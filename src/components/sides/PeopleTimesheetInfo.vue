@@ -39,8 +39,13 @@
           $t(totalKey, { count: total })
         }}</span>
       </div>
-      <div class="info-stat" v-if="currentLevel !== 'day'">
-        <span class="info-stat-value">{{ dayOffCount }}</span>
+      <div
+        class="info-stat"
+        v-if="withDaysOff && !isLoadingError && currentLevel !== 'day'"
+      >
+        <span class="info-stat-value" :class="{ skeleton: isLoading }">
+          <template v-if="!isLoading">{{ dayOffCount }}</template>
+        </span>
         <span class="info-stat-label">
           {{ $t('days_off.nb_days_off', { count: dayOffCount }) }}
         </span>
@@ -87,6 +92,7 @@ const store = useStore()
 // Props
 const props = defineProps({
   withPerson: { type: Boolean, default: true },
+  withDaysOff: { type: Boolean, default: true },
   person: { type: Object, default: () => ({}) },
   year: { type: Number, default: 0 },
   month: { type: Number, default: 0 },

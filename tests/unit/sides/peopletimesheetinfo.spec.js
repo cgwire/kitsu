@@ -75,4 +75,34 @@ describe('sides/PeopleTimesheetInfo', () => {
       false
     )
   })
+
+  // a viewer Zou refuses the days off to would read a count of zero
+  test('leaves the days off out when asked to', async () => {
+    const dayOffStats = () =>
+      wrapper
+        .findAll('.info-stat-label')
+        .filter(label => label.text() === 'days_off.nb_days_off')
+    expect(dayOffStats()).toHaveLength(1)
+    await wrapper.setProps({ withDaysOff: false })
+    expect(dayOffStats()).toHaveLength(0)
+    expect(wrapper.findAll('.info-stat')).toHaveLength(1)
+  })
+
+  // the days off of a load still running or failed are not known yet
+  test('shows the days off count once loaded only', async () => {
+    const dayOffValue = () =>
+      wrapper
+        .findAll('.info-stat')
+        .find(stat => stat.text().includes('days_off.nb_days_off'))
+        ?.find('.info-stat-value')
+    await wrapper.setProps({ dayOffs: [{ date: '2026-10-05' }] })
+    expect(dayOffValue().text()).toBe('1')
+
+    await wrapper.setProps({ isLoading: true })
+    expect(dayOffValue().classes()).toContain('skeleton')
+    expect(dayOffValue().text()).toBe('')
+
+    await wrapper.setProps({ isLoading: false, isLoadingError: true })
+    expect(dayOffValue()).toBeUndefined()
+  })
 })

@@ -275,6 +275,30 @@ const getters = {
     if (role === 'manager') return true
     return role === 'supervisor' && !(state.user.departments || []).length
   },
+  // Mirrors zou: admins, the person, the managers of a production of the
+  // person, and its supervisors sharing a department with the person (a
+  // supervisor without department supervises everybody). Nobody reads the
+  // days off of a bot. Zou also counts the closed productions, not loaded
+  // here.
+  canReadDaysOff: (state, getters, rootState, rootGetters) => personId => {
+    if (!state.user) return false
+    // The person map keeps its identity: the version read makes a computed
+    // over the rule follow the changes of the person.
+    rootState.people.personMapVersion // eslint-disable-line no-unused-expressions
+    const person = rootGetters.personMap.get(personId)
+    if (person?.is_bot) return false
+    if (state.user.role === 'admin' || state.user.id === personId) return true
+    const roles = rootGetters.openProductions
+      .filter(production => production.team?.includes(personId))
+      .map(production => getters.currentUserRoleForProduction(production.id))
+    if (roles.includes('manager')) return true
+    if (!roles.includes('supervisor')) return false
+    const departments = state.user.departments || []
+    return (
+      departments.length === 0 ||
+      departments.some(id => person?.departments?.includes(id))
+    )
+  },
   use12HourClock: state => Boolean(state.user?.use_12_hour_clock),
   isSaveProfileLoading: state => state.isSaveProfileLoading,
   isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,

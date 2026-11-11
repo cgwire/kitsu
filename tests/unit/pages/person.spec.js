@@ -1,6 +1,6 @@
 import moment from 'moment-timezone'
 import { flushPromises, shallowMount } from '@vue/test-utils'
-import { nextTick, reactive } from 'vue'
+import { nextTick, reactive, ref } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -64,7 +64,7 @@ const mountPage = async ({
 } = {}) => {
   const store = createStore({
     getters: {
-      currentUserRoleForProduction: () => () => 'user',
+      canReadDaysOff: () => () => true,
       displayedPersonDoneTasks: () => [],
       displayedPersonTasks: () => tasks,
       getProductionTaskStatuses: () => () => [],
@@ -923,7 +923,84 @@ describe('Person page', () => {
       expect(panel.props()).toMatchObject({
         person,
         day: 5,
-        tasks: [{ id: 'task-1', duration: 60 }]
+        tasks: [{ id: 'task-1', duration: 60 }],
+        withDaysOff: true
+      })
+      wrapper.unmount()
+    })
+
+    // Zou refuses the days off of the person to some viewers; the day level
+    // reads none
+    it('shows the time of the clicked month to a viewer refused the days off', async () => {
+      const loadAggregatedPersonDaysOff = vi.fn(() =>
+        Promise.reject(new Error('Forbidden'))
+      )
+      const wrapper = await mountPage({
+        actions: {
+          loadAggregatedPersonDaysOff,
+          loadAggregatedPersonTimeSpents: vi.fn(() => [
+            { id: 'task-1', duration: 60 }
+          ]),
+          loadPersonTimeSpentsByPeriod: vi.fn(() => [])
+        },
+        getters: {
+          canReadDaysOff: () => () => false,
+          isCurrentUserSupervisor: () => true,
+          user: () => otherUser
+        },
+        query: { section: 'productivity', view: 'month', year: '2026' }
+      })
+
+      wrapper.findComponent(ProductivityChart).vm.$emit('column-selected', 10)
+      await flushPromises()
+
+      expect(loadAggregatedPersonDaysOff).not.toHaveBeenCalled()
+      expect(wrapper.findComponent(PeopleTimesheetInfo).props()).toMatchObject({
+        month: 10,
+        dayOffs: [],
+        isLoadingError: false,
+        tasks: [{ id: 'task-1', duration: 60 }],
+        withDaysOff: false
+      })
+      wrapper.unmount()
+    })
+
+    // the rule can change under an open panel, as when the viewer gets a
+    // new role: the panel shows the days off count of its own load
+    it('shows the days off count once a load reads them', async () => {
+      const isAllowed = ref(false)
+      const loadAggregatedPersonDaysOff = vi.fn(() => [])
+      const wrapper = await mountPage({
+        actions: {
+          loadAggregatedPersonDaysOff,
+          loadAggregatedPersonTimeSpents: vi.fn(() => []),
+          loadPersonTimeSpentsByPeriod: vi.fn(() => [])
+        },
+        getters: {
+          canReadDaysOff: () => () => isAllowed.value,
+          isCurrentUserSupervisor: () => true,
+          user: () => otherUser
+        },
+        query: { section: 'productivity', view: 'month', year: '2026' }
+      })
+      const chart = wrapper.findComponent(ProductivityChart)
+      chart.vm.$emit('column-selected', 10)
+      await flushPromises()
+      const panel = wrapper.findComponent(PeopleTimesheetInfo)
+
+      isAllowed.value = true
+      await flushPromises()
+
+      expect(panel.props('withDaysOff')).toBe(false)
+      expect(loadAggregatedPersonDaysOff).not.toHaveBeenCalled()
+
+      chart.vm.$emit('column-selected', 9)
+      await flushPromises()
+
+      expect(panel.props('withDaysOff')).toBe(true)
+      expect(loadAggregatedPersonDaysOff.mock.calls[0][1]).toMatchObject({
+        personId: person.id,
+        month: 9
       })
       wrapper.unmount()
     })
@@ -1087,12 +1164,6 @@ describe('Person page', () => {
       expect(timeSpents).toEqual([])
     })
 
-    const onProduction = (role, team = [person.id, otherUser.id]) => ({
-      currentUserRoleForProduction: () => () => role,
-      openProductions: () => [{ id: 'prod-1', name: 'Prod', team }],
-      user: () => otherUser
-    })
-
     const daysOffRead = async getters => {
       const loadAggregatedPersonDaysOff = vi.fn(() => [])
       const wrapper = await mountPage({
@@ -1103,21 +1174,31 @@ describe('Person page', () => {
       return loadAggregatedPersonDaysOff
     }
 
-    it.each([
-      ['the person', {}],
-      ['a manager of a production of the person', onProduction('manager')],
-      ['a supervisor of a production of the person', onProduction('supervisor')]
-    ])('reads the days off for %s', async (_, getters) => {
-      expect((await daysOffRead(getters)).mock.calls[0][1]).toEqual({
+    // the user store holds the rule of Zou
+    it('reads the days off of the person for a viewer the rule allows', async () => {
+      const canReadDaysOff = vi.fn(personId => personId === person.id)
+      const loadAggregatedPersonDaysOff = await daysOffRead({
+        canReadDaysOff: () => canReadDaysOff,
+        user: () => otherUser
+      })
+      expect(canReadDaysOff).toHaveBeenCalledWith(person.id)
+      expect(loadAggregatedPersonDaysOff.mock.calls[0][1]).toEqual({
         personId: person.id
       })
     })
 
-    it.each([
-      ['an artist of a production of the person', onProduction('user')],
-      ['a manager of another production', onProduction('manager', [otherUser.id])]
-    ])('reads no days off for %s', async (_, getters) => {
-      expect(await daysOffRead(getters)).not.toHaveBeenCalled()
+    // with the role and the team alone, the page would read them: it
+    // follows the rule
+    it('reads no days off for a supervisor of a production of the person the rule refuses', async () => {
+      const loadAggregatedPersonDaysOff = await daysOffRead({
+        canReadDaysOff: () => () => false,
+        currentUserRoleForProduction: () => () => 'supervisor',
+        openProductions: () => [
+          { id: 'prod-1', name: 'Prod', team: [person.id, otherUser.id] }
+        ],
+        user: () => otherUser
+      })
+      expect(loadAggregatedPersonDaysOff).not.toHaveBeenCalled()
     })
   })
 
