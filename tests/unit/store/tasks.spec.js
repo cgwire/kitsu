@@ -53,6 +53,7 @@ vi.mock('@/store/api/tasks', () => ({
 }))
 
 import * as Sentry from '@sentry/vue'
+import { computed, effectScope } from 'vue'
 import { createStore } from 'vuex'
 
 import errors from '@/lib/errors'
@@ -2585,5 +2586,114 @@ describe('Tasks store, refused task edits', () => {
     await Promise.all([first, second])
 
     expect(task.estimation).toBe(720)
+  })
+})
+
+// The person page keeps the done tasks of a person in the people module, out
+// of the tasks module map.
+describe('Tasks store, dates of a done task of the person page', () => {
+  let vuexStore
+  let answer
+
+  const doneTask = () =>
+    vuexStore.state.people.displayedPersonDoneTasks.find(
+      task => task.id === 'task-done'
+    )
+  const moveDoneTask = () =>
+    vuexStore.dispatch('updateTask', {
+      taskId: 'task-done',
+      data: { start_date: '2026-08-10', due_date: '2026-08-12' }
+    })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vuexStore = createStore({
+      modules: {
+        people: { ...peopleStore, state: { ...peopleStore.state } },
+        tasks: {
+          ...tasksStore,
+          state: { ...tasksStore.state, taskMap: new Map() }
+        }
+      }
+    })
+    vuexStore.commit('LOAD_PERSON_DONE_TASKS_END', [
+      {
+        id: 'task-done',
+        entity_id: 'asset-1',
+        entity_name: 'Chair',
+        entity_type_name: 'Asset',
+        project_id: 'production-1',
+        start_date: '2026-08-03',
+        due_date: '2026-08-05'
+      }
+    ])
+    tasksApi.updateTask.mockImplementation(
+      () =>
+        new Promise((resolve, reject) => {
+          answer = { resolve, reject }
+        })
+    )
+  })
+
+  test('keeps the dates of a save', async () => {
+    const save = moveDoneTask()
+    answer.resolve({})
+    await save
+
+    expect(doneTask()).toMatchObject({
+      start_date: '2026-08-10',
+      due_date: '2026-08-12'
+    })
+  })
+
+  test('puts back the dates of a refused save', async () => {
+    const save = moveDoneTask().catch(() => {})
+    const datesDuringSave = { ...doneTask() }
+    answer.reject(new Error('Bad Request'))
+    await save
+
+    expect(datesDuringSave).toMatchObject({ start_date: '2026-08-10' })
+    expect(doneTask()).toMatchObject({
+      start_date: '2026-08-03',
+      due_date: '2026-08-05'
+    })
+  })
+
+  // The person page builds its rows in a computed over the displayed list:
+  // the move and its undo have to reach it.
+  test('lets a computed over the done list follow a refused save', async () => {
+    const scope = effectScope()
+    const startDate = scope.run(() => computed(() => doneTask().start_date))
+    const dateBefore = startDate.value
+    const save = moveDoneTask().catch(() => {})
+    const dateDuringSave = startDate.value
+    answer.reject(new Error('Bad Request'))
+    await save
+    const dateAfterRefusal = startDate.value
+    scope.stop()
+
+    expect([dateBefore, dateDuringSave, dateAfterRefusal]).toEqual([
+      '2026-08-03',
+      '2026-08-10',
+      '2026-08-03'
+    ])
+  })
+
+  // The search of the person page lists the matching done tasks only.
+  test('puts back the dates of a refused save a search hides', async () => {
+    const save = moveDoneTask().catch(() => {})
+    const datesDuringSave = { ...doneTask() }
+    vuexStore.commit('SET_PERSON_TASKS_SEARCH', 'table')
+    const isHidden = !doneTask()
+    answer.reject(new Error('Bad Request'))
+    await save
+    vuexStore.commit('SET_PERSON_TASKS_SEARCH', '')
+
+    expect(datesDuringSave).toMatchObject({ start_date: '2026-08-10' })
+    expect(isHidden).toBe(true)
+    expect(doneTask()).toMatchObject({
+      start_date: '2026-08-03',
+      due_date: '2026-08-05'
+    })
   })
 })

@@ -2,7 +2,11 @@ import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import colors from '@/lib/colors'
 import { isLatestTaskComment, isPostedSince } from '@/lib/comments'
-import { populateTask, setTasksEntityPreview } from '@/lib/models'
+import {
+  applyTaskEdit,
+  populateTask,
+  setTasksEntityPreview
+} from '@/lib/models'
 import { sortTasks, sortPeople, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex, buildPeopleIndex } from '@/lib/indexing'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
@@ -29,6 +33,7 @@ import {
   LOAD_PERSON_TASKS_END,
   LOAD_PERSON_DONE_TASKS_END,
   EDIT_PEOPLE_END,
+  EDIT_TASK_DATES,
   DELETE_PEOPLE_END,
   SET_PERSON_TASKS_SEARCH,
   SAVE_PERSON_TASKS_SEARCH_END,
@@ -276,6 +281,9 @@ const getters = {
   personTasksScrollPosition: state => state.personTasksScrollPosition,
 
   getPerson: state => id => cache.personMap.get(id),
+  // the full done list, which a search does not filter
+  getPersonDoneTask: state => id =>
+    cache.personDoneTasks.find(task => task.id === id),
 
   timesheet: state => state.timesheet,
   personTimeSpentMap: state => state.personTimeSpentMap,
@@ -934,6 +942,16 @@ const mutations = {
   // LOAD_PERSON_TASKS_END, and its own handler sweeps them from there.
   [SET_PREVIEW](state, { entityId, previewId }) {
     setTasksEntityPreview(state.displayedPersonDoneTasks, entityId, previewId)
+  },
+
+  // Root mutation of the tasks module, whose map does not hold the done tasks
+  // the person page loads here. A displayed task is edited through the state,
+  // for the page to see it; one a search hides, in the full list.
+  [EDIT_TASK_DATES](state, { taskId, data }) {
+    const task =
+      state.displayedPersonDoneTasks.find(({ id }) => id === taskId) ??
+      cache.personDoneTasks.find(({ id }) => id === taskId)
+    if (task) applyTaskEdit(task, data)
   },
 
   [SET_PERSON_TASKS_SEARCH](state, searchText) {

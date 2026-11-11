@@ -45,6 +45,15 @@ export const setTasksEntityPreview = (tasks, entityId, previewId) => {
   })
 }
 
+export const applyTaskEdit = (task, { data: metadata, ...fields }) => {
+  Object.assign(task, fields)
+  // Mirror the server-side merge of the metadata bag instead of replacing it
+  // wholesale.
+  if (metadata) {
+    task.data = { ...(task.data || {}), ...metadata }
+  }
+}
+
 export const updateModelFromList = (items, modelToUpdate) => {
   const item = items.find(item => item.id === modelToUpdate.id)
   if (item) Object.assign(item, modelToUpdate)

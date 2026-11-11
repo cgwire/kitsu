@@ -125,6 +125,36 @@ describe('People store', () => {
       expect(other.entity_preview_file_id).toBeUndefined()
     })
 
+    // Same reason: a done task moved on the person schedule gets its dates
+    // here, its metadata merged as the tasks module does.
+    test('EDIT_TASK_DATES moves a task of the person done list', () => {
+      const done = {
+        id: 'task-1',
+        start_date: '2026-08-03',
+        due_date: '2026-08-05',
+        data: { mood: 'calm' }
+      }
+      const other = { id: 'task-2', start_date: '2026-08-03' }
+      state.displayedPersonDoneTasks = [done, other]
+
+      store.mutations.EDIT_TASK_DATES(state, {
+        taskId: 'task-1',
+        data: {
+          start_date: '2026-08-10',
+          due_date: '2026-08-12',
+          data: { note: 'moved' }
+        }
+      })
+
+      expect(done).toEqual({
+        id: 'task-1',
+        start_date: '2026-08-10',
+        due_date: '2026-08-12',
+        data: { mood: 'calm', note: 'moved' }
+      })
+      expect(other.start_date).toEqual('2026-08-03')
+    })
+
     // NEW_TASK_COMMENT_END no longer rebuilds personDoneTasksIndex. That
     // rebuild is dead only because the done list comes from its own fetch:
     // the same task sits in both lists as two distinct objects, so commenting

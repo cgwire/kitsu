@@ -591,14 +591,14 @@ describe('Person page', () => {
       due_date: '2026-08-05'
     }
 
-    const mountSchedule = ({ tasks = [plannedTask], doneTasks = [] } = {}) =>
+    const mountSchedule = ({ tasks = [plannedTask] } = {}) =>
       mountPage({
         actions: { updateTask: vi.fn(() => Promise.resolve()) },
         getters: {
           currentProduction: () => null,
           dateFormat: () => 'YYYY-MM-DD',
           departmentMap: () => new Map(),
-          displayedPersonDoneTasks: () => doneTasks,
+          displayedPersonDoneTasks: () => [],
           isCurrentUserManager: () => true,
           isCurrentUserProductionManager: () => true,
           isDarkTheme: () => false,
@@ -703,29 +703,6 @@ describe('Person page', () => {
       )
       wrapper.unmount()
       expect(title).toContain('(2026-08-08 - ')
-    })
-
-    // A drop saves through the tasks module, whose map holds the to-do tasks
-    // only: the store copy of a done task keeps its former dates, and rows
-    // rebuilt at the drop put its bar back there.
-    it('keeps a dropped done task bar until the rows are rebuilt', async () => {
-      const wrapper = await mountSchedule({ tasks: [], doneTasks: [plannedTask] })
-
-      await taskBar(wrapper)
-        .find('.timebar-center')
-        .trigger('mousedown', { clientX: 300 })
-      document.dispatchEvent(
-        new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
-      )
-      await nextTick()
-      document.dispatchEvent(
-        new MouseEvent('mouseup', { bubbles: true, clientX: 360 })
-      )
-      await nextTick()
-
-      const title = taskBar(wrapper).attributes('title')
-      wrapper.unmount()
-      expect(title).toContain('(2026-08-06 - ')
     })
 
     // a click selects a bar: rebuilding every row for it would lag on people
