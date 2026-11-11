@@ -214,13 +214,8 @@ const getters = {
 }
 
 const actions = {
-  loadTask({ commit, state }, { taskId }) {
+  loadTask({ commit }, { taskId }) {
     return tasksApi.getTask(taskId).then(task => {
-      const currentTask = state.taskMap.get(taskId)
-      if (currentTask && task.updated_at < currentTask.updated_at) {
-        delete task.start_date
-        delete task.due_date
-      }
       commit(LOAD_TASK_END, task)
       return task
     })
@@ -1638,9 +1633,8 @@ const mutations = {
     }
   },
 
-  [UPDATE_TASK](state, { task, nbAssetsReady, updatedAt, taskStatusId }) {
+  [UPDATE_TASK](state, { task, nbAssetsReady, taskStatusId }) {
     if (nbAssetsReady) task.nb_assets_ready = nbAssetsReady
-    if (updatedAt) task.updated_at = updatedAt
     if (taskStatusId) task.task_status_id = taskStatusId
   },
 

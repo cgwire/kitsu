@@ -292,7 +292,9 @@ import {
   onBeforeUnmount,
   onMounted,
   onUnmounted,
+  reactive,
   ref,
+  toRaw,
   useTemplateRef,
   watch
 } from 'vue'
@@ -494,11 +496,23 @@ const tasksEndDate = computed(() =>
     : moment().add(15, 'days')
 )
 
+// read raw: a drag changes the dates of the rows, and the range would
+// slide the timeline under the mouse
 const scheduleTasks = computed(() =>
-  scheduleItems.value.flatMap(item => item.children)
+  toRaw(scheduleItems.value).flatMap(item => item.children)
 )
 
-const scheduleItems = computed(() => {
+// a task reloads on each task:update event, and the bar a drag moves has to
+// stay in the rows until the drop
+const scheduleItems = computed(previous =>
+  previous && scheduleWidgetRef.value?.isEditingDates
+    ? previous
+    : storeScheduleItems.value
+)
+
+// apart from scheduleItems: built there, after its read of the flag, the rows
+// would be rebuilt at each release, a plain click included
+const storeScheduleItems = computed(() => {
   const rootMap = new Map()
   sortedAllTasks.value.forEach(task => {
     if (!rootMap.get(task.project_id)) {
@@ -529,7 +543,8 @@ const scheduleItems = computed(() => {
       daysOff: daysOff.value
     })
   })
-  return rootElements
+  // reactive, so that a bar follows the mouse while the widget drags it
+  return reactive(rootElements)
 })
 
 const productionList = computed(() => [
@@ -1146,6 +1161,10 @@ useHead({ title: computed(() => `${person.value?.name || '...'} - Kitsu`) })
 
 // The schedule positions its grid absolutely: it takes the panel height
 .schedule-panel {
+  // the schedule hides the grid scrolling under its total and its month
+  // names with the page background, which the panel replaces here
+  --background: var(--background-panel-raised);
+
   display: flex;
   flex: 1;
   flex-direction: column;

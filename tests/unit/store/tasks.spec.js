@@ -28,6 +28,7 @@ vi.mock('@/store/api/tasks', () => ({
     ),
     deletePreview: vi.fn(),
     deleteTaskComment: vi.fn(),
+    getTask: vi.fn(),
     getTaskComment: vi.fn(),
     getTaskComments: vi.fn(),
     uploadPreview: vi.fn(),
@@ -552,6 +553,38 @@ describe('Tasks store', () => {
       await expect(pinAndSave(comment)).rejects.toBe(error)
 
       expect(comment.pinned).toBe(false)
+    })
+  })
+
+  describe('loadTask action', () => {
+    // A press on a schedule bar marked its task with the time of the press,
+    // and a reload older than that mark lost its dates.
+    test('keeps the dates of the reloaded task', async () => {
+      const task = {
+        id: 'task-1',
+        start_date: '2026-08-03',
+        due_date: '2026-08-05',
+        updated_at: '2026-08-10 09:00:00'
+      }
+      const state = { taskMap: new Map([[task.id, task]]) }
+      const commit = (type, payload) =>
+        tasksStore.mutations[type](state, payload)
+      tasksApi.getTask.mockResolvedValueOnce({
+        id: 'task-1',
+        start_date: '2026-08-17',
+        due_date: '2026-08-19',
+        updated_at: '2026-08-09T18:00:00',
+        project: { name: 'Mushroom' },
+        entity: { name: 'Chair' },
+        entity_type: { name: 'Asset' }
+      })
+
+      await tasksStore.actions.loadTask({ commit, state }, { taskId: 'task-1' })
+
+      expect(task).toMatchObject({
+        start_date: '2026-08-17',
+        due_date: '2026-08-19'
+      })
     })
   })
 

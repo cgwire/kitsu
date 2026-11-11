@@ -700,7 +700,6 @@ import {
   daysToMinutes,
   durationToMinutes,
   formatDisplayDate,
-  formatFullDate,
   getBusinessDays,
   getDayOffRange,
   minutesToDays,
@@ -961,8 +960,13 @@ const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const milestonesByDate = computed(() => store.getters.milestonesByDate)
 const openProductions = computed(() => store.getters.openProductions)
 const organisation = computed(() => store.getters.organisation)
-const taskMap = computed(() => store.getters.taskMap)
 const taskStatuses = computed(() => store.getters.taskStatuses)
+
+// from the press on a bar to its drop: rows a page rebuilds meanwhile no longer
+// hold the objects the move changes, and the bar jumps back to its dates
+const isEditingDates = computed(
+  () => isChangeDates.value || isChangeStartDate.value || isChangeEndDate.value
+)
 
 const isDurationInHours = computed(() => {
   return organisation.value.format_duration_in_hours
@@ -1782,6 +1786,8 @@ const updateItemEstimation = item => {
 
 const updateSelection = (item, event) => {
   const isCtrlKey = event.ctrlKey || event.metaKey
+  // a plain press on an unselected bar resets the selection anyway
+  if (isCtrlKey || isSelected(item)) syncSelection(item)
 
   if (isSelected(item)) {
     if (isCtrlKey) {
@@ -1840,8 +1846,11 @@ const addToSelection = itemToAdd => {
   selection.value.push(itemToAdd)
 }
 
+// the selection holds reactive proxies, and a page can pass plain objects
 const removeFromSelection = itemToRemove => {
-  selection.value = selection.value.filter(item => item !== itemToRemove)
+  selection.value = selection.value.filter(
+    item => toRaw(item) !== toRaw(itemToRemove)
+  )
 }
 
 const resetSelection = value => {
@@ -1854,6 +1863,38 @@ const selectAlone = item => {
   if (selection.value.length !== 1 || selection.value[0] !== item) {
     resetSelection([item])
   }
+}
+
+// isSelected matches ids, but a move or a reassignment works on the selected
+// objects: a page can rebuild its rows with new objects (the task type page
+// on each task:update event, so after every save) and give a task one bar
+// object per assignee row.
+const syncSelection = pressedItem => {
+  if (!selection.value.length) return
+  // every bar of the schedule, read raw: through the reactive proxies, this
+  // walk cost several times more on schedules of thousands of bars. Unwrap
+  // each root: a hierarchy filtered from a reactive array holds proxies.
+  const items = props.hierarchy
+    .map(toRaw)
+    .flatMap(rootElement => [
+      rootElement,
+      ...(rootElement.children ?? []).flatMap(rowItems)
+    ])
+    .filter(isSelected)
+  const rowKey = item => `${item.id}/${item.parentElement?.id}`
+  const itemsByRow = new Map(items.map(item => [rowKey(item), item]))
+  const itemsById = new Map(items.map(item => [item.id, item]))
+  const synced = selection.value
+    .map(item =>
+      item.id === pressedItem.id
+        ? pressedItem
+        : (itemsByRow.get(rowKey(item)) ?? itemsById.get(item.id))
+    )
+    .filter(Boolean)
+  const isChanged =
+    synced.length !== selection.value.length ||
+    synced.some((item, index) => toRaw(item) !== toRaw(selection.value[index]))
+  if (isChanged) resetSelection(synced)
 }
 
 const moveTimebar = (timeElement, event) => {
@@ -2766,18 +2807,6 @@ watch(
   }
 )
 
-watch(currentElement, () => {
-  if (currentElement.value && currentElement.value.task_type_id) {
-    const task = taskMap.value.get(currentElement.value.id)
-    if (task) {
-      store.commit('UPDATE_TASK', {
-        task,
-        updatedAt: formatFullDate(moment())
-      })
-    }
-  }
-})
-
 watch(
   currentProduction,
   () => {
@@ -2844,6 +2873,7 @@ provide('scheduleRowHelpers', {
 defineExpose({
   applyMoveToLoadedRows,
   exportData,
+  isEditingDates,
   refreshAllItemPositions,
   refreshItemPositions,
   refreshManDays,
