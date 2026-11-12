@@ -491,6 +491,37 @@ describe('Schedule widget - dragover renders', () => {
 })
 
 describe('Schedule widget - root row name', () => {
+  let rafSpy
+
+  beforeEach(() => {
+    // the grab is throttled through requestAnimationFrame, which never fires
+    // on its own in jsdom
+    rafSpy = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(callback => {
+        callback()
+        return 0
+      })
+  })
+
+  afterEach(() => {
+    rafSpy.mockRestore()
+  })
+
+  // The grab of the names column keeps the pressed element under the pointer,
+  // so the browser clicks it on the release.
+  const grabName = async (wrapper, fromY, toY, target = '.root-element-name') => {
+    const name = wrapper.find(target)
+    await name.trigger('mousedown', { clientY: fromY })
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientY: toY })
+    )
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientY: toY })
+    )
+    await name.trigger('click', { clientY: toY })
+  }
+
   test('a click on the name unfolds the row like its chevron', async () => {
     const rootElement = buildRootElement()
     const wrapper = mountRootBar(rootElement)
@@ -501,6 +532,114 @@ describe('Schedule widget - root row name', () => {
       rootElement
     )
 
+    wrapper.unmount()
+  })
+
+  test('a grab of the names started on a name leaves its row as is', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+
+    await grabName(wrapper, 300, 100)
+
+    // sanity check: the grab scrolled the names
+    expect(wrapper.find('.entities').element.scrollTop).toBe(200)
+    expect(wrapper.emitted('root-element-expanded')).toBeFalsy()
+    wrapper.unmount()
+  })
+
+  test('a click that slips by a few pixels still unfolds the row', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+
+    await grabName(wrapper, 300, 296)
+
+    expect(wrapper.emitted('root-element-expanded')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  test('a grab just longer than a slip leaves its row as is', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+
+    await grabName(wrapper, 300, 295)
+
+    expect(wrapper.emitted('root-element-expanded')).toBeFalsy()
+    wrapper.unmount()
+  })
+
+  test('a click after a grab released off the name still unfolds the row', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+    const name = wrapper.find('.root-element-name')
+    // released under the column header: the browser clicks no name
+    await name.trigger('mousedown', { clientY: 300 })
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientY: 20 })
+    )
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientY: 20 })
+    )
+
+    await grabName(wrapper, 300, 300)
+
+    expect(wrapper.emitted('root-element-expanded')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  test('a grab of the names started on a chevron leaves its row as is', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+
+    await grabName(wrapper, 300, 100, '.expand')
+
+    expect(wrapper.find('.entities').element.scrollTop).toBe(200)
+    expect(wrapper.emitted('root-element-expanded')).toBeFalsy()
+    wrapper.unmount()
+  })
+
+  test('a click on a chevron that slips by a few pixels unfolds the row', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+
+    await grabName(wrapper, 300, 297, '.expand')
+
+    expect(wrapper.emitted('root-element-expanded')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  // A press on the button that schedules the undated tasks of a row is meant
+  // for the button: the names do not follow the pointer away from it.
+  test('a press on the button that schedules a row starts no grab', async () => {
+    const root = {
+      ...buildRootElement(),
+      expanded: true,
+      people: {},
+      children: [
+        {
+          id: 'seq-1',
+          object_id: 'seq-1',
+          name: 'SEQ01',
+          color: '#4a90e2',
+          editable: true,
+          expanded: true,
+          loading: false,
+          man_days: 0,
+          startDate: moment('2026-08-10'),
+          endDate: moment('2026-08-14'),
+          children: new Map(),
+          nbUndatedTasks: 3
+        }
+      ]
+    }
+    const wrapper = mountSchedule(
+      {
+        startDate: moment('2026-07-05'),
+        endDate: moment('2026-10-23'),
+        hierarchy: reactive([root]),
+        subchildren: true,
+        reassignable: true
+      },
+      { attachTo: document.body }
+    )
+
+    await grabName(wrapper, 300, 100, '.plan-entity')
+
+    expect(wrapper.find('.entities').element.scrollTop).toBe(0)
+    expect(wrapper.emitted('plan-entity')).toEqual([[root, root.children[0]]])
     wrapper.unmount()
   })
 })

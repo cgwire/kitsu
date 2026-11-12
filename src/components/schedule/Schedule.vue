@@ -61,7 +61,7 @@
                 }"
                 role="button"
                 tabindex="0"
-                @click="expandRootElement(rootElement)"
+                @click="onRootToggleClick(rootElement)"
                 @keydown.enter.prevent="expandRootElement(rootElement)"
                 @keydown.space.prevent="expandRootElement(rootElement)"
               >
@@ -91,7 +91,7 @@
                     : `4px solid ${rootElement.color}`
                 }"
                 :title="rootElement.name"
-                @click="expandRootElement(rootElement)"
+                @click="onRootToggleClick(rootElement)"
               >
                 {{ rootElement.name }}
               </span>
@@ -197,6 +197,8 @@
                       <button
                         class="button is-small is-link plan-entity"
                         type="button"
+                        @mousedown.stop
+                        @touchstart.stop
                         @click="$emit('plan-entity', rootElement, childElement)"
                         v-if="reassignable"
                       >
@@ -892,6 +894,8 @@ const loading = reactive({
 
 let initialClientX = null
 let initialClientY = null
+// initialClientY follows the grab of the names: this keeps the press point
+let browseOriginY = null
 // the recent wheel deltas over the schedule, summed per axis with a decay,
 // the time of the last one, and whether Shift was held
 const wheelAxes = { x: 0, y: 0, at: 0, isShifted: false }
@@ -912,7 +916,8 @@ let isShiftDrag = false
 const dragPersonByItem = new Map()
 
 // a native click still fires on mouseup after a genuine drag (mousedown and
-// mouseup landed on the same bar), so an unguarded click handler would
+// mouseup landed on the same bar, or on the same row name, which the grab of
+// the names keeps under the pointer), so an unguarded click handler would
 // re-select/expand the row right after every move. stopBrowsing sets this
 // once it detects the pointer actually moved; the next click consumes it.
 let justDragged = false
@@ -1036,6 +1041,8 @@ const milestoneGroups = computed(() => {
 // scrollToDate puts a date this far left of the middle of the schedule
 const DATE_SCROLL_SHIFT = 295
 
+// a press that moves the pointer less than this is still a click
+const CLICK_TOLERANCE = 4
 // a wheel counted in lines (Firefox with a mouse) steps a row per line
 const ROW_HEIGHT = 40
 // share of the earlier wheel deltas kept to weigh the axis of the next one
@@ -2161,6 +2168,7 @@ const startBrowsingY = event => {
   document.body.style.cursor = 'grabbing'
   isBrowsingY.value = true
   initialClientY = getClientY(event)
+  browseOriginY = initialClientY
   startMoveTracking()
 }
 
@@ -2203,6 +2211,12 @@ const stopBrowsing = event => {
       }
     }
   } else {
+    if (
+      browseOriginY !== null &&
+      Math.abs(getClientY(event) - browseOriginY) > CLICK_TOLERANCE
+    ) {
+      justDragged = true
+    }
     // clear the selection when clicking outside an item
     let target = event.target
     while (target && target !== timelineRef.value) {
@@ -2221,6 +2235,7 @@ const stopBrowsing = event => {
   isBrowsingY.value = false
   initialClientX = null
   initialClientY = null
+  browseOriginY = null
   dragSourcePersonId = null
   dragPersonByItem.clear()
   currentElement.value = null
@@ -2457,6 +2472,11 @@ const consumeDragClick = () => {
 const onRootBarClick = rootElement => {
   if (consumeDragClick()) return
   emit('root-element-selected', rootElement)
+}
+
+const onRootToggleClick = rootElement => {
+  if (consumeDragClick()) return
+  expandRootElement(rootElement)
 }
 
 const onChildBarClick = (rootElement, childElement) => {
