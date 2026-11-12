@@ -31,6 +31,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 import '@/lib/auth'
 
 import { downloadBlob } from '@/lib/download'
+import errors from '@/lib/errors'
 
 import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
@@ -48,6 +49,8 @@ import DateField from '@/components/widgets/DateField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import ProgressBar from '@/components/widgets/ProgressBar.vue'
 import TextField from '@/components/widgets/TextField.vue'
+
+import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
 
 // The page is driven through what it renders and what it calls: the
 // schedule widget events, the comboboxes, the buttons and the modals, the
@@ -1049,6 +1052,68 @@ describe('ProductionSchedule page', () => {
     })
   })
 
+  // The start and end dates of the toolbar move the view and, once the
+  // production has them, set its own dates: Zou lets an admin or a manager
+  // of the production change them, and no one else.
+  describe('production dates', () => {
+    const toolbarDateFields = wrapper =>
+      wrapper.find('.schedule-toolbar').findAllComponents(DateField)
+
+    it('sets the production date a manager picks', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      const fields = toolbarDateFields(wrapper)
+      expect(fields.map(field => field.props('disabled'))).toEqual([
+        false,
+        false
+      ])
+
+      fields[0].vm.$emit(
+        'update:model-value',
+        new Date('2026-01-15T00:00:00.000Z')
+      )
+      await flushPromises()
+
+      expect(payloadsOf(storeActions.editProduction)).toEqual([
+        { id: 'production-1', start_date: '2026-01-15' }
+      ])
+    })
+
+    it.each([
+      ['a supervisor', { isCurrentUserProductionSupervisor: () => true }],
+      ['an artist', {}]
+    ])('locks the production dates for %s', async (_label, getters) => {
+      const { wrapper } = await mountPage({
+        getters: { isCurrentUserProductionManager: () => false, ...getters }
+      })
+
+      expect(
+        toolbarDateFields(wrapper).map(field => field.props('disabled'))
+      ).toEqual([true, true])
+    })
+
+    it('logs a failed save of a production date', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = Object.assign(new Error('Failed'), { status: 500 })
+      errors.markRequestFailure(failure)
+      const { wrapper } = await mountPage({
+        actions: { editProduction: vi.fn(() => Promise.reject(failure)) }
+      })
+
+      const rejections = await recordUnhandledRejections(async () => {
+        toolbarDateFields(wrapper)[1].vm.$emit(
+          'update:model-value',
+          new Date('2026-11-30T00:00:00.000Z')
+        )
+        await flushPromises()
+      })
+
+      expect(rejections).toEqual([])
+      expect(consoleError).toHaveBeenCalledWith(failure)
+    })
+  })
+
   // The view of an episode drew the task type bars of the production, so
   // the dates planned for the episode in the all-episodes view never
   // showed there, and a move from the episode view changed the production.
@@ -1462,6 +1527,54 @@ describe('ProductionSchedule page', () => {
           }
         }
       ])
+    })
+  })
+
+  // Zou lets an admin or a manager of the production create, edit, delete,
+  // and apply a version, and no one else: artists and supervisors only
+  // switch versions.
+  describe('version actions', () => {
+    const shownVersionActions = wrapper =>
+      [
+        findIconButton(wrapper, 'schedule.new_version'),
+        findIconButton(wrapper, 'schedule.edit_version'),
+        findIconButton(wrapper, 'schedule.delete_version'),
+        findButton(wrapper, 'schedule.apply_to_prod')
+      ].map(button => button !== undefined)
+
+    const findVersionCombobox = wrapper =>
+      wrapper
+        .findAllComponents(Combobox)
+        .find(combobox => combobox.props('modelValue') === unlockedVersion.id)
+
+    it('offers the version actions to a manager', async () => {
+      const { wrapper } = await mountPage({
+        query: { version: unlockedVersion.id },
+        versions: [unlockedVersion]
+      })
+
+      expect(shownVersionActions(wrapper)).toEqual([true, true, true, true])
+    })
+
+    it.each([
+      ['a supervisor', { isCurrentUserProductionSupervisor: () => true }],
+      ['an artist', {}]
+    ])('hides the version actions from %s', async (_label, getters) => {
+      const { wrapper } = await mountPage({
+        getters: { isCurrentUserProductionManager: () => false, ...getters },
+        query: { version: unlockedVersion.id },
+        versions: [unlockedVersion]
+      })
+
+      expect(shownVersionActions(wrapper)).toEqual([
+        false,
+        false,
+        false,
+        false
+      ])
+      expect(findVersionCombobox(wrapper).props('options')).toContainEqual(
+        expect.objectContaining({ value: unlockedVersion.id })
+      )
     })
   })
 
