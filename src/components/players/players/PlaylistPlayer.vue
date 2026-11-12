@@ -560,7 +560,8 @@
         :max-duration="playbackMaxDuration"
         :nb-frames="nbFrames"
         :phone="isPhone"
-        v-model:current-3-d-animation="objectModel.currentAnimation"
+        :current-3-d-animation="objectModel.currentAnimation"
+        @update:current-3-d-animation="onAnimationSelected"
         v-model:is-hd="isHd"
         v-model:is-muted="isMuted"
         v-model:is-show-annotations-while-playing="
@@ -1017,6 +1018,7 @@ import {
   buildAnnotationSnapshotFilename,
   buildAnnotationSnapshotTitle,
   drawSnapshotTitle,
+  isModelPreview,
   isMoviePreview,
   isPicturePreview,
   isSoundPreview,
@@ -2565,9 +2567,8 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
     }
     if (isPlaying.value && entity) {
       if (isSoundPreview(entity.preview_file_extension)) {
-        // The sound viewer gets its new file on the next render. A build holds
-        // the movies only, and plays its own sound.
-        if (!isFullMode.value) nextTick(playSound)
+        // A build holds the movies only, and plays its own sound.
+        if (!isFullMode.value) playSound()
       } else if (
         // Entities without any preview borrow the picture timer so
         // continuous playback holds their slot and then moves on instead
@@ -2576,6 +2577,13 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
         !entity.preview_file_id
       ) {
         playPicture()
+      } else if (isModelPreview(entity.preview_file_extension)) {
+        // The viewer gets the model on the next render. One that landed
+        // while hidden fires no load then: nothing else starts its animation.
+        // Back on the same entry, another of its files can still be on screen.
+        nextTick(() => {
+          if (isPlaying.value && isCurrentPreviewModel.value) playModel()
+        })
       }
     }
   }
@@ -3190,10 +3198,16 @@ const playPicture = () => {
   }, 100)
 }
 
+// After a move to a sound, the viewer shows up, or gets the new file, on the
+// next render.
 const playSound = () => {
   if (playingPictureTimeout) clearTimeout(playingPictureTimeout)
   isPlaying.value = true
-  if (isCurrentPreviewSound.value) soundPlayer.value?.play()
+  nextTick(() => {
+    if (isPlaying.value && isCurrentPreviewSound.value) {
+      soundPlayer.value?.play()
+    }
+  })
 }
 
 // A sound has no time update to chain the playlist on, like a movie does:
@@ -4141,11 +4155,21 @@ const onModelLoaded = () => {
       value: a
     }))
     objectModel.value.currentAnimation = animations[0]
-    nextTick(() => playModel())
+    // A model left while it loaded lands in the hidden viewer. Its
+    // animations stay for a return, which fires no load.
+    if (isPlaying.value && isCurrentPreviewModel.value) {
+      nextTick(() => playModel())
+    }
   } else {
     objectModel.value.availableAnimations = []
     objectModel.value.currentAnimation = null
   }
+}
+
+// Another animation picked in the bar plays, even in a paused playlist.
+const onAnimationSelected = animation => {
+  objectModel.value.currentAnimation = animation
+  playModel()
 }
 
 const onPreviewChanged = ({ entity, previewFile, previousPreviewFileId }) => {
@@ -5060,15 +5084,6 @@ watch(isDrawing, () => {
 watch(isTyping, () => {
   if (!isAnnotationsDisplayed.value) isAnnotationsDisplayed.value = true
 })
-
-watch(
-  () => objectModel.value.currentAnimation,
-  () => {
-    if (isCurrentPreviewModel.value && objectModel.value.isAnimation) {
-      playModel()
-    }
-  }
-)
 
 watch(isShowAnnotationsWhilePlaying, () => {
   lastShownWhilePlaying = null
