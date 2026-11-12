@@ -31,6 +31,7 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import ActionPanel from '@/components/tops/ActionPanel.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
 import errors from '@/lib/errors'
 import assetsStore from '@/store/modules/assets'
 
@@ -76,7 +77,10 @@ const mountPanel = async (
     errorHandler = null,
     isAdmin = false,
     isArtist = false,
-    projectRoles = {}
+    projectRoles = {},
+    departments = [],
+    taskTypes = [],
+    stubs = {}
   } = {}
 ) => {
   const router = createRouter({
@@ -154,8 +158,8 @@ const mountPanel = async (
       taskMap: () => toSelection(tasks),
       taskStatusForCurrentUser: () => statuses,
       taskStatusMap: () => new Map(statuses.map(status => [status.id, status])),
-      taskTypeMap: () => new Map(),
-      user: () => ({ id: 'user-1', departments: [] })
+      taskTypeMap: () => toSelection(taskTypes),
+      user: () => ({ id: 'user-1', departments })
     }
   })
   store.dispatch = vi.fn(() => Promise.resolve())
@@ -164,6 +168,7 @@ const mountPanel = async (
     props: { productionId: 'production-1' },
     global: {
       plugins: [router, store],
+      stubs,
       ...(errorHandler ? { config: { errorHandler } } : {})
     }
   })
@@ -1439,6 +1444,82 @@ describe('ActionPanel, concept folders', () => {
 
     expect(wrapper.find('[title="concepts.folders.move"]').exists()).toBe(false)
     expect(wrapper.find('[title="menu.edit_concepts"]').exists()).toBe(true)
+  })
+})
+
+describe('ActionPanel, assignation', () => {
+  // Tasks of a department of the user, which let an empty field through.
+  const tasks = ['task-1', 'task-2'].map(id => ({
+    id,
+    project_id: 'production-1',
+    task_type_id: 'task-type-1'
+  }))
+  const person = { id: 'person-2', name: 'Jane Doe', departments: [] }
+
+  const mountOnShots = (options = {}) => {
+    localStorage.setItem('entities--selected-bar', 'assignation')
+    return mountPanel([], {
+      path: '/productions/production-1/shots',
+      tasks,
+      departments: ['department-1'],
+      taskTypes: [{ id: 'task-type-1', department_id: 'department-1' }],
+      stubs: { PeopleField: false },
+      ...options
+    })
+  }
+
+  const assignButton = wrapper => wrapper.find('.action-bar .confirm-button')
+  const isButtonDisabled = wrapper =>
+    assignButton(wrapper).attributes('aria-disabled') === 'true' &&
+    assignButton(wrapper).classes().includes('is-disabled')
+  const choosePerson = async wrapper => {
+    wrapper.findComponent(PeopleField).vm.$emit('update:model-value', person)
+    await flushPromises()
+  }
+  const assign = async wrapper => {
+    await assignButton(wrapper).trigger('click')
+    await flushPromises()
+  }
+  const assignations = store =>
+    store.dispatch.mock.calls
+      .filter(([action]) => action === 'assignSelectedTasks')
+      .map(([, payload]) => payload)
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  test('assigns the chosen person', async () => {
+    const { store, wrapper } = await mountOnShots()
+    await choosePerson(wrapper)
+
+    await assign(wrapper)
+
+    expect(assignations(store)).toEqual([{ personId: 'person-2' }])
+  })
+
+  test.each(['manager', 'supervisor'])(
+    'assigns nobody for a %s with no chosen person',
+    async role => {
+      const { store, wrapper } = await mountOnShots({ role })
+
+      await assign(wrapper)
+
+      expect(assignations(store)).toEqual([])
+      expect(isButtonDisabled(wrapper)).toBe(true)
+    }
+  )
+
+  test('assigns nobody on a second click, the field emptied', async () => {
+    const { store, wrapper } = await mountOnShots()
+    await choosePerson(wrapper)
+    expect(isButtonDisabled(wrapper)).toBe(false)
+    await assign(wrapper)
+
+    await assign(wrapper)
+
+    expect(assignations(store)).toEqual([{ personId: 'person-2' }])
+    expect(isButtonDisabled(wrapper)).toBe(true)
   })
 })
 

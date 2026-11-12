@@ -381,6 +381,8 @@
           <div class="flexrow-item is-wide" v-if="!loading.assignation">
             <button
               class="button confirm-button is-wide"
+              :class="{ 'is-disabled': !assigneeId }"
+              :aria-disabled="!assigneeId"
               @click="confirmAssign"
             >
               {{
@@ -1342,6 +1344,13 @@ const isSupervisorInDepartment = computed(
     (user.value.departments.length === 0 || isInDepartment.value)
 )
 
+const assigneeId = computed(() => {
+  if (isCurrentUserManager.value || isCurrentUserSupervisor.value) {
+    return person.value?.id
+  }
+  return isInDepartment.value ? user.value.id : undefined
+})
+
 // The bars the menu offers to this selection. The bar used last comes back
 // only when offered: several pages share it, and it may come from a
 // selection of lines or of empty cells.
@@ -1523,22 +1532,18 @@ const confirmTaskStatusChange = async event => {
 }
 
 const confirmAssign = async () => {
-  if (person.value || isInDepartment.value) {
-    const personId =
-      isCurrentUserManager.value || isCurrentUserSupervisor.value
-        ? (person.value?.id ?? null)
-        : user.value.id
-    loading.assignation = true
-    errors.taskAssignation = false
-    try {
-      await store.dispatch('assignSelectedTasks', { personId })
-      assignationFieldRef.value?.clear()
-    } catch (err) {
-      errors.taskAssignation = true
-      console.error(err)
-    } finally {
-      loading.assignation = false
-    }
+  const personId = assigneeId.value
+  if (!personId) return
+  loading.assignation = true
+  errors.taskAssignation = false
+  try {
+    await store.dispatch('assignSelectedTasks', { personId })
+    assignationFieldRef.value?.clear()
+  } catch (err) {
+    errors.taskAssignation = true
+    console.error(err)
+  } finally {
+    loading.assignation = false
   }
 }
 
