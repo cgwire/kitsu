@@ -10,7 +10,11 @@ const currentUser = { id: 'person-1' }
 
 // reset() runs on mount, so every case needs the two loading dispatches to
 // settle before the action under test runs.
-const mountChat = async ({ participants = [], failing = {} } = {}) => {
+const mountChat = async ({
+  participants = [],
+  failing = {},
+  stubs = {}
+} = {}) => {
   const dispatch = vi.fn(action => {
     if (failing[action]) return Promise.reject(new Error(action))
     if (action === 'getEntityChat') return Promise.resolve({ participants })
@@ -31,7 +35,8 @@ const mountChat = async ({ participants = [], failing = {} } = {}) => {
       plugins: [store],
       config: {
         globalProperties: { $socket: { on: vi.fn(), off: vi.fn() } }
-      }
+      },
+      stubs
     }
   })
   await flushPromises()
@@ -96,5 +101,29 @@ describe('EntityChat errors', () => {
     expect(errorShown(wrapper, 'chats.loading_error')).toBe(false)
     expect(errorShown(wrapper, 'chats.leave_error')).toBe(false)
     expect(errorShown(wrapper, 'chats.send_error')).toBe(false)
+  })
+})
+
+describe('EntityChat paste', () => {
+  test('wraps a pasted Windows path in backticks', async () => {
+    const { wrapper, dispatch } = await mountChat({
+      participants: [currentUser.id],
+      stubs: {
+        EntityChatDays: {
+          template: '<div />',
+          methods: { scrollToBottom() {} }
+        }
+      }
+    })
+    const messageBox = wrapper.find('#message-box')
+    await messageBox.trigger('paste', {
+      clipboardData: { files: [], getData: () => 'S:\\8_anim\\_lib' }
+    })
+    await messageBox.trigger('keydown.enter')
+    await flushPromises()
+    expect(dispatch).toHaveBeenCalledWith(
+      'sendChatMessage',
+      expect.objectContaining({ message: '`S:\\8_anim\\_lib`' })
+    )
   })
 })

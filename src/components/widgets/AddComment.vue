@@ -117,6 +117,7 @@
               link
             )
           "
+          @paste="wrapPastedPath"
           v-autosize
           v-focus
           v-model="text"
@@ -448,6 +449,7 @@ import { EyeIcon, EyeOffIcon } from 'lucide-vue-next'
 
 import drafts from '@/lib/drafts'
 import { remove } from '@/lib/models'
+import { wrapPastedPath } from '@/lib/paste'
 import { replaceTimeWithTimecode } from '@/lib/render'
 import preferences from '@/lib/preferences'
 import strings from '@/lib/string'

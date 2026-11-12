@@ -181,6 +181,18 @@ describe('AddComment', () => {
     expect(wrapper.emitted('add-comment')).toBeTruthy()
   })
 
+  // The stubs name vue-at after its component name, AtTextarea.
+  it('wraps a pasted Windows path in backticks', async () => {
+    wrapper.unmount()
+    await mountComment({}, { AtTextarea: false })
+    const textarea = wrapper.find('textarea')
+    await textarea.trigger('paste', {
+      clipboardData: { files: [], getData: () => 'S:\\8_anim\\_lib' }
+    })
+    await wrapper.find('.post-button').trigger('click')
+    expect(wrapper.emitted('add-comment')[0][0]).toBe('`S:\\8_anim\\_lib`')
+  })
+
   // The extra preview modal of the panel may upload at the same time.
   it('clears the progress of its own files only when it publishes', async () => {
     await wrapper.setProps({ previewForms: [makeFormWithFile('sh010.mp4')] })

@@ -1189,6 +1189,11 @@ abbr {
   }
 }
 
+// Bulma paints inline code in its red, which reads as an error.
+code {
+  color: inherit;
+}
+
 .info {
   margin-top: 1em;
   font-size: 1.4em;
