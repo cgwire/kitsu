@@ -82,7 +82,7 @@ const taskTypes = [
   { id: 'tt-light', name: 'Lighting', color: '#0f0' }
 ]
 
-const mountFilteredPage = async () => {
+const mountFilteredPage = async (path = '/main-schedule') => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -94,7 +94,7 @@ const mountFilteredPage = async () => {
       }
     ]
   })
-  await router.push('/main-schedule')
+  await router.push(path)
   const store = createStore({
     getters: {
       openProductions: () => [
@@ -210,5 +210,49 @@ describe('MainSchedule filters', () => {
       [-1, 'weeks'],
       [1, 'months']
     ])
+  })
+
+  it('offers no day step on the week zoom, where it would not move', async () => {
+    const wrapper = await mountFilteredPage()
+    const unitCombo = () => wrapper.findComponent({ name: 'Combobox' })
+    const zoomCombo = wrapper.findComponent({ name: 'ComboboxNumber' })
+    unitCombo().vm.$emit('update:model-value', 'days')
+    zoomCombo.vm.$emit('update:model-value', 0)
+    await flushPromises()
+
+    expect(unitCombo().props('options').map(o => o.value)).toEqual([
+      'weeks',
+      'months'
+    ])
+    expect(unitCombo().props('modelValue')).toBe('weeks')
+  })
+
+  it('keeps the filters in the URL, for a reload', async () => {
+    const wrapper = await mountFilteredPage()
+    const [productionCombo, taskTypeCombo] = wrapper.findAllComponents({
+      name: 'ComboboxOptions'
+    })
+    productionCombo.vm.$emit('change', { key: 'production-2', value: false })
+    taskTypeCombo.vm.$emit('change', { key: 'tt-anim', value: false })
+    await flushPromises()
+    const { query } = wrapper.vm.$route
+    expect(query.hiddenProductions).toBe('production-2')
+    expect(query.hiddenTypes).toBe('tt-anim')
+
+    const reloaded = await mountFilteredPage(
+      '/main-schedule?hiddenProductions=production-2,gone&hiddenTypes=tt-anim'
+    )
+    const [reloadedProductions, reloadedTypes] = reloaded.findAllComponents({
+      name: 'ComboboxOptions'
+    })
+    expect(hierarchyOf(reloaded).map(item => item.id)).toEqual(['production-1'])
+    expect(reloadedProductions.props('modelValue')).toEqual({
+      'production-1': true,
+      'production-2': false
+    })
+    expect(reloadedTypes.props('modelValue')).toEqual({
+      'tt-anim': false,
+      'tt-light': true
+    })
   })
 })

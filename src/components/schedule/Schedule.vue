@@ -1029,6 +1029,9 @@ const milestoneGroups = computed(() => {
   })
 })
 
+// scrollToDate puts a date this far left of the middle of the schedule
+const DATE_SCROLL_SHIFT = 295
+
 const MILESTONE_LABEL_MAX_WIDTH = 180
 const MILESTONE_LABEL_MIN_WIDTH = 30
 
@@ -2036,8 +2039,10 @@ const scrollToDate = date => {
         : date.isBefore(props.startDate)
           ? props.startDate
           : props.endDate
-      const datePosition = getTimebarLeft({ startDate: target }) - 5
-      const newLeft = datePosition - (scheduleRef.value.offsetWidth / 2 - 300)
+      const newLeft =
+        getTimebarLeft({ startDate: target }) -
+        scheduleRef.value.offsetWidth / 2 +
+        DATE_SCROLL_SHIFT
       timelineContentWrapperRef.value.scrollLeft = newLeft
       if (timelineHeaderRef.value) {
         timelineHeaderRef.value.scrollLeft = newLeft
@@ -2046,15 +2051,17 @@ const scrollToDate = date => {
   }, 10)
 }
 
-// Steps from the date shown, the column where scrollToDate puts a date: the
-// position below is the inverse of its scrollLeft.
+// Steps from the date shown, the column where scrollToDate puts a date.
 const scrollByPeriod = (amount, unit) => {
   if (!scheduleRef.value || !columns.value.length) return
-  const left =
+  const shownLeft =
     timelineContentWrapperRef.value.scrollLeft +
     scheduleRef.value.offsetWidth / 2 -
-    298
-  const index = Math.round(left / cellWidth.value)
+    DATE_SCROLL_SHIFT
+  const index = Math.round(
+    (shownLeft - getTimebarLeft({ startDate: props.startDate })) /
+      cellWidth.value
+  )
   const shown =
     columns.value[Math.min(Math.max(index, 0), columns.value.length - 1)]
   scrollToDate(shown.clone().add(amount, unit))

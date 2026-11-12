@@ -114,10 +114,12 @@ import { useStore } from 'vuex'
 import colors from '@/lib/colors'
 import { episodifyRoute, getProductionSchedulePath } from '@/lib/path'
 import {
-  getTaskTypeFilterTitle,
-  getTaskTypeVisibilityMap,
+  formatHiddenIds,
+  getFilterTitle,
+  getVisibilityMap,
   getZoomOptions,
-  setTaskTypeVisibility
+  parseHiddenIds,
+  setVisibility
 } from '@/lib/productionSchedule'
 import {
   getEndDateFromString,
@@ -170,14 +172,11 @@ const productionFilterOptions = computed(() =>
 )
 
 const productionVisibilityMap = computed(() =>
-  getTaskTypeVisibilityMap(
-    productionFilterOptions.value,
-    hiddenProductionIds.value
-  )
+  getVisibilityMap(productionFilterOptions.value, hiddenProductionIds.value)
 )
 
 const productionFilterTitle = computed(() =>
-  getTaskTypeFilterTitle(
+  getFilterTitle(
     filteredScheduleItems.value.length,
     productionFilterOptions.value.length,
     t('main.all')
@@ -195,12 +194,12 @@ const taskTypeFilterOptions = computed(() => {
 })
 
 const taskTypeVisibilityMap = computed(() =>
-  getTaskTypeVisibilityMap(taskTypeFilterOptions.value, hiddenTaskTypeIds.value)
+  getVisibilityMap(taskTypeFilterOptions.value, hiddenTaskTypeIds.value)
 )
 
 const taskTypeFilterTitle = computed(() => {
   const nbOptions = taskTypeFilterOptions.value.length
-  return getTaskTypeFilterTitle(
+  return getFilterTitle(
     nbOptions - hiddenTaskTypeIds.value.length,
     nbOptions,
     t('main.all')
@@ -226,11 +225,14 @@ const shownMilestones = computed(() => {
     }))
 })
 
-const periodUnitOptions = [
-  { label: 'day', value: 'days' },
-  { label: 'week', value: 'weeks' },
-  { label: 'month', value: 'months' }
-]
+// a day stays in the same column on the week zoom: its arrows would not move
+const periodUnitOptions = computed(() =>
+  [
+    { label: 'day', value: 'days' },
+    { label: 'week', value: 'weeks' },
+    { label: 'month', value: 'months' }
+  ].filter(option => zoomLevel.value > 0 || option.value !== 'days')
+)
 
 const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
@@ -277,27 +279,37 @@ const convertTaskTypeScheduleItems = items =>
 const getVisibleTaskTypeItems = items =>
   items.filter(item => !hiddenTaskTypeIds.value.includes(item.task_type_id))
 
+// replace: one history entry per checkbox would take as many Back presses
+const updateFilterQuery = () => {
+  router.replace({
+    query: {
+      ...route.query,
+      hiddenProductions:
+        formatHiddenIds(hiddenProductionIds.value) ?? undefined,
+      hiddenTypes: formatHiddenIds(hiddenTaskTypeIds.value) ?? undefined
+    }
+  })
+}
+
 const onProductionVisibilityChanged = ({ key, value }) => {
-  hiddenProductionIds.value = setTaskTypeVisibility(
+  hiddenProductionIds.value = setVisibility(
     hiddenProductionIds.value,
     key,
     value
   )
+  updateFilterQuery()
 }
 
 // The rows of a production are loaded when it unfolds: the filter applies
 // to the ones already loaded and to the next ones.
 const onTaskTypeVisibilityChanged = ({ key, value }) => {
-  hiddenTaskTypeIds.value = setTaskTypeVisibility(
-    hiddenTaskTypeIds.value,
-    key,
-    value
-  )
+  hiddenTaskTypeIds.value = setVisibility(hiddenTaskTypeIds.value, key, value)
   scheduleItems.value.forEach(item => {
     if (item.allChildren) {
       item.children = getVisibleTaskTypeItems(item.allChildren)
     }
   })
+  updateFilterQuery()
 }
 
 const expandProductionElement = async productionElement => {
@@ -347,6 +359,7 @@ const scrollScheduleToToday = () => {
 // Watchers
 // --------------------------------------------------------------------------
 watch(zoomLevel, zoom => {
+  if (zoom === 0 && periodUnit.value === 'days') periodUnit.value = 'weeks'
   const query = { ...route.query, zoom: String(zoom) }
   if (JSON.stringify(query) !== JSON.stringify(route.query)) {
     router.push({ query })
@@ -358,6 +371,15 @@ watch(zoomLevel, zoom => {
 onMounted(() => {
   const zoom = parseInt(route.query.zoom)
   zoomLevel.value = Math.min(Math.max(isNaN(zoom) ? 1 : zoom, 0), 3)
+  const knownIds = options => new Set(options.map(option => option.value))
+  hiddenProductionIds.value = parseHiddenIds(
+    route.query.hiddenProductions,
+    knownIds(productionFilterOptions.value)
+  )
+  hiddenTaskTypeIds.value = parseHiddenIds(
+    route.query.hiddenTypes,
+    knownIds(taskTypeFilterOptions.value)
+  )
   if (openProductions.value.length) {
     scheduleItems.value = convertScheduleItems(openProductions.value)
     startDate.value = getFirstStartDate(scheduleItems.value)

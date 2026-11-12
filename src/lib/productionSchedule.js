@@ -13,15 +13,17 @@ export const DEFAULT_ZOOM = 0
 // --------------------------------------------------------------------------
 
 // A query param repeated in the URL reaches the page as an array of values.
-export const parseHiddenTaskTypeIds = (queryValue, taskTypeMap) =>
+// The filters below serve task types and productions alike.
+
+// knownIds: a Map or a Set
+export const parseHiddenIds = (queryValue, knownIds) =>
   [queryValue]
     .flat()
     .filter(Boolean)
     .flatMap(value => value.split(','))
-    .filter(id => taskTypeMap.has(id))
+    .filter(id => knownIds.has(id))
 
-export const formatHiddenTaskTypeIds = hiddenTaskTypeIds =>
-  hiddenTaskTypeIds.join(',') || null
+export const formatHiddenIds = hiddenIds => hiddenIds.join(',') || null
 
 // Return the query to navigate to, and whether it replaces the history
 // entry, or null when nothing changes.
@@ -85,12 +87,12 @@ export const getTaskTypeFilterOptions = scheduleItems =>
 export const isTaskTypeFilterShown = (optionCount, visibleCount, scopedCount) =>
   optionCount > 1 || visibleCount < scopedCount
 
-export const getTaskTypeFilterTitle = (visibleCount, optionCount, allLabel) =>
+export const getFilterTitle = (visibleCount, optionCount, allLabel) =>
   visibleCount === optionCount ? allLabel : `(${visibleCount}/${optionCount})`
 
-export const getTaskTypeVisibilityMap = (options, hiddenTaskTypeIds) =>
+export const getVisibilityMap = (options, hiddenIds) =>
   options.reduce((map, option) => {
-    map[option.value] = !hiddenTaskTypeIds.includes(option.value)
+    map[option.value] = !hiddenIds.includes(option.value)
     return map
   }, {})
 
@@ -103,14 +105,8 @@ export const removeHiddenTaskTypes = (scheduleItems, hiddenTaskTypeIds) =>
 
 // One id at a time: the options only cover the current entity filter, and
 // rebuilding the list from them would show the types hidden in the others.
-export const setTaskTypeVisibility = (
-  hiddenTaskTypeIds,
-  taskTypeId,
-  visible
-) =>
-  visible
-    ? hiddenTaskTypeIds.filter(id => id !== taskTypeId)
-    : [...hiddenTaskTypeIds, taskTypeId]
+export const setVisibility = (hiddenIds, id, visible) =>
+  visible ? hiddenIds.filter(hiddenId => hiddenId !== id) : [...hiddenIds, id]
 
 // Bar dates
 // --------------------------------------------------------------------------
