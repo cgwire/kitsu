@@ -4,21 +4,21 @@ import moment from 'moment-timezone'
 import { describe, expect, it } from 'vitest'
 
 import {
-  formatHiddenTaskTypeIds,
+  formatHiddenIds,
+  getFilterTitle,
   getMaxDate,
   getMinDate,
   getScheduleRouteChange,
   getTaskTypeFilterOptions,
-  getTaskTypeFilterTitle,
-  getTaskTypeVisibilityMap,
   getTaskUpdate,
   getVersionedTaskUpdate,
+  getVisibilityMap,
   getZoomOptions,
   isTaskTypeFilterShown,
-  parseHiddenTaskTypeIds,
+  parseHiddenIds,
   refreshRawDates,
   removeHiddenTaskTypes,
-  setTaskTypeVisibility,
+  setVisibility,
   widenParents
 } from '@/lib/productionSchedule'
 
@@ -34,13 +34,13 @@ describe('lib/productionSchedule', () => {
 
     it('reads the comma separated list', () => {
       expect(
-        parseHiddenTaskTypeIds('tt-modeling,tt-animation', taskTypeMap)
+        parseHiddenIds('tt-modeling,tt-animation', taskTypeMap)
       ).toEqual(['tt-modeling', 'tt-animation'])
     })
 
     it('drops the types the production no longer has', () => {
       expect(
-        parseHiddenTaskTypeIds('tt-modeling,tt-gone', taskTypeMap)
+        parseHiddenIds('tt-modeling,tt-gone', taskTypeMap)
       ).toEqual(['tt-modeling'])
     })
 
@@ -48,19 +48,19 @@ describe('lib/productionSchedule', () => {
     // threw and left the schedule editable in its read-only mode.
     it('reads the param repeated in the URL', () => {
       expect(
-        parseHiddenTaskTypeIds(['tt-modeling', 'tt-animation'], taskTypeMap)
+        parseHiddenIds(['tt-modeling', 'tt-animation'], taskTypeMap)
       ).toEqual(['tt-modeling', 'tt-animation'])
     })
 
     it('reads an empty query', () => {
-      expect(parseHiddenTaskTypeIds(undefined, taskTypeMap)).toEqual([])
+      expect(parseHiddenIds(undefined, taskTypeMap)).toEqual([])
     })
 
     it('writes the list, or nothing once every type is shown', () => {
-      expect(formatHiddenTaskTypeIds(['tt-modeling', 'tt-animation'])).toBe(
+      expect(formatHiddenIds(['tt-modeling', 'tt-animation'])).toBe(
         'tt-modeling,tt-animation'
       )
-      expect(formatHiddenTaskTypeIds([])).toBeNull()
+      expect(formatHiddenIds([])).toBeNull()
     })
   })
 
@@ -129,16 +129,16 @@ describe('lib/productionSchedule', () => {
       const options = getTaskTypeFilterOptions([layoutItem, animationItem])
 
       expect(
-        getTaskTypeVisibilityMap(options, ['tt-modeling', 'tt-animation'])
+        getVisibilityMap(options, ['tt-modeling', 'tt-animation'])
       ).toEqual({ 'tt-layout': true, 'tt-animation': false })
     })
 
     it('keeps the types hidden outside the current entity filter', () => {
       expect(
-        setTaskTypeVisibility(['tt-modeling'], 'tt-animation', false)
+        setVisibility(['tt-modeling'], 'tt-animation', false)
       ).toEqual(['tt-modeling', 'tt-animation'])
       expect(
-        setTaskTypeVisibility(['tt-modeling', 'tt-animation'], 'tt-animation', true)
+        setVisibility(['tt-modeling', 'tt-animation'], 'tt-animation', true)
       ).toEqual(['tt-modeling'])
     })
 
@@ -154,8 +154,8 @@ describe('lib/productionSchedule', () => {
     })
 
     it('counts the visible types in its title', () => {
-      expect(getTaskTypeFilterTitle(1, 3, 'All')).toBe('(1/3)')
-      expect(getTaskTypeFilterTitle(3, 3, 'All')).toBe('All')
+      expect(getFilterTitle(1, 3, 'All')).toBe('(1/3)')
+      expect(getFilterTitle(3, 3, 'All')).toBe('All')
     })
   })
 

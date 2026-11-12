@@ -114,10 +114,10 @@ import { useStore } from 'vuex'
 import colors from '@/lib/colors'
 import { episodifyRoute, getProductionSchedulePath } from '@/lib/path'
 import {
-  getTaskTypeFilterTitle,
-  getTaskTypeVisibilityMap,
+  getFilterTitle,
+  getVisibilityMap,
   getZoomOptions,
-  setTaskTypeVisibility
+  setVisibility
 } from '@/lib/productionSchedule'
 import {
   getEndDateFromString,
@@ -170,14 +170,11 @@ const productionFilterOptions = computed(() =>
 )
 
 const productionVisibilityMap = computed(() =>
-  getTaskTypeVisibilityMap(
-    productionFilterOptions.value,
-    hiddenProductionIds.value
-  )
+  getVisibilityMap(productionFilterOptions.value, hiddenProductionIds.value)
 )
 
 const productionFilterTitle = computed(() =>
-  getTaskTypeFilterTitle(
+  getFilterTitle(
     filteredScheduleItems.value.length,
     productionFilterOptions.value.length,
     t('main.all')
@@ -195,12 +192,12 @@ const taskTypeFilterOptions = computed(() => {
 })
 
 const taskTypeVisibilityMap = computed(() =>
-  getTaskTypeVisibilityMap(taskTypeFilterOptions.value, hiddenTaskTypeIds.value)
+  getVisibilityMap(taskTypeFilterOptions.value, hiddenTaskTypeIds.value)
 )
 
 const taskTypeFilterTitle = computed(() => {
   const nbOptions = taskTypeFilterOptions.value.length
-  return getTaskTypeFilterTitle(
+  return getFilterTitle(
     nbOptions - hiddenTaskTypeIds.value.length,
     nbOptions,
     t('main.all')
@@ -278,7 +275,7 @@ const getVisibleTaskTypeItems = items =>
   items.filter(item => !hiddenTaskTypeIds.value.includes(item.task_type_id))
 
 const onProductionVisibilityChanged = ({ key, value }) => {
-  hiddenProductionIds.value = setTaskTypeVisibility(
+  hiddenProductionIds.value = setVisibility(
     hiddenProductionIds.value,
     key,
     value
@@ -288,11 +285,7 @@ const onProductionVisibilityChanged = ({ key, value }) => {
 // The rows of a production are loaded when it unfolds: the filter applies
 // to the ones already loaded and to the next ones.
 const onTaskTypeVisibilityChanged = ({ key, value }) => {
-  hiddenTaskTypeIds.value = setTaskTypeVisibility(
-    hiddenTaskTypeIds.value,
-    key,
-    value
-  )
+  hiddenTaskTypeIds.value = setVisibility(hiddenTaskTypeIds.value, key, value)
   scheduleItems.value.forEach(item => {
     if (item.allChildren) {
       item.children = getVisibleTaskTypeItems(item.allChildren)

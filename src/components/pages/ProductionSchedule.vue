@@ -582,22 +582,22 @@ import {
   DEFAULT_MODE,
   DEFAULT_VERSION,
   DEFAULT_ZOOM,
-  formatHiddenTaskTypeIds,
+  formatHiddenIds,
+  getFilterTitle,
   getMaxDate,
   getMinDate,
   getScheduleRouteChange,
   getTaskTypeFilterOptions,
-  getTaskTypeFilterTitle,
-  getTaskTypeVisibilityMap,
   getTaskUpdate,
   getVersionedTaskUpdate,
+  getVisibilityMap,
   getZoomOptions,
   isTaskTypeFilterShown,
   movedSubItems,
-  parseHiddenTaskTypeIds,
+  parseHiddenIds,
   refreshRawDates,
   removeHiddenTaskTypes,
-  setTaskTypeVisibility,
+  setVisibility,
   subItemsOf,
   widenParents
 } from '@/lib/productionSchedule'
@@ -1005,7 +1005,7 @@ const hasTaskTypeFilter = computed(() => {
 })
 
 const taskTypeFilterTitle = computed(() => {
-  return getTaskTypeFilterTitle(
+  return getFilterTitle(
     filteredScheduleItems.value.length,
     taskTypeFilterOptions.value.length,
     t('main.all')
@@ -1013,10 +1013,7 @@ const taskTypeFilterTitle = computed(() => {
 })
 
 const taskTypeVisibilityMap = computed(() => {
-  return getTaskTypeVisibilityMap(
-    taskTypeFilterOptions.value,
-    hiddenTaskTypeIds.value
-  )
+  return getVisibilityMap(taskTypeFilterOptions.value, hiddenTaskTypeIds.value)
 })
 
 const filteredScheduleItems = computed(() => {
@@ -1047,7 +1044,7 @@ const saveFilterPreferences = () => {
   preferences.setPreference(ENTITY_TYPE_STORAGE_KEY, entityType.value ?? '')
   preferences.setPreference(
     hiddenTypesStorageKey(),
-    formatHiddenTaskTypeIds(hiddenTaskTypeIds.value) ?? ''
+    formatHiddenIds(hiddenTaskTypeIds.value) ?? ''
   )
 }
 
@@ -1210,10 +1207,7 @@ const loadSchedule = async () => {
   zoomLevel.value = zoomOptions.value.map(o => o.value).includes(queryZoom)
     ? queryZoom
     : DEFAULT_ZOOM
-  hiddenTaskTypeIds.value = parseHiddenTaskTypeIds(
-    queryHiddenTypes,
-    taskTypeMap.value
-  )
+  hiddenTaskTypeIds.value = parseHiddenIds(queryHiddenTypes, taskTypeMap.value)
 
   // loadData computed the editable flags with the default mode/version,
   // before the query params were applied
@@ -2619,13 +2613,9 @@ const onEntityTypeChanged = type => {
 }
 
 const onTaskTypeVisibilityChanged = ({ key, value }) => {
-  hiddenTaskTypeIds.value = setTaskTypeVisibility(
-    hiddenTaskTypeIds.value,
-    key,
-    value
-  )
+  hiddenTaskTypeIds.value = setVisibility(hiddenTaskTypeIds.value, key, value)
   updateRoute({
-    hiddenTypes: formatHiddenTaskTypeIds(hiddenTaskTypeIds.value)
+    hiddenTypes: formatHiddenIds(hiddenTaskTypeIds.value)
   })
   saveFilterPreferences()
 
