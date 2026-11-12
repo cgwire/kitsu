@@ -211,4 +211,19 @@ describe('MainSchedule filters', () => {
       [1, 'months']
     ])
   })
+
+  it('offers no day step on the week zoom, where it would not move', async () => {
+    const wrapper = await mountFilteredPage()
+    const unitCombo = () => wrapper.findComponent({ name: 'Combobox' })
+    const zoomCombo = wrapper.findComponent({ name: 'ComboboxNumber' })
+    unitCombo().vm.$emit('update:model-value', 'days')
+    zoomCombo.vm.$emit('update:model-value', 0)
+    await flushPromises()
+
+    expect(unitCombo().props('options').map(o => o.value)).toEqual([
+      'weeks',
+      'months'
+    ])
+    expect(unitCombo().props('modelValue')).toBe('weeks')
+  })
 })

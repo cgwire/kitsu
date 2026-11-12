@@ -223,11 +223,14 @@ const shownMilestones = computed(() => {
     }))
 })
 
-const periodUnitOptions = [
-  { label: 'day', value: 'days' },
-  { label: 'week', value: 'weeks' },
-  { label: 'month', value: 'months' }
-]
+// a day stays in the same column on the week zoom: its arrows would not move
+const periodUnitOptions = computed(() =>
+  [
+    { label: 'day', value: 'days' },
+    { label: 'week', value: 'weeks' },
+    { label: 'month', value: 'months' }
+  ].filter(option => zoomLevel.value > 0 || option.value !== 'days')
+)
 
 const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
@@ -340,6 +343,7 @@ const scrollScheduleToToday = () => {
 // Watchers
 // --------------------------------------------------------------------------
 watch(zoomLevel, zoom => {
+  if (zoom === 0 && periodUnit.value === 'days') periodUnit.value = 'weeks'
   const query = { ...route.query, zoom: String(zoom) }
   if (JSON.stringify(query) !== JSON.stringify(route.query)) {
     router.push({ query })
