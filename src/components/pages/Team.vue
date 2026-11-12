@@ -89,13 +89,10 @@
           {{ $t('people.import_from_unlisted') }}
         </p>
         <div class="import-list">
-          <div
+          <import-list-item
             :key="`unlisted-person-${unlistedPerson.id}`"
-            class="flexrow person-to-add mb05"
-            role="button"
-            tabindex="0"
-            @click="addPersonToTeam(unlistedPerson)"
-            @keydown.enter.prevent="addPersonToTeam(unlistedPerson)"
+            class="person-to-add"
+            @add="addPersonToTeam(unlistedPerson)"
             v-for="unlistedPerson in unlistedPeople"
           >
             <people-avatar
@@ -107,7 +104,7 @@
               :is-link="false"
             />
             <people-name class="flexrow-item" :person="unlistedPerson" />
-          </div>
+          </import-list-item>
         </div>
       </div>
     </template>
@@ -134,6 +131,7 @@ import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
+import ImportListItem from '@/components/widgets/ImportListItem.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
@@ -311,12 +309,8 @@ useHead({
   border: 1px solid var(--border);
   border-radius: 5px;
   margin-top: 0.5em;
-  padding: 0.5em;
+  padding: 0.3em;
   flex: 1;
   overflow-y: auto;
-}
-
-.person-to-add {
-  cursor: pointer;
 }
 </style>

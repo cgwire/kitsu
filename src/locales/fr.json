@@ -437,6 +437,7 @@
       "cell_save_error": "\"{name}\" n'a pas pu être enregistré : la valeur précédente est revenue. Veuillez recharger la page et réessayer.",
       "cells_save_error": "Certaines modifications n'ont pas pu être enregistrées : les valeurs précédentes sont revenues. Veuillez recharger la page et réessayer.",
       "clear_selection": "Effacer la sélection",
+      "click_to_add": "Cliquez pour ajouter",
       "close": "Fermer",
       "confirmation": "Confirmer",
       "confirmation_and_stay": "Confirmer et rester",

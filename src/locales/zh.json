@@ -437,6 +437,7 @@
       "cell_save_error": "无法保存“{name}”：已恢复为之前的值。请重新加载页面并重试。",
       "cells_save_error": "部分更改无法保存：已恢复为之前的值。请重新加载页面并重试。",
       "clear_selection": "清除当前所选",
+      "click_to_add": "点击添加",
       "close": "关闭",
       "confirmation": "确认",
       "confirmation_and_stay": "确认并停留",

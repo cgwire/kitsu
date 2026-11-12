@@ -437,6 +437,7 @@
       "cell_save_error": "„{name}“ konnte nicht gespeichert werden, der vorherige Wert wurde wiederhergestellt. Bitte laden Sie die Seite neu und versuchen Sie es erneut.",
       "cells_save_error": "Einige Änderungen konnten nicht gespeichert werden, die vorherigen Werte wurden wiederhergestellt. Bitte laden Sie die Seite neu und versuchen Sie es erneut.",
       "clear_selection": "Aktuelle Auswahl löschen",
+      "click_to_add": "Klicken, um hinzuzufügen",
       "close": "Schließen",
       "confirmation": "Bestätigen",
       "confirmation_and_stay": "Bestätigen und bleiben",

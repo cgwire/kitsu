@@ -50,6 +50,7 @@ const mountTeam = (query = {}, { actions = {}, getters = {} } = {}) =>
       }
     },
     stubs: {
+      ImportListItem: false,
       PageLayout: false,
       ProductionTeamList: {
         name: 'ProductionTeamList',
@@ -106,6 +107,29 @@ describe('Team page', () => {
       role: 'supervisor'
     })
     expect(listedNames(wrapper)).toEqual(['Cat'])
+  })
+
+  test('adds a person out of the team on a click, Enter, or Space', async () => {
+    const { wrapper, dispatched } = await mountTeam(
+      {},
+      {
+        getters: { isCurrentUserProductionManager: true },
+        actions: { addPersonToTeam: () => Promise.resolve() }
+      }
+    )
+    const row = wrapper.find('.person-to-add')
+
+    expect(row.attributes('title')).toBe('main.click_to_add')
+    await row.trigger('click')
+    await row.trigger('keydown', { key: 'Enter' })
+    await row.trigger('keydown', { key: ' ' })
+    await flushPromises()
+
+    expect(dispatched('addPersonToTeam')).toEqual([
+      ['addPersonToTeam', dan],
+      ['addPersonToTeam', dan],
+      ['addPersonToTeam', dan]
+    ])
   })
 
   // The store has put the team back: the page tells it.

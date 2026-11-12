@@ -94,7 +94,7 @@
           @import-from-production="onImportFromProduction"
         >
           <template #item-line="{ item }">
-            <task-type-name class="pointer" :task-type="item" />
+            <task-type-name :task-type="item" />
           </template>
         </setting-importer>
       </div>

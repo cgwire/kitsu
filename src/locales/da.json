@@ -437,6 +437,7 @@
       "cell_save_error": "\"{name}\" kunne ikke gemmes: den tidligere værdi er gendannet. Genindlæs venligst siden og prøv igen.",
       "cells_save_error": "Nogle ændringer kunne ikke gemmes: de tidligere værdier er gendannet. Genindlæs venligst siden og prøv igen.",
       "clear_selection": "Ryd nuværende markering",
+      "click_to_add": "Klik for at tilføje",
       "close": "Luk",
       "confirmation": "Bekræft",
       "confirmation_and_stay": "Bekræft og forbliv",

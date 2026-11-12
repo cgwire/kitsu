@@ -437,6 +437,7 @@
       "cell_save_error": "「{name}」を保存できませんでした。以前の値に戻しました。ページを再読み込みしてもう一度お試しください。",
       "cells_save_error": "一部の変更を保存できませんでした。以前の値に戻しました。ページを再読み込みしてもう一度お試しください。",
       "clear_selection": "現在の選択をクリア",
+      "click_to_add": "クリックして追加",
       "close": "閉じる",
       "confirmation": "確定",
       "confirmation_and_stay": "確定して続ける",

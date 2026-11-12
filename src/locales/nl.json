@@ -437,6 +437,7 @@
       "cell_save_error": "\"{name}\" kon niet worden opgeslagen: de vorige waarde is teruggezet. Herlaad de pagina en probeer het opnieuw.",
       "cells_save_error": "Sommige wijzigingen konden niet worden opgeslagen: de vorige waarden zijn teruggezet. Herlaad de pagina en probeer het opnieuw.",
       "clear_selection": "Huidige selectie wissen",
+      "click_to_add": "Klik om toe te voegen",
       "close": "Sluiten",
       "confirmation": "Bevestigen",
       "confirmation_and_stay": "Bevestigen en blijven",
