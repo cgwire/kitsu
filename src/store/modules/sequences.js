@@ -120,6 +120,11 @@ const helpers = {
     )
   },
 
+  showInfoColumns(state, sequence) {
+    if (sequence.description) state.isSequenceDescription = true
+    if (sequence.data?.resolution) state.isSequenceResolution = true
+  },
+
   // The listed rows, which "Create tasks", "Select column" and "Delete all"
   // read, hold the cached sequences: an edit puts copies among the displayed
   // ones.
@@ -825,7 +830,7 @@ const mutations = {
     sequence.preview_file_id = ''
     sequence.tasks = []
     sequence.validations = new Map()
-    sequence.data = {}
+    sequence.data = sequence.data || {}
     helpers.setEpisodeInfo(sequence, episodeMap)
 
     state.sequenceSelectionGrid = buildSelectionGrid()
@@ -848,6 +853,7 @@ const mutations = {
       ])
       helpers.setListedRows(state)
     }
+    helpers.showInfoColumns(state, sequence)
     helpers.setListStats(state, state.displayedSequences)
     state.sequenceFilledColumns = getFilledColumns(state.displayedSequences)
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
@@ -877,12 +883,7 @@ const mutations = {
       return stateSequence
     })
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
-    if (sequence.description && !state.isSequenceDescription) {
-      state.isSequenceDescription = true
-    }
-    if (sequence.data.resolution && !state.isSequenceResolution) {
-      state.isSequenceResolution = true
-    }
+    helpers.showInfoColumns(state, sequence)
   },
 
   [LOAD_SEQUENCES_END](
@@ -1052,6 +1053,7 @@ const mutations = {
       state.sequenceSelectionGrid,
       state.displayedSequences.indexOf(sequence)
     )
+    helpers.showInfoColumns(state, sequence)
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
     state.displayedSequencesLength = state.displayedSequences.length
   },

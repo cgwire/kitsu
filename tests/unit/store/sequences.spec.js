@@ -1601,6 +1601,47 @@ describe('Sequences store, through a store', () => {
       ])
     })
 
+    // The creation form offers both fields.
+    test('keeps the description and resolution of a new sequence', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+      client.ppost.mockResolvedValueOnce({
+        id: 'sq4',
+        name: 'SQ04',
+        project_id: 'p1',
+        description: 'Opening',
+        data: { resolution: '2048x858' }
+      })
+
+      await store.dispatch('newSequence', {
+        name: 'SQ04',
+        project_id: 'p1',
+        description: 'Opening',
+        data: { resolution: '2048x858' }
+      })
+
+      expect(store.getters.sequenceMap.get('sq4').data).toEqual({
+        resolution: '2048x858'
+      })
+      expect(store.getters.isSequenceDescription).toBe(true)
+      expect(store.getters.isSequenceResolution).toBe(true)
+    })
+
+    test('shows the description and resolution of a live sequence', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+
+      addSequence(store, {
+        id: 'sq4',
+        name: 'SQ04',
+        description: 'Opening',
+        data: { resolution: '2048x858' }
+      })
+
+      expect(store.getters.isSequenceDescription).toBe(true)
+      expect(store.getters.isSequenceResolution).toBe(true)
+    })
+
     // The selected cells are keyed by their row.
     test('moves down the cells selected below a live sequence', async () => {
       const { store } = await buildStore()
