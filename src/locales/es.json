@@ -1576,6 +1576,7 @@
       "no_assignee": "Ninguna persona asignable",
       "no_entity": "Ninguna entidad asignable",
       "no_task": "Ninguna tarea",
+      "period_unit": "Paso de las flechas",
       "plan_asset_type_tasks": "Planificar las tareas de este tipo de asset",
       "plan_entity_tasks": "Planificar sus tareas",
       "plan_sequence_tasks": "Planificar las tareas de esta secuencia",
@@ -1594,7 +1595,9 @@
         "locked": "bloqueado",
         "canceled": "cancelado"
       },
-      "zoom_level": "Nivel de zoom"
+      "zoom_days": "Días ({size})",
+      "zoom_level": "Nivel de zoom",
+      "zoom_weeks": "Semanas"
     },
     "quota": {
       "average": "Promedio",

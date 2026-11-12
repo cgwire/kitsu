@@ -90,6 +90,7 @@
                     : `4px solid ${rootElement.color}`
                 }"
                 :title="rootElement.name"
+                @click="expandRootElement(rootElement)"
               >
                 {{ rootElement.name }}
               </span>
@@ -293,7 +294,7 @@
               class="milestone-flag"
               :class="{
                 compact: group.isCompact,
-                pointer: isCurrentUserProductionManager
+                pointer: canEditMilestones
               }"
               :style="group.style"
               :key="`milestone-flag-${group.date}`"
@@ -348,8 +349,7 @@
 
             <div
               :class="{
-                'with-milestones':
-                  withMilestones && isCurrentUserProductionManager,
+                'with-milestones': withMilestones && canEditMilestones,
                 'date-widget': true
               }"
             >
@@ -380,7 +380,7 @@
                 @click="showEditMilestoneModal(day)"
                 @keydown.enter.prevent="showEditMilestoneModal(day)"
                 @keydown.space.prevent="showEditMilestoneModal(day)"
-                v-if="withMilestones && isCurrentUserProductionManager"
+                v-if="withMilestones && canEditMilestones"
               >
                 <span class="button">
                   <plus-icon :size="12" :stroke-width="3" />
@@ -527,6 +527,7 @@
                       class="timebar-left-hand"
                       @mousedown="moveTimebarLeftSide(rootElement, $event)"
                       @touchstart="moveTimebarLeftSide(rootElement, $event)"
+                      v-if="canMove(rootElement)"
                     ></div>
                     <div
                       class="timebar-center"
@@ -537,6 +538,7 @@
                       class="timebar-right-hand"
                       @mousedown="moveTimebarRightSide(rootElement, $event)"
                       @touchstart="moveTimebarRightSide(rootElement, $event)"
+                      v-if="canMove(rootElement)"
                     ></div>
                   </div>
                 </div>
@@ -597,10 +599,7 @@
                     dropTarget.forbidden
                   "
                 >
-                  <span
-                    class="drop-forbidden-message"
-                    :style="{ left: `${dropTarget.messageLeft + 16}px` }"
-                  >
+                  <span class="drop-forbidden-message">
                     <ban-icon :size="14" />
                     {{ $t(`schedule.drop_forbidden_${dropTarget.forbidden}`) }}
                   </span>
@@ -646,7 +645,7 @@
 
     <milestone-popover
       ref="milestonePopoverRef"
-      :can-edit="isCurrentUserProductionManager"
+      :can-edit="canEditMilestones"
       @edit="editMilestone"
       v-if="withMilestones"
     />
@@ -693,7 +692,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import colors from '@/lib/colors'
-import { getMilestoneColor } from '@/lib/milestones'
+import { getMilestoneColor, groupMilestonesByDate } from '@/lib/milestones'
 import { subItemsOf } from '@/lib/productionSchedule'
 import {
   addBusinessDays,
@@ -770,7 +769,17 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  // replaces the milestones of the current production
+  milestones: {
+    type: Array,
+    default: null
+  },
   multiline: {
+    type: Boolean,
+    default: false
+  },
+  // shows the bars without letting them move
+  readonly: {
     type: Boolean,
     default: false
   },
@@ -919,7 +928,6 @@ let expandHoverRootId = null
 // overlay (forbidden)
 const dropTarget = reactive({
   forbidden: null,
-  messageLeft: 0,
   rootElementId: null,
   segments: []
 })
@@ -953,11 +961,15 @@ const timesheetsByTaskCache = new WeakMap()
 const currentProduction = computed(() => store.getters.currentProduction)
 const dateFormat = computed(() => store.getters.dateFormat)
 const departmentMap = computed(() => store.getters.departmentMap)
-const isCurrentUserProductionManager = computed(
-  () => store.getters.isCurrentUserProductionManager
-)
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
-const milestonesByDate = computed(() => store.getters.milestonesByDate)
+const canEditMilestones = computed(
+  () => store.getters.isCurrentUserProductionManager && !props.readonly
+)
+const milestonesByDate = computed(() =>
+  props.milestones
+    ? groupMilestonesByDate(props.milestones)
+    : store.getters.milestonesByDate
+)
 const openProductions = computed(() => store.getters.openProductions)
 const organisation = computed(() => store.getters.organisation)
 const taskStatuses = computed(() => store.getters.taskStatuses)
@@ -1897,12 +1909,14 @@ const syncSelection = pressedItem => {
   if (isChanged) resetSelection(synced)
 }
 
+const canMove = timeElement => timeElement.editable && !props.readonly
+
 const moveTimebar = (timeElement, event) => {
   event.preventDefault() // avoid scroll of schedule on touch
   if (
     !isChangeStartDate.value &&
     !isChangeEndDate.value &&
-    timeElement.editable
+    canMove(timeElement)
   ) {
     isChangeDates.value = true
     isChangeStartDate.value = false
@@ -1927,7 +1941,7 @@ const moveTimebar = (timeElement, event) => {
 
 const moveTimebarLeftSide = (timeElement, event) => {
   event.preventDefault() // avoid scroll of schedule on touch
-  if (!isChangeDates.value && !isChangeEndDate.value && timeElement.editable) {
+  if (!isChangeDates.value && !isChangeEndDate.value && canMove(timeElement)) {
     isChangeDates.value = false
     isChangeStartDate.value = true
     isChangeEndDate.value = false
@@ -1951,7 +1965,7 @@ const moveTimebarRightSide = (timeElement, event) => {
   if (
     !isChangeDates.value &&
     !isChangeStartDate.value &&
-    timeElement.editable
+    canMove(timeElement)
   ) {
     isChangeDates.value = false
     isChangeStartDate.value = false
@@ -2030,6 +2044,20 @@ const scrollToDate = date => {
       }
     }
   }, 10)
+}
+
+// Steps from the date shown, the column where scrollToDate puts a date: the
+// position below is the inverse of its scrollLeft.
+const scrollByPeriod = (amount, unit) => {
+  if (!scheduleRef.value || !columns.value.length) return
+  const left =
+    timelineContentWrapperRef.value.scrollLeft +
+    scheduleRef.value.offsetWidth / 2 -
+    298
+  const index = Math.round(left / cellWidth.value)
+  const shown =
+    columns.value[Math.min(Math.max(index, 0), columns.value.length - 1)]
+  scrollToDate(shown.clone().add(amount, unit))
 }
 
 const startBrowsing = event => {
@@ -2241,7 +2269,7 @@ const timebarStyle = (timeElement, root = false) => {
   const style = {
     left: `${getTimebarLeft(timeElement)}px`,
     width: `${getTimebarWidth(timeElement)}px`,
-    cursor: timeElement.editable
+    cursor: canMove(timeElement)
       ? !root && props.reassignable
         ? 'all-scroll'
         : 'ew-resize'
@@ -2284,7 +2312,7 @@ const timebarChildStyle = (
   return {
     left: !multiline && `${getTimebarLeft(timeElement)}px`,
     width: `${getTimebarWidth(timeElement)}px`,
-    cursor: timeElement.editable
+    cursor: canMove(timeElement)
       ? props.reassignable
         ? 'all-scroll'
         : 'ew-resize'
@@ -2319,7 +2347,7 @@ const timebarSubchildStyle = (
   return {
     left: `${getTimebarLeft(timeElement)}px`,
     width: `${getTimebarWidth(timeElement)}px`,
-    cursor: timeElement.editable
+    cursor: canMove(timeElement)
       ? props.reassignable
         ? 'all-scroll'
         : 'ew-resize'
@@ -2449,7 +2477,7 @@ const childrenStyle = (
 }
 
 const showEditMilestoneModal = (day, milestone) => {
-  if (isCurrentUserProductionManager.value) {
+  if (canEditMilestones.value) {
     milestonePopoverRef.value?.hide({ immediate: true })
     modals.edit = true
     if (milestone) {
@@ -2645,14 +2673,18 @@ const onTaskDragOver = (event, rootElement) => {
     dropTarget.forbidden &&
     dropTarget.rootElementId === rootElement.id
   ) {
-    // the explanation pill follows the cursor so it cannot be missed
+    // the explanation pill follows the cursor so it cannot be missed,
+    // through a CSS variable: a reactive left would render the whole
+    // timeline on every mouse move
     if (!wrapperRect) {
       wrapperRect = timelineContentWrapperRef.value.getBoundingClientRect()
     }
-    dropTarget.messageLeft =
+    const left =
       timelineContentWrapperRef.value.scrollLeft +
       getClientX(event) -
-      wrapperRect.left
+      wrapperRect.left +
+      16
+    event.currentTarget.style.setProperty('--drop-message-left', `${left}px`)
     // no preventDefault: the browser shows the native no-drop cursor
     return
   }
@@ -2664,14 +2696,31 @@ const onTaskDragOver = (event, rootElement) => {
   if (!ranges.length) {
     return
   }
-  dropTarget.rootElementId = rootElement.id
-  dropTarget.segments = ranges.map(({ item, startDate, endDate }) => ({
+  const segments = ranges.map(({ item, startDate, endDate }) => ({
     id: item.id,
     left: getTimebarLeft({ startDate }),
     width: getTimebarWidth({ startDate, endDate }),
     color: item.type_color || null
   }))
+  // dragover fires on every mouse move: a new array would render the whole
+  // timeline each time, while the ghost only changes with the aimed day
+  if (
+    dropTarget.rootElementId !== rootElement.id ||
+    !isSameSegments(dropTarget.segments, segments)
+  ) {
+    dropTarget.rootElementId = rootElement.id
+    dropTarget.segments = segments
+  }
 }
+
+const isSameSegments = (segments, others) =>
+  segments.length === others.length &&
+  segments.every(
+    (segment, index) =>
+      segment.id === others[index].id &&
+      segment.left === others[index].left &&
+      segment.width === others[index].width
+  )
 
 const clearDropTarget = () => {
   dropTarget.rootElementId = null
@@ -2810,7 +2859,7 @@ watch(
 watch(
   currentProduction,
   () => {
-    if (props.withMilestones) {
+    if (props.withMilestones && !props.milestones) {
       store.dispatch('loadMilestones', currentProduction.value)
     }
   },
@@ -2879,6 +2928,7 @@ defineExpose({
   refreshManDays,
   resetScheduleSize,
   resetSelection,
+  scrollByPeriod,
   scrollToDate,
   scrollToToday,
   setScrollPosition
@@ -3478,7 +3528,8 @@ defineExpose({
     font-size: 0.9em;
     gap: 0.4em;
     padding: 0.25em 0.75em;
-    // follows the drag cursor (left is set inline on dragover)
+    // follows the drag cursor: dragover sets the variable on the row
+    left: var(--drop-message-left, 16px);
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -3630,6 +3681,7 @@ defineExpose({
 }
 
 .root-element-name {
+  cursor: pointer;
   padding-left: 10px;
   white-space: nowrap;
   color: var(--text-strong);

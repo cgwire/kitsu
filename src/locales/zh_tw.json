@@ -1576,6 +1576,7 @@
       "no_assignee": "無可指派人員",
       "no_entity": "無可指派的實體",
       "no_task": "沒有任務",
+      "period_unit": "箭頭步長",
       "plan_asset_type_tasks": "為此資產類型排程任務",
       "plan_entity_tasks": "排程其任務",
       "plan_sequence_tasks": "為此序列排程任務",
@@ -1594,7 +1595,9 @@
         "locked": "鎖定",
         "canceled": "已取消"
       },
-      "zoom_level": "縮放等級"
+      "zoom_days": "天 ({size})",
+      "zoom_level": "縮放等級",
+      "zoom_weeks": "週"
     },
     "quota": {
       "average": "平均",

@@ -1,6 +1,10 @@
 import client from '@/store/api/client'
 
 export default {
+  getAllMilestones() {
+    return client.pget('/api/data/milestones')
+  },
+
   getMilestones(production) {
     const path = `/api/data/projects/${production.id}/milestones`
     return client.pget(path)

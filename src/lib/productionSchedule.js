@@ -53,6 +53,22 @@ export const getScheduleRouteChange = (
   return { query, isReplace: hiddenTypes !== undefined }
 }
 
+// Zoom
+// --------------------------------------------------------------------------
+
+const ZOOM_DAY_SIZES = ['S', 'M', 'L', 'XL']
+
+// Level 0 draws a column per week, the next ones a day column wider at
+// each level.
+export const getZoomOptions = (t, levels) =>
+  levels.map(level => ({
+    label:
+      level === 0
+        ? t('schedule.zoom_weeks')
+        : t('schedule.zoom_days', { size: ZOOM_DAY_SIZES[level - 1] }),
+    value: level
+  }))
+
 // Task type filter
 // --------------------------------------------------------------------------
 

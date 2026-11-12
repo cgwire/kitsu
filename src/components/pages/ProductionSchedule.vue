@@ -86,7 +86,7 @@
           <button-simple
             class="flexrow-item toggle-filters"
             :active="showMoreFilters"
-            :icon="showMoreFilters ? 'minus' : 'plus'"
+            icon="funnel"
             :title="
               showMoreFilters
                 ? $t('main.less_filters')
@@ -447,7 +447,7 @@
                 }}
               </em>
             </p>
-            <div class="mt2 has-text-right">
+            <div class="apply mt2">
               <button-simple
                 :disabled="!hasDraggedEntities || !availablePersons.length"
                 :is-loading="assignments.saving"
@@ -591,6 +591,7 @@ import {
   getTaskTypeVisibilityMap,
   getTaskUpdate,
   getVersionedTaskUpdate,
+  getZoomOptions,
   isTaskTypeFilterShown,
   movedSubItems,
   parseHiddenTaskTypeIds,
@@ -750,12 +751,7 @@ const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserProductionSupervisor
 )
 
-const zoomOptions = computed(() => [
-  { label: t('main.week'), value: 0 },
-  { label: '1', value: 1 },
-  { label: '2', value: 2 },
-  { label: '3', value: 3 }
-])
+const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
 const modeOptions = computed(() => [
   { label: t('schedule.mode_prev'), value: 'prev' },
@@ -3106,7 +3102,7 @@ useHead({
   background: var(--background-panel);
   border-radius: 12px;
   margin-bottom: 1em;
-  padding: 0.5em 1em 1em;
+  padding: 0.75em 1em 1em;
 
   .field {
     padding-bottom: 0;
@@ -3187,6 +3183,9 @@ useHead({
     height: 100%;
     overflow-y: auto;
     padding: 1em;
+    // room to scroll the Apply button above the support chat bubble, fixed
+    // at the bottom right of the screen
+    padding-bottom: 70px;
   }
 
   .side-header {
@@ -3337,6 +3336,12 @@ useHead({
     &:hover {
       opacity: 1;
     }
+  }
+
+  .apply :deep(.button) {
+    height: 42px;
+    justify-content: center;
+    width: 100%;
   }
 
   .estimation {

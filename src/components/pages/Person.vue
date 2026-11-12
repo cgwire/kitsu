@@ -308,6 +308,7 @@ import { useProductivity } from '@/composables/productivity'
 import { useTaskFilters } from '@/composables/taskFilters'
 import colors from '@/lib/colors'
 import preferences from '@/lib/preferences'
+import { getZoomOptions } from '@/lib/productionSchedule'
 import {
   addBusinessDays,
   getFirstStartDate,
@@ -418,12 +419,7 @@ const {
   defaultSort: 'entity_name'
 })
 
-const zoomOptions = computed(() => [
-  { label: t('main.week'), value: 0 },
-  { label: '1', value: 1 },
-  { label: '2', value: 2 },
-  { label: '3', value: 3 }
-])
+const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
 const isCurrentUserAllowed = computed(
   () =>

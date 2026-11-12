@@ -1,9 +1,11 @@
 import moment from 'moment'
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { getEntityPath } from '@/lib/path'
+import { getZoomOptions } from '@/lib/productionSchedule'
 import {
   addBusinessDays,
   getFirstStartDate,
@@ -79,6 +81,7 @@ export const useEntity = ({
   loadList
 }) => {
   const route = useRoute()
+  const { t } = useI18n()
   const store = useStore()
 
   // Store getters used by the ported computeds.
@@ -112,11 +115,7 @@ export const useEntity = ({
   const zoomLevel = ref(1)
   const scheduleItems = ref([])
   let scheduleItemsSignature = null
-  const zoomOptions = [
-    { label: '1', value: 1 },
-    { label: '2', value: 2 },
-    { label: '3', value: 3 }
-  ]
+  const zoomOptions = computed(() => getZoomOptions(t, [1, 2, 3]))
 
   const isListOfPage = computed(() => isListOfPageLoaded(store.getters, type))
 

@@ -1,4 +1,4 @@
-import { sortByName } from '@/lib/sorting'
+import { groupMilestonesByDate } from '@/lib/milestones'
 import scheduleApi from '@/store/api/schedule'
 import {
   ADD_MILESTONE,
@@ -21,15 +21,8 @@ const initialState = {
 const state = { ...initialState }
 
 const getters = {
-  // Several milestones can share a day: the schedule header merges them.
-  milestonesByDate: state => {
-    const byDate = {}
-    sortByName(Object.values(state.milestones)).forEach(milestone => {
-      if (!byDate[milestone.date]) byDate[milestone.date] = []
-      byDate[milestone.date].push(milestone)
-    })
-    return byDate
-  },
+  milestonesByDate: state =>
+    groupMilestonesByDate(Object.values(state.milestones)),
   currentScheduleItems: state => state.currentScheduleItems,
   scheduleVersions: state => state.scheduleVersions
 }
@@ -119,6 +112,12 @@ const actions = {
         }
       })
       .catch(console.error)
+  },
+
+  // the milestones of every production, for the studio schedule: they stay
+  // out of the store, which holds the ones of the current production
+  loadAllMilestones() {
+    return scheduleApi.getAllMilestones()
   },
 
   async loadMilestones({ commit }, production) {

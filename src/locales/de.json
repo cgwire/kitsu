@@ -1576,6 +1576,7 @@
       "no_assignee": "Keine zuweisbare Person",
       "no_entity": "Keine zuweisbare Entität",
       "no_task": "Keine Aufgabe",
+      "period_unit": "Schrittweite der Pfeile",
       "plan_asset_type_tasks": "Aufgaben dieses Asset-Typs planen",
       "plan_entity_tasks": "Seine Aufgaben planen",
       "plan_sequence_tasks": "Aufgaben dieser Sequenz planen",
@@ -1594,7 +1595,9 @@
         "locked": "gesperrt",
         "canceled": "gestrichen"
       },
-      "zoom_level": "Zoomstufe"
+      "zoom_days": "Tage ({size})",
+      "zoom_level": "Zoomstufe",
+      "zoom_weeks": "Wochen"
     },
     "quota": {
       "average": "Durchschnitt",

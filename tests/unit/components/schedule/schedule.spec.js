@@ -134,6 +134,29 @@ describe('Schedule widget - milestones', () => {
     wrapper.unmount()
   })
 
+  it('shows the milestones it is given, read only', () => {
+    milestonesByDate['2026-08-01'] = [{ id: 'store-milestone', name: 'Store' }]
+    const wrapper = mountSchedule({
+      withMilestones: true,
+      readonly: true,
+      milestones: [
+        {
+          id: 'm1',
+          name: 'Delivery',
+          date: '2026-08-10',
+          milestone_type: 'other',
+          color: null
+        }
+      ]
+    })
+    expect(wrapper.findAll('.milestone-flag-name').map(f => f.text())).toEqual(
+      ['Delivery']
+    )
+    expect(wrapper.find('.add-milestone').exists()).toBe(false)
+    expect(wrapper.find('.milestone-flag.pointer').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   describe('flag popover', () => {
     const milestone = (id, name) => ({
       id,
@@ -370,6 +393,116 @@ describe('Schedule widget - dragging a collapsed root row bar', () => {
 
     wrapper.unmount()
   })
+
+  test('a read-only schedule shows the bar but does not move it', async () => {
+    const rootElement = buildRootElement()
+    const wrapper = mountSchedule(
+      {
+        startDate: moment('2026-07-05'),
+        endDate: moment('2026-10-23'),
+        hierarchy: [rootElement],
+        readonly: true
+      },
+      { attachTo: document.body }
+    )
+
+    const bar = wrapper.find('.timebar-center')
+    expect(bar.exists()).toBe(true)
+    await dragBar(wrapper, bar, 500, 560)
+    // the resize handles would show a resize cursor on hover
+    expect(wrapper.find('.timebar-left-hand').exists()).toBe(false)
+    expect(wrapper.find('.timebar-right-hand').exists()).toBe(false)
+
+    expect(rootElement.startDate.isSame(moment('2026-08-15'))).toBe(true)
+    expect(rootElement.endDate.isSame(moment('2026-08-29'))).toBe(true)
+    expect(wrapper.emitted('item-changed')).toBeFalsy()
+    expect(wrapper.find('.timebar-wrapper').attributes('style')).toContain(
+      'cursor: default'
+    )
+
+    wrapper.unmount()
+  })
+})
+
+describe('Schedule widget - dragover renders', () => {
+  // the whole timeline renders at once: a dragover fires on every mouse
+  // move, so it renders only when what it shows changes
+  const mountCounted = props => {
+    const updates = { count: 0 }
+    const wrapper = mountSchedule(props, {
+      global: {
+        stubs: { RouterLink: true },
+        mixins: [
+          {
+            updated() {
+              if (this.$options.__name === 'Schedule') updates.count++
+            }
+          }
+        ]
+      }
+    })
+    return { updates, wrapper }
+  }
+
+  // trigger() drops the clientX of a drag event in jsdom
+  const dragOver = async (row, clientX) => {
+    row.element.dispatchEvent(
+      new MouseEvent('dragover', { bubbles: true, cancelable: true, clientX })
+    )
+    await nextTick()
+  }
+
+  test('renders the drop ghost again only when the aimed day changes', async () => {
+    const { updates, wrapper } = mountCounted({
+      draggedItems: [{ ...task, estimation: 480 }]
+    })
+    const row = wrapper.find('.children[data-root-element-id]')
+    await row.trigger('dragenter', { clientX: 300 })
+    await dragOver(row, 300)
+    expect(wrapper.findAll('.drop-ghost')).toHaveLength(1)
+
+    updates.count = 0
+    // 20px wide day columns: 305 aims at the same day as 300
+    await dragOver(row, 305)
+    expect(updates.count).toBe(0)
+
+    await dragOver(row, 400)
+    expect(updates.count).toBe(1)
+    wrapper.unmount()
+  })
+
+  test('moves the forbidden pill with the cursor without rendering', async () => {
+    const { updates, wrapper } = mountCounted({
+      assignRule: () => 'task_type',
+      draggedItems: [task]
+    })
+    const row = wrapper.find('.children[data-root-element-id]')
+    await row.trigger('dragenter', { clientX: 300 })
+    await nextTick()
+
+    updates.count = 0
+    await dragOver(row, 310)
+    expect(updates.count).toBe(0)
+    expect(row.element.style.getPropertyValue('--drop-message-left')).toBe(
+      '326px'
+    )
+    wrapper.unmount()
+  })
+})
+
+describe('Schedule widget - root row name', () => {
+  test('a click on the name unfolds the row like its chevron', async () => {
+    const rootElement = buildRootElement()
+    const wrapper = mountRootBar(rootElement)
+
+    await wrapper.find('.root-element-name').trigger('click')
+
+    expect(wrapper.emitted('root-element-expanded')[0][0]).toStrictEqual(
+      rootElement
+    )
+
+    wrapper.unmount()
+  })
 })
 
 describe('Schedule widget - end of an interaction', () => {
@@ -481,6 +614,36 @@ describe('Schedule widget - today', () => {
     expect(middle.marker).toBe('block')
     expect(lastDay.scrollLeft).toBeGreaterThan(middle.scrollLeft)
     expect(lastDay.marker).toBe('block')
+  })
+
+  // The arrows of the studio schedule step from the date shown.
+  it('steps by a day, a week or a month from the date shown', () => {
+    const wrapper = mountSchedule(range)
+    const scrollLeft = () =>
+      wrapper.find('.timeline-content-wrapper').element.scrollLeft
+    const scrollLeftOf = day => {
+      wrapper.vm.scrollToDate(parseSimpleDate(day))
+      vi.advanceTimersByTime(20)
+      return scrollLeft()
+    }
+    const step = (amount, unit) => {
+      wrapper.vm.scrollByPeriod(amount, unit)
+      vi.advanceTimersByTime(20)
+      return scrollLeft()
+    }
+    const expected = {
+      nextDay: scrollLeftOf('2026-09-02'),
+      nextWeek: scrollLeftOf('2026-09-08'),
+      previousMonth: scrollLeftOf('2026-08-01')
+    }
+
+    scrollLeftOf('2026-09-01')
+    expect(step(1, 'days')).toBe(expected.nextDay)
+    scrollLeftOf('2026-09-01')
+    expect(step(1, 'weeks')).toBe(expected.nextWeek)
+    scrollLeftOf('2026-09-01')
+    expect(step(-1, 'months')).toBe(expected.previousMonth)
+    wrapper.unmount()
   })
 
   // Doing nothing there made the button look broken.

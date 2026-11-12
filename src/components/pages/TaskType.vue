@@ -471,6 +471,7 @@ import {
   pluralizeEntityType
 } from '@/lib/path'
 import preferences from '@/lib/preferences'
+import { getZoomOptions } from '@/lib/productionSchedule'
 import { sortByMetadata, sortByName, sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import {
@@ -979,12 +980,7 @@ const dataDisplayOptions = computed(() => [
   }
 ])
 
-const zoomOptions = computed(() => [
-  { label: t('main.week'), value: 0 },
-  { label: '1', value: 1 },
-  { label: '2', value: 2 },
-  { label: '3', value: 3 }
-])
+const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
 // Functions
 const initData = force => {
