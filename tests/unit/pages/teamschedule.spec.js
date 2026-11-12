@@ -339,6 +339,8 @@ describe('TeamSchedule page', () => {
   describe('department filter', () => {
     const departmentCombo = wrapper =>
       wrapper.findComponent({ name: 'ComboboxDepartment' })
+    const productionCombo = wrapper =>
+      wrapper.findComponent({ name: 'ComboboxProduction' })
 
     it('restricts the combobox to the supervisor departments', async () => {
       const { wrapper } = await mountPage({ getters: supervisorGetters })
@@ -459,6 +461,48 @@ describe('TeamSchedule page', () => {
       expect(wrapper.vm.selectedDepartment).toBe('ALL')
       wrapper.unmount()
     })
+
+    // the production and the department it resets change in one flush,
+    // each with its own navigation: the URL takes both
+    it('puts a supervised production in the URL with my departments', async () => {
+      const { wrapper } = await mountPage({
+        getters: {
+          ...openProductionGetters('prod-1'),
+          currentUserRoleForProduction: () => productionId =>
+            productionId === 'prod-1' ? 'supervisor' : 'manager',
+          user: () => ({ id: 'user-1', departments: ['dep-1'] })
+        },
+        query: {}
+      })
+
+      productionCombo(wrapper).vm.$emit('update:modelValue', 'prod-1')
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query).toEqual({
+        department: 'MY_DEPARTMENTS',
+        production: 'prod-1'
+      })
+      wrapper.unmount()
+    })
+
+    it('puts my departments in the URL without the managed production', async () => {
+      const { wrapper } = await mountPage({
+        getters: {
+          ...supervisorGetters,
+          ...openProductionGetters('prod-managed'),
+          currentUserRoleForProduction: () => productionId =>
+            productionId === 'prod-managed' ? 'manager' : 'supervisor'
+        },
+        query: { department: 'dep-2', production: 'prod-managed' }
+      })
+
+      // '' is the id of the "All" entry
+      productionCombo(wrapper).vm.$emit('update:modelValue', '')
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query).toEqual({ department: 'MY_DEPARTMENTS' })
+      wrapper.unmount()
+    })
   })
 
   describe('filter row', () => {
@@ -552,7 +596,7 @@ describe('TeamSchedule page', () => {
       wrapper.unmount()
     })
 
-    // a cleanup push would race the push of a supervisor's department
+    // no navigation on load just to clean the URL
     it.each([
       ['a manager', {}, { production: 'prod-closed' }],
       [

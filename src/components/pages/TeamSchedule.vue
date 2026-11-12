@@ -362,6 +362,10 @@ const zoomOptions = computed(() => getZoomOptions(t, [1, 2, 3, 4]))
 // Entries are dropped whenever the row's assignments or dates change.
 const personTasksCache = new Map()
 
+// the query of a navigation still on its way: route.query only changes
+// once it lands, and an update meanwhile builds on this one
+let pendingQuery = null
+
 // transparent 1px image: hides the native drag snapshot so the only
 // drag feedback is the drop-preview ghost on the timeline
 const emptyDragImage = new Image()
@@ -975,7 +979,8 @@ const hasFilters = () =>
     (isSupervisorWithDepartments.value ? 'MY_DEPARTMENTS' : 'ALL')
 
 const updateRoute = ({ department, production, studio, zoom }) => {
-  const query = { ...route.query }
+  const currentQuery = pendingQuery || route.query
+  const query = { ...currentQuery }
 
   if (department !== undefined) {
     query.department = department || undefined
@@ -990,8 +995,13 @@ const updateRoute = ({ department, production, studio, zoom }) => {
     query.zoom = String(zoom)
   }
 
-  if (JSON.stringify(query) !== JSON.stringify(route.query)) {
-    router.push({ query })
+  if (JSON.stringify(query) !== JSON.stringify(currentQuery)) {
+    pendingQuery = query
+    router.push({ query }).finally(() => {
+      if (pendingQuery === query) {
+        pendingQuery = null
+      }
+    })
   }
 }
 
@@ -1044,8 +1054,7 @@ onMounted(() => {
   selectedStudio.value = route.query.studio || undefined
   // the combobox lists the open productions only: a closed or deleted
   // production of a link is dropped. It stays in the URL (undefined, not
-  // ''): a cleanup push would race the push of a supervisor's department,
-  // both built on the query of the link.
+  // ''), so a link with nothing else to rewrite opens without a navigation.
   const production = route.query.production
   selectedProduction.value = openProductions.value.some(
     ({ id }) => id === production
