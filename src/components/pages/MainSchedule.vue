@@ -71,11 +71,11 @@
         :end-date="endDate"
         :hierarchy="filteredScheduleItems"
         :is-loading="false"
+        :milestones="shownMilestones"
         :start-date="startDate"
         :zoom-level="zoomLevel"
         hide-man-days
         readonly
-        :with-milestones="false"
         @root-element-expanded="expandProductionElement"
       />
     </div>
@@ -124,6 +124,7 @@ const store = useStore()
 const endDate = ref(moment().add(6, 'months'))
 const hiddenProductionIds = ref([])
 const hiddenTaskTypeIds = ref([])
+const milestones = ref([])
 const scheduleItems = ref([])
 const selectedEndDate = ref(null)
 const selectedStartDate = ref(null)
@@ -189,6 +190,19 @@ const filteredScheduleItems = computed(() =>
     item => !hiddenProductionIds.value.includes(item.id)
   )
 )
+
+// prefixed with their production: the studio schedule mixes them all
+const shownMilestones = computed(() => {
+  const productionMap = new Map(
+    filteredScheduleItems.value.map(item => [item.id, item])
+  )
+  return milestones.value
+    .filter(milestone => productionMap.has(milestone.project_id))
+    .map(milestone => ({
+      ...milestone,
+      name: `${productionMap.get(milestone.project_id).name}: ${milestone.name}`
+    }))
+})
 
 const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
@@ -286,6 +300,14 @@ const onUpdateSelectedEndDate = date => {
   endDate.value = parseSimpleDate(date)
 }
 
+const loadMilestones = async () => {
+  try {
+    milestones.value = await store.dispatch('loadAllMilestones')
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 const scrollScheduleToToday = () => {
   scheduleRef.value?.scrollToToday()
 }
@@ -312,6 +334,7 @@ onMounted(() => {
     selectedEndDate.value = endDate.value.toDate()
   }
   scrollScheduleToToday()
+  loadMilestones()
 })
 
 // Head

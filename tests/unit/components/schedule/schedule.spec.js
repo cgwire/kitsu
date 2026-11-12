@@ -134,6 +134,29 @@ describe('Schedule widget - milestones', () => {
     wrapper.unmount()
   })
 
+  it('shows the milestones it is given, read only', () => {
+    milestonesByDate['2026-08-01'] = [{ id: 'store-milestone', name: 'Store' }]
+    const wrapper = mountSchedule({
+      withMilestones: true,
+      readonly: true,
+      milestones: [
+        {
+          id: 'm1',
+          name: 'Delivery',
+          date: '2026-08-10',
+          milestone_type: 'other',
+          color: null
+        }
+      ]
+    })
+    expect(wrapper.findAll('.milestone-flag-name').map(f => f.text())).toEqual(
+      ['Delivery']
+    )
+    expect(wrapper.find('.add-milestone').exists()).toBe(false)
+    expect(wrapper.find('.milestone-flag.pointer').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   describe('flag popover', () => {
     const milestone = (id, name) => ({
       id,

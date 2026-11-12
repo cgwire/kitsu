@@ -294,7 +294,7 @@
               class="milestone-flag"
               :class="{
                 compact: group.isCompact,
-                pointer: isCurrentUserProductionManager
+                pointer: canEditMilestones
               }"
               :style="group.style"
               :key="`milestone-flag-${group.date}`"
@@ -349,8 +349,7 @@
 
             <div
               :class="{
-                'with-milestones':
-                  withMilestones && isCurrentUserProductionManager,
+                'with-milestones': withMilestones && canEditMilestones,
                 'date-widget': true
               }"
             >
@@ -381,7 +380,7 @@
                 @click="showEditMilestoneModal(day)"
                 @keydown.enter.prevent="showEditMilestoneModal(day)"
                 @keydown.space.prevent="showEditMilestoneModal(day)"
-                v-if="withMilestones && isCurrentUserProductionManager"
+                v-if="withMilestones && canEditMilestones"
               >
                 <span class="button">
                   <plus-icon :size="12" :stroke-width="3" />
@@ -646,7 +645,7 @@
 
     <milestone-popover
       ref="milestonePopoverRef"
-      :can-edit="isCurrentUserProductionManager"
+      :can-edit="canEditMilestones"
       @edit="editMilestone"
       v-if="withMilestones"
     />
@@ -693,7 +692,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import colors from '@/lib/colors'
-import { getMilestoneColor } from '@/lib/milestones'
+import { getMilestoneColor, groupMilestonesByDate } from '@/lib/milestones'
 import { subItemsOf } from '@/lib/productionSchedule'
 import {
   addBusinessDays,
@@ -769,6 +768,11 @@ const props = defineProps({
   isLoading: {
     type: Boolean,
     default: true
+  },
+  // replaces the milestones of the current production
+  milestones: {
+    type: Array,
+    default: null
   },
   multiline: {
     type: Boolean,
@@ -957,11 +961,15 @@ const timesheetsByTaskCache = new WeakMap()
 const currentProduction = computed(() => store.getters.currentProduction)
 const dateFormat = computed(() => store.getters.dateFormat)
 const departmentMap = computed(() => store.getters.departmentMap)
-const isCurrentUserProductionManager = computed(
-  () => store.getters.isCurrentUserProductionManager
-)
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
-const milestonesByDate = computed(() => store.getters.milestonesByDate)
+const canEditMilestones = computed(
+  () => store.getters.isCurrentUserProductionManager && !props.readonly
+)
+const milestonesByDate = computed(() =>
+  props.milestones
+    ? groupMilestonesByDate(props.milestones)
+    : store.getters.milestonesByDate
+)
 const openProductions = computed(() => store.getters.openProductions)
 const organisation = computed(() => store.getters.organisation)
 const taskStatuses = computed(() => store.getters.taskStatuses)
@@ -2455,7 +2463,7 @@ const childrenStyle = (
 }
 
 const showEditMilestoneModal = (day, milestone) => {
-  if (isCurrentUserProductionManager.value) {
+  if (canEditMilestones.value) {
     milestonePopoverRef.value?.hide({ immediate: true })
     modals.edit = true
     if (milestone) {
@@ -2837,7 +2845,7 @@ watch(
 watch(
   currentProduction,
   () => {
-    if (props.withMilestones) {
+    if (props.withMilestones && !props.milestones) {
       store.dispatch('loadMilestones', currentProduction.value)
     }
   },

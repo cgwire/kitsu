@@ -14,7 +14,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 const Page = { template: '<div />' }
 const ScheduleStub = {
   name: 'Schedule',
-  props: ['hierarchy'],
+  props: ['hierarchy', 'milestones'],
   emits: ['root-element-expanded'],
   template: '<div />',
   methods: { scrollToToday() {} }
@@ -51,7 +51,8 @@ const mountPage = async productions => {
       openProductions: () => productions,
       taskTypes: () => [],
       taskTypeMap: () => new Map()
-    }
+    },
+    actions: { loadAllMilestones: () => [] }
   })
   const wrapper = shallowMount(MainSchedule, {
     global: {
@@ -104,6 +105,11 @@ const mountFilteredPage = async () => {
       taskTypeMap: () => new Map(taskTypes.map(t => [t.id, t]))
     },
     actions: {
+      loadAllMilestones: () => [
+        { id: 'm1', project_id: 'production-1', name: 'Delivery' },
+        { id: 'm2', project_id: 'production-2', name: 'Review' },
+        { id: 'm3', project_id: 'closed-production', name: 'Old' }
+      ],
       loadScheduleItems: () => [
         { id: 'item-1', task_type_id: 'tt-anim', start_date: '2026-01-01' },
         { id: 'item-2', task_type_id: 'tt-light', start_date: '2026-02-01' }
@@ -168,5 +174,22 @@ describe('MainSchedule filters', () => {
       'item-1',
       'item-2'
     ])
+  })
+
+  it('shows the milestones of the shown productions', async () => {
+    const wrapper = await mountFilteredPage()
+    const milestoneNames = () =>
+      wrapper
+        .findComponent(ScheduleStub)
+        .props('milestones')
+        .map(milestone => milestone.name)
+    expect(milestoneNames()).toEqual(['Production: Delivery', 'Other: Review'])
+
+    const [productionCombo] = wrapper.findAllComponents({
+      name: 'ComboboxOptions'
+    })
+    productionCombo.vm.$emit('change', { key: 'production-2', value: false })
+    await flushPromises()
+    expect(milestoneNames()).toEqual(['Production: Delivery'])
   })
 })
