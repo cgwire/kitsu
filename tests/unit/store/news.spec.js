@@ -101,11 +101,19 @@ describe('News store', () => {
       deletedNewsIds: new Set(),
       isNewsListComplete: false,
       newsList: [],
-      newsListVersion: 0
+      newsListVersion: 0,
+      newsPagesVersion: 0
     })
     const runner = state => ({
       commit: (type, payload) => store.mutations[type](state, payload),
+      dispatch: (type, payload) => store.actions[type](runner(state), payload),
       state
+    })
+
+    // An answer a test left unused would go to the next one.
+    afterEach(() => {
+      newsApi.getLastNews.mockReset()
+      newsApi.getNews.mockReset()
     })
 
     test('loadNews - answer of a load sent before the last one', async () => {
@@ -130,6 +138,216 @@ describe('News store', () => {
       await firstLoad
 
       expect(state.newsList.map(news => news.id)).toEqual(['news-2'])
+    })
+
+    // The answer of the next request, given on demand.
+    const deferNextLoad = () => {
+      let answer = null
+      newsApi.getLastNews.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            answer = resolve
+          })
+      )
+      return value => answer(value)
+    }
+
+    test('syncNews - first page whatever page the feed is at', async () => {
+      newsApi.getLastNews.mockResolvedValueOnce({ data: [] })
+
+      await store.actions.syncNews(runner(newState()), { limit: 50, page: 3 })
+
+      expect(newsApi.getLastNews).toHaveBeenLastCalledWith({
+        limit: 50,
+        page: 1
+      })
+    })
+
+    test('syncNews - answer once the feed loaded again', async () => {
+      const state = newState()
+      state.newsList = [{ id: 'news-1', created_at: '2019-05-02T23:12:23' }]
+      const answer = deferNextLoad()
+
+      const sync = store.actions.syncNews(runner(state), { limit: 50 })
+      store.mutations.CLEAR_NEWS(state)
+      answer({ data: [{ id: 'news-2', created_at: '2019-05-03T21:12:23' }] })
+
+      expect(await sync).toBeNull()
+      expect(state.newsList).toEqual([])
+    })
+
+    test('syncNews - news listed while the page loads', async () => {
+      const state = newState()
+      state.newsList = [
+        { id: 'news-2', created_at: '2019-05-03T21:12:23' },
+        { id: 'news-1', created_at: '2019-05-02T23:12:23' }
+      ]
+      const answer = deferNextLoad()
+
+      const sync = store.actions.syncNews(runner(state), { limit: 2 })
+      store.mutations.ADD_NEWS(state, {
+        id: 'news-3',
+        created_at: '2019-05-04T23:12:23'
+      })
+      answer({ data: state.newsList.slice(1) })
+
+      expect(await sync).toBe(false)
+      expect(state.newsList.map(news => news.id)).toEqual([
+        'news-3',
+        'news-2',
+        'news-1'
+      ])
+    })
+
+    test('syncNews - page with none of the listed news', async () => {
+      const state = newState()
+      state.newsList = [{ id: 'news-1', created_at: '2019-05-02T23:12:23' }]
+      newsApi.getLastNews.mockResolvedValueOnce({
+        data: [{ id: 'news-9', created_at: '2019-05-09T23:12:23' }]
+      })
+
+      expect(await store.actions.syncNews(runner(state), { limit: 1 })).toBe(
+        true
+      )
+      expect(state.newsList.map(news => news.id)).toEqual(['news-9'])
+    })
+
+    // The socket may come back twice while a catch-up load is on its way.
+    test('syncNews - answer sent before the one merged', async () => {
+      const state = newState()
+      state.newsList = [
+        { id: 'news-2', created_at: '2019-05-03T21:12:23' },
+        { id: 'news-1', created_at: '2019-05-02T23:12:23' }
+      ]
+      const answerFirst = deferNextLoad()
+      const firstSync = store.actions.syncNews(runner(state), { limit: 50 })
+      // news-2 deleted and news-1 changed during the second drop
+      newsApi.getLastNews.mockResolvedValueOnce({
+        data: [{ id: 'news-1', created_at: '2019-05-02T23:12:23', change: 1 }]
+      })
+      await store.actions.syncNews(runner(state), { limit: 50 })
+      answerFirst({
+        data: [
+          { id: 'news-2', created_at: '2019-05-03T21:12:23' },
+          { id: 'news-1', created_at: '2019-05-02T23:12:23' }
+        ]
+      })
+
+      expect(await firstSync).toBeNull()
+      expect(state.newsList).toEqual([
+        { id: 'news-1', created_at: '2019-05-02T23:12:23', change: 1 }
+      ])
+    })
+
+    test('syncNews - answer sent before one that failed', async () => {
+      const state = newState()
+      state.newsList = [{ id: 'news-1', created_at: '2019-05-02T23:12:23' }]
+      const answerFirst = deferNextLoad()
+      const firstSync = store.actions.syncNews(runner(state), { limit: 50 })
+      newsApi.getLastNews.mockRejectedValueOnce(new Error('Bad Gateway'))
+      await expect(
+        store.actions.syncNews(runner(state), { limit: 50 })
+      ).rejects.toThrow('Bad Gateway')
+      answerFirst({
+        data: [
+          { id: 'news-2', created_at: '2019-05-03T21:12:23' },
+          { id: 'news-1', created_at: '2019-05-02T23:12:23' }
+        ]
+      })
+
+      expect(await firstSync).toBe(false)
+      expect(state.newsList.map(news => news.id)).toEqual(['news-2', 'news-1'])
+    })
+
+    test('syncNews - answer once an older one started the feed over', async () => {
+      const state = newState()
+      state.newsList = [
+        { id: 'news-2', created_at: '2019-05-03T21:12:23' },
+        { id: 'news-1', created_at: '2019-05-02T23:12:23' }
+      ]
+      const news5 = { id: 'news-5', created_at: '2019-05-06T21:12:23' }
+      const news4 = { id: 'news-4', created_at: '2019-05-05T21:12:23' }
+      const news3 = { id: 'news-3', created_at: '2019-05-04T21:12:23' }
+      const answerFirst = deferNextLoad()
+      const answerSecond = deferNextLoad()
+      // news-4 deleted during the second drop
+      newsApi.getLastNews.mockResolvedValueOnce({ data: [news5, news3] })
+      const firstSync = store.actions.syncNews(runner(state), { limit: 2 })
+      const secondSync = store.actions.syncNews(runner(state), { limit: 2 })
+
+      answerFirst({ data: [news5, news4] })
+      expect(await firstSync).toBe(true)
+      answerSecond({ data: [news5, news3] })
+
+      expect(await secondSync).toBe(false)
+      expect(state.newsList.map(news => news.id)).toEqual(['news-5', 'news-3'])
+    })
+
+    test('syncNews - answer once an older one was merged', async () => {
+      const state = newState()
+      state.newsList = [{ id: 'news-1', created_at: '2019-05-02T23:12:23' }]
+      const news2 = { id: 'news-2', created_at: '2019-05-03T21:12:23' }
+      const news1 = { id: 'news-1', created_at: '2019-05-02T23:12:23' }
+      const answerFirst = deferNextLoad()
+      const answerSecond = deferNextLoad()
+      // news-2 posted during the first drop and deleted during the second one
+      newsApi.getLastNews.mockResolvedValueOnce({ data: [news1] })
+      const firstSync = store.actions.syncNews(runner(state), { limit: 50 })
+      const secondSync = store.actions.syncNews(runner(state), { limit: 50 })
+
+      answerFirst({ data: [news2, news1] })
+      expect(await firstSync).toBe(false)
+      answerSecond({ data: [news1] })
+
+      expect(await secondSync).toBe(false)
+      expect(state.newsList.map(news => news.id)).toEqual(['news-1'])
+    })
+
+    // A live news goes by its date, whatever page the feed starts over from.
+    test('getSingleNews - answer once a resync started over', async () => {
+      const state = newState()
+      state.newsList = [{ id: 'news-1', created_at: '2019-05-02T23:12:23' }]
+      const news = { id: 'news-10', created_at: '2019-05-10T23:12:23' }
+      let answerNews = null
+      newsApi.getNews.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            answerNews = resolve
+          })
+      )
+      newsApi.getLastNews.mockResolvedValueOnce({
+        data: [{ id: 'news-9', created_at: '2019-05-09T23:12:23' }]
+      })
+
+      const singleNews = store.actions.getSingleNews(runner(state), {
+        productionId: 'production-1',
+        newsId: 'news-10'
+      })
+      expect(await store.actions.syncNews(runner(state), { limit: 1 })).toBe(
+        true
+      )
+      answerNews(news)
+
+      expect(await singleNews).toEqual(news)
+    })
+
+    test('loadMoreNews - answer once a resync started over', async () => {
+      const state = newState()
+      state.newsList = [{ id: 'news-1', created_at: '2019-05-02T23:12:23' }]
+      const answer = deferNextLoad()
+
+      const moreNews = store.actions.loadMoreNews(runner(state), {
+        limit: 1,
+        page: 2
+      })
+      newsApi.getLastNews.mockResolvedValueOnce({
+        data: [{ id: 'news-9', created_at: '2019-05-09T23:12:23' }]
+      })
+      await store.actions.syncNews(runner(state), { limit: 1 })
+      answer({ data: [{ id: 'news-0', created_at: '2019-05-01T23:12:23' }] })
+
+      expect(await moreNews).toBeNull()
+      expect(state.newsList.map(news => news.id)).toEqual(['news-9'])
     })
   })
 
@@ -161,6 +379,12 @@ describe('News store', () => {
       state.newsListVersion = 2
       store.mutations.CLEAR_NEWS(state)
       expect(state.newsListVersion).toEqual(3)
+    })
+
+    test('CLEAR_NEWS - new version of the pages', () => {
+      state.newsPagesVersion = 5
+      store.mutations.CLEAR_NEWS(state)
+      expect(state.newsPagesVersion).toEqual(6)
     })
 
     test('ADD_PREVIOUS_NEWS', () => {
@@ -287,6 +511,95 @@ describe('News store', () => {
       })
       expect(state.newsList[1].preview_file_id).toEqual('preview-1')
       expect(state.newsList[1].preview_file_extension).toEqual('mp4')
+    })
+
+    describe('SYNC_NEWS', () => {
+      const news4 = { id: 'news-4', created_at: '2019-05-06T23:12:23' }
+      const sync = (newsList, isComplete = false) =>
+        store.mutations.SYNC_NEWS(state, {
+          newsList,
+          listedIds: new Set(['news-3', 'news-2', 'news-1']),
+          isComplete
+        })
+      const newsIds = () => state.newsList.map(news => news.id)
+
+      test('news posted while the socket was down', () => {
+        state.isNewsListComplete = true
+        sync([news4, state.newsList[0]])
+        expect(newsIds()).toEqual(['news-4', 'news-3', 'news-2', 'news-1'])
+        expect(state.isNewsListComplete).toBe(true)
+      })
+
+      test('news deleted while the socket was down', () => {
+        sync([state.newsList[0], state.newsList[2]])
+        expect(newsIds()).toEqual(['news-3', 'news-1'])
+      })
+
+      test('news older than the whole page', () => {
+        sync([state.newsList[0]])
+        expect(newsIds()).toEqual(['news-3', 'news-2', 'news-1'])
+      })
+
+      test('short page', () => {
+        sync([state.newsList[1]], true)
+        expect(newsIds()).toEqual(['news-2'])
+        expect(state.isNewsListComplete).toBe(true)
+      })
+
+      test('empty page', () => {
+        sync([], true)
+        expect(state.newsList).toEqual([])
+      })
+
+      test('news changed while the socket was down', () => {
+        sync([{ ...state.newsList[0], change: true }])
+        expect(state.newsList[0].change).toBe(true)
+      })
+
+      test('news deleted while the page loads', () => {
+        state.deletedNewsIds.add('news-4')
+        sync([news4, state.newsList[0]])
+        expect(newsIds()).toEqual(['news-3', 'news-2', 'news-1'])
+      })
+
+      // Zou dates a news to the second, then orders by id: a news of the
+      // second of the oldest news of the page is on it only with a higher id.
+      test('news of the same second as the oldest of the page', () => {
+        const at = '2019-05-03T21:12:23'
+        state.newsList = [
+          state.newsList[0],
+          { id: 'news-c', created_at: at },
+          { id: 'news-b', created_at: at },
+          { id: 'news-a', created_at: at }
+        ]
+        store.mutations.SYNC_NEWS(state, {
+          newsList: [state.newsList[0], state.newsList[2]],
+          listedIds: new Set(newsIds()),
+          isComplete: false
+        })
+        expect(newsIds()).toEqual(['news-3', 'news-b', 'news-a'])
+      })
+
+      // More news than a page went by: the feed starts over from it, with
+      // the live news that came while it loaded.
+      test('page with none of the listed news', () => {
+        state.isNewsListComplete = true
+        state.newsListVersion = 2
+        state.newsPagesVersion = 5
+        state.newsList.unshift({
+          id: 'news-10',
+          created_at: '2019-05-10T23:12:23'
+        })
+        state.newsList.push({ id: 'news-0', created_at: '2019-05-01T23:12:23' })
+        sync([
+          { id: 'news-9', created_at: '2019-05-09T23:12:23' },
+          { id: 'news-8', created_at: '2019-05-08T23:12:23' }
+        ])
+        expect(newsIds()).toEqual(['news-10', 'news-9', 'news-8'])
+        expect(state.newsPagesVersion).toBe(6)
+        expect(state.newsListVersion).toBe(2)
+        expect(state.isNewsListComplete).toBe(false)
+      })
     })
   })
 })
