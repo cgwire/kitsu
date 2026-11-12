@@ -957,11 +957,22 @@ const syncDepartmentFilter = () => {
     ) {
       selectedDepartment.value = 'MY_DEPARTMENTS'
     }
-  } else if (department === 'MY_DEPARTMENTS' && isCurrentUserManager.value) {
-    // the unscoped list only offers "My departments" to a global supervisor
+  } else if (
+    department === 'MY_DEPARTMENTS' &&
+    (isCurrentUserManager.value || !user.value.departments.length)
+  ) {
+    // the unscoped list offers "My departments" only to a non-manager
+    // attached to departments
     selectedDepartment.value = 'ALL'
   }
 }
+
+// "My departments" is the widest scope of a supervisor attached to
+// departments: any other choice counts as a filter.
+const hasFilters = () =>
+  Boolean(selectedStudio.value || selectedProduction.value) ||
+  selectedDepartment.value !==
+    (isSupervisorWithDepartments.value ? 'MY_DEPARTMENTS' : 'ALL')
 
 const updateRoute = ({ department, production, studio, zoom }) => {
   const query = { ...route.query }
@@ -1031,7 +1042,16 @@ watch(isTaskSidePanelOpen, open => {
 // --------------------------------------------------------------------------
 onMounted(() => {
   selectedStudio.value = route.query.studio || undefined
-  selectedProduction.value = route.query.production || undefined
+  // the combobox lists the open productions only: a closed or deleted
+  // production of a link is dropped. It stays in the URL (undefined, not
+  // ''): a cleanup push would race the push of a supervisor's department,
+  // both built on the query of the link.
+  const production = route.query.production
+  selectedProduction.value = openProductions.value.some(
+    ({ id }) => id === production
+  )
+    ? production
+    : undefined
   // Supervisors land on their own departments (issue #1579), a bookmarked
   // department outside them included.
   const department = route.query.department
@@ -1041,6 +1061,8 @@ onMounted(() => {
     selectedDepartment.value = 'MY_DEPARTMENTS'
   }
   syncDepartmentFilter()
+  // a link or a reload brings the filters back: keep them in sight
+  showMoreFilters.value = hasFilters()
   const zoom = Number(route.query.zoom)
   zoomLevel.value = zoomOptions.value.some(option => option.value === zoom)
     ? zoom

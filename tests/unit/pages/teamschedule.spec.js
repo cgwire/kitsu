@@ -111,6 +111,20 @@ const supervisorGetters = {
   user: () => ({ id: 'user-1', departments: ['dep-1'] })
 }
 
+const supervisorWithoutDepartmentGetters = {
+  ...supervisorGetters,
+  user: () => ({ id: 'user-1', departments: [] })
+}
+
+// the page keeps the production of a link only while it is open
+const openProductionGetters = (...ids) => {
+  const productions = ids.map(id => ({ id, name: id, team: [] }))
+  return {
+    openProductions: () => productions,
+    productionMap: () => new Map(productions.map(p => [p.id, p]))
+  }
+}
+
 describe('TeamSchedule page', () => {
   describe('initial load', () => {
     const people = [
@@ -372,12 +386,40 @@ describe('TeamSchedule page', () => {
       wrapper.unmount()
     })
 
+    it('drops my departments for a supervisor without department', async () => {
+      const { wrapper } = await mountPage({
+        getters: supervisorWithoutDepartmentGetters,
+        query: { department: 'MY_DEPARTMENTS' }
+      })
+
+      expect(departmentCombo(wrapper).props('modelValue')).toBe('ALL')
+      wrapper.unmount()
+    })
+
+    it('keeps my departments on a production the supervisor manages', async () => {
+      const { wrapper } = await mountPage({
+        getters: {
+          ...supervisorGetters,
+          ...openProductionGetters('prod-managed'),
+          currentUserRoleForProduction: () => productionId =>
+            productionId === 'prod-managed' ? 'manager' : 'supervisor'
+        },
+        query: { department: 'MY_DEPARTMENTS', production: 'prod-managed' }
+      })
+
+      const combo = departmentCombo(wrapper)
+      expect(combo.props('myDepartmentsOnly')).toBe(false)
+      expect(combo.props('modelValue')).toBe('MY_DEPARTMENTS')
+      wrapper.unmount()
+    })
+
     // The scope follows the production filter: a supervisor promoted to
     // manager on a production browses every department there.
     it('follows the role held on the production filter', async () => {
       const { wrapper } = await mountPage({
         getters: {
           ...supervisorGetters,
+          ...openProductionGetters('prod-managed', 'prod-1'),
           currentUserRoleForProduction: () => productionId =>
             productionId === 'prod-managed' ? 'manager' : 'supervisor'
         },
@@ -398,6 +440,7 @@ describe('TeamSchedule page', () => {
     it('scopes a manager supervising the production filter', async () => {
       const { wrapper } = await mountPage({
         getters: {
+          ...openProductionGetters('prod-1'),
           currentUserRoleForProduction: () => productionId =>
             productionId === 'prod-1' ? 'supervisor' : 'manager',
           user: () => ({ id: 'user-1', departments: ['dep-1'] })
@@ -416,6 +459,120 @@ describe('TeamSchedule page', () => {
       expect(wrapper.vm.selectedDepartment).toBe('ALL')
       wrapper.unmount()
     })
+  })
+
+  describe('filter row', () => {
+    const isFilterRowShown = wrapper =>
+      wrapper.findAll('.toolbar-row')[1].element.style.display !== 'none'
+
+    it('stays folded without a filter', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(isFilterRowShown(wrapper)).toBe(false)
+      wrapper.unmount()
+    })
+
+    it.each([
+      ['studio', { studio: 'studio-1' }, {}],
+      ['department', { department: 'dep-2' }, {}],
+      ['production', { production: 'prod-1' }, openProductionGetters('prod-1')]
+    ])('shows the %s filter a link brings back', async (_, query, getters) => {
+      const { wrapper } = await mountPage({ getters, query })
+
+      expect(isFilterRowShown(wrapper)).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('stays folded on the own departments of a supervisor', async () => {
+      const { wrapper } = await mountPage({ getters: supervisorGetters })
+
+      expect(isFilterRowShown(wrapper)).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('shows a single department of a supervisor', async () => {
+      const { wrapper } = await mountPage({
+        getters: {
+          ...supervisorGetters,
+          user: () => ({ id: 'user-1', departments: ['dep-1', 'dep-2'] })
+        },
+        query: { department: 'dep-1' }
+      })
+
+      expect(isFilterRowShown(wrapper)).toBe(true)
+      wrapper.unmount()
+    })
+
+    const closedProductionGetters = {
+      productionMap: () =>
+        new Map([['prod-closed', { id: 'prod-closed', team: [] }]])
+    }
+
+    // values the page rewrites or drops on load, none of them a filter
+    it.each([
+      [
+        'all departments for a supervisor',
+        { department: 'ALL' },
+        supervisorGetters
+      ],
+      [
+        'a department out of the supervisor scope',
+        { department: 'dep-2' },
+        supervisorGetters
+      ],
+      ['my departments for a manager', { department: 'MY_DEPARTMENTS' }, {}],
+      [
+        'my departments for a supervisor without department',
+        { department: 'MY_DEPARTMENTS' },
+        supervisorWithoutDepartmentGetters
+      ],
+      ['a deleted production', { production: 'prod-gone' }, {}],
+      [
+        'a closed production',
+        { production: 'prod-closed' },
+        closedProductionGetters
+      ]
+    ])('stays folded on a link with %s', async (_, query, getters) => {
+      const { wrapper } = await mountPage({ getters, query })
+
+      expect(isFilterRowShown(wrapper)).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('drops the production of a link once it is closed', async () => {
+      const { wrapper } = await mountPage({
+        getters: closedProductionGetters,
+        query: { production: 'prod-closed' }
+      })
+
+      // '' is the id of the "All" entry
+      expect(
+        wrapper.findComponent({ name: 'ComboboxProduction' }).props('modelValue')
+      ).toBe('')
+      wrapper.unmount()
+    })
+
+    // a cleanup push would race the push of a supervisor's department
+    it.each([
+      ['a manager', {}, { production: 'prod-closed' }],
+      [
+        'a supervisor',
+        supervisorGetters,
+        { production: 'prod-closed', department: 'MY_DEPARTMENTS' }
+      ]
+    ])(
+      'keeps a closed production in the URL for %s',
+      async (_, getters, query) => {
+        const { wrapper } = await mountPage({
+          getters: { ...getters, ...closedProductionGetters },
+          query: { production: 'prod-closed' }
+        })
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query).toEqual(query)
+        wrapper.unmount()
+      }
+    )
   })
 
   describe('supervisor department scope', () => {
