@@ -114,9 +114,11 @@ import { useStore } from 'vuex'
 import colors from '@/lib/colors'
 import { episodifyRoute, getProductionSchedulePath } from '@/lib/path'
 import {
+  formatHiddenIds,
   getFilterTitle,
   getVisibilityMap,
   getZoomOptions,
+  parseHiddenIds,
   setVisibility
 } from '@/lib/productionSchedule'
 import {
@@ -277,12 +279,25 @@ const convertTaskTypeScheduleItems = items =>
 const getVisibleTaskTypeItems = items =>
   items.filter(item => !hiddenTaskTypeIds.value.includes(item.task_type_id))
 
+// replace: one history entry per checkbox would take as many Back presses
+const updateFilterQuery = () => {
+  router.replace({
+    query: {
+      ...route.query,
+      hiddenProductions:
+        formatHiddenIds(hiddenProductionIds.value) ?? undefined,
+      hiddenTypes: formatHiddenIds(hiddenTaskTypeIds.value) ?? undefined
+    }
+  })
+}
+
 const onProductionVisibilityChanged = ({ key, value }) => {
   hiddenProductionIds.value = setVisibility(
     hiddenProductionIds.value,
     key,
     value
   )
+  updateFilterQuery()
 }
 
 // The rows of a production are loaded when it unfolds: the filter applies
@@ -294,6 +309,7 @@ const onTaskTypeVisibilityChanged = ({ key, value }) => {
       item.children = getVisibleTaskTypeItems(item.allChildren)
     }
   })
+  updateFilterQuery()
 }
 
 const expandProductionElement = async productionElement => {
@@ -355,6 +371,15 @@ watch(zoomLevel, zoom => {
 onMounted(() => {
   const zoom = parseInt(route.query.zoom)
   zoomLevel.value = Math.min(Math.max(isNaN(zoom) ? 1 : zoom, 0), 3)
+  const knownIds = options => new Set(options.map(option => option.value))
+  hiddenProductionIds.value = parseHiddenIds(
+    route.query.hiddenProductions,
+    knownIds(productionFilterOptions.value)
+  )
+  hiddenTaskTypeIds.value = parseHiddenIds(
+    route.query.hiddenTypes,
+    knownIds(taskTypeFilterOptions.value)
+  )
   if (openProductions.value.length) {
     scheduleItems.value = convertScheduleItems(openProductions.value)
     startDate.value = getFirstStartDate(scheduleItems.value)
