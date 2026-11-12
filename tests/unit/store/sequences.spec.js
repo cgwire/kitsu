@@ -331,6 +331,7 @@ describe('Sequences store, task entity name', () => {
   })
   const buildState = () => ({
     displayedSequences: [],
+    sequenceSelectionGrid: new Set(),
     sequenceValidationColumns: [],
     sequenceFilledColumns: {}
   })
@@ -485,7 +486,7 @@ describe('Sequences store, ADD_SEQUENCE', () => {
   // The list load leaves the cached list and the displayed one as the same
   // array: pushing into each in place inserted the sequence twice.
   test('inserts a live sequence once', () => {
-    const state = { displayedSequences: [] }
+    const state = { displayedSequences: [], sequenceSelectionGrid: new Set() }
     sequencesStore.mutations.LOAD_SEQUENCES_END(state, {
       sequences: [
         { id: 'sq-1', name: 'SQ01', parent_id: 'ep-a' },
@@ -513,7 +514,7 @@ describe('Sequences store, ADD_SEQUENCE', () => {
   // zou emits sequence:new before the creation response lands, so the socket
   // handler inserts the sequence first: the response must not append a copy.
   test('does not duplicate a sequence the socket handler already added', () => {
-    const state = { displayedSequences: [] }
+    const state = { displayedSequences: [], sequenceSelectionGrid: new Set() }
     sequencesStore.mutations.LOAD_SEQUENCES_END(state, {
       sequences: [{ id: 'sq-1', name: 'SQ01', parent_id: 'ep-a' }],
       episodeMap: new Map(),
@@ -1597,6 +1598,27 @@ describe('Sequences store, through a store', () => {
         'SQ01',
         'SQ02',
         'SQ03'
+      ])
+    })
+
+    // The selected cells are keyed by their row.
+    test('moves down the cells selected below a live sequence', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+      store.commit('ADD_SELECTED_TASK', { x: 0, y: 0 })
+      store.commit('ADD_SELECTED_TASK', { x: 2, y: 0 })
+
+      addSequence(store, { id: 'sq0', name: 'SQ01B' })
+
+      expect(names(store.getters.displayedSequences)).toEqual([
+        'SQ01',
+        'SQ01B',
+        'SQ02',
+        'SQ03'
+      ])
+      expect([...store.getters.sequenceSelectionGrid].sort()).toEqual([
+        '0-0',
+        '3-0'
       ])
     })
 

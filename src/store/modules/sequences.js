@@ -14,7 +14,11 @@ import {
   sortSequenceResult,
   sortValidationColumns
 } from '@/lib/sorting'
-import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
+import {
+  addRowToSelectionGrid,
+  buildSelectionGrid,
+  clearSelectionGrid
+} from '@/lib/selection'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
 import { getFilledColumns, removeModelFromList, trackEdit } from '@/lib/models'
 import { computeStats, countEntities } from '@/lib/stats'
@@ -1043,6 +1047,11 @@ const mutations = {
       sequence
     ])
     helpers.setListedRows(state)
+    // The selected cells are keyed by their row.
+    state.sequenceSelectionGrid = addRowToSelectionGrid(
+      state.sequenceSelectionGrid,
+      state.displayedSequences.indexOf(sequence)
+    )
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
     state.displayedSequencesLength = state.displayedSequences.length
   },
