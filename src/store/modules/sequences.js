@@ -326,9 +326,10 @@ const actions = {
   ) {
     let taskIds
     if (selectionOnly) {
+      // A sequence received live comes without its tasks.
       taskIds = cache.result
-        .filter(sequence => sequence.validations.get(taskTypeId))
-        .map(sequence => sequence.validations.get(taskTypeId))
+        .map(sequence => sequence.validations?.get(taskTypeId))
+        .filter(Boolean)
     }
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
   },

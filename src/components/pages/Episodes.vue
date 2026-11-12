@@ -246,6 +246,11 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const departments = computed(() => store.getters.departments)
 const displayedEpisodes = computed(() => store.getters.displayedEpisodes)
 const episodeMap = computed(() => store.getters.episodeMap)
+// The episodes created from the Shots page join the plain list of the topbar
+// with their tasks: they would pass for a list loaded with them.
+const isEpisodeListLoadedWithTasks = computed(
+  () => store.getters.isEpisodeListLoadedWithTasks
+)
 const episodeSearchQueries = computed(() => store.getters.episodeSearchQueries)
 const episodeSorting = computed(() => store.getters.episodeSorting)
 const episodeValidationColumns = computed(
@@ -265,8 +270,7 @@ const user = computed(() => store.getters.user)
 // Functions
 // --------------------------------------------------------------------------
 
-// The map also holds the plain list of the topbar, and an episode created
-// from the Shots page gives such a list task columns.
+// An episode received live joins the list without its tasks.
 const hasRowsWithoutTasks = () =>
   [...episodeMap.value.values()].some(episode => !episode.validations)
 
@@ -434,6 +438,7 @@ onMounted(() => {
 
   if (
     episodeMap.value.size < 1 ||
+    !isEpisodeListLoadedWithTasks.value ||
     episodeValidationColumns.value.length === 0 ||
     hasRowsWithoutTasks() ||
     episodeMap.value.values().next().value?.project_id !==

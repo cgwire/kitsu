@@ -12,7 +12,11 @@ import {
   sortEpisodeResult,
   sortValidationColumns
 } from '@/lib/sorting'
-import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
+import {
+  addRowToSelectionGrid,
+  buildSelectionGrid,
+  clearSelectionGrid
+} from '@/lib/selection'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
 import { getFilledColumns, removeModelFromList, trackEdit } from '@/lib/models'
 import { computeStats } from '@/lib/stats'
@@ -99,11 +103,16 @@ const helpers = {
     })
   },
 
+  showInfoColumns(state, episode) {
+    if (episode.description) state.isEpisodeDescription = true
+    if (episode.data?.resolution) state.isEpisodeResolution = true
+  },
+
   // A row joining a sorted list takes its place in the order of that list.
   sortList(state, episodes) {
     return sortEpisodeResult(
       episodes,
-      cache.isLoadedWithTasks ? state.episodeSorting : [],
+      state.isEpisodeListLoadedWithTasks ? state.episodeSorting : [],
       taskTypesStore.cache.taskTypeMap,
       tasksStore.state.taskMap
     )
@@ -131,6 +140,15 @@ const helpers = {
     })
 
     return task
+  },
+
+  // The listed rows, which "Create tasks", "Select column" and "Delete all"
+  // read, hold the cached episodes: an edit puts copies among the displayed
+  // ones, and a production switch clears the cache before them.
+  setListedRows(state) {
+    cache.result = state.displayedEpisodes
+      .map(({ id }) => cache.episodeMap.get(id))
+      .filter(Boolean)
   },
 
   setListStats(state, episodes) {
@@ -178,9 +196,6 @@ const helpers = {
 const cache = {
   episodes: [],
   result: [],
-  // Only the list of the Episodes page follows its sort: the plain list of the
-  // topbar stays by name, and state.episodeSorting outlives a production.
-  isLoadedWithTasks: false,
   episodeIndex: {},
   episodeMap: new Map()
 }
@@ -189,6 +204,9 @@ const initialState = {
   currentEpisode: null,
   episodes: [],
   isEpisodeListLoaded: false,
+  // Only the list of the Episodes page follows its sort: the plain list of the
+  // topbar stays by name, and state.episodeSorting outlives a production.
+  isEpisodeListLoadedWithTasks: false,
 
   displayedEpisodes: [],
   displayedEpisodesLength: 0,
@@ -228,6 +246,7 @@ const getters = {
   displayedEpisodesEstimation: state => state.displayedEpisodesEstimation,
   displayedEpisodesTimeSpent: state => state.displayedEpisodesTimeSpent,
   isEpisodeDescription: state => state.isEpisodeDescription,
+  isEpisodeListLoadedWithTasks: state => state.isEpisodeListLoadedWithTasks,
   isEpisodeResolution: state => state.isEpisodeResolution,
   isEpisodeEstimation: state => state.isEpisodeEstimation,
   isEpisodeTime: state => state.isEpisodeTime,
@@ -335,9 +354,10 @@ const actions = {
   ) {
     let taskIds
     if (selectionOnly) {
+      // An episode received live comes without its tasks.
       taskIds = cache.result
-        .filter(episode => episode.validations.get(taskTypeId))
-        .map(episode => episode.validations.get(taskTypeId))
+        .map(episode => episode.validations?.get(taskTypeId))
+        .filter(Boolean)
     }
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
   },
@@ -537,7 +557,6 @@ const mutations = {
     Object.assign(state, { ...initialState })
     cache.episodes = []
     cache.result = []
-    cache.isLoadedWithTasks = false
     cache.episodeIndex = {}
   },
 
@@ -565,6 +584,7 @@ const mutations = {
     state.displayedEpisodes = helpers.sortList(state, [
       ...state.displayedEpisodes
     ])
+    helpers.setListedRows(state)
   },
 
   [ADD_EPISODE_SEARCH](state, searchQuery) {
@@ -593,7 +613,7 @@ const mutations = {
     state.currentEpisode = null
     cache.episodes = []
     cache.result = []
-    cache.isLoadedWithTasks = false
+    state.isEpisodeListLoadedWithTasks = false
     cache.episodeIndex = {}
     // clear(), never a new Map(): the episodeMap getter has no reactive
     // dependency, so Vuex memoizes the reference captured at its first read.
@@ -687,7 +707,7 @@ const mutations = {
     })
     cache.episodes = episodes
     cache.result = episodes
-    cache.isLoadedWithTasks = true
+    state.isEpisodeListLoadedWithTasks = true
     cache.episodeIndex = buildEpisodeIndex(episodes)
 
     const displayedEpisodes = cache.episodes
@@ -733,6 +753,13 @@ const mutations = {
       ...state.displayedEpisodes,
       episode
     ])
+    helpers.setListedRows(state)
+    // The selected cells are keyed by their row.
+    state.episodeSelectionGrid = addRowToSelectionGrid(
+      state.episodeSelectionGrid,
+      state.displayedEpisodes.indexOf(episode)
+    )
+    helpers.showInfoColumns(state, episode)
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
     state.displayedEpisodesLength = state.displayedEpisodes.length
   },
@@ -802,8 +829,10 @@ const mutations = {
         ...state.displayedEpisodes,
         episode
       ])
+      helpers.setListedRows(state)
     }
 
+    helpers.showInfoColumns(state, episode)
     helpers.setListStats(state, state.displayedEpisodes)
     state.episodeFilledColumns = getFilledColumns(state.displayedEpisodes)
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
@@ -829,12 +858,7 @@ const mutations = {
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
     // A renamed episode moves in the topbar selector.
     state.episodes = sortByName([...state.episodes])
-    if (episode.description && !state.isEpisodeDescription) {
-      state.isEpisodeDescription = true
-    }
-    if (episode.data.resolution && !state.isEpisodeResolution) {
-      state.isEpisodeResolution = true
-    }
+    helpers.showInfoColumns(state, episode)
   },
 
   [LOAD_EPISODES_END](state, { episodes, routeEpisodeId }) {

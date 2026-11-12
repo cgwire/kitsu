@@ -1138,8 +1138,8 @@ describe('entity list column selection', () => {
   })
   const shots = [shot('a'), shot('b', { canceled: true }), shot('c')]
 
-  const selectColumn = async options => {
-    shotStore.cache.result = shots
+  const selectColumn = async (options, rows = shots) => {
+    shotStore.cache.result = rows
     const wrapper = await mountHost(
       {
         taskMap: new Map(shots.map(({ id }) => [`task-${id}`, { id: `task-${id}` }])),
@@ -1167,6 +1167,18 @@ describe('entity list column selection', () => {
       isCellSelectable: entity => entity.id !== 'a'
     })
     expect(selection.map(({ entity, x }) => [entity.id, x])).toEqual([['c', 1]])
+  })
+
+  // An episode or a sequence received live comes without its tasks: the list
+  // shows its cells empty.
+  test('treats the cells of a row without its tasks as empty', async () => {
+    const row = { id: 'd' }
+    const selection = await selectColumn(undefined, [shots[0], row, shots[2]])
+    expect(selection.map(({ entity, task, x }) => [entity.id, task, x])).toEqual([
+      ['a', { id: 'task-a' }, 0],
+      ['d', undefined, 1],
+      ['c', { id: 'task-c' }, 2]
+    ])
   })
 })
 
