@@ -1576,6 +1576,7 @@
       "no_assignee": "アサイン可能なユーザーがいません",
       "no_entity": "アサイン可能なエンティティがありません",
       "no_task": "タスクはありません",
+      "period_unit": "矢印の移動単位",
       "plan_asset_type_tasks": "このアセットタイプのタスクをスケジュール",
       "plan_entity_tasks": "そのタスクをスケジュール",
       "plan_sequence_tasks": "このシーケンスのタスクをスケジュール",

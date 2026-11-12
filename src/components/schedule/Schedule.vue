@@ -2046,6 +2046,20 @@ const scrollToDate = date => {
   }, 10)
 }
 
+// Steps from the date shown, the column where scrollToDate puts a date: the
+// position below is the inverse of its scrollLeft.
+const scrollByPeriod = (amount, unit) => {
+  if (!scheduleRef.value || !columns.value.length) return
+  const left =
+    timelineContentWrapperRef.value.scrollLeft +
+    scheduleRef.value.offsetWidth / 2 -
+    298
+  const index = Math.round(left / cellWidth.value)
+  const shown =
+    columns.value[Math.min(Math.max(index, 0), columns.value.length - 1)]
+  scrollToDate(shown.clone().add(amount, unit))
+}
+
 const startBrowsing = event => {
   if (
     !isChangeStartDate.value &&
@@ -2914,6 +2928,7 @@ defineExpose({
   refreshManDays,
   resetScheduleSize,
   resetSelection,
+  scrollByPeriod,
   scrollToDate,
   scrollToToday,
   setScrollPosition

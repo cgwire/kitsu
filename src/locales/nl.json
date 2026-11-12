@@ -1576,6 +1576,7 @@
       "no_assignee": "Geen toewijsbare persoon",
       "no_entity": "Geen toewijsbare entiteit",
       "no_task": "Geen taak",
+      "period_unit": "Stap van de pijlen",
       "plan_asset_type_tasks": "Taken van dit assettype plannen",
       "plan_entity_tasks": "De taken ervan plannen",
       "plan_sequence_tasks": "Taken van deze sequentie plannen",

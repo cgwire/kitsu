@@ -1576,6 +1576,7 @@
       "no_assignee": "Nincs kiosztható személy",
       "no_entity": "Nincs kiosztható elem",
       "no_task": "Nincs feladat",
+      "period_unit": "A nyilak lépésköze",
       "plan_asset_type_tasks": "E eszköztípus feladatainak ütemezése",
       "plan_entity_tasks": "Feladatainak ütemezése",
       "plan_sequence_tasks": "E szekvencia feladatainak ütemezése",

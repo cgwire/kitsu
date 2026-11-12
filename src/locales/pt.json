@@ -1576,6 +1576,7 @@
       "no_assignee": "Nenhuma pessoa atribuível",
       "no_entity": "Nenhuma entidade atribuível",
       "no_task": "Nenhuma tarefa",
+      "period_unit": "Passo das setas",
       "plan_asset_type_tasks": "Planejar as tarefas deste tipo de asset",
       "plan_entity_tasks": "Planejar suas tarefas",
       "plan_sequence_tasks": "Planejar as tarefas desta sequência",

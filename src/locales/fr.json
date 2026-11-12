@@ -1576,6 +1576,7 @@
       "no_assignee": "Pas de personne assignable",
       "no_entity": "Pas d'entité assignable",
       "no_task": "Aucune tâche",
+      "period_unit": "Pas des flèches",
       "plan_asset_type_tasks": "Planifier les tâches de ce type d'asset",
       "plan_entity_tasks": "Planifier ses tâches",
       "plan_sequence_tasks": "Planifier les tâches de cette séquence",

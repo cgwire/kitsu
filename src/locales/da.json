@@ -1576,6 +1576,7 @@
       "no_assignee": "Ingen person at tildele",
       "no_entity": "Ingen enhed at tildele",
       "no_task": "Ingen opgave",
+      "period_unit": "Pilenes trin",
       "plan_asset_type_tasks": "Planlæg opgaver for denne asset-type",
       "plan_entity_tasks": "Planlæg dens opgaver",
       "plan_sequence_tasks": "Planlæg opgaver for denne sekvens",

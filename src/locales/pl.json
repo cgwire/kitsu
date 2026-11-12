@@ -2031,6 +2031,7 @@
       "no_assignee": "Brak osób do przypisania",
       "no_entity": "Brak obiektów do przypisania",
       "no_task": "Brak zadań",
+      "period_unit": "Krok strzałek",
       "plan_asset_type_tasks": "Zaplanuj zadania tego typu assetu",
       "plan_entity_tasks": "Zaplanuj jego zadania",
       "plan_sequence_tasks": "Zaplanuj zadania tej sekwencji",

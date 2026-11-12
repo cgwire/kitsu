@@ -27,10 +27,30 @@
           />
           <div class="filler"></div>
           <button-simple
+            class="flexrow-item previous-period"
+            icon="left"
+            :title="$t('main.previous')"
+            @click="scrollScheduleByPeriod(-1)"
+          />
+          <button-simple
             class="flexrow-item"
             icon="clock"
             :text="$t('schedule.today')"
             @click="scrollScheduleToToday"
+          />
+          <button-simple
+            class="flexrow-item next-period"
+            icon="right"
+            :title="$t('main.next')"
+            @click="scrollScheduleByPeriod(1)"
+          />
+          <combobox
+            class="flexrow-item period-unit"
+            :aria-label="$t('schedule.period_unit')"
+            locale-key-prefix="main."
+            :options="periodUnitOptions"
+            :with-margin="false"
+            v-model="periodUnit"
           />
           <button-simple
             class="flexrow-item toggle-filters"
@@ -109,6 +129,7 @@ import {
 
 import Schedule from '@/components/schedule/Schedule.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -124,6 +145,7 @@ const store = useStore()
 const endDate = ref(moment().add(6, 'months'))
 const hiddenProductionIds = ref([])
 const hiddenTaskTypeIds = ref([])
+const periodUnit = ref('weeks')
 const milestones = ref([])
 const scheduleItems = ref([])
 const selectedEndDate = ref(null)
@@ -203,6 +225,12 @@ const shownMilestones = computed(() => {
       name: `${productionMap.get(milestone.project_id).name}: ${milestone.name}`
     }))
 })
+
+const periodUnitOptions = [
+  { label: 'day', value: 'days' },
+  { label: 'week', value: 'weeks' },
+  { label: 'month', value: 'months' }
+]
 
 const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
@@ -306,6 +334,10 @@ const loadMilestones = async () => {
   } catch (err) {
     console.error(err)
   }
+}
+
+const scrollScheduleByPeriod = direction => {
+  scheduleRef.value?.scrollByPeriod(direction, periodUnit.value)
 }
 
 const scrollScheduleToToday = () => {

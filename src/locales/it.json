@@ -1576,6 +1576,7 @@
       "no_assignee": "Nessuna persona assegnabile",
       "no_entity": "Nessuna entità assegnabile",
       "no_task": "Nessun task",
+      "period_unit": "Passo delle frecce",
       "plan_asset_type_tasks": "Pianifica i task di questo tipo di asset",
       "plan_entity_tasks": "Pianifica i suoi task",
       "plan_sequence_tasks": "Pianifica i task di questa sequenza",

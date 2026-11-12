@@ -616,6 +616,36 @@ describe('Schedule widget - today', () => {
     expect(lastDay.marker).toBe('block')
   })
 
+  // The arrows of the studio schedule step from the date shown.
+  it('steps by a day, a week or a month from the date shown', () => {
+    const wrapper = mountSchedule(range)
+    const scrollLeft = () =>
+      wrapper.find('.timeline-content-wrapper').element.scrollLeft
+    const scrollLeftOf = day => {
+      wrapper.vm.scrollToDate(parseSimpleDate(day))
+      vi.advanceTimersByTime(20)
+      return scrollLeft()
+    }
+    const step = (amount, unit) => {
+      wrapper.vm.scrollByPeriod(amount, unit)
+      vi.advanceTimersByTime(20)
+      return scrollLeft()
+    }
+    const expected = {
+      nextDay: scrollLeftOf('2026-09-02'),
+      nextWeek: scrollLeftOf('2026-09-08'),
+      previousMonth: scrollLeftOf('2026-08-01')
+    }
+
+    scrollLeftOf('2026-09-01')
+    expect(step(1, 'days')).toBe(expected.nextDay)
+    scrollLeftOf('2026-09-01')
+    expect(step(1, 'weeks')).toBe(expected.nextWeek)
+    scrollLeftOf('2026-09-01')
+    expect(step(-1, 'months')).toBe(expected.previousMonth)
+    wrapper.unmount()
+  })
+
   // Doing nothing there made the button look broken.
   it('goes to the range end closest to a today out of the range', () => {
     const before = showTodayOn('2026-07-01')

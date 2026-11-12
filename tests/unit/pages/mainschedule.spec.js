@@ -17,7 +17,7 @@ const ScheduleStub = {
   props: ['hierarchy', 'milestones'],
   emits: ['root-element-expanded'],
   template: '<div />',
-  methods: { scrollToToday() {} }
+  methods: { scrollByPeriod: vi.fn(), scrollToToday() {} }
 }
 
 const production = {
@@ -191,5 +191,24 @@ describe('MainSchedule filters', () => {
     productionCombo.vm.$emit('change', { key: 'production-2', value: false })
     await flushPromises()
     expect(milestoneNames()).toEqual(['Production: Delivery'])
+  })
+
+  it('steps the schedule by the chosen unit', async () => {
+    const wrapper = await mountFilteredPage()
+    const { scrollByPeriod } = ScheduleStub.methods
+    scrollByPeriod.mockClear()
+
+    await wrapper.find('.previous-period').trigger('click')
+    wrapper.findComponent({ name: 'Combobox' }).vm.$emit(
+      'update:model-value',
+      'months'
+    )
+    await flushPromises()
+    await wrapper.find('.next-period').trigger('click')
+
+    expect(scrollByPeriod.mock.calls).toEqual([
+      [-1, 'weeks'],
+      [1, 'months']
+    ])
   })
 })

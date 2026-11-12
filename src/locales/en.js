@@ -2119,6 +2119,7 @@ export default {
     no_assignee: 'No assignable person',
     no_entity: 'No assignable entity',
     no_task: 'No task',
+    period_unit: 'Arrow step',
     plan_asset_type_tasks: 'Schedule tasks for this asset type',
     plan_entity_tasks: 'Schedule its tasks',
     plan_sequence_tasks: 'Schedule tasks for this sequence',
