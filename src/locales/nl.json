@@ -360,6 +360,8 @@
       "previous_annotation": "Vorige annotatie",
       "previous_frame": "Vorig frame",
       "scrub_anywhere": "Scrub de tijdlijn vanaf elke plek in de speler",
+      "move_annotation_marker": "Op een tijdlijnmarkering: je tekeningen naar een ander frame verplaatsen",
+      "hold_annotation_marker": "Op een tijdlijnmarkering: je tekeningen zichtbaar houden op de volgende frames",
       "focus_comment": "Wissel de focus tussen de speler en het commentaarvak",
       "first_frame": "Ga naar het eerste frame",
       "last_frame": "Ga naar het laatste frame",

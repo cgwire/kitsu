@@ -360,6 +360,8 @@
       "previous_annotation": "前のアノテーション",
       "previous_frame": "前のフレーム",
       "scrub_anywhere": "プレイヤー上のどこからでもタイムラインをスクラブ",
+      "move_annotation_marker": "タイムラインのマーカー上: 自分の描画を別のフレームへ移動",
+      "hold_annotation_marker": "タイムラインのマーカー上: 自分の描画を後続のフレームでも表示",
       "focus_comment": "プレイヤーとコメント欄の間でフォーカスを切り替え",
       "first_frame": "最初のフレームへ移動",
       "last_frame": "最後のフレームへ移動",

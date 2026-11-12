@@ -176,6 +176,9 @@ export const addSerialization = object => {
     result.scale = this.scale
     result.createdBy = this.createdBy
     result.createdAt = this.createdAt
+    // Frames the object stays visible after its own (timeline hold).
+    if (this.holdFrames) result.holdFrames = this.holdFrames
+    else delete result.holdFrames
     // Persist the eraser mask centrally: addSerialization is applied to plain
     // objects too, whose toJSON() never reaches the patched
     // fabric.Object.prototype.toObject, so the mask would be dropped (or a

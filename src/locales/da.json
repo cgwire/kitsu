@@ -360,6 +360,8 @@
       "previous_annotation": "Forrige annotering",
       "previous_frame": "Forrige frame",
       "scrub_anywhere": "Scrub tidslinjen fra hvor som helst i afspilleren",
+      "move_annotation_marker": "På en tidslinjemarkør: flyt dine tegninger til et andet billede",
+      "hold_annotation_marker": "På en tidslinjemarkør: hold dine tegninger synlige på de næste billeder",
       "focus_comment": "Skift fokus mellem afspilleren og kommentarfeltet",
       "first_frame": "Gå til første frame",
       "last_frame": "Gå til sidste frame",

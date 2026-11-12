@@ -1333,6 +1333,56 @@ describe('composables/annotation', () => {
     })
   })
 
+  // Edits made outside the canvas (a timeline marker moved or held) join the
+  // same history as the strokes.
+  describe('pushHistoryAction', () => {
+    const createAction = () => ({ undo: vi.fn(), redo: vi.fn() })
+
+    it('undoes and redoes the action from any frame', () => {
+      const currentTime = ref(10)
+      const { api, wrapper } = mountAnnotation({ currentTime })
+      const action = createAction()
+
+      api.pushHistoryAction(action)
+      currentTime.value = 25
+      api.undoLastAction()
+      expect(action.undo).toHaveBeenCalledTimes(1)
+      api.redoLastAction()
+      expect(action.redo).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('undoes in order with the strokes', () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const action = createAction()
+
+      api.addObject(obj)
+      api.pushHistoryAction(action)
+      api.undoLastAction()
+      expect(action.undo).toHaveBeenCalled()
+      expect(canvas.remove).not.toHaveBeenCalled()
+      api.undoLastAction()
+      expect(canvas.remove).toHaveBeenCalledWith(obj)
+      wrapper.unmount()
+    })
+
+    it('drops the actions left to redo', () => {
+      const { api, wrapper } = mountAnnotation()
+      const first = createAction()
+
+      api.pushHistoryAction(first)
+      api.undoLastAction()
+      api.pushHistoryAction(createAction())
+      api.undoLastAction()
+      api.redoLastAction()
+      api.redoLastAction()
+      expect(first.redo).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+  })
+
   describe('undoLastAction', () => {
     it('no-ops on an empty done stack', () => {
       const { api, wrapper, saveAnnotationsCb } = mountAnnotation()

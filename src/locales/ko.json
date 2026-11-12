@@ -360,6 +360,8 @@
       "previous_annotation": "이전 주석",
       "previous_frame": "이전 프레임",
       "scrub_anywhere": "플레이어 어디서든 타임라인 스크럽",
+      "move_annotation_marker": "타임라인 마커에서: 내 드로잉을 다른 프레임으로 이동",
+      "hold_annotation_marker": "타임라인 마커에서: 내 드로잉을 다음 프레임에도 표시",
       "focus_comment": "플레이어와 댓글 입력란 사이에서 포커스 전환",
       "first_frame": "첫 번째 프레임으로 이동",
       "last_frame": "마지막 프레임으로 이동",

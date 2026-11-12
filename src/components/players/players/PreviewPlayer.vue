@@ -33,6 +33,16 @@
               @resized="refreshOnionSkin"
             />
             <annotation-canvas
+              ref="held-annotation-canvas"
+              :canvas-id="`${canvasId}-held`"
+              :media-element="mainMediaElement"
+              :panzoom-transform="panzoomTransform"
+              :interactive="false"
+              :static="true"
+              v-show="isAnnotationsDisplayed && isMovie && mainMediaElement"
+              @resized="refreshHeldAnnotations(true)"
+            />
+            <annotation-canvas
               ref="main-annotation-canvas"
               :canvas-id="canvasId"
               :cursor="annotationCursor"
@@ -189,11 +199,16 @@
         :handle-out="handleOut"
         :preview-id="isMovie && currentPreview ? currentPreview.id : ''"
         :read-only="areHandlesReadOnly"
+        :editable-markers="areMarkersEditable"
+        :current-user-id="userId || ''"
+        :get-annotation-label="getAnnotationAuthorsLabel"
         @start-scrub="$refs['button-bar'].classList.add('unselectable')"
         @end-scrub="$refs['button-bar'].classList.remove('unselectable')"
         @progress-changed="onProgressChanged"
         @handle-in-changed="onHandleInChanged"
         @handle-out-changed="onHandleOutChanged"
+        @annotation-moved="onAnnotationMoved"
+        @annotation-hold-changed="onAnnotationHoldChanged"
         v-show="isMovie"
       />
 
@@ -491,6 +506,15 @@ import { useTrimmedShot } from '@/composables/players/trimmedShot'
 import func from '@/lib/func'
 import { getEntityPath } from '@/lib/path'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
+import {
+  applyAnnotationEdits,
+  buildHoldEdits,
+  buildMoveEdits,
+  getAnnotationAuthorIds,
+  getAnnotationFrame,
+  getHeldAnnotationsAtFrame,
+  getOwnObjectHolds
+} from '@/lib/players/annotationMarkers'
 import localPreferences from '@/lib/preferences'
 import { safeUrl } from '@/lib/render'
 import {
@@ -628,6 +652,7 @@ const comparisonAnnotationCanvas = useTemplateRef(
   'comparison-annotation-canvas'
 )
 const onionAnnotationCanvas = useTemplateRef('onion-annotation-canvas')
+const heldAnnotationCanvas = useTemplateRef('held-annotation-canvas')
 const previewViewer = useTemplateRef('preview-viewer')
 const comparisonViewer = useTemplateRef('comparison-preview-viewer')
 const previewContainer = useTemplateRef('preview-container')
@@ -727,6 +752,7 @@ const annotation = useAnnotation({
   mainCanvasComponent: mainAnnotationCanvas,
   comparisonCanvasComponent: comparisonAnnotationCanvas,
   onionCanvasComponent: onionAnnotationCanvas,
+  heldCanvasComponent: heldAnnotationCanvas,
   canvasWrapper,
   annotations,
   isCurrentUserArtist,
@@ -774,12 +800,16 @@ const {
   clearComparisonCanvas,
   loadOnionSkin,
   clearOnionCanvas,
+  loadHeldAnnotations,
+  clearHeldCanvas,
   copyAnnotations,
   copyAnnotationCanvas,
   compositeLiveAnnotationsOntoCanvas,
   pasteAnnotations,
   setAnnotationDrawingMode,
   setShapeTool,
+  queueAnnotationEdits,
+  pushHistoryAction,
   startAnnotationSaving,
   endAnnotationSaving,
   confirmAnnotationsSaved,
@@ -1820,6 +1850,112 @@ const saveAnnotations = () => {
   }
 }
 
+// Timeline markers
+
+const areMarkersEditable = computed(
+  () => !props.readOnly && !isCurrentUserArtist.value
+)
+
+// personMap is a non-reactive store cache: read it when the marker is
+// hovered, not in a computed.
+const getAnnotationAuthorsLabel = annotation =>
+  getAnnotationAuthorIds(annotation)
+    .map(personId => store.getters.personMap.get(personId)?.full_name)
+    .filter(Boolean)
+    .join(', ')
+
+const applyMarkerEdits = edits => {
+  if (!edits || props.readOnly) return
+  const preview = currentPreview.value
+  if (!preview) return
+  annotations.value = applyAnnotationEdits(annotations.value, edits, fps.value)
+  queueAnnotationEdits(edits)
+  if (!notSaved.value) startAnnotationSaving(preview, annotations.value)
+  endAnnotationSaving()
+  clearCanvas()
+  loadAnnotation()
+}
+
+const getAnnotationAtFrame = frame => getAnnotation(frame * frameDuration.value)
+
+// Drawings of earlier frames held on the current one, on their own
+// read-only canvas. While playing, the editable canvas is cleared, so the
+// held layer also shows the frame's own held drawings. Repainted only when
+// the held objects change: the frame changes at every tick of the playback.
+let heldSignature = ''
+const refreshHeldAnnotations = (force = false) => {
+  const held = isMovie.value
+    ? getHeldAnnotationsAtFrame(
+        annotations.value,
+        currentFrame.value,
+        frameDuration.value,
+        { includeStart: isPlaying.value }
+      )
+    : []
+  const signature = held
+    .map(annotation => annotation.drawing.objects.map(obj => obj.id).join())
+    .join('|')
+  if (!force && signature === heldSignature) return
+  heldSignature = signature
+  if (held.length) loadHeldAnnotations(held)
+  else clearHeldCanvas()
+}
+
+// Undo and redo replay the move on the objects it moved, as they are then:
+// a later edit of the drawing is kept.
+const onAnnotationMoved = ({ annotation, frame }) => {
+  const edits = buildMoveEdits({
+    annotation,
+    toFrame: frame,
+    fps: fps.value,
+    userId: userId.value
+  })
+  if (!edits) return
+  const fromFrame = getAnnotationFrame(annotation, frameDuration.value)
+  const ids = edits.deletions[0].objects
+  const move = (from, to) =>
+    applyMarkerEdits(
+      buildMoveEdits({
+        annotation: getAnnotationAtFrame(from),
+        toFrame: to,
+        fps: fps.value,
+        ids
+      })
+    )
+  applyMarkerEdits(edits)
+  pushHistoryAction({
+    undo: () => move(frame, fromFrame),
+    redo: () => move(fromFrame, frame)
+  })
+}
+
+const onAnnotationHoldChanged = ({ annotation, holdFrames }) => {
+  const previousHolds = getOwnObjectHolds(annotation, userId.value)
+  const edits = buildHoldEdits({
+    annotation,
+    holdFrames,
+    fps: fps.value,
+    userId: userId.value
+  })
+  if (!edits) return
+  const frame = getAnnotationFrame(annotation, frameDuration.value)
+  const ids = Object.keys(previousHolds)
+  const hold = value =>
+    applyMarkerEdits(
+      buildHoldEdits({
+        annotation: getAnnotationAtFrame(frame),
+        holdFrames: value,
+        fps: fps.value,
+        ids
+      })
+    )
+  applyMarkerEdits(edits)
+  pushHistoryAction({
+    undo: () => hold(previousHolds),
+    redo: () => hold(holdFrames)
+  })
+}
+
 const loadAnnotation = annotation => {
   let currentTimeVal = 0
   if (!annotation) {
@@ -2696,6 +2832,9 @@ watch(isTyping, () => {
     clickarea.removeEventListener('dblclick', addText)
   }
 })
+
+watch([currentFrame, isPlaying, isMovie], () => refreshHeldAnnotations())
+watch(annotations, () => refreshHeldAnnotations(true))
 
 watch(isAnnotationsDisplayed, () => {
   if (!isAnnotationsDisplayed.value) {

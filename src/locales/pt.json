@@ -360,6 +360,8 @@
       "previous_annotation": "Anotação anterior",
       "previous_frame": "Quadro anterior",
       "scrub_anywhere": "Percorrer a linha do tempo de qualquer lugar do player",
+      "move_annotation_marker": "Num marcador da linha do tempo: mover seus desenhos para outro quadro",
+      "hold_annotation_marker": "Num marcador da linha do tempo: manter seus desenhos visíveis nos quadros seguintes",
       "focus_comment": "Alternar o foco entre o player e a caixa de comentários",
       "first_frame": "Ir para o primeiro quadro",
       "last_frame": "Ir para o último quadro",
