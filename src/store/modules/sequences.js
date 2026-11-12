@@ -17,7 +17,8 @@ import {
 import {
   addRowToSelectionGrid,
   buildSelectionGrid,
-  clearSelectionGrid
+  clearSelectionGrid,
+  removeRowFromSelectionGrid
 } from '@/lib/selection'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
 import { getFilledColumns, removeModelFromList, trackEdit } from '@/lib/models'
@@ -1071,6 +1072,11 @@ const mutations = {
   },
 
   [REMOVE_SEQUENCE](state, sequenceToDelete) {
+    // The selected cells are keyed by their row.
+    state.sequenceSelectionGrid = removeRowFromSelectionGrid(
+      state.sequenceSelectionGrid,
+      state.displayedSequences.findIndex(({ id }) => id === sequenceToDelete.id)
+    )
     cache.sequenceMap.delete(sequenceToDelete.id)
     cache.sequences = removeModelFromList(cache.sequences, sequenceToDelete)
     cache.result = removeModelFromList(cache.result, sequenceToDelete)

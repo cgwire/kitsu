@@ -15,7 +15,8 @@ import {
 import {
   addRowToSelectionGrid,
   buildSelectionGrid,
-  clearSelectionGrid
+  clearSelectionGrid,
+  removeRowFromSelectionGrid
 } from '@/lib/selection'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
 import { getFilledColumns, removeModelFromList, trackEdit } from '@/lib/models'
@@ -780,6 +781,11 @@ const mutations = {
   },
 
   [REMOVE_EPISODE](state, episodeToDelete) {
+    // The selected cells are keyed by their row.
+    state.episodeSelectionGrid = removeRowFromSelectionGrid(
+      state.episodeSelectionGrid,
+      state.displayedEpisodes.findIndex(({ id }) => id === episodeToDelete.id)
+    )
     cache.episodeMap.delete(episodeToDelete.id)
     cache.episodes = removeModelFromList(cache.episodes, episodeToDelete)
     // From the search result, not from the list it was just removed from:

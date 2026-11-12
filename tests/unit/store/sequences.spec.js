@@ -1683,6 +1683,18 @@ describe('Sequences store, through a store', () => {
       ])
     })
 
+    test('moves up the cells selected below a sequence another user deletes', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+      store.commit('ADD_SELECTED_TASK', { x: 0, y: 0 })
+      store.commit('ADD_SELECTED_TASK', { x: 2, y: 0 })
+
+      store.commit('REMOVE_SEQUENCE', { id: 'sq1' })
+
+      expect(names(store.getters.displayedSequences)).toEqual(['SQ02', 'SQ03'])
+      expect([...store.getters.sequenceSelectionGrid]).toEqual(['1-0'])
+    })
+
     // The sort outlives the Sequences page, and the Breakdown page lists the
     // sequences without their tasks.
     test('keeps a plain list in its order under a sort', async () => {
