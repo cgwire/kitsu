@@ -67,6 +67,16 @@ describe('pages/ResetChangePassword', () => {
     )
   })
 
+  // Password managers file the new password under the username of its form,
+  // which the page does not show.
+  it('names the account of the link in a hidden field', () => {
+    const wrapper = mountPage(vi.fn())
+
+    const username = wrapper.find('input[autocomplete="username"]')
+    expect(username.element.value).toBe('jane@example.com')
+    expect(username.element.hidden).toBe(true)
+  })
+
   it('counts down to one second in the singular', async () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
     const wrapper = mountWithI18n(ResetChangePassword, {

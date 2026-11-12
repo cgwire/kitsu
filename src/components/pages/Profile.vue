@@ -172,6 +172,12 @@
         :disabled="user.is_generated_from_ldap"
         @save="passwordChangeRequested"
       >
+        <input
+          type="email"
+          autocomplete="username"
+          :value="user.email"
+          hidden
+        />
         <text-field
           autocomplete="current-password"
           :label="$t('people.fields.old_password')"

@@ -10,6 +10,7 @@
         <input
           class="input is-medium password"
           type="text"
+          autocomplete="one-time-code"
           :placeholder="placeholderInputText"
           @input="updatePayload"
           @keyup.enter="validate"

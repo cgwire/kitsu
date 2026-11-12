@@ -15,6 +15,7 @@ vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 const INFO_CARD = 0
 const NOTIFICATIONS_CARD = 1
+const PASSWORD_CARD = 2
 
 const mountProfile = (saveProfile = vi.fn()) => {
   const store = createStore({
@@ -262,6 +263,27 @@ describe('pages/Profile', () => {
         form: { email: 'ada@example.com' },
         currentPassword: undefined
       })
+    })
+  })
+
+  // Password managers file a changed password under the username of its
+  // form, which the password card does not show.
+  describe('password', () => {
+    test('names the account in a hidden field', () => {
+      const store = createStore({
+        getters: {
+          changePassword: () => ({ isValid: true }),
+          user: () => ({ id: 'person-1', email: 'ada@example.com' })
+        }
+      })
+      const wrapper = shallowMountWithI18n(Profile, {
+        global: { plugins: [store], renderStubDefaultSlot: true }
+      })
+
+      const card = wrapper.findAllComponents(Card)[PASSWORD_CARD]
+      const username = card.find('input[autocomplete="username"]')
+      expect(username.element.value).toBe('ada@example.com')
+      expect(username.element.hidden).toBe(true)
     })
   })
 })
