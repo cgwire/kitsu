@@ -1066,6 +1066,7 @@ const mutations = {
     )
     if (displayedSequence) Object.assign(displayedSequence, sequence)
     Object.assign(cache.sequenceMap.get(sequence.id), sequence)
+    helpers.showInfoColumns(state, sequence)
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
   },
 

@@ -773,6 +773,7 @@ const mutations = {
       if (listedEpisode) Object.assign(listedEpisode, episode)
     })
     Object.assign(cache.episodeMap.get(episode.id), episode)
+    helpers.showInfoColumns(state, episode)
     cache.episodeIndex = buildEpisodeIndex(cache.episodes)
     // A renamed episode moves in the topbar selector.
     state.episodes = sortByName([...state.episodes])

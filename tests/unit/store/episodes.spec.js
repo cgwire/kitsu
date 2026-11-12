@@ -942,6 +942,19 @@ describe('Episodes store, through a store', () => {
     expect(store.getters.isEpisodeResolution).toBe(Boolean(fields.data))
   })
 
+  test.each([
+    ['description', { description: 'Pilot' }],
+    ['resolution', { data: { resolution: '1920x1080' } }]
+  ])('shows the %s column once another user fills it', async (_, fields) => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: {} }])
+
+    store.commit('UPDATE_EPISODE', { id: 'ep1', name: 'E01', data: {}, ...fields })
+
+    expect(store.getters.isEpisodeDescription).toBe(Boolean(fields.description))
+    expect(store.getters.isEpisodeResolution).toBe(Boolean(fields.data))
+  })
+
   test('locks an edited episode until a while after its save', async () => {
     const { store } = await buildStore()
     loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: { fps: '24' } }])

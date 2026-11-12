@@ -1642,6 +1642,26 @@ describe('Sequences store, through a store', () => {
       expect(store.getters.isSequenceResolution).toBe(true)
     })
 
+    test.each([
+      ['description', { description: 'Chase' }],
+      ['resolution', { data: { resolution: '2048x858' } }]
+    ])('shows the %s column once another user fills it', async (_, fields) => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+
+      store.commit('UPDATE_SEQUENCE', {
+        id: 'sq2',
+        name: 'SQ02',
+        data: {},
+        ...fields
+      })
+
+      expect(store.getters.isSequenceDescription).toBe(
+        Boolean(fields.description)
+      )
+      expect(store.getters.isSequenceResolution).toBe(Boolean(fields.data))
+    })
+
     // The selected cells are keyed by their row.
     test('moves down the cells selected below a live sequence', async () => {
       const { store } = await buildStore()
