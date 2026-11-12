@@ -1848,7 +1848,6 @@
       "post_comment_on_tasks": "Hozzászólás küldése a kijelölt feladathoz | Hozzászólás küldése a(z) {count} kijelölt feladathoz",
       "select_status": "Válassz állapotot",
       "clear_all_assignations": "összes kiosztás megszüntetése",
-      "clear_own_assignations": "saját kiosztásaid törlése",
       "combobox_departments": {
         "all_departments": "Minden osztály",
         "my_departments": "Osztályaim"
@@ -1904,7 +1903,6 @@
       "show_contact_sheet": "Megjelenítés kontaktlapként",
       "smaller": "Feladat panel szűkítése",
       "subscribe_to_tasks": "Feliratkozás a kijelölt feladat értesítéseire | Feliratkozás a(z) {nbSelectedTasks} kijelölt feladat értesítéseire",
-      "to_myself": "Magamnak",
       "unassigned_tasks": "Ki nem osztott feladatok",
       "use_current_frame": "Jelenlegi kocka használata",
       "validated": "Jóváhagyva"

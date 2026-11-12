@@ -1521,6 +1521,32 @@ describe('ActionPanel, assignation', () => {
     expect(assignations(store)).toEqual([{ personId: 'person-2' }])
     expect(isButtonDisabled(wrapper)).toBe(true)
   })
+
+  // Nothing in the bar handles an artist or a vendor any more. The page of an
+  // entity offers the bar to every other role: the role check alone hides it.
+  test.each(['user', 'vendor'])('is hidden from the %s role', async role => {
+    const { wrapper } = await mountOnShots({
+      role,
+      isArtist: true,
+      path: '/productions/production-1/shots/shot-1'
+    })
+
+    expect(wrapper.find('[title="menu.assign_tasks"]').exists()).toBe(false)
+    expect(wrapper.findComponent(PeopleField).exists()).toBe(false)
+  })
+
+  // Out of the department of the tasks, which closes the bar on a list.
+  test('is offered to a supervisor on the page of an entity', async () => {
+    const options = { role: 'supervisor', departments: ['department-2'] }
+    const { wrapper: listPanel } = await mountOnShots(options)
+    const { wrapper } = await mountOnShots({
+      ...options,
+      path: '/productions/production-1/shots/shot-1'
+    })
+
+    expect(listPanel.find('[title="menu.assign_tasks"]').exists()).toBe(false)
+    expect(wrapper.find('[title="menu.assign_tasks"]').exists()).toBe(true)
+  })
 })
 
 // The playlist player weighs more than the rest of the panel.

@@ -358,12 +358,9 @@
           class="flexcolumn flexrow-item is-wide"
           v-if="selectedBar === 'assignation'"
         >
-          <div class="mb05" v-if="isCurrentUserArtist">
-            {{ $t('tasks.to_myself') }}
-          </div>
           <div
             class="mb05"
-            v-else-if="isCurrentUserManager || isCurrentUserSupervisor"
+            v-if="isCurrentUserManager || isCurrentUserSupervisor"
           >
             <people-field
               class="is-wide assignation-field"
@@ -381,8 +378,8 @@
           <div class="flexrow-item is-wide" v-if="!loading.assignation">
             <button
               class="button confirm-button is-wide"
-              :class="{ 'is-disabled': !assigneeId }"
-              :aria-disabled="!assigneeId"
+              :class="{ 'is-disabled': !person }"
+              :aria-disabled="!person"
               @click="confirmAssign"
             >
               {{
@@ -433,17 +430,6 @@
                 {{ $t('tasks.clear_all_assignations') }}
               </button>
             </div>
-          </div>
-          <div
-            class="flexrow-item hide-small-screen"
-            v-else-if="!loading.assignation && isCurrentUserArtist"
-          >
-            <button
-              class="button is-link clear-assignation-button hide-small-screen"
-              @click="clearAssignation"
-            >
-              {{ $t('tasks.clear_own_assignations') }}
-            </button>
           </div>
           <div class="flexrow-item" v-if="!isShowAssignations">
             {{ $t('tasks.assignation_warning') }}
@@ -1344,13 +1330,6 @@ const isSupervisorInDepartment = computed(
     (user.value.departments.length === 0 || isInDepartment.value)
 )
 
-const assigneeId = computed(() => {
-  if (isCurrentUserManager.value || isCurrentUserSupervisor.value) {
-    return person.value?.id
-  }
-  return isInDepartment.value ? user.value.id : undefined
-})
-
 // The bars the menu offers to this selection. The bar used last comes back
 // only when offered: several pages share it, and it may come from a
 // selection of lines or of empty cells.
@@ -1368,7 +1347,6 @@ const availableBars = computed(() => {
       (isCurrentViewSingleEntity.value || isCurrentViewEntity.value) &&
       (isCurrentUserManager.value ||
         isSupervisorInDepartment.value ||
-        isInDepartment.value ||
         isCurrentViewSingleEntity.value) &&
       !isEntitySelection.value &&
       isTaskSelection.value &&
@@ -1532,7 +1510,7 @@ const confirmTaskStatusChange = async event => {
 }
 
 const confirmAssign = async () => {
-  const personId = assigneeId.value
+  const personId = person.value?.id
   if (!personId) return
   loading.assignation = true
   errors.taskAssignation = false
@@ -1558,11 +1536,10 @@ const runUnassignation = async (action, payload) => {
 }
 
 const clearAssignation = () => {
-  const personToClear = isCurrentUserArtist.value ? user.value : person.value
-  if (personToClear) {
+  if (person.value) {
     runUnassignation('unassignPersonFromTasks', {
       tasks: Array.from(selectedTasks.value.values()),
-      person: personToClear
+      person: person.value
     })
   }
 }
