@@ -54,6 +54,7 @@
             ref="messageBox"
             :disabled="loading.send"
             @keydown.enter.prevent="sendMessage"
+            @paste="wrapPastedPath"
             v-focus
             v-model="currentMessage"
           >
@@ -134,6 +135,7 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
+import { wrapPastedPath } from '@/lib/paste'
 import { sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 

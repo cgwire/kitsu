@@ -57,6 +57,7 @@ const task = {
 // user is null for the anonymous guests of a shared playlist, so the guard has
 // to survive that too.
 const makeStore = ({
+  actions = {},
   isAdmin = false,
   isClient = false,
   persons = [],
@@ -64,6 +65,7 @@ const makeStore = ({
   user = { id: 'person-1' }
 } = {}) =>
   createStore({
+    actions,
     getters: {
       canValidatePreviewFiles: () => () => false,
       dateFormat: () => 'dd/MM/yyyy',
@@ -93,7 +95,9 @@ const mountComment = ({
   isAcknowledgeable,
   isActionError = false,
   isEditable = true,
+  isReplyable,
   storeOptions,
+  stubs = {},
   attachTo,
   urlPrefix = ''
 } = {}) =>
@@ -104,6 +108,7 @@ const mountComment = ({
       isAcknowledgeable,
       isActionError,
       isEditable,
+      isReplyable,
       task,
       taskTypes: [],
       team: [],
@@ -115,7 +120,8 @@ const mountComment = ({
         AttachmentAudioPlayer: true,
         AttachmentVideoPlayer: true,
         AddAttachmentModal: true,
-        'at-ta': true
+        'at-ta': true,
+        ...stubs
       }
     }
   })
@@ -436,6 +442,27 @@ describe('Comment', () => {
         storeOptions: { persons: [{ id: 'person-2', name: 'Sam Supervisor' }] }
       })
       expect(wrapper.html()).not.toContain('Sam Supervisor')
+    })
+  })
+
+  describe('reply', () => {
+    test('wraps a pasted Windows path in backticks', async () => {
+      const replyToComment = vi.fn()
+      const wrapper = mountComment({
+        isReplyable: true,
+        storeOptions: { actions: { replyToComment } },
+        stubs: { AtTextarea: false }
+      })
+      await wrapper.find('span.reply-button').trigger('click')
+      const textarea = wrapper.find('textarea.reply')
+      await textarea.trigger('paste', {
+        clipboardData: { files: [], getData: () => 'S:\\8_anim\\_lib' }
+      })
+      await textarea.trigger('keyup.ctrl.enter')
+      expect(replyToComment).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ text: '`S:\\8_anim\\_lib`' })
+      )
     })
   })
 })

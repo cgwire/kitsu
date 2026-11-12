@@ -78,6 +78,7 @@
                 v-model="form.text"
                 @keyup.ctrl="runConfirmation"
                 @keyup.meta="runConfirmation"
+                @paste="wrapPastedPath"
                 v-focus
               >
               </textarea>
@@ -190,6 +191,7 @@ import { useAtMentionsMembers } from '@/composables/atMentions'
 import { useModal } from '@/composables/modal'
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
+import { wrapPastedPath } from '@/lib/paste'
 import { replaceTimeWithTimecode } from '@/lib/render'
 
 import ModalFooter from '@/components/modals/ModalFooter.vue'

@@ -335,6 +335,7 @@
                       @keyup.ctrl.enter="onReplyClicked"
                       @dragover="onDragover"
                       @dragleave="onDragleave"
+                      @paste="wrapPastedPath"
                       v-model="replyText"
                     />
                   </at-ta>
@@ -581,6 +582,7 @@ import {
 import { isClientThread } from '@/lib/comments'
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
+import { wrapPastedPath } from '@/lib/paste'
 import {
   getDownloadAttachmentPath,
   getTaskRouteEntity,

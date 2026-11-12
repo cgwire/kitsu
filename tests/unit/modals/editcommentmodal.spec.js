@@ -53,13 +53,19 @@ const TextFieldStub = {
 describe('modals/EditCommentModal', () => {
   let wrapper
 
+  const mountModal = (stubs = {}) =>
+    shallowMount(EditCommentModal, {
+      global: {
+        plugins: [store],
+        stubs: { TextField: TextFieldStub, ...stubs }
+      },
+      props: { active: false, commentToEdit: null }
+    })
+
   beforeEach(() => {
     vi.useFakeTimers()
     isLinkValid = true
-    wrapper = shallowMount(EditCommentModal, {
-      global: { plugins: [store], stubs: { TextField: TextFieldStub } },
-      props: { active: false, commentToEdit: null }
-    })
+    wrapper = mountModal()
   })
 
   afterEach(() => {
@@ -112,5 +118,18 @@ describe('modals/EditCommentModal', () => {
     expect(wrapper.emitted('confirm')[0][0]).toMatchObject({
       links: ['https://example.com']
     })
+  })
+
+  it('wraps a pasted Windows path in backticks', async () => {
+    wrapper.unmount()
+    wrapper = mountModal({ AtTextarea: false })
+    await openOn(wrapper, buildComment('comment-1', []))
+    await wrapper.vm.$nextTick()
+    const textarea = wrapper.find('textarea')
+    textarea.element.setSelectionRange(0, textarea.element.value.length)
+    await textarea.trigger('paste', {
+      clipboardData: { files: [], getData: () => 'S:\\8_anim\\_lib' }
+    })
+    expect(confirmForm(wrapper).text).toBe('`S:\\8_anim\\_lib`')
   })
 })
