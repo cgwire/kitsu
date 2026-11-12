@@ -1,6 +1,8 @@
 import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
+import tasksStore from '@/store/modules/tasks'
+import taskTypesStore from '@/store/modules/tasktypes'
 
 import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
@@ -43,6 +45,7 @@ import {
   SET_SEQUENCE_STATS_SEARCH,
   SET_SEQUENCES_WITH_TASKS,
   SET_PREVIEW,
+  SORT_SEQUENCES,
   UNLOCK_SEQUENCE,
   UPDATE_SEQUENCE,
   UPDATE_METADATA_DESCRIPTOR_END,
@@ -85,6 +88,7 @@ const helpers = {
     }
     result = sortSequenceResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
+    cache.sorting = sorting || []
 
     // A new array: the sort works in place, and the same one reaches no render.
     const displayedSequences = [...result]
@@ -97,6 +101,28 @@ const helpers = {
       sequenceSelectionGrid: buildSelectionGrid()
     })
     return result
+  },
+
+  // A row joining the list takes its place in the order of its rows. The
+  // Shots page loads the sequences with their tasks too, and does not apply
+  // the sort of the Sequences page.
+  sortList(sequences) {
+    if (!cache.sorting) return sortSequences(sequences)
+    return sortSequenceResult(
+      sequences,
+      cache.sorting,
+      taskTypesStore.cache.taskTypeMap,
+      tasksStore.state.taskMap
+    )
+  },
+
+  // The listed rows, which "Create tasks", "Select column" and "Delete all"
+  // read, hold the cached sequences: an edit puts copies among the displayed
+  // ones.
+  setListedRows(state) {
+    cache.result = state.displayedSequences
+      .map(({ id }) => cache.sequenceMap.get(id))
+      .filter(Boolean)
   },
 
   getSequenceName(sequence) {
@@ -178,6 +204,10 @@ const cache = {
   sequencesLoadingPromise: null,
   sequences: [],
   result: [],
+  // The sort the rows are in: the one of the last search or sort change, an
+  // empty sort after a plain load (by name), or null for their default order
+  // after a load with tasks, a production switch, or a logout.
+  sorting: null,
   sequenceIndex: {},
   // Mutate sequenceMap in place, never reassign it (see tasktypes.js).
   sequenceMap: new Map()
@@ -488,7 +518,10 @@ const actions = {
         entityId: sequence.id,
         taskTypeIds
       })
-        .then(() => sequence)
+        .then(() => {
+          commit(SORT_SEQUENCES)
+          return sequence
+        })
         .catch(console.error)
     })
   },
@@ -586,6 +619,7 @@ const mutations = {
     Object.assign(state, { ...initialState })
     cache.sequences = []
     cache.result = []
+    cache.sorting = null
     cache.sequenceIndex = {}
   },
 
@@ -617,6 +651,7 @@ const mutations = {
 
   [CLEAR_SHOTS](state) {
     cache.sequences = []
+    cache.sorting = null
     state.displayedSequences = []
     state.sequencesLoadingKey = null
     cache.sequenceMap.clear()
@@ -697,6 +732,7 @@ const mutations = {
     sequences = sortSequences(sequences)
     cache.sequences = sequences
     cache.result = sequences
+    cache.sorting = null
     cache.sequenceIndex = buildSequenceIndex(sequences)
 
     const displayedSequences = cache.sequences
@@ -797,14 +833,28 @@ const mutations = {
     if (knownSequence) {
       Object.assign(knownSequence, sequence)
     } else {
-      cache.sequences.push(sequence)
-      cache.sequences = sortByName(cache.sequences)
-      state.displayedSequences = cache.sequences
+      // Each list copied from itself, like ADD_SEQUENCE: the displayed list
+      // is a search result, and taking the whole list for it dropped the
+      // search.
       cache.sequenceMap.set(sequence.id, sequence)
+      cache.sequences = helpers.sortList([...cache.sequences, sequence])
+      state.displayedSequences = helpers.sortList([
+        ...state.displayedSequences,
+        sequence
+      ])
+      helpers.setListedRows(state)
     }
-    helpers.setListStats(state, cache.sequences)
+    helpers.setListStats(state, state.displayedSequences)
     state.sequenceFilledColumns = getFilledColumns(state.displayedSequences)
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
+  },
+
+  // A new sequence gets its tasks once in the list, and they decide its place
+  // under a task type sort. No search here: it would hide that sequence.
+  [SORT_SEQUENCES](state) {
+    cache.sequences = helpers.sortList([...cache.sequences])
+    state.displayedSequences = helpers.sortList([...state.displayedSequences])
+    helpers.setListedRows(state)
   },
 
   [EDIT_SEQUENCE_END](state, newSequence) {
@@ -851,6 +901,8 @@ const mutations = {
       helpers.setEpisodeInfo(sequence, episodeMap)
     })
     cache.sequences = sortByName(sequences)
+    // By name, as a search without a sort.
+    cache.sorting = []
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
     state.displayedSequences = cache.sequences
     state.displayedSequencesLength = cache.sequences.length
@@ -985,11 +1037,12 @@ const mutations = {
     // The episode is resolved first, the sort reads its name.
     helpers.setEpisodeInfo(sequence, episodeMap)
     cache.sequenceMap.set(sequence.id, sequence)
-    cache.sequences = sortSequences([...cache.sequences, sequence])
-    state.displayedSequences = sortSequences([
+    cache.sequences = helpers.sortList([...cache.sequences, sequence])
+    state.displayedSequences = helpers.sortList([
       ...state.displayedSequences,
       sequence
     ])
+    helpers.setListedRows(state)
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
     state.displayedSequencesLength = state.displayedSequences.length
   },
