@@ -296,7 +296,9 @@ const playlistPath = playlist =>
     overflow: hidden;
     width: 96px;
 
+    // the global .avatar img is round; the box clips the corners
     img {
+      border-radius: 0;
       height: 100%;
       object-fit: cover;
       width: 100%;
