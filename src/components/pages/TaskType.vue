@@ -577,6 +577,10 @@ const daysOffByPerson = ref({})
 let daysOffRangeKey = null
 let timeSpentsRangeKey = null
 let timeSpentsCache = {}
+// Schedule rebuilds load side by side: the one asked last sets its rows,
+// with the scroll reset an earlier one asked for.
+let lastRebuildId = 0
+let isScrollResetAsked = false
 const timesheetByPerson = ref({})
 const displaySettings = ref({
   contactSheetMode: false,
@@ -1461,18 +1465,22 @@ const resetScheduleItems = async (resetScroll = false) => {
     resetScheduleItemsDebounced()
     return
   }
+  const rebuildId = ++lastRebuildId
+  if (resetScroll) isScrollResetAsked = true
   let scheduleItems = null
   if (isActiveTab('schedule')) {
     scheduleItems = await buildScheduleTabItems()
   } else if (isActiveTab('tasks') && isScheduleVisible.value) {
     scheduleItems = await buildTasksTabItems()
   }
+  if (rebuildId !== lastRebuildId) return
   if (isEditingBarDates()) {
     resetScheduleItemsDebounced()
     return
   }
   if (scheduleItems) schedule.scheduleItems = scheduleItems
-  if (resetScroll) {
+  if (isScrollResetAsked) {
+    isScrollResetAsked = false
     resetScheduleScroll()
   }
 }
@@ -2088,11 +2096,18 @@ const resetScheduleItemsDebounced = func.debounce(resetScheduleItems, 400)
 // Same bursts, and this is the heavier half: onSearchChange walks every
 // entity, re-sorts the tasks and rebuilds the search index. The schedule of
 // the tasks tab lines its rows up with the list, which waits for the drop too.
+// The selection and the search are checked when it runs: onSearchChange
+// clears a selection made since the event.
 const refreshTasksDebounced = func.debounce(() => {
   if (isEditingBarDates()) {
     refreshTasksDebounced()
-  } else if (searchFieldRef.value) {
-    onSearchChange(searchFieldRef.value.getValue())
+  } else if (
+    nbSelectedTasks.value === 0 &&
+    searchFieldRef.value?.getValue() === ''
+  ) {
+    // With an empty search field, onSearchChange falls into resetTasks(),
+    // which rebuilds the index from the same data.
+    onSearchChange('')
   }
 }, 400)
 
@@ -2104,13 +2119,8 @@ const onRemoteTaskUpdate = eventData => {
     task &&
     // getTasks only keeps the current task type, so an update on another one
     // cannot change what is displayed.
-    task.task_type_id === currentTaskType.value?.id &&
-    nbSelectedTasks.value === 0 &&
-    searchFieldRef.value &&
-    searchFieldRef.value.getValue() === ''
+    task.task_type_id === currentTaskType.value?.id
   ) {
-    // The guard above forces an empty search field, so onSearchChange falls
-    // into resetTasks(), which rebuilds the index from the same data.
     refreshTasksDebounced()
   }
 }
@@ -2210,6 +2220,12 @@ watch(
 
 watch(activeTab, () => {
   resetScheduleItems(true)
+})
+
+// A press on a bar works in the timeline as it is: the rows loading at that
+// moment keep its scroll, even when the drop comes before them.
+watch(isEditingBarDates, isEditing => {
+  if (isEditing) isScrollResetAsked = false
 })
 
 watch(currentScheduleItem, () => {

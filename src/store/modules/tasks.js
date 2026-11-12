@@ -9,6 +9,7 @@ import {
   sortByName
 } from '@/lib/sorting'
 import {
+  applyTaskEdit,
   arrayMove,
   populateTask,
   removeModelFromList,
@@ -605,10 +606,13 @@ const actions = {
     })
   },
 
-  updateTask({ commit, state }, { taskId, data }) {
-    const trackedEdit = trackEdit(
-      () => state.taskMap.get(taskId),
-      () => commit(EDIT_TASK_DATES, { taskId, data })
+  updateTask({ commit, state, rootGetters }, { taskId, data }) {
+    // the people module holds the done tasks of the person page, out of the
+    // map: its EDIT_TASK_DATES handler moves them
+    const getTask = () =>
+      state.taskMap.get(taskId) ?? rootGetters.getPersonDoneTask(taskId)
+    const trackedEdit = trackEdit(getTask, () =>
+      commit(EDIT_TASK_DATES, { taskId, data })
     )
     return tasksApi.updateTask(taskId, data).then(
       result => {
@@ -1640,15 +1644,7 @@ const mutations = {
 
   [EDIT_TASK_DATES](state, { taskId, data }) {
     const task = state.taskMap.get(taskId)
-    if (task) {
-      const { data: metadata, ...taskFields } = data
-      Object.assign(task, taskFields)
-      // Mirror the server-side merge of the metadata bag instead of
-      // replacing it wholesale.
-      if (metadata) {
-        task.data = { ...(task.data || {}), ...metadata }
-      }
-    }
+    if (task) applyTaskEdit(task, data)
   },
 
   [ASSIGN_TASKS](state, { taskIds, personId }) {
