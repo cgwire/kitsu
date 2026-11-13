@@ -1301,6 +1301,94 @@ describe('Productions store', () => {
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_METADATA_DESCRIPTOR_END, { production: { id: 1 }, descriptor })
     })
+
+    describe('deleteMetadataDescriptor', () => {
+      const notFound = Object.assign(new Error('Not Found'), { status: 404 })
+      let production
+      let state
+
+      // Runs the action through the real mutations of the module.
+      const run = descriptorId =>
+        store.actions.deleteMetadataDescriptor(
+          {
+            commit: (type, payload) => store.mutations[type](state, payload),
+            state
+          },
+          descriptorId
+        )
+      const columnIds = () => production.descriptors.map(({ id }) => id)
+
+      beforeEach(() => {
+        production = {
+          id: '123',
+          descriptors: [
+            { id: 'desc-1', entity_type: 'Shot', field_name: 'notes' },
+            { id: 'desc-2', entity_type: 'Shot', field_name: 'camera' }
+          ]
+        }
+        state = {
+          currentProduction: production,
+          openProductions: [production],
+          productionMap: new Map([['123', production]])
+        }
+      })
+
+      test('removes the column Zou deletes', async () => {
+        productionApi.deleteMetadataDescriptor = vi.fn(() => Promise.resolve())
+        await run('desc-1')
+        expect(productionApi.deleteMetadataDescriptor).toHaveBeenCalledWith(
+          '123',
+          'desc-1'
+        )
+        expect(columnIds()).toEqual(['desc-2'])
+      })
+
+      // Another tab or another person deleted it first.
+      test('removes a column Zou no longer has', async () => {
+        productionApi.deleteMetadataDescriptor = vi.fn(() =>
+          Promise.reject(notFound)
+        )
+        await run('desc-1')
+        expect(columnIds()).toEqual(['desc-2'])
+      })
+
+      test('resolves when a live update removed the column first', async () => {
+        production.descriptors = production.descriptors.slice(1)
+        productionApi.deleteMetadataDescriptor = vi.fn(() =>
+          Promise.reject(notFound)
+        )
+        await expect(run('desc-1')).resolves.toBeUndefined()
+        expect(columnIds()).toEqual(['desc-2'])
+      })
+
+      // A confirmation left open across a production switch sends the column
+      // of the previous production, and Zou answers 404 for it too. A closed
+      // production opened from a link is in the map only.
+      test('keeps a column of another production', async () => {
+        const other = { id: '456', descriptors: [] }
+        state.currentProduction = other
+        state.openProductions = [other]
+        state.productionMap.set('456', other)
+        productionApi.deleteMetadataDescriptor = vi.fn(() =>
+          Promise.reject(notFound)
+        )
+        await expect(run('desc-1')).rejects.toBe(notFound)
+        expect(productionApi.deleteMetadataDescriptor).toHaveBeenCalledWith(
+          '456',
+          'desc-1'
+        )
+        expect(columnIds()).toEqual(['desc-1', 'desc-2'])
+      })
+
+      test('keeps a column Zou refuses to delete', async () => {
+        const refusal = Object.assign(new Error('Forbidden'), { status: 403 })
+        productionApi.deleteMetadataDescriptor = vi.fn(() =>
+          Promise.reject(refusal)
+        )
+        await expect(run('desc-1')).rejects.toBe(refusal)
+        expect(columnIds()).toEqual(['desc-1', 'desc-2'])
+      })
+    })
   })
 
   describe('Mutations', () => {

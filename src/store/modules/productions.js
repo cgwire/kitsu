@@ -1,20 +1,20 @@
-import assetsApi from '@/store/api/assets'
-import playlistsApi from '@/store/api/playlists'
-import productionsApi from '@/store/api/productions'
-import shotsApi from '@/store/api/shots'
-import { sortProductions, sortByName } from '@/lib/sorting'
-
-import assetTypeStore from '@/store/modules/assettypes'
-import statusAutomationsStore from '@/store/modules/statusautomation'
-import taskTypeStore from '@/store/modules/tasktypes'
-import taskStatusStore from '@/store/modules/taskstatus'
-
+import { isNotFound } from '@/lib/errors'
 import {
   addToIdList,
   removeFromIdList,
   removeModelFromList,
   updateModelFromList
 } from '@/lib/models'
+import { sortByName, sortProductions } from '@/lib/sorting'
+import assetsApi from '@/store/api/assets'
+import playlistsApi from '@/store/api/playlists'
+import productionsApi from '@/store/api/productions'
+import shotsApi from '@/store/api/shots'
+import assetTypeStore from '@/store/modules/assettypes'
+import statusAutomationsStore from '@/store/modules/statusautomation'
+import taskStatusStore from '@/store/modules/taskstatus'
+import taskTypeStore from '@/store/modules/tasktypes'
+
 import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
@@ -227,6 +227,19 @@ const findProductionInState = (state, id) => {
     state.openProductions?.find(p => p.id === id) ||
     null
   )
+}
+
+const isDescriptorOfAnotherProduction = (state, productionId, descriptorId) => {
+  let isListed = false
+  forEachProductionObjectInState(state, p => {
+    if (
+      p.id !== productionId &&
+      p.descriptors?.some(d => d.id === descriptorId)
+    ) {
+      isListed = true
+    }
+  })
+  return isListed
 }
 
 /** Convert a stored Project descriptor to the form shape the metadata API expects. */
@@ -977,8 +990,20 @@ const actions = {
   },
 
   deleteMetadataDescriptor({ commit, state }, descriptorId) {
+    const productionId = state.currentProduction.id
     return productionsApi
-      .deleteMetadataDescriptor(state.currentProduction.id, descriptorId)
+      .deleteMetadataDescriptor(productionId, descriptorId)
+      .catch(err => {
+        // Zou answers 404 when another tab or another person deleted the
+        // column first, but also for the column of another production, sent
+        // by a confirmation left open across a production switch.
+        if (
+          !isNotFound(err) ||
+          isDescriptorOfAnotherProduction(state, productionId, descriptorId)
+        ) {
+          throw err
+        }
+      })
       .then(() => {
         commit(DELETE_METADATA_DESCRIPTOR_END, { id: descriptorId })
       })
