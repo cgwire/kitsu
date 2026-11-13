@@ -1,12 +1,20 @@
 import { computed, reactive, watch } from 'vue'
 import { useStore } from 'vuex'
 
-export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
+// The departments are the ones of the current production, unless a getter of
+// department ids is given.
+export const useAtMentionsMembers = (
+  teamGetter,
+  taskTypesGetter,
+  departmentIdsGetter = null
+) => {
   const store = useStore()
   const departmentMap = computed(() => store.getters.departmentMap)
   const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
-  const productionDepartmentIds = computed(
-    () => store.getters.productionDepartmentIds
+  const departmentIds = computed(() =>
+    departmentIdsGetter
+      ? departmentIdsGetter()
+      : store.getters.productionDepartmentIds
   )
 
   const membersForAts = reactive({ '@': [], '#': [] })
@@ -29,6 +37,7 @@ export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
       }))
       taskTypeOptions.push({
         isTaskType: true,
+        isAll: true,
         color: '#000',
         full_name: 'All'
       })
@@ -38,8 +47,8 @@ export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
   )
 
   watch(
-    teamGetter,
-    teamValues => {
+    [teamGetter, departmentIds],
+    ([teamValues]) => {
       let teamOptions
       if (isCurrentUserClient.value) {
         teamOptions = teamValues.filter(person =>
@@ -50,7 +59,7 @@ export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
       }
       if (!isCurrentUserClient.value) {
         teamOptions = teamOptions.concat(
-          productionDepartmentIds.value
+          departmentIds.value
             .map(departmentId => departmentMap.value.get(departmentId))
             .filter(Boolean)
             .map(department => ({

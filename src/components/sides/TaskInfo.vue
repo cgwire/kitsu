@@ -16,9 +16,12 @@
             nbSelectedTasks > 0 ||
             nbSelectedValidations > 0)
         "
+        :fps="currentFps"
+        :get-frame="getDisplayedFrame"
         :is-movie-preview="isMoviePreview"
         :is-set-frame-thumbnail-loading="loading.setFrameThumbnail"
         :production-id="currentProductionId"
+        :revision="currentRevision"
         :team="currentTeam"
         @export-task="onExportClick"
         @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
@@ -1459,6 +1462,10 @@ const timeCodeClicked = payload => {
 const onFrameUpdated = frame => {
   currentFrameRaw.value = frame
 }
+
+// The action panel gets this function, not the frame: the function keeps its
+// reference across renders, so the panel stays still while the player plays.
+const getDisplayedFrame = () => displayedFrame.value
 
 const extractAnnotationSnapshots = async (withLabel = false) => {
   const previewPlayer = previewPlayerRef.value || props.player

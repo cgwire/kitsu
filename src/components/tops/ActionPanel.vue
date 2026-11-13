@@ -320,15 +320,72 @@
                 v-model="taskStatusId"
               />
             </div>
-            <div class="flexrow-item is-wide">
-              <textarea
-                class="comment-text input w100"
-                type="text"
-                :placeholder="$t('comments.add_comment')"
-                @keyup.ctrl.enter="confirmTaskStatusChange"
-                @keyup.meta.enter="confirmTaskStatusChange"
-                v-model="statusComment"
-              />
+            <!-- vue-at picks its highlighted entry on Enter, whatever the
+            modifiers: closing the list first sends the text as typed. -->
+            <div
+              class="flexrow-item is-wide"
+              @keydown.ctrl.enter.capture="closeCommentSuggestions"
+              @keydown.meta.enter.capture="closeCommentSuggestions"
+            >
+              <at-ta
+                ref="comment-suggestions"
+                :ats="['#', '@']"
+                :members="mentionMembers"
+                name-key="full_name"
+                :filter-match="atOptionsFilter"
+                @update:value="onAtTextChanged"
+              >
+                <template #item="{ item }">
+                  <template v-if="item.isTime"> ⏱️ frame </template>
+                  <template v-else-if="item.isDepartment">
+                    <span
+                      class="mr05"
+                      :style="{
+                        background: item.color,
+                        width: '10px',
+                        height: '10px',
+                        'border-radius': '50%'
+                      }"
+                    >
+                      &nbsp;
+                    </span>
+                    {{ item.full_name }}
+                  </template>
+                  <template v-else-if="item.isTaskType">
+                    <task-type-name
+                      :task-type="{
+                        color: item.color,
+                        name: item.full_name
+                      }"
+                      :is-link="false"
+                      thin
+                    />
+                  </template>
+                  <template v-else>
+                    <div class="flexrow">
+                      <people-avatar
+                        class="flexrow-item"
+                        :person="item"
+                        :size="20"
+                        :font-size="11"
+                        :is-lazy="false"
+                        :is-link="false"
+                      />
+                      <span class="flexrow-item">
+                        {{ item.full_name }}
+                      </span>
+                    </div>
+                  </template>
+                </template>
+                <textarea
+                  class="comment-text input w100"
+                  type="text"
+                  :placeholder="$t('comments.add_comment')"
+                  @keyup.ctrl.enter="confirmTaskStatusChange"
+                  @keyup.meta.enter="confirmTaskStatusChange"
+                  v-model="statusComment"
+                />
+              </at-ta>
             </div>
           </div>
 
@@ -932,18 +989,23 @@ import {
   onMounted,
   reactive,
   ref,
+  toRaw,
   useTemplateRef,
   watch
 } from 'vue'
+import AtTa from 'vue-at/dist/vue-at-textarea'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useAtMentionsMembers } from '@/composables/atMentions'
 import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
 import { intersection } from '@/lib/array'
 import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import { isFreeEscape } from '@/lib/keyboard'
+import { replaceTimeWithTimecode } from '@/lib/render'
+import { sortByName, sortPeople } from '@/lib/sorting'
 import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
@@ -955,9 +1017,11 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 /* eslint-enable no-unused-vars */
 
 // The playlist player weighs more than the rest of the panel, which every
@@ -973,10 +1037,16 @@ const store = useStore()
 // Props / Emits
 // --------------------------------------------------------------------------
 
+// fps, getFrame, and revision: the preview of the task panel. The frame comes
+// through a function, read once @frame is typed: a prop would render the panel
+// again at each frame of the player.
 const props = defineProps({
+  fps: { type: Number, default: 25 },
+  getFrame: { type: Function, default: () => 0 },
   isMoviePreview: { type: Boolean, default: false },
   isSetFrameThumbnailLoading: { type: Boolean, default: false },
   productionId: { type: String, default: null },
+  revision: { type: Number, default: 1 },
   team: { type: Array, default: () => [] }
 })
 
@@ -988,6 +1058,7 @@ const CLIENT_COMMENTS_PREFIX_KEY = 'action-panel:client-comments-prefix'
 // --------------------------------------------------------------------------
 
 const assignationFieldRef = useTemplateRef('assignation-field')
+const commentSuggestionsRef = useTemplateRef('comment-suggestions')
 const entitySearchFieldRef = useTemplateRef('entity-search-field')
 
 const availableTaskStatuses = ref([])
@@ -1043,6 +1114,10 @@ const currentHost = window.location.host
 
 let linkQueue = Promise.resolve()
 
+// vue-at reopens its list at each change of its members, even with the focus
+// elsewhere: it gets this one array, refreshed in place.
+const mentionMembers = []
+
 // Computed
 // --------------------------------------------------------------------------
 
@@ -1056,6 +1131,7 @@ const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const nbSelectedValidations = computed(
   () => store.getters.nbSelectedValidations
 )
+const personMap = computed(() => store.getters.personMap)
 const productionMap = computed(() => store.getters.productionMap)
 const selectedAssets = computed(() => store.getters.selectedAssets)
 const selectedConcepts = computed(() => store.getters.selectedConcepts)
@@ -1339,6 +1415,75 @@ const statusOrderProductionId = computed(() =>
     : ''
 )
 
+const mentionProductions = computed(() =>
+  selectionProductionIds.value
+    .map(productionId => productionMap.value.get(productionId))
+    .filter(Boolean)
+)
+
+// Zou finds a name after @ in the team of the production of each task: with
+// several productions, the list holds the people of every team, each one
+// notified on the tasks of their own productions.
+const mentionTeam = computed(() => {
+  if (mentionProductions.value.length < 2) return props.team
+  return sortPeople(
+    [
+      ...new Set(
+        mentionProductions.value.flatMap(production => production.team ?? [])
+      )
+    ]
+      .map(personId => personMap.value.get(personId))
+      .filter(Boolean)
+  )
+})
+
+// The task types a # can name: the ones of the tasks of the selected
+// entities, in the order of the productions, as in the comment form of a
+// task. Zou copies a hashtag comment only to the tasks an entity has. The raw
+// map keeps this list from following every change of every task.
+const mentionTaskTypes = computed(() => {
+  const entityIds = new Set(
+    Array.from(selectedTasks.value.values()).map(task => task.entity_id)
+  )
+  const taskTypeIds = new Set(
+    Array.from(toRaw(taskMap.value).values())
+      .filter(task => entityIds.has(task.entity_id))
+      .map(task => task.task_type_id)
+  )
+  return [
+    ...new Set(
+      mentionProductions.value.flatMap(
+        production => production.task_types ?? []
+      )
+    )
+  ]
+    .filter(taskTypeId => taskTypeIds.has(taskTypeId))
+    .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+    .filter(Boolean)
+})
+
+// As in the comment form of a task, the departments come from the task types
+// of each production, or from all of them when it lists none. Sorted by task
+// type name.
+const mentionDepartmentIds = computed(() => [
+  ...new Set(
+    sortByName(
+      mentionProductions.value.flatMap(production =>
+        store.getters.getProductionTaskTypes(production.id)
+      )
+    )
+      .map(taskType => taskType.department_id)
+      .filter(Boolean)
+  )
+])
+
+// Its watchers run at once: the values they read come first.
+const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
+  () => mentionTeam.value,
+  () => mentionTaskTypes.value,
+  () => mentionDepartmentIds.value
+)
+
 const isInDepartment = computed(() =>
   selectedTaskIds.value.every(taskId => {
     const task = taskMap.value.get(taskId)
@@ -1497,6 +1642,17 @@ const storagePrefix = computed(() => {
 // Functions
 // --------------------------------------------------------------------------
 
+const onAtTextChanged = input => {
+  if (nbSelectedTasks.value === 1 && input.includes('@frame')) {
+    statusComment.value = replaceTimeWithTimecode(
+      input,
+      props.revision,
+      props.getFrame() + 1,
+      props.fps
+    )
+  }
+}
+
 // A change once sent cannot be called back: closing the modal now would read as
 // a cancel.
 const cancelStatusChange = () => {
@@ -1522,10 +1678,23 @@ const runTaskStatusChange = async () => {
   }
 }
 
+// vue-at leaves its list open once the field loses the focus, over the button
+// and the confirmation it opens: a press or a focus anywhere else closes it.
+const closeCommentSuggestions = () => {
+  commentSuggestionsRef.value?.closePanel()
+}
+
+const onDocumentPressOrFocus = event => {
+  if (!commentSuggestionsRef.value?.$el.contains(event.target)) {
+    closeCommentSuggestions()
+  }
+}
+
 // The list of statuses lies over the button: the second click of a double click
 // on a status lands here. The loading look only stops the mouse: Ctrl+Enter
 // still gets here.
 const confirmTaskStatusChange = async event => {
+  closeCommentSuggestions()
   if (event.detail > 1 || loading.changeStatus || !isStatusChangeReady.value) {
     return
   }
@@ -1897,6 +2066,24 @@ const confirmBuildFilter = query => {
 // Watchers
 // --------------------------------------------------------------------------
 
+// The frame points at the preview of one task. Zou copies an #All comment to
+// every other task of each selected entity: for several tasks, All is only
+// typed on purpose.
+watch(
+  () => [
+    ...membersForAts['@'].filter(
+      member => !member.isTime || nbSelectedTasks.value === 1
+    ),
+    ...membersForAts['#'].filter(
+      member => !member.isAll || nbSelectedTasks.value === 1
+    )
+  ],
+  members => {
+    mentionMembers.splice(0, mentionMembers.length, ...members)
+  },
+  { immediate: true }
+)
+
 const watchEntitySelection = (count, threshold = 0) => {
   watch(count, () => {
     autoChooseSelectBar()
@@ -1946,10 +2133,14 @@ onMounted(() => {
   // The task panel shows this one with its selection already made: the
   // watchers only see the changes that follow.
   autoChooseSelectBar()
+  document.addEventListener('pointerdown', onDocumentPressOrFocus, true)
+  document.addEventListener('focusin', onDocumentPressOrFocus, true)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
+  document.removeEventListener('pointerdown', onDocumentPressOrFocus, true)
+  document.removeEventListener('focusin', onDocumentPressOrFocus, true)
 })
 </script>
 
@@ -2042,6 +2233,26 @@ onBeforeUnmount(() => {
   height: 43px;
   min-height: 43px;
   padding: 8px;
+}
+
+// The suggestions open above the caret, where the top bar covers them, and
+// past the right edge they scroll the panel sideways: here they open under
+// the field, from its left edge.
+.action-bar :deep(.atwho-panel) {
+  left: 0 !important;
+  top: 100% !important;
+}
+
+.action-bar :deep(.atwho-view) {
+  bottom: auto;
+  left: 0;
+  top: 4px;
+}
+
+// vue-at clips the spans of its list, and the thin task type chip has a line
+// height smaller than its letters.
+.atwho-li .tag.thin {
+  line-height: 1.2em;
 }
 
 .prefix-field,

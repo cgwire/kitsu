@@ -324,6 +324,50 @@ describe('TaskInfo.vue', () => {
       })
       expect(wrapper.findComponent(ActionPanel).exists()).toBe(false)
     })
+
+    describe('beside a movie', () => {
+      const previews = [{ id: 'preview-1', revision: 1, extension: 'mp4' }]
+      const mountWithMovie = (stubs = {}) =>
+        mountPanel({
+          task: buildTask({ assignees: [USER_ID] }),
+          previews,
+          props: { withActions: true },
+          getterOverrides: { nbSelectedTasks: () => 1 },
+          stubs
+        })
+
+      it('gives the actions the frame the player shows', async () => {
+        const { wrapper } = await mountWithMovie()
+
+        wrapper.findComponent(PreviewPlayer).vm.$emit('frame-updated', 12)
+
+        expect(wrapper.findComponent(ActionPanel).props('getFrame')()).toBe(12)
+      })
+
+      // The player emits each frame while it plays.
+      it('keeps the actions still while the player plays', async () => {
+        let updates = 0
+        const { wrapper } = await mountWithMovie({
+          ActionPanel: {
+            template: '<div />',
+            updated: () => {
+              updates += 1
+            }
+          }
+        })
+        expect(wrapper.findComponent(ActionPanel).exists()).toBe(true)
+        const updatesBefore = updates
+
+        const player = wrapper.findComponent(PreviewPlayer)
+        player.vm.$emit('frame-updated', 12)
+        await nextTick()
+        player.vm.$emit('frame-updated', 13)
+        await nextTick()
+
+        expect(wrapper.findComponent(AddComment).props('frame')).toBe(13)
+        expect(updates).toBe(updatesBefore)
+      })
+    })
   })
 
   describe('title', () => {
