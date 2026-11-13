@@ -671,16 +671,18 @@ const actions = {
   },
 
   async setTeamMemberRole({ commit, state, rootState }, { personId, role }) {
+    // The user may open another production before Zou answers.
+    const productionId = state.currentProduction.id
     const link = await productionsApi.updateTeamMemberRole(
-      state.currentProduction.id,
+      productionId,
       personId,
       role
     )
-    commit(TEAM_MEMBER_ROLE_UPDATED, link)
+    commit(TEAM_MEMBER_ROLE_UPDATED, { productionId, link })
     // Managers changing their own role must see their gating follow.
     if (personId === rootState.user.user?.id) {
       commit(SET_USER_PROJECT_ROLE, {
-        projectId: state.currentProduction.id,
+        projectId: productionId,
         role: link.role
       })
     }
@@ -1289,8 +1291,7 @@ const mutations = {
     }
   },
 
-  [TEAM_MEMBER_ROLE_UPDATED](state, link) {
-    const productionId = state.currentProduction.id
+  [TEAM_MEMBER_ROLE_UPDATED](state, { productionId, link }) {
     state.teamRoles = {
       ...state.teamRoles,
       [productionId]: {

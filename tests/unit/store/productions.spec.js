@@ -762,14 +762,16 @@ describe('Productions store', () => {
       const refusal = new Error('Refused')
       let state
 
-      // Runs the action through the real mutations of the module.
-      const run = (action, person) =>
+      // Runs the action through the real mutations of the module, for a
+      // user who is none of the members.
+      const run = (action, params) =>
         store.actions[action](
           {
             commit: (type, payload) => store.mutations[type](state, payload),
-            state
+            state,
+            rootState: { user: { user: { id: '111' } } }
           },
-          person
+          params
         )
 
       beforeEach(() => {
@@ -849,6 +851,46 @@ describe('Productions store', () => {
           expect(state.teamRoles[123]).toEqual({ 456: 'supervisor' })
           expect(otherProduction.team).toEqual(['789'])
           expect(state.teamRoles[999]).toEqual({ 789: 'manager' })
+        })
+
+        // The member has a role in the other production too.
+        test('setTeamMemberRole gives the member the new role in their own production', async () => {
+          const link = { project_id: '123', person_id: '456', role: 'manager' }
+          productionApi.updateTeamMemberRole = vi.fn(() => Promise.resolve(link))
+          const running = run('setTeamMemberRole', {
+            personId: '456',
+            role: 'manager'
+          })
+          state.currentProduction = otherProduction
+          state.teamRoles[999] = { 456: 'supervisor', 789: 'manager' }
+          await running
+          expect(productionApi.updateTeamMemberRole).toHaveBeenCalledWith(
+            '123',
+            '456',
+            'manager'
+          )
+          expect(state.teamRoles[123]).toEqual({ 456: 'manager' })
+          expect(state.teamRoles[999]).toEqual({
+            456: 'supervisor',
+            789: 'manager'
+          })
+        })
+
+        test('setTeamMemberRole gives the user the new role in their own production', async () => {
+          const link = { project_id: '123', person_id: '456', role: 'manager' }
+          productionApi.updateTeamMemberRole = vi.fn(() => Promise.resolve(link))
+          const commit = vi.fn()
+          const rootState = { user: { user: { id: '456' } } }
+          const running = store.actions.setTeamMemberRole(
+            { commit, state, rootState },
+            { personId: '456', role: 'manager' }
+          )
+          state.currentProduction = otherProduction
+          await running
+          expect(commit.mock.calls).toEqual([
+            ['TEAM_MEMBER_ROLE_UPDATED', { productionId: '123', link }],
+            ['SET_USER_PROJECT_ROLE', { projectId: '123', role: 'manager' }]
+          ])
         })
       })
     })
@@ -1547,16 +1589,15 @@ describe('Productions store', () => {
     })
 
     test('TEAM_MEMBER_ROLE_UPDATED', () => {
-      state.currentProduction = { id: 'production-1' }
       state.teamRoles = { 'production-1': { 123: 'supervisor' } }
       store.mutations.TEAM_MEMBER_ROLE_UPDATED(state, {
-        person_id: 123,
-        role: 'manager'
+        productionId: 'production-1',
+        link: { person_id: 123, role: 'manager' }
       })
       expect(state.teamRoles['production-1'][123]).toEqual('manager')
       store.mutations.TEAM_MEMBER_ROLE_UPDATED(state, {
-        person_id: 123,
-        role: null
+        productionId: 'production-1',
+        link: { person_id: 123, role: null }
       })
       expect(state.teamRoles['production-1'][123]).toBeNull()
     })
