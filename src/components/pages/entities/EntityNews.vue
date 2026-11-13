@@ -3,11 +3,11 @@
     <div class="has-text-centered" v-if="isLoading">
       <spinner />
     </div>
-    <div class="timeline mt1" v-else-if="newsList.length">
+    <div class="timeline mt1" v-else-if="shownNews.length">
       <div
         class="timeline-entry flexrow"
         :key="`news-${news.id}`"
-        v-for="news in newsList"
+        v-for="news in shownNews"
       >
         <span
           :class="{
@@ -65,6 +65,7 @@ import {
 import { useStore } from 'vuex'
 
 import { useFormat } from '@/composables/format'
+import { logRequestFailure } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
 import EmptySection from '@/components/widgets/EmptySection.vue'
@@ -88,12 +89,22 @@ const props = defineProps({
 // --------------------------------------------------------------------------
 const isLoading = ref(false)
 const newsList = ref([])
+// The entity the list comes from: the list of another one never shows.
+const newsEntityId = ref(null)
 // A load that ends after the deletion of a news keeps it out.
 const deletedNewsIds = new Set()
+// Loads may answer out of order: each takes a number, and an answer older
+// than the last one shown for its entity is dropped, even after a visit to
+// another entity.
+let lastLoadId = 0
+const shownLoadIds = new Map()
 
 // Computed
 // --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
+const shownNews = computed(() =>
+  newsEntityId.value === props.entity?.id ? newsList.value : []
+)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
@@ -116,18 +127,44 @@ const hasDoneValue = news => {
   return taskStatus ? news.change && taskStatus.is_done : false
 }
 
+const loadNews = async entityId => {
+  // The author is already resolved and enriched by the store action.
+  const data = await store.dispatch('getEntityNews', entityId)
+  return data.data.filter(news => !deletedNewsIds.has(news.id))
+}
+
+const showNews = (loadId, entityId, list) => {
+  const isOlder = loadId < (shownLoadIds.get(entityId) ?? 0)
+  if (entityId !== props.entity?.id || isOlder) return
+  shownLoadIds.set(entityId, loadId)
+  newsEntityId.value = entityId
+  newsList.value = list
+}
+
 const reset = async () => {
   if (!props.entity) return
+  const entityId = props.entity.id
+  const loadId = ++lastLoadId
   isLoading.value = true
   try {
-    // The author is already resolved and enriched by the store action.
-    const data = await store.dispatch('getEntityNews', props.entity.id)
-    newsList.value = data.data.filter(news => !deletedNewsIds.has(news.id))
+    showNews(loadId, entityId, await loadNews(entityId))
   } catch (err) {
     console.error(err)
-    newsList.value = []
   }
   isLoading.value = false
+}
+
+// Zou sends no event again once the socket is back. The socket may come back
+// before the API: a failed load keeps the list as it was.
+const onSocketConnect = async () => {
+  if (!props.entity) return
+  const entityId = props.entity.id
+  const loadId = ++lastLoadId
+  try {
+    showNews(loadId, entityId, await loadNews(entityId))
+  } catch (err) {
+    logRequestFailure(err)
+  }
 }
 
 const onNewsNew = eventData => {
@@ -151,12 +188,14 @@ watch(() => props.entity, reset)
 onMounted(() => {
   socket.on('news:new', onNewsNew)
   socket.on('news:delete', onNewsDelete)
+  socket.on('connect', onSocketConnect)
   reset()
 })
 
 onBeforeUnmount(() => {
   socket.off('news:new', onNewsNew)
   socket.off('news:delete', onNewsDelete)
+  socket.off('connect', onSocketConnect)
 })
 </script>
 

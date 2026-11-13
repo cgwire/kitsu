@@ -380,6 +380,9 @@ onMounted(() => {
     route.query.hiddenTypes,
     knownIds(taskTypeFilterOptions.value)
   )
+  // a link or a reload brings the filters back: keep them in sight
+  showMoreFilters.value =
+    hiddenProductionIds.value.length > 0 || hiddenTaskTypeIds.value.length > 0
   if (openProductions.value.length) {
     scheduleItems.value = convertScheduleItems(openProductions.value)
     startDate.value = getFirstStartDate(scheduleItems.value)

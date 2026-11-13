@@ -1,20 +1,20 @@
-import assetsApi from '@/store/api/assets'
-import playlistsApi from '@/store/api/playlists'
-import productionsApi from '@/store/api/productions'
-import shotsApi from '@/store/api/shots'
-import { sortProductions, sortByName } from '@/lib/sorting'
-
-import assetTypeStore from '@/store/modules/assettypes'
-import statusAutomationsStore from '@/store/modules/statusautomation'
-import taskTypeStore from '@/store/modules/tasktypes'
-import taskStatusStore from '@/store/modules/taskstatus'
-
+import { isNotFound } from '@/lib/errors'
 import {
   addToIdList,
   removeFromIdList,
   removeModelFromList,
   updateModelFromList
 } from '@/lib/models'
+import { sortByName, sortProductions } from '@/lib/sorting'
+import assetsApi from '@/store/api/assets'
+import playlistsApi from '@/store/api/playlists'
+import productionsApi from '@/store/api/productions'
+import shotsApi from '@/store/api/shots'
+import assetTypeStore from '@/store/modules/assettypes'
+import statusAutomationsStore from '@/store/modules/statusautomation'
+import taskStatusStore from '@/store/modules/taskstatus'
+import taskTypeStore from '@/store/modules/tasktypes'
+
 import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
@@ -56,6 +56,7 @@ import {
   CLEAR_ASSETS,
   CLEAR_EDITS,
   SAVE_LAST_PRODUCTION_ROUTE,
+  SET_PRODUCTION_ACCESS_ERROR,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -82,7 +83,10 @@ const initialState = {
   isProductionsLoading: false,
   isProductionsLoadingError: false,
 
-  lastProductionRoute: { name: 'open-productions' }
+  lastProductionRoute: { name: 'open-productions' },
+  // Why a production page sent the user to the home page, which tells it
+  // once: { reason: 'forbidden', 'missing' or 'failed', path: of that page }.
+  productionAccessError: null
 }
 
 const state = { ...initialState }
@@ -225,6 +229,19 @@ const findProductionInState = (state, id) => {
   )
 }
 
+const isDescriptorOfAnotherProduction = (state, productionId, descriptorId) => {
+  let isListed = false
+  forEachProductionObjectInState(state, p => {
+    if (
+      p.id !== productionId &&
+      p.descriptors?.some(d => d.id === descriptorId)
+    ) {
+      isListed = true
+    }
+  })
+  return isListed
+}
+
 /** Convert a stored Project descriptor to the form shape the metadata API expects. */
 const projectDescriptorToForm = descriptor => ({
   name: descriptor.name,
@@ -238,6 +255,21 @@ const projectDescriptorToForm = descriptor => ({
 // In-flight Project descriptor creations keyed by production + field, so the
 // per-keystroke metadata-changed events can't create duplicate descriptors.
 const pendingProjectDescriptorCreations = new Map()
+
+// Someone else may have changed the role of the user in the production: a
+// project update announces it, and a page listing the team reads it again in
+// case the socket missed that update.
+const loadTeamWithUserRole = async (commit, rootState, productionId) => {
+  const team = await productionsApi.getTeam(productionId)
+  commit(TEAM_ROLES_LOADED, { productionId, team })
+  const userId = rootState.user.user?.id
+  const member = team.find(person => person.id === userId)
+  commit(SET_USER_PROJECT_ROLE, {
+    projectId: productionId,
+    role: member?.project_role ?? null
+  })
+  return team
+}
 
 const getters = {
   productions: state => state.productions,
@@ -280,6 +312,7 @@ const getters = {
     helpers.getSectionPath(getters, rootGetters, 'team', false),
 
   lastProductionRoute: state => state.lastProductionRoute,
+  productionAccessError: state => state.productionAccessError,
 
   productionAssetTypes: (state, getters, rootState) => {
     if (!state.currentProduction) return []
@@ -616,16 +649,25 @@ const actions = {
     commit(PRODUCTION_AVATAR_UPLOADED, productionId)
   },
 
-  addPersonToTeam({ commit, state }, person) {
-    commit(TEAM_ADD_PERSON, person.id)
-    return productionsApi.addPersonToTeam(state.currentProduction.id, person.id)
+  // The team changes at once in the list, and changes back if Zou refuses,
+  // in its own production even when the user opened another one meanwhile.
+  async addPersonToTeam({ commit, state }, person) {
+    const production = state.currentProduction
+    // An import also adds the people already in the team: they stay.
+    const isMember = production.team?.includes(person.id)
+    commit(TEAM_ADD_PERSON, { production, personId: person.id })
+    try {
+      return await productionsApi.addPersonToTeam(production.id, person.id)
+    } catch (err) {
+      if (!isMember) {
+        commit(TEAM_REMOVE_PERSON, { production, personId: person.id })
+      }
+      throw err
+    }
   },
 
-  async loadProductionTeam({ commit, state }) {
-    const productionId = state.currentProduction.id
-    const team = await productionsApi.getTeam(productionId)
-    commit(TEAM_ROLES_LOADED, { productionId, team })
-    return team
+  async loadProductionTeam({ commit, state, rootState }) {
+    return loadTeamWithUserRole(commit, rootState, state.currentProduction.id)
   },
 
   // For the pages that read the roles without listing the team, such as the
@@ -637,40 +679,39 @@ const actions = {
     commit(TEAM_ROLES_LOADED, { productionId, team })
   },
 
-  async reloadTeamRoles({ commit, rootState }, productionId) {
-    const team = await productionsApi.getTeam(productionId)
-    commit(TEAM_ROLES_LOADED, { productionId, team })
-    const userId = rootState.user.user?.id
-    const member = team.find(person => person.id === userId)
-    commit(SET_USER_PROJECT_ROLE, {
-      projectId: productionId,
-      role: member?.project_role ?? null
-    })
+  reloadTeamRoles({ commit, rootState }, productionId) {
+    return loadTeamWithUserRole(commit, rootState, productionId)
   },
 
   async setTeamMemberRole({ commit, state, rootState }, { personId, role }) {
+    // The user may open another production before Zou answers.
+    const productionId = state.currentProduction.id
     const link = await productionsApi.updateTeamMemberRole(
-      state.currentProduction.id,
+      productionId,
       personId,
       role
     )
-    commit(TEAM_MEMBER_ROLE_UPDATED, link)
+    commit(TEAM_MEMBER_ROLE_UPDATED, { productionId, link })
     // Managers changing their own role must see their gating follow.
     if (personId === rootState.user.user?.id) {
       commit(SET_USER_PROJECT_ROLE, {
-        projectId: state.currentProduction.id,
+        projectId: productionId,
         role: link.role
       })
     }
     return link
   },
 
-  removePersonFromTeam({ commit, state }, person) {
-    commit(TEAM_REMOVE_PERSON, person.id)
-    return productionsApi.removePersonFromTeam(
-      state.currentProduction.id,
-      person.id
-    )
+  async removePersonFromTeam({ commit, state }, person) {
+    const production = state.currentProduction
+    const role = state.teamRoles[production.id]?.[person.id]
+    commit(TEAM_REMOVE_PERSON, { production, personId: person.id })
+    try {
+      return await productionsApi.removePersonFromTeam(production.id, person.id)
+    } catch (err) {
+      commit(TEAM_ADD_PERSON, { production, personId: person.id, role })
+      throw err
+    }
   },
 
   addAssetTypeToProduction({ commit, state }, assetTypeId) {
@@ -949,8 +990,20 @@ const actions = {
   },
 
   deleteMetadataDescriptor({ commit, state }, descriptorId) {
+    const productionId = state.currentProduction.id
     return productionsApi
-      .deleteMetadataDescriptor(state.currentProduction.id, descriptorId)
+      .deleteMetadataDescriptor(productionId, descriptorId)
+      .catch(err => {
+        // Zou answers 404 when another tab or another person deleted the
+        // column first, but also for the column of another production, sent
+        // by a confirmation left open across a production switch.
+        if (
+          !isNotFound(err) ||
+          isDescriptorOfAnotherProduction(state, productionId, descriptorId)
+        ) {
+          throw err
+        }
+      })
       .then(() => {
         commit(DELETE_METADATA_DESCRIPTOR_END, { id: descriptorId })
       })
@@ -1082,6 +1135,10 @@ const actions = {
 
   saveLastProductionRoute({ commit }, route) {
     this.commit(SAVE_LAST_PRODUCTION_ROUTE, route)
+  },
+
+  setProductionAccessError({ commit }, error) {
+    commit(SET_PRODUCTION_ACCESS_ERROR, error)
   }
 }
 
@@ -1234,13 +1291,20 @@ const mutations = {
     state.currentProduction = production
   },
 
-  [TEAM_ADD_PERSON](state, personId) {
-    addToIdList(state.currentProduction, 'team', personId)
+  // A refused removal brings the member back with their project role.
+  [TEAM_ADD_PERSON](state, { production, personId, role }) {
+    addToIdList(production, 'team', personId)
+    if (role) {
+      state.teamRoles = {
+        ...state.teamRoles,
+        [production.id]: { ...state.teamRoles[production.id], [personId]: role }
+      }
+    }
   },
 
-  [TEAM_REMOVE_PERSON](state, personId) {
-    removeFromIdList(state.currentProduction, 'team', personId)
-    delete state.teamRoles[state.currentProduction.id]?.[personId]
+  [TEAM_REMOVE_PERSON](state, { production, personId }) {
+    removeFromIdList(production, 'team', personId)
+    delete state.teamRoles[production.id]?.[personId]
   },
 
   [TEAM_ROLES_LOADED](state, { productionId, team }) {
@@ -1252,8 +1316,7 @@ const mutations = {
     }
   },
 
-  [TEAM_MEMBER_ROLE_UPDATED](state, link) {
-    const productionId = state.currentProduction.id
+  [TEAM_MEMBER_ROLE_UPDATED](state, { productionId, link }) {
     state.teamRoles = {
       ...state.teamRoles,
       [productionId]: {
@@ -1419,6 +1482,10 @@ const mutations = {
 
   [SAVE_LAST_PRODUCTION_ROUTE](state, route) {
     state.lastProductionRoute = route
+  },
+
+  [SET_PRODUCTION_ACCESS_ERROR](state, error) {
+    state.productionAccessError = error
   },
 
   [RESET_ALL](state) {

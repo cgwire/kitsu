@@ -58,6 +58,22 @@ describe('widgets/TwoFactorAuthentication', () => {
     expect(wrapper.emitted('validate')).toBeUndefined()
   })
 
+  // Safari then offers the code that Mail received, or the one its Passwords
+  // app generates.
+  it.each(['totp', 'email_otp'])(
+    'marks the %s field as a one-time code',
+    method => {
+      const wrapper = mountWidget(
+        { preferredTwoFa: method, twoFasEnabled: [method] },
+        { sendEmailOTP: () => {} }
+      )
+
+      expect(wrapper.find('input').attributes('autocomplete')).toBe(
+        'one-time-code'
+      )
+    }
+  )
+
   // The code step of the login page sits under the language list.
   describe('validation label', () => {
     let wrapper = null

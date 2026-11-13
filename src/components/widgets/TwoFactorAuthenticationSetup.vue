@@ -109,6 +109,7 @@
               <input
                 class="input is-medium otp-input"
                 type="text"
+                autocomplete="one-time-code"
                 v-model.trim="twoFA.validationOTP"
                 @keyup.enter="nextEnable"
                 :placeholder="placeholderInputEnableOTP"
@@ -221,6 +222,7 @@
               <input
                 class="input is-medium otp-input"
                 type="text"
+                autocomplete="one-time-code"
                 v-model.trim="twoFA.validationOTP"
                 @keyup.enter="nextEnable"
                 :placeholder="placeholderInputEnableOTP"

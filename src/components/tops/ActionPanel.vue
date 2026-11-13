@@ -358,12 +358,9 @@
           class="flexcolumn flexrow-item is-wide"
           v-if="selectedBar === 'assignation'"
         >
-          <div class="mb05" v-if="isCurrentUserArtist">
-            {{ $t('tasks.to_myself') }}
-          </div>
           <div
             class="mb05"
-            v-else-if="isCurrentUserManager || isCurrentUserSupervisor"
+            v-if="isCurrentUserManager || isCurrentUserSupervisor"
           >
             <people-field
               class="is-wide assignation-field"
@@ -381,6 +378,8 @@
           <div class="flexrow-item is-wide" v-if="!loading.assignation">
             <button
               class="button confirm-button is-wide"
+              :class="{ 'is-disabled': !person }"
+              :aria-disabled="!person"
               @click="confirmAssign"
             >
               {{
@@ -431,17 +430,6 @@
                 {{ $t('tasks.clear_all_assignations') }}
               </button>
             </div>
-          </div>
-          <div
-            class="flexrow-item hide-small-screen"
-            v-else-if="!loading.assignation && isCurrentUserArtist"
-          >
-            <button
-              class="button is-link clear-assignation-button hide-small-screen"
-              @click="clearAssignation"
-            >
-              {{ $t('tasks.clear_own_assignations') }}
-            </button>
           </div>
           <div class="flexrow-item" v-if="!isShowAssignations">
             {{ $t('tasks.assignation_warning') }}
@@ -1359,7 +1347,6 @@ const availableBars = computed(() => {
       (isCurrentViewSingleEntity.value || isCurrentViewEntity.value) &&
       (isCurrentUserManager.value ||
         isSupervisorInDepartment.value ||
-        isInDepartment.value ||
         isCurrentViewSingleEntity.value) &&
       !isEntitySelection.value &&
       isTaskSelection.value &&
@@ -1523,22 +1510,18 @@ const confirmTaskStatusChange = async event => {
 }
 
 const confirmAssign = async () => {
-  if (person.value || isInDepartment.value) {
-    const personId =
-      isCurrentUserManager.value || isCurrentUserSupervisor.value
-        ? (person.value?.id ?? null)
-        : user.value.id
-    loading.assignation = true
-    errors.taskAssignation = false
-    try {
-      await store.dispatch('assignSelectedTasks', { personId })
-      assignationFieldRef.value?.clear()
-    } catch (err) {
-      errors.taskAssignation = true
-      console.error(err)
-    } finally {
-      loading.assignation = false
-    }
+  const personId = person.value?.id
+  if (!personId) return
+  loading.assignation = true
+  errors.taskAssignation = false
+  try {
+    await store.dispatch('assignSelectedTasks', { personId })
+    assignationFieldRef.value?.clear()
+  } catch (err) {
+    errors.taskAssignation = true
+    console.error(err)
+  } finally {
+    loading.assignation = false
   }
 }
 
@@ -1553,11 +1536,10 @@ const runUnassignation = async (action, payload) => {
 }
 
 const clearAssignation = () => {
-  const personToClear = isCurrentUserArtist.value ? user.value : person.value
-  if (personToClear) {
+  if (person.value) {
     runUnassignation('unassignPersonFromTasks', {
       tasks: Array.from(selectedTasks.value.values()),
-      person: personToClear
+      person: person.value
     })
   }
 }

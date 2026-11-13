@@ -437,6 +437,7 @@
       "cell_save_error": "A(z) \"{name}\" mentése nem sikerült: az előző érték visszaállt. Kérlek töltsd újra az oldalt és próbáld újra.",
       "cells_save_error": "Néhány módosítás mentése nem sikerült: az előző értékek visszaálltak. Kérlek töltsd újra az oldalt és próbáld újra.",
       "clear_selection": "Kijelölés megszüntetése",
+      "click_to_add": "Kattints a hozzáadáshoz",
       "close": "Bezárás",
       "confirmation": "Megerősítés",
       "confirmation_and_stay": "Megerősít és marad",
@@ -1106,6 +1107,9 @@
       },
       "title": "Produkciók",
       "home": {
+        "access_failed": "Nem sikerült betölteni a kért produkciót. Kérlek próbáld újra.",
+        "access_forbidden": "Nincs hozzáférésed a kért produkcióhoz. Lépj kapcsolatba a stúdió adminisztrátorával a hozzáférés megszerzéséhez.",
+        "access_missing": "A kért produkció nem található.",
         "all_playlists": "Összes lejátszási lista",
         "all_stats": "Összes statisztika",
         "create_new": "Új produkció létrehozása",
@@ -1844,7 +1848,6 @@
       "post_comment_on_tasks": "Hozzászólás küldése a kijelölt feladathoz | Hozzászólás küldése a(z) {count} kijelölt feladathoz",
       "select_status": "Válassz állapotot",
       "clear_all_assignations": "összes kiosztás megszüntetése",
-      "clear_own_assignations": "saját kiosztásaid törlése",
       "combobox_departments": {
         "all_departments": "Minden osztály",
         "my_departments": "Osztályaim"
@@ -1900,7 +1903,6 @@
       "show_contact_sheet": "Megjelenítés kontaktlapként",
       "smaller": "Feladat panel szűkítése",
       "subscribe_to_tasks": "Feliratkozás a kijelölt feladat értesítéseire | Feliratkozás a(z) {nbSelectedTasks} kijelölt feladat értesítéseire",
-      "to_myself": "Magamnak",
       "unassigned_tasks": "Ki nem osztott feladatok",
       "use_current_frame": "Jelenlegi kocka használata",
       "validated": "Jóváhagyva"

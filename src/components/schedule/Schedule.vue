@@ -4,6 +4,7 @@
       ref="scheduleRef"
       class="schedule unselectable"
       :class="`zoom-level-${zoomLevel}`"
+      @wheel="onScheduleWheel"
     >
       <div
         ref="entityListRef"
@@ -60,7 +61,7 @@
                 }"
                 role="button"
                 tabindex="0"
-                @click="expandRootElement(rootElement)"
+                @click="onRootToggleClick(rootElement)"
                 @keydown.enter.prevent="expandRootElement(rootElement)"
                 @keydown.space.prevent="expandRootElement(rootElement)"
               >
@@ -90,7 +91,7 @@
                     : `4px solid ${rootElement.color}`
                 }"
                 :title="rootElement.name"
-                @click="expandRootElement(rootElement)"
+                @click="onRootToggleClick(rootElement)"
               >
                 {{ rootElement.name }}
               </span>
@@ -196,6 +197,8 @@
                       <button
                         class="button is-small is-link plan-entity"
                         type="button"
+                        @mousedown.stop
+                        @touchstart.stop
                         @click="$emit('plan-entity', rootElement, childElement)"
                         v-if="reassignable"
                       >
@@ -891,6 +894,11 @@ const loading = reactive({
 
 let initialClientX = null
 let initialClientY = null
+// initialClientY follows the grab of the names: this keeps the press point
+let browseOriginY = null
+// the recent wheel deltas over the schedule, summed per axis with a decay,
+// the time of the last one, and whether Shift was held
+const wheelAxes = { x: 0, y: 0, at: 0, isShifted: false }
 let lastStartDate = null
 let lastEndDate = null
 
@@ -908,7 +916,8 @@ let isShiftDrag = false
 const dragPersonByItem = new Map()
 
 // a native click still fires on mouseup after a genuine drag (mousedown and
-// mouseup landed on the same bar), so an unguarded click handler would
+// mouseup landed on the same bar, or on the same row name, which the grab of
+// the names keeps under the pointer), so an unguarded click handler would
 // re-select/expand the row right after every move. stopBrowsing sets this
 // once it detects the pointer actually moved; the next click consumes it.
 let justDragged = false
@@ -1031,6 +1040,15 @@ const milestoneGroups = computed(() => {
 
 // scrollToDate puts a date this far left of the middle of the schedule
 const DATE_SCROLL_SHIFT = 295
+
+// a press that moves the pointer less than this is still a click
+const CLICK_TOLERANCE = 4
+// a wheel counted in lines (Firefox with a mouse) steps a row per line
+const ROW_HEIGHT = 40
+// share of the earlier wheel deltas kept to weigh the axis of the next one
+const WHEEL_AXIS_DECAY = 0.8
+// a pause this long between two wheel events starts a new swipe
+const WHEEL_SWIPE_PAUSE = 200
 
 const MILESTONE_LABEL_MAX_WIDTH = 180
 const MILESTONE_LABEL_MIN_WIDTH = 30
@@ -2004,6 +2022,63 @@ const setScrollPosition = top => {
   entityListRef.value.scrollTop = top
 }
 
+const wheelPixels = (delta, deltaMode, pageSize) => {
+  if (deltaMode === WheelEvent.DOM_DELTA_LINE) return delta * ROW_HEIGHT
+  if (deltaMode === WheelEvent.DOM_DELTA_PAGE) return delta * pageSize
+  return delta
+}
+
+// The browser scrolls the timeline on its own, and the names and the dates
+// follow it at its scroll event, a frame or more later: a wheel over the
+// schedule moves the three of them here, at once. It keeps a trackpad swipe
+// on one axis, as the browser does, though the wheel events carry a little of
+// the other one: the axis the recent deltas favor, so that a noisy event does
+// not switch it.
+const onScheduleWheel = event => {
+  // Ctrl+wheel zooms the page, as a trackpad pinch does
+  if (event.ctrlKey) return
+  const wrapper = timelineContentWrapperRef.value
+  // Shift turns a vertical wheel sideways, as the browser does
+  const isTurned = event.shiftKey && !event.deltaX
+  const deltaX = wheelPixels(
+    isTurned ? event.deltaY : event.deltaX,
+    event.deltaMode,
+    wrapper.clientWidth
+  )
+  const deltaY = wheelPixels(
+    isTurned ? 0 : event.deltaY,
+    event.deltaMode,
+    wrapper.clientHeight
+  )
+  // a new swipe owes nothing to the previous one, and Shift turns the wheel
+  // on purpose: the axis it gives has no noise to outweigh
+  const isNewSwipe =
+    event.timeStamp - wheelAxes.at > WHEEL_SWIPE_PAUSE ||
+    event.shiftKey !== wheelAxes.isShifted
+  const decay = isNewSwipe ? 0 : WHEEL_AXIS_DECAY
+  wheelAxes.at = event.timeStamp
+  wheelAxes.isShifted = event.shiftKey
+  wheelAxes.x = wheelAxes.x * decay + Math.abs(deltaX)
+  wheelAxes.y = wheelAxes.y * decay + Math.abs(deltaY)
+  const isVertical = wheelAxes.y >= wheelAxes.x
+  const { scrollLeft, scrollTop } = wrapper
+  if (isVertical) {
+    wrapper.scrollTop += deltaY
+  } else {
+    wrapper.scrollLeft += deltaX
+  }
+  const isMoved =
+    wrapper.scrollTop !== scrollTop || wrapper.scrollLeft !== scrollLeft
+  const [delta, otherDelta] = isVertical ? [deltaY, deltaX] : [deltaX, deltaY]
+  // at its end, the timeline leaves a straight wheel to the page, as the
+  // browser does, but the browser would scroll a slanted or turned one along
+  // the other axis
+  if (!isMoved && delta && !otherDelta && !isTurned) return
+  event.preventDefault()
+  entityListRef.value.scrollTop = wrapper.scrollTop
+  timelineHeaderRef.value.scrollLeft = wrapper.scrollLeft
+}
+
 const scrollScheduleLeft = event => {
   if (!timelineContentWrapperRef.value) return
   const previousLeft = timelineContentWrapperRef.value.scrollLeft
@@ -2093,6 +2168,7 @@ const startBrowsingY = event => {
   document.body.style.cursor = 'grabbing'
   isBrowsingY.value = true
   initialClientY = getClientY(event)
+  browseOriginY = initialClientY
   startMoveTracking()
 }
 
@@ -2135,6 +2211,12 @@ const stopBrowsing = event => {
       }
     }
   } else {
+    if (
+      browseOriginY !== null &&
+      Math.abs(getClientY(event) - browseOriginY) > CLICK_TOLERANCE
+    ) {
+      justDragged = true
+    }
     // clear the selection when clicking outside an item
     let target = event.target
     while (target && target !== timelineRef.value) {
@@ -2153,6 +2235,7 @@ const stopBrowsing = event => {
   isBrowsingY.value = false
   initialClientX = null
   initialClientY = null
+  browseOriginY = null
   dragSourcePersonId = null
   dragPersonByItem.clear()
   currentElement.value = null
@@ -2389,6 +2472,11 @@ const consumeDragClick = () => {
 const onRootBarClick = rootElement => {
   if (consumeDragClick()) return
   emit('root-element-selected', rootElement)
+}
+
+const onRootToggleClick = rootElement => {
+  if (consumeDragClick()) return
+  expandRootElement(rootElement)
 }
 
 const onChildBarClick = (rootElement, childElement) => {

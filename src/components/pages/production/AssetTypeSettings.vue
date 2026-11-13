@@ -81,7 +81,7 @@
           @import-from-production="onImportFromProduction"
         >
           <template #item-line="{ item }">
-            <span class="pointer">{{ item.name }}</span>
+            {{ item.name }}
           </template>
         </setting-importer>
       </div>

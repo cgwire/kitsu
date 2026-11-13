@@ -124,7 +124,7 @@
             @import-item="addTaskType"
           >
             <template #item-line="{ item }">
-              <task-type-name class="pointer" :task-type="item" />
+              <task-type-name :task-type="item" />
             </template>
           </setting-importer>
         </div>
@@ -615,9 +615,5 @@ table {
 
 .task-type[draggable='true'] {
   cursor: grabbing;
-}
-
-.pointer {
-  cursor: pointer;
 }
 </style>

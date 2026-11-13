@@ -52,6 +52,7 @@
                     !['admin', 'client'].includes(person.role) &&
                     person.id !== user.id
                   "
+                  :key="`role-${person.id}-${roleRedraws[person.id] || 0}`"
                   thin
                   class="flexrow-item"
                   :options="roleOptions"
@@ -114,9 +115,13 @@ const store = useStore()
 // Props / Emits
 const props = defineProps({
   entries: { type: Array, default: () => [] },
-  projectRoles: { type: Object, default: () => ({}) }
+  projectRoles: { type: Object, default: () => ({}) },
+  // Bumped for a person whose role Zou refused: drawn again, the select shows
+  // the stored role, as Vue patches a selected option only when its value
+  // changes.
+  roleRedraws: { type: Object, default: () => ({}) }
 })
-const emit = defineEmits(['update-role'])
+const emit = defineEmits(['remove-person', 'update-role'])
 
 // Computed
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
@@ -159,9 +164,7 @@ const onRoleChange = (person, value) => {
   })
 }
 
-const removePerson = person => {
-  store.dispatch('removePersonFromTeam', person)
-}
+const removePerson = person => emit('remove-person', person)
 </script>
 
 <style lang="scss" scoped>

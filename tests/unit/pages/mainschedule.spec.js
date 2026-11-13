@@ -255,4 +255,27 @@ describe('MainSchedule filters', () => {
       'tt-light': true
     })
   })
+
+  const isFilterRowShown = wrapper =>
+    wrapper.findAll('.toolbar-row')[1].element.style.display !== 'none'
+
+  it('keeps the filters folded when none is set', async () => {
+    const wrapper = await mountFilteredPage()
+    expect(isFilterRowShown(wrapper)).toBe(false)
+  })
+
+  it.each([
+    '/main-schedule?hiddenProductions=production-2',
+    '/main-schedule?hiddenTypes=tt-anim'
+  ])('shows the filters a reload brings back (%s)', async path => {
+    const wrapper = await mountFilteredPage(path)
+    expect(isFilterRowShown(wrapper)).toBe(true)
+  })
+
+  it('keeps the filters folded when the link hides only gone productions', async () => {
+    const wrapper = await mountFilteredPage(
+      '/main-schedule?hiddenProductions=gone'
+    )
+    expect(isFilterRowShown(wrapper)).toBe(false)
+  })
 })
