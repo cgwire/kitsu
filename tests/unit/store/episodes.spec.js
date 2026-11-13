@@ -461,7 +461,7 @@ describe('Episodes store', () => {
     // The topbar validates route episodes against the episodes getter: a
     // deleted episode must leave that list too, not only the map.
     test('drops the episode from the episodes list', () => {
-      const state = { episodes: [] }
+      const state = { episodes: [], episodeSelectionGrid: new Set() }
       episodesStore.mutations.LOAD_EPISODES_END(state, {
         episodes: [
           { id: 'episode-1', name: 'E01', status: 'running' },
@@ -476,7 +476,11 @@ describe('Episodes store', () => {
     // The list footer and the keyboard navigation read the counter, and the
     // search result must stay the search result.
     test('counts the episodes left after a deletion', () => {
-      const state = { episodes: [], displayedEpisodes: [] }
+      const state = {
+        episodes: [],
+        displayedEpisodes: [],
+        episodeSelectionGrid: new Set()
+      }
       episodesStore.mutations.LOAD_EPISODES_END(state, {
         episodes: [
           { id: 'episode-1', name: 'E01', status: 'running' },
@@ -526,7 +530,11 @@ describe('Episodes store', () => {
     })
 
     test('keeps the search result to the episodes it held', () => {
-      const state = { episodes: [], displayedEpisodes: [] }
+      const state = {
+        episodes: [],
+        displayedEpisodes: [],
+        episodeSelectionGrid: new Set()
+      }
       episodesStore.mutations.LOAD_EPISODES_END(state, {
         episodes: [
           { id: 'episode-1', name: 'E01', status: 'running' },
@@ -940,6 +948,32 @@ describe('Episodes store, through a store', () => {
 
     expect(store.getters.isEpisodeDescription).toBe(Boolean(fields.description))
     expect(store.getters.isEpisodeResolution).toBe(Boolean(fields.data))
+  })
+
+  test.each([
+    ['description', { description: 'Pilot' }],
+    ['resolution', { data: { resolution: '1920x1080' } }]
+  ])('shows the %s column once another user fills it', async (_, fields) => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: {} }])
+
+    store.commit('UPDATE_EPISODE', { id: 'ep1', name: 'E01', data: {}, ...fields })
+
+    expect(store.getters.isEpisodeDescription).toBe(Boolean(fields.description))
+    expect(store.getters.isEpisodeResolution).toBe(Boolean(fields.data))
+  })
+
+  // The selected cells are keyed by their row.
+  test('moves up the cells selected below an episode another user deletes', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, buildEpisodes())
+    store.commit('ADD_SELECTED_TASK', { x: 0, y: 0 })
+    store.commit('ADD_SELECTED_TASK', { x: 2, y: 0 })
+
+    store.commit('REMOVE_EPISODE', { id: 'ep1' })
+
+    expect(names(store.getters.displayedEpisodes)).toEqual(['E02', 'E03'])
+    expect([...store.getters.episodeSelectionGrid]).toEqual(['1-0'])
   })
 
   test('locks an edited episode until a while after its save', async () => {

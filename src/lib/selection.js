@@ -20,3 +20,17 @@ export const addRowToSelectionGrid = (selectionGrid, rowIndex) => {
     })
   )
 }
+
+// A row leaving the list takes its cells along and moves up those below it.
+export const removeRowFromSelectionGrid = (selectionGrid, rowIndex) => {
+  if (selectionGrid.size === 0 || rowIndex < 0) return selectionGrid
+  return new Set(
+    [...selectionGrid]
+      .map(key => {
+        const separator = key.lastIndexOf('-')
+        return { x: Number(key.slice(0, separator)), y: key.slice(separator) }
+      })
+      .filter(({ x }) => x !== rowIndex)
+      .map(({ x, y }) => `${x > rowIndex ? x - 1 : x}${y}`)
+  )
+}

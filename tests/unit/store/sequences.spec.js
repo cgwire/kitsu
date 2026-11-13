@@ -331,6 +331,7 @@ describe('Sequences store, task entity name', () => {
   })
   const buildState = () => ({
     displayedSequences: [],
+    sequenceSelectionGrid: new Set(),
     sequenceValidationColumns: [],
     sequenceFilledColumns: {}
   })
@@ -485,7 +486,7 @@ describe('Sequences store, ADD_SEQUENCE', () => {
   // The list load leaves the cached list and the displayed one as the same
   // array: pushing into each in place inserted the sequence twice.
   test('inserts a live sequence once', () => {
-    const state = { displayedSequences: [] }
+    const state = { displayedSequences: [], sequenceSelectionGrid: new Set() }
     sequencesStore.mutations.LOAD_SEQUENCES_END(state, {
       sequences: [
         { id: 'sq-1', name: 'SQ01', parent_id: 'ep-a' },
@@ -513,7 +514,7 @@ describe('Sequences store, ADD_SEQUENCE', () => {
   // zou emits sequence:new before the creation response lands, so the socket
   // handler inserts the sequence first: the response must not append a copy.
   test('does not duplicate a sequence the socket handler already added', () => {
-    const state = { displayedSequences: [] }
+    const state = { displayedSequences: [], sequenceSelectionGrid: new Set() }
     sequencesStore.mutations.LOAD_SEQUENCES_END(state, {
       sequences: [{ id: 'sq-1', name: 'SQ01', parent_id: 'ep-a' }],
       episodeMap: new Map(),
@@ -1510,5 +1511,411 @@ describe('Sequences store, through a store', () => {
     await store.dispatch('resetSequences')
 
     expect(names(store.getters.displayedSequences)).toEqual(['SQ01'])
+  })
+
+  describe('new and live rows', () => {
+    const sortInfo = {
+      type: 'metadata',
+      column: 'difficulty',
+      data_type: 'number',
+      ascending: true
+    }
+    const buildSequences = () =>
+      ['SQ01', 'SQ02', 'SQ03'].map((name, index) => ({
+        ...buildSequence(`sq${index + 1}`, name),
+        data: { difficulty: String([10, 30, 20][index]) }
+      }))
+    const createSequence = (store, id, name) => {
+      client.ppost.mockResolvedValueOnce({ id, name, project_id: 'p1' })
+      return store.dispatch('newSequence', { name, project_id: 'p1' })
+    }
+    const addSequence = (store, sequence) =>
+      store.commit('ADD_SEQUENCE', {
+        sequence: { data: {}, ...sequence },
+        episodeMap: new Map()
+      })
+
+    test('creates a sequence at its place in a sorted list', async () => {
+      const { module, store } = await buildStore()
+      loadSequences(store, buildSequences())
+      await store.dispatch('changeSequenceSort', sortInfo)
+
+      await createSequence(store, 'sq0', 'SQ00')
+
+      const sorted = ['SQ01', 'SQ03', 'SQ02', 'SQ00']
+      expect(names(store.getters.displayedSequences)).toEqual(sorted)
+      expect(names(module.cache.sequences)).toEqual(sorted)
+    })
+
+    test('keeps the search of the list when a sequence is created', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+      await store.dispatch('setSequenceSearch', 'SQ01')
+
+      await createSequence(store, 'sq4', 'SQ04')
+
+      expect(names(store.getters.displayedSequences)).toEqual(['SQ01', 'SQ04'])
+      expect(store.getters.sequenceSearchText).toBe('SQ01')
+    })
+
+    // "Create tasks", "Delete all", and "Select column" read the listed rows.
+    test('counts a new sequence among the listed rows of a search', async () => {
+      const { module, store } = await buildStore()
+      loadSequences(store, buildSequences())
+      await store.dispatch('setSequenceSearch', 'SQ0')
+
+      await createSequence(store, 'sq4', 'SQ04')
+
+      expect(names(module.cache.result)).toEqual([
+        'SQ01',
+        'SQ02',
+        'SQ03',
+        'SQ04'
+      ])
+    })
+
+    test('adds a live sequence at its place in a sorted list', async () => {
+      const { module, store } = await buildStore()
+      loadSequences(store, buildSequences())
+      await store.dispatch('changeSequenceSort', sortInfo)
+
+      addSequence(store, { id: 'sq0', name: 'SQ00', data: { difficulty: '15' } })
+
+      const sorted = ['SQ01', 'SQ00', 'SQ03', 'SQ02']
+      expect(names(store.getters.displayedSequences)).toEqual(sorted)
+      expect(names(module.cache.sequences)).toEqual(sorted)
+      expect(names(module.cache.result)).toEqual(sorted)
+    })
+
+    test('counts a live sequence among the listed rows', async () => {
+      const { module, store } = await buildStore()
+      loadSequences(store, buildSequences())
+
+      addSequence(store, { id: 'sq0', name: 'SQ00' })
+
+      expect(names(module.cache.result)).toEqual([
+        'SQ00',
+        'SQ01',
+        'SQ02',
+        'SQ03'
+      ])
+    })
+
+    // The creation form offers both fields.
+    test('keeps the description and resolution of a new sequence', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+      client.ppost.mockResolvedValueOnce({
+        id: 'sq4',
+        name: 'SQ04',
+        project_id: 'p1',
+        description: 'Opening',
+        data: { resolution: '2048x858' }
+      })
+
+      await store.dispatch('newSequence', {
+        name: 'SQ04',
+        project_id: 'p1',
+        description: 'Opening',
+        data: { resolution: '2048x858' }
+      })
+
+      expect(store.getters.sequenceMap.get('sq4').data).toEqual({
+        resolution: '2048x858'
+      })
+      expect(store.getters.isSequenceDescription).toBe(true)
+      expect(store.getters.isSequenceResolution).toBe(true)
+    })
+
+    test('shows the description and resolution of a live sequence', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+
+      addSequence(store, {
+        id: 'sq4',
+        name: 'SQ04',
+        description: 'Opening',
+        data: { resolution: '2048x858' }
+      })
+
+      expect(store.getters.isSequenceDescription).toBe(true)
+      expect(store.getters.isSequenceResolution).toBe(true)
+    })
+
+    test.each([
+      ['description', { description: 'Chase' }],
+      ['resolution', { data: { resolution: '2048x858' } }]
+    ])('shows the %s column once another user fills it', async (_, fields) => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+
+      store.commit('UPDATE_SEQUENCE', {
+        id: 'sq2',
+        name: 'SQ02',
+        data: {},
+        ...fields
+      })
+
+      expect(store.getters.isSequenceDescription).toBe(
+        Boolean(fields.description)
+      )
+      expect(store.getters.isSequenceResolution).toBe(Boolean(fields.data))
+    })
+
+    // The selected cells are keyed by their row.
+    test('moves down the cells selected below a live sequence', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+      store.commit('ADD_SELECTED_TASK', { x: 0, y: 0 })
+      store.commit('ADD_SELECTED_TASK', { x: 2, y: 0 })
+
+      addSequence(store, { id: 'sq0', name: 'SQ01B' })
+
+      expect(names(store.getters.displayedSequences)).toEqual([
+        'SQ01',
+        'SQ01B',
+        'SQ02',
+        'SQ03'
+      ])
+      expect([...store.getters.sequenceSelectionGrid].sort()).toEqual([
+        '0-0',
+        '3-0'
+      ])
+    })
+
+    test('moves up the cells selected below a sequence another user deletes', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+      store.commit('ADD_SELECTED_TASK', { x: 0, y: 0 })
+      store.commit('ADD_SELECTED_TASK', { x: 2, y: 0 })
+
+      store.commit('REMOVE_SEQUENCE', { id: 'sq1' })
+
+      expect(names(store.getters.displayedSequences)).toEqual(['SQ02', 'SQ03'])
+      expect([...store.getters.sequenceSelectionGrid]).toEqual(['1-0'])
+    })
+
+    // The sort outlives the Sequences page, and the Breakdown page lists the
+    // sequences without their tasks.
+    test('keeps a plain list in its order under a sort', async () => {
+      const { store } = await buildStore()
+      await store.dispatch('changeSequenceSort', sortInfo)
+      store.commit(LOAD_SEQUENCES_END, {
+        sequences: buildSequences().map(sequence => ({
+          ...sequence,
+          tasks: undefined
+        })),
+        episodeMap: new Map(),
+        production,
+        userFilters: {},
+        loadingKey: 'p1/#partial'
+      })
+
+      addSequence(store, { id: 'sq0', name: 'SQ00', data: { difficulty: '15' } })
+
+      expect(names(store.getters.displayedSequences)).toEqual([
+        'SQ00',
+        'SQ01',
+        'SQ02',
+        'SQ03'
+      ])
+    })
+
+    // The Shots page loads the sequences with their tasks too, and does not
+    // apply the sort of the Sequences page.
+    test.each([
+      ['a new', store => createSequence(store, 'sq0', 'SQ00')],
+      [
+        'a live',
+        store =>
+          addSequence(store, {
+            id: 'sq0',
+            name: 'SQ00',
+            data: { difficulty: '15' }
+          })
+      ]
+    ])('adds %s sequence to a list another page loaded, in its order', async (_, add) => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+      await store.dispatch('changeSequenceSort', sortInfo)
+      loadSequences(store, buildSequences())
+
+      await add(store)
+
+      expect(names(store.getters.displayedSequences)).toEqual([
+        'SQ00',
+        'SQ01',
+        'SQ02',
+        'SQ03'
+      ])
+    })
+
+    test.each([
+      ['a production switch', 'CLEAR_SHOTS'],
+      ['a logout', 'RESET_ALL']
+    ])('forgets the sort of the rows after %s', async (_, mutation) => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+      await store.dispatch('changeSequenceSort', sortInfo)
+
+      store.commit(mutation)
+      addSequence(store, { id: 'sq5', name: 'SQ05', data: { difficulty: '10' } })
+      addSequence(store, { id: 'sq4', name: 'SQ04', data: { difficulty: '20' } })
+
+      expect(names(store.getters.displayedSequences)).toEqual(['SQ04', 'SQ05'])
+    })
+
+    test('keeps the sequences of several episodes grouped by episode', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, [
+        { ...buildSequence('sq1', 'SQ01'), episode_name: 'E02' },
+        { ...buildSequence('sq2', 'SQ02'), episode_name: 'E01' }
+      ])
+
+      addSequence(store, { id: 'sq0', name: 'SQ00', episode_name: 'E02' })
+
+      expect(names(store.getters.displayedSequences)).toEqual([
+        'SQ02',
+        'SQ00',
+        'SQ01'
+      ])
+    })
+
+    test('keeps a plain list of several episodes by name', async () => {
+      const { store } = await buildStore()
+      store.commit(LOAD_SEQUENCES_END, {
+        sequences: [
+          { ...buildSequence('sq1', 'SQ01'), episode_name: 'E02' },
+          { ...buildSequence('sq2', 'SQ02'), episode_name: 'E01' }
+        ].map(sequence => ({ ...sequence, tasks: undefined })),
+        episodeMap: new Map(),
+        production,
+        userFilters: {},
+        loadingKey: 'p1/#partial'
+      })
+
+      addSequence(store, { id: 'sq0', name: 'SQ00', episode_name: 'E02' })
+
+      expect(names(store.getters.displayedSequences)).toEqual([
+        'SQ00',
+        'SQ01',
+        'SQ02'
+      ])
+    })
+
+    describe('with default tasks', () => {
+      const buildTask = (id, entityId, statusId) => ({
+        id,
+        entity_id: entityId,
+        task_type_id: 'tt-1',
+        task_status_id: statusId,
+        assignees: [],
+        duration: 0,
+        estimation: 0
+      })
+      const statusMap = new Map([
+        ['ts-todo', { short_name: 'todo' }],
+        ['ts-wip', { short_name: 'wip' }]
+      ])
+
+      // The task map of the tasks module, which the sort reads, once
+      // buildStore has reset the modules.
+      const buildStoreWithDefaultTask = async () => {
+        let taskMap
+        const context = await buildStore(
+          {
+            productionSequenceTaskTypeIds: () => ['tt-1'],
+            taskMap: () => taskMap,
+            taskStatusMap: () => statusMap
+          },
+          {
+            createEntityTasks: ({ commit, rootGetters }, { entityId }) => {
+              const task = buildTask(`t-${entityId}`, entityId, 'ts-todo')
+              rootGetters.taskMap.set(task.id, task)
+              commit('NEW_TASK_END', {
+                task,
+                production,
+                taskTypeMap,
+                taskStatusMap: statusMap
+              })
+            }
+          }
+        )
+        const { default: tasksStore } = await import('@/store/modules/tasks')
+        taskMap = tasksStore.state.taskMap
+        return context
+      }
+
+      const loadWithTasks = (store, sequences) =>
+        store.commit('SET_SEQUENCES_WITH_TASKS', {
+          episodeMap: new Map(),
+          userFilters: {},
+          personMap: new Map(),
+          production,
+          sequences,
+          taskMap: store.getters.taskMap,
+          taskTypeMap,
+          taskStatusMap: statusMap
+        })
+
+      // Its tasks come once the sequence has joined the list, and they decide
+      // its place under a task type sort.
+      test('moves a new sequence to its place once it holds its tasks', async () => {
+        const { module, store } = await buildStoreWithDefaultTask()
+        loadWithTasks(store, [
+          { ...buildSequence('sq1', 'SQ01'), tasks: [buildTask('t1', 'sq1', 'ts-wip')] },
+          { ...buildSequence('sq2', 'SQ02'), tasks: [buildTask('t2', 'sq2', 'ts-todo')] },
+          { ...buildSequence('sq3', 'SQ03'), tasks: [buildTask('t3', 'sq3', 'ts-wip')] }
+        ])
+        await store.dispatch('changeSequenceSort', {
+          type: 'status',
+          column: 'tt-1',
+          name: 'Layout'
+        })
+        const rows = computed(() => names(store.getters.displayedSequences))
+        expect(rows.value).toEqual(['SQ02', 'SQ01', 'SQ03'])
+
+        await createSequence(store, 'sq4', 'SQ04')
+
+        expect(rows.value).toEqual(['SQ02', 'SQ04', 'SQ01', 'SQ03'])
+        expect(names(module.cache.sequences)).toEqual(rows.value)
+        expect(names(module.cache.result)).toEqual(rows.value)
+      })
+    })
+
+    test('counts the rows of a search with a new sequence', async () => {
+      const { store } = await buildStore()
+      loadSequences(store, buildSequences())
+      await store.dispatch('setSequenceSearch', 'SQ01')
+
+      await createSequence(store, 'sq4', 'SQ04')
+
+      expect(store.getters.displayedSequencesLength).toBe(2)
+    })
+
+    // An edit puts a copy of the sequence among the displayed rows, and a
+    // deleted task leaves the cached sequence only.
+    test('sends no task deleted after an edit once a live sequence joins the list', async () => {
+      const deleteAllTasks = vi.fn()
+      const { store } = await buildStore({}, { deleteAllTasks })
+      loadSequences(store, [buildSequence('sq1', 'SQ01')])
+      store.commit('EDIT_SEQUENCE_END', { id: 'sq1', name: 'SQ01' })
+      store.commit('DELETE_TASK_END', {
+        id: 'task-sq1',
+        entity_id: 'sq1',
+        task_type_id: 'tt-1'
+      })
+      addSequence(store, { id: 'sq2', name: 'SQ02' })
+
+      await store.dispatch('deleteAllSequenceTasks', {
+        projectId: 'p1',
+        taskTypeId: 'tt-1',
+        selectionOnly: true
+      })
+
+      expect(deleteAllTasks.mock.calls.map(([, payload]) => payload)).toEqual([
+        { projectId: 'p1', taskTypeId: 'tt-1', taskIds: [] }
+      ])
+    })
   })
 })
