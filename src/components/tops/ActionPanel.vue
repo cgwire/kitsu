@@ -314,6 +314,7 @@
             <div class="flexrow-item change-status-item">
               <combobox-status
                 :placeholder="$t('tasks.select_status')"
+                :production-id="statusOrderProductionId"
                 :with-margin="false"
                 :task-status-list="availableTaskStatuses"
                 v-model="taskStatusId"
@@ -1321,6 +1322,21 @@ const isHidden = computed(
 const selectedTaskIds = computed(() => Array.from(selectedTasks.value.keys()))
 const selectedValidationKeys = computed(() =>
   Array.from(selectedValidations.value.keys())
+)
+
+// One production on the pages of a production, maybe several on My Tasks.
+const selectionProductionIds = computed(() => [
+  ...new Set(
+    Array.from(selectedTasks.value.values()).map(task => task.project_id)
+  )
+])
+
+// The statuses follow the order of the production, as in the comment form of
+// a task, when the selection has a single one.
+const statusOrderProductionId = computed(() =>
+  selectionProductionIds.value.length === 1
+    ? selectionProductionIds.value[0]
+    : ''
 )
 
 const isInDepartment = computed(() =>

@@ -160,3 +160,146 @@ describe('ActionPanel, status change messages', () => {
     )
   })
 })
+
+// The list of the comment form of a task follows the order of its
+// production: the panel shows the same order.
+describe('ActionPanel, order of the statuses', () => {
+  const mountedPanels = []
+
+  const productionMap = new Map([
+    [
+      'production-1',
+      {
+        id: 'production-1',
+        task_statuses: ['status-retake', 'status-wip'],
+        task_statuses_link: {
+          'status-retake': { priority: 2 },
+          'status-wip': { priority: 1 }
+        }
+      }
+    ],
+    [
+      'production-2',
+      {
+        id: 'production-2',
+        task_statuses: ['status-retake', 'status-wip'],
+        task_statuses_link: {
+          'status-retake': { priority: 1 },
+          'status-wip': { priority: 2 }
+        }
+      }
+    ]
+  ])
+
+  const openStatusList = async (
+    path,
+    tasks,
+    currentProductionId = 'production-1'
+  ) => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        {
+          path: '/my-tasks',
+          name: 'todos',
+          component: { template: '<div />' }
+        },
+        {
+          path: '/productions/:production_id/shots',
+          name: 'shots',
+          component: { template: '<div />' }
+        }
+      ]
+    })
+    await router.push(path)
+    await router.isReady()
+    const store = createStore({
+      getters: {
+        assetsByType: () => [],
+        conceptFolders: () => [],
+        currentProduction: () => productionMap.get(currentProductionId),
+        currentUserRoleForProduction: () => () => 'manager',
+        getCustomActionsByType: () => () => [],
+        isCurrentUserAdmin: () => false,
+        isCurrentUserArtist: () => false,
+        isCurrentUserClient: () => false,
+        isDarkTheme: () => false,
+        isShowAssignations: () => true,
+        nbSelectedTasks: () => tasks.length,
+        nbSelectedValidations: () => 0,
+        productionMap: () => productionMap,
+        selectedAssets: () => new Map(),
+        selectedConcepts: () => new Map(),
+        selectedEdits: () => new Map(),
+        selectedShots: () => new Map(),
+        selectedTasks: () => new Map(tasks.map(task => [task.id, task])),
+        selectedValidations: () => new Map(),
+        taskMap: () => new Map(tasks.map(task => [task.id, task])),
+        taskStatusForCurrentUser: () => statuses,
+        taskStatusMap: () =>
+          new Map(statuses.map(status => [status.id, status])),
+        taskTypeMap: () => new Map(),
+        user: () => ({ id: 'user-1', departments: [] })
+      }
+    })
+    const wrapper = shallowMountWithI18n(ActionPanel, {
+      props: { productionId: tasks[0].project_id },
+      global: {
+        plugins: [router, store],
+        stubs: { ComboboxStatus: false }
+      }
+    })
+    await flushPromises()
+    mountedPanels.push(wrapper)
+    if (!wrapper.find('.action-bar').exists()) {
+      await wrapper.find('.status-item').trigger('click')
+    }
+    await wrapper.find('.action-bar [role="combobox"]').trigger('click')
+    return wrapper
+  }
+
+  const listedStatuses = wrapper =>
+    wrapper
+      .findAll('.action-bar [role="option"] .tag')
+      .map(tag => tag.attributes('title'))
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    mountedPanels
+      .splice(0)
+      .filter(wrapper => wrapper.exists())
+      .forEach(wrapper => wrapper.unmount())
+  })
+
+  test('follows the production of the selected tasks', async () => {
+    const wrapper = await openStatusList(
+      '/productions/production-1/shots',
+      buildTasks(2)
+    )
+
+    expect(listedStatuses(wrapper)).toEqual(['Work In Progress', 'Retake'])
+  })
+
+  // On My Tasks, the current production can be any other one.
+  test('follows the production of the selected tasks on My Tasks', async () => {
+    const wrapper = await openStatusList(
+      '/my-tasks',
+      buildTasks(2),
+      'production-2'
+    )
+
+    expect(listedStatuses(wrapper)).toEqual(['Work In Progress', 'Retake'])
+  })
+
+  test('stays sorted by name for tasks of several productions', async () => {
+    const tasks = buildTasks(2)
+    tasks[1].project_id = 'production-2'
+
+    const wrapper = await openStatusList('/my-tasks', tasks)
+
+    expect(listedStatuses(wrapper)).toEqual(['Retake', 'Work In Progress'])
+  })
+})

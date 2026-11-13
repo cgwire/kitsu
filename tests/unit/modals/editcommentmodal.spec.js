@@ -8,6 +8,8 @@ import { createStore } from 'vuex'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 
+import { shallowMountWithI18n } from '../fixtures/i18n'
+
 const store = createStore({
   getters: {
     departmentMap: () => new Map(),
@@ -131,5 +133,49 @@ describe('modals/EditCommentModal', () => {
       clipboardData: { files: [], getData: () => 'S:\\8_anim\\_lib' }
     })
     expect(confirmForm(wrapper).text).toBe('`S:\\8_anim\\_lib`')
+  })
+
+  // The comment form of a task shows the same order.
+  it('lists the statuses in the order of the production', async () => {
+    const statuses = [
+      { id: 'status-retake', name: 'Retake', short_name: 'retake' },
+      { id: 'status-wip', name: 'Work In Progress', short_name: 'wip' }
+    ]
+    const production = {
+      id: 'production-1',
+      task_statuses_link: {
+        'status-retake': { priority: 2 },
+        'status-wip': { priority: 1 }
+      }
+    }
+    const productionStore = createStore({
+      getters: {
+        currentProduction: () => production,
+        departmentMap: () => new Map(),
+        getTaskStatusForCurrentUser: () => () => [],
+        isCurrentUserClient: () => false,
+        isDarkTheme: () => false,
+        productionDepartmentIds: () => [],
+        productionMap: () => new Map([[production.id, production]]),
+        taskStatusForCurrentUser: () => statuses,
+        taskStatusMap: () =>
+          new Map(statuses.map(status => [status.id, status]))
+      }
+    })
+    wrapper.unmount()
+    wrapper = shallowMountWithI18n(EditCommentModal, {
+      global: {
+        plugins: [productionStore],
+        stubs: { ComboboxStatus: false, TextField: TextFieldStub }
+      },
+      props: { active: false, commentToEdit: null }
+    })
+    await openOn(wrapper, buildComment('comment-1', []))
+
+    await wrapper.find('[role="combobox"]').trigger('click')
+
+    expect(
+      wrapper.findAll('[role="option"] .tag').map(tag => tag.attributes('title'))
+    ).toEqual(['Work In Progress', 'Retake'])
   })
 })

@@ -16,6 +16,7 @@
         <form @submit.prevent>
           <combobox-status
             :label="$t('task_status.title')"
+            :production-id="currentProduction?.id || ''"
             :task-status-list="taskStatuses"
             v-model="form.task_status_id"
           />
@@ -240,6 +241,7 @@ const form = ref({
   link: null
 })
 
+const currentProduction = computed(() => store.getters.currentProduction)
 const getTaskStatusForCurrentUser = computed(
   () => store.getters.getTaskStatusForCurrentUser
 )
