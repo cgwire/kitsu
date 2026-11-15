@@ -12,6 +12,7 @@ vi.mock('@/store/api/client', () => ({
     getModel: vi.fn(),
     pdel: vi.fn(),
     pget: vi.fn(),
+    pgetNdjson: vi.fn(),
     ppost: vi.fn(),
     pput: vi.fn()
   }
@@ -578,6 +579,27 @@ describe('Shots store, loadShot live insertion', () => {
       { shotId: 'sh-gone', onlyInScope: true }
     )
 
+    expect(commit).not.toHaveBeenCalled()
+  })
+})
+
+describe('Shots store, loadShot failure', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // The shot page tells a missing shot from a failed load by the error.
+  test('hands a failed read to its caller', async () => {
+    const failure = Object.assign(new Error('HTTP 404'), { status: 404 })
+    vi.spyOn(shotsApi, 'getShot').mockRejectedValue(failure)
+    const commit = vi.fn()
+
+    await expect(
+      shotsStore.actions.loadShot(
+        { commit, state: {}, rootGetters: { currentProduction: { id: 'p1' } } },
+        'sh-missing'
+      )
+    ).rejects.toBe(failure)
     expect(commit).not.toHaveBeenCalled()
   })
 })
@@ -1597,7 +1619,9 @@ describe('Shots store, through a store', () => {
         taskMap: () => taskMap,
         taskStatus: () => [],
         taskStatusMap: () => new Map(),
-        taskTypeMap: () => taskTypeMap
+        taskTypeMap: () => taskTypeMap,
+        userFilterGroups: () => ({}),
+        userFilters: () => ({})
       },
       actions: rootActions
     })
@@ -1792,6 +1816,40 @@ describe('Shots store, through a store', () => {
         taskStatusStore.cache.taskStatusMap.delete('ts-wfa')
         taskStatusStore.cache.taskStatusMap.delete('ts-wip')
       }
+    })
+
+    // The list load replaces the whole list, and commits its answer only
+    // under the scope it started with.
+    test('keeps a list load started during a read by id to its scope and shots', async () => {
+      rootActions.loadSequencesWithTasks = vi.fn(() => Promise.resolve())
+      const store = buildStore({
+        isTVShow: true,
+        currentEpisode: { id: 'ep-a' }
+      })
+      client.getModel.mockResolvedValueOnce(
+        buildShot('s9', 'SH090', { episode_id: 'ep-b' })
+      )
+      let answerList
+      client.pgetNdjson.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            answerList = resolve
+          })
+      )
+
+      const reading = store.dispatch('loadShot', 's9')
+      const loading = store.dispatch('loadShots')
+      await reading
+      // The list request leaves once the load steps before it settle.
+      await new Promise(resolve => setTimeout(resolve))
+      answerList([buildShot('s1', 'SH010', { episode_id: 'ep-a' })])
+      await loading
+
+      expect(store.getters.isShotsLoading).toBe(false)
+      expect(store.getters.shotsLoadingKey).toBe('p1/ep-a')
+      expect(names(store.getters.displayedShots)).toEqual(['SH010'])
+      // The playlists read the map, not the list.
+      expect([...store.getters.shotMap.keys()]).toEqual(['s1'])
     })
   })
 

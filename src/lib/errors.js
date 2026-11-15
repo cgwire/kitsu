@@ -19,6 +19,10 @@ export const logRequestFailure = err => {
 // another session for instance.
 export const isNotFound = err => err?.status === 404
 
+// An entity deleted (404), out of the user's reach (403), or named by a
+// malformed id from a broken link (400).
+export const isMissingEntity = err => [400, 403, 404].includes(err?.status)
+
 const errors = {
   backToLogin() {
     if (window.location.pathname !== '/login') {

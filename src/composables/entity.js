@@ -1,9 +1,10 @@
 import moment from 'moment'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { isMissingEntity, logRequestFailure } from '@/lib/errors'
 import { getEntityPath } from '@/lib/path'
 import { getZoomOptions } from '@/lib/productionSchedule'
 import {
@@ -68,8 +69,14 @@ export const isListOfPageLoaded = (getters, entityType) => {
  * @param {import('vue').ComputedRef<Array>} options.entityList - the
  *   full list of entities (computed from store or page state). Caller
  *   passes a ref/computed.
- * @param {Function} options.init - reset/reload callback fired when the
- *   route params change.
+ * @param {Function} options.readEntity - reads the entity of the URL from
+ *   the store, loaded when missing: resolves to the entity, or to null when
+ *   the load did not find it, and rejects when the load fails.
+ * @param {Function} [options.onEntityRead] - called with the entity a load
+ *   of the page shows, and with true as second argument when the list loaded
+ *   for the arrows replaces it with its own object.
+ * @param {boolean} [options.isMissingReported=true] - false for a page that
+ *   leaves an entity its load did not find to the topbar.
  * @param {Function} [options.loadList] - loads the list of the page for the
  *   arrows when the store holds another one; returns a promise.
  */
@@ -77,7 +84,9 @@ export const useEntity = ({
   type,
   currentEntity,
   entityList,
-  init,
+  readEntity,
+  onEntityRead,
+  isMissingReported = true,
   loadList
 }) => {
   const route = useRoute()
@@ -116,6 +125,27 @@ export const useEntity = ({
   const scheduleItems = ref([])
   let scheduleItemsSignature = null
   const zoomOptions = computed(() => getZoomOptions(t, [1, 2, 3]))
+
+  // Why the entity of the URL is not shown: 'missing' or 'failed'.
+  const loadError = ref(null)
+  // Loads of the page: only the last one shows its result.
+  let initCount = 0
+  // A load put off until the production of the URL is set.
+  let isInitWaiting = false
+
+  // The store reads the entity, and its list, for the current production. A
+  // link to a closed production opens under another one, or none, until the
+  // topbar has loaded it; a refused one sends the user home.
+  const isRouteProduction = computed(
+    () => currentProduction.value?.id === route.params.production_id
+  )
+
+  // The title of the page while it shows no entity.
+  const loadTitle = computed(() => {
+    if (loadError.value === 'missing') return t('not_found.title')
+    if (loadError.value === 'failed') return t('main.loading_error')
+    return t('main.loading')
+  })
 
   const isListOfPage = computed(() => isListOfPageLoaded(store.getters, type))
 
@@ -295,6 +325,54 @@ export const useEntity = ({
     scheduleItems.value = [rootElement]
   }
 
+  const showEntity = (entity, isListRead) => {
+    currentEntity.value = entity
+    if (entity) {
+      onEntityRead?.(entity, isListRead)
+    } else if (isMissingReported) {
+      loadError.value = 'missing'
+    }
+  }
+
+  const init = async () => {
+    const call = ++initCount
+    loadError.value = null
+    if (!isRouteProduction.value) {
+      // The previous entity would stay shown, and editable, under this URL.
+      currentEntity.value = null
+      isInitWaiting = true
+      return
+    }
+    isInitWaiting = false
+    try {
+      const entity = await readEntity()
+      // A later load shows its own result.
+      if (call !== initCount) return
+      currentSection.value = route.query.section || 'infos'
+      showEntity(entity, false)
+    } catch (err) {
+      if (call === initCount) {
+        currentEntity.value = null
+        loadError.value = isMissingEntity(err) ? 'missing' : 'failed'
+      }
+      logRequestFailure(err)
+    }
+  }
+
+  // The list loaded holds its own object for the entity, the one the store
+  // updates from then on. Read for the load of the page that asked for the
+  // list: a later one, which may wait for another production, reads its own.
+  const readListEntity = async call => {
+    if (call !== initCount) return
+    const entity = await readEntity()
+    // A load started meanwhile shows its own result.
+    if (call !== initCount) return
+    // A list load that kept the object shown, such as one a TV show answers
+    // without loading, has nothing new to show.
+    if (entity && toRaw(entity) === toRaw(currentEntity.value)) return
+    showEntity(entity, true)
+  }
+
   const onTaskSelected = task => {
     store.dispatch('clearSelectedTasks')
     if (!currentTask.value || currentTask.value.id !== task.id) {
@@ -339,31 +417,50 @@ export const useEntity = ({
       const entityId = route.params[`${type}_id`]
       if (entityId && entityId !== initEntityId) {
         initEntityId = entityId
-        init?.()
+        init()
       }
       currentSection.value = route.query.section || 'infos'
     }
   )
 
+  watch(isRouteProduction, isCurrent => {
+    if (isCurrent && isInitWaiting) init()
+  })
+
   // Opened elsewhere than from its list (news feed, search, a reload), the
   // page shows its entity, then loads the list of its episode for the arrows.
-  // Once per entity: a URL naming another episode than the one of its entity
-  // would load a list without it again and again. A TV show page without an
-  // episode in its URL cannot tell which list it walks.
-  let listLoadEntityId = null
+  // Once per entity and episode: a URL naming another episode than the one
+  // of its entity would load a list without it again and again, and a TV
+  // show sets its episode once the topbar has loaded them, which may answer
+  // after the entity. A TV show page without an episode in its URL cannot
+  // tell which list it walks. The entity the URL leaves, still shown until
+  // the next one is read, loads no list.
+  let listLoadKey = null
   watch(
-    () =>
-      currentEntity.value && !isListOfPage.value
-        ? currentEntity.value.id
-        : null,
-    entityId => {
-      if (!loadList || !entityId || entityId === listLoadEntityId) return
+    () => {
+      if (!currentEntity.value || isListOfPage.value) return null
+      if (currentEntity.value.id !== route.params[`${type}_id`]) return null
+      const episodeId = isTVShow.value ? currentEpisode.value?.id : null
+      return `${currentEntity.value.id}/${episodeId}`
+    },
+    key => {
+      if (!loadList || !key || key === listLoadKey) return
       if (isTVShow.value && !route.params.episode_id) return
-      listLoadEntityId = entityId
-      loadList().catch(console.error)
+      listLoadKey = key
+      const call = initCount
+      loadList()
+        .then(() => readListEntity(call))
+        .catch(logRequestFailure)
     },
     { immediate: true }
   )
+
+  // Only a list without the entity loads once per entity and episode: once
+  // the list holds it, as the arrows show, a read by id extending that list
+  // later on loads it again.
+  watch(previousEntity, entity => {
+    if (entity) listLoadKey = null
+  })
 
   // Keep schedule items in sync with the current tasks list (mirrors the
   // mixin's `currentTasks` watcher with `immediate: true`).
@@ -378,6 +475,9 @@ export const useEntity = ({
   )
 
   return {
+    init,
+    loadError,
+    loadTitle,
     currentSection,
     currentTask,
     zoomLevel,

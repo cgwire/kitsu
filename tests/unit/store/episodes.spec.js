@@ -146,6 +146,10 @@ describe('Episodes store', () => {
   })
 
   describe('loadEpisode', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
     // The fetch of an episode created live may outlive a production switch:
     // the list of the production displayed now must not adopt it.
     test('drops an episode of the production left behind', async () => {
@@ -181,6 +185,25 @@ describe('Episodes store', () => {
         'ADD_EPISODE',
         expect.objectContaining({ id: 'episode-9' })
       )
+    })
+
+    // A live update of an episode deleted, or out of reach, by then.
+    test('hands a failed read to its caller', async () => {
+      const failure = Object.assign(new Error('HTTP 404'), { status: 404 })
+      vi.spyOn(shotsApi, 'getEpisode').mockRejectedValue(failure)
+      const commit = vi.fn()
+
+      await expect(
+        episodesStore.actions.loadEpisode(
+          {
+            commit,
+            state: {},
+            rootGetters: { currentProduction: { id: 'production-1' } }
+          },
+          'episode-9'
+        )
+      ).rejects.toBe(failure)
+      expect(commit).not.toHaveBeenCalled()
     })
   })
 

@@ -616,7 +616,6 @@ const actions = {
         }
         return sequence
       })
-      .catch(console.error)
   },
 
   computeSequenceStats({ commit, rootGetters }) {

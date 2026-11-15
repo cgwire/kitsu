@@ -1001,6 +1001,27 @@ describe('Assets store, loadAsset live insertion', () => {
   })
 })
 
+describe('Assets store, loadAsset failure', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // The asset page tells a missing asset from a failed load by the error.
+  test('hands a failed read to its caller', async () => {
+    const failure = Object.assign(new Error('HTTP 404'), { status: 404 })
+    vi.spyOn(assetsApi, 'getAsset').mockRejectedValue(failure)
+    const commit = vi.fn()
+
+    await expect(
+      assetsStore.actions.loadAsset(
+        { commit, state: {}, rootGetters: baseRootGetters() },
+        'a-missing'
+      )
+    ).rejects.toBe(failure)
+    expect(commit).not.toHaveBeenCalled()
+  })
+})
+
 describe('Assets store, ADD_ASSET', () => {
   // The episode column and the scope checks read asset.episode_id. The
   // single-asset payload of a TV show carries it as a string, empty for the
@@ -2019,7 +2040,8 @@ describe('Assets store, list workflow', () => {
 
   const buildStore = ({
     assetTaskTypeIds = ['tt-model', 'tt-rig'],
-    isTVShow = false
+    isTVShow = false,
+    episode = null
   } = {}) =>
     createStore({
       modules: {
@@ -2041,9 +2063,9 @@ describe('Assets store, list workflow', () => {
       },
       getters: {
         assetTypeMap: () => assetTypeMap,
-        currentEpisode: () => null,
+        currentEpisode: () => episode,
         currentProduction: () => production,
-        episodes: () => [],
+        episodes: () => (episode ? [episode] : []),
         isTVShow: () => isTVShow,
         organisation: () => ({ hours_by_day: 8 }),
         people: () => [],
@@ -2276,6 +2298,33 @@ describe('Assets store, list workflow', () => {
       store.state.assets.assetsLoadingKey = 'p1/all#shared'
       store.commit('MARK_ASSETS_PARTIAL')
       expect(store.getters.assetsLoadingKey).toBe('p1/all#shared')
+    })
+
+    // The list load replaces the whole list, and commits its answer only
+    // under the scope it started with.
+    test('leaves the scope of a list load started during a read by id', async () => {
+      const store = buildStore({ isTVShow: true, episode: { id: 'ep-a' } })
+      client.getModel.mockResolvedValueOnce(
+        buildAsset('a9', 'Lamp', { episode_id: 'ep-b' })
+      )
+      let answerList
+      client.pgetNdjson.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            answerList = resolve
+          })
+      )
+      client.pget.mockResolvedValueOnce([])
+
+      const reading = store.dispatch('loadAsset', 'a9')
+      const loading = store.dispatch('loadAssets')
+      await reading
+      answerList([buildAsset('a1', 'Rock', { episode_id: 'ep-a' })])
+      await loading
+
+      expect(store.getters.isAssetsLoading).toBe(false)
+      expect(store.getters.assetsLoadingKey).toBe('p1/ep-a')
+      expect(names(store.getters.displayedAssets)).toEqual(['Rock'])
     })
 
     test('adds an asset loaded by id with its tasks', async () => {

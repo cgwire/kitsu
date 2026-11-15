@@ -482,6 +482,28 @@ describe('Sequences store, loadSequence live insertion', () => {
   })
 })
 
+describe('Sequences store, loadSequence failure', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // The sequence page tells a missing sequence from a failed load by the
+  // error.
+  test('hands a failed read to its caller', async () => {
+    const failure = Object.assign(new Error('HTTP 404'), { status: 404 })
+    vi.spyOn(shotsApi, 'getSequence').mockRejectedValue(failure)
+    const commit = vi.fn()
+
+    await expect(
+      sequencesStore.actions.loadSequence(
+        { commit, state: {}, rootGetters: { episodeMap: new Map() } },
+        's-missing'
+      )
+    ).rejects.toBe(failure)
+    expect(commit).not.toHaveBeenCalled()
+  })
+})
+
 describe('Sequences store, ADD_SEQUENCE', () => {
   // The list load leaves the cached list and the displayed one as the same
   // array: pushing into each in place inserted the sequence twice.

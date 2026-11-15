@@ -58,7 +58,7 @@
         </router-link>
       </div>
 
-      <div class="asset-data block">
+      <div class="asset-data block" v-if="!loadError">
         <route-section-tabs
           class="section-tabs"
           :active-tab="currentSection"
@@ -444,6 +444,12 @@
           v-if="currentSection === 'output-files'"
         />
       </div>
+      <entity-load-error
+        class="asset-data block"
+        :error="loadError"
+        @reload="init()"
+        v-else
+      />
     </div>
 
     <div
@@ -549,6 +555,7 @@ import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
+import EntityLoadError from '@/components/pages/entities/EntityLoadError.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
@@ -587,7 +594,6 @@ const currentAsset = ref(null)
 const currentConcept = ref(null)
 const currentConceptStatus = ref(null)
 const currentConceptTask = ref(null)
-const localTasks = ref([])
 const playlist = ref(null)
 const scheduleWidget = ref(null)
 const castIn = reactive({ isLoading: false, isError: false })
@@ -617,11 +623,26 @@ const entityList = computed(() =>
   isListOfPageLoaded(store.getters, 'asset') ? assetStore.cache.assets : []
 )
 
-const title = computed(() =>
-  currentAsset.value
-    ? `${currentAsset.value.asset_type_name} / ${currentAsset.value.name}`
-    : t('main.loading')
-)
+const title = computed(() => {
+  if (!currentAsset.value) return loadTitle.value
+  return `${currentAsset.value.asset_type_name} / ${currentAsset.value.name}`
+})
+
+// The tasks of the asset shown, in the workflow of its type.
+const localTasks = computed(() => {
+  const asset = currentAsset.value
+  if (!asset) return []
+  return asset.tasks
+    .map(taskId => taskMap.value.get(taskId))
+    .filter(
+      task =>
+        task &&
+        store.getters.isInAssetTypeWorkflow(
+          asset.asset_type_id,
+          task.task_type_id
+        )
+    )
+})
 
 const castInShots = computed(() =>
   (currentAsset.value?.castInShotsBySequence || []).flat()
@@ -691,19 +712,8 @@ const getCurrentAsset = async () => {
   let asset = assetStore.cache.assetMap.get(assetId) || null
   if (!asset) {
     await store.dispatch('loadAsset', assetId)
-    asset = assetStore.cache.assetMap.get(assetId)
-    if (!asset) return null
+    asset = assetStore.cache.assetMap.get(assetId) || null
   }
-  localTasks.value = asset.tasks
-    .map(taskId => taskMap.value.get(taskId))
-    .filter(
-      task =>
-        task &&
-        store.getters.isInAssetTypeWorkflow(
-          asset.asset_type_id,
-          task.task_type_id
-        )
-    )
   return asset
 }
 
@@ -729,36 +739,6 @@ const loadCastingData = async () => {
 
 const scrollScheduleToStart = () => {
   scheduleWidget.value?.scrollToDate(scheduleItems.value[0].startDate)
-}
-
-const resetData = async () => {
-  castIn.isLoading = true
-  if (route.params.episode_id === 'main') {
-    store.dispatch('setCurrentEpisode', 'main')
-  }
-  // Next tick is needed to wait for the episode change.
-  await nextTick()
-  currentAsset.value = await getCurrentAsset()
-  await loadCastingData()
-}
-
-const init = async () => {
-  try {
-    const assetId = route.params.asset_id
-    const asset = await getCurrentAsset()
-    // Another asset opened during the load: its own init shows it.
-    if (route.params.asset_id !== assetId) return
-    currentAsset.value = asset
-    currentSection.value = route.query.section || 'infos'
-    if (currentAsset.value) {
-      loadCastingData()
-    } else {
-      resetData()
-    }
-    setTimeout(scrollScheduleToStart, 100)
-  } catch (err) {
-    console.error(err)
-  }
 }
 
 const assetPath = asset => ({
@@ -847,6 +827,9 @@ const selectConcept = concept => {
 }
 
 const {
+  init,
+  loadError,
+  loadTitle,
   currentSection,
   currentTask,
   zoomLevel,
@@ -862,10 +845,19 @@ const {
   type: 'asset',
   currentEntity: currentAsset,
   entityList,
-  init,
-  // The list loaded holds its own object for the asset, the one the store
-  // updates from then on.
-  loadList: () => store.dispatch('loadAssets').then(resetData)
+  readEntity: getCurrentAsset,
+  onEntityRead: (asset, isListRead) => {
+    loadCastingData()
+    if (!isListRead) setTimeout(scrollScheduleToStart, 100)
+  },
+  loadList: async () => {
+    await store.dispatch('loadAssets')
+    if (route.params.episode_id === 'main') {
+      store.dispatch('setCurrentEpisode', 'main')
+    }
+    // Next tick is needed to wait for the episode change.
+    await nextTick()
+  }
 })
 
 // Watchers

@@ -361,6 +361,28 @@ describe('Edits store, loadEdit live insertion', () => {
     expect(types).toContain('ADD_EDIT')
   })
 
+  // The list pages adopt the dataset on its recorded scope: they must refetch
+  // it rather than show an edit of another episode.
+  test('marks the list partial for an edit loaded by id out of its scope', async () => {
+    expect(
+      await committedTypes('e-scope-6', 'p-live/ep-a', {
+        id: 'e-scope-6',
+        parent_id: 'ep-b',
+        project_id: 'p-live'
+      })
+    ).toContain('MARK_EDITS_PARTIAL')
+  })
+
+  test('leaves the list whole for an edit loaded by id in its scope', async () => {
+    expect(
+      await committedTypes('e-scope-7', 'p-live/ep-a', {
+        id: 'e-scope-7',
+        parent_id: 'ep-a',
+        project_id: 'p-live'
+      })
+    ).not.toContain('MARK_EDITS_PARTIAL')
+  })
+
   // An update then a deletion within one round trip: the refresh must not
   // bring back the row the deletion removed.
   test('keeps out a displayed edit deleted during its refresh', async () => {
@@ -381,6 +403,36 @@ describe('Edits store, loadEdit live insertion', () => {
       { editId: 'e-gone', onlyInScope: true }
     )
 
+    expect(commit).not.toHaveBeenCalled()
+  })
+})
+
+describe('Edits store, loadEdit failure', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // The edit page tells a missing edit from a failed load by the error.
+  test('hands a failed read to its caller', async () => {
+    const failure = Object.assign(new Error('HTTP 404'), { status: 404 })
+    vi.spyOn(editsApi, 'getEdit').mockRejectedValue(failure)
+    const commit = vi.fn()
+
+    await expect(
+      editsStore.actions.loadEdit(
+        {
+          commit,
+          state: {},
+          rootGetters: {
+            currentProduction: { id: 'p1' },
+            personMap: new Map(),
+            taskMap: new Map(),
+            taskTypeMap: new Map()
+          }
+        },
+        'e-missing'
+      )
+    ).rejects.toBe(failure)
     expect(commit).not.toHaveBeenCalled()
   })
 })
@@ -408,6 +460,19 @@ describe('Edits store, LOAD_EDITS_START', () => {
     editsStore.mutations.LOAD_EDITS_START(state, { loadingKey: 'p1/ep-a' })
     expect(state.displayedEditsTimeSpent).toBe(0)
     expect(state.displayedEditsEstimation).toBe(0)
+  })
+})
+
+describe('Edits store, MARK_EDITS_PARTIAL', () => {
+  test('marks the recorded scope once, and nothing when none is recorded', () => {
+    const state = { editsLoadingKey: 'p1/ep-a', isEditsLoading: false }
+    editsStore.mutations.MARK_EDITS_PARTIAL(state)
+    editsStore.mutations.MARK_EDITS_PARTIAL(state)
+    expect(state.editsLoadingKey).toBe('p1/ep-a#partial')
+
+    const empty = { editsLoadingKey: null, isEditsLoading: false }
+    editsStore.mutations.MARK_EDITS_PARTIAL(empty)
+    expect(empty.editsLoadingKey).toBeNull()
   })
 })
 
@@ -803,7 +868,11 @@ describe('Edits store, through a store', () => {
     selectedEdits: new Map()
   })
 
-  const buildStore = ({ isTVShow = false, editTaskTypeIds = [] } = {}) =>
+  const buildStore = ({
+    isTVShow = false,
+    editTaskTypeIds = [],
+    episode = null
+  } = {}) =>
     createStore({
       modules: {
         edits: {
@@ -815,7 +884,9 @@ describe('Edits store, through a store', () => {
         }
       },
       getters: {
+        currentEpisode: () => episode,
         currentProduction: () => production,
+        episodes: () => (episode ? [episode] : []),
         isTVShow: () => isTVShow,
         organisation: () => ({ hours_by_day: 8 }),
         people: () => [],
@@ -824,7 +895,8 @@ describe('Edits store, through a store', () => {
         taskMap: () => taskMap,
         taskStatus: () => [],
         taskStatusMap: () => new Map(),
-        taskTypeMap: () => taskTypeMap
+        taskTypeMap: () => taskTypeMap,
+        userFilters: () => ({})
       },
       actions: rootActions
     })
@@ -936,6 +1008,38 @@ describe('Edits store, through a store', () => {
       store.dispatch('displayMoreEdits')
 
       expect(store.getters.displayedEdits).toHaveLength(PAGE_SIZE + 5)
+    })
+  })
+
+  describe('read by id', () => {
+    // The list load replaces the whole list, and commits its answer only
+    // under the scope it started with.
+    test('leaves the scope of a list load started during the read', async () => {
+      const store = buildStore({ isTVShow: true, episode: { id: 'ep-a' } })
+      editsApi.getEdit = vi.fn(() =>
+        Promise.resolve(
+          buildEdit('e9', 'E09', { parent_id: 'ep-b', project_id: 'p1' })
+        )
+      )
+      let answerList
+      editsApi.getEdits.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            answerList = resolve
+          })
+      )
+
+      const reading = store.dispatch('loadEdit', 'e9')
+      const loading = store.dispatch('loadEdits')
+      await reading
+      answerList([
+        buildEdit('e1', 'E01', { parent_id: 'ep-a', project_id: 'p1' })
+      ])
+      await loading
+
+      expect(store.getters.isEditsLoading).toBe(false)
+      expect(store.getters.editsLoadingKey).toBe('p1/ep-a')
+      expect(names(store.getters.displayedEdits)).toEqual(['E01'])
     })
   })
 

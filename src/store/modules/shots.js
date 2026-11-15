@@ -548,7 +548,6 @@ const actions = {
           if (!isInLoadedScope) commit(MARK_SHOTS_PARTIAL)
         }
       })
-      .catch(err => console.error(err))
   },
 
   newShot({ commit, dispatch, rootGetters }, shot) {
@@ -993,6 +992,9 @@ const mutations = {
     let isEstimation = false
     let isMaxRetakes = false
     let isResolution = false
+    // A shot read by id during the load joined the map without marking the
+    // scope: the list replaces the whole map.
+    cache.shotMap.clear()
     shots.forEach(shot => {
       const taskIds = []
       const validations = new Map()
@@ -1084,8 +1086,14 @@ const mutations = {
     state.shotsLoadingKey = null
   },
 
+  // A load in flight replaces the list, and drops its answer once its scope
+  // changed: it stays unmarked.
   [MARK_SHOTS_PARTIAL](state) {
-    if (state.shotsLoadingKey && !state.shotsLoadingKey.includes('#')) {
+    if (
+      state.shotsLoadingKey &&
+      !state.shotsLoadingKey.includes('#') &&
+      !state.isShotsLoading
+    ) {
       state.shotsLoadingKey = `${state.shotsLoadingKey}#partial`
     }
   },

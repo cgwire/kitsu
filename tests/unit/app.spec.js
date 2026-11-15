@@ -9,6 +9,11 @@ import auth from '@/lib/auth'
 import errors from '@/lib/errors'
 import i18n, { loadLocaleMessages } from '@/lib/i18n'
 import lang from '@/lib/lang'
+import assetsStore from '@/store/modules/assets'
+import editsStore from '@/store/modules/edits'
+import episodesStore from '@/store/modules/episodes'
+import sequencesStore from '@/store/modules/sequences'
+import shotsStore from '@/store/modules/shots'
 
 import App from '@/App.vue'
 import MetadataTextarea from '@/components/cells/MetadataTextarea.vue'
@@ -173,6 +178,123 @@ describe('App', () => {
 
       emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
       expect(reloaded()).toHaveLength(3)
+    })
+
+    // The entity may be deleted, or out of reach, by the time it loads.
+    describe.each([
+      {
+        event: 'asset:new',
+        action: 'loadAsset',
+        eventData: { asset_id: 'asset-1', project_id: 'prod-1' }
+      },
+      {
+        event: 'asset:update',
+        action: 'loadAsset',
+        eventData: { asset_id: 'asset-1', project_id: 'prod-1' },
+        map: assetsStore.cache.assetMap
+      },
+      {
+        event: 'shot:new',
+        action: 'loadShot',
+        eventData: { shot_id: 'shot-1', project_id: 'prod-1' }
+      },
+      {
+        event: 'shot:update',
+        action: 'loadShot',
+        eventData: { shot_id: 'shot-1', project_id: 'prod-1' },
+        map: shotsStore.cache.shotMap
+      },
+      {
+        event: 'sequence:new',
+        action: 'loadSequence',
+        eventData: { sequence_id: 'sequence-1', project_id: 'prod-1' }
+      },
+      {
+        event: 'sequence:update',
+        action: 'loadSequence',
+        eventData: { sequence_id: 'sequence-1', project_id: 'prod-1' },
+        map: sequencesStore.cache.sequenceMap
+      },
+      {
+        event: 'edit:new',
+        action: 'loadEdit',
+        eventData: { edit_id: 'edit-1', project_id: 'prod-1' }
+      },
+      {
+        event: 'edit:update',
+        action: 'loadEdit',
+        eventData: { edit_id: 'edit-1', project_id: 'prod-1' },
+        map: editsStore.cache.editMap
+      },
+      {
+        event: 'episode:new',
+        action: 'loadEpisode',
+        eventData: { episode_id: 'episode-1', project_id: 'prod-1' }
+      },
+      {
+        event: 'episode:update',
+        action: 'loadEpisode',
+        eventData: { episode_id: 'episode-1', project_id: 'prod-1' },
+        map: episodesStore.cache.episodeMap
+      }
+    ])('$event', ({ action, event, eventData, map }) => {
+      const id =
+        eventData.asset_id ||
+        eventData.shot_id ||
+        eventData.sequence_id ||
+        eventData.edit_id ||
+        eventData.episode_id
+
+      afterEach(() => {
+        map?.delete(id)
+        vi.useRealTimers()
+      })
+
+      // The handlers of a new entity wait a second before loading it.
+      const emitEvent = async load => {
+        map?.set(id, { id })
+        const { socket } = await mountApp({
+          actions: { [action]: load },
+          getters: {
+            currentProduction: () => ({ id: 'prod-1' }),
+            shotsLoadingKey: () => 'prod-1/'
+          }
+        })
+        vi.useFakeTimers({ toFake: ['setTimeout'] })
+        emitSocketEvent(socket, event, eventData)
+        vi.advanceTimersByTime(1000)
+      }
+
+      it('logs a failed load', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const failure = Object.assign(new Error('HTTP 404'), { status: 404 })
+        errors.markRequestFailure(failure)
+        const load = vi.fn(() => Promise.reject(failure))
+
+        const rejections = await recordUnhandledRejections(() =>
+          emitEvent(load)
+        )
+
+        expect(load).toHaveBeenCalledTimes(1)
+        expect(rejections).toEqual([])
+        expect(consoleError).toHaveBeenCalledWith(failure)
+      })
+
+      it('leaves a bug in the load to Sentry', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const bug = new TypeError('Cannot read properties of undefined')
+
+        const rejections = await recordUnhandledRejections(() =>
+          emitEvent(() => Promise.reject(bug))
+        )
+
+        expect(rejections).toEqual([bug])
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
+      })
     })
 
     // Zou builds the files of an uploaded preview in a job, and announces

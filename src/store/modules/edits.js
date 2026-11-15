@@ -33,6 +33,7 @@ import {
   LOAD_EDITS_START,
   LOAD_EDITS_ERROR,
   LOAD_EDITS_END,
+  MARK_EDITS_PARTIAL,
   SORT_VALIDATION_COLUMNS,
   EDIT_CSV_FILE_SELECTED,
   IMPORT_EDITS_END,
@@ -335,7 +336,8 @@ const actions = {
 
   // Reloads an edit after a remote change, unless it is locked by a recent
   // local update. A socket event passes { editId, onlyInScope: true } so an
-  // edit created in another episode stays out of the loaded dataset.
+  // edit created in another episode stays out of the loaded dataset. A load
+  // by id (detail page) always adds.
   loadEdit({ commit, state, rootGetters }, payload) {
     const { editId, onlyInScope = false } =
       typeof payload === 'string' ? { editId: payload } : payload
@@ -364,14 +366,12 @@ const actions = {
         // Displayed when its refresh started and gone since: deleted, or
         // dropped by a list load whose own response decides.
         if (displayedEdit) return
-        if (
-          !onlyInScope ||
-          isEpisodeInLoadedScope(
-            state.editsLoadingKey,
-            edit.parent_id,
-            edit.project_id
-          )
-        ) {
+        const isInLoadedScope = isEpisodeInLoadedScope(
+          state.editsLoadingKey,
+          edit.parent_id,
+          edit.project_id
+        )
+        if (!onlyInScope || isInLoadedScope) {
           commit(ADD_EDIT, {
             edit,
             taskTypeMap,
@@ -379,9 +379,11 @@ const actions = {
             personMap,
             production
           })
+          // A detail page loads its edit whatever the list holds: holding more
+          // than its recorded scope, the list must be refetched by its pages.
+          if (!isInLoadedScope) commit(MARK_EDITS_PARTIAL)
         }
       })
-      .catch(err => console.error(err))
   },
 
   newEdit({ commit, dispatch, rootGetters }, edit) {
@@ -610,6 +612,18 @@ const mutations = {
     state.editSearchQueries = []
 
     state.selectedEdits = new Map()
+  },
+
+  // A load in flight replaces the list, and drops its answer once its scope
+  // changed: it stays unmarked.
+  [MARK_EDITS_PARTIAL](state) {
+    if (
+      state.editsLoadingKey &&
+      !state.editsLoadingKey.includes('#') &&
+      !state.isEditsLoading
+    ) {
+      state.editsLoadingKey = `${state.editsLoadingKey}#partial`
+    }
   },
 
   [LOAD_EDITS_ERROR](state) {

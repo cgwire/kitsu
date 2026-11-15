@@ -395,19 +395,16 @@ const actions = {
     const episode = cache.episodeMap.get(episodeId)
     if (episode?.lock) return
 
-    return shotsApi
-      .getEpisode(episodeId)
-      .then(episode => {
-        // The fetch may outlive a production switch: an episode of the
-        // production left behind would stay in the list of the new one.
-        if (episode.project_id !== rootGetters.currentProduction?.id) return
-        if (cache.episodeMap.get(episode.id)) {
-          commit(UPDATE_EPISODE, episode)
-        } else {
-          commit(ADD_EPISODE, episode)
-        }
-      })
-      .catch(console.error)
+    return shotsApi.getEpisode(episodeId).then(episode => {
+      // The fetch may outlive a production switch: an episode of the
+      // production left behind would stay in the list of the new one.
+      if (episode.project_id !== rootGetters.currentProduction?.id) return
+      if (cache.episodeMap.get(episode.id)) {
+        commit(UPDATE_EPISODE, episode)
+      } else {
+        commit(ADD_EPISODE, episode)
+      }
+    })
   },
 
   // Episodes of an arbitrary production, without touching the

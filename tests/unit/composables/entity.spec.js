@@ -8,7 +8,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import '@/lib/auth'
 
 import { useEntity } from '@/composables/entity'
+import { markRequestFailure } from '@/lib/errors'
 import { parseSimpleDate } from '@/lib/time'
+
+import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
 
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
@@ -27,18 +30,22 @@ const mountEntity = async ({
   tasks = [],
   getters = {},
   actions = {},
-  init = () => {},
+  readEntity = () => Promise.resolve(entity),
+  onEntityRead,
   loadList
 } = {}) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
+      // The entity pages name the id of their entity after its type.
       {
-        path: '/productions/:production_id/episodes/:episode_id/:section/:id',
+        path: '/productions/:production_id/episodes/:episode_id/shots/:shot_id',
         component: { template: '<div />' }
       },
-      // The entity pages name the id of their entity after its type.
-      { path: '/shots/:shot_id', component: { template: '<div />' } },
+      {
+        path: '/productions/:production_id/shots/:shot_id',
+        component: { template: '<div />' }
+      },
       { path: '/:path(.*)*', component: { template: '<div />' } }
     ]
   })
@@ -87,18 +94,17 @@ const mountEntity = async ({
   let api
   const Host = defineComponent({
     setup() {
-      // As the pages: the entity shows once their init has found it.
       const currentEntity = ref(null)
       api = useEntity({
         type,
         currentEntity,
         entityList: computed(() => entities),
-        init,
+        readEntity,
+        onEntityRead,
         loadList: loadList && (() => loadList(store))
       })
-      onMounted(() => {
-        currentEntity.value = entity
-      })
+      // As the pages: the entity shows once the load has read it.
+      onMounted(() => api.init())
       return () => null
     }
   })
@@ -209,10 +215,77 @@ describe('useEntity', () => {
   describe('list of the page', () => {
     const otherList = { key: 'production-1/episode-3#partial', isLoading: false }
 
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    // The page reads its entity again once the list is loaded: deleted
+    // meanwhile, the entity fails like any request.
+    it('logs a failed list load', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = Object.assign(new Error('HTTP 404'), { status: 404 })
+      markRequestFailure(failure)
+
+      const rejections = await recordUnhandledRejections(() =>
+        mountEntity({ list: otherList, loadList: () => Promise.reject(failure) })
+      )
+
+      expect(rejections).toEqual([])
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    it('leaves a bug in the list load to Sentry', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const bug = new TypeError('Cannot read properties of undefined')
+
+      const rejections = await recordUnhandledRejections(() =>
+        mountEntity({ list: otherList, loadList: () => Promise.reject(bug) })
+      )
+
+      expect(rejections).toEqual([bug])
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
     it('loads the list of the page when the store holds another one', async () => {
       const loadList = vi.fn(() => Promise.resolve())
       await mountEntity({ list: otherList, loadList })
       expect(loadList).toHaveBeenCalledTimes(1)
+    })
+
+    it('shows the object of the list it loads', async () => {
+      const listed = { id: 'entity-1' }
+      const readEntity = vi
+        .fn()
+        .mockResolvedValueOnce(entities[1])
+        .mockResolvedValue(listed)
+      const onEntityRead = vi.fn()
+      await mountEntity({
+        list: otherList,
+        readEntity,
+        onEntityRead,
+        loadList: () => Promise.resolve()
+      })
+
+      expect(onEntityRead.mock.calls).toEqual([
+        [entities[1], false],
+        [listed, true]
+      ])
+    })
+
+    // A TV show answers the list load of a cold link without loading.
+    it('shows nothing new for a list load that keeps the entity shown', async () => {
+      const onEntityRead = vi.fn()
+      await mountEntity({
+        list: otherList,
+        onEntityRead,
+        loadList: () => Promise.resolve()
+      })
+
+      expect(onEntityRead.mock.calls).toEqual([[entities[1], false]])
     })
 
     it('offers the arrows once that list is loaded', async () => {
@@ -230,15 +303,114 @@ describe('useEntity', () => {
     // A URL whose episode is not the one of its entity: the list loaded lacks
     // the entity, which the page loads into it again.
     it('loads the list once for an entity', async () => {
+      const entity = { id: 'entity-9' }
+      let listStore = null
+      const loadList = vi.fn(store => {
+        listStore = store
+        // Loading again and again fails the test rather than hanging it.
+        if (loadList.mock.calls.length < 3) {
+          store.commit('LOAD_START', 'production-1/episode-1')
+          store.commit('LOAD_END')
+        }
+        return Promise.resolve()
+      })
+      // Read again from that list, the entity loads by id into it.
+      const readEntity = vi.fn(() => {
+        listStore?.commit('MARK_PARTIAL')
+        return Promise.resolve(entity)
+      })
+      const { neighbors } = await mountEntity({
+        path: '/productions/production-1/episodes/episode-1/shots/entity-9',
+        list: otherList,
+        readEntity,
+        loadList
+      })
+      expect(loadList).toHaveBeenCalledTimes(1)
+      expect(readEntity).toHaveBeenCalledTimes(2)
+      expect(neighbors()).toEqual([null, null])
+    })
+
+    // A read by id landing once the list is loaded, such as the late one of
+    // an entity left at once with Back, extends that list.
+    it('loads the list again once a read by id extends it', async () => {
       const loadList = vi.fn(store => {
         store.commit('LOAD_START', 'production-1/episode-1')
         store.commit('LOAD_END')
-        store.commit('MARK_PARTIAL')
         return Promise.resolve()
       })
-      const { neighbors } = await mountEntity({ list: otherList, loadList })
+      const { neighbors, store } = await mountEntity({
+        list: otherList,
+        loadList
+      })
+
+      store.commit('MARK_PARTIAL')
+      await flushPromises()
+
+      expect(loadList).toHaveBeenCalledTimes(2)
+      expect(neighbors()).toEqual(['entity-0', 'entity-2'])
+    })
+
+    // A TV show sets its episode once the topbar has loaded the episodes,
+    // which may answer after the entity.
+    it('loads the list again once the episode of the page is set', async () => {
+      const episode = ref(null)
+      const loadList = vi.fn(store => {
+        if (episode.value) {
+          store.commit('LOAD_START', 'production-1/episode-1')
+          store.commit('LOAD_END')
+        }
+        return Promise.resolve()
+      })
+      const { neighbors } = await mountEntity({
+        list: { key: null, isLoading: false },
+        getters: { currentEpisode: () => episode.value },
+        loadList
+      })
       expect(loadList).toHaveBeenCalledTimes(1)
-      expect(neighbors()).toEqual([null, null])
+
+      episode.value = { id: 'episode-1' }
+      await flushPromises()
+
+      expect(loadList).toHaveBeenCalledTimes(2)
+      expect(neighbors()).toEqual(['entity-0', 'entity-2'])
+    })
+
+    // A link to an entity of another episode: the topbar sets the episode of
+    // the URL while the page still shows the entity it leaves.
+    it('loads no list for the entity the URL leaves', async () => {
+      const episode = ref({ id: 'episode-2' })
+      let resolveRead
+      const readEntity = vi
+        .fn()
+        .mockResolvedValueOnce(entities[1])
+        .mockImplementationOnce(
+          () =>
+            new Promise(resolve => {
+              resolveRead = resolve
+            })
+        )
+        .mockResolvedValue(entities[2])
+      const loadList = vi.fn(() => Promise.resolve())
+      const { router } = await mountEntity({
+        path: '/productions/production-1/episodes/episode-2/shots/entity-1',
+        list: { key: 'production-1/episode-2', isLoading: false },
+        getters: { currentEpisode: () => episode.value },
+        readEntity,
+        loadList
+      })
+
+      await router.push(
+        '/productions/production-1/episodes/episode-1/shots/entity-2'
+      )
+      episode.value = { id: 'episode-1' }
+      await flushPromises()
+      expect(loadList).not.toHaveBeenCalled()
+
+      resolveRead(entities[2])
+      await flushPromises()
+      expect(loadList).toHaveBeenCalledTimes(1)
+      // The page reads the entity of the URL, then again from its list.
+      expect(readEntity).toHaveBeenCalledTimes(3)
     })
 
     it('loads nothing when the store holds the list of the page', async () => {
@@ -505,20 +677,21 @@ describe('useEntity', () => {
 
   describe('route', () => {
     it('reloads the page for another entity of the URL only', async () => {
-      const init = vi.fn()
+      const readEntity = vi.fn(() => Promise.resolve(entities[1]))
       const { api, router } = await mountEntity({
-        path: '/shots/entity-1',
-        init
+        path: '/productions/production-1/shots/entity-1',
+        readEntity
       })
+      expect(readEntity).toHaveBeenCalledTimes(1)
 
-      await router.push('/shots/entity-1?section=schedule')
+      await router.push('/productions/production-1/shots/entity-1?section=schedule')
       await nextTick()
-      expect(init).not.toHaveBeenCalled()
+      expect(readEntity).toHaveBeenCalledTimes(1)
       expect(api.currentSection.value).toBe('schedule')
 
-      await router.push('/shots/entity-2')
+      await router.push('/productions/production-1/shots/entity-2')
       await nextTick()
-      expect(init).toHaveBeenCalledTimes(1)
+      expect(readEntity).toHaveBeenCalledTimes(2)
       expect(api.currentSection.value).toBe('infos')
     })
   })

@@ -351,20 +351,24 @@ const socketEvents = {
       !sequenceMap.get(eventData.sequence_id) &&
       currentProduction.value?.id === eventData.project_id
     ) {
-      store.dispatch('loadSequence', {
-        sequenceId: eventData.sequence_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadSequence', {
+          sequenceId: eventData.sequence_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
   'sequence:update': eventData => {
     const sequence = sequenceMap.get(eventData.sequence_id)
     if (sequence && !sequence.lock) {
-      store.dispatch('loadSequence', {
-        sequenceId: eventData.sequence_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadSequence', {
+          sequenceId: eventData.sequence_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -379,20 +383,24 @@ const socketEvents = {
       !editMap.get(eventData.edit_id) &&
       currentProduction.value?.id === eventData.project_id
     ) {
-      store.dispatch('loadEdit', {
-        editId: eventData.edit_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadEdit', {
+          editId: eventData.edit_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
   'edit:update': eventData => {
     const edit = editMap.get(eventData.edit_id)
     if (edit && !edit.lock) {
-      store.dispatch('loadEdit', {
-        editId: eventData.edit_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadEdit', {
+          editId: eventData.edit_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -409,14 +417,18 @@ const socketEvents = {
       !episodeMap.get(eventData.episode_id) &&
       currentProduction.value?.id === eventData.project_id
     ) {
-      store.dispatch('loadEpisode', eventData.episode_id)
+      store
+        .dispatch('loadEpisode', eventData.episode_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'episode:update': eventData => {
     const episode = episodeMap.get(eventData.episode_id)
     if (episode && !episode.lock) {
-      store.dispatch('loadEpisode', eventData.episode_id)
+      store
+        .dispatch('loadEpisode', eventData.episode_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -433,10 +445,12 @@ const socketEvents = {
       isNewShotInLoadedScope(shotsLoadingKey.value, eventData.episode_id)
     ) {
       setTimeout(() => {
-        store.dispatch('loadShot', {
-          shotId: eventData.shot_id,
-          onlyInScope: true
-        })
+        store
+          .dispatch('loadShot', {
+            shotId: eventData.shot_id,
+            onlyInScope: true
+          })
+          .catch(errors.logRequestFailure)
       }, 1000)
     }
   },
@@ -451,10 +465,12 @@ const socketEvents = {
       !shot.lock &&
       currentProduction.value?.id === eventData.project_id
     ) {
-      store.dispatch('loadShot', {
-        shotId: eventData.shot_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadShot', {
+          shotId: eventData.shot_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -472,10 +488,12 @@ const socketEvents = {
       currentProduction.value?.id === eventData.project_id
     ) {
       setTimeout(() => {
-        store.dispatch('loadAsset', {
-          assetId: eventData.asset_id,
-          onlyInScope: true
-        })
+        store
+          .dispatch('loadAsset', {
+            assetId: eventData.asset_id,
+            onlyInScope: true
+          })
+          .catch(errors.logRequestFailure)
       }, 1000)
     }
   },
@@ -483,10 +501,12 @@ const socketEvents = {
   'asset:update': eventData => {
     const asset = assetMap.get(eventData.asset_id)
     if (asset && !asset.lock) {
-      store.dispatch('loadAsset', {
-        assetId: eventData.asset_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadAsset', {
+          assetId: eventData.asset_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 

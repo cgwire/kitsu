@@ -595,7 +595,6 @@ const actions = {
         }
         return asset
       })
-      .catch(console.error)
   },
 
   newAsset({ commit, dispatch, state, rootGetters }, data) {
@@ -1029,8 +1028,14 @@ const mutations = {
     state.selectedAssets = new Map()
   },
 
+  // A load in flight replaces the list, and drops its answer once its scope
+  // changed: it stays unmarked.
   [MARK_ASSETS_PARTIAL](state) {
-    if (state.assetsLoadingKey && !state.assetsLoadingKey.includes('#')) {
+    if (
+      state.assetsLoadingKey &&
+      !state.assetsLoadingKey.includes('#') &&
+      !state.isAssetsLoading
+    ) {
       state.assetsLoadingKey = `${state.assetsLoadingKey}#partial`
     }
   },
