@@ -373,6 +373,8 @@
       "login_failed": "ログインに失敗しました。認証情報を確認してください。",
       "login_inactive": "ログインに失敗しました。アカウントが無効です。",
       "login_page": "キャンセル",
+      "new_link_sent_to": "新しいリンクを次のアドレスに送信しました:",
+      "new_link_use_most_recent": "最新のメールをご利用ください。",
       "redirecting": "{count} 秒後にリダイレクトします… | {count} 秒後にリダイレクトします…",
       "reset_change_password": "パスワードを変更",
       "reset_change_password_form_failed": "入力したパスワードに問題があります。8文字以上で、確認用と一致しているかご確認ください。",
@@ -403,6 +405,8 @@
       "unable_to_verify_totp": "TOTP での認証ができませんか？",
       "unable_to_verify_email_otp": "メールでの認証ができませんか？",
       "send_email_otp": "メールで OTP を再送",
+      "send_new_link": "新しいリンクを送信",
+      "send_new_link_failed": "新しいリンクを送信できませんでした。もう一度お試しください。",
       "unable_to_verify_recovery_code": "リカバリーコードがありませんか？",
       "choose_totp": "TOTP による二要素認証コードを入力",
       "choose_email_otp": "メールによる二要素認証コードを入力",
@@ -424,7 +428,7 @@
       "oidc": "SSO ログイン",
       "set_password_title": "Kitsu へようこそ！",
       "set_password": "パスワードの設定",
-      "reset_change_password_token_failed": "パスワードリセットリンクが無効か、有効期限が切れています。手続きをやり直してください。"
+      "reset_change_password_token_failed": "このリンクは有効期限が切れているか、すでに使用されています。"
     },
     "main": {
       "technical_details": "技術的な詳細:",

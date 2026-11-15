@@ -8,7 +8,7 @@
           </h1>
         </div>
 
-        <div class="field mt2">
+        <div class="field mt2" v-if="!isTokenError">
           <input
             type="email"
             autocomplete="username"
@@ -53,7 +53,7 @@
             @click="confirmResetChangePassword"
             @keydown.enter.prevent="confirmResetChangePassword"
             @keydown.space.prevent="confirmResetChangePassword"
-            v-if="!isSuccess"
+            v-if="!isSuccess && !isTokenError"
           >
             {{
               isNew
@@ -65,7 +65,12 @@
         <p class="error" v-if="isFormError">
           {{ $t('login.reset_change_password_form_failed') }}
         </p>
-        <p class="error" v-else-if="isTokenError">
+        <p
+          ref="tokenErrorRef"
+          class="error mt2"
+          tabindex="-1"
+          v-else-if="isTokenError && !isNewLinkSent"
+        >
           {{ $t('login.reset_change_password_token_failed') }}
         </p>
         <p class="error" v-else-if="isError">
@@ -77,9 +82,37 @@
         <p class="has-text-centered mt2" v-if="isSuccess">
           {{ $t('login.redirecting', { count: secondsLeft }) }}
         </p>
+        <template v-if="isTokenError">
+          <p
+            ref="newLinkSentRef"
+            class="success mt2"
+            tabindex="-1"
+            v-if="isNewLinkSent"
+          >
+            {{ $t('login.new_link_sent_to') }}
+            <span class="sent-address">{{ route.query.email }}</span>
+            {{ $t('login.new_link_use_most_recent') }}
+          </p>
+          <p class="control mt1" v-else>
+            <a
+              class="button main-button is-fullwidth"
+              :class="{ 'is-loading': isSendingLink }"
+              role="button"
+              tabindex="0"
+              @click="sendNewLink"
+              @keydown.enter.prevent="sendNewLink"
+              @keydown.space.prevent="sendNewLink"
+            >
+              {{ $t('login.send_new_link') }}
+            </a>
+          </p>
+          <p class="error" role="alert" v-if="isSendLinkError">
+            {{ $t('login.send_new_link_failed') }}
+          </p>
+        </template>
         <p class="has-text-centered mt2">
           <router-link :to="{ name: 'login' }">
-            <span v-if="isSuccess">
+            <span v-if="isSuccess || isTokenError">
               {{ $t('login.back_to_login') }}
             </span>
             <span v-else>
@@ -95,12 +128,13 @@
 <script setup>
 import { useHead } from '@unhead/vue'
 import { LockIcon } from 'lucide-vue-next'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import auth from '@/lib/auth'
+import errors from '@/lib/errors'
 
 // Composables
 // --------------------------------------------------------------------------
@@ -120,7 +154,12 @@ const isFormError = ref(false)
 const isLoading = ref(false)
 const isSuccess = ref(false)
 const isTokenError = ref(false)
+const isNewLinkSent = ref(false)
+const isSendingLink = ref(false)
+const isSendLinkError = ref(false)
 const secondsLeft = ref(5)
+const tokenErrorRef = ref(null)
+const newLinkSentRef = ref(null)
 
 let redirectInterval = null
 
@@ -136,6 +175,13 @@ const title = computed(() =>
 
 // Functions
 // --------------------------------------------------------------------------
+
+// The field or button that had the focus goes away with the form: hand the
+// focus to the message that replaces it, so the keyboard stays on the page.
+const focusOnceShown = async elementRef => {
+  await nextTick()
+  elementRef.value?.focus()
+}
 
 const confirmResetChangePassword = async () => {
   // Enter in a field submits too, whatever the button shows, and Zou spends
@@ -167,11 +213,29 @@ const confirmResetChangePassword = async () => {
   } catch (error) {
     if (error.body?.message?.includes('Wrong or expired token')) {
       isTokenError.value = true
+      await focusOnceShown(tokenErrorRef)
     } else {
       isError.value = true
     }
   } finally {
     isLoading.value = false
+  }
+}
+
+const sendNewLink = async () => {
+  if (isSendingLink.value) return
+  isSendLinkError.value = false
+  isSendingLink.value = true
+  try {
+    await store.dispatch('resetPassword', route.query.email)
+    isNewLinkSent.value = true
+    await focusOnceShown(newLinkSentRef)
+  } catch (err) {
+    isSendLinkError.value = true
+    // The API client reported a failed request: a bug stays unhandled.
+    if (!errors.isRequestFailure(err)) throw err
+  } finally {
+    isSendingLink.value = false
   }
 }
 
@@ -193,6 +257,13 @@ useHead({ title })
 </script>
 
 <style lang="scss" scoped>
+// The box keeps one width, the 400 px cap of App.vue, while the form gives
+// way to the message of a dead link, then to the confirmation that a new
+// link was sent.
+.container {
+  width: 100%;
+}
+
 .box {
   border-radius: 1em;
 }
@@ -213,5 +284,13 @@ useHead({ title })
 
 .icon {
   padding: 0.25em;
+}
+
+// Inline, the length of the address would move the line breaks of the
+// message. On a line of its own, it never shares a line with the sentences
+// around it, and a very long one breaks inside the box.
+.sent-address {
+  display: block;
+  overflow-wrap: break-word;
 }
 </style>

@@ -373,6 +373,8 @@
       "login_failed": "Falha no login, verifique suas credenciais.",
       "login_inactive": "Falha no login, sua conta está inativa.",
       "login_page": "Cancelar",
+      "new_link_sent_to": "Um novo link foi enviado para:",
+      "new_link_use_most_recent": "Use o e-mail mais recente.",
       "redirecting": "Redirecionando em {count} segundo... | Redirecionando em {count} segundos...",
       "reset_change_password": "Alterar senha",
       "reset_change_password_form_failed": "Há um problema com a senha que você forneceu. Por favor, verifique se ela tem pelo menos 8 caracteres e se as duas senhas correspondem.",
@@ -403,6 +405,8 @@
       "unable_to_verify_totp": "Não é possível verificar com o TOTP?",
       "unable_to_verify_email_otp": "Não é possível verificar com o e-mail?",
       "send_email_otp": "Reenviar OTP por e-mail",
+      "send_new_link": "Enviar um novo link",
+      "send_new_link_failed": "Não foi possível enviar um novo link. Tente novamente.",
       "unable_to_verify_recovery_code": "Não tem um código de recuperação?",
       "choose_totp": "Digite o código de autenticação de dois fatores via TOTP",
       "choose_email_otp": "Insira o código de autenticação de dois fatores por e-mail",
@@ -424,7 +428,7 @@
       "oidc": "Login SSO",
       "set_password_title": "Bem-vindo ao Kitsu!",
       "set_password": "Defina sua senha",
-      "reset_change_password_token_failed": "O link de redefinição de senha é inválido ou expirou. Reinicie o procedimento."
+      "reset_change_password_token_failed": "Este link expirou ou já foi usado."
     },
     "main": {
       "technical_details": "Detalhes técnicos:",

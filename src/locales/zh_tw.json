@@ -373,6 +373,8 @@
       "login_failed": "登入失敗，請確認您的帳號密碼。",
       "login_inactive": "登入失敗，您的帳號已停用。",
       "login_page": "取消",
+      "new_link_sent_to": "新連結已寄送至：",
+      "new_link_use_most_recent": "請使用最新的一封電子郵件。",
       "redirecting": "{count} 秒內重新導向 | {count} 秒內重新導向",
       "reset_change_password": "更改密碼",
       "reset_change_password_form_failed": "您提供的密碼有問題。請確認密碼長度至少為 8 個字元，且兩次輸入的密碼一致。",
@@ -403,6 +405,8 @@
       "unable_to_verify_totp": "無法使用 TOTP 進行驗證？",
       "unable_to_verify_email_otp": "無法使用電子郵件驗證？",
       "send_email_otp": "透過電子郵件重新傳送 OTP",
+      "send_new_link": "寄送新連結",
+      "send_new_link_failed": "無法寄送新連結。請再試一次。",
       "unable_to_verify_recovery_code": "沒有復原碼？",
       "choose_totp": "透過 TOTP 輸入雙因素驗證碼",
       "choose_email_otp": "透過電子郵件輸入雙因素驗證碼",
@@ -424,7 +428,7 @@
       "oidc": "SSO 登入",
       "set_password_title": "歡迎來到 Kitsu！",
       "set_password": "設定您的密碼",
-      "reset_change_password_token_failed": "密碼重設連結無效或已過期。請重新啟動程序。"
+      "reset_change_password_token_failed": "此連結已過期或已被使用。"
     },
     "main": {
       "technical_details": "技術詳情：",

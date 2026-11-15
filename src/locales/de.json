@@ -373,6 +373,8 @@
       "login_failed": "Die Anmeldung ist fehlgeschlagen, bitte überprüfen Sie Ihre Zugangsdaten.",
       "login_inactive": "Die Anmeldung ist fehlgeschlagen, Ihr Konto ist inaktiv.",
       "login_page": "Abbrechen",
+      "new_link_sent_to": "Ein neuer Link wurde gesendet an:",
+      "new_link_use_most_recent": "Bitte verwenden Sie die neueste E-Mail.",
       "redirecting": "Weiterleitung in {count} Sekunde... | Weiterleitung in {count} Sekunden...",
       "reset_change_password": "Passwort ändern",
       "reset_change_password_form_failed": "Es gibt ein Problem mit dem von Ihnen angegebenen Passwort. Bitte überprüfen Sie, ob es mindestens 8 Zeichen lang ist und ob beide Passwörter übereinstimmen.",
@@ -403,6 +405,8 @@
       "unable_to_verify_totp": "Verifizierung per TOTP nicht möglich?",
       "unable_to_verify_email_otp": "Verifizierung per E-Mail nicht möglich?",
       "send_email_otp": "OTP erneut per E-Mail senden",
+      "send_new_link": "Neuen Link senden",
+      "send_new_link_failed": "Es konnte kein neuer Link gesendet werden. Bitte versuchen Sie es erneut.",
       "unable_to_verify_recovery_code": "Sie haben keinen Wiederherstellungscode?",
       "choose_totp": "Geben Sie den Code für die Zwei-Faktor-Authentifizierung per TOTP ein",
       "choose_email_otp": "Geben Sie den Code für die Zwei-Faktor-Authentifizierung per E-Mail ein",
@@ -424,7 +428,7 @@
       "oidc": "SSO-Anmeldung",
       "set_password_title": "Willkommen bei Kitsu!",
       "set_password": "Ihr Passwort festlegen",
-      "reset_change_password_token_failed": "Der Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Bitte starten Sie den Vorgang erneut."
+      "reset_change_password_token_failed": "Dieser Link ist abgelaufen oder wurde bereits verwendet."
     },
     "main": {
       "technical_details": "Technische Details:",

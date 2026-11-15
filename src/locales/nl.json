@@ -373,6 +373,8 @@
       "login_failed": "Inloggen mislukt, controleer je gegevens.",
       "login_inactive": "Inloggen mislukt, je account is inactief.",
       "login_page": "Annuleren",
+      "new_link_sent_to": "Er is een nieuwe link verstuurd naar:",
+      "new_link_use_most_recent": "Gebruik de meest recente e-mail.",
       "redirecting": "Doorsturen over {count} seconde... | Doorsturen over {count} seconden...",
       "reset_change_password": "Wachtwoord wijzigen",
       "reset_change_password_form_failed": "Er is een probleem met het ingevulde wachtwoord. Controleer of je wachtwoord minstens 8 tekens lang is en of beide wachtwoorden gelijk zijn.",
@@ -403,6 +405,8 @@
       "unable_to_verify_totp": "Kan je niet verifiëren met TOTP?",
       "unable_to_verify_email_otp": "Kan je niet verifiëren met e-mail?",
       "send_email_otp": "OTP opnieuw verzenden per e-mail",
+      "send_new_link": "Stuur me een nieuwe link",
+      "send_new_link_failed": "Kon geen nieuwe link versturen. Probeer het opnieuw.",
       "unable_to_verify_recovery_code": "Heb je geen herstelcode?",
       "choose_totp": "Tweefactorauthenticatiecode invoeren via TOTP",
       "choose_email_otp": "Tweefactorauthenticatiecode invoeren via e-mail",
@@ -424,7 +428,7 @@
       "oidc": "SSO aanmelding",
       "set_password_title": "Welkom bij Kitsu!",
       "set_password": "Wachtwoord instellen",
-      "reset_change_password_token_failed": "De link om het wachtwoord te resetten is ongeldig of verlopen. Start de procedure opnieuw."
+      "reset_change_password_token_failed": "Deze link is verlopen of al gebruikt."
     },
     "main": {
       "technical_details": "Technische details:",
