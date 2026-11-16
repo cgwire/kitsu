@@ -21,6 +21,7 @@ import {
   CLEAR_ASSETS,
   CLEAR_EDITS,
   CLEAR_SHOTS,
+  DELETE_METADATA_DESCRIPTOR_END,
   LOAD_BACKGROUNDS_END,
   LOAD_OPEN_PRODUCTIONS_END,
   LOAD_PRODUCTION_STATUS_END,
@@ -1232,6 +1233,63 @@ describe('Productions store', () => {
       expect(productionApi.removeTaskStatusFromProduction).toBeCalledTimes(1)
     })
 
+    // Someone else may rename the same column during the save: the lists then
+    // hold its values under that other name.
+    test('addMetadataDescriptor reads the old name once Zou answers', async () => {
+      const mockCommit = vi.fn()
+      const known = { id: 1, field_name: 'mood' }
+      const state = {
+        currentProduction: { id: '123', descriptors: [known] },
+        productionMap: new Map(),
+        openProductions: [],
+        productions: []
+      }
+      let answer
+      productionApi.updateMetadataDescriptor = vi.fn(
+        () =>
+          new Promise(resolve => {
+            answer = resolve
+          })
+      )
+      const saving = store.actions.addMetadataDescriptor(
+        { commit: mockCommit, state },
+        { id: 1, field_name: 'feel' }
+      )
+      known.field_name = 'tone'
+      const descriptor = { id: 1, field_name: 'feel' }
+      answer(descriptor)
+      await saving
+
+      expect(mockCommit).toHaveBeenCalledWith(UPDATE_METADATA_DESCRIPTOR_END, {
+        production: state.currentProduction,
+        previousDescriptorFieldName: 'tone',
+        descriptor
+      })
+    })
+
+    // A logout during the save empties the store.
+    test('addMetadataDescriptor ends a save answered after a logout', async () => {
+      const mockCommit = vi.fn()
+      const state = {
+        currentProduction: { id: '123', descriptors: [{ id: 1, field_name: 'mood' }] }
+      }
+      let answer
+      productionApi.updateMetadataDescriptor = vi.fn(
+        () =>
+          new Promise(resolve => {
+            answer = resolve
+          })
+      )
+      const saving = store.actions.addMetadataDescriptor(
+        { commit: mockCommit, state },
+        { id: 1, field_name: 'feel' }
+      )
+      state.currentProduction = null
+      answer({ id: 1, field_name: 'feel' })
+
+      await expect(saving).resolves.toBeUndefined()
+    })
+
     test('addMetadataDescriptor', async () => {
       let mockCommit = vi.fn()
       const productionForMap = { id: '123', descriptors: [] }
@@ -1290,7 +1348,7 @@ describe('Productions store', () => {
       expect(productionApi.getMetadataDescriptor).toBeCalledTimes(1)
       expect(productionApi.getMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', descriptor.id)
       expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_METADATA_DESCRIPTOR_END, { production: { id: 1 }, descriptor })
+      expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_METADATA_DESCRIPTOR_END, { production: { id: 1 }, previousDescriptorFieldName: 'descriptor name', descriptor })
 
       descriptor.id = '789'
       mockCommit = vi.fn()
@@ -1300,6 +1358,53 @@ describe('Productions store', () => {
       expect(productionApi.getMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', descriptor.id)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_METADATA_DESCRIPTOR_END, { production: { id: 1 }, descriptor })
+    })
+
+    // A rename made elsewhere reaches the lists with the name they hold.
+    test('refreshMetadataDescriptor gives the old field name of a renamed column', async () => {
+      const production = {
+        id: 'p1',
+        descriptors: [{ id: 'd1', entity_type: 'Shot', field_name: 'look' }]
+      }
+      const state = {
+        currentProduction: production,
+        openProductions: [production],
+        productionMap: new Map([['p1', production]])
+      }
+      const renamed = {
+        id: 'd1',
+        entity_type: 'Shot',
+        field_name: 'style',
+        project_id: 'p1'
+      }
+      productionApi.getMetadataDescriptor = vi.fn(() => Promise.resolve(renamed))
+      const commit = vi.fn()
+      await store.actions.refreshMetadataDescriptor({ commit, state }, 'd1')
+      expect(commit).toHaveBeenCalledWith(UPDATE_METADATA_DESCRIPTOR_END, {
+        production,
+        previousDescriptorFieldName: 'look',
+        descriptor: renamed
+      })
+    })
+
+    describe('dropMetadataDescriptor', () => {
+      // A column deleted elsewhere, in this production or another one. The
+      // descriptors of a production come without its id.
+      test('hands the column deleted elsewhere to the lists', () => {
+        const column = { id: 'desc-1', entity_type: 'Shot', field_name: 'notes' }
+        const production = { id: '123', descriptors: [column] }
+        const state = {
+          productions: [],
+          openProductions: [production],
+          productionMap: new Map([['123', production]])
+        }
+        const commit = vi.fn()
+        store.actions.dropMetadataDescriptor({ commit, state }, 'desc-1')
+        expect(commit).toHaveBeenCalledWith(DELETE_METADATA_DESCRIPTOR_END, {
+          id: 'desc-1',
+          descriptor: { ...column, project_id: '123' }
+        })
+      })
     })
 
     describe('deleteMetadataDescriptor', () => {
@@ -1380,6 +1485,47 @@ describe('Productions store', () => {
         expect(columnIds()).toEqual(['desc-1', 'desc-2'])
       })
 
+      // The lists drop the values of the column with it. The descriptors of a
+      // production come without its id.
+      test.each([
+        ['deletes it', () => Promise.resolve()],
+        ['no longer has it', () => Promise.reject(notFound)]
+      ])('hands the column to the lists when Zou %s', async (_, answer) => {
+        const column = production.descriptors[0]
+        const commits = []
+        productionApi.deleteMetadataDescriptor = vi.fn(answer)
+        await store.actions.deleteMetadataDescriptor(
+          { commit: (type, payload) => commits.push([type, payload]), state },
+          'desc-1'
+        )
+        expect(commits).toEqual([
+          [
+            DELETE_METADATA_DESCRIPTOR_END,
+            { id: 'desc-1', descriptor: { ...column, project_id: '123' } }
+          ]
+        ])
+      })
+
+      // A reload of the production can leave the column out meanwhile.
+      test('hands the column to the lists once the store lost it', async () => {
+        const column = production.descriptors[0]
+        const commits = []
+        productionApi.deleteMetadataDescriptor = vi.fn(() => {
+          production.descriptors = production.descriptors.slice(1)
+          return Promise.resolve()
+        })
+        await store.actions.deleteMetadataDescriptor(
+          { commit: (type, payload) => commits.push([type, payload]), state },
+          'desc-1'
+        )
+        expect(commits).toEqual([
+          [
+            DELETE_METADATA_DESCRIPTOR_END,
+            { id: 'desc-1', descriptor: { ...column, project_id: '123' } }
+          ]
+        ])
+      })
+
       test('keeps a column Zou refuses to delete', async () => {
         const refusal = Object.assign(new Error('Forbidden'), { status: 403 })
         productionApi.deleteMetadataDescriptor = vi.fn(() =>
@@ -1387,6 +1533,165 @@ describe('Productions store', () => {
         )
         await expect(run('desc-1')).rejects.toBe(refusal)
         expect(columnIds()).toEqual(['desc-1', 'desc-2'])
+      })
+    })
+
+    // Zou deletes or renames a column of all productions on the open ones
+    // only.
+    describe('Project columns of all productions', () => {
+      const budget = productionId => ({
+        id: `budget-${productionId}`,
+        project_id: productionId,
+        entity_type: 'Project',
+        field_name: 'budget'
+      })
+      let open
+      let closed
+      let state
+
+      // Runs an action through the real mutations of the module.
+      const run = (action, payload) =>
+        store.actions[action](
+          {
+            commit: (type, value) => store.mutations[type](state, value),
+            state
+          },
+          payload
+        )
+
+      // The save of a production sends its cached data along.
+      const sentDataOfNextEdit = async () => {
+        const updateProduction = vi
+          .spyOn(productionApi, 'updateProduction')
+          .mockResolvedValue({ id: 'open' })
+        await store.actions.editProduction(
+          { commit: vi.fn(), state },
+          { id: 'open', data: { studio: 'B' } }
+        )
+        return updateProduction.mock.calls[0][0].data
+      }
+
+      beforeEach(() => {
+        open = {
+          id: 'open',
+          descriptors: [budget('open')],
+          data: { budget: '100 k', studio: 'A' }
+        }
+        closed = {
+          id: 'closed',
+          descriptors: [budget('closed')],
+          data: { budget: '200 k' }
+        }
+        state = {
+          productions: [open, closed],
+          openProductions: [open],
+          productionMap: new Map([
+            ['open', open],
+            ['closed', closed]
+          ])
+        }
+      })
+
+      afterEach(() => vi.restoreAllMocks())
+
+      // The Productions page loads its list after the context: the open
+      // production is then both the map entry and a list entry, each with
+      // its own descriptors, and they share one data object.
+      const listOpenProductionApart = () => {
+        const listEntry = { ...open, descriptors: [budget('open')] }
+        state.productions = [listEntry, closed]
+        return listEntry
+      }
+
+      describe('deleteProjectMetadataByFieldName', () => {
+        beforeEach(() => {
+          vi.spyOn(
+            productionApi,
+            'deleteMetadataDescriptorOnAllProjects'
+          ).mockResolvedValue(['budget-open'])
+        })
+
+        test('clears the values of the column with it', async () => {
+          await run('deleteProjectMetadataByFieldName', 'budget')
+          expect(
+            productionApi.deleteMetadataDescriptorOnAllProjects
+          ).toHaveBeenCalledWith('budget', 'Project')
+          expect(open.descriptors).toEqual([])
+          expect(open.data).toEqual({ studio: 'A' })
+        })
+
+        test('keeps the column and the values Zou keeps', async () => {
+          await run('deleteProjectMetadataByFieldName', 'budget')
+          expect(closed.descriptors).toEqual([budget('closed')])
+          expect(closed.data).toEqual({ budget: '200 k' })
+        })
+
+        test('sends no deleted value back with the next edit', async () => {
+          await run('deleteProjectMetadataByFieldName', 'budget')
+          expect(await sentDataOfNextEdit()).toEqual({ studio: 'B' })
+        })
+
+        test('clears the column from the list entry too', async () => {
+          const listEntry = listOpenProductionApart()
+          await run('deleteProjectMetadataByFieldName', 'budget')
+          expect(open.descriptors).toEqual([])
+          expect(listEntry.descriptors).toEqual([])
+          expect(listEntry.data).toEqual({ studio: 'A' })
+        })
+      })
+
+      describe('updateProjectMetadataOnAll', () => {
+        const cost = productionId => ({
+          ...budget(productionId),
+          name: 'Cost',
+          field_name: 'cost'
+        })
+        const rename = () =>
+          run('updateProjectMetadataOnAll', {
+            fieldName: 'budget',
+            form: { name: 'Cost' }
+          })
+
+        beforeEach(() => {
+          vi.spyOn(
+            productionApi,
+            'updateMetadataDescriptorOnAllProjects'
+          ).mockResolvedValue([cost('open')])
+        })
+
+        test('moves the values of a renamed column', async () => {
+          await rename()
+          expect(
+            productionApi.updateMetadataDescriptorOnAllProjects
+          ).toHaveBeenCalledWith('budget', {
+            name: 'Cost',
+            entity_type: 'Project'
+          })
+          expect(open.descriptors).toEqual([cost('open')])
+          expect(open.data).toEqual({ cost: '100 k', studio: 'A' })
+        })
+
+        test('keeps the column and the values Zou keeps', async () => {
+          await rename()
+          expect(closed.descriptors).toEqual([budget('closed')])
+          expect(closed.data).toEqual({ budget: '200 k' })
+        })
+
+        test('sends the value under its new name with the next edit', async () => {
+          await rename()
+          expect(await sentDataOfNextEdit()).toEqual({
+            cost: '100 k',
+            studio: 'B'
+          })
+        })
+
+        test('moves the value once for the list entry too', async () => {
+          const listEntry = listOpenProductionApart()
+          await rename()
+          expect(open.descriptors).toEqual([cost('open')])
+          expect(listEntry.descriptors).toEqual([cost('open')])
+          expect(listEntry.data).toEqual({ cost: '100 k', studio: 'A' })
+        })
       })
     })
   })
@@ -1752,11 +2057,178 @@ describe('Productions store', () => {
       expect(production.descriptors[0]).toEqual(descriptor)
     })
 
+    // The live update of a rename commits the new descriptor alone.
+    test('UPDATE_METADATA_DESCRIPTOR_END on a renamed production column', () => {
+      const budget = {
+        id: 'descriptor',
+        entity_type: 'Project',
+        field_name: 'budget'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: '100 k', studio: 'A' }
+      }
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      expect(production.data).toEqual({ cost: '100 k', studio: 'A' })
+    })
+
+    // Zou moves every value but null.
+    test.each([
+      ['an empty text', ''],
+      ['0', 0],
+      ['false', false]
+    ])('UPDATE_METADATA_DESCRIPTOR_END on a renamed production column holding %s', (_, value) => {
+      const budget = {
+        id: 'descriptor',
+        entity_type: 'Project',
+        field_name: 'budget'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: value }
+      }
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      expect(production.data).toEqual({ cost: value })
+    })
+
+    // A column named "Constructor" has the field name of a property every
+    // object inherits.
+    test('UPDATE_METADATA_DESCRIPTOR_END on a renamed production column the data does not hold', () => {
+      const builder = {
+        id: 'descriptor',
+        entity_type: 'Project',
+        field_name: 'constructor'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [builder],
+        data: { studio: 'A' }
+      }
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...builder, field_name: 'builder' }
+      })
+      expect(production.data).toEqual({ studio: 'A' })
+    })
+
+    // The live update of a rename made in this tab comes after the action.
+    // A column added in this tab is one object in every copy of the
+    // production, and a reload of the context gives the copies their own data.
+    test('UPDATE_METADATA_DESCRIPTOR_END on copies that share the column', () => {
+      const budget = {
+        id: 'descriptor',
+        entity_type: 'Project',
+        field_name: 'budget'
+      }
+      const inMap = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: '100 k' }
+      }
+      const inList = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: '100 k' }
+      }
+      state.productions = [inList]
+      state.productionMap.set('production-id', inMap)
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production: inMap,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      expect(inMap.data).toEqual({ cost: '100 k' })
+      expect(inList.data).toEqual({ cost: '100 k' })
+    })
+
+    test('UPDATE_METADATA_DESCRIPTOR_END twice for the same rename', () => {
+      const budget = {
+        id: 'descriptor',
+        entity_type: 'Project',
+        field_name: 'budget'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: '100 k' }
+      }
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      expect(production.data).toEqual({ cost: '100 k' })
+    })
+
+    // A shot column keeps its values on the shots, even when the production
+    // data holds a key of the same name for a Project column.
+    test('UPDATE_METADATA_DESCRIPTOR_END on a renamed shot column', () => {
+      const budget = {
+        id: 'descriptor',
+        entity_type: 'Shot',
+        field_name: 'budget'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: '100 k' }
+      }
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      expect(production.data).toEqual({ budget: '100 k' })
+    })
+
     test('DELETE_METADATA_DESCRIPTOR_END', () => {
       const descriptor = { id: 'descriptor', field_name: 'new descriptor' }
       state.openProductions = [{ id: 'production-id', descriptors: [descriptor] }]
       store.mutations.DELETE_METADATA_DESCRIPTOR_END(state, descriptor)
       expect(state.openProductions[0].descriptors).toHaveLength(0)
+    })
+
+    // The live update of a deletion commits the id of the column alone.
+    test('DELETE_METADATA_DESCRIPTOR_END on a production column', () => {
+      const production = {
+        id: 'production-id',
+        descriptors: [
+          { id: 'descriptor', entity_type: 'Project', field_name: 'budget' }
+        ],
+        data: { budget: '100 k', studio: 'A' }
+      }
+      state.openProductions = [production]
+      store.mutations.DELETE_METADATA_DESCRIPTOR_END(state, { id: 'descriptor' })
+      expect(production.descriptors).toHaveLength(0)
+      expect(production.data).toEqual({ studio: 'A' })
+    })
+
+    // A shot column keeps its values on the shots, even when the production
+    // data holds a key of the same name for a Project column.
+    test('DELETE_METADATA_DESCRIPTOR_END on a shot column', () => {
+      const descriptor = {
+        id: 'descriptor',
+        entity_type: 'Shot',
+        field_name: 'budget'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [descriptor],
+        data: { budget: '100 k' }
+      }
+      state.openProductions = [production]
+      store.mutations.DELETE_METADATA_DESCRIPTOR_END(state, descriptor)
+      expect(production.descriptors).toHaveLength(0)
+      expect(production.data).toEqual({ budget: '100 k' })
     })
 
     test('ASSIGN_TASKS', () => {

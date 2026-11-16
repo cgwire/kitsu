@@ -707,6 +707,23 @@ describe('App', () => {
       })
     })
 
+    // A column deleted elsewhere, in this production or another one.
+    it('drops a column deleted elsewhere', async () => {
+      const dropMetadataDescriptor = vi.fn()
+      const { socket } = await mountApp({ actions: { dropMetadataDescriptor } })
+
+      emitSocketEvent(socket, 'metadata-descriptor:delete', {
+        metadata_descriptor_id: 'descriptor-1',
+        project_id: 'prod-2'
+      })
+      await flushPromises()
+
+      expect(dropMetadataDescriptor).toHaveBeenCalledWith(
+        expect.anything(),
+        'descriptor-1'
+      )
+    })
+
     // The record may be deleted, or the network down, by the time it
     // reloads: the API client reports the failed request, the handler only
     // logs it. Anything else is a bug, left to Sentry.

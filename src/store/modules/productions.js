@@ -1,3 +1,4 @@
+import { hasDataValue } from '@/lib/descriptors'
 import { isNotFound } from '@/lib/errors'
 import {
   addToIdList,
@@ -864,13 +865,15 @@ const actions = {
 
   addMetadataDescriptor({ commit, state }, descriptor) {
     if (descriptor.id) {
-      const previousDescriptorFieldName =
-        state.currentProduction.descriptors.find(
-          d => d.id === descriptor.id
-        )?.field_name
       return productionsApi
         .updateMetadataDescriptor(state.currentProduction.id, descriptor)
         .then(descriptor => {
+          // Read once Zou answers, as the productions do: a rename of this
+          // column by someone else may have come in during the save.
+          const previousDescriptorFieldName =
+            state.currentProduction?.descriptors?.find(
+              d => d.id === descriptor.id
+            )?.field_name
           commit(UPDATE_METADATA_DESCRIPTOR_END, {
             production: state.currentProduction,
             previousDescriptorFieldName,
@@ -991,6 +994,12 @@ const actions = {
 
   deleteMetadataDescriptor({ commit, state }, descriptorId) {
     const productionId = state.currentProduction.id
+    // Read before the request, while the store still lists the column. The
+    // descriptors of a production come without its id.
+    const known = state.currentProduction.descriptors?.find(
+      d => d.id === descriptorId
+    )
+    const descriptor = known && { ...known, project_id: productionId }
     return productionsApi
       .deleteMetadataDescriptor(productionId, descriptorId)
       .catch(err => {
@@ -1005,8 +1014,21 @@ const actions = {
         }
       })
       .then(() => {
-        commit(DELETE_METADATA_DESCRIPTOR_END, { id: descriptorId })
+        commit(DELETE_METADATA_DESCRIPTOR_END, { id: descriptorId, descriptor })
       })
+  },
+
+  // A column deleted elsewhere, in this production or another one: the lists
+  // drop its values with it.
+  dropMetadataDescriptor({ commit, state }, descriptorId) {
+    let descriptor
+    forEachProductionObjectInState(state, production => {
+      const known = production.descriptors?.find(d => d.id === descriptorId)
+      if (known && !descriptor) {
+        descriptor = { ...known, project_id: production.id }
+      }
+    })
+    commit(DELETE_METADATA_DESCRIPTOR_END, { id: descriptorId, descriptor })
   },
 
   refreshMetadataDescriptor({ commit, state }, descriptorId) {
@@ -1025,7 +1047,8 @@ const actions = {
             descriptorMap.set(desc.id, desc)
           })
         })
-        if (!descriptorMap.get(descriptor.id)) {
+        const known = descriptorMap.get(descriptor.id)
+        if (!known) {
           commit(ADD_METADATA_DESCRIPTOR_END, {
             production: state.productionMap.get(descriptor.project_id),
             descriptor
@@ -1033,6 +1056,7 @@ const actions = {
         } else {
           commit(UPDATE_METADATA_DESCRIPTOR_END, {
             production: state.productionMap.get(descriptor.project_id),
+            previousDescriptorFieldName: known.field_name,
             descriptor
           })
         }
@@ -1451,12 +1475,35 @@ const mutations = {
     if (!pid) {
       return
     }
+    // Read before any update: the copies of a production can share the
+    // descriptor object that the first update changes.
+    let previousFieldName
+    forEachProductionAlias(
+      state,
+      pid,
+      p => {
+        previousFieldName =
+          previousFieldName ||
+          p.descriptors?.find(d => d.id === descriptor.id)?.field_name
+      },
+      production
+    )
+    const isRenamedProjectColumn =
+      descriptor.entity_type === 'Project' &&
+      previousFieldName &&
+      previousFieldName !== descriptor.field_name
     forEachProductionAlias(
       state,
       pid,
       p => {
         if (p.descriptors) {
           updateModelFromList(p.descriptors, descriptor)
+        }
+        // Zou moves the values of a renamed Project column to its new field
+        // name in the data of the production.
+        if (isRenamedProjectColumn && hasDataValue(p.data, previousFieldName)) {
+          p.data[descriptor.field_name] = p.data[previousFieldName]
+          delete p.data[previousFieldName]
         }
       },
       production
@@ -1465,8 +1512,14 @@ const mutations = {
 
   [DELETE_METADATA_DESCRIPTOR_END](state, { id }) {
     forEachProductionObjectInState(state, p => {
-      if (p.descriptors?.some(d => d.id === id)) {
+      const descriptor = p.descriptors?.find(d => d.id === id)
+      if (descriptor) {
         p.descriptors = removeModelFromList(p.descriptors, { id })
+        // A Project column keeps its values in the data of the production,
+        // which Zou clears with the column.
+        if (descriptor.entity_type === 'Project' && p.data) {
+          delete p.data[descriptor.field_name]
+        }
       }
     })
   },

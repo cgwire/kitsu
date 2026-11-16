@@ -35,6 +35,7 @@ import {
   ADD_SELECTED_TASKS,
   CLEAR_SELECTED_TASKS,
   CREATE_TASKS_END,
+  DELETE_METADATA_DESCRIPTOR_END,
   DELETE_TASK_END,
   EDIT_CSV_FILE_SELECTED,
   EDIT_EDIT_END,
@@ -1666,16 +1667,113 @@ describe('Edits store, through a store', () => {
       load(store, [buildEdit('e1', 'E01', { data: { look: 'warm' } })])
 
       store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
-        descriptor: { entity_type: 'Shot', field_name: 'style' },
+        descriptor: {
+          entity_type: 'Shot',
+          field_name: 'style',
+          project_id: 'p1'
+        },
         previousDescriptorFieldName: 'look'
       })
       expect(store.getters.editMap.get('e1').data).toEqual({ look: 'warm' })
 
       store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
-        descriptor: { entity_type: 'Edit', field_name: 'style' },
+        descriptor: {
+          entity_type: 'Edit',
+          field_name: 'style',
+          project_id: 'p1'
+        },
         previousDescriptorFieldName: 'look'
       })
       expect(store.getters.editMap.get('e1').data).toEqual({ style: 'warm' })
+    })
+
+    test('drops the data of a deleted edit descriptor of its production', () => {
+      const store = buildStore()
+      load(store, [
+        buildEdit('e1', 'E01', {
+          project_id: 'p1',
+          data: { look: 'warm', mood: 'calm' }
+        })
+      ])
+      const drop = (entityType, projectId) =>
+        store.commit(DELETE_METADATA_DESCRIPTOR_END, {
+          id: 'd1',
+          descriptor: {
+            id: 'd1',
+            entity_type: entityType,
+            field_name: 'look',
+            project_id: projectId
+          }
+        })
+
+      drop('Shot', 'p1')
+      drop('Edit', 'p2')
+      expect(store.getters.editMap.get('e1').data).toEqual({
+        look: 'warm',
+        mood: 'calm'
+      })
+
+      drop('Edit', 'p1')
+      expect(store.getters.editMap.get('e1').data).toEqual({ mood: 'calm' })
+    })
+
+    // Someone else deletes or renames a column while the list loads: Zou may
+    // have built its answer before.
+    test('replays the column changes made during a list load', async () => {
+      const store = buildStore()
+      let answerList
+      editsApi.getEdits.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            answerList = resolve
+          })
+      )
+
+      const loading = store.dispatch('loadEdits')
+      store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
+        descriptor: { entity_type: 'Edit', field_name: 'style', project_id: 'p1' },
+        previousDescriptorFieldName: 'look'
+      })
+      store.commit(DELETE_METADATA_DESCRIPTOR_END, {
+        id: 'd1',
+        descriptor: { id: 'd1', entity_type: 'Edit', field_name: 'notes', project_id: 'p1' }
+      })
+      answerList([
+        buildEdit('e1', 'E01', {
+          project_id: 'p1',
+          data: { look: 'warm', notes: 'n', mood: 'calm' }
+        })
+      ])
+      await loading
+
+      expect(store.getters.editMap.get('e1').data).toEqual({
+        style: 'warm',
+        mood: 'calm'
+      })
+    })
+
+    // A load started after a change gets what Zou wrote since, such as a
+    // column created again under the old name.
+    test('replays no column change made before a list load', async () => {
+      const store = buildStore()
+      store.commit(DELETE_METADATA_DESCRIPTOR_END, {
+        id: 'd1',
+        descriptor: { id: 'd1', entity_type: 'Edit', field_name: 'notes', project_id: 'p1' }
+      })
+      editsApi.getEdits.mockImplementationOnce(() =>
+        Promise.resolve([
+          buildEdit('e1', 'E01', {
+            project_id: 'p1',
+            data: { notes: 'new column' }
+          })
+        ])
+      )
+
+      await store.dispatch('loadEdits')
+
+      expect(store.getters.editMap.get('e1').data).toEqual({
+        notes: 'new column'
+      })
     })
 
     test('imports a CSV file of edits', async () => {

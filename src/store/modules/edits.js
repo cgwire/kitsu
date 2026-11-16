@@ -8,7 +8,14 @@ import taskTypesStore from '@/store/modules/tasktypes'
 import taskStatusStore from '@/store/modules/taskstatus'
 
 import { getEntityCsvLines } from '@/lib/csv'
-import { getExportDescriptors } from '@/lib/descriptors'
+import {
+  createColumnChangeLog,
+  getExportDescriptors,
+  logColumnChange,
+  removeMetadataField,
+  renameMetadataField,
+  replayColumnChanges
+} from '@/lib/descriptors'
 import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
@@ -54,6 +61,7 @@ import {
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
   ADD_SELECTED_TASKS,
+  DELETE_METADATA_DESCRIPTOR_END,
   DELETE_TASK_END,
   CLEAR_SELECTED_TASKS,
   SET_PREVIEW,
@@ -73,6 +81,9 @@ import {
 const cache = {
   // Edits deleted while a list load runs: its response may still hold them.
   removedEditIds: new Set(),
+  // Columns deleted or renamed: a list load replays on its response the
+  // ones logged while it ran.
+  columnChanges: createColumnChangeLog(),
   edits: [],
   editIndex: [],
   editsLoadingPromise: null,
@@ -301,6 +312,7 @@ const actions = {
     }
 
     commit(LOAD_EDITS_START, { loadingKey })
+    const columnChangesSeen = cache.columnChanges.count
     const loadingPromise = editsApi
       .getEdits(production, episode)
       .then(edits => {
@@ -314,6 +326,7 @@ const actions = {
         commit(LOAD_EDITS_END, {
           production,
           edits,
+          columnChangesSeen,
           userFilters,
           personMap,
           taskMap,
@@ -643,11 +656,26 @@ const mutations = {
 
   [LOAD_EDITS_END](
     state,
-    { production, edits, userFilters, taskMap, taskTypeMap, personMap }
+    {
+      production,
+      edits,
+      columnChangesSeen,
+      userFilters,
+      taskMap,
+      taskTypeMap,
+      personMap
+    }
   ) {
     // Deleted during the load, after the response was built.
     edits = edits.filter(({ id }) => !cache.removedEditIds.has(id))
     cache.removedEditIds.clear()
+    // A column deleted or renamed during the load: the response may predate it.
+    replayColumnChanges(
+      edits,
+      cache.columnChanges,
+      columnChangesSeen,
+      production.id
+    )
     const validationColumns = {}
     let isDescription = false
     let isTime = false
@@ -1074,12 +1102,19 @@ const mutations = {
       previousDescriptorFieldName &&
       previousDescriptorFieldName !== descriptor.field_name
     ) {
-      cache.edits.forEach(edit => {
-        const data = { ...edit.data }
-        data[descriptor.field_name] = data[previousDescriptorFieldName]
-        delete data[previousDescriptorFieldName]
-        edit.data = data
-      })
+      renameMetadataField(cache.edits, descriptor, previousDescriptorFieldName)
+      logColumnChange(
+        cache.columnChanges,
+        descriptor,
+        previousDescriptorFieldName
+      )
+    }
+  },
+
+  [DELETE_METADATA_DESCRIPTOR_END](state, { descriptor }) {
+    if (descriptor?.entity_type === 'Edit') {
+      removeMetadataField(cache.edits, descriptor)
+      logColumnChange(cache.columnChanges, descriptor)
     }
   },
 

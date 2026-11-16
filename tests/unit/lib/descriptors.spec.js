@@ -1,12 +1,18 @@
 // @vitest-environment node
 
 import {
+  createColumnChangeLog,
+  dropRemovedDataKeys,
   getDescriptorChoicesOptions,
   getDescriptorFieldName,
   getExportDescriptors,
   getMetadataChecklistValues,
   getMetadataFieldValue,
-  isBuiltInFieldName
+  isBuiltInFieldName,
+  logColumnChange,
+  removeMetadataField,
+  renameMetadataField,
+  replayColumnChanges
 } from '@/lib/descriptors'
 
 describe('lib/descriptors', () => {
@@ -178,6 +184,252 @@ describe('lib/descriptors', () => {
     test('leaves the project and task columns free', () => {
       expect(isBuiltInFieldName('Project', 'resolution')).toBe(false)
       expect(isBuiltInFieldName('Task', 'fps')).toBe(false)
+    })
+  })
+
+  describe('renameMetadataField', () => {
+    const style = { field_name: 'style', project_id: 'p1' }
+
+    test('moves a value to the new field name in its production', () => {
+      const shots = [
+        { id: 's1', production_id: 'p1', data: { look: 'warm', mood: 'calm' } },
+        { id: 's2', production_id: 'p1', data: { mood: 'dark' } },
+        { id: 's3', production_id: 'p1', data: { look: null } },
+        { id: 's4', production_id: 'p1' },
+        { id: 's5', production_id: 'p1', data: null }
+      ]
+      renameMetadataField(shots, style, 'look')
+      expect(shots.map(({ data }) => data)).toEqual([
+        { style: 'warm', mood: 'calm' },
+        { mood: 'dark' },
+        { look: null },
+        undefined,
+        null
+      ])
+    })
+
+    // A shared asset of another production shows in the list of this one.
+    test('leaves the entities of another production', () => {
+      const assets = [
+        { id: 'a1', production_id: 'p1', data: { look: 'warm' } },
+        {
+          id: 'a2',
+          project_id: 'p2',
+          production_id: 'p1',
+          data: { look: 'wild' }
+        }
+      ]
+      renameMetadataField(assets, style, 'look')
+      expect(assets.map(({ data }) => data)).toEqual([
+        { style: 'warm' },
+        { look: 'wild' }
+      ])
+    })
+
+    // Zou moves every value but null.
+    test('moves an empty text, 0, and false', () => {
+      const shots = [
+        { id: 's1', production_id: 'p1', data: { look: '' } },
+        { id: 's2', production_id: 'p1', data: { look: 0 } },
+        { id: 's3', production_id: 'p1', data: { look: false } }
+      ]
+      renameMetadataField(shots, style, 'look')
+      expect(shots.map(({ data }) => data)).toEqual([
+        { style: '' },
+        { style: 0 },
+        { style: false }
+      ])
+    })
+
+    // A column named "Constructor" has the field name of a property every
+    // object inherits.
+    test('moves no value the data does not hold', () => {
+      const builder = { field_name: 'builder', project_id: 'p1' }
+      const shots = [
+        { id: 's1', production_id: 'p1', data: {} },
+        { id: 's2', production_id: 'p1', data: { constructor: 'Ann' } }
+      ]
+      renameMetadataField(shots, builder, 'constructor')
+      expect(shots.map(({ data }) => data)).toEqual([{}, { builder: 'Ann' }])
+    })
+
+    // The live update of a rename made in this tab can come before the
+    // answer to the rename.
+    test('moves a value once for the same rename', () => {
+      const shots = [{ id: 's1', production_id: 'p1', data: { look: 'warm' } }]
+      renameMetadataField(shots, style, 'look')
+      renameMetadataField(shots, style, 'look')
+      expect(shots[0].data).toEqual({ style: 'warm' })
+    })
+
+    // The rows of a list can hold a copy of an entity that shares its data.
+    test('changes the data the copies of an entity share', () => {
+      const shot = { id: 's1', production_id: 'p1', data: { look: 'warm' } }
+      const copy = { ...shot }
+      renameMetadataField([shot], style, 'look')
+      expect(copy.data).toEqual({ style: 'warm' })
+    })
+  })
+
+  describe('removeMetadataField', () => {
+    const notes = { field_name: 'notes', project_id: 'p1' }
+
+    test('removes the value of the column in its production', () => {
+      const assets = [
+        { id: 'a1', production_id: 'p1', data: { notes: 'a', mood: 'calm' } },
+        {
+          id: 'a2',
+          project_id: 'p2',
+          production_id: 'p1',
+          data: { notes: 'b' }
+        },
+        { id: 'a3', production_id: 'p1' }
+      ]
+      removeMetadataField(assets, notes)
+      expect(assets.map(({ data }) => data)).toEqual([
+        { mood: 'calm' },
+        { notes: 'b' },
+        undefined
+      ])
+    })
+
+    test('changes the data the copies of an entity share', () => {
+      const shot = { id: 's1', production_id: 'p1', data: { notes: 'a' } }
+      const copy = { ...shot }
+      removeMetadataField([shot], notes)
+      expect(copy.data).toEqual({})
+    })
+  })
+  // A list load replaces the cached entities with a payload Zou may have
+  // built before a column was deleted or renamed.
+  describe('replayColumnChanges', () => {
+    const notes = { field_name: 'notes', project_id: 'p1' }
+    const tone = { field_name: 'tone', project_id: 'p1' }
+
+    test('replays the changes logged since the load started', () => {
+      const log = createColumnChangeLog()
+      logColumnChange(log, { field_name: 'size', project_id: 'p1' })
+      const since = log.count
+      logColumnChange(log, tone, 'mood')
+      logColumnChange(log, notes)
+      // Zou lists some entities without their production.
+      const shots = [{ id: 's1', data: { mood: 'calm', notes: 'n', size: 'big' } }]
+      replayColumnChanges(shots, log, since, 'p1')
+      expect(shots[0].data).toEqual({ tone: 'calm', size: 'big' })
+    })
+
+    // A shared asset of another production shows in the list of this one.
+    test('leaves the entities of another production', () => {
+      const log = createColumnChangeLog()
+      logColumnChange(log, notes)
+      const assets = [{ id: 'a2', project_id: 'p2', data: { notes: 'n' } }]
+      replayColumnChanges(assets, log, 0, 'p1')
+      expect(assets[0].data).toEqual({ notes: 'n' })
+    })
+
+    // The productions store updates its descriptors in place.
+    test('replays a change as it was logged', () => {
+      const log = createColumnChangeLog()
+      const descriptor = { field_name: 'tone', project_id: 'p1' }
+      logColumnChange(log, descriptor, 'mood')
+      descriptor.field_name = 'feel'
+      const shots = [{ id: 's1', production_id: 'p1', data: { mood: 'calm' } }]
+      replayColumnChanges(shots, log, 0)
+      expect(shots[0].data).toEqual({ tone: 'calm' })
+    })
+
+    test('keeps the last hundred changes only', () => {
+      const log = createColumnChangeLog()
+      logColumnChange(log, { field_name: 'size', project_id: 'p1' })
+      Array.from({ length: 100 }, (_, index) =>
+        logColumnChange(log, { field_name: `extra${index}`, project_id: 'p1' })
+      )
+      const shots = [{ id: 's1', production_id: 'p1', data: { size: 'big' } }]
+      replayColumnChanges(shots, log, 0)
+      expect(shots[0].data).toEqual({ size: 'big' })
+      expect(log.changes).toHaveLength(100)
+    })
+
+    test('replays nothing for a load that did not mark its start', () => {
+      const log = createColumnChangeLog()
+      logColumnChange(log, notes)
+      const shots = [{ id: 's1', production_id: 'p1', data: { notes: 'n' } }]
+      replayColumnChanges(shots, log, undefined)
+      expect(shots[0].data).toEqual({ notes: 'n' })
+    })
+  })
+
+  // An edit modal sends a copy of the entity data made when it opened, and
+  // Zou merges the data it gets.
+  describe('dropRemovedDataKeys', () => {
+    test('drops the keys the entity lost since the form was filled', () => {
+      // Since then, mood was renamed to tone, and notes deleted, then created
+      // again.
+      const entityData = { tone: 'calm', size: 'big' }
+      const formData = { mood: 'calm', notes: 'n', size: 'huge', look: '' }
+      expect(
+        dropRemovedDataKeys(formData, ['mood', 'notes', 'size'], entityData, [
+          'tone',
+          'notes',
+          'size',
+          'look'
+        ])
+      ).toEqual({ size: 'huge', look: '' })
+    })
+
+    // Zou moves no null value on a rename: the entity keeps the old key.
+    test('drops a key the entity kept for a column renamed since', () => {
+      expect(
+        dropRemovedDataKeys(
+          { notes: 'n', size: 'big' },
+          ['notes', 'size'],
+          { notes: null, size: 'big' },
+          ['remarks', 'size']
+        )
+      ).toEqual({ size: 'big' })
+    })
+
+    test('keeps a key the entity holds with no value', () => {
+      expect(
+        dropRemovedDataKeys({ notes: 'n' }, ['notes'], { notes: null }, [
+          'notes'
+        ])
+      ).toEqual({ notes: 'n' })
+    })
+
+    // A column named "Constructor" gets the field name of a property every
+    // object inherits: here it was deleted, then created again.
+    test('drops a lost key named after an inherited property', () => {
+      expect(
+        dropRemovedDataKeys({ constructor: 'c' }, ['constructor'], {}, [
+          'constructor'
+        ])
+      ).toEqual({})
+    })
+
+    // A field empty at opening has no key in the entity data, and a creation
+    // has no entity yet.
+    test('keeps a value typed for a column', () => {
+      expect(dropRemovedDataKeys({ look: 'warm' }, [], undefined, ['look'])).toEqual(
+        { look: 'warm' }
+      )
+    })
+
+    test('drops a value typed for a column deleted or renamed since', () => {
+      // look was renamed to style, and notes deleted.
+      expect(
+        dropRemovedDataKeys({ look: 'warm', notes: 'n', mood: 'calm' }, [], {}, [
+          'style',
+          'mood'
+        ])
+      ).toEqual({ mood: 'calm' })
+    })
+
+    // The edit modals write the resolution in the data, which is no column.
+    test('keeps a built-in field typed', () => {
+      expect(dropRemovedDataKeys({ resolution: '4K' }, [], {}, [])).toEqual({
+        resolution: '4K'
+      })
     })
   })
 })

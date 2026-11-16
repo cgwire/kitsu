@@ -35,6 +35,107 @@ export const getMetadataFieldValue = (descriptor, entity) => {
   return ''
 }
 
+// A shared asset keeps the id of its own production. The list loads give the
+// other entities the id of the production they show, as some lists come
+// without one: a payload replayed before that gets the production it was
+// loaded for.
+const getEntityProductionId = (entity, productionId) =>
+  entity.project_id ?? entity.production_id ?? productionId
+
+// A column named "Constructor" has the field name of a property every object
+// inherits: a value counts only when the data holds it.
+export const hasDataValue = (data, fieldName) =>
+  Object.keys(data ?? {}).includes(fieldName) && data[fieldName] != null
+
+// Zou moves the value of a renamed column to its new field name, in the
+// production of the column, when there is one. The data changes in place: a
+// list row can hold a copy of the entity that shares it.
+export const renameMetadataField = (
+  entities,
+  descriptor,
+  oldFieldName,
+  productionId
+) => {
+  entities.forEach(entity => {
+    if (
+      getEntityProductionId(entity, productionId) === descriptor.project_id &&
+      hasDataValue(entity.data, oldFieldName)
+    ) {
+      entity.data[descriptor.field_name] = entity.data[oldFieldName]
+      delete entity.data[oldFieldName]
+    }
+  })
+}
+
+// Zou clears the values of a deleted column in its production.
+export const removeMetadataField = (entities, descriptor, productionId) => {
+  entities.forEach(entity => {
+    if (
+      getEntityProductionId(entity, productionId) === descriptor.project_id &&
+      entity.data
+    ) {
+      delete entity.data[descriptor.field_name]
+    }
+  })
+}
+
+// A list load replaces the cached entities with a payload Zou may have built
+// before a column was deleted or renamed. Each list store logs these changes,
+// and a load replays the ones logged after it started.
+const MAX_LOGGED_COLUMN_CHANGES = 100
+
+export const createColumnChangeLog = () => ({ count: 0, changes: [] })
+
+export const logColumnChange = (log, descriptor, previousFieldName) => {
+  log.count += 1
+  // A copy: the productions store updates its descriptors in place.
+  log.changes.push({
+    index: log.count,
+    descriptor: { ...descriptor },
+    previousFieldName
+  })
+  if (log.changes.length > MAX_LOGGED_COLUMN_CHANGES) log.changes.shift()
+}
+
+export const replayColumnChanges = (entities, log, since, productionId) => {
+  if (since == null) return
+  log.changes
+    .filter(({ index }) => index > since)
+    .forEach(({ descriptor, previousFieldName }) => {
+      if (previousFieldName) {
+        renameMetadataField(
+          entities,
+          descriptor,
+          previousFieldName,
+          productionId
+        )
+      } else {
+        removeMetadataField(entities, descriptor, productionId)
+      }
+    })
+}
+
+// An edit modal fills its form with a copy of the entity data, and Zou merges
+// the data it gets: a value goes out only under the field name of a current
+// column or of a built-in field, or a column deleted or renamed while the form
+// was open would get it back. A key the form was filled with also needs the
+// entity to still hold it: a column deleted and created again starts empty.
+export const dropRemovedDataKeys = (
+  data,
+  openedKeys,
+  entityData,
+  fieldNames
+) => {
+  const storedKeys = Object.keys(entityData ?? {})
+  return Object.fromEntries(
+    Object.entries(data).filter(
+      ([key]) =>
+        (BUILT_IN_DATA_FIELDS.includes(key) || fieldNames.includes(key)) &&
+        (!openedKeys.includes(key) || storedKeys.includes(key))
+    )
+  )
+}
+
 export const getDescriptorChecklistValues = descriptor => {
   const values = descriptor.choices.reduce((result, choice) => {
     if (choice && typeof choice === 'string' && choice.startsWith('[x] ')) {

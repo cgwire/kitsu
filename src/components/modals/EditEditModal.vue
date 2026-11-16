@@ -58,6 +58,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { dropRemovedDataKeys } from '@/lib/descriptors'
+
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -89,6 +91,9 @@ const form = ref({
   data: { resolution: '' }
 })
 const nameField = ref(null)
+// Keys of the edit data the form was filled with: a column deleted or
+// renamed by someone else meanwhile took its key out of that data.
+let openedDataKeys = []
 
 // Computed
 
@@ -120,12 +125,26 @@ const episodeOptions = computed(() => {
 
 // Functions
 
+// The store changes its own edit: a page can hand over a copy of it.
+const storedEntity = () =>
+  store.getters.editMap?.get(props.editToEdit?.id) ?? props.editToEdit
+
+const formToSend = () => ({
+  ...form.value,
+  data: dropRemovedDataKeys(
+    form.value.data,
+    openedDataKeys,
+    storedEntity()?.data,
+    editMetadataDescriptors.value.map(d => d.field_name)
+  )
+})
+
 const confirmClicked = () => {
-  emit('confirm', form.value)
+  emit('confirm', formToSend())
 }
 
 const confirmAndStayClicked = () => {
-  emit('confirm-and-stay', form.value)
+  emit('confirm-and-stay', formToSend())
 }
 
 const runConfirmation = () => {
@@ -138,6 +157,7 @@ const runConfirmation = () => {
 
 const resetForm = () => {
   if (isEditing.value) {
+    openedDataKeys = Object.keys(props.editToEdit.data || {})
     form.value = {
       project_id: props.editToEdit.project_id,
       name: props.editToEdit.name,
@@ -149,6 +169,7 @@ const resetForm = () => {
       }
     }
   } else {
+    openedDataKeys = []
     if (openProductions.value.length > 0) {
       form.value.project_id = currentProduction.value?.id || ''
     }

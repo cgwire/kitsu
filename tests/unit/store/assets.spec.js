@@ -2958,7 +2958,11 @@ describe('Assets store, list workflow', () => {
       const store = buildStore()
       load(store, [buildAsset('a1', 'Rock', { data: { mood: 'calm' } })])
       const rename = entityType => ({
-        descriptor: { entity_type: entityType, field_name: 'tone' },
+        descriptor: {
+          entity_type: entityType,
+          field_name: 'tone',
+          project_id: 'p1'
+        },
         previousDescriptorFieldName: 'mood'
       })
 
@@ -2967,6 +2971,104 @@ describe('Assets store, list workflow', () => {
 
       store.commit('UPDATE_METADATA_DESCRIPTOR_END', rename('Asset'))
       expect(store.getters.assetMap.get('a1').data).toEqual({ tone: 'calm' })
+    })
+
+    test('drops the data of a deleted asset descriptor of its production', () => {
+      const store = buildStore()
+      load(store, [
+        // Zou lists the assets of a production without its id.
+        buildAsset('a1', 'Rock', {
+          project_id: undefined,
+          data: { mood: 'calm', size: 'big' }
+        }),
+        // A shared asset of another production shows in this list.
+        buildAsset('a2', 'Tree', {
+          project_id: 'p2',
+          shared: true,
+          data: { mood: 'wild' }
+        })
+      ])
+      const drop = (entityType, projectId) =>
+        store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+          id: 'd1',
+          descriptor: {
+            id: 'd1',
+            entity_type: entityType,
+            field_name: 'mood',
+            project_id: projectId
+          }
+        })
+      const dataOf = id => store.getters.assetMap.get(id).data
+
+      drop('Shot', 'p1')
+      expect(dataOf('a1')).toEqual({ mood: 'calm', size: 'big' })
+
+      drop('Asset', 'p1')
+      expect(dataOf('a1')).toEqual({ size: 'big' })
+      expect(dataOf('a2')).toEqual({ mood: 'wild' })
+
+      drop('Asset', 'p2')
+      expect(dataOf('a2')).toEqual({})
+    })
+
+    // Someone else deletes or renames a column while the list loads: Zou may
+    // have built its answer before.
+    test('replays the column changes made during a list load', async () => {
+      const store = buildStore()
+      let answerList
+      vi.spyOn(assetsApi, 'getAssets').mockReturnValue(
+        new Promise(resolve => {
+          answerList = resolve
+        })
+      )
+
+      const loading = store.dispatch('loadAssets', { withShared: false })
+      store.commit('UPDATE_METADATA_DESCRIPTOR_END', {
+        descriptor: { entity_type: 'Asset', field_name: 'tone', project_id: 'p1' },
+        previousDescriptorFieldName: 'mood'
+      })
+      store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+        id: 'd2',
+        descriptor: { id: 'd2', entity_type: 'Asset', field_name: 'notes', project_id: 'p1' }
+      })
+      answerList([
+        // Zou lists the assets of a production without its id.
+        buildAsset('a1', 'Rock', {
+          project_id: undefined,
+          data: { mood: 'calm', notes: 'n', size: 'big' }
+        }),
+        buildAsset('a2', 'Tree', {
+          project_id: 'p2',
+          shared: true,
+          data: { notes: 'wild' }
+        })
+      ])
+      await loading
+
+      expect(store.getters.assetMap.get('a1').data).toEqual({
+        tone: 'calm',
+        size: 'big'
+      })
+      expect(store.getters.assetMap.get('a2').data).toEqual({ notes: 'wild' })
+    })
+
+    // A load started after a change gets what Zou wrote since, such as a
+    // column created again under the old name.
+    test('replays no column change made before a list load', async () => {
+      const store = buildStore()
+      store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+        id: 'd2',
+        descriptor: { id: 'd2', entity_type: 'Asset', field_name: 'notes', project_id: 'p1' }
+      })
+      vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([
+        buildAsset('a1', 'Rock', { data: { notes: 'new column' } })
+      ])
+
+      await store.dispatch('loadAssets', { withShared: false })
+
+      expect(store.getters.assetMap.get('a1').data).toEqual({
+        notes: 'new column'
+      })
     })
 
     test('sorts the task columns by task type priority', () => {

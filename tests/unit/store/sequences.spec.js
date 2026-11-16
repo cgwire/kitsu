@@ -1450,7 +1450,11 @@ describe('Sequences store, through a store', () => {
     store.getters.sequenceMap.get('sq1').data = { level: 'hard' }
     const rename = entityType =>
       store.commit('UPDATE_METADATA_DESCRIPTOR_END', {
-        descriptor: { entity_type: entityType, field_name: 'difficulty' },
+        descriptor: {
+          entity_type: entityType,
+          field_name: 'difficulty',
+          project_id: 'p1'
+        },
         previousDescriptorFieldName: 'level'
       })
 
@@ -1462,6 +1466,101 @@ describe('Sequences store, through a store', () => {
     rename('Sequence')
     expect(store.getters.sequenceMap.get('sq1').data).toEqual({
       difficulty: 'hard'
+    })
+  })
+
+  test('drops a deleted descriptor field of its production from the sequence data', async () => {
+    const { store } = await buildStore()
+    loadSequences(store, [buildSequence('sq1', 'SQ01')])
+    store.getters.sequenceMap.get('sq1').data = { level: 'hard', mood: 'calm' }
+    const drop = (entityType, projectId) =>
+      store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+        id: 'd1',
+        descriptor: {
+          id: 'd1',
+          entity_type: entityType,
+          field_name: 'level',
+          project_id: projectId
+        }
+      })
+
+    drop('Shot', 'p1')
+    drop('Sequence', 'p2')
+    expect(store.getters.sequenceMap.get('sq1').data).toEqual({
+      level: 'hard',
+      mood: 'calm'
+    })
+
+    drop('Sequence', 'p1')
+    expect(store.getters.sequenceMap.get('sq1').data).toEqual({ mood: 'calm' })
+  })
+
+  const loadGetters = {
+    currentEpisode: () => null,
+    personMap: () => new Map(),
+    route: () => ({ params: {} }),
+    userFilters: () => ({})
+  }
+
+  // Someone else deletes or renames a column while the list loads: Zou may
+  // have built its answer before. The menu list gives the production of each
+  // sequence, the list with tasks does not.
+  test.each([
+    ['loadSequencesWithTasks', {}],
+    ['loadSequences', { project_id: 'p1' }]
+  ])('replays the column changes made during %s', async (action, fields) => {
+    const { store } = await buildStore(loadGetters)
+    let answerList
+    client.pget.mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          answerList = resolve
+        })
+    )
+
+    const loading = store.dispatch(action)
+    store.commit('UPDATE_METADATA_DESCRIPTOR_END', {
+      descriptor: { entity_type: 'Sequence', field_name: 'difficulty', project_id: 'p1' },
+      previousDescriptorFieldName: 'level'
+    })
+    store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+      id: 'd1',
+      descriptor: { id: 'd1', entity_type: 'Sequence', field_name: 'notes', project_id: 'p1' }
+    })
+    answerList([
+      {
+        ...buildSequence('sq1', 'SQ01'),
+        ...fields,
+        data: { level: 'hard', notes: 'n', mood: 'calm' }
+      }
+    ])
+    await loading
+
+    expect(store.getters.sequenceMap.get('sq1').data).toEqual({
+      difficulty: 'hard',
+      mood: 'calm'
+    })
+  })
+
+  // A load started after a change gets what Zou wrote since, such as a
+  // column created again under the old name.
+  test.each([
+    ['loadSequencesWithTasks', {}],
+    ['loadSequences', { project_id: 'p1' }]
+  ])('replays no column change made before %s', async (action, fields) => {
+    const { store } = await buildStore(loadGetters)
+    store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+      id: 'd1',
+      descriptor: { id: 'd1', entity_type: 'Sequence', field_name: 'notes', project_id: 'p1' }
+    })
+    client.pget.mockResolvedValueOnce([
+      { ...buildSequence('sq1', 'SQ01'), ...fields, data: { notes: 'new column' } }
+    ])
+
+    await store.dispatch(action)
+
+    expect(store.getters.sequenceMap.get('sq1').data).toEqual({
+      notes: 'new column'
     })
   })
 

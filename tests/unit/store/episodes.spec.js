@@ -1698,10 +1698,16 @@ describe('Episodes store, through a store', () => {
 
   test('renames a descriptor field in the episode data', async () => {
     const { store } = await buildStore()
-    loadEpisodes(store, [{ id: 'ep1', name: 'E01', data: { level: 'hard' } }])
+    loadEpisodes(store, [
+      { id: 'ep1', name: 'E01', project_id: 'p1', data: { level: 'hard' } }
+    ])
     const rename = entityType =>
       store.commit('UPDATE_METADATA_DESCRIPTOR_END', {
-        descriptor: { entity_type: entityType, field_name: 'difficulty' },
+        descriptor: {
+          entity_type: entityType,
+          field_name: 'difficulty',
+          project_id: 'p1'
+        },
         previousDescriptorFieldName: 'level'
       })
 
@@ -1711,6 +1717,107 @@ describe('Episodes store, through a store', () => {
     rename('Episode')
     expect(store.getters.episodeMap.get('ep1').data).toEqual({
       difficulty: 'hard'
+    })
+  })
+
+  test('drops a deleted descriptor field of its production from the episode data', async () => {
+    const { store } = await buildStore()
+    loadEpisodes(store, [
+      {
+        id: 'ep1',
+        name: 'E01',
+        project_id: 'p1',
+        data: { level: 'hard', mood: 'calm' }
+      }
+    ])
+    const drop = (entityType, projectId) =>
+      store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+        id: 'd1',
+        descriptor: {
+          id: 'd1',
+          entity_type: entityType,
+          field_name: 'level',
+          project_id: projectId
+        }
+      })
+
+    drop('Shot', 'p1')
+    drop('Episode', 'p2')
+    expect(store.getters.episodeMap.get('ep1').data).toEqual({
+      level: 'hard',
+      mood: 'calm'
+    })
+
+    drop('Episode', 'p1')
+    expect(store.getters.episodeMap.get('ep1').data).toEqual({ mood: 'calm' })
+  })
+
+  const loadGetters = {
+    personMap: () => new Map(),
+    route: () => ({ params: {} }),
+    userFilters: () => ({})
+  }
+  // The menu list gives the production of each episode, the list with tasks
+  // does not.
+  const loads = [
+    ['loadEpisodesWithTasks', () => client.pget, {}],
+    ['loadEpisodes', () => shotsApi.getEpisodes, { project_id: 'p1' }]
+  ]
+
+  // Someone else deletes or renames a column while the list loads: Zou may
+  // have built its answer before.
+  test.each(loads)('replays the column changes made during %s', async (action, api, fields) => {
+    const { store } = await buildStore(loadGetters)
+    let answerList
+    api().mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          answerList = resolve
+        })
+    )
+
+    const loading = store.dispatch(action)
+    store.commit('UPDATE_METADATA_DESCRIPTOR_END', {
+      descriptor: { entity_type: 'Episode', field_name: 'difficulty', project_id: 'p1' },
+      previousDescriptorFieldName: 'level'
+    })
+    store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+      id: 'd1',
+      descriptor: { id: 'd1', entity_type: 'Episode', field_name: 'notes', project_id: 'p1' }
+    })
+    answerList([
+      {
+        id: 'ep1',
+        name: 'E01',
+        tasks: [],
+        ...fields,
+        data: { level: 'hard', notes: 'n', mood: 'calm' }
+      }
+    ])
+    await loading
+
+    expect(store.getters.episodeMap.get('ep1').data).toEqual({
+      difficulty: 'hard',
+      mood: 'calm'
+    })
+  })
+
+  // A load started after a change gets what Zou wrote since, such as a
+  // column created again under the old name.
+  test.each(loads)('replays no column change made before %s', async (action, api, fields) => {
+    const { store } = await buildStore(loadGetters)
+    store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+      id: 'd1',
+      descriptor: { id: 'd1', entity_type: 'Episode', field_name: 'notes', project_id: 'p1' }
+    })
+    api().mockResolvedValueOnce([
+      { id: 'ep1', name: 'E01', tasks: [], ...fields, data: { notes: 'new column' } }
+    ])
+
+    await store.dispatch(action)
+
+    expect(store.getters.episodeMap.get('ep1').data).toEqual({
+      notes: 'new column'
     })
   })
 

@@ -5,7 +5,14 @@ import tasksStore from '@/store/modules/tasks'
 import taskTypesStore from '@/store/modules/tasktypes'
 
 import { getEntityCsvLines } from '@/lib/csv'
-import { getExportDescriptors } from '@/lib/descriptors'
+import {
+  createColumnChangeLog,
+  getExportDescriptors,
+  logColumnChange,
+  removeMetadataField,
+  renameMetadataField,
+  replayColumnChanges
+} from '@/lib/descriptors'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { buildEpisodeIndex, indexSearch } from '@/lib/indexing'
 import {
@@ -34,6 +41,7 @@ import {
   CLEAR_SELECTED_TASKS,
   COMPUTE_EPISODE_STATS,
   CREATE_TASKS_END,
+  DELETE_METADATA_DESCRIPTOR_END,
   DELETE_TASK_END,
   EDIT_EPISODE_END,
   EPISODE_CSV_FILE_SELECTED,
@@ -202,7 +210,10 @@ const cache = {
   episodes: [],
   result: [],
   episodeIndex: {},
-  episodeMap: new Map()
+  episodeMap: new Map(),
+  // Columns deleted or renamed: a list load replays on its response the
+  // ones logged while it ran.
+  columnChanges: createColumnChangeLog()
 }
 
 const initialState = {
@@ -416,6 +427,7 @@ const actions = {
   loadEpisodes({ commit, state, rootGetters }) {
     const currentProduction = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
+    const columnChangesSeen = cache.columnChanges.count
     return shotsApi.getEpisodes(currentProduction).then(episodes => {
       if (currentProduction?.id !== rootGetters.currentProduction?.id) {
         return episodes
@@ -424,7 +436,12 @@ const actions = {
       // episode during the fetch, and a snapshot taken at dispatch would
       // silently move the store back to the episode left behind.
       const routeEpisodeId = rootGetters.route.params.episode_id
-      commit(LOAD_EPISODES_END, { episodes, routeEpisodeId, userFilters })
+      commit(LOAD_EPISODES_END, {
+        episodes,
+        columnChangesSeen,
+        routeEpisodeId,
+        userFilters
+      })
       return episodes
     })
   },
@@ -437,12 +454,14 @@ const actions = {
     const taskMap = rootGetters.taskMap
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
+    const columnChangesSeen = cache.columnChanges.count
     return shotsApi.getEpisodesWithTasks(production).then(episodes => {
       if (production?.id !== rootGetters.currentProduction?.id) {
         return episodes
       }
       commit(SET_EPISODES_WITH_TASKS, {
         episodes,
+        columnChangesSeen,
         routeEpisodeId,
         personMap,
         production,
@@ -680,6 +699,7 @@ const mutations = {
     {
       production,
       episodes,
+      columnChangesSeen,
       userFilters,
       taskMap,
       taskTypeMap,
@@ -687,6 +707,13 @@ const mutations = {
       taskStatusMap
     }
   ) {
+    // A column deleted or renamed during the load: the response may predate it.
+    replayColumnChanges(
+      episodes,
+      cache.columnChanges,
+      columnChangesSeen,
+      production.id
+    )
     const validationColumns = {}
     let isDescription = false
     let isTime = false
@@ -908,12 +935,14 @@ const mutations = {
     helpers.showInfoColumns(state, episode)
   },
 
-  [LOAD_EPISODES_END](state, { episodes, routeEpisodeId }) {
+  [LOAD_EPISODES_END](state, { episodes, columnChangesSeen, routeEpisodeId }) {
     // The topbar refetches the list of a small production on every episode
     // change: a second response must not rebuild a list already loaded. An
     // empty list is rebuilt so the route episode is resolved again.
     if (state.isEpisodeListLoaded && state.episodes.length > 0) return
     if (!episodes) episodes = []
+    // A column deleted or renamed during the load: the response may predate it.
+    replayColumnChanges(episodes, cache.columnChanges, columnChangesSeen)
     // An episode:new received while the list was in flight filled the list
     // first, and the response may not hold that episode yet.
     const responseIds = new Set(episodes.map(({ id }) => id))
@@ -1121,12 +1150,23 @@ const mutations = {
       previousDescriptorFieldName &&
       previousDescriptorFieldName !== descriptor.field_name
     ) {
-      cache.episodes.forEach(episode => {
-        const data = { ...episode.data }
-        data[descriptor.field_name] = data[previousDescriptorFieldName]
-        delete data[previousDescriptorFieldName]
-        episode.data = data
-      })
+      renameMetadataField(
+        cache.episodes,
+        descriptor,
+        previousDescriptorFieldName
+      )
+      logColumnChange(
+        cache.columnChanges,
+        descriptor,
+        previousDescriptorFieldName
+      )
+    }
+  },
+
+  [DELETE_METADATA_DESCRIPTOR_END](state, { descriptor }) {
+    if (descriptor?.entity_type === 'Episode') {
+      removeMetadataField(cache.episodes, descriptor)
+      logColumnChange(cache.columnChanges, descriptor)
     }
   },
 

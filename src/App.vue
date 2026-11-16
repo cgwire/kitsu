@@ -772,9 +772,7 @@ const socketEvents = {
   },
 
   'metadata-descriptor:delete': eventData => {
-    store.commit('DELETE_METADATA_DESCRIPTOR_END', {
-      id: eventData.metadata_descriptor_id
-    })
+    store.dispatch('dropMetadataDescriptor', eventData.metadata_descriptor_id)
   },
 
   'organisation:update': () => {

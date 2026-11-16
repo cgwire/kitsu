@@ -11,7 +11,14 @@ import tasksStore from '@/store/modules/tasks'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypesStore from '@/store/modules/tasktypes'
 
-import { getExportDescriptors } from '@/lib/descriptors'
+import {
+  createColumnChangeLog,
+  getExportDescriptors,
+  logColumnChange,
+  removeMetadataField,
+  renameMetadataField,
+  replayColumnChanges
+} from '@/lib/descriptors'
 import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { minutesToDays } from '@/lib/time'
@@ -65,6 +72,7 @@ import {
   ASSET_CSV_FILE_SELECTED,
   IMPORT_ASSETS_START,
   IMPORT_ASSETS_END,
+  DELETE_METADATA_DESCRIPTOR_END,
   DELETE_TASK_END,
   NEW_TASK_END,
   SET_ASSET_SEARCH,
@@ -295,6 +303,9 @@ const helpers = {
 const cache = {
   // Assets deleted while a list load runs: its response may still hold them.
   removedAssetIds: new Set(),
+  // Columns deleted or renamed: a list load replays on its response the
+  // ones logged while it ran.
+  columnChanges: createColumnChangeLog(),
   assets: [],
   assetsLoadingPromise: null,
   assetMap: new Map(),
@@ -476,6 +487,7 @@ const actions = {
     }
 
     commit(LOAD_ASSETS_START, { loadingKey })
+    const columnChangesSeen = cache.columnChanges.count
     const loadingPromise = assetsApi
       .getAssets(production, episode, withTasks)
       .then(async assets => {
@@ -511,6 +523,7 @@ const actions = {
         commit(LOAD_ASSETS_END, {
           production,
           assets,
+          columnChangesSeen,
           userFilters,
           userFilterGroups,
           personMap,
@@ -1051,6 +1064,7 @@ const mutations = {
     {
       production,
       assets,
+      columnChangesSeen,
       userFilters,
       userFilterGroups,
       personMap,
@@ -1061,6 +1075,13 @@ const mutations = {
     // Deleted during the load, after the response was built.
     assets = assets.filter(({ id }) => !cache.removedAssetIds.has(id))
     cache.removedAssetIds.clear()
+    // A column deleted or renamed during the load: the response may predate it.
+    replayColumnChanges(
+      assets,
+      cache.columnChanges,
+      columnChangesSeen,
+      production.id
+    )
     const validationColumns = {}
     const assetTypeMap = new Map()
     let isTime = false
@@ -1587,12 +1608,19 @@ const mutations = {
       previousDescriptorFieldName &&
       previousDescriptorFieldName !== descriptor.field_name
     ) {
-      cache.assets.forEach(asset => {
-        const data = { ...asset.data }
-        data[descriptor.field_name] = data[previousDescriptorFieldName]
-        delete data[previousDescriptorFieldName]
-        asset.data = data
-      })
+      renameMetadataField(cache.assets, descriptor, previousDescriptorFieldName)
+      logColumnChange(
+        cache.columnChanges,
+        descriptor,
+        previousDescriptorFieldName
+      )
+    }
+  },
+
+  [DELETE_METADATA_DESCRIPTOR_END](state, { descriptor }) {
+    if (descriptor?.entity_type === 'Asset') {
+      removeMetadataField(cache.assets, descriptor)
+      logColumnChange(cache.columnChanges, descriptor)
     }
   },
 

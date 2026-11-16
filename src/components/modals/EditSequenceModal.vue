@@ -51,6 +51,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { dropRemovedDataKeys } from '@/lib/descriptors'
+
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import MetadataField from '@/components/widgets/MetadataField.vue'
@@ -80,6 +82,9 @@ const form = ref({
   description: '',
   data: { resolution: '' }
 })
+// Keys of the sequence data the form was filled with: a column deleted or
+// renamed by someone else meanwhile took its key out of that data.
+let openedDataKeys = []
 
 // Computed
 
@@ -98,12 +103,28 @@ const modalTitle = computed(() =>
 
 // Functions
 
+// The store changes its own sequence: a page can hand over a copy of it.
+const storedEntity = () =>
+  store.getters.sequenceMap?.get(props.sequenceToEdit?.id) ??
+  props.sequenceToEdit
+
+const formToSend = () => ({
+  ...form.value,
+  data: dropRemovedDataKeys(
+    form.value.data,
+    openedDataKeys,
+    storedEntity()?.data,
+    sequenceMetadataDescriptors.value.map(d => d.field_name)
+  )
+})
+
 const runConfirmation = () => {
-  emit('confirm', form.value)
+  emit('confirm', formToSend())
 }
 
 const resetForm = () => {
   if (isEditing.value) {
+    openedDataKeys = Object.keys(props.sequenceToEdit.data || {})
     form.value = {
       id: props.sequenceToEdit.id,
       name: props.sequenceToEdit.name,
@@ -114,6 +135,7 @@ const resetForm = () => {
       }
     }
   } else {
+    openedDataKeys = []
     form.value.id = null
     form.value.name = ''
     form.value.description = ''
