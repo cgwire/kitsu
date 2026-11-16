@@ -5714,7 +5714,7 @@ const playerProxy = {
   }
 
   &.active {
-    color: var(--background-selectable);
+    color: var(--selectable-accent);
   }
 }
 
@@ -6178,7 +6178,7 @@ const playerProxy = {
 }
 
 .playlist-button.button.active {
-  color: var(--background-selectable);
+  color: var(--selectable-accent);
 
   img.active {
     filter: invert(59%) sepia(38%) saturate(660%) hue-rotate(201deg)

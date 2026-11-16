@@ -332,7 +332,7 @@ onBeforeUnmount(() => {
 
   &:hover,
   &:active {
-    border: 3px solid var(--background-selectable);
+    border: 3px solid var(--selectable-accent);
   }
 
   &.selected {

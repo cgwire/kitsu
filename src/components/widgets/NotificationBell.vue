@@ -64,7 +64,7 @@ const isNotificationPage = computed(() => {
 
   &.active {
     border-radius: 50%;
-    background: var(--background-selectable);
+    background: var(--selectable-accent);
 
     .dark & {
       background: $dark-grey-light;

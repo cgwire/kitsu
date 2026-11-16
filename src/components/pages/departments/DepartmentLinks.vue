@@ -12,7 +12,8 @@
           role="button"
           tabindex="0"
           @click="selectDepartment(dept)"
-          @keydown.enter.prevent="selectDepartment(dept)"
+          @keydown.enter.prevent="onDepartmentKey($event, dept)"
+          @keydown.space.prevent="onDepartmentKey($event, dept)"
         >
           <department-name :department="dept" />
         </li>
@@ -22,45 +23,45 @@
       <label class="label">
         {{ $t('departments.linked_items') }}
       </label>
-      <ul class="element-list">
-        <li v-if="selectedDepartment === null">
+      <div class="element-list">
+        <p class="list-line" v-if="selectedDepartment === null">
           {{ $t('departments.select_department') }}
-        </li>
-        <li v-else-if="linkedItems.length === 0">
+        </p>
+        <p class="list-line" v-else-if="departmentLinkedItems.length === 0">
           {{ $t('departments.no_items_linked') }}
-        </li>
+        </p>
         <template v-else>
-          <li
+          <transfer-list-item
+            action="remove"
             :key="item.id"
+            @remove="removeItem(item)"
             v-for="item in departmentLinkedItems"
-            role="button"
-            tabindex="0"
-            @click="removeItem(item)"
-            @keydown.enter.prevent="removeItem(item)"
           >
-            <div class="item-info">
-              {{ item.name }}
-            </div>
-          </li>
+            {{ item.name }}
+          </transfer-list-item>
         </template>
-      </ul>
+      </div>
     </div>
     <div class="column column-hardware">
       <label class="label">
         {{ $t('departments.available_items') }}
       </label>
-      <ul class="element-list">
-        <li
-          :key="item.id"
-          v-for="item in availableItems"
-          role="button"
-          tabindex="0"
-          @click="selectItem(item)"
-          @keydown.enter.prevent="selectItem(item)"
-        >
-          {{ item.name }}
-        </li>
-      </ul>
+      <div class="element-list">
+        <template v-if="selectedDepartment">
+          <transfer-list-item
+            :key="item.id"
+            @add="selectItem(item)"
+            v-for="item in availableItems"
+          >
+            {{ item.name }}
+          </transfer-list-item>
+        </template>
+        <template v-else>
+          <p class="list-line" :key="item.id" v-for="item in availableItems">
+            {{ item.name }}
+          </p>
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -70,6 +71,7 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
+import TransferListItem from '@/components/widgets/TransferListItem.vue'
 
 const store = useStore()
 
@@ -112,6 +114,11 @@ const selectDepartment = department => {
     selectedDepartment.value === department ? null : department
 }
 
+// A held key repeats, and each repeat would toggle the selection again.
+const onDepartmentKey = (event, department) => {
+  if (!event.repeat) selectDepartment(department)
+}
+
 const selectItem = item => {
   if (!selectedDepartment.value) return
   emit('link-item', {
@@ -150,7 +157,7 @@ const removeItem = item => {
   border-radius: 8px;
 }
 
-ul.element-list {
+.element-list {
   padding: 0;
   border: 1px solid var(--border-alt);
   border-radius: 8px;
@@ -159,11 +166,16 @@ ul.element-list {
   overflow-y: auto;
   list-style: none;
 
-  li {
+  li,
+  .list-line,
+  .transfer-list-item {
     border-bottom: 1px solid var(--border-alt);
-    cursor: pointer;
-    margin-bottom: 0;
+    margin: 0;
     padding: 0.5rem;
+  }
+
+  li {
+    cursor: pointer;
 
     &:hover {
       background-color: var(--background-selectable);
@@ -171,6 +183,15 @@ ul.element-list {
 
     &.selected {
       background-color: var(--background-selected);
+    }
+  }
+
+  // Square rows flush with each other, like the department ones.
+  .transfer-list-item {
+    border-radius: 0;
+
+    & + .transfer-list-item {
+      margin-top: 0;
     }
   }
 }

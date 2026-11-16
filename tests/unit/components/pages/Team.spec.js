@@ -50,7 +50,7 @@ const mountTeam = (query = {}, { actions = {}, getters = {} } = {}) =>
       }
     },
     stubs: {
-      ImportListItem: false,
+      TransferListItem: false,
       PageLayout: false,
       ProductionTeamList: {
         name: 'ProductionTeamList',

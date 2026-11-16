@@ -626,7 +626,7 @@ th.today {
   padding: 0.5em;
 
   &:focus-visible {
-    box-shadow: 0 0 0 2px var(--background-selectable);
+    box-shadow: 0 0 0 2px var(--selectable-accent);
   }
 }
 

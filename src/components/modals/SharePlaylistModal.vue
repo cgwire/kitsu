@@ -537,7 +537,7 @@ onMounted(() => {
   }
 
   .invite-button.active {
-    background: var(--background-selectable);
+    background: var(--selectable-accent);
   }
 }
 
@@ -679,8 +679,8 @@ onMounted(() => {
   font-size: 0.9em;
 
   // Theme the chips, the "Add this email" hint and the option hover with
-  // Kitsu's selectable accent so the picker matches the rest of the UI
-  // rather than vue-multiselect's default red/orange.
+  // the background of Kitsu's selectable items, so the picker matches the
+  // rest of the UI rather than vue-multiselect's default red/orange.
   :deep(.multiselect__tag) {
     background: var(--background-selectable);
     color: var(--text);

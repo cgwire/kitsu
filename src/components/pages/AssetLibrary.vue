@@ -316,7 +316,7 @@ useHead({
       cursor: pointer;
 
       &:hover {
-        border-color: var(--background-selectable);
+        border-color: var(--selectable-accent);
       }
     }
 

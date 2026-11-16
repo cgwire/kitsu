@@ -433,7 +433,7 @@
     "main": {
       "technical_details": "Technikai részletek:",
       "about": "Rólunk",
-      "add": "hozzáadás",
+      "add": "Hozzáadás",
       "all": "Mind",
       "all_assets": "Minden asset",
       "admin": "Admin",
@@ -442,6 +442,7 @@
       "cells_save_error": "Néhány módosítás mentése nem sikerült: az előző értékek visszaálltak. Kérlek töltsd újra az oldalt és próbáld újra.",
       "clear_selection": "Kijelölés megszüntetése",
       "click_to_add": "Kattints a hozzáadáshoz",
+      "click_to_remove": "Kattints az eltávolításhoz",
       "close": "Bezárás",
       "confirmation": "Megerősítés",
       "confirmation_and_stay": "Megerősít és marad",

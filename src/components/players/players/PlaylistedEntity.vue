@@ -358,7 +358,7 @@ onMounted(() => {
   padding: 4px;
 
   &:hover {
-    border: 3px solid var(--background-selectable);
+    border: 3px solid var(--selectable-accent);
   }
 
   &.playing {

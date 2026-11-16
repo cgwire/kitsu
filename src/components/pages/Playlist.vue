@@ -1875,7 +1875,7 @@ useHead({ title: pageTitle })
 
   &:hover {
     transform: scale(1.02);
-    border: 2px solid var(--background-selectable);
+    border: 2px solid var(--selectable-accent);
   }
 }
 

@@ -1158,7 +1158,7 @@ useHead({
 .drop-mask {
   // the mask paints over the panels, so a plain page color + opacity
   // keeps the layout readable underneath
-  background: rgba(var(--background-selectable-rgb), 0.6);
+  background: rgba(var(--selectable-accent-rgb), 0.6);
   border: 3px dashed var(--background-selected);
   border-radius: 12px;
   color: var(--text-strong);

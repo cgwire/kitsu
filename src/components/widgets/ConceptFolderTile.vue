@@ -40,7 +40,7 @@ defineProps({
 
   // same soft wash as the hover, the ring carries the drop target
   &.highlighted {
-    background: rgba(var(--background-selectable-rgb), 0.35);
+    background: rgba(var(--selectable-accent-rgb), 0.35);
     border-color: var(--background-selected);
     box-shadow: 0 0 0 2px var(--background-selected);
   }

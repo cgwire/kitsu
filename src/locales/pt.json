@@ -442,6 +442,7 @@
       "cells_save_error": "Não foi possível salvar algumas alterações: os valores anteriores foram restaurados. Recarregue a página e tente novamente.",
       "clear_selection": "Limpar seleção",
       "click_to_add": "Clique para adicionar",
+      "click_to_remove": "Clique para remover",
       "close": "Fechar",
       "confirmation": "Confirmar",
       "confirmation_and_stay": "Confirmar e permanecer",

@@ -433,7 +433,7 @@
     "main": {
       "technical_details": "Technische details:",
       "about": "Over",
-      "add": "toevoegen",
+      "add": "Toevoegen",
       "all": "Alle",
       "all_assets": "Alle assets",
       "admin": "Admin",
@@ -442,6 +442,7 @@
       "cells_save_error": "Sommige wijzigingen konden niet worden opgeslagen: de vorige waarden zijn teruggezet. Herlaad de pagina en probeer het opnieuw.",
       "clear_selection": "Huidige selectie wissen",
       "click_to_add": "Klik om toe te voegen",
+      "click_to_remove": "Klik om te verwijderen",
       "close": "Sluiten",
       "confirmation": "Bevestigen",
       "confirmation_and_stay": "Bevestigen en blijven",

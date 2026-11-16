@@ -433,7 +433,7 @@
     "main": {
       "technical_details": "Dettagli tecnici:",
       "about": "Informazioni",
-      "add": "aggiungi",
+      "add": "Aggiungi",
       "all": "Tutti",
       "all_assets": "Tutti gli asset",
       "admin": "Admin",
@@ -442,6 +442,7 @@
       "cells_save_error": "Impossibile salvare alcune modifiche: sono stati ripristinati i valori precedenti. Ricarica la pagina e riprova.",
       "clear_selection": "Rimuovi la selezione corrente",
       "click_to_add": "Clicca per aggiungere",
+      "click_to_remove": "Clicca per rimuovere",
       "close": "Chiudi",
       "confirmation": "Conferma",
       "confirmation_and_stay": "Conferma e resta",

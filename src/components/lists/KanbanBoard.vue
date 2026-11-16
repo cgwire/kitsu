@@ -766,7 +766,7 @@ onBeforeUnmount(() => {
   // flash the ring on every hover.
   &:focus-visible .ui-droppable {
     box-shadow:
-      0 0 0 3px var(--background-selectable),
+      0 0 0 3px var(--selectable-accent),
       0 4px 12px rgba(0, 0, 0, 0.05);
   }
 

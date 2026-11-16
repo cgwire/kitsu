@@ -89,7 +89,7 @@
           {{ $t('people.import_from_unlisted') }}
         </p>
         <div class="import-list">
-          <import-list-item
+          <transfer-list-item
             :key="`unlisted-person-${unlistedPerson.id}`"
             class="person-to-add"
             @add="addPersonToTeam(unlistedPerson)"
@@ -104,7 +104,7 @@
               :is-link="false"
             />
             <people-name class="flexrow-item" :person="unlistedPerson" />
-          </import-list-item>
+          </transfer-list-item>
         </div>
       </div>
     </template>
@@ -131,10 +131,10 @@ import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
-import ImportListItem from '@/components/widgets/ImportListItem.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
+import TransferListItem from '@/components/widgets/TransferListItem.vue'
 /* eslint-enable no-unused-vars */
 
 // Composables
@@ -312,5 +312,13 @@ useHead({
   padding: 0.3em;
   flex: 1;
   overflow-y: auto;
+}
+
+// The gray name would read 3.5:1 on the light hover color, under AA.
+.person-to-add:hover,
+.person-to-add:focus-visible {
+  :deep(.person-name) {
+    color: var(--text-strong);
+  }
 }
 </style>

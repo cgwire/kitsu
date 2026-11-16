@@ -3898,7 +3898,7 @@ input[type='number'] {
 }
 
 .droppable {
-  background-color: rgba(var(--background-selectable-rgb), 0.5) !important;
+  background-color: rgba(var(--selectable-accent-rgb), 0.5) !important;
 
   :deep(*) {
     pointer-events: none;

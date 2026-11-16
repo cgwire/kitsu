@@ -3003,7 +3003,7 @@ defineExpose({
 
 .buttons :deep(.button.active),
 .buttons :deep(.background-combo.active .icon) {
-  color: var(--background-selectable);
+  color: var(--selectable-accent);
 }
 
 .buttons :deep(.button:hover) {

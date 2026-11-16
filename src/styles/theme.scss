@@ -11,7 +11,6 @@
   --background-tag: #eee;
   --background-tag-button: #f9f9f9;
   --background-selectable: #e3e6ff;
-  --background-selectable-rgb: 227, 230, 255;
   --background-selected: #cecefe;
   --background-disabled: #ddd;
   --background-panel: #f4f4f4;
@@ -29,6 +28,11 @@
   --text-panel: #{$dark-grey-lightmore};
   --text-selectable: #9fa2fb;
   --text-selected: #8f91eb;
+  // Focus rings, hover borders, active icons, toggled icon buttons, and
+  // translucent drop overlays. In the dark theme they need more light than
+  // --background-selectable, which stays dark enough to carry text.
+  --selectable-accent: #e3e6ff;
+  --selectable-accent-rgb: 227, 230, 255;
   --poster-color: #000;
   --purple: #cfd1ff;
   --shared-color: #f9e04b;
@@ -50,8 +54,7 @@
   --background-page: #36393f;
   --background-tag: #36393f;
   --background-tag-button: #4e5159;
-  --background-selectable: #7375bc;
-  --background-selectable-rgb: 115, 117, 188;
+  --background-selectable: #585a84;
   --background-selectable-alt: #878b97;
   --background-selected: #5e60ba;
   --background-disabled: #25282e;
@@ -70,6 +73,8 @@
   --text-panel: #fefefe;
   --text-selectable: #bec0fa;
   --text-selected: #9ea0fa;
+  --selectable-accent: #7375bc;
+  --selectable-accent-rgb: 115, 117, 188;
   --purple: #5e60ba;
 }
 

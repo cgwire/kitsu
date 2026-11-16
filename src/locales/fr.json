@@ -442,6 +442,7 @@
       "cells_save_error": "Certaines modifications n'ont pas pu être enregistrées : les valeurs précédentes sont revenues. Veuillez recharger la page et réessayer.",
       "clear_selection": "Effacer la sélection",
       "click_to_add": "Cliquez pour ajouter",
+      "click_to_remove": "Cliquez pour enlever",
       "close": "Fermer",
       "confirmation": "Confirmer",
       "confirmation_and_stay": "Confirmer et rester",

@@ -140,7 +140,7 @@ const onError = () => {
   padding: 0.2em;
 
   &:hover {
-    color: var(--background-selectable, $purple-strong);
+    color: var(--selectable-accent, $purple-strong);
   }
 }
 
