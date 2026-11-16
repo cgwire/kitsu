@@ -4,7 +4,12 @@ import { vi } from 'vitest'
 
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@/lib/auth', () => ({
-  default: { logIn: vi.fn(), logout: vi.fn(), resetChangePassword: vi.fn() }
+  default: {
+    checkResetToken: vi.fn(),
+    logIn: vi.fn(),
+    logout: vi.fn(),
+    resetChangePassword: vi.fn()
+  }
 }))
 
 import auth from '@/lib/auth'
@@ -65,6 +70,29 @@ describe('Login store', () => {
       )
 
       expect(commit).toHaveBeenCalledWith('CHANGE_EMAIL', 'jane@studio.com')
+    })
+  })
+
+  describe('checkResetToken action', () => {
+    test('tells if the link is valid', async () => {
+      const link = { email: 'jane@studio.com', token: 'token-1' }
+      for (const valid of [true, false]) {
+        auth.checkResetToken.mockResolvedValue({ valid })
+        expect(await loginStore.actions.checkResetToken({}, link)).toBe(valid)
+      }
+
+      expect(auth.checkResetToken).toHaveBeenCalledWith(
+        'jane@studio.com',
+        'token-1'
+      )
+    })
+
+    test('takes any answer but false for a valid link', async () => {
+      const link = { email: 'jane@studio.com', token: 'token-1' }
+      for (const answer of [{}, { valid: 'no' }, null]) {
+        auth.checkResetToken.mockResolvedValue(answer)
+        expect(await loginStore.actions.checkResetToken({}, link)).toBe(true)
+      }
     })
   })
 

@@ -10,7 +10,7 @@ vi.mock('@/store', () => ({
 }))
 vi.mock('superagent', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 vi.mock('@/store/api/client', () => ({
-  default: { ppost: vi.fn(), pput: vi.fn() }
+  default: { ppost: vi.fn(), pput: vi.fn(), request: vi.fn() }
 }))
 
 import superagent from 'superagent'
@@ -186,6 +186,16 @@ describe('auth', () => {
         password: 'n3w-secret',
         password2: 'n3w-secret'
       })
+    })
+
+    test('checks the token of a link, 10 seconds at most', () => {
+      auth.checkResetToken('jane@studio.com', 'token-1')
+      expect(client.request).toHaveBeenCalledWith(
+        'POST',
+        '/api/auth/reset-password/check',
+        { email: 'jane@studio.com', token: 'token-1' },
+        { response: 5000, deadline: 10000 }
+      )
     })
   })
 })

@@ -20,6 +20,7 @@ vi.mock('vue-router', () => ({
 import errors from '@/lib/errors'
 
 import ResetChangePassword from '@/components/pages/ResetChangePassword.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 import { mountWithI18n } from '../fixtures/i18n'
 
@@ -31,19 +32,33 @@ const i18n = createI18n({
   fallbackWarn: false
 })
 
-const createPageStore = (resetChangePassword, resetPassword = vi.fn()) =>
+const createPageStore = (
+  resetChangePassword,
+  resetPassword = vi.fn(),
+  checkResetToken = vi.fn(() => true)
+) =>
   createStore({
-    actions: { resetChangePassword, resetPassword },
+    actions: { checkResetToken, resetChangePassword, resetPassword },
     mutations: { LOGIN_SUCCESS: () => {} }
   })
 
-const mountPage = (resetChangePassword, resetPassword) =>
+const mountPage = (resetChangePassword, resetPassword, checkResetToken) =>
   shallowMount(ResetChangePassword, {
     global: {
-      plugins: [i18n, createPageStore(resetChangePassword, resetPassword)],
+      plugins: [
+        i18n,
+        createPageStore(resetChangePassword, resetPassword, checkResetToken)
+      ],
       stubs: { RouterLink: RouterLinkStub }
     }
   })
+
+// The form shows once Zou tells the link is valid.
+const openPage = async (...actions) => {
+  const wrapper = mountPage(...actions)
+  await flushPromises()
+  return wrapper
+}
 
 const fillPasswords = async wrapper => {
   const [password, password2] = wrapper.findAll('input[type="password"]')
@@ -118,6 +133,7 @@ describe('pages/ResetChangePassword', () => {
         stubs: { RouterLink: true }
       }
     })
+    await flushPromises()
     await fillPasswords(wrapper)
 
     await wrapper.find('a.main-button').trigger('click')
@@ -132,7 +148,7 @@ describe('pages/ResetChangePassword', () => {
 
   it('sends the new password once while the request runs', async () => {
     const resetChangePassword = vi.fn(() => new Promise(() => {}))
-    const wrapper = mountPage(resetChangePassword)
+    const wrapper = await openPage(resetChangePassword)
     await fillPasswords(wrapper)
     const submit = wrapper.find('a.main-button')
 
@@ -149,7 +165,7 @@ describe('pages/ResetChangePassword', () => {
 
   it('sends it again after a failure', async () => {
     const resetChangePassword = vi.fn(() => Promise.reject(new Error('down')))
-    const wrapper = mountPage(resetChangePassword)
+    const wrapper = await openPage(resetChangePassword)
     await fillPasswords(wrapper)
     const submit = wrapper.find('a.main-button')
 
@@ -168,7 +184,7 @@ describe('pages/ResetChangePassword', () => {
       .fn()
       .mockResolvedValueOnce()
       .mockRejectedValue({ body: { message: 'Wrong or expired token.' } })
-    const wrapper = mountPage(resetChangePassword)
+    const wrapper = await openPage(resetChangePassword)
     await fillPasswords(wrapper)
     const password = wrapper.find('input[type="password"]')
 
@@ -183,10 +199,160 @@ describe('pages/ResetChangePassword', () => {
     wrapper.unmount()
   })
 
+  describe('when the page opens', () => {
+    const passwordFields = wrapper => wrapper.findAll('input[type="password"]')
+
+    it('holds the form back until Zou tells the link is valid', async () => {
+      let answer
+      const checkResetToken = vi.fn(
+        () => new Promise(resolve => (answer = resolve))
+      )
+      const resetChangePassword = vi.fn()
+      const wrapper = mountPage(resetChangePassword, vi.fn(), checkResetToken)
+
+      expect(checkResetToken.mock.calls[0][1]).toEqual({
+        email: 'jane@example.com',
+        token: 'token-1'
+      })
+      // Hidden, the form keeps its place: the box does not change size.
+      const hidden = wrapper.find('.is-checking')
+      expect(hidden.findAll('input[type="password"]')).toHaveLength(2)
+      expect(hidden.findComponent(Spinner).exists()).toBe(true)
+      expect(wrapper.find('.box').attributes('aria-busy')).toBe('true')
+      await fillPasswords(wrapper)
+      await wrapper.find('a.main-button').trigger('click')
+      expect(resetChangePassword).not.toHaveBeenCalled()
+      answer(true)
+      await flushPromises()
+
+      expect(wrapper.find('.is-checking').exists()).toBe(false)
+      expect(wrapper.find('.box').attributes('aria-busy')).toBe('false')
+      expect(passwordFields(wrapper)).toHaveLength(2)
+      expect(wrapper.find('a.main-button').text()).toBe(
+        'login.reset_change_password'
+      )
+      expect(wrapper.findComponent(Spinner).exists()).toBe(false)
+    })
+
+    describe('focus', () => {
+      // In a browser, a field hidden during the check cannot take the focus
+      // of v-focus: only the page can give it, once the check is done.
+      const mountAttached = checkResetToken =>
+        mount(ResetChangePassword, {
+          attachTo: document.body,
+          global: {
+            plugins: [i18n, createPageStore(vi.fn(), vi.fn(), checkResetToken)],
+            stubs: { RouterLink: RouterLinkStub },
+            directives: { focus: {} }
+          }
+        })
+
+      it('goes to the first field of a valid link', async () => {
+        const wrapper = mountAttached(vi.fn(() => true))
+        const field = wrapper.find('input[type="password"]').element
+        // In a browser, a field still hidden would not take the focus.
+        let isHiddenOnFocus = null
+        field.addEventListener('focus', () => {
+          isHiddenOnFocus = Boolean(field.closest('.is-checking'))
+        })
+        await flushPromises()
+
+        expect(document.activeElement).toBe(field)
+        expect(isHiddenOnFocus).toBe(false)
+        wrapper.unmount()
+      })
+
+      it('stays put for a dead link, whose message is announced', async () => {
+        // A focus given on load would draw its ring for mouse users too.
+        const wrapper = mountAttached(vi.fn(() => false))
+        await flushPromises()
+
+        expect(document.activeElement).toBe(document.body)
+        expect(wrapper.find('.error').attributes('role')).toBe('alert')
+        wrapper.unmount()
+      })
+
+      it('stays where the user put it during the check', async () => {
+        let answer
+        const wrapper = mountAttached(
+          vi.fn(() => new Promise(resolve => (answer = resolve)))
+        )
+        // The language switch sits outside the page.
+        const languageSwitch = document.createElement('button')
+        document.body.appendChild(languageSwitch)
+        languageSwitch.focus()
+        answer(true)
+        await flushPromises()
+
+        expect(document.activeElement).toBe(languageSwitch)
+        languageSwitch.remove()
+        wrapper.unmount()
+      })
+    })
+
+    it('offers a new link at once when the link is dead', async () => {
+      const wrapper = await openPage(
+        vi.fn(),
+        vi.fn(),
+        vi.fn(() => false)
+      )
+
+      expect(passwordFields(wrapper)).toHaveLength(0)
+      expect(wrapper.find('.error').text()).toBe(
+        'login.reset_change_password_token_failed'
+      )
+      expect(wrapper.find('a.main-button').text()).toBe('login.send_new_link')
+      expect(wrapper.findComponent(RouterLinkStub).text()).toBe(
+        'login.back_to_login'
+      )
+    })
+
+    it('shows the form when the check fails', async () => {
+      // An older Zou has no such route: setting the password checks the
+      // link anyway.
+      const wrapper = await openPage(
+        vi.fn(),
+        vi.fn(),
+        vi.fn(() => Promise.reject(requestFailure('not found')))
+      )
+
+      expect(passwordFields(wrapper)).toHaveLength(2)
+      expect(wrapper.find('.error').exists()).toBe(false)
+      expect(wrapper.findComponent(Spinner).exists()).toBe(false)
+    })
+
+    it('leaves a bug of the check to Sentry, and shows the form', async () => {
+      const bug = new TypeError('a bug')
+      const errorHandler = vi.fn()
+      const wrapper = mountWithErrorHandler(
+        errorHandler,
+        vi.fn(),
+        vi.fn(),
+        vi.fn(() => Promise.reject(bug))
+      )
+      await flushPromises()
+
+      expect(errorHandler).toHaveBeenCalledTimes(1)
+      expect(errorHandler.mock.calls[0][0]).toBe(bug)
+      expect(wrapper.find('.is-checking').exists()).toBe(false)
+      expect(passwordFields(wrapper)).toHaveLength(2)
+    })
+
+    it('shows the form of a link without a token', async () => {
+      route.query = { email: 'jane@example.com' }
+      const checkResetToken = vi.fn()
+
+      const wrapper = await openPage(vi.fn(), vi.fn(), checkResetToken)
+
+      expect(checkResetToken).not.toHaveBeenCalled()
+      expect(passwordFields(wrapper)).toHaveLength(2)
+    })
+  })
+
   describe('once the link is dead', () => {
     it('offers a new link instead of the password form', async () => {
       route.query.type = 'new'
-      const wrapper = mountPage(vi.fn(rejectDeadLink))
+      const wrapper = await openPage(vi.fn(rejectDeadLink))
 
       await submitPasswords(wrapper)
 
@@ -208,6 +374,7 @@ describe('pages/ResetChangePassword', () => {
           stubs: { RouterLink: RouterLinkStub }
         }
       })
+      await flushPromises()
       await submitPasswords(wrapper)
 
       await wrapper.find('a.main-button').trigger('click')
@@ -227,7 +394,7 @@ describe('pages/ResetChangePassword', () => {
 
     it('asks for one link while the request runs', async () => {
       const resetPassword = vi.fn(() => new Promise(() => {}))
-      const wrapper = mountPage(vi.fn(rejectDeadLink), resetPassword)
+      const wrapper = await openPage(vi.fn(rejectDeadLink), resetPassword)
       await submitPasswords(wrapper)
       const send = wrapper.find('a.main-button')
 
@@ -244,7 +411,7 @@ describe('pages/ResetChangePassword', () => {
         .fn()
         .mockRejectedValueOnce(requestFailure('down'))
         .mockResolvedValue()
-      const wrapper = mountPage(vi.fn(rejectDeadLink), resetPassword)
+      const wrapper = await openPage(vi.fn(rejectDeadLink), resetPassword)
       await submitPasswords(wrapper)
       const send = wrapper.find('a.main-button')
 
@@ -276,6 +443,7 @@ describe('pages/ResetChangePassword', () => {
         vi.fn(rejectDeadLink),
         vi.fn(() => Promise.reject(bug))
       )
+      await flushPromises()
       await submitPasswords(wrapper)
 
       await wrapper.find('a.main-button').trigger('click')
@@ -296,12 +464,15 @@ describe('pages/ResetChangePassword', () => {
           stubs: { RouterLink: RouterLinkStub }
         }
       })
+      await flushPromises()
       await fillPasswords(wrapper)
       wrapper.find('a.main-button').element.focus()
 
       await wrapper.find('a.main-button').trigger('click')
       await flushPromises()
       expect(document.activeElement).toBe(wrapper.find('.error').element)
+      // The focus reads the message: an alert would say it twice.
+      expect(wrapper.find('.error').attributes('role')).toBeUndefined()
 
       wrapper.find('a.main-button').element.focus()
       await wrapper.find('a.main-button').trigger('click')

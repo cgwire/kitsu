@@ -98,6 +98,13 @@ const actions = {
     return auth.resetPassword(email)
   },
 
+  async checkResetToken({}, { email, token }) {
+    const answer = await auth.checkResetToken(email, token)
+    // Only a dead link loses its form: setting the password checks the link
+    // anyway, so an odd answer must not lock the person out.
+    return answer?.valid !== false
+  },
+
   async resetChangePassword({ commit }, { email, token, password, password2 }) {
     await auth.resetChangePassword(email, token, password, password2)
     // Filled in on the login page the reset page leads to.
