@@ -204,8 +204,102 @@ describe('ViewPlaylistModal', () => {
     expect(editModal.props('isError')).toBe(false)
   })
 
-  // Clearing on cancel would miss a save that fails after the cancel.
-  it('opens the save form without the error of a save that failed after a cancel', async () => {
+  // The action answers null when the save of the entries fails: the new
+  // playlist is there, but empty.
+  it('tells when the entries of a new playlist fail to save', async () => {
+    const dispatch = store.dispatch.bind(store)
+    vi.spyOn(store, 'dispatch').mockImplementation((type, payload) =>
+      type === 'editPlaylist' ? Promise.resolve(null) : dispatch(type, payload)
+    )
+    const editModal = wrapper.findComponent(EditPlaylistModal)
+
+    wrapper.findComponent({ name: 'PlaylistPlayer' }).vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+    editModal.vm.$emit('confirm', { name: 'My playlist', for_entity: 'shot' })
+    await flushPromises()
+
+    expect(editModal.props('isError')).toBe(true)
+    expect(editModal.props('isSuccess')).toBe(false)
+  })
+
+  // That playlist is there, empty: a new try from the same form sends the
+  // entries to it instead of creating another one.
+  it('sends the entries again to the playlist a failed save created', async () => {
+    tempEntities = [
+      {
+        id: 'shot-1',
+        name: 'SH01',
+        preview_file_id: 'pf-1',
+        preview_files: { 'tt-1': [{ id: 'pf-1' }] }
+      }
+    ]
+    await wrapper.setProps({ active: true })
+    await new Promise(resolve => setTimeout(resolve))
+    await wrapper.vm.$nextTick()
+    const dispatch = store.dispatch.bind(store)
+    const editAnswers = [null]
+    const dispatched = vi
+      .spyOn(store, 'dispatch')
+      .mockImplementation((type, payload) =>
+        type === 'editPlaylist' && editAnswers.length
+          ? Promise.resolve(editAnswers.shift())
+          : dispatch(type, payload)
+      )
+    const editModal = wrapper.findComponent(EditPlaylistModal)
+    wrapper.findComponent({ name: 'PlaylistPlayer' }).vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+    editModal.vm.$emit('confirm', { name: 'My playlist', for_entity: 'shot' })
+    await flushPromises()
+    expect(editModal.props('isError')).toBe(true)
+
+    editModal.vm.$emit('confirm', { name: 'Renamed', for_entity: 'shot' })
+    await flushPromises()
+
+    const creations = dispatched.mock.calls.filter(
+      ([type]) => type === 'newPlaylist'
+    )
+    expect(creations).toHaveLength(1)
+    expect(editPlaylistPayload.data).toMatchObject({
+      id: 'playlist-1',
+      name: 'Renamed',
+      shots: [{ entity_id: 'shot-1', preview_file_id: 'pf-1' }]
+    })
+    expect(editModal.props('isSuccess')).toBe(true)
+  })
+
+  // Cancel, then Save again, opens a new form: it creates a playlist again.
+  it('creates a playlist again from a new form after a failed save', async () => {
+    const dispatch = store.dispatch.bind(store)
+    const editAnswers = [null]
+    const dispatched = vi
+      .spyOn(store, 'dispatch')
+      .mockImplementation((type, payload) =>
+        type === 'editPlaylist' && editAnswers.length
+          ? Promise.resolve(editAnswers.shift())
+          : dispatch(type, payload)
+      )
+    const player = wrapper.findComponent({ name: 'PlaylistPlayer' })
+    const editModal = wrapper.findComponent(EditPlaylistModal)
+    player.vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+    editModal.vm.$emit('confirm', { name: 'My playlist', for_entity: 'shot' })
+    await flushPromises()
+
+    editModal.vm.$emit('cancel')
+    await wrapper.vm.$nextTick()
+    player.vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+    editModal.vm.$emit('confirm', { name: 'My playlist', for_entity: 'shot' })
+    await flushPromises()
+
+    const creations = dispatched.mock.calls.filter(
+      ([type]) => type === 'newPlaylist'
+    )
+    expect(creations).toHaveLength(2)
+  })
+
+  // A save that fails after a cancel leaves its closed form alone.
+  it('keeps the error of a save that failed after a cancel out of the form', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     let rejectSave
     newPlaylistRequest = new Promise((resolve, reject) => {
@@ -220,13 +314,65 @@ describe('ViewPlaylistModal', () => {
     editModal.vm.$emit('cancel')
     rejectSave(new Error('taken'))
     await flushPromises()
-    expect(editModal.props('isError')).toBe(true)
+    expect(editModal.props('isError')).toBe(false)
 
     player.vm.$emit('save-clicked')
     await wrapper.vm.$nextTick()
 
     expect(editModal.props('active')).toBe(true)
     expect(editModal.props('isError')).toBe(false)
+  })
+
+  // Cancel, then Save again, before the save answers.
+  const reopenDuringSave = async () => {
+    const player = wrapper.findComponent({ name: 'PlaylistPlayer' })
+    const editModal = wrapper.findComponent(EditPlaylistModal)
+    player.vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+    editModal.vm.$emit('confirm', { name: 'My playlist', for_entity: 'shot' })
+    editModal.vm.$emit('cancel')
+    await wrapper.vm.$nextTick()
+    player.vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+    expect(editModal.props('active')).toBe(true)
+    return editModal
+  }
+
+  it('keeps a late success out of a save form opened again', async () => {
+    let resolveSave
+    newPlaylistRequest = new Promise(resolve => {
+      resolveSave = resolve
+    })
+    const editModal = await reopenDuringSave()
+
+    resolveSave({ id: 'playlist-1', name: 'My playlist', for_entity: 'shot' })
+    await flushPromises()
+
+    expect(editPlaylistPayload.data.id).toBe('playlist-1')
+    expect(editModal.props()).toMatchObject({
+      active: true,
+      isLoading: false,
+      isSuccess: false
+    })
+  })
+
+  it('keeps a late failure out of a save form opened again', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    let rejectSave
+    newPlaylistRequest = new Promise((resolve, reject) => {
+      rejectSave = reject
+    })
+    const editModal = await reopenDuringSave()
+
+    rejectSave(new Error('taken'))
+    await flushPromises()
+
+    expect(consoleError).toHaveBeenCalled()
+    expect(editModal.props()).toMatchObject({
+      active: true,
+      isLoading: false,
+      isError: false
+    })
   })
 
   it('saves the chosen task type preview for each entity, not the default one', async () => {

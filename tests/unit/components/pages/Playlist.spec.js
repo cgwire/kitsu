@@ -173,6 +173,19 @@ const gatedAction = () => {
   return { fn, release: gateNextCall(fn) }
 }
 
+// The next call fails once released, as a request Zou refuses.
+const gatedFailure = () => {
+  let fail
+  const fn = vi.fn(() => Promise.resolve())
+  fn.mockImplementationOnce(
+    () =>
+      new Promise((_resolve, reject) => {
+        fail = reject
+      })
+  )
+  return { fn, fail: error => fail(error) }
+}
+
 const lastPayload = action => action.mock.calls.at(-1)[1]
 
 const changeSort = (wrapper, sort) =>
@@ -1699,7 +1712,7 @@ describe('Playlist page, modals and navigation', () => {
     expect(page.player.props('initialShareLinksCount')).toBe(3)
   })
 
-  it('shows the answer of an edit', async () => {
+  it('shows the answer of an edit and closes its form', async () => {
     const page = await openFirstPlaylist()
     await editFirstPlaylist(page)
 
@@ -1708,6 +1721,77 @@ describe('Playlist page, modals and navigation', () => {
       .vm.$emit('confirm', { name: 'A2', for_client: false })
     await flushPromises()
 
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(false)
+    expect(page.player.props('playlist')).toMatchObject({
+      id: 'pl-1',
+      name: 'A2'
+    })
+  })
+
+  // The action answers null when the save fails, as for a name another
+  // playlist of the episode already holds.
+  it('keeps the edit form open with its error when the save fails', async () => {
+    const page = await openFirstPlaylist({
+      editPlaylist: vi.fn(() => Promise.resolve(null))
+    })
+    await editFirstPlaylist(page)
+
+    page
+      .modal('EditPlaylistModal')
+      .vm.$emit('confirm', { name: 'B', for_client: false })
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props()).toMatchObject({
+      active: true,
+      isError: true,
+      isLoading: false
+    })
+    expect(page.player.props('playlist')).toMatchObject({
+      id: 'pl-1',
+      name: 'A'
+    })
+  })
+
+  // Cancel closes the edit form before the save answers, and the creation
+  // form opens in the same modal.
+  const openCreationDuringRename = async (page, name) => {
+    await editFirstPlaylist(page)
+    page
+      .modal('EditPlaylistModal')
+      .vm.$emit('confirm', { name, for_client: false })
+    await flushPromises()
+    page.modal('EditPlaylistModal').vm.$emit('cancel')
+    await nextTick()
+    await page.wrapper
+      .findAll('button')
+      .find(button => button.text() === 'playlists.new_playlist')
+      .trigger('click')
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(true)
+  }
+
+  it('keeps a late refusal of a rename out of the creation form', async () => {
+    const save = gatedAction()
+    const page = await openFirstPlaylist({ editPlaylist: save.fn })
+    await openCreationDuringRename(page, 'B')
+
+    save.release(null)
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props()).toMatchObject({
+      active: true,
+      isError: false
+    })
+  })
+
+  it('keeps the creation form open when a rename answers late', async () => {
+    const save = gatedAction()
+    const page = await openFirstPlaylist({ editPlaylist: save.fn })
+    await openCreationDuringRename(page, 'A2')
+
+    save.release({ ...stored.get('pl-1'), name: 'A2' })
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(true)
     expect(page.player.props('playlist')).toMatchObject({
       id: 'pl-1',
       name: 'A2'
@@ -1733,6 +1817,151 @@ describe('Playlist page, modals and navigation', () => {
       id: 'pl-2',
       name: 'B'
     })
+  })
+
+  const openCreation = async page => {
+    await page.wrapper
+      .findAll('button')
+      .find(button => button.text() === 'playlists.new_playlist')
+      .trigger('click')
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(true)
+  }
+
+  it('opens the playlist it creates and closes its form', async () => {
+    const page = await openFirstPlaylist({
+      newPlaylist: vi.fn(() => Promise.resolve({ id: 'pl-3', name: 'C' }))
+    })
+    await openCreation(page)
+    routeHolder.router.push.mockClear()
+
+    page
+      .modal('EditPlaylistModal')
+      .vm.$emit('confirm', { name: 'C', for_client: false })
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(false)
+    expect(routeHolder.router.push).toHaveBeenCalledTimes(1)
+    expect(routeHolder.router.push.mock.calls[0][0]).toMatchObject({
+      params: { playlist_id: 'pl-3' }
+    })
+  })
+
+  it('keeps the creation form open with its error when the creation fails', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const page = await openFirstPlaylist({
+      newPlaylist: vi.fn(() => Promise.reject(new Error('Bad Request')))
+    })
+    await openCreation(page)
+
+    page
+      .modal('EditPlaylistModal')
+      .vm.$emit('confirm', { name: 'B', for_client: false })
+    await flushPromises()
+
+    expect(consoleError).toHaveBeenCalled()
+    expect(page.modal('EditPlaylistModal').props()).toMatchObject({
+      active: true,
+      isError: true,
+      isLoading: false
+    })
+  })
+
+  const confirmCreation = async page => {
+    await openCreation(page)
+    page
+      .modal('EditPlaylistModal')
+      .vm.$emit('confirm', { name: 'C', for_client: false })
+    await flushPromises()
+  }
+
+  it('stays on the playlist shown when a creation answers after a Cancel', async () => {
+    const create = gatedAction()
+    const page = await openFirstPlaylist({ newPlaylist: create.fn })
+    await confirmCreation(page)
+    page.modal('EditPlaylistModal').vm.$emit('cancel')
+    await nextTick()
+    routeHolder.router.push.mockClear()
+
+    create.release({ id: 'pl-3', name: 'C' })
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props('active')).toBe(false)
+    expect(routeHolder.router.push).not.toHaveBeenCalled()
+  })
+
+  it('keeps the next creation form open when a creation answers after a Cancel', async () => {
+    const create = gatedAction()
+    const page = await openFirstPlaylist({ newPlaylist: create.fn })
+    await confirmCreation(page)
+    page.modal('EditPlaylistModal').vm.$emit('cancel')
+    await nextTick()
+    await openCreation(page)
+    routeHolder.router.push.mockClear()
+
+    create.release({ id: 'pl-3', name: 'C' })
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props()).toMatchObject({
+      active: true,
+      isLoading: false
+    })
+    expect(routeHolder.router.push).not.toHaveBeenCalled()
+  })
+
+  // Cancel closes the creation form before its save answers, and the edit
+  // form of the playlist shown opens in the same modal.
+  const openEditDuringCreation = async page => {
+    await confirmCreation(page)
+    page.modal('EditPlaylistModal').vm.$emit('cancel')
+    await nextTick()
+    await editFirstPlaylist(page)
+    routeHolder.router.push.mockClear()
+  }
+
+  it('keeps a late refusal of a creation out of the edit form', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const create = gatedFailure()
+    const page = await openFirstPlaylist({ newPlaylist: create.fn })
+    await openEditDuringCreation(page)
+
+    create.fail(new Error('Bad Request'))
+    await flushPromises()
+
+    expect(consoleError).toHaveBeenCalled()
+    expect(page.modal('EditPlaylistModal').props()).toMatchObject({
+      active: true,
+      isError: false,
+      isLoading: false
+    })
+  })
+
+  it('keeps the edit form open when a creation succeeds after it opened', async () => {
+    const create = gatedAction()
+    const page = await openFirstPlaylist({ newPlaylist: create.fn })
+    await openEditDuringCreation(page)
+
+    create.release({ id: 'pl-3', name: 'C' })
+    await flushPromises()
+
+    expect(page.modal('EditPlaylistModal').props()).toMatchObject({
+      active: true,
+      isLoading: false
+    })
+    expect(routeHolder.router.push).not.toHaveBeenCalled()
+  })
+
+  // Leaving the page closes the form without a Cancel.
+  it('does not open the playlist it creates once the page is left', async () => {
+    const create = gatedAction()
+    const page = await openFirstPlaylist({ newPlaylist: create.fn })
+    await confirmCreation(page)
+    routeHolder.router.push.mockClear()
+
+    page.wrapper.unmount()
+    create.release({ id: 'pl-3', name: 'C' })
+    await flushPromises()
+
+    expect(routeHolder.router.push).not.toHaveBeenCalled()
   })
 })
 

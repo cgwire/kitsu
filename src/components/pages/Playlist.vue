@@ -1426,6 +1426,11 @@ const onForClientChanged = forClient => {
 }
 
 const runAddPlaylist = async form => {
+  // Cancel and any form opened next replace this object, while leaving the
+  // page replaces nothing: an answer that arrives after any of them leaves
+  // the modal and the route alone.
+  const shownForm = playlistToEdit.value
+  const isFormShown = () => !isUnmounted && playlistToEdit.value === shownForm
   loading.editPlaylist = true
   errors.editPlaylist = false
   try {
@@ -1440,11 +1445,14 @@ const runAddPlaylist = async form => {
         ? { episode_id: currentEpisode.value.id }
         : {})
     })
-    router.push(getPlaylistPath(playlist.id))
-    modals.isEditDisplayed = false
+    // Otherwise the new playlist only joins the list.
+    if (isFormShown()) {
+      router.push(getPlaylistPath(playlist.id))
+      modals.isEditDisplayed = false
+    }
   } catch (err) {
     console.error(err)
-    errors.editPlaylist = true
+    if (isFormShown()) errors.editPlaylist = true
   } finally {
     loading.editPlaylist = false
   }
@@ -1463,7 +1471,14 @@ const runEditPlaylist = async form => {
         task_type_id: form.task_type_id
       }
     })
-    modals.isEditDisplayed = false
+    // The form may have closed, and another one opened, during the save.
+    const isFormShown = playlistToEdit.value.id === form.id
+    // The action answers null when the save fails, a taken name for one.
+    if (!playlist) {
+      if (isFormShown) errors.editPlaylist = true
+      return
+    }
+    if (isFormShown) modals.isEditDisplayed = false
     // Another playlist may have opened during the save.
     if (currentPlaylist.value.id === form.id) {
       Object.assign(currentPlaylist.value, playlist)

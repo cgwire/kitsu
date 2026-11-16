@@ -6,6 +6,7 @@ import '@/lib/auth'
 
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
 import ComboboxSimple from '@/components/widgets/ComboboxSimple.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 // The modal is mounted closed and opened afterwards, like in the app.
 const mountWith = async (props, getters = {}) => {
@@ -112,5 +113,49 @@ describe('EditPlaylistModal on a real episode', () => {
     // Episodes only exist in TV shows; the option would be a dead end
     // anywhere else.
     expect(await mountOn('featurefilm')).not.toContain('episode')
+  })
+})
+
+describe('EditPlaylistModal confirmation', () => {
+  const playlistToEdit = { name: 'Review A', for_client: false }
+
+  const pressEnterInName = wrapper =>
+    wrapper.findComponent(TextField).vm.$emit('enter', 'Review A')
+
+  it('confirms the form on Enter in the name field', async () => {
+    const wrapper = await mountWith({ playlistToEdit })
+    pressEnterInName(wrapper)
+    expect(wrapper.emitted('confirm')).toHaveLength(1)
+    expect(wrapper.emitted('confirm')[0][0].name).toBe('Review A')
+  })
+
+  it('ignores Enter in the name field while the save runs', async () => {
+    const wrapper = await mountWith({ isLoading: true, playlistToEdit })
+    pressEnterInName(wrapper)
+    expect(wrapper.emitted('confirm')).toBeUndefined()
+  })
+
+  it('ignores Enter in the name field once the playlist is created', async () => {
+    // ViewPlaylistModal keeps the form on screen above its success footer.
+    const wrapper = await mountWith({ isSuccess: true, playlistToEdit })
+    pressEnterInName(wrapper)
+    expect(wrapper.emitted('confirm')).toBeUndefined()
+  })
+
+  it('confirms the edit form once, then waits for its save', async () => {
+    const wrapper = await mountWith({
+      playlistToEdit: { ...playlistToEdit, id: 'playlist-1' }
+    })
+    pressEnterInName(wrapper)
+    await wrapper.setProps({ isLoading: true })
+    pressEnterInName(wrapper)
+    expect(wrapper.emitted('confirm')).toHaveLength(1)
+  })
+
+  it('confirms on Enter again once the save failed', async () => {
+    const wrapper = await mountWith({ isLoading: true, playlistToEdit })
+    await wrapper.setProps({ isLoading: false, isError: true })
+    pressEnterInName(wrapper)
+    expect(wrapper.emitted('confirm')).toHaveLength(1)
   })
 })
