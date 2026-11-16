@@ -210,15 +210,21 @@ const state = {
   ...initialState
 }
 
-// Keyed on the route rather than on currentProduction: the latter is never
-// cleared, so it would leak a project role onto studio-wide pages. Admin is
-// a global-only role, as in zou.
-const routeRole = (state, rootState) => {
+// The role of the user on a production: the role of their team link when one
+// is set, their global role otherwise. Admin is a global-only role, as in Zou:
+// an admin keeps it whatever their link says, and a link holding it, invalid
+// data the API never accepted, counts as the global role.
+const productionRole = (state, productionId) => {
   const role = state.user?.role
-  if (role === 'admin') return role
-  const productionId = rootState?.route?.params?.production_id
-  return (productionId && state.projectRoles?.[productionId]) || role
+  const linkRole = productionId && state.projectRoles?.[productionId]
+  if (role === 'admin' || !linkRole || linkRole === 'admin') return role
+  return linkRole
 }
+
+// Keyed on the route rather than on currentProduction: the latter is never
+// cleared, so it would leak a project role onto studio-wide pages.
+const routeRole = (state, rootState) =>
+  productionRole(state, rootState?.route?.params?.production_id)
 
 const getters = {
   user: state => state.user,
@@ -235,12 +241,8 @@ const getters = {
   isCurrentUserVendor: (state, getters, rootState) =>
     state.user && routeRole(state, rootState) === 'vendor',
 
-  // Role the user effectively holds on given production: the per-project
-  // role when one is set, the global role otherwise.
-  currentUserRoleForProduction: state => productionId => {
-    if (!state.user) return null
-    return (productionId && state.projectRoles[productionId]) || state.user.role
-  },
+  currentUserRoleForProduction: state => productionId =>
+    state.user ? productionRole(state, productionId) : null,
   currentUserEffectiveRole: (state, getters, rootState) =>
     getters.currentUserRoleForProduction(
       rootState.productions.currentProduction?.id
