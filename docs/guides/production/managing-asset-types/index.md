@@ -75,6 +75,10 @@ However, you can add or remove specific Asset Types if they are created on the G
 On the **Asset Types** tab, you can choose which **Asset Types** you want to add or remove on this production,
 validate your choice with the **add** button.
 
+![task type per asset type per production](/guides/production/managing-asset-types/images/4.png)
+
+Note that you can also go further and define different workflows (task types) per asset type and per production.
+
 ## Update an Asset Type
 
 Go to `Main Menu > Asset Types`:

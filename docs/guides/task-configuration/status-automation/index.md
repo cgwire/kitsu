@@ -73,3 +73,9 @@ On the **Status Automation** tab, you can choose which automation you want to us
 validate your choice with the **add** button.
 
 ![Setting Add Task Type](/img/getting-started/setting_auto_add.png)
+
+## Conditions
+
+![](/guides/task-configuration/status-automation/images/1.png)
+
+You can combine multiple conditions with the `AND` or `OR` keywords.
