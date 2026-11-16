@@ -784,15 +784,26 @@ const isMovie = computed(() => extension.value === 'mp4')
 
 const isPicture = computed(() => ['png', 'gif'].includes(extension.value))
 
+// The page keeps the previews of the previous task until the comments of
+// the next one load: the right to annotate them is the one of their task.
+const previewTask = computed(() => {
+  const previewTaskId = currentPreview.value?.task_id
+  if (!previewTaskId || previewTaskId === task.value?.id) return task.value
+  return taskMap.value.get(previewTaskId)
+})
+
 const isPreviewPlayerReadOnly = computed(() => {
-  if (task.value) {
+  if (task.value && previewTask.value) {
     if (isCurrentUserManager.value || isCurrentUserClient.value) {
       return false
     } else if (isCurrentUserSupervisor.value) {
       if (user.value.departments.length === 0) {
         return false
       }
-      return !user.value.departments.includes(taskType.value?.department_id)
+      const previewTaskType = taskTypeMap.value.get(
+        previewTask.value.task_type_id
+      )
+      return !user.value.departments.includes(previewTaskType?.department_id)
     }
   }
   return true
@@ -1615,7 +1626,9 @@ const onAnnotationChanged = async ({
   deletions,
   updates
 }) => {
-  const taskId = task.value.id
+  // The player sends the strokes of the previous preview as it changes, once
+  // the page shows the next task.
+  const taskId = preview.task_id || task.value.id
   try {
     await store.dispatch('updatePreviewAnnotation', {
       taskId,

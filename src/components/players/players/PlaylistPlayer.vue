@@ -1849,7 +1849,7 @@ const annotation = useAnnotation({
   onionCanvasComponent: onionAnnotationCanvas,
   canvasWrapper,
   annotations,
-  isCurrentUserArtist,
+  isReadOnly: computed(() => !canAnnotateCurrentPreview.value),
   userId,
   store,
   emit,
@@ -2062,8 +2062,12 @@ const { isAltHeld } = usePreviewShortcuts({
       onEraseClicked()
     }
   },
-  onUndo: () => undoLastAction(),
-  onRedo: () => redoLastAction(),
+  onUndo: () => {
+    if (canAnnotateCurrentPreview.value) undoLastAction()
+  },
+  onRedo: () => {
+    if (canAnnotateCurrentPreview.value) redoLastAction()
+  },
   onPrevPreview: () => onPlayPreviousEntityClicked(),
   onNextPreview: () => onPlayNextEntityClicked(),
   onCopy: () => copyAnnotations(),

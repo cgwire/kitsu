@@ -4153,6 +4153,46 @@ describe('PlaylistPlayer.vue', () => {
       expect(annotationBar().props('readOnly')).toBe(false)
     })
 
+    // Nothing saves a change of theirs on another department: Delete or a
+    // drag of a stroke changed it on screen only.
+    it.each([
+      ['lets them select the strokes of their department', 'tt-anim', true],
+      [
+        'keeps them from selecting the strokes of another department',
+        'tt-comp',
+        false
+      ]
+    ])('%s', async (_, taskTypeId, isSelectable) => {
+      const canvas = createFakeCanvas()
+      const stroke = {
+        id: 'stroke-1',
+        type: 'path',
+        path: 'M 0 0 L 10 10',
+        left: 100,
+        top: 50,
+        scaleX: 1,
+        scaleY: 1,
+        stroke: '#ff0000',
+        strokeWidth: 2
+      }
+      await mountAsSupervisor(
+        [
+          {
+            ...movieOf('shot-1', taskTypeId, 'png'),
+            preview_file_annotations: [
+              { time: 0, width: 800, height: 600, drawing: { objects: [stroke] } }
+            ]
+          }
+        ],
+        { stubs: { AnnotationCanvas: annotationCanvasStub(canvas) } }
+      )
+
+      const strokes = canvas.add.mock.calls.map(([object]) => object)
+      expect(strokes.map(({ selectable }) => selectable)).toEqual([
+        isSelectable
+      ])
+    })
+
     it('keeps them from annotating a preview of another department', async () => {
       await mountAsSupervisor([compositingShot])
 
@@ -4324,5 +4364,97 @@ describe('PlaylistPlayer.vue', () => {
         expect(annotationBar().props(prop)).toBe(false)
       }
     )
+
+    // A stroke drawn while they could annotate stays in the undo history,
+    // with the preview: undoing it once the right went changed on screen what
+    // nothing saved, and its deletion left with their next save.
+    describe('once their departments change', () => {
+      const drawStroke = canvas => {
+        const stroke = {
+          id: 'stroke-new',
+          type: 'path',
+          set(key, value) {
+            if (typeof key === 'object') Object.assign(this, key)
+            else this[key] = value
+          },
+          setControlsVisibility: () => {},
+          toJSON() {
+            return { id: this.id, type: this.type }
+          }
+        }
+        canvas._objects.push(stroke)
+        canvas.fire('object:added', { target: stroke })
+        return stroke
+      }
+
+      const mountAndDraw = async () => {
+        // The composable reads the objects of the canvas to save them.
+        const objects = []
+        const canvas = {
+          ...createFakeCanvas(),
+          _objects: objects,
+          getObjects: () => objects
+        }
+        const user = reactive({ ...animationSupervisor })
+        await mountAsSupervisor([animationShot], {
+          user,
+          stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+        })
+        const stroke = drawStroke(canvas)
+        const moveToAnotherDepartment = async () => {
+          user.departments = ['comp']
+          await flushPromises()
+          expect(annotationBar().props('readOnly')).toBe(true)
+        }
+        return { canvas, stroke, moveToAnotherDepartment }
+      }
+
+      const undo = () => press({ key: 'z', ctrlKey: true })
+      const redo = () => press({ key: 'r', code: 'KeyR', altKey: true })
+
+      it('undoes a stroke before', async () => {
+        const { canvas, stroke } = await mountAndDraw()
+
+        undo()
+        await flushPromises()
+
+        expect(canvas.remove).toHaveBeenCalledWith(stroke)
+      })
+
+      it('undoes nothing after', async () => {
+        const { canvas, moveToAnotherDepartment } = await mountAndDraw()
+        await moveToAnotherDepartment()
+
+        undo()
+        await flushPromises()
+
+        expect(canvas.remove).not.toHaveBeenCalled()
+      })
+
+      it('redoes a stroke before', async () => {
+        const { canvas, stroke } = await mountAndDraw()
+        undo()
+        await flushPromises()
+        canvas.add.mockClear()
+
+        redo()
+        await flushPromises()
+
+        expect(canvas.add).toHaveBeenCalledWith(stroke)
+      })
+
+      it('redoes nothing after', async () => {
+        const { canvas, moveToAnotherDepartment } = await mountAndDraw()
+        undo()
+        await flushPromises()
+        await moveToAnotherDepartment()
+        canvas.add.mockClear()
+
+        redo()
+        await flushPromises()
+
+        expect(canvas.add).not.toHaveBeenCalled()
+      })
+    })
   })
 })

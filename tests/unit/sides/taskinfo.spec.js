@@ -921,6 +921,14 @@ describe('TaskInfo.vue', () => {
       expect(isReadOnly(wrapper)).toBe(false)
     })
 
+    it('is writable for an admin', async () => {
+      const { wrapper } = await mountPanel({
+        previews,
+        getterOverrides: { isCurrentUserAdmin: () => true }
+      })
+      expect(isReadOnly(wrapper)).toBe(false)
+    })
+
     it('is writable for the supervisor of the task department', async () => {
       const { wrapper } = await mountPanel({
         previews,
@@ -953,6 +961,286 @@ describe('TaskInfo.vue', () => {
         }
       })
       expect(isReadOnly(wrapper)).toBe(true)
+    })
+
+    // The panel keeps the previews of the previous task until the comments
+    // of the next one load: a drawing went onto them with the rights of the
+    // next task, and Zou refused it.
+    describe('on the previews of the previous task', () => {
+      const otherTaskType = {
+        ...taskType,
+        id: 'task-type-2',
+        department_id: 'department-2'
+      }
+      const ownTask = id => buildTask({ id })
+      const otherTask = (id, overrides = {}) =>
+        buildTask({ id, task_type_id: otherTaskType.id, ...overrides })
+      const previewsByTask = {
+        'task-a': [
+          { id: 'preview-a', revision: 1, task_id: 'task-a', previews: ['a'] }
+        ],
+        'task-b': [
+          { id: 'preview-b', revision: 1, task_id: 'task-b', previews: ['b'] }
+        ]
+      }
+
+      it.each([
+        {
+          title: 'locks them for a supervisor of another department',
+          previousTask: otherTask('task-a'),
+          nextTask: ownTask('task-b'),
+          roles: { 'production-1': 'supervisor' },
+          readOnlyWhileLoading: true,
+          readOnlyOnceLoaded: false
+        },
+        {
+          title: 'leaves them open to a supervisor of their department',
+          previousTask: ownTask('task-a'),
+          nextTask: otherTask('task-b'),
+          roles: { 'production-1': 'supervisor' },
+          readOnlyWhileLoading: false,
+          readOnlyOnceLoaded: true
+        },
+        {
+          title: 'leaves them open to a manager',
+          previousTask: otherTask('task-a'),
+          nextTask: ownTask('task-b'),
+          roles: { 'production-1': 'manager' },
+          readOnlyWhileLoading: false,
+          readOnlyOnceLoaded: false
+        },
+        {
+          title: 'leaves them open to a manager of their production only',
+          previousTask: otherTask('task-a', { project_id: 'production-2' }),
+          nextTask: otherTask('task-b'),
+          roles: { 'production-1': 'supervisor', 'production-2': 'manager' },
+          readOnlyWhileLoading: false,
+          readOnlyOnceLoaded: true
+        },
+        // All Tasks and Concepts keep their tasks out of the store.
+        {
+          title: 'leaves them open to a manager on a page without stored tasks',
+          previousTask: otherTask('task-a'),
+          nextTask: ownTask('task-b'),
+          roles: { 'production-1': 'manager' },
+          areTasksStored: false,
+          readOnlyWhileLoading: false,
+          readOnlyOnceLoaded: false
+        },
+        {
+          title:
+            'locks them for a supervisor of another department on a page without stored tasks',
+          previousTask: otherTask('task-a'),
+          nextTask: ownTask('task-b'),
+          roles: { 'production-1': 'supervisor' },
+          areTasksStored: false,
+          readOnlyWhileLoading: true,
+          readOnlyOnceLoaded: false
+        }
+      ])(
+        '$title',
+        async ({
+          previousTask,
+          nextTask,
+          roles,
+          areTasksStored = true,
+          readOnlyWhileLoading,
+          readOnlyOnceLoaded
+        }) => {
+          const storedTasks = areTasksStored ? [previousTask, nextTask] : []
+          const { wrapper, store } = await mountPanel({
+            task: previousTask,
+            getterOverrides: {
+              currentUserRoleForProduction: () => productionId =>
+                roles[productionId] ?? 'user',
+              getTaskPreviews: () => taskId => previewsByTask[taskId] ?? [],
+              taskMap: () => new Map(storedTasks.map(task => [task.id, task])),
+              taskTypeMap: () =>
+                new Map([
+                  [taskType.id, taskType],
+                  [otherTaskType.id, otherTaskType]
+                ]),
+              user: () => ({ id: USER_ID, departments: ['department-1'] })
+            }
+          })
+          const player = () => wrapper.findComponent(PreviewPlayer)
+          let endCommentsLoad
+          store.dispatch.mockImplementation(type =>
+            type === 'loadTaskComments'
+              ? new Promise(resolve => {
+                  endCommentsLoad = resolve
+                })
+              : Promise.resolve()
+          )
+
+          await wrapper.setProps({ task: nextTask })
+
+          expect(player().props('previews')).toEqual(['a'])
+          expect(player().props('readOnly')).toBe(readOnlyWhileLoading)
+
+          endCommentsLoad()
+          await flushPromises()
+
+          expect(player().props('previews')).toEqual(['b'])
+          expect(player().props('readOnly')).toBe(readOnlyOnceLoaded)
+        }
+      )
+
+      // The player sends the strokes of the previous preview as its preview
+      // changes, once the panel shows the next task.
+      it('files a drawing under the task of its preview', async () => {
+        const confirmAnnotationsSaved = vi.fn()
+        const { wrapper, store } = await mountPanel({
+          task: ownTask('task-a'),
+          stubs: {
+            PreviewPlayer: {
+              props: ['canComment', 'fps', 'previews', 'readOnly'],
+              template: '<div />',
+              methods: {
+                confirmAnnotationsSaved,
+                focus: () => {},
+                restoreFailedAnnotations: () => {},
+                setCurrentFrame: () => {}
+              }
+            }
+          },
+          getterOverrides: {
+            currentUserRoleForProduction: () => () => 'manager',
+            getTaskPreviews: () => taskId => previewsByTask[taskId] ?? []
+          }
+        })
+        await wrapper.setProps({ task: ownTask('task-b') })
+        await flushPromises()
+        const changes = {
+          preview: { id: 'preview-a', task_id: 'task-a' },
+          additions: [{ id: 'stroke-1' }],
+          deletions: [],
+          updates: []
+        }
+
+        wrapper
+          .findComponent(PreviewPlayer)
+          .vm.$emit('annotation-changed', changes)
+        await flushPromises()
+
+        expect(store.dispatch).toHaveBeenCalledWith('updatePreviewAnnotation', {
+          taskId: 'task-a',
+          ...changes
+        })
+        expect(confirmAnnotationsSaved).toHaveBeenCalled()
+      })
+
+      // A failed load leaves the previews of the previous task on screen:
+      // whatever then shows the previews of the next task gives their rights.
+      describe('after a failed load of the next task', () => {
+        afterEach(() => {
+          vi.useRealTimers()
+          vi.restoreAllMocks()
+        })
+
+        const commentsByTask = {
+          'task-a': [{ id: 'comment-a' }],
+          'task-b': [{ id: 'comment-b1' }, { id: 'comment-b2' }]
+        }
+
+        const failNextTaskLoad = async () => {
+          vi.spyOn(console, 'error').mockImplementation(() => {})
+          const { wrapper, store, socket } = await mountPanel({
+            task: otherTask('task-a'),
+            stubs: {
+              PreviewPlayer: {
+                props: ['canComment', 'fps', 'previews', 'readOnly'],
+                template: '<div />',
+                data: () => ({
+                  currentPreview: { id: 'preview-a', task_id: 'task-a' }
+                }),
+                methods: {
+                  focus: () => {},
+                  isValidPreviewModification: () => true,
+                  loadAnnotation: () => {},
+                  reloadAnnotations: () => {},
+                  setCurrentFrame: () => {}
+                }
+              }
+            },
+            getterOverrides: {
+              currentUserRoleForProduction: () => () => 'supervisor',
+              getTaskComments: () => taskId => commentsByTask[taskId] ?? [],
+              getTaskPreviews: () => taskId => previewsByTask[taskId] ?? [],
+              taskTypeMap: () =>
+                new Map([
+                  [taskType.id, taskType],
+                  [otherTaskType.id, otherTaskType]
+                ]),
+              user: () => ({ id: USER_ID, departments: ['department-1'] })
+            }
+          })
+          store.dispatch.mockImplementation(type =>
+            type === 'loadTaskComments'
+              ? Promise.reject(new Error('Request has been terminated'))
+              : Promise.resolve()
+          )
+          await wrapper.setProps({ task: ownTask('task-b') })
+          await flushPromises()
+          const emitEvent = (event, data) => {
+            const [, handler] = socket.on.mock.calls.find(
+              ([name]) => name === event
+            )
+            handler(data)
+          }
+          return { wrapper, emitEvent }
+        }
+
+        it.each([
+          {
+            title: 'when the player reorders the previews',
+            show: ({ wrapper }) =>
+              wrapper.findComponent(PreviewPlayer).vm.$emit('previews-order-change')
+          },
+          {
+            title: 'when a comment comes for it',
+            show: ({ emitEvent }) => {
+              vi.useFakeTimers({ toFake: ['setTimeout'] })
+              emitEvent('comment:new', {
+                task_id: 'task-b',
+                comment_id: 'comment-b2'
+              })
+              vi.runAllTimers()
+            }
+          },
+          {
+            title: 'when a comment of the previous task is deleted',
+            show: ({ emitEvent }) =>
+              emitEvent('comment:delete', {
+                task_id: 'task-a',
+                comment_id: 'comment-a'
+              })
+          },
+          {
+            title: 'when someone annotates the shown preview',
+            show: ({ emitEvent }) =>
+              emitEvent('preview-file:annotation-update', {
+                preview_file_id: 'preview-a',
+                updated_at: '2026-11-16T12:00:00'
+              })
+          }
+        ])(
+          'shows the previews of the next task with its rights $title',
+          async ({ show }) => {
+            const panel = await failNextTaskLoad()
+            const player = () => panel.wrapper.findComponent(PreviewPlayer)
+            expect(console.error).toHaveBeenCalled()
+            expect(player().props('previews')).toEqual(['a'])
+            expect(player().props('readOnly')).toBe(true)
+
+            show(panel)
+            await flushPromises()
+
+            expect(player().props('previews')).toEqual(['b'])
+            expect(player().props('readOnly')).toBe(false)
+          }
+        )
+      })
     })
   })
 

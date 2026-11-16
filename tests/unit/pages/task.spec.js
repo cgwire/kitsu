@@ -1904,6 +1904,170 @@ describe('Task.vue preview player permissions', () => {
     })
     expect(isReadOnly(wrapper)).toBe(true)
   })
+
+  // The page keeps the previews of the previous task until the comments of
+  // the next one load: a drawing went onto them with the rights of the next
+  // task, and Zou refused it.
+  describe('on the previews of the previous task', () => {
+    const ownTaskType = { ...taskType, department_id: 'department-1' }
+    const otherTaskType = {
+      ...taskType,
+      id: 'task-type-2',
+      department_id: 'department-2'
+    }
+    const ownTask = id => buildTask({ id })
+    const otherTask = id => buildTask({ id, task_type_id: otherTaskType.id })
+    const previewsByTask = {
+      [TASK_ID]: [
+        { id: 'preview-1', revision: 1, task_id: TASK_ID, previews: ['1'] }
+      ],
+      'task-2': [
+        { id: 'preview-2', revision: 1, task_id: 'task-2', previews: ['2'] }
+      ]
+    }
+
+    it.each([
+      {
+        title: 'locks them for a supervisor of another department',
+        previousTask: otherTask(TASK_ID),
+        nextTask: ownTask('task-2'),
+        role: 'supervisor',
+        readOnlyWhileLoading: true,
+        readOnlyOnceLoaded: false
+      },
+      {
+        title: 'leaves them open to a supervisor of their department',
+        previousTask: ownTask(TASK_ID),
+        nextTask: otherTask('task-2'),
+        role: 'supervisor',
+        readOnlyWhileLoading: false,
+        readOnlyOnceLoaded: true
+      },
+      {
+        title: 'leaves them open to a manager',
+        previousTask: otherTask(TASK_ID),
+        nextTask: ownTask('task-2'),
+        role: 'manager',
+        readOnlyWhileLoading: false,
+        readOnlyOnceLoaded: false
+      },
+      {
+        title: 'locks them once the store drops their task',
+        previousTask: otherTask(TASK_ID),
+        nextTask: ownTask('task-2'),
+        role: 'manager',
+        isPreviousTaskDropped: true,
+        readOnlyWhileLoading: true,
+        readOnlyOnceLoaded: false
+      }
+    ])(
+      '$title',
+      async ({
+        previousTask,
+        nextTask,
+        role,
+        isPreviousTaskDropped = false,
+        readOnlyWhileLoading,
+        readOnlyOnceLoaded
+      }) => {
+        const tasks = new Map([
+          [previousTask.id, previousTask],
+          [nextTask.id, nextTask]
+        ])
+        const { wrapper, store, router } = await mountPage({
+          task: previousTask,
+          getterOverrides: {
+            getTaskPreviews: () => taskId => previewsByTask[taskId] ?? [],
+            isCurrentUserProductionManager: () => role === 'manager',
+            isCurrentUserProductionSupervisor: () => role === 'supervisor',
+            taskMap: () => tasks,
+            taskTypeMap: () =>
+              new Map([
+                [ownTaskType.id, ownTaskType],
+                [otherTaskType.id, otherTaskType]
+              ]),
+            user: () => ({ id: 'user-1', departments: ['department-1'] })
+          }
+        })
+        const player = () => wrapper.findComponent(PreviewPlayer)
+        let endCommentsLoad
+        store.dispatch.mockImplementation(type =>
+          type === 'loadTaskComments'
+            ? new Promise(resolve => {
+                endCommentsLoad = resolve
+              })
+            : Promise.resolve()
+        )
+        if (isPreviousTaskDropped) tasks.delete(previousTask.id)
+
+        await router.push({
+          name: 'task',
+          params: { ...TASK_ROUTE_PARAMS, task_id: nextTask.id }
+        })
+        await flushPromises()
+
+        expect(player().props('previews')).toEqual(['1'])
+        expect(isReadOnly(wrapper)).toBe(readOnlyWhileLoading)
+
+        endCommentsLoad()
+        await flushPromises()
+
+        expect(player().props('previews')).toEqual(['2'])
+        expect(isReadOnly(wrapper)).toBe(readOnlyOnceLoaded)
+      }
+    )
+
+    // The player sends the strokes of the previous preview as its preview
+    // changes, once the page shows the next task.
+    it('files a drawing under the task of its preview', async () => {
+      const confirmAnnotationsSaved = vi.fn()
+      const tasks = new Map([
+        [TASK_ID, ownTask(TASK_ID)],
+        ['task-2', ownTask('task-2')]
+      ])
+      const { wrapper, store, router } = await mountPage({
+        task: ownTask(TASK_ID),
+        stubs: {
+          PreviewPlayer: {
+            props: ['previews', 'readOnly'],
+            template: '<div />',
+            methods: {
+              confirmAnnotationsSaved,
+              focus: () => {},
+              restoreFailedAnnotations: () => {}
+            }
+          }
+        },
+        getterOverrides: {
+          getTaskPreviews: () => taskId => previewsByTask[taskId] ?? [],
+          isCurrentUserProductionManager: () => true,
+          taskMap: () => tasks
+        }
+      })
+      await router.push({
+        name: 'task',
+        params: { ...TASK_ROUTE_PARAMS, task_id: 'task-2' }
+      })
+      await flushPromises()
+      const changes = {
+        preview: { id: 'preview-1', task_id: TASK_ID },
+        additions: [{ id: 'stroke-1' }],
+        deletions: [],
+        updates: []
+      }
+
+      wrapper
+        .findComponent(PreviewPlayer)
+        .vm.$emit('annotation-changed', changes)
+      await flushPromises()
+
+      expect(store.dispatch).toHaveBeenCalledWith('updatePreviewAnnotation', {
+        taskId: TASK_ID,
+        ...changes
+      })
+      expect(confirmAnnotationsSaved).toHaveBeenCalled()
+    })
+  })
 })
 
 describe('Task.vue metadata values', () => {

@@ -729,7 +729,7 @@ const annotation = useAnnotation({
   onionCanvasComponent: onionAnnotationCanvas,
   canvasWrapper,
   annotations,
-  isCurrentUserArtist,
+  isReadOnly: computed(() => props.readOnly),
   userId,
   store,
   emit,
@@ -2159,22 +2159,32 @@ const { isAltHeld } = usePreviewShortcuts({
   onPrevAnnotation: () => goPreviousDrawing(),
   onNextAnnotation: () => goNextDrawing(),
   onAnnotate: () => {
+    if (props.readOnly) return
     container.value.focus()
     onPencilAnnotateClicked()
   },
   onErase: () => {
+    if (props.readOnly) return
     container.value.focus()
     onEraseClicked()
   },
-  onUndo: () => undoLastAction(),
-  onRedo: () => redoLastAction(),
+  onUndo: () => {
+    if (props.readOnly) return
+    undoLastAction()
+  },
+  onRedo: () => {
+    if (props.readOnly) return
+    redoLastAction()
+  },
   onPrevPreview: () => onPreviousClicked(),
   onNextPreview: () => onNextClicked(),
   onCopy: () => copyAnnotations(),
   // The canvas shows over movies and pictures only: a paste anywhere else
   // would save annotations that nothing shows again.
   onPaste: () => {
-    if (isMovie.value || isPicture.value) pasteAnnotations()
+    if (!props.readOnly && (isMovie.value || isPicture.value)) {
+      pasteAnnotations()
+    }
   },
   onToggleOverlay: () => toggleFullOverlay()
 })
@@ -2731,6 +2741,20 @@ watch(isAnnotationsDisplayed, () => {
     if (isEraserModeOn.value) onEraseClicked()
   }
 })
+
+// The right can go while a tool is on, with the previews of another task or
+// a new department or role of the viewer: a tool left on would draw what
+// nothing saves.
+watch(
+  () => props.readOnly,
+  () => {
+    if (!props.readOnly) return
+    if (isDrawing.value) onPencilAnnotateClicked()
+    else if (isTyping.value) onTypeClicked()
+    else if (isEraserModeOn.value) onEraseClicked()
+    else if (isShapeMode.value) onShapeModeClicked()
+  }
+)
 
 watch(isComparisonOverlay, () => {
   nextTick(() => {

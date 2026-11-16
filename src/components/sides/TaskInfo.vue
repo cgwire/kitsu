@@ -400,6 +400,7 @@ import {
   provide,
   reactive,
   ref,
+  shallowRef,
   useTemplateRef,
   watch
 } from 'vue'
@@ -530,6 +531,9 @@ const isWide = ref(false)
 const isExtraWide = ref(false)
 const taskComments = ref([])
 const taskPreviews = ref([])
+// The previews stay on screen until the comments of the next task load: the
+// right to annotate them is the one of the task they were shown for.
+const previewsTask = shallowRef(null)
 
 let currentExtraPreviewId = null
 let extraFileRevisionId = null
@@ -732,15 +736,24 @@ const isDepartmentSupervisor = computed(() =>
   )
 )
 
-const isPreviewPlayerReadOnly = computed(
-  () =>
-    !props.task ||
-    !(
-      isCurrentUserManager.value ||
-      isCurrentUserClient.value ||
-      isDepartmentSupervisor.value
+const isPreviewPlayerReadOnly = computed(() => {
+  const task = previewsTask.value
+  if (!props.task || !task) return true
+  if (store.getters.isCurrentUserAdmin || isCurrentUserClient.value) {
+    return false
+  }
+  const role = store.getters.currentUserRoleForProduction(
+    task.project_id || currentProduction.value?.id
+  )
+  return !(
+    role === 'manager' ||
+    isSupervisorInDepartments(
+      user.value,
+      role === 'supervisor',
+      taskTypeMap.value.get(task.task_type_id)?.department_id
     )
-)
+  )
+})
 
 const currentTaskType = computed(() =>
   taskTypeMap.value.get(props.task?.task_type_id)
@@ -1004,6 +1017,11 @@ const resetComments = () => {
   taskComments.value = getCurrentTaskComments()
 }
 
+const showTaskPreviews = () => {
+  taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+  previewsTask.value = props.task
+}
+
 const reset = ({ keepPreviewFiles = false } = {}) => {
   resetModals()
   if (!keepPreviewFiles) {
@@ -1011,7 +1029,7 @@ const reset = ({ keepPreviewFiles = false } = {}) => {
   }
   if (props.task) {
     resetComments()
-    taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+    showTaskPreviews()
     nextTick(() => {
       previewPlayerRef.value?.focus()
     })
@@ -1107,7 +1125,7 @@ const onPreviewAdded = eventData => {
 }
 
 const onPreviewsOrderChange = () => {
-  taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+  showTaskPreviews()
 }
 
 const onAnnotationChanged = async ({
@@ -1116,7 +1134,9 @@ const onAnnotationChanged = async ({
   deletions,
   updates
 }) => {
-  const taskId = props.task?.id || preview.task_id
+  // The player sends the strokes of the previous preview as it changes, once
+  // the panel shows the next task.
+  const taskId = preview.task_id || props.task?.id
   if (!taskId) return
   try {
     await store.dispatch('updatePreviewAnnotation', {
@@ -1631,7 +1651,7 @@ const onRemoteCommentNew = eventData => {
       !loading.task
     ) {
       taskComments.value = comments
-      taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+      showTaskPreviews()
     }
     animOn.value = false
   }, 1000)
@@ -1684,7 +1704,7 @@ const onRemoteCommentDelete = eventData => {
     if (comment) {
       store.commit('REMOVE_TASK_COMMENT', { task: props.task, comment })
       resetComments()
-      taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+      showTaskPreviews()
     } else if (eventData.task_id !== props.task.id) {
       store
         .dispatch('refreshTaskEntityPreviewFiles', {
@@ -1730,7 +1750,7 @@ const onRemoteAnnotationUpdate = eventData => {
           eventData.updated_at
         )
         if (isStillValid) {
-          taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+          showTaskPreviews()
           // Wait for the refreshed previews prop to propagate to the
           // player before reloading — otherwise reloadAnnotations
           // reads the stale currentPreview and the remote drawing

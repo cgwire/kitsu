@@ -198,7 +198,8 @@ export const addSerialization = object => {
 
 // fabric's toObject() does not emit the interaction flags, so a clone comes
 // back with the class defaults (selectable and evented both true) whatever the
-// source allowed. The artist read-only contract lives on those flags.
+// source allowed. The contract of a viewer who may not annotate lives on
+// those flags.
 const INTERACTION_KEYS = ['selectable', 'evented', 'editable']
 
 /**
