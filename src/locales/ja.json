@@ -1604,6 +1604,7 @@
       "previous_day": "前の日",
       "previous_month": "前の月",
       "previous_week": "前の週",
+      "production_dates_locked": "プロダクションの日付を変更できるのは、スタジオマネージャーとプロダクションマネージャーのみです。",
       "reset_list": "リストをリセット",
       "save_task_error": "タスクを保存できませんでした。もう一度お試しください。",
       "select_entity_group": "エンティティのグループを選択",

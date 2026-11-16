@@ -2059,6 +2059,7 @@
       "previous_day": "Poprzedni dzień",
       "previous_month": "Poprzedni miesiąc",
       "previous_week": "Poprzedni tydzień",
+      "production_dates_locked": "Tylko kierownicy studia i kierownicy produkcji mogą zmieniać daty produkcji.",
       "reset_list": "Zresetuj listę",
       "save_task_error": "Nie udało się zapisać zadania. Spróbuj ponownie.",
       "select_entity_group": "Wybierz grupę encji",

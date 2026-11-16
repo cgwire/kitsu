@@ -1604,6 +1604,7 @@
       "previous_day": "Vorheriger Tag",
       "previous_month": "Vorheriger Monat",
       "previous_week": "Vorherige Woche",
+      "production_dates_locked": "Nur Studio-Manager und Produktionsleiter können das Start- und Enddatum der Produktion ändern.",
       "reset_list": "Liste zurücksetzen",
       "save_task_error": "Die Aufgabe konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "select_entity_group": "Eine Gruppe von Entitäten wählen",

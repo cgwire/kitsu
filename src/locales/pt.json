@@ -1604,6 +1604,7 @@
       "previous_day": "Dia anterior",
       "previous_month": "Mês anterior",
       "previous_week": "Semana anterior",
+      "production_dates_locked": "Apenas gerentes de estúdio e gerentes de produção podem alterar as datas da produção.",
       "reset_list": "Redefinir lista",
       "save_task_error": "Não foi possível salvar a tarefa. Tente novamente.",
       "select_entity_group": "Selecionar um grupo de entidades",

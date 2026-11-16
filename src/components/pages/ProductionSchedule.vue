@@ -116,6 +116,11 @@
               v-model="selectedEndDate"
             />
           </div>
+          <info-question-mark
+            class="flexrow-item dates-help"
+            :text="$t('schedule.production_dates_locked')"
+            v-if="!isCurrentUserManager"
+          />
           <div class="filler"></div>
           <button-simple
             class="flexrow-item"
@@ -643,6 +648,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import ProgressBar from '@/components/widgets/ProgressBar.vue'
@@ -3128,6 +3134,13 @@ useHead({
 
   .zoom-level :deep(.control),
   .zoom-level :deep(.select) {
+    height: 42px;
+  }
+
+  // centered on the date inputs it follows
+  .dates-help {
+    align-items: center;
+    display: flex;
     height: 42px;
   }
 }

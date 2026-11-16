@@ -1604,6 +1604,7 @@
       "previous_day": "Jour précédent",
       "previous_month": "Mois précédent",
       "previous_week": "Semaine précédente",
+      "production_dates_locked": "Seuls les responsables de studio et les chargés de production peuvent modifier les dates de la production.",
       "reset_list": "Réinitialiser la liste",
       "save_task_error": "Impossible d'enregistrer la tâche. Veuillez réessayer.",
       "select_entity_group": "Sélectionner un groupe d'entités",

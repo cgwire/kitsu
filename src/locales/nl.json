@@ -1604,6 +1604,7 @@
       "previous_day": "Vorige dag",
       "previous_month": "Vorige maand",
       "previous_week": "Vorige week",
+      "production_dates_locked": "Alleen studiomanagers en productiemanagers kunnen de datums van de productie wijzigen.",
       "reset_list": "Lijst resetten",
       "save_task_error": "Kon de taak niet opslaan. Probeer het opnieuw.",
       "select_entity_group": "Selecteer een groep entiteiten",

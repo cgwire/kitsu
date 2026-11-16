@@ -2152,6 +2152,8 @@ export default {
     previous_day: 'Previous day',
     previous_month: 'Previous month',
     previous_week: 'Previous week',
+    production_dates_locked:
+      'Only Studio Managers and Production Managers can change the production dates.',
     reset_list: 'Reset list',
     save_task_error: 'Could not save the task. Please try again.',
     select_entity_group: 'Select a group of entities',

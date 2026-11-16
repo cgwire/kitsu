@@ -46,6 +46,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import ProgressBar from '@/components/widgets/ProgressBar.vue'
 import TextField from '@/components/widgets/TextField.vue'
@@ -1058,6 +1059,8 @@ describe('ProductionSchedule page', () => {
   describe('production dates', () => {
     const toolbarDateFields = wrapper =>
       wrapper.find('.schedule-toolbar').findAllComponents(DateField)
+    const findDatesHelp = wrapper =>
+      wrapper.find('.schedule-toolbar').findComponent(InfoQuestionMark)
 
     it('sets the production date a manager picks', async () => {
       const { storeActions, wrapper } = await mountPage()
@@ -1066,6 +1069,7 @@ describe('ProductionSchedule page', () => {
         false,
         false
       ])
+      expect(findDatesHelp(wrapper).exists()).toBe(false)
 
       fields[0].vm.$emit(
         'update:model-value',
@@ -1081,7 +1085,10 @@ describe('ProductionSchedule page', () => {
     it.each([
       ['a supervisor', { isCurrentUserProductionSupervisor: () => true }],
       ['an artist', {}]
-    ])('locks the production dates for %s', async (_label, getters) => {
+    ])('locks the production dates for %s and tells why', async (
+      _label,
+      getters
+    ) => {
       const { wrapper } = await mountPage({
         getters: { isCurrentUserProductionManager: () => false, ...getters }
       })
@@ -1089,6 +1096,9 @@ describe('ProductionSchedule page', () => {
       expect(
         toolbarDateFields(wrapper).map(field => field.props('disabled'))
       ).toEqual([true, true])
+      expect(findDatesHelp(wrapper).props('text')).toBe(
+        'schedule.production_dates_locked'
+      )
     })
 
     it('logs a failed save of a production date', async () => {

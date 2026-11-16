@@ -1604,6 +1604,7 @@
       "previous_day": "Előző nap",
       "previous_month": "Előző hónap",
       "previous_week": "Előző hét",
+      "production_dates_locked": "Csak a stúdió menedzserek és a produkciós menedzserek módosíthatják a produkció dátumait.",
       "reset_list": "Lista visszaállítása",
       "save_task_error": "Nem sikerült menteni a feladatot. Kérlek próbáld újra.",
       "select_entity_group": "Válasszon egy entitáscsoportot",

@@ -1604,6 +1604,7 @@
       "previous_day": "이전 날",
       "previous_month": "이전 달",
       "previous_week": "이전 주",
+      "production_dates_locked": "프로덕션 날짜는 스튜디오 관리자와 프로덕션 관리자만 변경할 수 있습니다.",
       "reset_list": "목록 초기화",
       "save_task_error": "작업을 저장할 수 없습니다. 다시 시도해 주세요.",
       "select_entity_group": "엔티티 그룹 선택",
