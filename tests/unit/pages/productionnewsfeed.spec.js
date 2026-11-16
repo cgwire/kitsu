@@ -19,6 +19,7 @@ vi.mock('@/store/api/client', () => ({
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
+import { markRequestFailure } from '@/lib/errors'
 import newsModule from '@/store/modules/news'
 
 import NewsFilters from '@/components/pages/news/NewsFilters.vue'
@@ -82,7 +83,8 @@ const mountPage = async (
           deletedNewsIds: new Set(),
           isNewsListComplete: false,
           newsList: [],
-          newsListVersion: 0
+          newsListVersion: 0,
+          newsPagesVersion: 0
         })
       }
     },
@@ -313,6 +315,142 @@ describe('pages/ProductionNewsFeed', () => {
       expect(rejections).toEqual([])
       expect(consoleError.mock.calls).toEqual([[error], [error]])
       expect(store.getters.newsList).toHaveLength(2)
+    })
+
+    // Zou sends no event again once the socket is back.
+    describe('after a reconnection', () => {
+      const news3 = {
+        id: 'news-3',
+        created_at: '2026-09-16T10:00:00',
+        project_id: production.id,
+        task_id: 'task-3'
+      }
+
+      const reconnect = async socket => {
+        emitSocketEvent(socket, 'connect')
+        await flushPromises()
+      }
+
+      const newsIds = store => store.getters.newsList.map(news => news.id)
+
+      it('asks for the first page with the filters of the feed', async () => {
+        const { socket } = await mountPage(`${feedPath}?task_type_id=type-1`)
+
+        await reconnect(socket)
+
+        expect(pget).toHaveBeenCalledTimes(2)
+        const query = new URL(pget.mock.calls[1][0], 'http://kitsu')
+          .searchParams
+        expect(query.get('page')).toBe('1')
+        expect(query.get('task_type_id')).toBe('type-1')
+      })
+
+      it('adds the news posted while the socket was down', async () => {
+        const { socket, store, wrapper } = await mountPage(feedPath)
+        pget.mockResolvedValueOnce({ data: [news3, ...newsList], stats: [] })
+
+        await reconnect(socket)
+
+        expect(newsIds(store)).toEqual(['news-3', 'news-2', 'news-1'])
+        expect(wrapper.findAllComponents(NewsRow)).toHaveLength(3)
+      })
+
+      // The deletion went by while the socket was down: the next update of
+      // its task no longer reloads the news.
+      it('drops the news deleted while the socket was down', async () => {
+        const { socket, store } = await mountPage(feedPath)
+        pget.mockResolvedValueOnce({ data: [newsList[1]], stats: [] })
+
+        await reconnect(socket)
+        emitSocketEvent(socket, 'task:update', {
+          project_id: production.id,
+          task_id: 'task-2'
+        })
+        await settle()
+
+        expect(pget).toHaveBeenCalledTimes(2)
+        expect(newsIds(store)).toEqual(['news-1'])
+      })
+
+      it('keeps the task drawer open', async () => {
+        const { socket, wrapper } = await mountPage(feedPath)
+        wrapper.findAllComponents(NewsRow)[0].vm.$emit('select', newsList[0])
+        await flushPromises()
+
+        await reconnect(socket)
+
+        expect(wrapper.find('.side-column').classes()).toContain('is-open')
+      })
+
+      it('leaves the news to the load in flight', async () => {
+        const { socket, wrapper } = await mountPage(feedPath)
+        let answer = null
+        pget.mockImplementationOnce(
+          () =>
+            new Promise(resolve => {
+              answer = resolve
+            })
+        )
+        wrapper
+          .findComponent(NewsFilters)
+          .vm.$emit('update:taskTypeId', 'type-1')
+        await flushPromises()
+
+        await reconnect(socket)
+        answer({ data: newsList, stats: [] })
+        await flushPromises()
+
+        expect(pget).toHaveBeenCalledTimes(2)
+      })
+
+      it('loads the feed again when its last load failed', async () => {
+        const { socket, store, wrapper } = await mountPage(feedPath)
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const error = httpError(500)
+        pget.mockRejectedValueOnce(error)
+        wrapper
+          .findComponent(NewsFilters)
+          .vm.$emit('update:taskTypeId', 'type-1')
+        await flushPromises()
+        expect(wrapper.find('.empty-state').exists()).toBe(true)
+
+        await reconnect(socket)
+
+        expect(consoleError.mock.calls).toEqual([[error]])
+        expect(wrapper.find('.empty-state').exists()).toBe(false)
+        expect(newsIds(store)).toEqual(['news-2', 'news-1'])
+      })
+
+      it('logs a failed request and keeps the news shown', async () => {
+        const { socket, store } = await mountPage(feedPath)
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const error = httpError(500)
+        markRequestFailure(error)
+        pget.mockRejectedValueOnce(error)
+
+        await reconnect(socket)
+        await settle()
+
+        expect(rejections).toEqual([])
+        expect(consoleError.mock.calls).toEqual([[error]])
+        expect(newsIds(store)).toEqual(['news-2', 'news-1'])
+      })
+
+      it('stops listening to the reconnections once unmounted', async () => {
+        const { socket } = await mountPage(feedPath)
+        const [, onSocketConnect] = socket.on.mock.calls.find(
+          ([name]) => name === 'connect'
+        )
+
+        mounted.unmount()
+        mounted = null
+
+        expect(socket.off).toHaveBeenCalledWith('connect', onSocketConnect)
+      })
     })
   })
 
@@ -802,6 +940,57 @@ describe('pages/ProductionNewsFeed', () => {
       await scrollDown(wrapper)
 
       expect(pget).toHaveBeenCalledTimes(1)
+    })
+
+    const lastPageAsked = () =>
+      new URL(pget.mock.lastCall[0], 'http://kitsu').searchParams.get('page')
+
+    it('keeps the pages loaded when the socket comes back', async () => {
+      const { socket, store, wrapper } = await mountPage(feedPath, {
+        firstPage: page(0, 50),
+        total: 120
+      })
+      pget.mockResolvedValueOnce({ data: page(50, 50), total: 120, stats: [] })
+      await scrollDown(wrapper)
+      const newNews = {
+        ...page(0, 1)[0],
+        id: 'news-new',
+        created_at: '2026-09-15T10:01:00'
+      }
+      pget.mockResolvedValueOnce({
+        data: [newNews, ...page(0, 49)],
+        total: 121,
+        stats: []
+      })
+
+      emitSocketEvent(socket, 'connect')
+      await flushPromises()
+      await scrollDown(wrapper)
+
+      expect(store.getters.newsList).toHaveLength(101)
+      expect(store.getters.newsList[0].id).toBe('news-new')
+      expect(lastPageAsked()).toBe('3')
+    })
+
+    // More news than a page went by while the socket was down: the feed
+    // cannot tell what lies between them and the news shown.
+    it('starts over from the first page when it holds none of the news shown', async () => {
+      const { socket, store, wrapper } = await mountPage(feedPath, {
+        firstPage: page(50, 50),
+        total: 60
+      })
+      pget.mockResolvedValueOnce({ data: page(100, 10), total: 60, stats: [] })
+      await scrollDown(wrapper)
+      pget.mockResolvedValueOnce({ data: page(0, 50), total: 110, stats: [] })
+
+      emitSocketEvent(socket, 'connect')
+      await flushPromises()
+
+      expect(store.getters.newsList.map(news => news.id)).toEqual(
+        page(0, 50).map(news => news.id)
+      )
+      await scrollDown(wrapper)
+      expect(lastPageAsked()).toBe('2')
     })
   })
 

@@ -29,17 +29,14 @@
         {{ $t('settings.available_items') }}
       </p>
       <div class="import-list" v-if="items.length > 0">
-        <div
+        <import-list-item
           :key="`unlisted-item-${item.id}`"
-          class="flexrow item-to-add mb05"
-          role="button"
-          tabindex="0"
-          @click="$emit('import-item', item)"
-          @keydown.enter.prevent="$emit('import-item', item)"
+          class="item-to-add"
+          @add="$emit('import-item', item)"
           v-for="item in items"
         >
           <slot name="item-line" :item="item" />
-        </div>
+        </import-list-item>
       </div>
       <p class="infos mt05" v-else>
         {{ $t('settings.no_more_available_items') }}
@@ -54,6 +51,7 @@ import { useStore } from 'vuex'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ImportListItem from '@/components/widgets/ImportListItem.vue'
 
 const store = useStore()
 
@@ -95,10 +93,9 @@ onMounted(() => {
 .import-list {
   border: 1px solid var(--border);
   border-radius: 5px;
-  cursor: pointer;
   flex: 1;
   margin-top: 0.5em;
-  padding: 0.5em;
+  padding: 0.3em;
   overflow-y: auto;
   color: var(--text);
 }

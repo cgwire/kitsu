@@ -9,6 +9,12 @@
         </div>
 
         <div class="field mt2">
+          <input
+            type="email"
+            autocomplete="username"
+            :value="route.query.email"
+            hidden
+          />
           <p class="control has-icon">
             <input
               class="input is-medium email"

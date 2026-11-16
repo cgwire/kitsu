@@ -886,6 +886,7 @@ export default {
       'Some changes could not be saved: the previous values are back. Please reload the page and try again.',
     clear_selection: 'Clear current selection',
     clear_sorting: 'Clear current sorting',
+    click_to_add: 'Click to add',
     close: 'Close',
     color: 'Color',
     copy: 'Copy',
@@ -1638,6 +1639,9 @@ export default {
     },
 
     home: {
+      access_failed: 'Could not load the requested production. Please try again.',
+      access_forbidden: 'You don\'t have access to the requested production. Contact your site admin to obtain access.',
+      access_missing: 'The requested production was not found.',
       all_playlists: 'All playlists',
       all_stats: 'All statistics',
       create_new: 'Create a new production',
@@ -2301,7 +2305,6 @@ export default {
     change_task_status_error: 'An error occurred while updating the selected task. | An error occurred while updating the {count} selected tasks: some of them may have changed. Check them before trying again.',
     clear_all_assignations: 'unassign all',
     clear_assignations: 'unassign from selection',
-    clear_own_assignations: 'clear your assignments',
     client_comments_copied: 'Comments created: {nbCopied}. Tasks without client comment: {nbSkipped}.',
     comment_image: 'Attach files',
     confirm_change_task_status: 'Change the status of the selected task to {status}? | Change the status of the {count} selected tasks to {status}?',
@@ -2399,7 +2402,6 @@ export default {
     subscribe_to_tasks: 'Subscribe to notifications of the selected task | Subscribe to notifications of the {nbSelectedTasks} selected tasks',
     unsubscribe_notifications: 'Unsubscribe from notifications',
     tasks: 'Tasks',
-    to_myself: 'To myself',
     use_current_frame: 'Use current frame',
     unassigned_tasks: 'Unassigned tasks',
     validated: 'Validated',

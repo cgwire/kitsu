@@ -28,6 +28,7 @@
             <input
               class="input is-medium email"
               type="email"
+              autocomplete="email"
               :placeholder="$t('login.fields.email')"
               @keyup.enter="confirmResetPassword"
               v-model="email"

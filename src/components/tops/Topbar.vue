@@ -321,10 +321,11 @@ import {
   onMounted,
   reactive,
   ref,
+  toRaw,
   watch
 } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { isNavigationFailure, useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { version as kitsuVersion } from '@/../package.json'
@@ -683,8 +684,36 @@ const getBaseEpisodeOptions = allLabel => [
   ...(hasMainPack.value ? [{ label: t('main.main_pack'), value: 'main' }] : [])
 ]
 
-const leaveToOpenProductions = () =>
-  router.replace({ name: 'open-productions' }).catch(console.error)
+// The home page tells the access error once. A navigation started meanwhile
+// or a failed one leaves the user elsewhere: the error goes, or a later visit
+// would tell it.
+const leaveToOpenProductions = accessError => {
+  // A cancelled way home settles only once the home page chunk has loaded:
+  // the error of a later failure, set meanwhile, stays.
+  const forgetAccessError = () => {
+    if (
+      accessError &&
+      toRaw(store.getters.productionAccessError) === accessError
+    ) {
+      store.dispatch('setProductionAccessError', null)
+    }
+  }
+  if (accessError) store.dispatch('setProductionAccessError', accessError)
+  return router
+    .replace({ name: 'open-productions' })
+    .then(failure => {
+      if (isNavigationFailure(failure)) forgetAccessError()
+    })
+    .catch(err => {
+      forgetAccessError()
+      console.error(err)
+    })
+}
+
+// Zou answers 400 to a malformed id, as a broken link holds.
+const getAccessErrorReason = err =>
+  ({ 400: 'missing', 403: 'forbidden', 404: 'missing' })[err?.status] ||
+  'failed'
 
 // The all-productions listing leaves the relations out (task types, team,
 // asset types): a missing task_types marks such a production.
@@ -702,7 +731,12 @@ const loadProductionFromRoute = async productionId => {
     // Deleted, not shared with the user or out of reach: the page would show
     // the production of the store under the route of this one. The user may
     // have moved to another page during the load.
-    if (route.params.production_id === productionId) leaveToOpenProductions()
+    if (route.params.production_id === productionId) {
+      leaveToOpenProductions({
+        reason: getAccessErrorReason(err),
+        path: route.fullPath
+      })
+    }
     errors.logRequestFailure(err)
     return
   } finally {

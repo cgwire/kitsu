@@ -582,6 +582,9 @@ let timeSpentsCache = {}
 // with the scroll reset an earlier one asked for.
 let lastRebuildId = 0
 let isScrollResetAsked = false
+// The store getters follow the route: a load still running when the page
+// is left stops at its next step instead of acting on the next page.
+let isUnmounted = false
 const timesheetByPerson = ref({})
 const displaySettings = ref({
   contactSheetMode: false,
@@ -991,8 +994,9 @@ const initData = force => {
     errors.entities = false
     store
       .dispatch('initTaskType', force)
-      .then(setCurrentScheduleItem)
+      .then(() => (isUnmounted ? null : setCurrentScheduleItem()))
       .then(() => {
+        if (isUnmounted) return
         loading.entities = false
         resetTasks()
         focusSearchField({ preventScroll: true })
@@ -1029,6 +1033,7 @@ const initData = force => {
   } else {
     loading.entities = true
     setCurrentScheduleItem().then(() => {
+      if (isUnmounted) return
       resetTaskTypeDates()
       loading.entities = false
       applySearchAndScheduleState()
@@ -2281,6 +2286,7 @@ onMounted(() => {
           : 'Episode'
   updateActiveTab()
   setTimeout(() => {
+    if (isUnmounted) return
     initData(false)
     resetScheduleScroll()
   }, 100)
@@ -2289,6 +2295,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  isUnmounted = true
   store.dispatch('clearSelectedTasks')
   socket.off('task:update', onRemoteTaskUpdate)
   resetScheduleItemsDebounced.cancel()

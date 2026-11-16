@@ -112,6 +112,7 @@ import { useStore } from 'vuex'
 
 import { isBehindModal } from '@/composables/modal'
 import { useTime } from '@/composables/time'
+import { logRequestFailure } from '@/lib/errors'
 import { isCaretMoveOnMac, isFreeEscape } from '@/lib/keyboard'
 import {
   formatFullDateWithRevertedTimezone,
@@ -497,6 +498,21 @@ const onTaskUpdate = eventData => {
   if (relatedNews) reloadNews(relatedNews)
 }
 
+// Zou sends no event again once the socket is back: the first page brings
+// the news posted, changed or deleted meanwhile.
+const onSocketConnect = () => {
+  if (errors.news) {
+    init()
+  } else if (!loading.news) {
+    store
+      .dispatch('syncNews', params.value)
+      .then(isRestarted => {
+        if (isRestarted) currentPage.value = 1
+      })
+      .catch(logRequestFailure)
+  }
+}
+
 // Watchers
 
 watch(currentProduction, init)
@@ -547,6 +563,7 @@ onMounted(() => {
   socket.on('news:new', onNewsNew)
   socket.on('news:delete', onNewsDelete)
   socket.on('task:update', onTaskUpdate)
+  socket.on('connect', onSocketConnect)
 
   if (!loading.news) {
     init()
@@ -560,6 +577,7 @@ onBeforeUnmount(() => {
   socket.off('news:new', onNewsNew)
   socket.off('news:delete', onNewsDelete)
   socket.off('task:update', onTaskUpdate)
+  socket.off('connect', onSocketConnect)
 })
 
 // Head

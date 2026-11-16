@@ -40,8 +40,6 @@ import {
   PRODUCTION_REMOVE_TASK_TYPE,
   REMOVE_PRODUCTION,
   SET_CURRENT_PRODUCTION,
-  TEAM_ADD_PERSON,
-  TEAM_REMOVE_PERSON,
   UPDATE_METADATA_DESCRIPTOR_END,
   UPDATE_PRODUCTION
 } from '@/store/mutation-types'
@@ -759,16 +757,142 @@ describe('Productions store', () => {
       }
     })
 
-    test('addPersonToTeam', () => {
-      const mockCommit = vi.fn()
-      const state = {
-        currentProduction: { id: '123' }
-      }
-      productionApi.addPersonToTeam = vi.fn()
-      store.actions.addPersonToTeam({ commit: mockCommit, state }, { id: '456' })
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, TEAM_ADD_PERSON, '456')
-      expect(productionApi.addPersonToTeam).toBeCalledTimes(1)
+    // The list moves at once, and back when Zou refuses.
+    describe('team changes', () => {
+      const refusal = new Error('Refused')
+      let state
+
+      // Runs the action through the real mutations of the module, for a
+      // user who is none of the members.
+      const run = (action, params) =>
+        store.actions[action](
+          {
+            commit: (type, payload) => store.mutations[type](state, payload),
+            state,
+            rootState: { user: { user: { id: '111' } } }
+          },
+          params
+        )
+
+      beforeEach(() => {
+        state = {
+          currentProduction: { id: '123', team: ['456'] },
+          teamRoles: { 123: { 456: 'supervisor' } }
+        }
+      })
+
+      test('addPersonToTeam lists the person before Zou answers', () => {
+        productionApi.addPersonToTeam = vi.fn(() => new Promise(() => {}))
+        run('addPersonToTeam', { id: '789' })
+        expect(state.currentProduction.team).toEqual(['456', '789'])
+        expect(productionApi.addPersonToTeam).toHaveBeenCalledWith('123', '789')
+      })
+
+      test('addPersonToTeam takes out a person Zou refuses', async () => {
+        productionApi.addPersonToTeam = vi.fn(() => Promise.reject(refusal))
+        await expect(run('addPersonToTeam', { id: '789' })).rejects.toBe(refusal)
+        expect(state.currentProduction.team).toEqual(['456'])
+      })
+
+      // An import also adds the people already in the team.
+      test('addPersonToTeam keeps a member Zou refuses to add again', async () => {
+        productionApi.addPersonToTeam = vi.fn(() => Promise.reject(refusal))
+        await expect(run('addPersonToTeam', { id: '456' })).rejects.toBe(refusal)
+        expect(state.currentProduction.team).toEqual(['456'])
+        expect(state.teamRoles).toEqual({ 123: { 456: 'supervisor' } })
+      })
+
+      test('removePersonFromTeam takes the member out before Zou answers', () => {
+        productionApi.removePersonFromTeam = vi.fn(() => new Promise(() => {}))
+        run('removePersonFromTeam', { id: '456' })
+        expect(state.currentProduction.team).toEqual([])
+        expect(productionApi.removePersonFromTeam).toHaveBeenCalledWith('123', '456')
+      })
+
+      test('removePersonFromTeam puts back a member Zou keeps, with their role', async () => {
+        productionApi.removePersonFromTeam = vi.fn(() => Promise.reject(refusal))
+        await expect(run('removePersonFromTeam', { id: '456' })).rejects.toBe(
+          refusal
+        )
+        expect(state.currentProduction.team).toEqual(['456'])
+        expect(state.teamRoles).toEqual({ 123: { 456: 'supervisor' } })
+      })
+
+      describe('with another production opened meanwhile', () => {
+        let otherProduction
+
+        beforeEach(() => {
+          otherProduction = { id: '999', team: ['789'] }
+        })
+
+        const runAndSwitch = async (action, person) => {
+          const running = run(action, person)
+          state.currentProduction = otherProduction
+          state.teamRoles[999] = { 789: 'manager' }
+          await expect(running).rejects.toBe(refusal)
+        }
+
+        // Back on the production left, its list reads the team again only
+        // with a reload of the page.
+        test('addPersonToTeam takes the person out of their own production', async () => {
+          productionApi.addPersonToTeam = vi.fn(() => Promise.reject(refusal))
+          const production = state.currentProduction
+          await runAndSwitch('addPersonToTeam', { id: '789' })
+          expect(production.team).toEqual(['456'])
+          expect(otherProduction.team).toEqual(['789'])
+          expect(state.teamRoles[999]).toEqual({ 789: 'manager' })
+        })
+
+        test('removePersonFromTeam puts the member back in their own production', async () => {
+          productionApi.removePersonFromTeam = vi.fn(() => Promise.reject(refusal))
+          const production = state.currentProduction
+          await runAndSwitch('removePersonFromTeam', { id: '456' })
+          expect(production.team).toEqual(['456'])
+          expect(state.teamRoles[123]).toEqual({ 456: 'supervisor' })
+          expect(otherProduction.team).toEqual(['789'])
+          expect(state.teamRoles[999]).toEqual({ 789: 'manager' })
+        })
+
+        // The member has a role in the other production too.
+        test('setTeamMemberRole gives the member the new role in their own production', async () => {
+          const link = { project_id: '123', person_id: '456', role: 'manager' }
+          productionApi.updateTeamMemberRole = vi.fn(() => Promise.resolve(link))
+          const running = run('setTeamMemberRole', {
+            personId: '456',
+            role: 'manager'
+          })
+          state.currentProduction = otherProduction
+          state.teamRoles[999] = { 456: 'supervisor', 789: 'manager' }
+          await running
+          expect(productionApi.updateTeamMemberRole).toHaveBeenCalledWith(
+            '123',
+            '456',
+            'manager'
+          )
+          expect(state.teamRoles[123]).toEqual({ 456: 'manager' })
+          expect(state.teamRoles[999]).toEqual({
+            456: 'supervisor',
+            789: 'manager'
+          })
+        })
+
+        test('setTeamMemberRole gives the user the new role in their own production', async () => {
+          const link = { project_id: '123', person_id: '456', role: 'manager' }
+          productionApi.updateTeamMemberRole = vi.fn(() => Promise.resolve(link))
+          const commit = vi.fn()
+          const rootState = { user: { user: { id: '456' } } }
+          const running = store.actions.setTeamMemberRole(
+            { commit, state, rootState },
+            { personId: '456', role: 'manager' }
+          )
+          state.currentProduction = otherProduction
+          await running
+          expect(commit.mock.calls).toEqual([
+            ['TEAM_MEMBER_ROLE_UPDATED', { productionId: '123', link }],
+            ['SET_USER_PROJECT_ROLE', { projectId: '123', role: 'manager' }]
+          ])
+        })
+      })
     })
 
     describe('team roles', () => {
@@ -778,15 +902,30 @@ describe('Productions store', () => {
         productionApi.getTeam = vi.fn(() => Promise.resolve(team))
       })
 
-      test('loadProductionTeam loads those of the current production', async () => {
+      // A team page opened after a missed socket event must not keep the
+      // controls of a role the user lost.
+      test('loadProductionTeam loads those of the current production with the role of the user', async () => {
         const commit = vi.fn()
         const state = { currentProduction: { id: '123' }, teamRoles: {} }
-        await store.actions.loadProductionTeam({ commit, state })
+        const rootState = { user: { user: { id: '456' } } }
+        await store.actions.loadProductionTeam({ commit, state, rootState })
         expect(productionApi.getTeam).toHaveBeenCalledWith('123')
-        expect(commit).toHaveBeenCalledWith('TEAM_ROLES_LOADED', {
-          productionId: '123',
-          team
-        })
+        expect(commit.mock.calls).toEqual([
+          ['TEAM_ROLES_LOADED', { productionId: '123', team }],
+          ['SET_USER_PROJECT_ROLE', { projectId: '123', role: 'client' }]
+        ])
+      })
+
+      // The pages catch its failure on the promise it returns.
+      test('loadProductionTeam rejects without a current production', async () => {
+        const commit = vi.fn()
+        const state = { currentProduction: null, teamRoles: {} }
+        const rootState = { user: { user: { id: '456' } } }
+        await expect(
+          store.actions.loadProductionTeam({ commit, state, rootState })
+        ).rejects.toThrow()
+        expect(productionApi.getTeam).not.toHaveBeenCalled()
+        expect(commit).not.toHaveBeenCalled()
       })
 
       test('loadTeamRolesOnce loads those of given production', async () => {
@@ -858,18 +997,6 @@ describe('Productions store', () => {
           })
         })
       })
-    })
-
-    test('removePersonFromTeam', () => {
-      const mockCommit = vi.fn()
-      const state = {
-        currentProduction: { id: '123' }
-      }
-      productionApi.removePersonFromTeam = vi.fn()
-      store.actions.removePersonFromTeam({ commit: mockCommit, state }, { id: '456' })
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, TEAM_REMOVE_PERSON, '456')
-      expect(productionApi.removePersonFromTeam).toBeCalledTimes(1)
     })
 
     test('addAssetTypeToProduction', () => {
@@ -1174,6 +1301,94 @@ describe('Productions store', () => {
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_METADATA_DESCRIPTOR_END, { production: { id: 1 }, descriptor })
     })
+
+    describe('deleteMetadataDescriptor', () => {
+      const notFound = Object.assign(new Error('Not Found'), { status: 404 })
+      let production
+      let state
+
+      // Runs the action through the real mutations of the module.
+      const run = descriptorId =>
+        store.actions.deleteMetadataDescriptor(
+          {
+            commit: (type, payload) => store.mutations[type](state, payload),
+            state
+          },
+          descriptorId
+        )
+      const columnIds = () => production.descriptors.map(({ id }) => id)
+
+      beforeEach(() => {
+        production = {
+          id: '123',
+          descriptors: [
+            { id: 'desc-1', entity_type: 'Shot', field_name: 'notes' },
+            { id: 'desc-2', entity_type: 'Shot', field_name: 'camera' }
+          ]
+        }
+        state = {
+          currentProduction: production,
+          openProductions: [production],
+          productionMap: new Map([['123', production]])
+        }
+      })
+
+      test('removes the column Zou deletes', async () => {
+        productionApi.deleteMetadataDescriptor = vi.fn(() => Promise.resolve())
+        await run('desc-1')
+        expect(productionApi.deleteMetadataDescriptor).toHaveBeenCalledWith(
+          '123',
+          'desc-1'
+        )
+        expect(columnIds()).toEqual(['desc-2'])
+      })
+
+      // Another tab or another person deleted it first.
+      test('removes a column Zou no longer has', async () => {
+        productionApi.deleteMetadataDescriptor = vi.fn(() =>
+          Promise.reject(notFound)
+        )
+        await run('desc-1')
+        expect(columnIds()).toEqual(['desc-2'])
+      })
+
+      test('resolves when a live update removed the column first', async () => {
+        production.descriptors = production.descriptors.slice(1)
+        productionApi.deleteMetadataDescriptor = vi.fn(() =>
+          Promise.reject(notFound)
+        )
+        await expect(run('desc-1')).resolves.toBeUndefined()
+        expect(columnIds()).toEqual(['desc-2'])
+      })
+
+      // A confirmation left open across a production switch sends the column
+      // of the previous production, and Zou answers 404 for it too. A closed
+      // production opened from a link is in the map only.
+      test('keeps a column of another production', async () => {
+        const other = { id: '456', descriptors: [] }
+        state.currentProduction = other
+        state.openProductions = [other]
+        state.productionMap.set('456', other)
+        productionApi.deleteMetadataDescriptor = vi.fn(() =>
+          Promise.reject(notFound)
+        )
+        await expect(run('desc-1')).rejects.toBe(notFound)
+        expect(productionApi.deleteMetadataDescriptor).toHaveBeenCalledWith(
+          '456',
+          'desc-1'
+        )
+        expect(columnIds()).toEqual(['desc-1', 'desc-2'])
+      })
+
+      test('keeps a column Zou refuses to delete', async () => {
+        const refusal = Object.assign(new Error('Forbidden'), { status: 403 })
+        productionApi.deleteMetadataDescriptor = vi.fn(() =>
+          Promise.reject(refusal)
+        )
+        await expect(run('desc-1')).rejects.toBe(refusal)
+        expect(columnIds()).toEqual(['desc-1', 'desc-2'])
+      })
+    })
   })
 
   describe('Mutations', () => {
@@ -1379,23 +1594,48 @@ describe('Productions store', () => {
       expect(state.currentProduction).toEqual({ id: 'production-id' })
     })
 
+    // The team changes in the production given, which may not be the
+    // current one anymore.
     test('TEAM_ADD_PERSON', () => {
-      state.currentProduction = {
-        team: []
-      }
-      store.mutations.TEAM_ADD_PERSON(state, 123)
-      expect(state.currentProduction.team[0]).toEqual(123)
+      const production = { id: 'production-1', team: [] }
+      state.currentProduction = { id: 'production-2', team: [] }
+      state.teamRoles = {}
+      store.mutations.TEAM_ADD_PERSON(state, { production, personId: 123 })
+      expect(production.team).toEqual([123])
+      expect(state.currentProduction.team).toEqual([])
+      expect(state.teamRoles).toEqual({})
+    })
+
+    // A refused removal brings the member back with their project role.
+    test('TEAM_ADD_PERSON with a role', () => {
+      const production = { id: 'production-1', team: [] }
+      state.currentProduction = { id: 'production-2', team: [] }
+      state.teamRoles = { 'production-1': { 456: 'client' } }
+      store.mutations.TEAM_ADD_PERSON(state, {
+        production,
+        personId: 123,
+        role: 'manager'
+      })
+      expect(production.team).toEqual([123])
+      expect(state.teamRoles).toEqual({
+        'production-1': { 123: 'manager', 456: 'client' }
+      })
     })
 
     test('TEAM_REMOVE_PERSON', () => {
-      state.currentProduction = {
-        id: 'production-1',
-        team: [123]
+      const production = { id: 'production-1', team: [123] }
+      state.currentProduction = { id: 'production-2', team: [123] }
+      state.teamRoles = {
+        'production-1': { 123: 'manager' },
+        'production-2': { 123: 'supervisor' }
       }
-      state.teamRoles = { 'production-1': { 123: 'manager' } }
-      store.mutations.TEAM_REMOVE_PERSON(state, 123)
-      expect(state.currentProduction.team).toHaveLength(0)
-      expect(state.teamRoles['production-1'][123]).toBeUndefined()
+      store.mutations.TEAM_REMOVE_PERSON(state, { production, personId: 123 })
+      expect(production.team).toHaveLength(0)
+      expect(state.currentProduction.team).toEqual([123])
+      expect(state.teamRoles).toEqual({
+        'production-1': {},
+        'production-2': { 123: 'supervisor' }
+      })
     })
 
     // The roles are kept per production: the comments of a task read those
@@ -1425,17 +1665,27 @@ describe('Productions store', () => {
       expect(state.teamRoles).toEqual({})
     })
 
+    test('RESET_ALL forgets the production access error', () => {
+      store.mutations.SET_PRODUCTION_ACCESS_ERROR(state, {
+        reason: 'forbidden',
+        path: '/productions/production-1/playlists'
+      })
+
+      store.mutations.RESET_ALL(state)
+
+      expect(state.productionAccessError).toBeNull()
+    })
+
     test('TEAM_MEMBER_ROLE_UPDATED', () => {
-      state.currentProduction = { id: 'production-1' }
       state.teamRoles = { 'production-1': { 123: 'supervisor' } }
       store.mutations.TEAM_MEMBER_ROLE_UPDATED(state, {
-        person_id: 123,
-        role: 'manager'
+        productionId: 'production-1',
+        link: { person_id: 123, role: 'manager' }
       })
       expect(state.teamRoles['production-1'][123]).toEqual('manager')
       store.mutations.TEAM_MEMBER_ROLE_UPDATED(state, {
-        person_id: 123,
-        role: null
+        productionId: 'production-1',
+        link: { person_id: 123, role: null }
       })
       expect(state.teamRoles['production-1'][123]).toBeNull()
     })
@@ -2264,5 +2514,36 @@ describe('Productions store, asset type workflow', () => {
     const { isInAssetTypeWorkflow } = vuexStore.getters
     expect(isInAssetTypeWorkflow('character', 'modeling')).toBe(true)
     expect(isInAssetTypeWorkflow('character', 'rigging')).toBe(false)
+  })
+})
+
+// A production page whose production cannot be loaded sends the user to the
+// home page, which tells why.
+describe('Productions store, production access error', () => {
+  let vuexStore
+
+  beforeEach(() => {
+    vuexStore = createStore({
+      modules: {
+        productions: {
+          state: { productionAccessError: null },
+          getters: store.getters,
+          mutations: store.mutations,
+          actions: store.actions
+        }
+      }
+    })
+  })
+
+  test('keeps the reason until the home page clears it', async () => {
+    const accessError = {
+      reason: 'failed',
+      path: '/productions/production-1/playlists'
+    }
+    await vuexStore.dispatch('setProductionAccessError', accessError)
+    expect(vuexStore.getters.productionAccessError).toEqual(accessError)
+
+    await vuexStore.dispatch('setProductionAccessError', null)
+    expect(vuexStore.getters.productionAccessError).toBeNull()
   })
 })

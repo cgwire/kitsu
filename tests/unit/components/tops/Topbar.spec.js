@@ -1,6 +1,11 @@
 import { nextTick, reactive, ref } from 'vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
-import { createMemoryHistory, createRouter } from 'vue-router'
+import {
+  createMemoryHistory,
+  createRouter,
+  isNavigationFailure,
+  NavigationFailureType
+} from 'vue-router'
 import { createStore } from 'vuex'
 
 vi.mock('@/composables/desktopNotifications', () => ({
@@ -67,6 +72,9 @@ const makeStore = (getterOverrides = {}) => {
     loadProduction: vi.fn(() => Promise.resolve()),
     saveLastProductionRoute: vi.fn(),
     setProduction: vi.fn(),
+    setProductionAccessError: vi.fn(({ commit }, error) =>
+      commit('SET_PRODUCTION_ACCESS_ERROR', error)
+    ),
     setCurrentEpisode: vi.fn(),
     setSupportChat: vi.fn(),
     toggleDarkTheme: vi.fn(),
@@ -79,7 +87,9 @@ const makeStore = (getterOverrides = {}) => {
     toggleNotificationReadStatusLocal: vi.fn()
   }
   const store = createStore({
-    state: () => ({}),
+    // The access error is held for real: the topbar reads it back before
+    // forgetting it.
+    state: () => ({ productionAccessError: null }),
     getters: {
       clientAccess: () => ({ isStatsVisible: true, isTaskListVisible: true }),
       currentEpisode: () => null,
@@ -106,12 +116,18 @@ const makeStore = (getterOverrides = {}) => {
       // carries no avatar, as the one mocked above does not.
       organisationLogoPath: () => null,
       personMap: () => new Map(),
+      productionAccessError: state => state.productionAccessError,
       productionMap: () => new Map(),
       projectPlugins: () => [],
       taskTypeMap: () =>
         new Map([['task-type-1', { for_entity: 'Shot', name: 'Animation' }]]),
       user: () => ({ id: 'user-1' }),
       ...getterOverrides
+    },
+    mutations: {
+      SET_PRODUCTION_ACCESS_ERROR: (state, error) => {
+        state.productionAccessError = error
+      }
     },
     actions
   })
@@ -914,6 +930,11 @@ describe('Topbar.vue', () => {
     // as is, the page crashed on its missing task types.
     describe('production listed without its relations', () => {
       const closedProduction = { id: 'production-closed' }
+      const closedPath = '/productions/production-closed/episodes/all/edits'
+      // Every access error handed to the home page, in order: a successful
+      // way home keeps the first one.
+      const accessErrorCalls = actions =>
+        actions.setProductionAccessError.mock.calls.map(([, error]) => error)
       const mountOnClosed = () => {
         const mounted = mountFor('edits', 'all', {
           otherProductions: [closedProduction]
@@ -923,6 +944,7 @@ describe('Topbar.vue', () => {
         // guard, the reload then shows as a second call instead of spinning.
         mounted.actions.loadProduction.mockReturnValue(new Promise(() => {}))
         mounted.route.params.production_id = 'production-closed'
+        mounted.route.fullPath = closedPath
         return mounted
       }
 
@@ -1034,13 +1056,16 @@ describe('Topbar.vue', () => {
       })
 
       // Deleted, not shared with the user or out of reach: the page would
-      // show the production of the store under the route of this one.
+      // show the production of the store under the route of this one. The
+      // home page tells which, and offers the page again after a failure.
       it.each([
-        ['missing', { status: 404 }],
-        ['out of reach', {}]
+        ['not shared', { status: 403 }, 'forbidden'],
+        ['missing', { status: 404 }, 'missing'],
+        ['behind a broken link', { status: 400 }, 'missing'],
+        ['out of reach', {}, 'failed']
       ])(
         'leaves a production that fails to load, %s',
-        async (_label, failureFields) => {
+        async (_label, failureFields, reason) => {
           const consoleError = vi
             .spyOn(console, 'error')
             .mockImplementation(() => {})
@@ -1053,6 +1078,9 @@ describe('Topbar.vue', () => {
           await flushPromises()
 
           expect(replaceSpy).toHaveBeenCalledWith({ name: 'open-productions' })
+          expect(accessErrorCalls(actions)).toEqual([
+            { reason, path: closedPath }
+          ])
           expect(consoleError).toHaveBeenCalledWith(failure)
           consoleError.mockRestore()
           wrapper.unmount()
@@ -1074,7 +1102,113 @@ describe('Topbar.vue', () => {
 
         expect(rejections).toEqual([bug])
         expect(replaceSpy).toHaveBeenCalledWith({ name: 'open-productions' })
+        expect(accessErrorCalls(actions)).toEqual([
+          { reason: 'failed', path: closedPath }
+        ])
         expect(consoleError).not.toHaveBeenCalledWith(bug)
+        consoleError.mockRestore()
+        wrapper.unmount()
+      })
+
+      // A click elsewhere before the home page shows wins over the way home:
+      // the reason must not wait there for a later visit.
+      it('forgets the reason when another navigation wins', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const raceRouter = makeRouter([
+          { path: '/elsewhere', component: { template: '<div />' } }
+        ])
+        const wayHome = raceRouter.push('/')
+        raceRouter.push('/elsewhere')
+        const cancelled = await wayHome
+        expect(
+          isNavigationFailure(cancelled, NavigationFailureType.cancelled)
+        ).toBe(true)
+        const { wrapper, actions, replaceSpy } = mountOnClosed()
+        replaceSpy.mockResolvedValueOnce(cancelled)
+        const failure = Object.assign(new Error('Forbidden'), { status: 403 })
+        errors.markRequestFailure(failure)
+        actions.loadProduction.mockRejectedValueOnce(failure)
+
+        wrapper.vm.setProductionFromRoute()
+        await flushPromises()
+
+        expect(accessErrorCalls(actions)).toEqual([
+          { reason: 'forbidden', path: closedPath },
+          null
+        ])
+        consoleError.mockRestore()
+        wrapper.unmount()
+      })
+
+      // A click on the page before the home page chunk has loaded cancels the
+      // first way home, and the production load fails again: that cancel,
+      // settled once the chunk has loaded, must leave the second reason alone.
+      it('keeps a later reason when an earlier way home is cancelled', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const raceRouter = makeRouter([
+          { path: '/elsewhere', component: { template: '<div />' } }
+        ])
+        const wayHome = raceRouter.push('/')
+        raceRouter.push('/elsewhere')
+        const cancelled = await wayHome
+        const { wrapper, actions, replaceSpy, route } = mountOnClosed()
+        let settleFirstWayHome = () => {}
+        replaceSpy.mockReturnValueOnce(
+          new Promise(resolve => {
+            settleFirstWayHome = () => resolve(cancelled)
+          })
+        )
+        const failure = Object.assign(new Error('Forbidden'), { status: 403 })
+        errors.markRequestFailure(failure)
+        actions.loadProduction
+          .mockRejectedValueOnce(failure)
+          .mockRejectedValueOnce(failure)
+        const tabPath = '/productions/production-closed/episodes/all/shots'
+
+        wrapper.vm.setProductionFromRoute()
+        await flushPromises()
+        route.fullPath = tabPath
+        wrapper.vm.setProductionFromRoute()
+        await flushPromises()
+        settleFirstWayHome()
+        await flushPromises()
+
+        expect(replaceSpy).toHaveBeenCalledTimes(2)
+        expect(accessErrorCalls(actions)).toEqual([
+          { reason: 'forbidden', path: closedPath },
+          { reason: 'forbidden', path: tabPath }
+        ])
+        consoleError.mockRestore()
+        wrapper.unmount()
+      })
+
+      // The home page chunk may fail to load after a deploy: the user stays
+      // put, and the reason must not wait for a later visit either.
+      it('forgets the reason when the way home fails', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper, actions, replaceSpy } = mountOnClosed()
+        const importFailure = new TypeError(
+          'Failed to fetch dynamically imported module'
+        )
+        replaceSpy.mockRejectedValueOnce(importFailure)
+        const failure = Object.assign(new Error('Forbidden'), { status: 403 })
+        errors.markRequestFailure(failure)
+        actions.loadProduction.mockRejectedValueOnce(failure)
+
+        wrapper.vm.setProductionFromRoute()
+        await flushPromises()
+
+        expect(accessErrorCalls(actions)).toEqual([
+          { reason: 'forbidden', path: closedPath },
+          null
+        ])
+        expect(consoleError).toHaveBeenCalledWith(importFailure)
         consoleError.mockRestore()
         wrapper.unmount()
       })
@@ -1104,6 +1238,7 @@ describe('Topbar.vue', () => {
         expect(replaceSpy).not.toHaveBeenCalledWith({
           name: 'open-productions'
         })
+        expect(actions.setProductionAccessError).not.toHaveBeenCalled()
         consoleError.mockRestore()
         wrapper.unmount()
       })

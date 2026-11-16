@@ -21,26 +21,28 @@
                 :options="versionOptions"
                 @update:model-value="onVersionChanged"
               />
-              <button-simple
-                class="ml05"
-                icon="calendar-plus"
-                :title="$t('schedule.new_version')"
-                @click="openEditScheduleVersion()"
-              />
-              <button-simple
-                class="ml05"
-                :disabled="version === 'ref'"
-                icon="pencil"
-                :title="$t('schedule.edit_version')"
-                @click="openEditScheduleVersion(currentVersion)"
-              />
-              <button-simple
-                class="ml05"
-                :disabled="version === 'ref'"
-                icon="trash"
-                :title="$t('schedule.delete_version')"
-                @click="openDeleteScheduleVersion(version)"
-              />
+              <template v-if="isCurrentUserManager">
+                <button-simple
+                  class="ml05"
+                  icon="calendar-plus"
+                  :title="$t('schedule.new_version')"
+                  @click="openEditScheduleVersion()"
+                />
+                <button-simple
+                  class="ml05"
+                  :disabled="version === 'ref'"
+                  icon="pencil"
+                  :title="$t('schedule.edit_version')"
+                  @click="openEditScheduleVersion(currentVersion)"
+                />
+                <button-simple
+                  class="ml05"
+                  :disabled="version === 'ref'"
+                  icon="trash"
+                  :title="$t('schedule.delete_version')"
+                  @click="openDeleteScheduleVersion(version)"
+                />
+              </template>
             </div>
           </div>
           <button-simple
@@ -56,7 +58,7 @@
             icon="save"
             :text="$t('schedule.apply_to_prod')"
             @click="modals.applyScheduleVersion = true"
-            v-if="!isTVShow && mode === 'prev'"
+            v-if="!isTVShow && mode === 'prev' && isCurrentUserManager"
           />
           <div class="filler"></div>
           <combobox-number
@@ -99,6 +101,7 @@
           <div class="flexrow-item">
             <date-field
               :can-delete="false"
+              :disabled="!isCurrentUserManager"
               :label="$t('main.start_date')"
               utc
               v-model="selectedStartDate"
@@ -107,6 +110,7 @@
           <div class="flexrow-item">
             <date-field
               :can-delete="false"
+              :disabled="!isCurrentUserManager"
               :label="$t('main.end_date')"
               utc
               v-model="selectedEndDate"
@@ -575,6 +579,7 @@ import { useStore } from 'vuex'
 import { useFormat } from '@/composables/format'
 import colors from '@/lib/colors'
 import { downloadBlob } from '@/lib/download'
+import { logRequestFailure } from '@/lib/errors'
 import { isFreeEscape } from '@/lib/keyboard'
 import { getTaskTypeSchedulePath } from '@/lib/path'
 import preferences from '@/lib/preferences'
@@ -3028,7 +3033,7 @@ const buildExportFile = async () => {
 // --------------------------------------------------------------------------
 
 // a picked range date moves the schedule and, once the production has
-// one, its own date
+// one, its own date: only an admin or its managers pick one, as Zou allows
 const watchRangeDate = (selectedDate, rangeDate, field) =>
   watch(selectedDate, () => {
     rangeDate.value = parseDate(selectedDate.value)
@@ -3037,10 +3042,12 @@ const watchRangeDate = (selectedDate, rangeDate, field) =>
       currentProduction.value[field] &&
       currentProduction.value[field] !== date
     ) {
-      store.dispatch('editProduction', {
-        id: currentProduction.value.id,
-        [field]: date
-      })
+      store
+        .dispatch('editProduction', {
+          id: currentProduction.value.id,
+          [field]: date
+        })
+        .catch(logRequestFailure)
     }
   })
 

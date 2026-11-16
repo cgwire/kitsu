@@ -142,6 +142,28 @@ describe('User store', () => {
         )
       })
 
+      // The page of an entity hides the assignation bar from vendors through
+      // this getter alone: nothing in the bar handles them any more.
+      test('vendors count as artists', () => {
+        const projectVendor = stateFor('supervisor', {
+          'production-1': 'vendor'
+        })
+        expect(
+          store.getters.isCurrentUserArtist(
+            stateFor('vendor'),
+            {},
+            routeFor(null)
+          )
+        ).toBe(true)
+        expect(
+          store.getters.isCurrentUserArtist(
+            projectVendor,
+            {},
+            routeFor('production-1')
+          )
+        ).toBe(true)
+      })
+
       test('admin stays manager whatever the project role says', () => {
         expect(
           store.getters.isCurrentUserManager(

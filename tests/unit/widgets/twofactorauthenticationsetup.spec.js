@@ -128,6 +128,22 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
     expect(enableTOTP).not.toHaveBeenCalled()
   })
 
+  // Safari then offers the code that Mail received, or the one its Passwords
+  // app generates.
+  it.each([
+    { name: 'TOTP', open: 'totp.button_enable' },
+    { name: 'OTP via email', open: 'email_otp.button_enable' }
+  ])('marks the $name setup field as a one-time code', async ({ open }) => {
+    const wrapper = mountSetup({}, { preEnableEmailOTP: () => {} })
+
+    await findButton(wrapper, label(open)).trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('.otp-input').attributes('autocomplete')).toBe(
+      'one-time-code'
+    )
+  })
+
   describe('while a request runs', () => {
     // Spinners only stop the mouse: Enter in a field, or on a focused
     // button, reached the handlers again.

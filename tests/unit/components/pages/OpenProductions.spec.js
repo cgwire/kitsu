@@ -1,4 +1,4 @@
-import { flushPromises, shallowMount } from '@vue/test-utils'
+import { flushPromises, RouterLinkStub, shallowMount } from '@vue/test-utils'
 import { ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
@@ -29,6 +29,7 @@ const mountPage = async ({
   isClient = false,
   mainConfig = ref({ is_self_hosted: false }),
   openProductions = ref(productions),
+  accessError = ref(null),
   failing = []
 } = {}) => {
   const store = createStore({
@@ -39,21 +40,27 @@ const mountPage = async ({
       lastProductionScreen: () => 'assets',
       mainConfig: () => mainConfig.value,
       openProductions: () => openProductions.value,
-      organisation: () => ({ name: 'Doudou Corp' })
+      organisation: () => ({ name: 'Doudou Corp' }),
+      productionAccessError: () => accessError.value
     }
   })
-  store.dispatch = vi.fn((type, production) =>
-    failing.includes(production.id)
+  store.dispatch = vi.fn((type, payload) => {
+    if (type === 'setProductionAccessError') {
+      accessError.value = payload
+      return Promise.resolve()
+    }
+    return failing.includes(payload.id)
       ? Promise.reject(new Error('down'))
       : Promise.resolve({
-          entities: [{ id: `shot-of-${production.id}` }],
-          playlists: [{ id: `playlist-of-${production.id}` }]
+          entities: [{ id: `shot-of-${payload.id}` }],
+          playlists: [{ id: `playlist-of-${payload.id}` }]
         })
-  )
+  })
   const wrapper = shallowMount(OpenProductions, {
     global: {
       plugins: [router, store],
-      directives: { focus: () => {} }
+      directives: { focus: () => {} },
+      stubs: { RouterLink: RouterLinkStub }
     }
   })
   await flushPromises()
@@ -125,6 +132,95 @@ describe('OpenProductions', () => {
     expect(again.wrapper.find('.client-welcome').exists()).toBe(false)
     const studio = await mountPage()
     expect(studio.wrapper.find('.client-welcome').exists()).toBe(false)
+  })
+
+  // A production page whose production cannot be loaded sends the user
+  // here: the page tells why.
+  describe('production access error', () => {
+    const path = '/productions/production-3/playlists'
+    const accessError = reason => ref({ reason, path })
+
+    it.each([
+      ['forbidden', 'productions.home.access_forbidden'],
+      ['missing', 'productions.home.access_missing']
+    ])('tells why a production page sent the user home, %s', async (reason, text) => {
+      const { store, wrapper } = await mountPage({
+        accessError: accessError(reason)
+      })
+
+      expect(wrapper.find('[role="alert"]').text()).toBe(text)
+      expect(wrapper.find('.access-error a').exists()).toBe(false)
+      expect(store.dispatch).toHaveBeenCalledWith('setProductionAccessError', null)
+    })
+
+    // The way home replaced the production page in the history: Back does
+    // not lead there any more.
+    it('offers the page again after a failed load', async () => {
+      const { wrapper } = await mountPage({
+        openProductions: ref([]),
+        accessError: accessError('failed')
+      })
+
+      const alert = wrapper.find('[role="alert"]')
+      expect(alert.text()).toContain('productions.home.access_failed')
+      const reload = wrapper.findComponent(RouterLinkStub)
+      expect(reload.element.closest('[role="alert"]')).toBe(alert.element)
+      expect(reload.props('to')).toBe(path)
+      expect(reload.text()).toBe('main.reload')
+    })
+
+    // A screen reader announces the message alone, not the close control.
+    it('keeps the close control out of the announced message', async () => {
+      const { wrapper } = await mountPage({ accessError: accessError('forbidden') })
+
+      expect(wrapper.find('.access-error .close-access-error').exists()).toBe(true)
+      expect(wrapper.find('[role="alert"] .close-access-error').exists()).toBe(false)
+    })
+
+    it('tells it to a client too', async () => {
+      const { wrapper } = await mountPage({
+        isClient: true,
+        accessError: accessError('forbidden')
+      })
+
+      expect(wrapper.find('[role="alert"]').text()).toBe(
+        'productions.home.access_forbidden'
+      )
+    })
+
+    it('tells it once', async () => {
+      const error = accessError('forbidden')
+      await mountPage({ accessError: error })
+
+      const again = await mountPage({ accessError: error })
+
+      expect(again.wrapper.find('.access-error').exists()).toBe(false)
+    })
+
+    it.each([
+      ['Enter', 'Enter'],
+      ['Space', ' ']
+    ])('hides the message once closed with %s', async (name, key) => {
+      const { wrapper } = await mountPage({ accessError: accessError('missing') })
+
+      await wrapper.find('.close-access-error').trigger('keydown', { key })
+
+      expect(wrapper.find('.access-error').exists()).toBe(false)
+    })
+
+    it('hides the message once closed', async () => {
+      const { wrapper } = await mountPage({ accessError: accessError('missing') })
+
+      await wrapper.find('.close-access-error').trigger('click')
+
+      expect(wrapper.find('.access-error').exists()).toBe(false)
+    })
+
+    it('tells nothing on a plain visit', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(wrapper.find('.access-error').exists()).toBe(false)
+    })
   })
 
   describe('contributions', () => {

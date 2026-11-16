@@ -1047,6 +1047,141 @@ describe('TaskType page', () => {
     })
   })
 
+  // The store's task type follows the route: a load still running when the
+  // page is left ends under the route of the next page, which has none.
+  describe('load of a page left meanwhile', () => {
+    const taskType = ref(null)
+    const assetTasks = ['task-a', 'task-b'].map(id => ({
+      id,
+      assignees: [],
+      entity_id: `asset-${id}`,
+      entity_name: id,
+      task_type_id: 'task-type-1'
+    }))
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      taskType.value = {
+        id: 'task-type-1',
+        name: 'Modeling',
+        for_entity: 'Asset'
+      }
+    })
+
+    afterEach(() => {
+      assetTasks.forEach(task => assetStore.cache.assetMap.delete(task.entity_id))
+    })
+
+    const mountLoadingPage = ({ actions, getters = {} }) =>
+      mountPage({
+        actions,
+        getters: {
+          assetValidationColumns: () => [],
+          currentTaskType: () => taskType.value,
+          taskMap: () => new Map(assetTasks.map(task => [task.id, task])),
+          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' }),
+          ...getters
+        },
+        routes: [
+          {
+            path: '/productions/:production_id/assets/task-types/:task_type_id/:section',
+            component: Page
+          },
+          { path: '/productions/:production_id/shots', component: Page }
+        ],
+        section: 'tasks'
+      })
+
+    // The shots list the user went to holds a search in its URL.
+    const leave = async (wrapper, router) => {
+      wrapper.unmount()
+      taskType.value = {}
+      await router.push('/productions/production-1/shots?search=retake')
+    }
+
+    // Sentry: GET /api/data/projects/:id/schedule-items/undefined/episodes
+    it('asks no episode schedule items when left while its entities load', async () => {
+      let endLoad
+      const { router, storeActions, wrapper } = await mountLoadingPage({
+        actions: {
+          initTaskType: vi.fn(
+            () => new Promise(resolve => (endLoad = resolve))
+          ),
+          loadEpisodeScheduleItems: vi.fn(() => [])
+        },
+        getters: {
+          currentEpisode: () => ({ id: 'episode-1', name: 'E01' }),
+          isTVShow: () => true
+        }
+      })
+      await vi.advanceTimersByTimeAsync(100)
+      expect(storeActions.initTaskType).toHaveBeenCalledTimes(1)
+
+      await leave(wrapper, router)
+      endLoad()
+      await flushPromises()
+
+      expect(storeActions.loadEpisodeScheduleItems).not.toHaveBeenCalled()
+    })
+
+    // The left page ran the search of the next page's URL, then wrote its
+    // own empty search field back there: that page listed every row.
+    it.each([
+      ['its entities load', 'initTaskType', false],
+      ['its schedule items load', 'loadScheduleItems', false],
+      ['the schedule items of its loaded entities load', 'loadScheduleItems', true]
+    ])(
+      'keeps the search of the next page when left while %s',
+      async (_, pendingAction, isLoaded) => {
+        if (isLoaded) {
+          assetTasks.forEach(task => {
+            assetStore.cache.assetMap.set(task.entity_id, {
+              id: task.entity_id,
+              tasks: [task.id]
+            })
+          })
+        }
+        let endLoad
+        const pendingLoad = vi.fn(
+          () => new Promise(resolve => (endLoad = resolve))
+        )
+        const { router, storeActions, wrapper } = await mountLoadingPage({
+          actions: {
+            initTaskType: vi.fn(),
+            loadScheduleItems: vi.fn(() => []),
+            [pendingAction]: pendingLoad
+          }
+        })
+        await vi.advanceTimersByTimeAsync(100)
+        await flushPromises()
+        expect(pendingLoad).toHaveBeenCalledTimes(1)
+        expect(storeActions.initTaskType).toHaveBeenCalledTimes(
+          isLoaded ? 0 : 1
+        )
+
+        await leave(wrapper, router)
+        endLoad([])
+        await flushPromises()
+        await vi.advanceTimersByTimeAsync(200)
+
+        expect(router.currentRoute.value.fullPath).toBe(
+          '/productions/production-1/shots?search=retake'
+        )
+      }
+    )
+
+    it('starts no load when left within its first 100 ms', async () => {
+      const { router, storeActions, wrapper } = await mountLoadingPage({
+        actions: { initTaskType: vi.fn(), loadScheduleItems: vi.fn(() => []) }
+      })
+
+      await leave(wrapper, router)
+      await vi.advanceTimersByTimeAsync(100)
+
+      expect(storeActions.initTaskType).not.toHaveBeenCalled()
+    })
+  })
+
   describe('CSV import', () => {
     // unmounted after each test, a failed one included
     let wrapper = null

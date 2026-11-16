@@ -491,6 +491,37 @@ describe('Schedule widget - dragover renders', () => {
 })
 
 describe('Schedule widget - root row name', () => {
+  let rafSpy
+
+  beforeEach(() => {
+    // the grab is throttled through requestAnimationFrame, which never fires
+    // on its own in jsdom
+    rafSpy = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(callback => {
+        callback()
+        return 0
+      })
+  })
+
+  afterEach(() => {
+    rafSpy.mockRestore()
+  })
+
+  // The grab of the names column keeps the pressed element under the pointer,
+  // so the browser clicks it on the release.
+  const grabName = async (wrapper, fromY, toY, target = '.root-element-name') => {
+    const name = wrapper.find(target)
+    await name.trigger('mousedown', { clientY: fromY })
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientY: toY })
+    )
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientY: toY })
+    )
+    await name.trigger('click', { clientY: toY })
+  }
+
   test('a click on the name unfolds the row like its chevron', async () => {
     const rootElement = buildRootElement()
     const wrapper = mountRootBar(rootElement)
@@ -501,6 +532,114 @@ describe('Schedule widget - root row name', () => {
       rootElement
     )
 
+    wrapper.unmount()
+  })
+
+  test('a grab of the names started on a name leaves its row as is', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+
+    await grabName(wrapper, 300, 100)
+
+    // sanity check: the grab scrolled the names
+    expect(wrapper.find('.entities').element.scrollTop).toBe(200)
+    expect(wrapper.emitted('root-element-expanded')).toBeFalsy()
+    wrapper.unmount()
+  })
+
+  test('a click that slips by a few pixels still unfolds the row', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+
+    await grabName(wrapper, 300, 296)
+
+    expect(wrapper.emitted('root-element-expanded')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  test('a grab just longer than a slip leaves its row as is', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+
+    await grabName(wrapper, 300, 295)
+
+    expect(wrapper.emitted('root-element-expanded')).toBeFalsy()
+    wrapper.unmount()
+  })
+
+  test('a click after a grab released off the name still unfolds the row', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+    const name = wrapper.find('.root-element-name')
+    // released under the column header: the browser clicks no name
+    await name.trigger('mousedown', { clientY: 300 })
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientY: 20 })
+    )
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientY: 20 })
+    )
+
+    await grabName(wrapper, 300, 300)
+
+    expect(wrapper.emitted('root-element-expanded')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  test('a grab of the names started on a chevron leaves its row as is', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+
+    await grabName(wrapper, 300, 100, '.expand')
+
+    expect(wrapper.find('.entities').element.scrollTop).toBe(200)
+    expect(wrapper.emitted('root-element-expanded')).toBeFalsy()
+    wrapper.unmount()
+  })
+
+  test('a click on a chevron that slips by a few pixels unfolds the row', async () => {
+    const wrapper = mountRootBar(buildRootElement())
+
+    await grabName(wrapper, 300, 297, '.expand')
+
+    expect(wrapper.emitted('root-element-expanded')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  // A press on the button that schedules the undated tasks of a row is meant
+  // for the button: the names do not follow the pointer away from it.
+  test('a press on the button that schedules a row starts no grab', async () => {
+    const root = {
+      ...buildRootElement(),
+      expanded: true,
+      people: {},
+      children: [
+        {
+          id: 'seq-1',
+          object_id: 'seq-1',
+          name: 'SEQ01',
+          color: '#4a90e2',
+          editable: true,
+          expanded: true,
+          loading: false,
+          man_days: 0,
+          startDate: moment('2026-08-10'),
+          endDate: moment('2026-08-14'),
+          children: new Map(),
+          nbUndatedTasks: 3
+        }
+      ]
+    }
+    const wrapper = mountSchedule(
+      {
+        startDate: moment('2026-07-05'),
+        endDate: moment('2026-10-23'),
+        hierarchy: reactive([root]),
+        subchildren: true,
+        reassignable: true
+      },
+      { attachTo: document.body }
+    )
+
+    await grabName(wrapper, 300, 100, '.plan-entity')
+
+    expect(wrapper.find('.entities').element.scrollTop).toBe(0)
+    expect(wrapper.emitted('plan-entity')).toEqual([[root, root.children[0]]])
     wrapper.unmount()
   })
 })
@@ -693,6 +832,254 @@ describe('Schedule widget - timeline scroll', () => {
     timeline.dispatchEvent(new Event('scroll'))
 
     expect(errors).toEqual([])
+  })
+})
+
+// The browser scrolls the timeline on its own, and the names and the dates
+// follow it at its scroll event: the schedule takes the wheel to move them in
+// the same frame.
+describe('Schedule widget - wheel over the schedule', () => {
+  // the events take their time stamp from Date.now: a slow run must not
+  // split a swipe in two
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  // stops the scroll at both ends, as a browser does
+  const clampScroll = (element, property, max) => {
+    let position = 0
+    Object.defineProperty(element, property, {
+      get: () => position,
+      set: value => {
+        position = Math.min(Math.max(value, 0), max)
+      }
+    })
+  }
+
+  // the wheel events in order, a number being a pause in milliseconds; a
+  // wheel may name its own event, wheel.shift for instance
+  const wheelOver = async (selector, wheels, options = {}) => {
+    const { event = 'wheel', maxLeft, maxTop } = options
+    const wrapper = mountSchedule({}, { attachTo: document.body })
+    const timeline = wrapper.find('.timeline-content-wrapper').element
+    // jsdom lays nothing out
+    Object.defineProperty(timeline, 'clientHeight', { value: 500 })
+    Object.defineProperty(timeline, 'clientWidth', { value: 800 })
+    if (maxTop !== undefined) clampScroll(timeline, 'scrollTop', maxTop)
+    if (maxLeft !== undefined) clampScroll(timeline, 'scrollLeft', maxLeft)
+    const prevented = []
+    const onWheel = event => prevented.push(event.defaultPrevented)
+    document.addEventListener('wheel', onWheel)
+    const target = wrapper.find(selector)
+
+    wheels.forEach(wheel => {
+      if (typeof wheel === 'number') {
+        vi.advanceTimersByTime(wheel)
+      } else {
+        const { event: wheelEvent = event, ...init } = wheel
+        target.trigger(wheelEvent, init)
+      }
+    })
+    await nextTick()
+
+    document.removeEventListener('wheel', onWheel)
+    const result = {
+      top: timeline.scrollTop,
+      left: timeline.scrollLeft,
+      names: wrapper.find('.entities').element.scrollTop,
+      dates: wrapper.find('.timeline-header').element.scrollLeft,
+      prevented
+    }
+    wrapper.unmount()
+    return result
+  }
+  const wheelOverTimeline = (wheels, options) =>
+    wheelOver('.timeline-content', wheels, options)
+
+  test.each(['.entity-name-list', '.timeline-content', '.timeline-header'])(
+    'moves the timeline and the names at once under a wheel over %s',
+    async selector => {
+      expect(await wheelOver(selector, [{ deltaY: 120 }])).toEqual({
+        top: 120,
+        left: 0,
+        names: 120,
+        dates: 0,
+        prevented: [true]
+      })
+    }
+  )
+
+  it('moves the dates at once under a sideways wheel', async () => {
+    expect(await wheelOverTimeline([{ deltaX: 50 }])).toMatchObject({
+      left: 50,
+      dates: 50
+    })
+  })
+
+  it('turns a Shift+wheel sideways, as the browser does', async () => {
+    const options = { event: 'wheel.shift' }
+
+    expect(await wheelOverTimeline([{ deltaY: 50 }], options)).toMatchObject({
+      top: 0,
+      left: 50
+    })
+  })
+
+  it('leaves a wheel past the end of the timeline to the page', async () => {
+    const options = { maxTop: 400 }
+
+    expect(await wheelOverTimeline([{ deltaY: -120 }], options)).toMatchObject({
+      top: 0,
+      prevented: [false]
+    })
+  })
+
+  // The browser would scroll the timeline along the other axis.
+  it('keeps a swipe past the end of the timeline from scrolling the other way', async () => {
+    const swipe = [
+      { deltaX: 10, deltaY: 1 },
+      { deltaX: 12, deltaY: 2 }
+    ]
+
+    expect(await wheelOverTimeline(swipe, { maxLeft: 0 })).toMatchObject({
+      top: 0,
+      left: 0,
+      prevented: [true, true]
+    })
+  })
+
+  it('keeps a Shift+wheel past the end of the timeline from scrolling the other way', async () => {
+    const options = { event: 'wheel.shift', maxLeft: 0 }
+
+    expect(
+      await wheelOverTimeline([{ deltaY: 10 }, { deltaY: 10 }], options)
+    ).toMatchObject({ top: 0, left: 0, prevented: [true, true] })
+  })
+
+  // The browser keeps a trackpad swipe on one axis, yet its wheel events
+  // carry a little of the other one.
+  it('keeps a vertical trackpad swipe from drifting sideways', async () => {
+    const swipe = [
+      { deltaX: 1, deltaY: 10 },
+      { deltaX: 2, deltaY: 12 },
+      { deltaX: -1, deltaY: 8 },
+      // the end of a swipe gets noisy
+      { deltaX: 2, deltaY: 1 },
+      { deltaX: 1, deltaY: 0 }
+    ]
+
+    expect(await wheelOverTimeline(swipe)).toEqual({
+      top: 31,
+      left: 0,
+      names: 31,
+      dates: 0,
+      // the browser would scroll sideways what is left to it
+      prevented: Array(5).fill(true)
+    })
+  })
+
+  it('keeps a sideways trackpad swipe from drifting vertically', async () => {
+    const swipe = [
+      { deltaX: 10, deltaY: 1 },
+      { deltaX: 12, deltaY: 2 },
+      { deltaX: 8, deltaY: 1 }
+    ]
+
+    expect(await wheelOverTimeline(swipe)).toMatchObject({
+      top: 0,
+      left: 30,
+      dates: 30
+    })
+  })
+
+  it('turns sideways once the swipe clearly does', async () => {
+    const down = Array(3).fill({ deltaY: 10 })
+    const sideways = Array(4).fill({ deltaX: 10 })
+
+    const { top, left } = await wheelOverTimeline([...down, ...sideways])
+
+    expect(top).toBe(30)
+    expect(left).toBeGreaterThan(0)
+  })
+
+  it('weighs the axis afresh after a pause between two swipes', async () => {
+    const down = Array(3).fill({ deltaY: 10 })
+    const sideways = [
+      { deltaX: 8, deltaY: 2 },
+      { deltaX: 11, deltaY: 1 },
+      { deltaX: 14, deltaY: 1 }
+    ]
+
+    expect(await wheelOverTimeline([...down, 300, ...sideways])).toMatchObject(
+      { top: 30, left: 33 }
+    )
+  })
+
+  // Shift turns the wheel on purpose: no noise to outweigh.
+  it('turns the wheel as soon as Shift is pressed or released', async () => {
+    const down = { deltaY: 100 }
+    const sideways = { event: 'wheel.shift', deltaY: 100 }
+
+    expect(
+      await wheelOverTimeline([down, down, sideways, sideways, sideways, down])
+    ).toMatchObject({ top: 300, left: 300 })
+  })
+
+  it('keeps a trackpad swipe on one axis while Shift is held', async () => {
+    const swipe = [
+      { deltaX: 1, deltaY: 10 },
+      { deltaX: 2, deltaY: 12 },
+      { deltaX: 2, deltaY: 1 }
+    ]
+    const options = { event: 'wheel.shift' }
+
+    expect(await wheelOverTimeline(swipe, options)).toMatchObject({
+      top: 23,
+      left: 0
+    })
+  })
+
+  // Shift turns an event without a sideways delta only, as the browser does.
+  it('follows a trackpad swipe with Shift held event by event', async () => {
+    const swipe = [{ deltaX: 0, deltaY: 1 }, ...Array(3).fill({ deltaX: 10 })]
+    const options = { event: 'wheel.shift' }
+
+    expect(await wheelOverTimeline(swipe, options)).toMatchObject({
+      top: 0,
+      left: 31
+    })
+  })
+
+  it('steps a row per line of a wheel counted in lines', async () => {
+    const lines = { deltaY: 3, deltaMode: WheelEvent.DOM_DELTA_LINE }
+
+    expect((await wheelOverTimeline([lines])).top).toBe(120)
+  })
+
+  it('steps the visible size per page of a wheel counted in pages', async () => {
+    const page = { deltaMode: WheelEvent.DOM_DELTA_PAGE }
+
+    const down = await wheelOverTimeline([{ ...page, deltaY: 1 }])
+    const sideways = await wheelOverTimeline([{ ...page, deltaX: 1 }])
+
+    expect([down.top, sideways.left]).toEqual([500, 800])
+  })
+
+  it('leaves a Ctrl+wheel to the browser zoom', async () => {
+    // a ctrlKey option would hit the read-only property of the event
+    const options = { event: 'wheel.ctrl' }
+
+    expect(await wheelOverTimeline([{ deltaY: 120 }], options)).toEqual({
+      top: 0,
+      left: 0,
+      names: 0,
+      dates: 0,
+      prevented: [false]
+    })
   })
 })
 
