@@ -362,9 +362,13 @@ const onNewClicked = () => {
 }
 
 const updateRoute = () => {
-  const search = searchFieldRef.value?.getValue()
   router.push({
-    query: { search, department: selectedDepartment.value, role: role.value }
+    query: {
+      ...route.query,
+      search: searchFieldRef.value?.getValue() || undefined,
+      department: selectedDepartment.value || undefined,
+      role: role.value === 'all' ? undefined : role.value
+    }
   })
 }
 
