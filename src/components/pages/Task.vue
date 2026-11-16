@@ -126,7 +126,7 @@
                   :options="previewOptions"
                   is-preview
                   :model-value="currentPreviewId"
-                  @update:model-value="selectedPreviewId = $event"
+                  @update:model-value="onRevisionPicked"
                 />
               </div>
               <div v-else>
@@ -591,8 +591,10 @@ const isUseCurrentFrame = ref(false)
 const hookupPlaylistTaskIds = ref([])
 const addPreviewFormData = ref(null)
 const addExtraPreviewFormData = ref(null)
-const currentExtraPreviewId = ref(null)
-const extraFileRevisionId = ref(null)
+// The file the trash of the player removes and the revision its "+" adds a
+// file to, each with the task of the revision shown at the click.
+const removedFile = ref(null)
+const extraFileRevision = ref(null)
 
 const isTaskLoading = ref(true)
 // Why the task of the URL is not shown: 'missing' or 'failed'.
@@ -603,6 +605,8 @@ let loadCount = 0
 let pageTaskId = null
 // The task of the last load that ended well: reading it again is a refresh.
 let shownTaskId = null
+// The address it loaded under: its URL may change later, with no load.
+let shownTaskRoute = null
 // The list the arrows walk loads once, with the first task shown, and
 // again after a failure.
 let isEntityListLoaded = false
@@ -1294,6 +1298,7 @@ const loadTaskData = () => {
               reset()
               isTaskLoading.value = false
               shownTaskId = route.params.task_id
+              shownTaskRoute = { name: route.name, params: { ...route.params } }
               listReadWithTask =
                 loadedTask.entity_type_name === 'Shot' ? 'Shot' : 'Asset'
               return true
@@ -1314,6 +1319,7 @@ const loadTaskData = () => {
       reset()
       isTaskLoading.value = false
       shownTaskId = route.params.task_id
+      shownTaskRoute = { name: route.name, params: { ...route.params } }
       return true
     })
     .catch(onLoadFailure)
@@ -1559,14 +1565,24 @@ const selectFile = forms => {
   previewForms.value = previewForms.value.concat(forms)
 }
 
+// The task of the page may not be the one of the revision shown yet.
+const getShownRevision = () => ({
+  previewId: currentPreviewId.value,
+  taskId: currentPreview.value?.task_id ?? task.value?.id
+})
+
+// The page shows its own task once its URL and `task` both name it: while it
+// reads a task the store lacks, `task` keeps the one shown before.
+const isTaskOfPage = taskId =>
+  taskId === route.params.task_id && taskId === task.value?.id
+
 const createExtraPreview = forms => {
   errors.value.addExtraPreview = false
   loading.value.addExtraPreview = true
-  const previewId = extraFileRevisionId.value ?? currentPreviewId.value
-  const comment = getCurrentTaskComments().find(item =>
-    item.previews.find(preview => preview.id === previewId)
-  )
-  const taskId = task.value.id
+  const { previewId, taskId } = extraFileRevision.value ?? getShownRevision()
+  const comment = getTaskComments
+    .value(taskId)
+    .find(item => item.previews.find(preview => preview.id === previewId))
   store
     .dispatch('addCommentExtraPreview', {
       taskId,
@@ -1578,12 +1594,15 @@ const createExtraPreview = forms => {
       loading.value.addExtraPreview = false
       modals.value.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
-      // A file may start over a revision the trash emptied meanwhile.
-      taskPreviews.value = getCurrentTaskPreviews()
+      // A file may start over a revision the trash emptied meanwhile. One of
+      // the previous task leaves the page as it is.
+      if (isTaskOfPage(taskId)) {
+        taskPreviews.value = getCurrentTaskPreviews()
+      }
       setTimeout(() => {
         // The page may have moved on to another task, with or without a
         // player.
-        if (task.value?.id === taskId) previewPlayerRef.value?.displayLast()
+        if (isTaskOfPage(taskId)) previewPlayerRef.value?.displayLast()
       }, 0)
     })
     .catch(err => {
@@ -1621,22 +1640,23 @@ const setPreview = () => {
 const confirmDeleteTaskPreview = () => {
   loading.value.deleteExtraPreview = true
   errors.value.deleteExtraPreview = false
-  const previewId = currentPreviewId.value
-  const comment = getCurrentTaskComments().find(
-    item => item.previews.findIndex(p => p.id === previewId) >= 0
-  )
+  const { previewId, revisionId, taskId } = removedFile.value
+  const comment = getTaskComments
+    .value(taskId)
+    .find(item => item.previews.findIndex(p => p.id === revisionId) >= 0)
 
   // A colleague may have deleted the only revision, and so the player.
   previewPlayerRef.value?.displayFirst()
   store
     .dispatch('deleteTaskPreview', {
-      taskId: task.value.id,
+      taskId,
       commentId: comment?.id,
-      previewId: currentExtraPreviewId.value
+      previewId
     })
     .then(() => {
       loading.value.deleteExtraPreview = false
-      resetPreview()
+      // A file of the previous task leaves the page, and its URL, as they are.
+      if (isTaskOfPage(taskId)) resetPreview()
       hideRemoveExtraPreviewModal()
     })
     .catch(err => {
@@ -1682,13 +1702,14 @@ const onPreviewAdded = eventData => {
 // The revisions may change behind the modal: the file must join this one.
 // A save can fail after its window closed: each opening starts clean.
 const onAddExtraPreviewClicked = () => {
-  extraFileRevisionId.value = currentPreviewId.value
+  extraFileRevision.value = getShownRevision()
   errors.value.addExtraPreview = false
   modals.value.addExtraPreview = true
 }
 
 const showRemoveExtraPreviewModal = preview => {
-  currentExtraPreviewId.value = preview.id
+  const { previewId: revisionId, taskId } = getShownRevision()
+  removedFile.value = { previewId: preview.id, revisionId, taskId }
   errors.value.deleteExtraPreview = false
   modals.value.deleteExtraPreview = true
 }
@@ -1725,8 +1746,38 @@ const onPreviewFormRemoved = previewForm => {
   previewForms.value = previewForms.value.filter(f => f !== previewForm)
 }
 
+// The address of a revision, from the address of its task.
+const revisionRoute = ({ name, params }, previewId) => ({
+  name: name.endsWith('-preview') ? name : `${name}-preview`,
+  params: { ...params, preview_id: previewId }
+})
+
+// A revision of the task the page shows opens at the address the page writes.
+// Until the next task loads in full, the lists may also hold the revisions of
+// the task before, or those of the task of the URL under the header of the
+// task before: the task of the URL opens at the URL, the task shown before at
+// the address it loaded under. A revision of any other task only changes the
+// player; one naming no task, which Zou never sends, reaches the URL while the
+// page shows its own task in full.
 const changeCurrentPreview = preview => {
-  router.push(previewPath(preview.id))
+  const taskId = preview.task_id
+  if (isTaskOfPage(taskId)) {
+    router.push(previewPath(preview.id))
+  } else if (taskId === route.params.task_id) {
+    router.push(revisionRoute(route, preview.id))
+  } else if (taskId === shownTaskId) {
+    router.push(revisionRoute(shownTaskRoute, preview.id))
+  } else {
+    selectedPreviewId.value = preview.id
+  }
+}
+
+// A click on the revision shown closes the list.
+const onRevisionPicked = previewId => {
+  const preview = taskPreviews.value.find(item => item.id === previewId)
+  if (preview && previewId !== currentPreviewId.value) {
+    changeCurrentPreview(preview)
+  }
 }
 
 const onFrameUpdated = frame => {
@@ -2027,7 +2078,6 @@ const socketEvents = {
 watch(route, () => {
   if (route.params.task_id !== pageTaskId) {
     failedActionCommentId.value = null
-    extraFileRevisionId.value = null
     loadPage()
   }
   if (route.params.preview_id !== selectedPreviewId.value) {
@@ -2049,7 +2099,18 @@ watch(
 )
 
 watch(selectedPreviewId, () => {
-  if (task.value && selectedPreviewId.value) {
+  // Until the task of the URL shows, loaded in full, the header or the list of
+  // revisions may still belong to another task: a path built then would lead
+  // to that task, or name one of its revisions. On a Back to the task shown,
+  // the list may still hold the revisions of the task left.
+  const taskId = taskPreviews.value.find(
+    item => item.id === selectedPreviewId.value
+  )?.task_id
+  if (
+    isTaskOfPage(shownTaskId) &&
+    selectedPreviewId.value &&
+    (!taskId || taskId === shownTaskId)
+  ) {
     router.push(previewPath(selectedPreviewId.value))
   }
 })

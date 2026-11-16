@@ -152,7 +152,7 @@
                     :entity-type="entityType"
                     :extra-wide="isExtraWide"
                     :fps="currentFps"
-                    :is-assigned="isAssigned"
+                    :is-assigned="isAssignedToPreviewsTask"
                     :last-preview-files="taskPreviews"
                     :light="!isWide"
                     :link="currentPreviewComment?.links?.[0]"
@@ -535,8 +535,10 @@ const taskPreviews = ref([])
 // right to annotate them is the one of the task they were shown for.
 const previewsTask = shallowRef(null)
 
-let currentExtraPreviewId = null
-let extraFileRevisionId = null
+// The file the trash of the player removes and the revision its "+" adds a
+// file to, each with the task of the previews shown at the click.
+let removedFile = null
+let extraFileRevision = null
 // Extend-drag bookkeeping, read only inside event handlers
 let lastWidth = 0
 let lastWidthX = 0
@@ -754,6 +756,12 @@ const isPreviewPlayerReadOnly = computed(() => {
     )
   )
 })
+
+// The "+" of the player adds a file to a revision shown, which may still be
+// one of the previous task.
+const isAssignedToPreviewsTask = computed(
+  () => previewsTask.value?.assignees?.includes(user.value?.id) ?? false
+)
 
 const currentTaskType = computed(() =>
   taskTypeMap.value.get(props.task?.task_type_id)
@@ -1022,6 +1030,12 @@ const showTaskPreviews = () => {
   previewsTask.value = props.task
 }
 
+// The task of the panel may not be the one of the revision shown yet.
+const getShownRevision = () => ({
+  previewId: currentPreviewId.value,
+  task: previewsTask.value
+})
+
 const reset = ({ keepPreviewFiles = false } = {}) => {
   resetModals()
   if (!keepPreviewFiles) {
@@ -1059,11 +1073,11 @@ const clearPreviewFiles = () => {
 const createExtraPreview = forms => {
   errors.addExtraPreview = false
   loading.addExtraPreview = true
-  const previewId = extraFileRevisionId ?? currentPreviewId.value
-  const comment = taskComments.value.find(comment =>
-    comment.previews.some(preview => preview.id === previewId)
-  )
-  const taskId = props.task.id
+  const { previewId, task } = extraFileRevision ?? getShownRevision()
+  const taskId = task.id
+  const comment = store.getters
+    .getTaskComments(taskId)
+    .find(comment => comment.previews.some(preview => preview.id === previewId))
   store
     .dispatch('addCommentExtraPreview', {
       taskId,
@@ -1074,7 +1088,8 @@ const createExtraPreview = forms => {
     .then(() => {
       loading.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
-      reset({ keepPreviewFiles: true })
+      // A file of the previous task leaves the panel as it is.
+      if (props.task?.id === taskId) reset({ keepPreviewFiles: true })
       setTimeout(() => {
         // The panel may have moved on to another task, with or without a
         // player.
@@ -1158,12 +1173,12 @@ const onAddPreviewClicked = () => {
 
 // The revisions may change behind the modal: the file must join this one.
 const onAddExtraPreview = () => {
-  extraFileRevisionId = currentPreviewId.value
+  extraFileRevision = getShownRevision()
   modals.addExtraPreview = true
 }
 
 const onRemoveExtraPreview = preview => {
-  currentExtraPreviewId = preview.id
+  removedFile = { previewId: preview.id, task: previewsTask.value }
   modals.deleteExtraPreview = true
 }
 
@@ -1376,16 +1391,16 @@ const confirmDeleteTaskComment = () => {
 const confirmDeleteTaskPreview = () => {
   loading.deleteExtraPreview = true
   errors.deleteExtraPreview = false
-  const previewId = currentExtraPreviewId
-  const comment = getCurrentTaskComments().find(comment =>
-    comment.previews.some(p => p.id === previewId)
-  )
+  const { previewId, task } = removedFile
+  const comment = store.getters
+    .getTaskComments(task.id)
+    .find(comment => comment.previews.some(p => p.id === previewId))
 
   // A colleague may have deleted the only revision, and so the player.
   previewPlayerRef.value?.displayFirst()
   store
     .dispatch('deleteTaskPreview', {
-      taskId: props.task.id,
+      taskId: task.id,
       commentId: comment?.id,
       previewId
     })
@@ -1786,7 +1801,6 @@ watch(
   () => {
     clearPreviewFiles()
     pickedPreviewId.value = null
-    extraFileRevisionId = null
     failedActionCommentId.value = null
     if (!props.silent) {
       loadTaskData()

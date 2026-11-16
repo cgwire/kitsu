@@ -88,6 +88,8 @@ const mountPage = async ({
   pendingTaskLoad = false,
   // The revision the URL names when the page opens.
   previewId = null,
+  // The episode the URL names when the page opens, on a TV show.
+  episodeId = null,
   // Answers of store actions, by name, in place of the defaults below.
   actions = {},
   stubs = {}
@@ -123,13 +125,14 @@ const mountPage = async ({
       }
     ]
   })
+  const params = episodeId
+    ? { ...TASK_ROUTE_PARAMS, episode_id: episodeId }
+    : TASK_ROUTE_PARAMS
+  const name = episodeId ? 'episode-task' : 'task'
   await router.push(
     previewId
-      ? {
-          name: 'task-preview',
-          params: { ...TASK_ROUTE_PARAMS, preview_id: previewId }
-        }
-      : { name: 'task', params: TASK_ROUTE_PARAMS }
+      ? { name: `${name}-preview`, params: { ...params, preview_id: previewId } }
+      : { name, params }
   )
   await router.isReady()
 
@@ -214,6 +217,46 @@ const mountPage = async ({
   })
   await flushPromises()
   return { wrapper, socket, dispatched, store, router }
+}
+
+// The revision list of the page, above the player.
+const previewCombo = wrapper =>
+  wrapper
+    .findAllComponents(ComboboxStyled)
+    .find(combo => combo.classes().includes('preview-combo'))
+
+const pickInPageList = async (wrapper, previewId) => {
+  previewCombo(wrapper).vm.$emit('update:modelValue', previewId)
+  await flushPromises()
+}
+
+// The handler seeks the player on a timer, and the shallow player stub has
+// no seek method. Dropping the fake clock discards that pending callback.
+const clickTimeCode = async (wrapper, versionRevision) => {
+  vi.useFakeTimers()
+  try {
+    wrapper
+      .findComponent(Comment)
+      .vm.$emit('time-code-clicked', { versionRevision, frame: 100 })
+  } finally {
+    vi.useRealTimers()
+  }
+  await flushPromises()
+}
+
+// The handler waits a second for the store to load the comment.
+const emitCommentNew = async (socket, taskId) => {
+  const [, onCommentNew] = socket.on.mock.calls.find(
+    ([event]) => event === 'comment:new'
+  )
+  vi.useFakeTimers()
+  try {
+    onCommentNew({ comment_id: 'comment-1', task_id: taskId })
+    vi.advanceTimersByTime(1000)
+  } finally {
+    vi.useRealTimers()
+  }
+  await flushPromises()
 }
 
 describe('Task.vue', () => {
@@ -1963,7 +2006,31 @@ describe('Task.vue preview selection', () => {
   // page, the list the page walks.
   it('keeps the episode of the URL when it switches revision', async () => {
     const { wrapper, router } = await mountPage({
-      previews,
+      previews: previews.map(preview => ({ ...preview, task_id: TASK_ID })),
+      task: buildTask({ episode_id: 'episode-2' }),
+      getterOverrides: {
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true
+      }
+    })
+    await router.push({
+      name: 'episode-task',
+      params: { ...TASK_ROUTE_PARAMS, episode_id: 'episode-1' }
+    })
+    await flushPromises()
+
+    await pickInPageList(wrapper, 'preview-2')
+
+    expect(router.currentRoute.value.name).toBe('episode-task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      episode_id: 'episode-1',
+      preview_id: 'preview-2'
+    })
+  })
+
+  it('keeps the episode of the URL when the player switches revision', async () => {
+    const { wrapper, router } = await mountPage({
+      previews: previews.map(preview => ({ ...preview, task_id: TASK_ID })),
       task: buildTask({ episode_id: 'episode-2' }),
       getterOverrides: {
         currentEpisode: () => ({ id: 'episode-1' }),
@@ -1977,14 +2044,162 @@ describe('Task.vue preview selection', () => {
     await flushPromises()
 
     wrapper
-      .findAllComponents(ComboboxStyled)
-      .find(combo => combo.classes().includes('preview-combo'))
-      .vm.$emit('update:modelValue', 'preview-2')
+      .findComponent(PreviewPlayer)
+      .vm.$emit('change-current-preview', { ...previews[1], task_id: TASK_ID })
     await flushPromises()
 
     expect(router.currentRoute.value.name).toBe('episode-task-preview')
     expect(router.currentRoute.value.params).toMatchObject({
       episode_id: 'episode-1',
+      preview_id: 'preview-2'
+    })
+  })
+
+  // Opened at an address without its episode, the page writes the revision
+  // picked at the episode address of its task at once, not in a second step.
+  it('writes the revision the player picks at the episode address of its task in one step', async () => {
+    const { wrapper, router } = await mountPage({
+      previews: previews.map(preview => ({ ...preview, task_id: TASK_ID })),
+      getterOverrides: {
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true
+      }
+    })
+    const push = vi.spyOn(router, 'push')
+
+    wrapper
+      .findComponent(PreviewPlayer)
+      .vm.$emit('change-current-preview', { ...previews[1], task_id: TASK_ID })
+    await flushPromises()
+
+    expect(push.mock.calls[0][0]).toMatchObject({
+      name: 'episode-task-preview',
+      params: { episode_id: 'episode-1', preview_id: 'preview-2' }
+    })
+  })
+
+  // A link or a Back to a revision of a task the store does not hold: the
+  // page still shows the task before while it reads that one.
+  it('stays on the revision of the URL while its task loads', async () => {
+    const { router } = await mountPage({
+      previews,
+      actions: { loadTask: () => new Promise(() => {}) }
+    })
+
+    await router.push({
+      name: 'task-preview',
+      params: { ...TASK_ROUTE_PARAMS, task_id: 'task-2', preview_id: 'preview-9' }
+    })
+    await flushPromises()
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: 'task-2',
+      preview_id: 'preview-9'
+    })
+  })
+
+  // The list keeps the revisions of the task before until the comments of
+  // the next one load: one that names no task only changes the player.
+  it('changes only the player for a revision of no known task picked while the next task loads', async () => {
+    const { wrapper, router } = await mountPage({
+      previews,
+      actions: {
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValueOnce()
+          .mockReturnValueOnce(new Promise(() => {}))
+      },
+      getterOverrides: {
+        taskMap: () =>
+          new Map([
+            [TASK_ID, buildTask()],
+            ['task-2', buildTask({ id: 'task-2' })]
+          ])
+      }
+    })
+    await router.push({
+      name: 'task',
+      params: { ...TASK_ROUTE_PARAMS, task_id: 'task-2' }
+    })
+    await flushPromises()
+
+    await pickInPageList(wrapper, 'preview-2')
+
+    expect(router.currentRoute.value.name).toBe('task')
+    expect(router.currentRoute.value.params.task_id).toBe('task-2')
+    expect(playerPreviews(wrapper)).toEqual(['from-2'])
+  })
+
+  // Zou names the task of every revision: one that names none still reaches
+  // the URL of the task shown in full.
+  it('writes a revision of no known task in the URL of the task shown', async () => {
+    const { wrapper, router } = await mountPage({ previews })
+
+    await pickInPageList(wrapper, 'preview-2')
+
+    expect(router.currentRoute.value.name).toBe('task-preview')
+    expect(router.currentRoute.value.params.preview_id).toBe('preview-2')
+  })
+
+  // Back from a task whose comments still load, to a task the store let go
+  // with its production for instance.
+  it('stays on the revision of the URL on the way back to a task the store let go', async () => {
+    const tasks = new Map([[TASK_ID, buildTask()]])
+    const { router } = await mountPage({
+      previews,
+      previewId: 'preview-2',
+      actions: {
+        loadTask: ({ taskId }) => {
+          if (taskId !== 'task-2') return new Promise(() => {})
+          const nextTask = buildTask({ id: 'task-2' })
+          tasks.set(nextTask.id, nextTask)
+          return Promise.resolve(nextTask)
+        },
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValueOnce()
+          .mockReturnValueOnce(new Promise(() => {}))
+      },
+      getterOverrides: { taskMap: () => tasks }
+    })
+    await router.push({
+      name: 'task',
+      params: { ...TASK_ROUTE_PARAMS, task_id: 'task-2' }
+    })
+    await flushPromises()
+    tasks.delete(TASK_ID)
+
+    router.back()
+    await flushPromises()
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: TASK_ID,
+      preview_id: 'preview-2'
+    })
+  })
+
+  it('puts the revision picked in the URL once the next task shows', async () => {
+    const { wrapper, router } = await mountPage({
+      getterOverrides: {
+        getTaskPreviews: () => taskId =>
+          previews.map(preview => ({ ...preview, task_id: taskId })),
+        taskMap: () =>
+          new Map([
+            [TASK_ID, buildTask()],
+            ['task-2', buildTask({ id: 'task-2' })]
+          ])
+      }
+    })
+    await router.push({
+      name: 'task',
+      params: { ...TASK_ROUTE_PARAMS, task_id: 'task-2' }
+    })
+    await flushPromises()
+
+    await pickInPageList(wrapper, 'preview-2')
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: 'task-2',
       preview_id: 'preview-2'
     })
   })
@@ -2020,11 +2235,14 @@ describe('Task.vue preview selection', () => {
   describe('once a comment is deleted', () => {
     const { mutations } = tasksStore
 
-    const buildComment = revision => ({
+    // Zou names the task of every file of a comment.
+    const buildComment = (revision, taskId = TASK_ID) => ({
       id: `comment-${revision}`,
       person: { id: 'user-1', first_name: 'Ann', last_name: 'Lee' },
       person_id: 'user-1',
-      previews: [{ id: `preview-${revision}`, revision, extension: 'png' }],
+      previews: [
+        { id: `preview-${revision}`, revision, extension: 'png', task_id: taskId }
+      ],
       task_status: {}
     })
 
@@ -2037,7 +2255,7 @@ describe('Task.vue preview selection', () => {
       }
       mutations.LOAD_TASK_COMMENTS_END(state, {
         taskId: TASK_ID,
-        comments: revisions.map(buildComment)
+        comments: revisions.map(revision => buildComment(revision))
       })
       const page = await mountPage({
         ...options,
@@ -2056,11 +2274,6 @@ describe('Task.vue preview selection', () => {
       })
       return { ...page, state }
     }
-
-    const previewCombo = wrapper =>
-      wrapper
-        .findAllComponents(ComboboxStyled)
-        .find(combo => combo.classes().includes('preview-combo'))
 
     const options = wrapper =>
       previewCombo(wrapper)
@@ -2175,8 +2388,7 @@ describe('Task.vue preview selection', () => {
     it('opens the revision picked in its list', async () => {
       const page = await mountOnRevisions([2, 1])
 
-      previewCombo(page.wrapper).vm.$emit('update:model-value', 'preview-1')
-      await flushPromises()
+      await pickInPageList(page.wrapper, 'preview-1')
 
       expect(shownFiles(page.wrapper)).toEqual(['preview-1'])
       expect(page.router.currentRoute.value.params.preview_id).toBe('preview-1')
@@ -2206,6 +2418,14 @@ describe('Task.vue preview selection', () => {
         }
       }
 
+      // The trash shows the first file of the revision before it removes one.
+      const trashStubs = {
+        PreviewPlayer: {
+          ...stubs.PreviewPlayer,
+          methods: { ...stubs.PreviewPlayer.methods, displayFirst: () => {} }
+        }
+      }
+
       it('adds a file to the revision it opened on, once a new one is published', async () => {
         const page = await mountOnRevisions([2, 1], { stubs })
         page.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
@@ -2220,6 +2440,28 @@ describe('Task.vue preview selection', () => {
             previewId: 'preview-2'
           })
         )
+      })
+
+      it('removes a file from the revision it opened on, once a new one is published', async () => {
+        const page = await mountOnRevisions([2, 1], { stubs: trashStubs })
+        page.wrapper
+          .findComponent(PreviewPlayer)
+          .vm.$emit('remove-extra-preview', { id: 'preview-2' })
+        await flushPromises()
+
+        await publish(page, 3)
+        expect(shownFiles(page.wrapper)).toEqual(['preview-3'])
+        page.wrapper
+          .findAllComponents(DeleteModal)
+          .find(modal => modal.props('active'))
+          .vm.$emit('confirm')
+        await flushPromises()
+
+        expect(page.store.dispatch).toHaveBeenCalledWith('deleteTaskPreview', {
+          taskId: TASK_ID,
+          commentId: 'comment-2',
+          previewId: 'preview-2'
+        })
       })
 
       it('adds a file to no other revision once its own goes', async () => {
@@ -2239,7 +2481,7 @@ describe('Task.vue preview selection', () => {
       })
 
       // The way back in the browser leaves the modal open.
-      it('adds a file to the revision shown once the task changes', async () => {
+      it('adds a file to the revision it opened on once the task changes', async () => {
         const otherTask = buildTask({ id: 'task-2' })
         const page = await mountOnRevisions([2, 1], {
           stubs,
@@ -2253,7 +2495,7 @@ describe('Task.vue preview selection', () => {
         })
         mutations.LOAD_TASK_COMMENTS_END(page.state, {
           taskId: otherTask.id,
-          comments: [buildComment(5)]
+          comments: [buildComment(5, otherTask.id)]
         })
         page.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
 
@@ -2267,11 +2509,13 @@ describe('Task.vue preview selection', () => {
         expect(page.store.dispatch).toHaveBeenCalledWith(
           'addCommentExtraPreview',
           expect.objectContaining({
-            taskId: otherTask.id,
-            commentId: 'comment-5',
-            previewId: 'preview-5'
+            taskId: TASK_ID,
+            commentId: 'comment-2',
+            previewId: 'preview-2'
           })
         )
+        // A file of the previous task leaves the page as it is.
+        expect(shownFiles(page.wrapper)).toEqual(['preview-5'])
       })
 
       // The trash can take the only file during the upload of another one.
@@ -2324,6 +2568,345 @@ describe('Task.vue preview selection', () => {
         expect(modal.props('isLoading')).toBe(false)
         expect(modal.props('isError')).toBe(true)
         consoleError.mockRestore()
+      })
+
+      // The page shows the revisions of the previous task until the comments
+      // of the next one load: the "+" and the trash sent the next task there,
+      // with no comment, and Zou refused them.
+      describe('on a revision of the previous task', () => {
+        const nextTask = buildTask({ id: 'task-2' })
+
+        // The page moves on to the next task, whose comments load until
+        // `endCommentsLoad` runs. `beforeMove` acts on the previous task. A
+        // next task out of the store reads first, then the list of its page,
+        // which never comes here.
+        const mountAndMoveOn = async (
+          pageStubs,
+          beforeMove = () => {},
+          { isNextTaskInStore = true, previewId } = {}
+        ) => {
+          const tasks = new Map([[TASK_ID, buildTask()]])
+          if (isNextTaskInStore) tasks.set(nextTask.id, nextTask)
+          const page = await mountOnRevisions([2, 1], {
+            previewId,
+            stubs: pageStubs,
+            getterOverrides: { taskMap: () => tasks }
+          })
+          beforeMove(page, tasks)
+          let endLoad
+          page.store.dispatch.mockImplementation(type => {
+            if (type === 'loadTaskComments') {
+              return new Promise(resolve => {
+                endLoad = resolve
+              })
+            }
+            if (!isNextTaskInStore && type === 'loadTask') {
+              return Promise.resolve(nextTask)
+            }
+            if (!isNextTaskInStore && type === 'loadEpisodes') {
+              return new Promise(() => {})
+            }
+            return Promise.resolve()
+          })
+          await page.router.push({
+            name: 'task',
+            params: { ...TASK_ROUTE_PARAMS, task_id: nextTask.id }
+          })
+          await flushPromises()
+          const endCommentsLoad = async () => {
+            mutations.LOAD_TASK_COMMENTS_END(page.state, {
+              taskId: nextTask.id,
+              comments: [buildComment(5, nextTask.id)]
+            })
+            endLoad()
+            await flushPromises()
+          }
+          return { ...page, endCommentsLoad }
+        }
+
+        const openExtraFileModal = ({ wrapper }) =>
+          wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+
+        it.each([
+          ['opened before the move', true, false],
+          ['opened before the move, confirmed once the next task loads', true, true],
+          ['opened on it', false, false],
+          ['opened on it, confirmed once the next task loads', false, true]
+        ])(
+          'adds a file to it from a modal %s',
+          async (_, isOpenedBeforeMove, isConfirmedOnceLoaded) => {
+            const page = await mountAndMoveOn(stubs, page => {
+              if (isOpenedBeforeMove) openExtraFileModal(page)
+            })
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+            if (!isOpenedBeforeMove) openExtraFileModal(page)
+            if (isConfirmedOnceLoaded) {
+              await page.endCommentsLoad()
+              expect(shownFiles(page.wrapper)).toEqual(['preview-5'])
+            }
+            await confirmExtraFile(page.wrapper)
+
+            expect(page.store.dispatch).toHaveBeenCalledWith(
+              'addCommentExtraPreview',
+              expect.objectContaining({
+                taskId: TASK_ID,
+                commentId: 'comment-2',
+                previewId: 'preview-2'
+              })
+            )
+            // A file of the previous task leaves the page as it is.
+            expect(shownFiles(page.wrapper)).toEqual(
+              isConfirmedOnceLoaded ? ['preview-5'] : ['preview-2']
+            )
+          }
+        )
+
+        // The page shows the latest revision of the previous task meanwhile.
+        it('adds a file to the older revision it opened on', async () => {
+          const page = await mountAndMoveOn(stubs, openExtraFileModal, {
+            previewId: 'preview-1'
+          })
+          expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+
+          await confirmExtraFile(page.wrapper)
+
+          expect(page.store.dispatch).toHaveBeenCalledWith(
+            'addCommentExtraPreview',
+            expect.objectContaining({
+              taskId: TASK_ID,
+              commentId: 'comment-1',
+              previewId: 'preview-1'
+            })
+          )
+        })
+
+        // The way back to another production, for one: the page keeps the
+        // previous task until the next one reads, while its URL names the
+        // next one already.
+        describe('with the next task out of the store', () => {
+          const moveOutOfStore = pageStubs =>
+            mountAndMoveOn(pageStubs, undefined, { isNextTaskInStore: false })
+
+          it('adds a file to it and leaves the page as it is', async () => {
+            const displayLast = vi.fn()
+            const page = await moveOutOfStore({
+              PreviewPlayer: {
+                ...stubs.PreviewPlayer,
+                methods: { ...stubs.PreviewPlayer.methods, displayLast }
+              }
+            })
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+            openExtraFileModal(page)
+
+            // The player shows the last file once a timer runs.
+            vi.useFakeTimers({ toFake: ['setTimeout'] })
+            try {
+              await confirmExtraFile(page.wrapper)
+              vi.runAllTimers()
+            } finally {
+              vi.useRealTimers()
+            }
+
+            expect(page.store.dispatch).toHaveBeenCalledWith(
+              'addCommentExtraPreview',
+              expect.objectContaining({
+                taskId: TASK_ID,
+                commentId: 'comment-2',
+                previewId: 'preview-2'
+              })
+            )
+            expect(page.wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+            expect(displayLast).not.toHaveBeenCalled()
+          })
+
+          it('removes a file of it and leaves the page and its URL as they are', async () => {
+            const page = await moveOutOfStore(trashStubs)
+            page.wrapper
+              .findComponent(PreviewPlayer)
+              .vm.$emit('remove-extra-preview', { id: 'preview-2' })
+            await flushPromises()
+
+            page.wrapper
+              .findAllComponents(DeleteModal)
+              .find(modal => modal.props('active'))
+              .vm.$emit('confirm')
+            await flushPromises()
+
+            expect(page.store.dispatch).toHaveBeenCalledWith('deleteTaskPreview', {
+              taskId: TASK_ID,
+              commentId: 'comment-2',
+              previewId: 'preview-2'
+            })
+            expect(page.router.currentRoute.value.params).toEqual({
+              ...TASK_ROUTE_PARAMS,
+              task_id: nextTask.id
+            })
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+          })
+
+          // The list of the next task drops the previous one from the store:
+          // the way back to it during the comments of the next one reads it
+          // again, while `task` still holds the next one.
+          const goBackDuringLoad = async pageStubs => {
+            const tasks = new Map([[TASK_ID, buildTask()]])
+            const page = await mountOnRevisions([2, 1], {
+              stubs: pageStubs,
+              getterOverrides: { taskMap: () => tasks }
+            })
+            page.store.dispatch.mockImplementation((type, payload) => {
+              if (type === 'loadTask') {
+                return payload.taskId === nextTask.id
+                  ? Promise.resolve(nextTask)
+                  : new Promise(() => {})
+              }
+              if (type === 'loadShots') {
+                tasks.delete(TASK_ID)
+                tasks.set(nextTask.id, nextTask)
+              }
+              if (type === 'loadTaskComments') return new Promise(() => {})
+              return Promise.resolve()
+            })
+            await page.router.push({
+              name: 'task',
+              params: { ...TASK_ROUTE_PARAMS, task_id: nextTask.id }
+            })
+            await flushPromises()
+            await page.router.push({ name: 'task', params: TASK_ROUTE_PARAMS })
+            await flushPromises()
+            return page
+          }
+
+          it('removes a file of it back on it, and keeps the URL on it', async () => {
+            const page = await goBackDuringLoad(trashStubs)
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+            page.wrapper
+              .findComponent(PreviewPlayer)
+              .vm.$emit('remove-extra-preview', { id: 'preview-2' })
+            await flushPromises()
+
+            page.wrapper
+              .findAllComponents(DeleteModal)
+              .find(modal => modal.props('active'))
+              .vm.$emit('confirm')
+            await flushPromises()
+
+            expect(page.store.dispatch).toHaveBeenCalledWith('deleteTaskPreview', {
+              taskId: TASK_ID,
+              commentId: 'comment-2',
+              previewId: 'preview-2'
+            })
+            expect(page.router.currentRoute.value.params).toEqual(
+              TASK_ROUTE_PARAMS
+            )
+          })
+
+          it('adds a file to it back on it, and leaves the page as it is', async () => {
+            const displayLast = vi.fn()
+            const page = await goBackDuringLoad({
+              PreviewPlayer: {
+                ...stubs.PreviewPlayer,
+                methods: { ...stubs.PreviewPlayer.methods, displayLast }
+              }
+            })
+            openExtraFileModal(page)
+
+            vi.useFakeTimers({ toFake: ['setTimeout'] })
+            try {
+              await confirmExtraFile(page.wrapper)
+              vi.runAllTimers()
+            } finally {
+              vi.useRealTimers()
+            }
+
+            expect(page.store.dispatch).toHaveBeenCalledWith(
+              'addCommentExtraPreview',
+              expect.objectContaining({
+                taskId: TASK_ID,
+                commentId: 'comment-2',
+                previewId: 'preview-2'
+              })
+            )
+            expect(displayLast).not.toHaveBeenCalled()
+          })
+        })
+
+        // A change of production, for one, drops it from the store.
+        it('adds a file to it once the store dropped its task', async () => {
+          const page = await mountAndMoveOn(stubs, (page, tasks) => {
+            openExtraFileModal(page)
+            tasks.delete(TASK_ID)
+          })
+          expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+
+          await confirmExtraFile(page.wrapper)
+
+          expect(page.store.dispatch).toHaveBeenCalledWith(
+            'addCommentExtraPreview',
+            expect.objectContaining({
+              taskId: TASK_ID,
+              commentId: 'comment-2',
+              previewId: 'preview-2'
+            })
+          )
+        })
+
+        // The URL keeps naming the task shown, never a revision of another.
+        it.each([
+          ['while it shows', false],
+          ['once the next task loads', true]
+        ])(
+          'removes a file of it confirmed %s',
+          async (_, isConfirmedOnceLoaded) => {
+            const page = await mountAndMoveOn(trashStubs)
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+            page.wrapper
+              .findComponent(PreviewPlayer)
+              .vm.$emit('remove-extra-preview', { id: 'preview-2' })
+            await flushPromises()
+            if (isConfirmedOnceLoaded) await page.endCommentsLoad()
+
+            page.wrapper
+              .findAllComponents(DeleteModal)
+              .find(modal => modal.props('active'))
+              .vm.$emit('confirm')
+            await flushPromises()
+
+            expect(page.store.dispatch).toHaveBeenCalledWith(
+              'deleteTaskPreview',
+              { taskId: TASK_ID, commentId: 'comment-2', previewId: 'preview-2' }
+            )
+            expect(page.router.currentRoute.value.params).toEqual({
+              ...TASK_ROUTE_PARAMS,
+              task_id: nextTask.id
+            })
+            expect(shownFiles(page.wrapper)).toEqual(
+              isConfirmedOnceLoaded ? ['preview-5'] : ['preview-2']
+            )
+          }
+        )
+
+        // A file added since stays out of the list of its comment: the trash
+        // finds the comment by the revision it shows.
+        it('removes a file added since from the comment of its revision', async () => {
+          const page = await mountAndMoveOn(trashStubs)
+          page.wrapper
+            .findComponent(PreviewPlayer)
+            .vm.$emit('remove-extra-preview', { id: 'preview-2b' })
+          await flushPromises()
+
+          page.wrapper
+            .findAllComponents(DeleteModal)
+            .find(modal => modal.props('active'))
+            .vm.$emit('confirm')
+          await flushPromises()
+
+          expect(page.store.dispatch).toHaveBeenCalledWith('deleteTaskPreview', {
+            taskId: TASK_ID,
+            commentId: 'comment-2',
+            previewId: 'preview-2b'
+          })
+        })
       })
     })
 
@@ -2407,19 +2990,11 @@ describe('Task.vue timecode navigation', () => {
   ]
   const comments = [{ id: 'comment-1', text: 'v1 00:04.00 (100)' }]
 
-  const clickTimeCode = (wrapper, versionRevision) => {
-    // The handler seeks the player on a timer, and the shallow player stub has
-    // no seek method. Dropping the fake clock discards that pending callback.
-    vi.useFakeTimers()
-    wrapper
-      .findComponent(Comment)
-      .vm.$emit('time-code-clicked', { versionRevision, frame: 100 })
-    vi.useRealTimers()
-    return flushPromises()
-  }
-
   it('opens the preview the timecode names', async () => {
-    const { wrapper, router } = await mountPage({ comments, previews })
+    const { wrapper, router } = await mountPage({
+      comments,
+      previews: previews.map(preview => ({ ...preview, task_id: TASK_ID }))
+    })
     await clickTimeCode(wrapper, '1')
     expect(router.currentRoute.value.params.preview_id).toBe('preview-1')
   })
@@ -2433,21 +3008,384 @@ describe('Task.vue timecode navigation', () => {
   })
 })
 
+// The page keeps the comments and revisions of the task shown until the
+// comments of the next task load: its time codes, its revision list, and the
+// list of the player in full screen still pick among them.
+describe('Task.vue revision picked while the next task loads', () => {
+  const NEXT_TASK_ID = 'task-2'
+  // Zou names the task of each revision.
+  const previews = [
+    { id: 'preview-2', revision: 2, extension: 'mp4', task_id: TASK_ID },
+    { id: 'preview-1', revision: 1, extension: 'mp4', task_id: TASK_ID }
+  ]
+  const comments = [{ id: 'comment-1', text: 'v1 00:04.00 (100)' }]
+  // The revisions the store keeps for the next task from an earlier visit: a
+  // production change empties its task map only, and a new comment brings no
+  // revision.
+  const nextTaskPreviews = [
+    {
+      id: 'preview-9',
+      revision: 2,
+      extension: 'mp4',
+      previews: ['from-9'],
+      task_id: NEXT_TASK_ID
+    },
+    {
+      id: 'preview-8',
+      revision: 1,
+      extension: 'mp4',
+      previews: ['from-8'],
+      task_id: NEXT_TASK_ID
+    }
+  ]
+
+  // The comments of the task shown load, then those of the next task hang.
+  const commentsOfNextTaskHang = () =>
+    vi
+      .fn()
+      .mockResolvedValue()
+      .mockResolvedValueOnce()
+      .mockReturnValueOnce(new Promise(() => {}))
+
+  const bothTasks = () =>
+    new Map([
+      [TASK_ID, buildTask()],
+      [NEXT_TASK_ID, buildTask({ id: NEXT_TASK_ID })]
+    ])
+
+  const goTo = async (router, params) => {
+    await router.push({
+      name: 'task',
+      params: { ...TASK_ROUTE_PARAMS, ...params }
+    })
+    await flushPromises()
+  }
+
+  // The list of revisions of the player in full screen.
+  const pickInPlayer = async (wrapper, preview) => {
+    wrapper
+      .findComponent(PreviewPlayer)
+      .vm.$emit('change-current-preview', preview)
+    await flushPromises()
+  }
+
+  it('opens a time code of the task before on that task', async () => {
+    const { wrapper, router } = await mountPage({
+      comments,
+      previews,
+      actions: { loadTaskComments: commentsOfNextTaskHang() },
+      getterOverrides: { taskMap: bothTasks }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+
+    await clickTimeCode(wrapper, '1')
+
+    expect(router.currentRoute.value.name).toBe('task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // A link to a task of another episode, which the store does not hold: the
+  // header keeps the task before while the page reads that one.
+  it('opens a time code of the task before under its own episode', async () => {
+    const { wrapper, router } = await mountPage({
+      comments,
+      previews,
+      episodeId: 'episode-1',
+      actions: { loadTask: () => new Promise(() => {}) },
+      getterOverrides: {
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true
+      }
+    })
+    await router.push({
+      name: 'episode-task',
+      params: {
+        ...TASK_ROUTE_PARAMS,
+        episode_id: 'episode-2',
+        task_id: NEXT_TASK_ID
+      }
+    })
+    await flushPromises()
+
+    await clickTimeCode(wrapper, '1')
+
+    expect(router.currentRoute.value.name).toBe('episode-task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      episode_id: 'episode-1',
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // A link to a task of another production: the store lets go of the task
+  // shown, read like the next one.
+  it('opens a revision of the task before in its own production', async () => {
+    const tasks = new Map()
+    const { wrapper, router } = await mountPage({
+      previews,
+      actions: {
+        loadTask: ({ taskId }) => {
+          const task =
+            taskId === TASK_ID
+              ? buildTask()
+              : buildTask({ id: taskId, project_id: 'production-2' })
+          tasks.set(task.id, task)
+          return Promise.resolve(task)
+        },
+        loadTaskComments: commentsOfNextTaskHang()
+      },
+      getterOverrides: { taskMap: () => tasks }
+    })
+    tasks.clear()
+    await goTo(router, {
+      production_id: 'production-2',
+      task_id: NEXT_TASK_ID
+    })
+
+    await pickInPlayer(wrapper, previews[1])
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      production_id: 'production-1',
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // Back from a task whose comments still load, to a task the store let go:
+  // the header shows the task left while the page reads that one.
+  it('stays on the task of the URL on the way back to a task the store let go', async () => {
+    const tasks = new Map([[TASK_ID, buildTask()]])
+    const { wrapper, router } = await mountPage({
+      previews,
+      previewId: 'preview-2',
+      actions: {
+        loadTask: ({ taskId }) => {
+          if (taskId !== NEXT_TASK_ID) return new Promise(() => {})
+          const nextTask = buildTask({ id: NEXT_TASK_ID })
+          tasks.set(nextTask.id, nextTask)
+          return Promise.resolve(nextTask)
+        },
+        loadTaskComments: commentsOfNextTaskHang()
+      },
+      getterOverrides: { taskMap: () => tasks }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+    tasks.delete(TASK_ID)
+    router.back()
+    await flushPromises()
+
+    await pickInPlayer(wrapper, previews[1])
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // Back to a task the store holds, from the next one shown in full: the
+  // header shows the task of the Back at once, the lists keep those of the
+  // task left until its comments load.
+  it('opens a revision of the task left on that task while a Back loads the task before', async () => {
+    const { wrapper, router } = await mountPage({
+      actions: {
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValue()
+          .mockResolvedValueOnce()
+          .mockResolvedValueOnce()
+          .mockReturnValueOnce(new Promise(() => {}))
+      },
+      getterOverrides: {
+        getTaskPreviews: () => taskId =>
+          taskId === NEXT_TASK_ID ? nextTaskPreviews : previews,
+        taskMap: bothTasks
+      }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+    router.back()
+    await flushPromises()
+
+    await pickInPlayer(wrapper, nextTaskPreviews[1])
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: NEXT_TASK_ID,
+      preview_id: 'preview-8'
+    })
+  })
+
+  // A new comment on the next task lists the revisions the store kept for
+  // it, before its comments load.
+  it('opens a revision of the next task on that task', async () => {
+    const { wrapper, router, socket } = await mountPage({
+      actions: { loadTaskComments: commentsOfNextTaskHang() },
+      getterOverrides: {
+        getTaskComments: () => taskId =>
+          taskId === NEXT_TASK_ID ? comments : [],
+        getTaskPreviews: () => taskId =>
+          taskId === NEXT_TASK_ID ? nextTaskPreviews : previews,
+        taskMap: bothTasks
+      }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+    await emitCommentNew(socket, NEXT_TASK_ID)
+
+    await pickInPlayer(wrapper, nextTaskPreviews[1])
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: NEXT_TASK_ID,
+      preview_id: 'preview-8'
+    })
+  })
+
+  it('opens a revision of the task before picked in the list of the page on that task', async () => {
+    const { wrapper, router } = await mountPage({
+      previews,
+      actions: { loadTaskComments: commentsOfNextTaskHang() },
+      getterOverrides: { taskMap: bothTasks }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+
+    await pickInPageList(wrapper, 'preview-1')
+
+    expect(router.currentRoute.value.name).toBe('task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // A task the store does not hold reads while the header keeps the task
+  // before. Reordering the files of a revision meanwhile reads again the
+  // revisions the store kept for the task of the URL.
+  it('opens a revision of the next task listed under the task before on that task', async () => {
+    const { wrapper, router } = await mountPage({
+      previews,
+      actions: { loadTask: () => new Promise(() => {}) },
+      getterOverrides: {
+        getTaskPreviews: () => taskId =>
+          taskId === NEXT_TASK_ID ? nextTaskPreviews : previews
+      }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+    wrapper.findComponent(PreviewPlayer).vm.$emit('previews-order-changed')
+    await flushPromises()
+
+    await pickInPlayer(wrapper, nextTaskPreviews[1])
+
+    expect(router.currentRoute.value.name).toBe('task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: NEXT_TASK_ID,
+      preview_id: 'preview-8'
+    })
+    expect(wrapper.findComponent(PreviewPlayer).props('previews')).toEqual([
+      'from-8'
+    ])
+  })
+
+  // Back to the task shown while the comments of the next one still load,
+  // once a new comment listed the revisions the store kept for the next one.
+  // That one never showed in full: the page has no address for it.
+  it('keeps out of the URL a revision a new comment listed for the task left, on the way back', async () => {
+    const { wrapper, router, socket } = await mountPage({
+      actions: {
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValue()
+          .mockResolvedValueOnce()
+          .mockReturnValueOnce(new Promise(() => {}))
+          .mockReturnValueOnce(new Promise(() => {}))
+      },
+      getterOverrides: {
+        getTaskComments: () => taskId =>
+          taskId === NEXT_TASK_ID ? comments : [],
+        getTaskPreviews: () => taskId =>
+          taskId === NEXT_TASK_ID ? nextTaskPreviews : previews,
+        taskMap: bothTasks
+      }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+    await emitCommentNew(socket, NEXT_TASK_ID)
+    router.back()
+    await flushPromises()
+
+    await pickInPlayer(wrapper, nextTaskPreviews[1])
+
+    expect(router.currentRoute.value.name).toBe('task')
+    expect(router.currentRoute.value.params.task_id).toBe(TASK_ID)
+    expect(wrapper.findComponent(PreviewPlayer).props('previews')).toEqual([
+      'from-8'
+    ])
+  })
+
+  // The URL of a task may change its episode after the load, with no new
+  // load. Back to it from a task of another production, its current URL wins
+  // over the one it loaded under.
+  it('opens a revision of the task of the URL under the episode of its URL', async () => {
+    const tasks = new Map([[TASK_ID, buildTask()]])
+    const { wrapper, router } = await mountPage({
+      previews,
+      episodeId: 'episode-1',
+      actions: {
+        loadTask: ({ taskId }) => {
+          if (taskId !== NEXT_TASK_ID) return new Promise(() => {})
+          const nextTask = buildTask({ id: taskId, project_id: 'production-2' })
+          tasks.set(nextTask.id, nextTask)
+          return Promise.resolve(nextTask)
+        },
+        loadTaskComments: commentsOfNextTaskHang()
+      },
+      getterOverrides: {
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true,
+        taskMap: () => tasks
+      }
+    })
+    const episodeTask = params =>
+      router.push({ name: 'episode-task', params: { ...TASK_ROUTE_PARAMS, ...params } })
+    await episodeTask({ episode_id: 'episode-2' })
+    await flushPromises()
+    tasks.delete(TASK_ID)
+    await episodeTask({
+      episode_id: 'episode-3',
+      production_id: 'production-2',
+      task_id: NEXT_TASK_ID
+    })
+    await flushPromises()
+    router.back()
+    await flushPromises()
+
+    await pickInPlayer(wrapper, previews[1])
+
+    expect(router.currentRoute.value.name).toBe('episode-task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      episode_id: 'episode-2',
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // A click on the revision shown closes the list.
+  it('stays on the next task when the revision shown is picked again in the list of the page', async () => {
+    const { wrapper, router } = await mountPage({
+      previews,
+      actions: { loadTaskComments: commentsOfNextTaskHang() },
+      getterOverrides: { taskMap: bothTasks }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+
+    await pickInPageList(wrapper, 'preview-2')
+
+    expect(router.currentRoute.value.name).toBe('task')
+    expect(router.currentRoute.value.params.task_id).toBe(NEXT_TASK_ID)
+  })
+})
+
 describe('Task.vue comment events', () => {
   const previews = [{ id: 'preview-1', revision: 1, extension: 'mp4' }]
   const comment = { id: 'comment-1', text: 'v1', previews: [] }
-
-  // The handler waits a second for the store to finish loading the comment.
-  const emitCommentNew = async (socket, taskId) => {
-    const [, onCommentNew] = socket.on.mock.calls.find(
-      ([event]) => event === 'comment:new'
-    )
-    vi.useFakeTimers()
-    onCommentNew({ comment_id: comment.id, task_id: taskId })
-    vi.advanceTimersByTime(1000)
-    vi.useRealTimers()
-    await flushPromises()
-  }
 
   it('mounts the player once a comment brings the first preview', async () => {
     // The store replaces its lists when the comment lands, and the page

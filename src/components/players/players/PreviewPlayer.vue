@@ -2298,7 +2298,9 @@ const removeEvents = () => {
 
 // Browsing
 
+// A click on the version shown closes the list.
 const changeCurrentPreviewFile = previewFileId => {
+  if (previewFileId === currentRevisionPreviewId.value) return
   const previewFile = props.lastPreviewFiles.find(p => p.id === previewFileId)
   changeCurrentPreview(previewFile)
 }

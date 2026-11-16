@@ -1732,6 +1732,13 @@ describe('PreviewPlayer.vue', () => {
           [previousRevision]
         ])
       })
+
+      // A click on the version shown closes the list.
+      it('keeps the version shown when it is picked again', async () => {
+        await showSecondFile('mp3')
+        combo().vm.$emit('update:modelValue', 'preview-v2')
+        expect(wrapper.emitted('change-current-preview')).toBeUndefined()
+      })
     })
   })
 

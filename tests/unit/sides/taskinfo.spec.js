@@ -1130,6 +1130,53 @@ describe('TaskInfo.vue', () => {
         expect(confirmAnnotationsSaved).toHaveBeenCalled()
       })
 
+      // The "+" of the player adds a file to a revision shown: it shows to the
+      // assignees of their task, not to those of the next one.
+      it.each([
+        ['the previous task', 'task-a', true, false],
+        ['the next task', 'task-b', false, true]
+      ])(
+        'counts an assignee of %s as assigned to its previews only',
+        async (_, assignedTaskId, isAssignedWhileLoading, isAssignedOnceLoaded) => {
+          const assignees = id => (id === assignedTaskId ? [USER_ID] : [])
+          const { wrapper, store } = await mountPanel({
+            task: buildTask({ id: 'task-a', assignees: assignees('task-a') }),
+            stubs: {
+              PreviewPlayer: {
+                props: ['isAssigned', 'previews'],
+                template: '<div />',
+                methods: { focus: () => {} }
+              }
+            },
+            getterOverrides: {
+              getTaskPreviews: () => taskId => previewsByTask[taskId] ?? []
+            }
+          })
+          const player = () => wrapper.findComponent(PreviewPlayer)
+          let endCommentsLoad
+          store.dispatch.mockImplementation(type =>
+            type === 'loadTaskComments'
+              ? new Promise(resolve => {
+                  endCommentsLoad = resolve
+                })
+              : Promise.resolve()
+          )
+
+          await wrapper.setProps({
+            task: buildTask({ id: 'task-b', assignees: assignees('task-b') })
+          })
+
+          expect(player().props('previews')).toEqual(['a'])
+          expect(player().props('isAssigned')).toBe(isAssignedWhileLoading)
+
+          endCommentsLoad()
+          await flushPromises()
+
+          expect(player().props('previews')).toEqual(['b'])
+          expect(player().props('isAssigned')).toBe(isAssignedOnceLoaded)
+        }
+      )
+
       // A failed load leaves the previews of the previous task on screen:
       // whatever then shows the previews of the next task gives their rights.
       describe('after a failed load of the next task', () => {
@@ -2684,7 +2731,7 @@ describe('TaskInfo.vue', () => {
       })
 
       // Alt and the arrows walk the list behind a modal.
-      it('adds a file to the revision shown once the task changes', async () => {
+      it('adds a file to the revision it opened on once the task changes', async () => {
         const panel = await mountOnRevisions([2, 1], {
           PreviewPlayer: playerStub
         })
@@ -2701,11 +2748,13 @@ describe('TaskInfo.vue', () => {
         expect(panel.store.dispatch).toHaveBeenCalledWith(
           'addCommentExtraPreview',
           expect.objectContaining({
-            taskId: 'task-2',
-            commentId: 'comment-5',
-            previewId: 'preview-5'
+            taskId: TASK_ID,
+            commentId: 'comment-2',
+            previewId: 'preview-2'
           })
         )
+        // A file of the previous task leaves the panel as it is.
+        expect(shownFiles(panel.wrapper)).toEqual(['preview-5'])
       })
 
       it('tells a trash Zou refuses once the only revision went', async () => {
@@ -2735,6 +2784,143 @@ describe('TaskInfo.vue', () => {
         expect(modal.props('isLoading')).toBe(false)
         expect(modal.props('isError')).toBe(true)
         consoleError.mockRestore()
+      })
+
+      // The panel shows the revisions of the previous task until the comments
+      // of the next one load: the "+" sent the next task with a comment of the
+      // previous one, and the trash a comment it could not find.
+      describe('on a revision of the previous task', () => {
+        const nextTask = buildTask({ id: 'task-2' })
+
+        // The trash shows the first file of the revision before it removes one.
+        const trashPlayerStub = {
+          ...playerStub,
+          methods: { ...playerStub.methods, displayFirst: () => {} }
+        }
+
+        // The panel moves on to the next task, whose comments load until the
+        // returned function runs.
+        const moveOn = async ({ state, store, wrapper }) => {
+          let endLoad
+          store.dispatch.mockImplementation(type =>
+            type === 'loadTaskComments'
+              ? new Promise(resolve => {
+                  endLoad = resolve
+                })
+              : Promise.resolve()
+          )
+          await wrapper.setProps({ task: nextTask })
+          await flushPromises()
+          return async () => {
+            mutations.LOAD_TASK_COMMENTS_END(state, {
+              taskId: nextTask.id,
+              comments: [
+                buildComment(5, [
+                  {
+                    id: 'preview-5',
+                    revision: 5,
+                    extension: 'png',
+                    task_id: nextTask.id
+                  }
+                ])
+              ]
+            })
+            endLoad()
+            await flushPromises()
+          }
+        }
+
+        it.each([
+          ['opened before the move', true, false],
+          ['opened before the move, confirmed once the next task loads', true, true],
+          ['opened on it', false, false],
+          ['opened on it, confirmed once the next task loads', false, true]
+        ])(
+          'adds a file to it from a modal %s',
+          async (_, isOpenedBeforeMove, isConfirmedOnceLoaded) => {
+            const panel = await mountOnRevisions([2, 1], {
+              PreviewPlayer: playerStub
+            })
+            const openModal = () =>
+              panel.wrapper
+                .findComponent(PreviewPlayer)
+                .vm.$emit('add-extra-preview')
+            if (isOpenedBeforeMove) openModal()
+
+            const endLoad = await moveOn(panel)
+            expect(shownFiles(panel.wrapper)).toEqual(['preview-2'])
+            if (!isOpenedBeforeMove) openModal()
+            if (isConfirmedOnceLoaded) {
+              await endLoad()
+              expect(shownFiles(panel.wrapper)).toEqual(['preview-5'])
+            }
+            await confirmExtraFile(panel.wrapper)
+
+            expect(panel.store.dispatch).toHaveBeenCalledWith(
+              'addCommentExtraPreview',
+              expect.objectContaining({
+                taskId: TASK_ID,
+                commentId: 'comment-2',
+                previewId: 'preview-2'
+              })
+            )
+            // A file of the previous task leaves the panel as it is.
+            expect(shownFiles(panel.wrapper)).toEqual(
+              isConfirmedOnceLoaded ? ['preview-5'] : ['preview-2']
+            )
+          }
+        )
+
+        // The panel shows the latest revision of the previous task meanwhile.
+        it('adds a file to the older revision it opened on', async () => {
+          const panel = await mountOnRevisions([2, 1], {
+            PreviewPlayer: playerStub
+          })
+          await pick(panel.wrapper, 'preview-1')
+          panel.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+
+          await moveOn(panel)
+          expect(shownFiles(panel.wrapper)).toEqual(['preview-2'])
+          await confirmExtraFile(panel.wrapper)
+
+          expect(panel.store.dispatch).toHaveBeenCalledWith(
+            'addCommentExtraPreview',
+            expect.objectContaining({
+              taskId: TASK_ID,
+              commentId: 'comment-1',
+              previewId: 'preview-1'
+            })
+          )
+        })
+
+        it.each([
+          ['while it shows', false],
+          ['once the next task loads', true]
+        ])(
+          'removes a file of it confirmed %s',
+          async (_, isConfirmedOnceLoaded) => {
+            const panel = await mountOnRevisions([2, 1], {
+              PreviewPlayer: trashPlayerStub
+            })
+            const endLoad = await moveOn(panel)
+            panel.wrapper
+              .findComponent(PreviewPlayer)
+              .vm.$emit('remove-extra-preview', { id: 'preview-2' })
+            await flushPromises()
+            if (isConfirmedOnceLoaded) await endLoad()
+
+            panel.wrapper
+              .findAllComponents(DeleteModal)
+              .find(modal => modal.props('active'))
+              .vm.$emit('confirm')
+            await flushPromises()
+
+            expect(panel.store.dispatch).toHaveBeenCalledWith(
+              'deleteTaskPreview',
+              { taskId: TASK_ID, commentId: 'comment-2', previewId: 'preview-2' }
+            )
+          }
+        )
       })
     })
 
