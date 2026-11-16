@@ -3154,7 +3154,7 @@ defineExpose({
   padding-top: 85px;
 
   &.without-milestones {
-    padding-top: 55px;
+    padding-top: 54px;
   }
 }
 
