@@ -357,6 +357,136 @@ describe('TaskType page', () => {
       expect(modal().props('active')).toBe(true)
       expect(modal().props('isError')).toBe(false)
     })
+
+    // The modal cannot judge every name: € is "eur" for Zou.
+    it('tells a name Zou says is taken, until the next opening', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const refusal = Object.assign(new Error('Bad Request'), {
+        status: 400,
+        body: { message: 'Metadata descriptor already exists.' }
+      })
+      const page = await mountPage({
+        section: 'tasks',
+        actions: {
+          addMetadataDescriptor: vi.fn(() => Promise.reject(refusal))
+        },
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            descriptors: [descriptor]
+          })
+        }
+      })
+      wrapper = page.wrapper
+      const modal = () => wrapper.findComponent(AddMetadataModal)
+      const openNew = () =>
+        wrapper
+          .findAllComponents(ButtonSimple)
+          .find(button => button.props('icon') === 'plus')
+          .vm.$emit('click')
+
+      await openNew()
+      await modal().vm.$emit('confirm', { name: 'Budget €' })
+      await flushPromises()
+      expect(modal().props('takenName')).toBe('Budget €')
+      expect(modal().props('isError')).toBe(false)
+      expect(consoleError).not.toHaveBeenCalled()
+
+      await modal().vm.$emit('cancel')
+      await openNew()
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('takenName')).toBe('')
+
+      await modal().vm.$emit('confirm', { name: 'Budget €' })
+      await flushPromises()
+      await modal().vm.$emit('cancel')
+      await wrapper
+        .findComponent(TaskList)
+        .vm.$emit('edit-metadata', descriptor.id)
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('takenName')).toBe('')
+    })
+
+    // The name field stays open to typing while the save runs, and the
+    // modal may close and open on another column before Zou answers.
+    it('tells the name sent, and leaves a later opening alone', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const refusal = Object.assign(new Error('Bad Request'), {
+        status: 400,
+        body: { message: 'Metadata descriptor already exists.' }
+      })
+      let refuse
+      const page = await mountPage({
+        section: 'tasks',
+        actions: {
+          addMetadataDescriptor: vi.fn(
+            () =>
+              new Promise((resolve, reject) => {
+                refuse = () => reject(refusal)
+              })
+          )
+        },
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            descriptors: [descriptor]
+          })
+        }
+      })
+      wrapper = page.wrapper
+      const modal = () => wrapper.findComponent(AddMetadataModal)
+
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'plus')
+        .vm.$emit('click')
+      const form = { name: 'Budget €' }
+      await modal().vm.$emit('confirm', form)
+      form.name = 'Budget € 2'
+      refuse()
+      await flushPromises()
+      expect(modal().props('takenName')).toBe('Budget €')
+
+      await modal().vm.$emit('confirm', { name: 'Difficulty' })
+      await modal().vm.$emit('cancel')
+      await wrapper
+        .findComponent(TaskList)
+        .vm.$emit('edit-metadata', descriptor.id)
+      refuse()
+      await flushPromises()
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('takenName')).toBe('')
+    })
+
+    // Zou keeps the names of the task columns unique per task type.
+    it('checks a new name against the columns of its task type', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const own = {
+        ...descriptor,
+        entity_type: 'Task',
+        task_type_id: 'task-type-1'
+      }
+      const other = {
+        id: 'descriptor-2',
+        name: 'Camera',
+        entity_type: 'Task',
+        task_type_id: 'task-type-2'
+      }
+      const page = await mountPage({
+        section: 'tasks',
+        getters: { taskMetadataDescriptors: () => [own, other] }
+      })
+      wrapper = page.wrapper
+
+      expect(
+        wrapper.findComponent(AddMetadataModal).props('descriptors')
+      ).toEqual([own])
+    })
   })
 
   describe('task filters', () => {

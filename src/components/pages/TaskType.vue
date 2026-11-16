@@ -415,7 +415,9 @@
           :active="modals.isAddMetadataDisplayed"
           :is-loading="loading.addMetadata"
           :is-error="errors.addMetadata"
+          :taken-name="errors.takenMetadataName"
           :descriptor-to-edit="descriptorToEdit"
+          :descriptors="taskMetadataDescriptors"
           entity-type="Task"
           @confirm="confirmAddMetadata"
           @cancel="modals.isAddMetadataDisplayed = false"
@@ -464,7 +466,10 @@ import { useCellSave } from '@/composables/cellSave'
 import { getEntityMap } from '@/composables/entity'
 import { getBarOrigin, useScheduleSave } from '@/composables/scheduleSave'
 import csv, { getEstimationsCsvLabelKeys } from '@/lib/csv'
-import { isSupervisorInDepartments } from '@/lib/descriptors'
+import {
+  isSupervisorInDepartments,
+  isTakenDescriptorNameError
+} from '@/lib/descriptors'
 import func from '@/lib/func'
 import {
   applyFilters,
@@ -699,7 +704,8 @@ const errors = reactive({
   deleteMetadata: false,
   entities: false,
   importing: false,
-  importingError: null
+  importingError: null,
+  takenMetadataName: ''
 })
 
 const loading = reactive({
@@ -1971,12 +1977,14 @@ const expandPersonElement = personElement => {
 // Close leaves the error of the last save: opening drops it.
 const onAddMetadataClicked = () => {
   errors.addMetadata = false
+  errors.takenMetadataName = ''
   descriptorToEdit.value = {}
   modals.isAddMetadataDisplayed = true
 }
 
 const onEditMetadataClicked = descriptorId => {
   errors.addMetadata = false
+  errors.takenMetadataName = ''
   descriptorToEdit.value = currentProduction.value.descriptors.find(
     descriptor => descriptor.id === descriptorId
   )
@@ -1997,7 +2005,10 @@ const onSortByMetadata = descriptorId => {
   }
 }
 
+// Zou refuses the name sent, which the modal may have closed on since.
 const confirmAddMetadata = form => {
+  const { name } = form
+  const opening = descriptorToEdit.value
   loading.addMetadata = true
   errors.addMetadata = false
   store
@@ -2011,9 +2022,15 @@ const confirmAddMetadata = form => {
       modals.isAddMetadataDisplayed = false
     })
     .catch(err => {
-      console.error(err)
       loading.addMetadata = false
-      errors.addMetadata = true
+      if (isTakenDescriptorNameError(err)) {
+        if (descriptorToEdit.value === opening) {
+          errors.takenMetadataName = name
+        }
+      } else {
+        console.error(err)
+        errors.addMetadata = true
+      }
     })
 }
 

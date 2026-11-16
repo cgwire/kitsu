@@ -3,11 +3,12 @@ import { enableAutoUnmount, flushPromises } from '@vue/test-utils'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
-import { mountEntityPage } from '../../fixtures/entity-page'
+import { mountEntityPage, production } from '../../fixtures/entity-page'
 import { buildRefusal } from '../../fixtures/refusal'
 
 import shotStore from '@/store/modules/shots'
 
+import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
 import EditEditModal from '@/components/modals/EditEditModal.vue'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
@@ -199,6 +200,150 @@ describe.each(pages)(
       await flushPromises()
 
       expect(message(wrapper).exists()).toBe(false)
+    })
+  }
+)
+
+// Zou refuses a column named like another column of the production, even
+// one hidden from the list.
+describe.each(pages)(
+  '$name page, metadata column modal',
+  ({ listName, page }) => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    // The modal cannot judge every name: € is "eur" for Zou. It says the
+    // name is taken once Zou refuses it, until the next opening.
+    test.each([
+      ['a name Zou says is taken', 'Metadata descriptor already exists.', 'Budget €', false],
+      ['another refusal', 'Metadata descriptor name is too long.', '', true]
+    ])('tells %s, until the next opening', async (_, message, takenName, isError) => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const refusal = Object.assign(buildRefusal(), { body: { message } })
+      const descriptor = { id: 'descriptor-1', name: 'Camera' }
+      const { wrapper } = await mountEntityPage(page, {
+        listName,
+        getters: {
+          currentProduction: { ...production, descriptors: [descriptor] }
+        },
+        actions: { addMetadataDescriptor: () => Promise.reject(refusal) }
+      })
+      const list = wrapper.findComponent({ name: listName })
+      const modal = () => wrapper.findComponent(AddMetadataModal)
+
+      await list.vm.$emit('add-metadata')
+      await modal().vm.$emit('confirm', { name: 'Budget €' })
+      await flushPromises()
+      expect(modal().props('takenName')).toBe(takenName)
+      expect(modal().props('isError')).toBe(isError)
+      expect(consoleError).toHaveBeenCalledTimes(isError ? 1 : 0)
+
+      await modal().vm.$emit('cancel')
+      await list.vm.$emit('add-metadata')
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('takenName')).toBe('')
+      expect(modal().props('isError')).toBe(false)
+
+      await modal().vm.$emit('confirm', { id: descriptor.id, name: 'Budget €' })
+      await flushPromises()
+      await modal().vm.$emit('cancel')
+      await list.vm.$emit('edit-metadata', descriptor.id)
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('takenName')).toBe('')
+      expect(modal().props('isError')).toBe(false)
+    })
+
+    // Zou drops an emoji from the field name: "FPS 🎬" takes the key of the
+    // built-in FPS field, where the modal leaves such a name to Zou.
+    test('tells a built-in field uses the name Zou refused as one, until the next opening', async () => {
+      const refusal = Object.assign(buildRefusal(), {
+        body: {
+          message: 'Metadata descriptor name is used by a built-in field.'
+        }
+      })
+      const descriptor = { id: 'descriptor-1', name: 'Camera' }
+      const { wrapper } = await mountEntityPage(page, {
+        listName,
+        getters: {
+          currentProduction: { ...production, descriptors: [descriptor] }
+        },
+        actions: { addMetadataDescriptor: () => Promise.reject(refusal) }
+      })
+      const list = wrapper.findComponent({ name: listName })
+      const modal = () => wrapper.findComponent(AddMetadataModal)
+
+      await list.vm.$emit('add-metadata')
+      await modal().vm.$emit('confirm', { name: 'FPS 🎬' })
+      await flushPromises()
+      expect(modal().props('builtInName')).toBe('FPS 🎬')
+      expect(modal().props('takenName')).toBe('')
+      expect(modal().props('isError')).toBe(false)
+
+      await modal().vm.$emit('cancel')
+      await list.vm.$emit('edit-metadata', descriptor.id)
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('builtInName')).toBe('')
+    })
+
+    // The name field stays open to typing while the save runs, and the
+    // modal may close and open on another column before Zou answers.
+    test('tells the name sent, and leaves a later opening alone', async () => {
+      const refusal = Object.assign(buildRefusal(), {
+        body: { message: 'Metadata descriptor already exists.' }
+      })
+      let refuse
+      const descriptor = { id: 'descriptor-1', name: 'Camera' }
+      const { wrapper } = await mountEntityPage(page, {
+        listName,
+        getters: {
+          currentProduction: { ...production, descriptors: [descriptor] }
+        },
+        actions: {
+          addMetadataDescriptor: () =>
+            new Promise((resolve, reject) => {
+              refuse = () => reject(refusal)
+            })
+        }
+      })
+      const list = wrapper.findComponent({ name: listName })
+      const modal = () => wrapper.findComponent(AddMetadataModal)
+
+      await list.vm.$emit('add-metadata')
+      const form = { name: 'Budget €' }
+      await modal().vm.$emit('confirm', form)
+      form.name = 'Budget € 2'
+      refuse()
+      await flushPromises()
+      expect(modal().props('takenName')).toBe('Budget €')
+
+      await modal().vm.$emit('confirm', { name: 'Camera' })
+      await modal().vm.$emit('cancel')
+      await list.vm.$emit('edit-metadata', descriptor.id)
+      refuse()
+      await flushPromises()
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('takenName')).toBe('')
+    })
+
+    test('checks a new name against the columns of the production', async () => {
+      const descriptor = {
+        id: 'descriptor-1',
+        name: 'Camera',
+        field_name: 'camera'
+      }
+      const { wrapper } = await mountEntityPage(page, {
+        listName,
+        getters: {
+          currentProduction: { ...production, descriptors: [descriptor] }
+        }
+      })
+
+      expect(
+        wrapper.findComponent(AddMetadataModal).props('descriptors')
+      ).toEqual([descriptor])
     })
   }
 )

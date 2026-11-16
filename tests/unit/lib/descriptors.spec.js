@@ -9,6 +9,8 @@ import {
   getMetadataChecklistValues,
   getMetadataFieldValue,
   isBuiltInFieldName,
+  isPlainDescriptorName,
+  isTakenDescriptorNameError,
   logColumnChange,
   removeMetadataField,
   renameMetadataField,
@@ -165,6 +167,38 @@ describe('lib/descriptors', () => {
     })
   })
 
+  // python-slugify spells other characters in Latin letters, drops a comma
+  // between two digits, and decodes HTML entities.
+  describe('isPlainDescriptorName', () => {
+    test('accepts a name of Latin letters, accented or not, digits, spaces, and punctuation', () => {
+      ;['Frame In', ' Résolution ', "Max  Retakes'!", 'Câmera 2'].forEach(
+        name => expect(isPlainDescriptorName(name)).toBe(true)
+      )
+    })
+
+    test('turns down a name Zou spells otherwise', () => {
+      ;['Budget (€)', 'Größe', 'Камера', '1,000 frames', 'R&amp;D'].forEach(
+        name => expect(isPlainDescriptorName(name)).toBe(false)
+      )
+    })
+
+    // python-slugify drops the combining marks from U+0300 to U+034E and from
+    // U+0360 to U+0362, turns those in between (U+034F, the grapheme joiner,
+    // to U+035F) into a separator, spells the combining letters after them
+    // (U+0363 for "a"), and drops a fullwidth apostrophe.
+    test('accepts the combining marks Zou drops, not the others or a fullwidth apostrophe', () => {
+      ;['Ca\u0303mera', 'Ca\u0362mera'].forEach(name =>
+        expect(isPlainDescriptorName(name)).toBe(true)
+      )
+      ;[
+        'Ca\u0363mera',
+        'Ca\u034fmera',
+        'Ca\u035fmera',
+        'Director\uff07s cut'
+      ].forEach(name => expect(isPlainDescriptorName(name)).toBe(false))
+    })
+  })
+
   describe('isBuiltInFieldName', () => {
     test('flags the key of a built-in field for an entity column', () => {
       const entityTypes = ['Asset', 'Shot', 'Sequence', 'Episode', 'Edit']
@@ -184,6 +218,32 @@ describe('lib/descriptors', () => {
     test('leaves the project and task columns free', () => {
       expect(isBuiltInFieldName('Project', 'resolution')).toBe(false)
       expect(isBuiltInFieldName('Task', 'fps')).toBe(false)
+    })
+  })
+
+  describe('isTakenDescriptorNameError', () => {
+    const refusal = message =>
+      Object.assign(new Error('Bad Request'), {
+        status: 400,
+        body: { error: true, message }
+      })
+
+    test('flags the refusal of a name another column holds', () => {
+      expect(
+        isTakenDescriptorNameError(
+          refusal('Metadata descriptor already exists.')
+        )
+      ).toBe(true)
+    })
+
+    test('leaves the other failures out', () => {
+      expect(
+        isTakenDescriptorNameError(
+          refusal('Metadata descriptor name is too long.')
+        )
+      ).toBe(false)
+      expect(isTakenDescriptorNameError(new Error('Bad Gateway'))).toBe(false)
+      expect(isTakenDescriptorNameError(undefined)).toBe(false)
     })
   })
 

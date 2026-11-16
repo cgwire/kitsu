@@ -1167,6 +1167,7 @@
         "add_new_values": "Il n'y a pour le moment aucune valeur enregistrée.",
         "available_values": "Valeurs disponibles",
         "built_in_name": "Un champ intégré utilise déjà ce nom.",
+        "taken_name": "Une autre colonne utilise déjà ce nom.",
         "choices": "Liste de valeurs",
         "delete_task_text": "Êtes-vous sûr de vouloir supprimer cette colonne et les données associées pour toutes les tâches de ce type de tâche ?",
         "delete_asset_text": "Êtes-vous sûr de vouloir supprimer cette colonne et les données associées pour tous les assets de cette production ?",

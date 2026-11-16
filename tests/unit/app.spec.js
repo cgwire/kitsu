@@ -3,7 +3,7 @@ import process from 'node:process'
 import { ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import auth from '@/lib/auth'
 import errors from '@/lib/errors'
@@ -707,6 +707,75 @@ describe('App', () => {
       })
     })
 
+    // Zou sends the column events of every production: the store reads the
+    // column of the production on screen, the columns of another one once
+    // it is on screen.
+    describe('columns created or changed elsewhere', () => {
+      it.each(['metadata-descriptor:new', 'metadata-descriptor:update'])(
+        'hands %s of any production to the store',
+        async event => {
+          const refreshMetadataDescriptor = vi.fn()
+          const { socket } = await mountApp({
+            actions: { refreshMetadataDescriptor },
+            getters: { currentProduction: () => ({ id: 'prod-1' }) }
+          })
+
+          emitSocketEvent(socket, event, {
+            project_id: 'prod-2',
+            metadata_descriptor_id: 'descriptor-1'
+          })
+          await flushPromises()
+
+          expect(refreshMetadataDescriptor).toHaveBeenCalledWith(
+            expect.anything(),
+            { productionId: 'prod-2', descriptorId: 'descriptor-1' }
+          )
+        }
+      )
+
+      it('reads the columns changed off screen once the production is on screen', async () => {
+        const production = ref({ id: 'prod-1' })
+        const loadStaleMetadataDescriptors = vi.fn()
+        await mountApp({
+          actions: { loadStaleMetadataDescriptors },
+          getters: { currentProduction: () => production.value }
+        })
+        expect(loadStaleMetadataDescriptors).not.toHaveBeenCalled()
+
+        production.value = { id: 'prod-2' }
+        await flushPromises()
+
+        expect(loadStaleMetadataDescriptors).toHaveBeenCalledTimes(1)
+        expect(loadStaleMetadataDescriptors).toHaveBeenCalledWith(
+          expect.anything(),
+          'prod-2'
+        )
+      })
+
+      it('logs a failed read of the columns', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const error = new Error('Bad Gateway')
+        errors.markRequestFailure(error)
+        const production = ref({ id: 'prod-1' })
+
+        const rejections = await recordUnhandledRejections(async () => {
+          await mountApp({
+            actions: {
+              loadStaleMetadataDescriptors: () => Promise.reject(error)
+            },
+            getters: { currentProduction: () => production.value }
+          })
+          production.value = { id: 'prod-2' }
+          await flushPromises()
+        })
+
+        expect(rejections).toEqual([])
+        expect(consoleError).toHaveBeenCalledWith(error)
+      })
+    })
+
     // A column deleted elsewhere, in this production or another one.
     it('drops a column deleted elsewhere', async () => {
       const dropMetadataDescriptor = vi.fn()
@@ -718,10 +787,222 @@ describe('App', () => {
       })
       await flushPromises()
 
-      expect(dropMetadataDescriptor).toHaveBeenCalledWith(
-        expect.anything(),
-        'descriptor-1'
-      )
+      expect(dropMetadataDescriptor).toHaveBeenCalledWith(expect.anything(), {
+        productionId: 'prod-2',
+        descriptorId: 'descriptor-1'
+      })
+    })
+
+    // Zou sends no event again once the socket is back: the columns are read
+    // again after a drop, not on the first connection.
+    describe('socket drop', () => {
+      const refreshProcessingPreviewFiles = () => Promise.resolve()
+
+      it('reads the columns again once the socket comes back', async () => {
+        const resyncMetadataDescriptors = vi.fn()
+        const { socket } = await mountApp({
+          actions: { refreshProcessingPreviewFiles, resyncMetadataDescriptors }
+        })
+
+        emitSocketEvent(socket, 'connect')
+        await flushPromises()
+        expect(resyncMetadataDescriptors).not.toHaveBeenCalled()
+
+        emitSocketEvent(socket, 'disconnect', 'transport close')
+        emitSocketEvent(socket, 'connect')
+        emitSocketEvent(socket, 'connect')
+        await flushPromises()
+        expect(resyncMetadataDescriptors).toHaveBeenCalledTimes(1)
+      })
+
+      // The context loads before the socket connects, which may take several
+      // attempts.
+      it('reads the columns again after a failed first connection', async () => {
+        const resyncMetadataDescriptors = vi.fn()
+        const { socket } = await mountApp({
+          actions: { refreshProcessingPreviewFiles, resyncMetadataDescriptors }
+        })
+
+        emitSocketEvent(socket, 'connect_error', new Error('xhr poll error'))
+        emitSocketEvent(socket, 'connect')
+        await flushPromises()
+
+        expect(resyncMetadataDescriptors).toHaveBeenCalledTimes(1)
+      })
+
+      // The socket may come back before the API: the catch-up is made again,
+      // a little later each time, while the production stays on screen.
+      describe('failed catch-up', () => {
+        const error = new Error('Bad Gateway')
+        const production = ref(null)
+
+        beforeEach(() => {
+          errors.markRequestFailure(error)
+          production.value = { id: 'prod-1' }
+          vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        })
+
+        afterEach(() => vi.useRealTimers())
+
+        const mountAfterDrop = async (
+          loadStaleMetadataDescriptors,
+          failure = error
+        ) => {
+          const { socket } = await mountApp({
+            actions: {
+              loadStaleMetadataDescriptors,
+              refreshProcessingPreviewFiles,
+              resyncMetadataDescriptors: () => Promise.reject(failure)
+            },
+            getters: { currentProduction: () => production.value }
+          })
+          emitSocketEvent(socket, 'disconnect', 'transport close')
+          emitSocketEvent(socket, 'connect')
+          await flushPromises()
+          return socket
+        }
+
+        it('reads the columns again a little later', async () => {
+          const loadStaleMetadataDescriptors = vi.fn()
+          await mountAfterDrop(loadStaleMetadataDescriptors)
+          await vi.advanceTimersByTimeAsync(1999)
+          expect(loadStaleMetadataDescriptors).not.toHaveBeenCalled()
+
+          await vi.advanceTimersByTimeAsync(1)
+
+          expect(loadStaleMetadataDescriptors).toHaveBeenCalledTimes(1)
+          expect(loadStaleMetadataDescriptors).toHaveBeenCalledWith(
+            expect.anything(),
+            'prod-1'
+          )
+        })
+
+        it('waits longer each time, and logs the failure of the last read', async () => {
+          const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+          const loadStaleMetadataDescriptors = vi.fn(() =>
+            Promise.reject(error)
+          )
+          const delays = [2000, 4000, 8000, 16000, 32000]
+
+          const rejections = await recordUnhandledRejections(async () => {
+            await mountAfterDrop(loadStaleMetadataDescriptors)
+            for (const [index, delay] of delays.entries()) {
+              await vi.advanceTimersByTimeAsync(delay - 1)
+              expect(loadStaleMetadataDescriptors).toHaveBeenCalledTimes(index)
+              await vi.advanceTimersByTimeAsync(1)
+              await flushPromises()
+              expect(loadStaleMetadataDescriptors).toHaveBeenCalledTimes(
+                index + 1
+              )
+              expect(consoleError).toHaveBeenCalledTimes(
+                index === delays.length - 1 ? 1 : 0
+              )
+            }
+            await vi.advanceTimersByTimeAsync(64000)
+          })
+
+          expect(rejections).toEqual([])
+          expect(loadStaleMetadataDescriptors).toHaveBeenCalledTimes(5)
+          expect(consoleError).toHaveBeenCalledWith(error)
+        })
+
+        it('reads no more once another production is on screen', async () => {
+          const loadStaleMetadataDescriptors = vi.fn()
+          await mountAfterDrop(loadStaleMetadataDescriptors)
+
+          production.value = { id: 'prod-2' }
+          await flushPromises()
+          await vi.advanceTimersByTimeAsync(2000)
+
+          expect(
+            loadStaleMetadataDescriptors.mock.calls.map(([, id]) => id)
+          ).toEqual(['prod-2'])
+        })
+
+        it('starts over once the socket comes back again', async () => {
+          const loadStaleMetadataDescriptors = vi.fn()
+          const socket = await mountAfterDrop(loadStaleMetadataDescriptors)
+          await vi.advanceTimersByTimeAsync(1000)
+
+          emitSocketEvent(socket, 'disconnect', 'transport close')
+          emitSocketEvent(socket, 'connect')
+          await flushPromises()
+          await vi.advanceTimersByTimeAsync(1999)
+          expect(loadStaleMetadataDescriptors).not.toHaveBeenCalled()
+
+          await vi.advanceTimersByTimeAsync(1)
+          expect(loadStaleMetadataDescriptors).toHaveBeenCalledTimes(1)
+        })
+
+        // The store gives the read still running to the next catch-up.
+        it('reads again in one series once the socket comes back during a read', async () => {
+          let failRead
+          const read = new Promise((resolve, reject) => {
+            failRead = reject
+          })
+          const loadStaleMetadataDescriptors = vi
+            .fn()
+            .mockReturnValueOnce(read)
+            .mockResolvedValue()
+          const { socket } = await mountApp({
+            actions: {
+              loadStaleMetadataDescriptors,
+              refreshProcessingPreviewFiles,
+              resyncMetadataDescriptors: vi
+                .fn()
+                .mockRejectedValueOnce(error)
+                .mockReturnValue(read)
+            },
+            getters: { currentProduction: () => production.value }
+          })
+          emitSocketEvent(socket, 'disconnect', 'transport close')
+          emitSocketEvent(socket, 'connect')
+          await flushPromises()
+          await vi.advanceTimersByTimeAsync(2000)
+          expect(loadStaleMetadataDescriptors).toHaveBeenCalledTimes(1)
+
+          emitSocketEvent(socket, 'disconnect', 'transport close')
+          emitSocketEvent(socket, 'connect')
+          failRead(error)
+          await flushPromises()
+          await vi.advanceTimersByTimeAsync(64000)
+
+          expect(loadStaleMetadataDescriptors).toHaveBeenCalledTimes(2)
+        })
+
+        // A production deleted, or out of reach, answers the same each time.
+        it('reads no more a production Zou no longer serves', async () => {
+          const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+          const missing = Object.assign(new Error('Not Found'), {
+            status: 404
+          })
+          errors.markRequestFailure(missing)
+          const loadStaleMetadataDescriptors = vi.fn()
+
+          await mountAfterDrop(loadStaleMetadataDescriptors, missing)
+          await vi.advanceTimersByTimeAsync(64000)
+
+          expect(loadStaleMetadataDescriptors).not.toHaveBeenCalled()
+          expect(consoleError).toHaveBeenCalledWith(missing)
+        })
+
+        it('leaves a bug in the catch-up to Sentry', async () => {
+          const bug = new TypeError('Cannot read properties of undefined')
+          const loadStaleMetadataDescriptors = vi.fn()
+
+          const rejections = await recordUnhandledRejections(() =>
+            mountAfterDrop(loadStaleMetadataDescriptors, bug)
+          )
+          await vi.advanceTimersByTimeAsync(64000)
+
+          expect(rejections).toEqual([bug])
+          expect(loadStaleMetadataDescriptors).not.toHaveBeenCalled()
+        })
+      })
     })
 
     // The record may be deleted, or the network down, by the time it
@@ -803,7 +1084,7 @@ describe('App', () => {
             metadata_descriptor_id: 'descriptor-1'
           },
           action: 'refreshMetadataDescriptor',
-          payload: 'descriptor-1',
+          payload: { productionId: 'prod-1', descriptorId: 'descriptor-1' },
           getters: { currentProduction }
         },
         {
@@ -813,7 +1094,7 @@ describe('App', () => {
             metadata_descriptor_id: 'descriptor-1'
           },
           action: 'refreshMetadataDescriptor',
-          payload: 'descriptor-1',
+          payload: { productionId: 'prod-1', descriptorId: 'descriptor-1' },
           getters: { currentProduction }
         },
         {
@@ -1341,6 +1622,7 @@ describe('App', () => {
     it('follows the type of the current production', async () => {
       const production = ref({ id: 'production-1', production_style: 'nft' })
       await mountApp({
+        actions: { loadStaleMetadataDescriptors: () => Promise.resolve() },
         getters: {
           currentProduction: () => production.value,
           user: () => ({ id: 'user-1', locale: 'en_US' })

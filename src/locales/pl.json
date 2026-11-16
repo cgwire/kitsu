@@ -1618,6 +1618,7 @@
         "add_new_values": "Obecnie brak dostępnych wartości.",
         "available_values": "Dostępne wartości",
         "built_in_name": "Ta nazwa jest już używana przez wbudowane pole.",
+        "taken_name": "Inna kolumna używa już tej nazwy.",
         "boolean": "Pole wyboru",
         "checklist": "Lista kontrolna",
         "choices": "Lista wartości",

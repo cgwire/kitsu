@@ -1167,6 +1167,7 @@
         "add_new_values": "Der er i øjeblikket ingen tilgængelige værdier.",
         "available_values": "Tilgængelige værdier",
         "built_in_name": "Et indbygget felt bruger allerede dette navn.",
+        "taken_name": "En anden kolonne bruger allerede dette navn.",
         "choices": "Liste over værdier",
         "delete_asset_text": "Er du sikker på, at du vil slette denne kolonne og relaterede data for alle assets i denne produktion?",
         "delete_edit_text": "Er du sikker på, at du vil slette denne kolonne og relaterede data for alle montager i denne produktion?",

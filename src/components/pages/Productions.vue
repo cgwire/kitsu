@@ -76,6 +76,7 @@
       :descriptor-to-edit="descriptorToEdit"
       :is-loading="loading.addMetadata"
       :is-error="errors.addMetadata"
+      :taken-name="errors.takenMetadataName"
       entity-type="Project"
       @cancel="onCancelAddProjectMetadata"
       @confirm="confirmAddProjectMetadata"
@@ -95,9 +96,19 @@
 
 <script setup>
 import { useHead } from '@unhead/vue'
-import { computed, reactive, ref } from 'vue'
+import {
+  computed,
+  getCurrentInstance,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
+
+import { isTakenDescriptorNameError } from '@/lib/descriptors'
+import { logRequestFailure } from '@/lib/errors'
 
 import ProductionList from '@/components/lists/ProductionList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
@@ -111,8 +122,16 @@ import SearchField from '@/components/widgets/SearchField.vue'
 
 const { t } = useI18n()
 const store = useStore()
+const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
 // State
+
+// Zou sends a column event per production for a column of all of them: one
+// listing follows them.
+const RELIST_DELAY = 500
+// The listing sent last, or the next one, which waits for it.
+let productionsListing = null
+let relistTimer = null
 
 const metadataDisplayHeaders = ref({})
 const descriptorToEdit = ref(null)
@@ -127,7 +146,8 @@ const errors = reactive({
   addMetadata: false,
   deleteProjectMetadata: false,
   del: false,
-  edit: false
+  edit: false,
+  takenMetadataName: ''
 })
 
 const loading = reactive({
@@ -280,22 +300,24 @@ const onProjectMetadataChanged = async ({ entry, descriptor, value }) => {
   try {
     // Productions created after the column was added don't own their copy of
     // the descriptor row yet (Zou stores one per project): create it first.
-    await store.dispatch('ensureProjectMetadataDescriptor', {
+    // A rename made elsewhere may have given that copy another field name.
+    const owned = await store.dispatch('ensureProjectMetadataDescriptor', {
       production: entry,
       descriptor
     })
     await store.dispatch('editProduction', {
       id: entry.id,
-      data: { [descriptor.field_name]: value }
+      data: { [(owned || descriptor).field_name]: value }
     })
   } catch (err) {
-    console.error(err)
+    logRequestFailure(err)
   }
 }
 
 // Close leaves the error of the last save: opening drops it.
 const onAddProjectMetadata = () => {
   errors.addMetadata = false
+  errors.takenMetadataName = ''
   descriptorToEdit.value = null
   modals.isAddProjectMetadata = true
 }
@@ -304,6 +326,7 @@ const onEditProjectMetadata = fieldName => {
   const d = findFirstProjectDescriptorByFieldName(fieldName)
   if (!d) return
   errors.addMetadata = false
+  errors.takenMetadataName = ''
   descriptorToEdit.value = { ...d }
   modals.isAddProjectMetadata = true
 }
@@ -323,7 +346,10 @@ const onCancelDeleteProjectMetadata = () => {
   fieldNameForDeleteMetadata.value = null
 }
 
+// Zou refuses the name sent, which the modal may have closed on since.
 const confirmAddProjectMetadata = form => {
+  const { name } = form
+  const opening = descriptorToEdit.value
   loading.addMetadata = true
   errors.addMetadata = false
   const payload = { ...form, entity_type: 'Project' }
@@ -339,8 +365,14 @@ const confirmAddProjectMetadata = form => {
       descriptorToEdit.value = null
     })
     .catch(err => {
-      console.error(err)
-      errors.addMetadata = true
+      if (isTakenDescriptorNameError(err)) {
+        if (descriptorToEdit.value === opening) {
+          errors.takenMetadataName = name
+        }
+      } else {
+        console.error(err)
+        errors.addMetadata = true
+      }
     })
     .finally(() => {
       loading.addMetadata = false
@@ -380,9 +412,47 @@ const toggleStats = async () => {
   loading.stats = false
 }
 
+// A column created or changed, by this tab too (Zou names no author), marks
+// a production off screen without reading its columns, while the current one
+// reads it at once: the productions are listed again, with their Project
+// columns and values, the rows shown kept until the answer.
+const listProductionsAgain = () => {
+  clearTimeout(relistTimer)
+  relistTimer = setTimeout(() => {
+    productionsListing = productionsListing
+      .catch(() => {})
+      .then(() => store.dispatch('loadProductions', { isQuiet: true }))
+      .catch(logRequestFailure)
+  }, RELIST_DELAY)
+}
+
+const socketEvents = {
+  'metadata-descriptor:new': listProductionsAgain,
+  'metadata-descriptor:update': listProductionsAgain
+}
+
 // Lifecycle
 
-store.dispatch('loadProductions')
+productionsListing = store.dispatch('loadProductions')
+
+// Zou sends no event again for the changes made while the socket was down.
+// The manager of the socket announces each reconnection, a drop that began
+// before the page opened included, and a first connection only when it took
+// several tries.
+onMounted(() => {
+  Object.entries(socketEvents).forEach(([event, handler]) =>
+    socket.on(event, handler)
+  )
+  socket.io.on('reconnect', listProductionsAgain)
+})
+
+onBeforeUnmount(() => {
+  clearTimeout(relistTimer)
+  Object.entries(socketEvents).forEach(([event, handler]) =>
+    socket.off(event, handler)
+  )
+  socket.io.off('reconnect', listProductionsAgain)
+})
 
 // Head
 

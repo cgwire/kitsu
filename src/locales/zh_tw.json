@@ -1167,6 +1167,7 @@
         "add_new_values": "目前沒有可用值。",
         "available_values": "可用值",
         "built_in_name": "此名稱已被內建欄位使用。",
+        "taken_name": "其他欄位已使用此名稱。",
         "choices": "值列表",
         "delete_asset_text": "您確定要刪除此欄位，以及此製作項目所有資產的相關資料嗎？",
         "delete_edit_text": "您確定要刪除此欄位，以及此製作項目所有剪輯的相關資料嗎？",

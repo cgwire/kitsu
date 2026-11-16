@@ -262,7 +262,35 @@ export const getDescriptorFieldName = name =>
     .replace(/[^\p{L}\p{N}]+/gu, '_')
     .replace(/^_|_$/g, '')
 
+// python-slugify also spells other characters in Latin letters (€ as "eur",
+// ß as "ss", Cyrillic letters, the combining ones after U+0362), turns the
+// combining marks from U+034F to U+035F into a separator, drops a comma
+// between two digits and a fullwidth apostrophe, and decodes HTML entities:
+// getDescriptorFieldName gives the field name of Zou only for a name with
+// none of them.
+export const isPlainDescriptorName = name => {
+  const text = name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u034e\u0360-\u0362]/g, '')
+  return (
+    /^[\x20-\x7e]*$/.test(text) &&
+    !name.includes('\uff07') &&
+    !/\d,\d/.test(text) &&
+    !/&#?\w+;/.test(text)
+  )
+}
+
 // Project and task columns store their values out of the entity data.
 export const isBuiltInFieldName = (entityType, fieldName) =>
   !['Project', 'Task'].includes(entityType) &&
   BUILT_IN_DATA_FIELDS.includes(fieldName)
+
+// Zou answers "Metadata descriptor already exists." to a name another column
+// holds, as its name or as its field name.
+export const isTakenDescriptorNameError = err =>
+  /already exists/i.test(err?.body?.message ?? '')
+
+// Zou answers "Metadata descriptor name is used by a built-in field." to a
+// name whose field name is the key of a built-in field of the entity data.
+export const isBuiltInDescriptorNameError = err =>
+  /built-in field/i.test(err?.body?.message ?? '')
