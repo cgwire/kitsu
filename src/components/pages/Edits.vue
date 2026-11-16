@@ -154,7 +154,7 @@
       :is-loading="loading.deleteMetadata"
       :is-error="errors.deleteMetadata"
       @cancel="modals.isDeleteMetadataDisplayed = false"
-      :text="$t('productions.metadata.delete_text')"
+      :text="$t('productions.metadata.delete_edit_text')"
       :error-text="$t('productions.metadata.delete_error')"
       @confirm="confirmDeleteMetadata"
     />

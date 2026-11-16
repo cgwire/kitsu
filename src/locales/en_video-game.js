@@ -136,6 +136,14 @@ export default {
       'shots': 'Maps',
       'sequences': 'Levels'
     },
+    metadata: {
+      delete_episode_text:
+        'Are you sure you want to delete this column and related data for all chapters of this production?',
+      delete_sequence_text:
+        'Are you sure you want to delete this column and related data for all levels of this production?',
+      delete_shot_text:
+        'Are you sure you want to delete this column and related data for all maps of this production?'
+    },
     type: {
       shots: 'Only maps'
     },

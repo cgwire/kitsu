@@ -10,6 +10,7 @@ import ImportModal from '@/components/modals/ImportModal.vue'
 import Assets from '@/components/pages/Assets.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import en from '@/locales/en'
 import fr from '@/locales/fr.json'
 
 import {
@@ -429,5 +430,23 @@ describe('Assets page, saved searches', () => {
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('save', 'props')
 
     expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('props')
+  })
+})
+
+describe('Assets page, column delete', () => {
+  test('names the assets in its confirmation', async () => {
+    const { wrapper } = await mountEntityPage(Assets, { listName: 'AssetList' })
+
+    await wrapper
+      .findComponent({ name: 'AssetList' })
+      .vm.$emit('delete-metadata', 'descriptor-1')
+
+    const texts = wrapper
+      .findAllComponents(DeleteModal)
+      .filter(modal => modal.props('active'))
+      .map(modal => modal.props('text'))
+    expect(texts).toEqual(['productions.metadata.delete_asset_text'])
+    // The $t mock echoes the key: en.js must hold it.
+    expect(en.productions.metadata.delete_asset_text).toEqual(expect.any(String))
   })
 })

@@ -1169,8 +1169,12 @@
         "built_in_name": "Un champ intégré utilise déjà ce nom.",
         "choices": "Liste de valeurs",
         "delete_task_text": "Êtes-vous sûr de vouloir supprimer cette colonne et les données associées pour toutes les tâches de ce type de tâche ?",
-        "delete_text": "Êtes-vous sûr de vouloir supprimer cette colonne et toutes les données liées ?",
-        "delete_list_column_text": "Cela retirera la colonne « {name} » de toutes les productions, y compris les valeurs enregistrées. Continuer ?",
+        "delete_asset_text": "Êtes-vous sûr de vouloir supprimer cette colonne et les données associées pour tous les assets de cette production ?",
+        "delete_edit_text": "Êtes-vous sûr de vouloir supprimer cette colonne et les données associées pour tous les montages de cette production ?",
+        "delete_episode_text": "Êtes-vous sûr de vouloir supprimer cette colonne et les données associées pour tous les épisodes de cette production ?",
+        "delete_sequence_text": "Êtes-vous sûr de vouloir supprimer cette colonne et les données associées pour toutes les séquences de cette production ?",
+        "delete_shot_text": "Êtes-vous sûr de vouloir supprimer cette colonne et les données associées pour tous les plans de cette production ?",
+        "delete_list_column_text": "Cela retirera la colonne « {name} » de toutes les productions ouvertes, y compris les valeurs enregistrées. Continuer ?",
         "delete_error": "Une erreur est survenue en supprimant une colonne de métadonnées.",
         "error": "Une erreur est survenue en ajoutant la colonne de métadonnées. Assurez-vous qu'aucune colonne ne porte le même nom et que les champs sont bien renseignés. Si le problème persiste, contactez notre support.",
         "title": "Ajouter une colonne de métadonnées",
@@ -1184,7 +1188,7 @@
         "textarea": "Texte long",
         "person": "Personne",
         "tags": "Liste des étiquettes",
-        "applies_to_all_projects": "Cette colonne est ajoutée à toutes les productions de la liste. Chaque production peut avoir sa propre valeur dans la vue en liste."
+        "applies_to_all_projects": "Cette colonne est ajoutée à toutes les productions ouvertes. Chaque production peut avoir sa propre valeur dans la vue en liste."
       },
       "status": {
         "closed": "Fermé",

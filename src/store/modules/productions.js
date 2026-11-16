@@ -902,16 +902,16 @@ const actions = {
   },
 
   /**
-   * Create the same Project-entity metadata descriptor on every production in
-   * the list (Zou still stores one row per project; this mirrors a studio-wide
-   * column in the all-projects view).
+   * Create the same Project-entity metadata descriptor on every open
+   * production (Zou still stores one row per project; this mirrors a
+   * studio-wide column in the all-projects view).
    */
   async addProjectMetadataDescriptorToAllProductions(
     { commit, state },
     descriptor
   ) {
-    // Drop projectId — one request applies the column to every accessible
-    // project server-side, skipping those that already own it.
+    // Drop projectId: one request applies the column to every accessible
+    // open project server-side, skipping those that already own it.
     // eslint-disable-next-line no-unused-vars
     const { projectId, ...toSend } = descriptor
     const created =

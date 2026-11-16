@@ -113,7 +113,7 @@
       :active="modals.isDeleteMetadataDisplayed"
       :is-loading="loading.deleteMetadata"
       :is-error="errors.deleteMetadata"
-      :text="$t('productions.metadata.delete_text')"
+      :text="$t('productions.metadata.delete_episode_text')"
       :error-text="$t('productions.metadata.delete_error')"
       @cancel="modals.isDeleteMetadataDisplayed = false"
       @confirm="confirmDeleteMetadata"

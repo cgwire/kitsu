@@ -171,7 +171,7 @@
       :active="modals.isDeleteMetadataDisplayed"
       :is-loading="loading.deleteMetadata"
       :is-error="errors.deleteMetadata"
-      :text="$t('productions.metadata.delete_text')"
+      :text="$t('productions.metadata.delete_asset_text')"
       :error-text="$t('productions.metadata.delete_error')"
       @confirm="confirmDeleteMetadata"
       @cancel="modals.isDeleteMetadataDisplayed = false"

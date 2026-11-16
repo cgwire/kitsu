@@ -1363,7 +1363,7 @@ describe('Productions store', () => {
 
       // A confirmation left open across a production switch sends the column
       // of the previous production, and Zou answers 404 for it too. A closed
-      // production opened from a link is in the map only.
+      // production opened from a link is not among the open productions.
       test('keeps a column of another production', async () => {
         const other = { id: '456', descriptors: [] }
         state.currentProduction = other

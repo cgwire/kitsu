@@ -4,6 +4,7 @@ import { nextTick, ref } from 'vue'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import DeleteModal from '@/components/modals/DeleteModal.vue'
 import ImportEdlModal from '@/components/modals/ImportEdlModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
@@ -471,5 +472,23 @@ describe('Shots page, saved searches', () => {
     await nextTick()
 
     expect(searchField(wrapper).props('canSave')).toBe(false)
+  })
+})
+
+describe('Shots page, column delete', () => {
+  test('names the shots in its confirmation', async () => {
+    const { wrapper } = await mountPage()
+
+    await wrapper
+      .findComponent({ name: 'ShotList' })
+      .vm.$emit('delete-metadata', 'descriptor-1')
+
+    const texts = wrapper
+      .findAllComponents(DeleteModal)
+      .filter(modal => modal.props('active'))
+      .map(modal => modal.props('text'))
+    expect(texts).toEqual(['productions.metadata.delete_shot_text'])
+    // The $t mock echoes the key: en.js must hold it.
+    expect(en.productions.metadata.delete_shot_text).toEqual(expect.any(String))
   })
 })

@@ -1671,7 +1671,7 @@ export default {
 
     metadata: {
       applies_to_all_projects:
-        'This column is added to every production in the list. Each production can have its own value in the list view.',
+        'This column is added to every open production. Each production can have its own value in the list view.',
       add_new_values: 'There are currently no available values.',
       available_values: 'Available values',
       boolean: 'Checkbox',
@@ -1680,10 +1680,19 @@ export default {
       choices: 'List of values',
       date: 'Date',
       delete_list_column_text:
-        'This will remove the column “{name}” from all productions, including stored values. Continue?',
+        'This will remove the column “{name}” from all open productions, including stored values. Continue?',
       delete_task_text:
         'Are you sure you want to delete this column and related data for all tasks of this task type?',
-      delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
+      delete_asset_text:
+        'Are you sure you want to delete this column and related data for all assets of this production?',
+      delete_edit_text:
+        'Are you sure you want to delete this column and related data for all edits of this production?',
+      delete_episode_text:
+        'Are you sure you want to delete this column and related data for all episodes of this production?',
+      delete_sequence_text:
+        'Are you sure you want to delete this column and related data for all sequences of this production?',
+      delete_shot_text:
+        'Are you sure you want to delete this column and related data for all shots of this production?',
       delete_error: 'An error occurred while deleting this metadata column.',
       edit_title: 'Edit metadata column',
       error: 'An error occurred while adding the metadata column. Make sure there is no column with a similar name and that all fields are filled. If the problem persists, please contact the support team.',
