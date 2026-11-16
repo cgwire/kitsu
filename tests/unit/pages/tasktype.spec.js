@@ -2284,3 +2284,117 @@ describe('TaskType page, cell saves', () => {
     wrapper.unmount()
   })
 })
+
+// The schedules of the page: the rows of the people around their bars.
+describe('TaskType page, schedule bars', () => {
+  // Monday 5 to Friday 9 October
+  const scheduleTask = {
+    id: 'task-2',
+    assignees: ['person-1'],
+    entity_id: 'asset-1',
+    entity_name: 'Chair',
+    estimation: 0,
+    start_date: '2026-10-05T00:00:00',
+    due_date: '2026-10-09T00:00:00',
+    task_status_id: 'status-1',
+    task_type_id: 'task-type-1'
+  }
+  const person = {
+    id: 'person-1',
+    first_name: 'Alice',
+    last_name: 'Smith',
+    full_name: 'Alice Smith'
+  }
+  const format = date => date.format('YYYY-MM-DD')
+  const span = bar => [format(bar.startDate), format(bar.endDate)]
+  // unmounted after each test, a failed one included
+  let wrapper = null
+
+  beforeEach(() => {
+    // the data load starts 100 ms after mounting, the schedule dates follow
+    // 200 ms after it
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    assetStore.cache.assetMap.set('asset-1', {
+      id: 'asset-1',
+      tasks: [scheduleTask.id]
+    })
+  })
+
+  afterEach(() => {
+    wrapper?.unmount()
+    wrapper = null
+    assetStore.cache.assetMap.delete('asset-1')
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  const mountSchedule = async (actions = {}) => {
+    const page = await mountPage({
+      section: 'schedule',
+      actions: {
+        loadProductionDaysOff: vi.fn(() => ({})),
+        loadProductionTimeSpents: vi.fn(() => ({})),
+        loadScheduleItems: vi.fn(() => [
+          {
+            id: 'schedule-item-1',
+            task_type_id: 'task-type-1',
+            start_date: '2026-10-01',
+            end_date: '2026-10-30'
+          }
+        ]),
+        saveScheduleItem: vi.fn(),
+        ...actions
+      },
+      getters: {
+        assetValidationColumns: () => [],
+        currentProduction: () => ({
+          id: 'production-1',
+          name: 'Production',
+          start_date: '2026-01-01',
+          end_date: '2026-12-31',
+          team: [person.id]
+        }),
+        personMap: () => new Map([[person.id, person]]),
+        taskMap: () => new Map([[scheduleTask.id, scheduleTask]]),
+        user: () => ({
+          id: 'manager-1',
+          departments: [],
+          full_name: 'Manager'
+        })
+      }
+    })
+    wrapper = page.wrapper
+    await vi.advanceTimersByTimeAsync(400)
+    await flushPromises()
+    return page
+  }
+
+  const findSchedule = () => wrapper.findComponent({ name: 'Schedule' })
+  const findRows = () => findSchedule().props('hierarchy')
+  const findBar = () =>
+    findRows()
+      .flatMap(row => row.children)
+      .find(bar => bar.id === 'task-2')
+  // the widget stamps where a change found the bar
+  const stamp = bar => {
+    bar._dragOrigStartDate = bar.startDate.clone()
+    bar._dragOrigEndDate = bar.endDate.clone()
+    bar._dragOrigEstimation = bar.estimation
+  }
+
+  // The row of a person spans their bars: the bars pointed to a copy of it,
+  // so a move re-spanned a row no one sees.
+  it('re-spans the row shown when one of its bars moves', async () => {
+    await mountSchedule()
+    const bar = findBar()
+    const row = findRows().find(({ id }) => id === person.id)
+    stamp(bar)
+    bar.startDate = bar.startDate.clone().add(7, 'days')
+    bar.endDate = bar.endDate.clone().add(7, 'days')
+
+    findSchedule().vm.$emit('item-changed', bar)
+    await flushPromises()
+
+    expect(span(row)).toEqual(['2026-10-12', '2026-10-16'])
+  })
+})

@@ -1861,13 +1861,13 @@ const buildPersonElement = (
     return data
   })
 
-  return {
-    ...personElement,
+  // the row its bars point to, which a move re-spans
+  return Object.assign(personElement, {
     children,
     startDate: minStartDate,
     endDate: maxEndDate,
     man_days: manDays
-  }
+  })
 }
 
 const getTaskElementColor = (task, endDate) => {
