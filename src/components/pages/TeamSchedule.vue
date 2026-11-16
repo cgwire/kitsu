@@ -87,6 +87,12 @@
         </div>
       </div>
 
+      <error-text
+        class="has-text-centered"
+        :text="scheduleSaveErrorText"
+        v-if="scheduleSaveErrorText"
+      />
+
       <div class="empty-schedule schedule-error" v-if="errors.schedule">
         <table-info is-error />
         <button-simple :text="$t('main.reload')" @click="init" />
@@ -283,6 +289,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { getBarOrigin, useScheduleSave } from '@/composables/scheduleSave'
 import colors from '@/lib/colors'
 import { getPersonPath } from '@/lib/path'
 import { getZoomOptions } from '@/lib/productionSchedule'
@@ -306,6 +313,7 @@ import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -320,6 +328,8 @@ const route = useRoute()
 const router = useRouter()
 const store = useStore()
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
+const { saveAssignment, saveBar, saveChange, scheduleSaveErrorText } =
+  useScheduleSave(bar => bar.name)
 
 // State
 // --------------------------------------------------------------------------
@@ -807,6 +817,33 @@ const onTaskDragEnd = () => {
   draggedTasks.value = []
 }
 
+// The tasks of a person row as Zou has them, after a refused reassignment
+// or drop: the widget had already moved the bar.
+const reloadPersonRow = async person => {
+  personTasksCache.delete(person.id)
+  if (!person.expanded) return
+  person.expanded = false
+  await expandPersonElement(person, element =>
+    scheduleRef.value?.refreshItemPositions(element)
+  )
+}
+
+// The person rows of the reassignments Zou refused: a drag reassigns as it
+// crosses the rows, and the rows come back from Zou once it is over.
+const rowsToReload = new Set()
+
+const reloadRefusedRows = () => {
+  const rows = [...rowsToReload]
+  rowsToReload.clear()
+  rows.forEach(reloadPersonRow)
+}
+
+const saveReassignment = async (task, person, save) => {
+  if (await saveAssignment(task, save)) return
+  rowsToReload.add(person)
+  if (!scheduleRef.value?.isEditingDates) reloadRefusedRows()
+}
+
 const onScheduleItemDropped = async (item, person, refreshScheduleCallBack) => {
   if (item.type === 'Task') {
     const task = buildTaskScheduleItem(person, item)
@@ -819,36 +856,43 @@ const onScheduleItemDropped = async (item, person, refreshScheduleCallBack) => {
     if (refreshScheduleCallBack) {
       refreshScheduleCallBack(person)
     }
-    try {
-      await store.dispatch('assignSelectedTasks', {
+    const isAssigned = await saveAssignment(task, () =>
+      store.dispatch('assignSelectedTasks', {
         personId: person.id,
         taskIds: [task.id]
       })
-      await saveTaskScheduleItem(task)
-      // the task left the backlog: update the panel locally instead of
-      // reloading it, which kept resetting the scroll and pagination
-      // (and multi-drop fires this handler once per task)
-      unassignedTasks.value = unassignedTasks.value.filter(
-        ({ id }) => id !== task.id
-      )
-      totalUnassignedTasks.value = Math.max(0, totalUnassignedTasks.value - 1)
-      if (selectedTaskIds.value.has(task.id)) {
-        const ids = new Set(selectedTaskIds.value)
-        ids.delete(task.id)
-        selectedTaskIds.value = ids
-      }
-    } catch (err) {
-      console.error(err)
+    )
+    if (!isAssigned) {
+      // refused, the task stays in the backlog
       person.children = person.children.filter(({ id }) => id !== task.id)
       if (refreshScheduleCallBack) {
         refreshScheduleCallBack(person)
       }
+      return
+    }
+    // the task left the backlog: update the panel locally instead of
+    // reloading it, which kept resetting the scroll and pagination
+    // (and multi-drop fires this handler once per task)
+    unassignedTasks.value = unassignedTasks.value.filter(
+      ({ id }) => id !== task.id
+    )
+    totalUnassignedTasks.value = Math.max(0, totalUnassignedTasks.value - 1)
+    if (selectedTaskIds.value.has(task.id)) {
+      const ids = new Set(selectedTaskIds.value)
+      ids.delete(task.id)
+      selectedTaskIds.value = ids
+    }
+    // refused, the task keeps the dates it had: as Zou has them
+    if (!(await saveChange(task, () => saveTaskScheduleItem(task)))) {
+      await reloadPersonRow(person)
     }
   }
 }
 
+// A bar whose save Zou refuses goes back where the widget found it.
 const onScheduleItemChanged = async item => {
   if (item.type === 'Task') {
+    const origin = getBarOrigin(item)
     item.startDate = addBusinessDays(
       item.startDate,
       0,
@@ -861,34 +905,45 @@ const onScheduleItemChanged = async item => {
         item.parentElement.daysOff
       )
     }
-    try {
-      await saveTaskScheduleItem(item)
+    const isSaved = await saveBar(item, () => saveTaskScheduleItem(item), {
+      origin,
+      onPutBack: putBackBar
+    })
+    if (isSaved) {
       refreshPersonRootDates(item.parentElement)
       personTasksCache.delete(item.parentElement.id)
-    } catch (err) {
-      console.error(err)
     }
   }
+}
+
+// a bar put back: its person row spans its bars again
+const putBackBar = bar => {
+  refreshPersonRootDates(bar.parentElement)
+  scheduleRef.value?.refreshItemPositions(bar.parentElement)
 }
 
 const onScheduleItemAssigned = (item, person) => {
   if (item.type === 'Task') {
     personTasksCache.delete(person.id)
     person.children.sort(childrenOrder)
-    store.dispatch('assignSelectedTasks', {
-      personId: person.id,
-      taskIds: [item.id]
-    })
+    saveReassignment(item, person, () =>
+      store.dispatch('assignSelectedTasks', {
+        personId: person.id,
+        taskIds: [item.id]
+      })
+    )
   }
 }
 
 const onScheduleItemUnassigned = (item, person) => {
   if (item.type === 'Task') {
     personTasksCache.delete(person.id)
-    store.dispatch('unassignPersonFromTask', {
-      person,
-      task: item
-    })
+    saveReassignment(item, person, () =>
+      store.dispatch('unassignPersonFromTask', {
+        person,
+        task: item
+      })
+    )
   }
 }
 
@@ -1017,6 +1072,14 @@ const onPreviewFileSetMain = eventData => {
 
 // Watchers
 // --------------------------------------------------------------------------
+
+// the rows of a refused reassignment wait for the drop
+watch(
+  () => scheduleRef.value?.isEditingDates,
+  isEditing => {
+    if (!isEditing && rowsToReload.size) reloadRefusedRows()
+  }
+)
 watch(selectedDepartment, value => {
   updateRoute({ department: value })
   clearHiddenSelectedPerson()

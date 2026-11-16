@@ -215,6 +215,21 @@ describe('useCellSave', () => {
     expect(console.error).toHaveBeenCalledTimes(2)
   })
 
+  // A confirmed move saves a thousand rows in batches, one after the other:
+  // a later batch going through keeps the refusals of an earlier one.
+  test('keeps the refusals of a grouped change past its later batches', async () => {
+    const { cellSaveErrorText, groupSaves, saveCell } = setup()
+
+    await groupSaves(async () => {
+      await saveCell(shot1, refuse)
+      await saveCell(shot2, accept)
+    })
+
+    expect(cellSaveErrorText.value).toBe(
+      'main.cell_save_error {"name":"SH010"}'
+    )
+  })
+
   test('tells the refusals of successive changes', async () => {
     const { cellSaveErrorText, saveCell } = setup()
 

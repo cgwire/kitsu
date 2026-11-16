@@ -1408,6 +1408,7 @@ const onRootEstimationChanged = (event, rootElement) => {
 const onChildEstimationChanged = (event, childElement, rootElement) => {
   const estimation = readEstimation(event, childElement)
   if (estimation === null) return
+  stampOrigin(childElement)
   if (props.isEstimationLinked) {
     childElement.man_days = estimation
     childElement.estimation = estimation
@@ -1727,17 +1728,22 @@ const changeEndDate = event => {
   }
 }
 
-// Origin dates (and estimation) are stamped at drag start so the clip can
-// restore-then-apply on every tick without drift and a cancelled move can
-// restore the exact pre-drag state. Only consumers that opt in through the
-// clipChildren prop get the stamping and the propagation: other schedules
-// (e.g. MainSchedule) do not persist child moves, so clipping there would
-// silently revert on reload.
-const stampDragOrigin = timeElement => {
-  if (!props.clipChildren) return
-  timeElement._dragOrigStartDate = timeElement.startDate.clone()
-  timeElement._dragOrigEndDate = timeElement.endDate.clone()
+// The dates and estimation a bar had as a drag or an estimation change
+// started: a page puts the bar back there when Zou refuses the change.
+const stampOrigin = timeElement => {
+  timeElement._dragOrigStartDate = timeElement.startDate?.clone()
+  timeElement._dragOrigEndDate = timeElement.endDate?.clone()
   timeElement._dragOrigEstimation = timeElement.estimation
+}
+
+// The origin is also what the clip restores-then-applies on every tick,
+// without drift, and what a cancelled move restores. Only consumers that opt
+// in through the clipChildren prop get the stamping of the rows under the bar
+// and the propagation: other schedules do not persist child moves, so
+// clipping there would silently revert on reload.
+const stampDragOrigin = timeElement => {
+  stampOrigin(timeElement)
+  if (!props.clipChildren) return
   timeElement._dragShifted = !isShiftDrag && isChangeDates.value
   stampSubItems(timeElement)
 }
@@ -1747,6 +1753,7 @@ const stampSubItems = item => {
     if (!child.startDate || !child.endDate) return
     child._dragOrigStartDate = child.startDate.clone()
     child._dragOrigEndDate = child.endDate.clone()
+    child._dragOrigEstimation = child.estimation
     stampSubItems(child)
   })
 }

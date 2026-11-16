@@ -75,6 +75,19 @@ export const useCellSave = (
     return true
   }
 
+  // The saves run makes belong to one change, even in batches one after
+  // the other: a later batch going through keeps the refusals of an
+  // earlier one.
+  const groupSaves = async run => {
+    if (nbPendingSaves === 0) change += 1
+    nbPendingSaves += 1
+    try {
+      return await run()
+    } finally {
+      nbPendingSaves -= 1
+    }
+  }
+
   // A change of production or episode keeps the list mounted: the topbar
   // keeps the page, and on Person and My Checks it only writes the query. The
   // message is about the former list, even when one of its rows stays shown.
@@ -90,5 +103,5 @@ export const useCellSave = (
     }
   )
 
-  return { cellSaveErrorText, saveCell }
+  return { cellSaveErrorText, groupSaves, saveCell }
 }

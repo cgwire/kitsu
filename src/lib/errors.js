@@ -1,5 +1,6 @@
 // The failures of the requests sent through the API client, which reports
-// them on its own.
+// them on its own, and the refusals Zou answers with a 200, such as a task
+// left out of the answer to an assignment.
 const requestFailures = new WeakSet()
 
 export const markRequestFailure = err => {
@@ -9,7 +10,8 @@ export const markRequestFailure = err => {
 export const isRequestFailure = err => requestFailures.has(err)
 
 // Ends a promise chain nobody else waits on: a failed request is already
-// reported, anything else is a bug that must stay unhandled for Sentry.
+// reported, a refusal Zou answered with a 200 is no bug, and anything else
+// is one, which must stay unhandled for Sentry.
 export const logRequestFailure = err => {
   if (!isRequestFailure(err)) throw err
   console.error(err)

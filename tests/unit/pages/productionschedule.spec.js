@@ -22,9 +22,12 @@ vi.mock('exceljs', () => {
     })
   return { default: { Workbook: function () { return anything() } } }
 })
+// the parameters of a message show in its text
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
-  useI18n: () => ({ t: key => key })
+  useI18n: () => ({
+    t: (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key)
+  })
 }))
 
 // Pre-load the real store to avoid circular-import race from child components.
@@ -46,11 +49,13 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import ProgressBar from '@/components/widgets/ProgressBar.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
+import { buildRefusal } from '../fixtures/refusal'
 import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
 
 // The page is driven through what it renders and what it calls: the
@@ -194,6 +199,7 @@ const mountPage = async ({
     loadTasks: vi.fn(() => []),
     loadTasksFromScheduleVersion: vi.fn(() => []),
     saveScheduleItem: vi.fn(),
+    unassignPersonFromTask: vi.fn(),
     unassignSelectedTasks: vi.fn(),
     updateScheduleVersionedTask: vi.fn(),
     updateTask: vi.fn(),
@@ -243,6 +249,8 @@ const mountPage = async ({
   const scheduleWidget = {
     name: 'Schedule',
     props: { hierarchy: { type: Array, default: () => [] } },
+    // true from the press on a bar to its drop
+    data: () => ({ isEditingDates: false }),
     template: '<div />',
     methods: {
       applyMoveToLoadedRows: vi.fn(),
@@ -268,6 +276,7 @@ const mountPage = async ({
 }
 
 const findSchedule = wrapper => wrapper.findComponent({ name: 'Schedule' })
+const findSaveError = wrapper => wrapper.findComponent(ErrorText)
 const rowsOf = wrapper => findSchedule(wrapper).props('hierarchy')
 const rowNames = wrapper => rowsOf(wrapper).map(row => row.name)
 const payloadsOf = action => action.mock.calls.map(([, payload]) => payload)
@@ -1101,7 +1110,212 @@ describe('ProductionSchedule page', () => {
       )
     })
 
-    it('logs a failed save of a production date', async () => {
+    // The field of the toolbar stays across a production switch, while the
+    // saves and the refusals belong to one production.
+    describe('across productions', () => {
+      const secondProduction = {
+        ...production,
+        id: 'production-2',
+        name: 'Second Production',
+        start_date: '2025-06-02'
+      }
+      const startField = wrapper => toolbarDateFields(wrapper)[0]
+      const shownStart = wrapper =>
+        moment.utc(startField(wrapper).props('modelValue')).format('YYYY-MM-DD')
+      const pick = async (wrapper, date) => {
+        startField(wrapper).vm.$emit(
+          'update:model-value',
+          new Date(`${date}T00:00:00Z`)
+        )
+        await flushPromises()
+      }
+      const settle = async () => {
+        for (let index = 0; index < 20; index++) await flushPromises()
+      }
+      const switchProduction = async store => {
+        store.commit('SET_PRODUCTION', secondProduction)
+        await waitForLoad()
+      }
+
+      beforeEach(() => {
+        vi.spyOn(console, 'error').mockImplementation(() => {})
+      })
+
+      // refused twice, then taken: a loop must not hang the run
+      const refuseTwice = () => {
+        let nbCalls = 0
+        return vi.fn(() => {
+          nbCalls += 1
+          return nbCalls <= 2
+            ? Promise.reject(buildRefusal(500))
+            : Promise.resolve()
+        })
+      }
+
+      it('shows the date of the production switched to after a refusal', async () => {
+        const editProduction = refuseTwice()
+        const { store, wrapper } = await mountPage({
+          actions: { editProduction }
+        })
+        await pick(wrapper, '2026-01-15')
+        await settle()
+        await switchProduction(store)
+
+        await pick(wrapper, '2025-07-01')
+        await settle()
+
+        expect(shownStart(wrapper)).toBe('2025-06-02')
+        expect(payloadsOf(editProduction)).toEqual([
+          { id: 'production-1', start_date: '2026-01-15' },
+          { id: 'production-2', start_date: '2025-07-01' }
+        ])
+      })
+
+      it('sends no save again when a production keeps refusing', async () => {
+        let nbCalls = 0
+        // capped: a loop must not hang the run
+        const editProduction = vi.fn(() => {
+          nbCalls += 1
+          return nbCalls <= 8
+            ? Promise.reject(buildRefusal(403))
+            : Promise.resolve()
+        })
+        const { store, wrapper } = await mountPage({
+          actions: { editProduction }
+        })
+        await pick(wrapper, '2026-01-15')
+        await settle()
+        await switchProduction(store)
+
+        await pick(wrapper, '2025-07-01')
+        await settle()
+
+        expect(editProduction).toHaveBeenCalledTimes(2)
+      })
+
+      it('keeps the save of a production left out of the next one', async () => {
+        const held = []
+        const editProduction = vi.fn(
+          () => new Promise((resolve, reject) => held.push({ resolve, reject }))
+        )
+        const { store, wrapper } = await mountPage({
+          actions: { editProduction }
+        })
+        await pick(wrapper, '2026-01-15')
+        await switchProduction(store)
+        await pick(wrapper, '2025-07-01')
+
+        held[0].resolve()
+        await settle()
+        held[1].reject(buildRefusal(500))
+        await settle()
+
+        expect(shownStart(wrapper)).toBe('2025-06-02')
+      })
+
+      // The refusal on the second production comes before the answer on
+      // the first.
+      it('puts back the date of the production switched to, its refusal first', async () => {
+        const held = []
+        const editProduction = vi.fn(
+          () => new Promise((resolve, reject) => held.push({ resolve, reject }))
+        )
+        const { store, wrapper } = await mountPage({
+          actions: { editProduction }
+        })
+        await pick(wrapper, '2026-01-15')
+        await switchProduction(store)
+        await pick(wrapper, '2025-07-01')
+
+        held[1].reject(buildRefusal(500))
+        await settle()
+        held[0].resolve()
+        await settle()
+
+        expect(shownStart(wrapper)).toBe('2025-06-02')
+      })
+
+      // Another session moved the date while the save was pending: the field
+      // shows its date, which the watcher does not save again.
+      it('puts back the date another session set during the save', async () => {
+        let refuse
+        const editProduction = vi.fn(
+          () =>
+            new Promise((resolve, reject) => {
+              refuse = () => reject(buildRefusal(403))
+            })
+        )
+        const { store, wrapper } = await mountPage({
+          actions: { editProduction }
+        })
+        await pick(wrapper, '2026-01-15')
+        // project:update reloads the production
+        store.commit('SET_PRODUCTION', {
+          ...production,
+          start_date: '2026-02-02'
+        })
+
+        refuse()
+        await settle()
+
+        expect(shownStart(wrapper)).toBe('2026-02-02')
+        expect(editProduction).toHaveBeenCalledTimes(1)
+      })
+
+      // project:update reloads the production in place
+      it('puts back the date another session set meanwhile', async () => {
+        const editProduction = refuseTwice()
+        const { store, wrapper } = await mountPage({
+          actions: { editProduction }
+        })
+        await pick(wrapper, '2026-01-15')
+        await settle()
+        store.commit('SET_PRODUCTION', {
+          ...production,
+          start_date: '2026-02-02'
+        })
+        await waitForLoad()
+
+        await pick(wrapper, '2026-03-03')
+        await settle()
+
+        expect(shownStart(wrapper)).toBe('2026-02-02')
+        expect(editProduction).toHaveBeenCalledTimes(2)
+      })
+    })
+
+    // Two dates picked before the first answer: the field shows what Zou
+    // took.
+    it('keeps the production date Zou took after an overlapping refusal', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const settles = []
+      const { wrapper } = await mountPage({
+        actions: {
+          editProduction: vi.fn(
+            () =>
+              new Promise((resolve, reject) => {
+                settles.push({ resolve, reject })
+              })
+          )
+        }
+      })
+      const endField = () => toolbarDateFields(wrapper)[1]
+
+      endField().vm.$emit('update:model-value', new Date('2026-11-27T00:00:00Z'))
+      await flushPromises()
+      endField().vm.$emit('update:model-value', new Date('2026-11-30T00:00:00Z'))
+      await flushPromises()
+      settles[0].reject(buildRefusal(403))
+      await flushPromises()
+      settles[1].resolve()
+      await flushPromises()
+
+      expect(
+        moment.utc(endField().props('modelValue')).format('YYYY-MM-DD')
+      ).toBe('2026-11-30')
+    })
+
+    it('puts back a production date whose save fails, and says so', async () => {
       const consoleError = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {})
@@ -1121,6 +1335,13 @@ describe('ProductionSchedule page', () => {
 
       expect(rejections).toEqual([])
       expect(consoleError).toHaveBeenCalledWith(failure)
+      expect(
+        moment.utc(toolbarDateFields(wrapper)[1].props('modelValue'))
+          .format('YYYY-MM-DD')
+      ).toBe(production.end_date)
+      expect(findSaveError(wrapper).props('text')).toBe(
+        `main.cell_save_error {"name":"${production.name}"}`
+      )
     })
   })
 
@@ -1537,6 +1758,330 @@ describe('ProductionSchedule page', () => {
           }
         }
       ])
+    })
+  })
+
+  // A bar whose change Zou refuses goes back where the drag found it, and a
+  // line under the toolbar says so.
+  describe('refused changes', () => {
+    const refuse = () => vi.fn(() => Promise.reject(buildRefusal(403)))
+    const datesOf = bar => [format(bar.startDate), format(bar.endDate)]
+
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    // Moved by the widget from Monday 9 to Monday 16 February.
+    const buildMovedTask = (parentElement, id = 'task-1', name = 'Chair') => ({
+      type: 'Task',
+      id,
+      entity: { name },
+      assignees: ['person-1'],
+      estimation: 8 * 60,
+      startDate: day('2026-02-16'),
+      endDate: day('2026-02-16'),
+      _dragOrigStartDate: day('2026-02-09'),
+      _dragOrigEndDate: day('2026-02-09'),
+      _dragOrigEstimation: 8 * 60,
+      parentElement
+    })
+
+    const buildEntityRow = taskTypeBar => ({
+      id: 'bar-props',
+      name: 'Props',
+      start_date: '2026-02-02',
+      end_date: '2026-02-27',
+      startDate: day('2026-02-02'),
+      endDate: day('2026-02-27'),
+      parentElement: taskTypeBar
+    })
+
+    it('puts back a task whose move Zou refuses, and says so', async () => {
+      const { scheduleWidget, wrapper } = await mountPage({
+        actions: { updateTask: refuse() }
+      })
+      const entityRow = buildEntityRow(rowsOf(wrapper)[0])
+      const task = buildMovedTask(entityRow)
+
+      await changeItem(wrapper, task)
+
+      expect(datesOf(task)).toEqual(['2026-02-09', '2026-02-09'])
+      expect(findSaveError(wrapper).props('text')).toBe(
+        'main.cell_save_error {"name":"Chair"}'
+      )
+      expect(findSaveError(wrapper).classes()).toContain('has-text-centered')
+      expect(scheduleWidget.methods.refreshItemPositions).toHaveBeenCalledWith(
+        entityRow
+      )
+      expect(console.error).toHaveBeenCalled()
+    })
+
+    it('puts back a row whose move Zou refuses, and its task type bar', async () => {
+      const { wrapper } = await mountPage({
+        actions: { saveScheduleItem: refuse() }
+      })
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const taskTypeDates = datesOf(taskTypeBar)
+      const movedRow = {
+        ...buildEntityRow(taskTypeBar),
+        startDate: day('2026-04-01'),
+        endDate: day('2026-04-10'),
+        _dragOrigStartDate: day('2026-02-02'),
+        _dragOrigEndDate: day('2026-02-11')
+      }
+      taskTypeBar.children = [movedRow]
+
+      await changeItem(wrapper, movedRow)
+
+      expect(datesOf(movedRow)).toEqual(['2026-02-02', '2026-02-11'])
+      expect([movedRow.start_date, movedRow.end_date]).toEqual([
+        '2026-02-02',
+        '2026-02-11'
+      ])
+      expect(datesOf(taskTypeBar)).toEqual(taskTypeDates)
+      expect(findSaveError(wrapper).props('text')).toBe('main.cells_save_error')
+    })
+
+    // A confirmed move saves a thousand tasks: one refused, the others still
+    // move.
+    it('saves the other tasks of a confirmed move when one is refused', async () => {
+      const { storeActions, wrapper } = await mountPage({
+        actions: {
+          updateTask: vi.fn((_, { taskId }) =>
+            taskId === 'task-2'
+              ? Promise.reject(buildRefusal(403))
+              : Promise.resolve()
+          )
+        }
+      })
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedRow = {
+        ...buildEntityRow(taskTypeBar),
+        _dragOrigStartDate: day('2026-01-26'),
+        _dragOrigEndDate: day('2026-02-20')
+      }
+      taskTypeBar.children = [movedRow]
+      const tasks = [
+        buildMovedTask(movedRow, 'task-1', 'Chair'),
+        buildMovedTask(movedRow, 'task-2', 'Lamp'),
+        buildMovedTask(movedRow, 'task-3', 'Table')
+      ]
+      movedRow.children = new Map([['person-1', tasks]])
+      await changeItem(wrapper, movedRow)
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(storeActions.updateTask).toHaveBeenCalledTimes(3)
+      expect(tasks.map(datesOf)).toEqual([
+        ['2026-02-16', '2026-02-16'],
+        ['2026-02-09', '2026-02-09'],
+        ['2026-02-16', '2026-02-16']
+      ])
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
+      expect(findSaveError(wrapper).props('text')).toBe(
+        'main.cell_save_error {"name":"Lamp"}'
+      )
+    })
+
+    // The row a confirmed move saves first, refused: the tasks it carried
+    // still save.
+    it('puts back the row of a confirmed move Zou refuses', async () => {
+      const { storeActions, wrapper } = await mountPage({
+        actions: { saveScheduleItem: refuse() }
+      })
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedRow = {
+        ...buildEntityRow(taskTypeBar),
+        startDate: day('2026-02-09'),
+        endDate: day('2026-03-06'),
+        _dragOrigStartDate: day('2026-02-02'),
+        _dragOrigEndDate: day('2026-02-27')
+      }
+      taskTypeBar.children = [movedRow]
+      const task = buildMovedTask(movedRow)
+      movedRow.children = new Map([['person-1', [task]]])
+      await changeItem(wrapper, movedRow)
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(datesOf(movedRow)).toEqual(['2026-02-02', '2026-02-27'])
+      expect(storeActions.updateTask).toHaveBeenCalledTimes(1)
+      expect(datesOf(task)).toEqual(['2026-02-16', '2026-02-16'])
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
+      expect(findSaveError(wrapper).props('text')).toBe(
+        'main.cell_save_error {"name":"Props"}'
+      )
+    })
+
+    // A confirmed move saves its tasks in batches of ten: a refusal in the
+    // first batch stays said after the second goes through.
+    it('keeps saying a refusal of an early batch of a confirmed move', async () => {
+      const { wrapper } = await mountPage({
+        actions: {
+          updateTask: vi.fn((_, { taskId }) =>
+            taskId === 'task-2'
+              ? Promise.reject(buildRefusal(403))
+              : Promise.resolve()
+          )
+        }
+      })
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedRow = {
+        ...buildEntityRow(taskTypeBar),
+        _dragOrigStartDate: day('2026-01-26'),
+        _dragOrigEndDate: day('2026-02-20')
+      }
+      taskTypeBar.children = [movedRow]
+      const tasks = Array.from({ length: 15 }, (_, index) =>
+        buildMovedTask(movedRow, `task-${index + 1}`, `Asset ${index + 1}`)
+      )
+      movedRow.children = new Map([['person-1', tasks]])
+      await changeItem(wrapper, movedRow)
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(datesOf(tasks[1])).toEqual(['2026-02-09', '2026-02-09'])
+      expect(findSaveError(wrapper).props('text')).toBe(
+        'main.cell_save_error {"name":"Asset 2"}'
+      )
+    })
+
+    // The tasks under a row may carry no estimation stamp: a refused one
+    // keeps its estimation.
+    it('keeps the estimation of a refused task of a confirmed move', async () => {
+      const { wrapper } = await mountPage({
+        actions: { updateTask: refuse() }
+      })
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedRow = {
+        ...buildEntityRow(taskTypeBar),
+        _dragOrigStartDate: day('2026-01-26'),
+        _dragOrigEndDate: day('2026-02-20')
+      }
+      taskTypeBar.children = [movedRow]
+      const task = buildMovedTask(movedRow)
+      delete task._dragOrigEstimation
+      movedRow.children = new Map([['person-1', [task]]])
+      await changeItem(wrapper, movedRow)
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(datesOf(task)).toEqual(['2026-02-09', '2026-02-09'])
+      expect(task.estimation).toBe(8 * 60)
+    })
+
+    // Two selected tasks moved together each widen their row: refused, the
+    // row goes back to the dates it had before both.
+    it('puts back a row two selected tasks widened', async () => {
+      const { wrapper } = await mountPage({
+        actions: { updateTask: refuse(), saveScheduleItem: refuse() }
+      })
+      const entityRow = buildEntityRow(rowsOf(wrapper)[0])
+      const first = {
+        ...buildMovedTask(entityRow, 'task-1', 'Chair'),
+        startDate: day('2026-03-02'),
+        endDate: day('2026-03-02')
+      }
+      const second = {
+        ...buildMovedTask(entityRow, 'task-2', 'Lamp'),
+        startDate: day('2026-03-09'),
+        endDate: day('2026-03-09')
+      }
+      entityRow.children = new Map([['person-1', [first, second]]])
+
+      findSchedule(wrapper).vm.$emit('item-changed', first)
+      findSchedule(wrapper).vm.$emit('item-changed', second)
+      await flushPromises()
+
+      expect(datesOf(first)).toEqual(['2026-02-09', '2026-02-09'])
+      expect(datesOf(second)).toEqual(['2026-02-09', '2026-02-09'])
+      expect(datesOf(entityRow)).toEqual(['2026-02-02', '2026-02-27'])
+    })
+
+    // A drag reassigns as it crosses the rows of the people: the rows of the
+    // task type come back from Zou once the drag is over.
+    const reassign = async (wrapper, task, from, to) => {
+      findSchedule(wrapper).vm.$emit('item-unassign', task, from)
+      findSchedule(wrapper).vm.$emit('item-assign', task, to)
+      await flushPromises()
+    }
+
+    const buildAssignedTask = wrapper => {
+      const entityRow = buildEntityRow(rowsOf(wrapper)[0])
+      const task = buildMovedTask(entityRow)
+      entityRow.children = new Map([
+        ['person-1', [task]],
+        ['person-2', []]
+      ])
+      return task
+    }
+
+    it('reloads the rows of a reassignment Zou refuses, and says so', async () => {
+      const { storeActions, wrapper } = await mountPage({
+        actions: { assignSelectedTasks: refuse() }
+      })
+      const task = buildAssignedTask(wrapper)
+      const nbLoads = storeActions.loadTasks.mock.calls.length
+
+      await reassign(wrapper, task, 'person-1', 'person-2')
+
+      expect(storeActions.loadTasks).toHaveBeenCalledTimes(nbLoads + 1)
+      expect(findSaveError(wrapper).props('text')).toBe(
+        'main.cell_save_error {"name":"Chair"}'
+      )
+    })
+
+    // The rows of a production left meanwhile are gone: a refusal that comes
+    // after the switch reloads nothing.
+    it('reloads no rows of a reassignment refused after a production switch', async () => {
+      let refuseAssignment
+      const { storeActions, store, wrapper } = await mountPage({
+        actions: {
+          assignSelectedTasks: vi.fn(
+            () =>
+              new Promise((resolve, reject) => {
+                refuseAssignment = () => reject(buildRefusal(403))
+              })
+          )
+        }
+      })
+      const task = buildAssignedTask(wrapper)
+      await reassign(wrapper, task, 'person-1', 'person-2')
+      store.commit('SET_PRODUCTION', { ...production, id: 'production-2' })
+      await waitForLoad()
+      const nbLoads = storeActions.loadTasks.mock.calls.length
+
+      refuseAssignment()
+      await flushPromises()
+
+      expect(storeActions.loadTasks).toHaveBeenCalledTimes(nbLoads)
+    })
+
+    // The drop saves the dates of the bar: that save going through must not
+    // clear the refusal of the reassignment.
+    it('keeps the refusal of a reassignment past the dates of its drop', async () => {
+      const { storeActions, wrapper } = await mountPage({
+        actions: { assignSelectedTasks: refuse() }
+      })
+      const task = buildAssignedTask(wrapper)
+      const nbLoads = storeActions.loadTasks.mock.calls.length
+      findSchedule(wrapper).vm.isEditingDates = true
+
+      await reassign(wrapper, task, 'person-1', 'person-2')
+      expect(storeActions.loadTasks).toHaveBeenCalledTimes(nbLoads)
+
+      findSchedule(wrapper).vm.isEditingDates = false
+      await changeItem(wrapper, task)
+
+      expect(storeActions.updateTask).toHaveBeenCalled()
+      expect(storeActions.loadTasks).toHaveBeenCalledTimes(nbLoads + 1)
+      expect(findSaveError(wrapper).props('text')).toBe(
+        'main.cell_save_error {"name":"Chair"}'
+      )
     })
   })
 
@@ -2201,7 +2746,7 @@ describe('ProductionSchedule page', () => {
     ])(
       'stops the spinner and tells when a task edit of %s fails',
       async (_, options, saveAction) => {
-        const error = new Error('Bad request')
+        const error = buildRefusal(400)
         const consoleError = vi
           .spyOn(console, 'error')
           .mockImplementation(() => {})
@@ -2245,6 +2790,36 @@ describe('ProductionSchedule page', () => {
         },
         { taskId: 'task-asset-1', data: { assignees: ['person-1'] } }
       ])
+    })
+
+    // A row the task widens goes back on a refusal, with its own line: the
+    // assignees still follow the task Zou took.
+    it('saves the assignees of a task edit when only a widened row is refused', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { storeActions, wrapper } = await mountAssignments({
+        actions: {
+          saveScheduleItem: vi.fn(() => Promise.reject(buildRefusal(403)))
+        }
+      })
+      // The row ends before the day the chair moves to.
+      const row = {
+        id: 'bar-props',
+        name: 'Props',
+        start_date: '2026-03-02',
+        end_date: '2026-03-27',
+        startDate: day('2026-03-02'),
+        endDate: day('2026-03-27')
+      }
+      await editTask(wrapper, { ...buildChairTask(), parentElement: row })
+
+      await apply(wrapper)
+
+      expect(storeActions.saveScheduleItem).toHaveBeenCalledTimes(1)
+      expect(payloadsOf(storeActions.updateTask)).toContainEqual({
+        taskId: 'task-asset-1',
+        data: { assignees: ['person-1'] }
+      })
+      expect(panelText(wrapper)).not.toContain('schedule.save_task_error')
     })
 
     it.each([

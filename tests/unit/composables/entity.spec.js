@@ -13,9 +13,12 @@ import { parseSimpleDate } from '@/lib/time'
 
 import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
 
+// the parameters of a message show in its text
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
-  useI18n: () => ({ t: key => key })
+  useI18n: () => ({
+    t: (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key)
+  })
 }))
 
 enableAutoUnmount(afterEach)
@@ -32,7 +35,8 @@ const mountEntity = async ({
   actions = {},
   readEntity = () => Promise.resolve(entity),
   onEntityRead,
-  loadList
+  loadList,
+  scheduleWidget
 } = {}) => {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -101,7 +105,8 @@ const mountEntity = async ({
         entityList: computed(() => entities),
         readEntity,
         onEntityRead,
-        loadList: loadList && (() => loadList(store))
+        loadList: loadList && (() => loadList(store)),
+        scheduleWidget
       })
       // As the pages: the entity shows once the load has read it.
       onMounted(() => api.init())
@@ -659,17 +664,48 @@ describe('useEntity', () => {
         expect(updateTask).not.toHaveBeenCalled()
       })
 
-      it('logs a save Zou refuses', async () => {
-        const error = new Error('refused')
+      // A bar whose save Zou refuses goes back where the drag found it, and
+      // the page says so.
+      it('puts back a bar whose save Zou refuses, and says so', async () => {
+        const refusal = Object.assign(new Error('refused'), { status: 403 })
+        markRequestFailure(refusal)
         const consoleError = vi
           .spyOn(console, 'error')
           .mockImplementation(() => {})
-        const api = await mountSchedule(() => Promise.reject(error))
+        const scheduleWidget = ref({
+          refreshItemPositions: vi.fn(),
+          refreshManDays: vi.fn()
+        })
+        const { api } = await mountEntity({
+          actions: { updateTask: () => Promise.reject(refusal) },
+          getters: taskGetters(),
+          scheduleWidget
+        })
+        // moved by the widget from Monday 2 to Monday 9 March
+        const item = bar({
+          name: 'Animation',
+          startDate: parseSimpleDate('2026-03-09'),
+          endDate: parseSimpleDate('2026-03-11'),
+          _dragOrigStartDate: parseSimpleDate('2026-03-02'),
+          _dragOrigEndDate: parseSimpleDate('2026-03-04'),
+          _dragOrigEstimation: undefined
+        })
 
-        api.saveTaskScheduleItem(bar())
+        await api.saveTaskScheduleItem(item)
         await flushPromises()
 
-        expect(consoleError).toHaveBeenCalledWith(error)
+        expect(span(item)).toEqual(['2026-03-02', '2026-03-04'])
+        expect(api.scheduleSaveErrorText.value).toBe(
+          'main.cell_save_error {"name":"Animation"}'
+        )
+        expect(scheduleWidget.value.refreshItemPositions).toHaveBeenCalledWith(
+          item.parentElement
+        )
+        // the man-days of its row add up its bars again
+        expect(scheduleWidget.value.refreshManDays).toHaveBeenCalledWith(
+          item.parentElement
+        )
+        expect(consoleError).toHaveBeenCalledWith(refusal)
         consoleError.mockRestore()
       })
     })

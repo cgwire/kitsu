@@ -1358,6 +1358,116 @@ const dragFrom = async (wrapper, handle, fromX, toX) => {
   await nextTick()
 }
 
+// A page puts back a bar whose change Zou refuses: the widget stamps the
+// dates and the estimation the bar had as the change started, on every
+// schedule, clipped or not.
+describe('Schedule widget - origin of a changed bar', () => {
+  let rafSpy
+
+  beforeEach(() => {
+    rafSpy = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(callback => {
+        callback()
+        return 0
+      })
+  })
+
+  afterEach(() => {
+    rafSpy.mockRestore()
+  })
+
+  const fmt = date => date.format('YYYY-MM-DD')
+  const buildTaskBar = () => ({
+    id: 'task-1',
+    name: 'Characters / Cat / Modeling',
+    editable: true,
+    estimation: 8 * 60,
+    man_days: 8 * 60,
+    startDate: moment('2026-08-31'),
+    endDate: moment('2026-09-01'),
+    children: []
+  })
+
+  it('stamps where a dragged bar started on a schedule without clip', async () => {
+    const task = buildTaskBar()
+    const wrapper = mountSchedule({
+      hierarchy: [{ ...person, children: [task] }]
+    })
+    const bar = wrapper
+      .findAll('.timebar-center')
+      .find(({ element }) => !element.closest('.root-element'))
+
+    // zoom level 1 is 20px a day: a 200px drag is 10 days
+    await bar.trigger('mousedown', { clientX: 300 })
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: 500 })
+    )
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 500 })
+    )
+    await nextTick()
+
+    expect(wrapper.emitted('item-changed')).toHaveLength(1)
+    expect(fmt(task.startDate)).not.toBe('2026-08-31')
+    expect([
+      fmt(task._dragOrigStartDate),
+      fmt(task._dragOrigEndDate),
+      task._dragOrigEstimation
+    ]).toEqual(['2026-08-31', '2026-09-01', 8 * 60])
+    wrapper.unmount()
+  })
+
+  // A refused task of a confirmed move goes back with its estimation.
+  it('stamps the estimation of the tasks under a dragged row', async () => {
+    const hierarchy = buildSubchildrenHierarchy(1)
+    const [row] = hierarchy[0].children
+    const [task] = row.children.get('person-1')
+    task.estimation = 3 * 8 * 60
+    row.endDate = moment.utc('2026-09-30')
+    const wrapper = mountSubchildren(hierarchy)
+    const bar = wrapper
+      .findAll('.timebar-center')
+      .find(
+        ({ element }) =>
+          !element.closest('.root-element') && !element.closest('.subchild')
+      )
+
+    await bar.trigger('mousedown', { clientX: 300 })
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: 500 })
+    )
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 500 })
+    )
+    await nextTick()
+
+    expect(task._dragOrigEstimation).toBe(3 * 8 * 60)
+    wrapper.unmount()
+  })
+
+  it('stamps the dates and the estimation a typed estimation replaces', async () => {
+    const task = buildTaskBar()
+    const wrapper = mountSchedule({
+      hierarchy: [{ ...person, editable: false, children: [task] }],
+      isEstimationLinked: true
+    })
+
+    await wrapper.find('.man-days-unit-wrapper input').setValue('3')
+
+    expect([task.estimation, fmt(task.endDate)]).toEqual([
+      24 * 60,
+      '2026-09-02'
+    ])
+    expect([
+      fmt(task._dragOrigStartDate),
+      fmt(task._dragOrigEndDate),
+      task._dragOrigEstimation
+    ]).toEqual(['2026-08-31', '2026-09-01', 8 * 60])
+    wrapper.unmount()
+  })
+})
+
 describe('Schedule widget - week zoom columns', () => {
   // The header and the line layout count weeks from Monday, while the bar
   // positions counted days / 7 from the schedule start, a Tuesday here:

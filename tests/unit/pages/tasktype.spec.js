@@ -19,6 +19,7 @@ import '@/lib/auth'
 import csv from '@/lib/csv'
 import assetStore from '@/store/modules/assets'
 import episodeStore from '@/store/modules/episodes'
+import scheduleStore from '@/store/modules/schedule'
 import shotStore from '@/store/modules/shots'
 import taskTypeStore from '@/store/modules/tasktypes'
 
@@ -31,6 +32,7 @@ import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
 import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
 
 import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
@@ -53,6 +55,8 @@ const ScheduleStub = {
   template: '<div />',
   data: () => ({ isEditingDates: false }),
   methods: {
+    refreshItemPositions: () => {},
+    refreshManDays: vi.fn(),
     scrollToDate: () => {},
     scrollToToday: () => {}
   }
@@ -78,6 +82,7 @@ const mountPage = async ({
     }
   ],
   section = 'estimation',
+  mutations = {},
   socket = { on: vi.fn(), off: vi.fn() },
   stubs = {}
 } = {}) => {
@@ -88,6 +93,7 @@ const mountPage = async ({
     ...actions
   }
   const store = createStore({
+    mutations,
     getters: {
       isInAssetTypeWorkflow: () => () => true,
       currentEpisode: () => null,
@@ -2285,7 +2291,8 @@ describe('TaskType page, cell saves', () => {
   })
 })
 
-// The schedules of the page: the rows of the people around their bars.
+// The schedules of the page: the rows of the people around their bars, and
+// a bar whose change Zou refuses, put back with a line above it.
 describe('TaskType page, schedule bars', () => {
   // Monday 5 to Friday 9 October
   const scheduleTask = {
@@ -2305,6 +2312,7 @@ describe('TaskType page, schedule bars', () => {
     last_name: 'Smith',
     full_name: 'Alice Smith'
   }
+  const refuse = () => vi.fn(() => Promise.reject(buildRefusal(403)))
   const format = date => date.format('YYYY-MM-DD')
   const span = bar => [format(bar.startDate), format(bar.endDate)]
   // unmounted after each test, a failed one included
@@ -2314,6 +2322,7 @@ describe('TaskType page, schedule bars', () => {
     // the data load starts 100 ms after mounting, the schedule dates follow
     // 200 ms after it
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
     assetStore.cache.assetMap.set('asset-1', {
       id: 'asset-1',
       tasks: [scheduleTask.id]
@@ -2331,6 +2340,10 @@ describe('TaskType page, schedule bars', () => {
   const mountSchedule = async (actions = {}) => {
     const page = await mountPage({
       section: 'schedule',
+      // the dates of the task type set on its bar
+      mutations: {
+        SET_SCHEDULE_ITEM_DATES: scheduleStore.mutations.SET_SCHEDULE_ITEM_DATES
+      },
       actions: {
         loadProductionDaysOff: vi.fn(() => ({})),
         loadProductionTimeSpents: vi.fn(() => ({})),
@@ -2397,4 +2410,142 @@ describe('TaskType page, schedule bars', () => {
 
     expect(span(row)).toEqual(['2026-10-12', '2026-10-16'])
   })
+
+  it('puts back a bar whose move Zou refuses, and its row', async () => {
+    await mountSchedule({ updateTask: refuse() })
+    const bar = findBar()
+    const row = bar.parentElement
+    stamp(bar)
+    bar.startDate = bar.startDate.clone().add(7, 'days')
+    bar.endDate = bar.endDate.clone().add(7, 'days')
+
+    findSchedule().vm.$emit('item-changed', bar)
+    await flushPromises()
+
+    expect(span(bar)).toEqual(['2026-10-05', '2026-10-09'])
+    expect(span(row)).toEqual(['2026-10-05', '2026-10-09'])
+    const error = wrapper.findComponent(ErrorText)
+    expect(error.props('text')).toBe('main.cell_save_error {"name":"Chair"}')
+    expect(error.classes()).toContain('has-text-centered')
+    expect(console.error).toHaveBeenCalled()
+  })
+
+  it('puts back an estimation typed in the schedule that Zou refuses', async () => {
+    await mountSchedule({ updateTask: refuse() })
+    const bar = findBar()
+    stamp(bar)
+    // the widget applies the estimation before it tells
+    bar.estimation = 16 * 60
+    bar.man_days = 16 * 60
+
+    findSchedule().vm.$emit('estimation-changed', {
+      taskId: 'task-2',
+      estimation: 16 * 60,
+      item: bar,
+      daysOff: []
+    })
+    await flushPromises()
+
+    expect([bar.estimation, bar.man_days]).toEqual([0, 0])
+    expect(span(bar)).toEqual(['2026-10-05', '2026-10-09'])
+    // the man-days of its row add up its bars again
+    expect(ScheduleStub.methods.refreshManDays).toHaveBeenCalledWith(
+      bar.parentElement
+    )
+    expect(wrapper.findComponent(ErrorText).props('text')).toBe(
+      'main.cell_save_error {"name":"Chair"}'
+    )
+  })
+
+  // A change Zou took stays when a later one is refused.
+  it('puts back the task type dates Zou took before a refused change', async () => {
+    await mountSchedule({
+      saveScheduleItem: vi
+        .fn()
+        .mockResolvedValueOnce()
+        .mockRejectedValueOnce(buildRefusal(403))
+    })
+    const fieldDate = index =>
+      wrapper
+        .findAllComponents(DateField)
+        [index].props('modelValue')
+        .toISOString()
+        .slice(0, 10)
+
+    wrapper
+      .findAllComponents(DateField)[1]
+      .vm.$emit('update:model-value', new Date('2026-10-23T00:00:00Z'))
+    await flushPromises()
+    wrapper
+      .findAllComponents(DateField)[0]
+      .vm.$emit('update:model-value', new Date('2026-10-12T00:00:00Z'))
+    await flushPromises()
+
+    expect([fieldDate(0), fieldDate(1)]).toEqual(['2026-10-01', '2026-10-23'])
+  })
+
+  // Two dates picked before the first answer: the fields show what Zou took.
+  it('keeps the task type dates Zou took after an overlapping refusal', async () => {
+    const settles = []
+    await mountSchedule({
+      saveScheduleItem: vi.fn(
+        () =>
+          new Promise((resolve, reject) => {
+            settles.push({ resolve, reject })
+          })
+      )
+    })
+    const fieldDate = index =>
+      wrapper
+        .findAllComponents(DateField)
+        [index].props('modelValue')
+        .toISOString()
+        .slice(0, 10)
+
+    wrapper
+      .findAllComponents(DateField)[0]
+      .vm.$emit('update:model-value', new Date('2026-10-12T00:00:00Z'))
+    await flushPromises()
+    wrapper
+      .findAllComponents(DateField)[1]
+      .vm.$emit('update:model-value', new Date('2026-10-23T00:00:00Z'))
+    await flushPromises()
+    settles[0].reject(buildRefusal(403))
+    await flushPromises()
+    settles[1].resolve()
+    await flushPromises()
+
+    expect([fieldDate(0), fieldDate(1)]).toEqual(['2026-10-12', '2026-10-23'])
+  })
+
+  // The dates of the task type are those of its bar on the production
+  // schedule.
+  it.each([
+    ['start', 0, '2026-10-12', '2026-10-01'],
+    ['end', 1, '2026-10-23', '2026-10-30']
+  ])(
+    'puts back the %s date of the task type Zou refuses',
+    async (_, index, picked, saved) => {
+      const { storeActions } = await mountSchedule({
+        saveScheduleItem: refuse()
+      })
+
+      wrapper
+        .findAllComponents(DateField)
+        [index].vm.$emit('update:model-value', new Date(`${picked}T00:00:00Z`))
+      await flushPromises()
+
+      expect(storeActions.saveScheduleItem).toHaveBeenCalledTimes(1)
+      expect(
+        wrapper
+          .findAllComponents(DateField)
+          [index].props('modelValue')
+          .toISOString()
+          .slice(0, 10)
+      ).toBe(saved)
+      expect(wrapper.findComponent(ErrorText).props('text')).toBe(
+        'main.cell_save_error {"name":"Modeling"}'
+      )
+    }
+  )
 })

@@ -281,6 +281,15 @@
           :text="taskListSaveErrorText"
           v-if="taskListSaveErrorText"
         />
+        <error-text
+          class="has-text-centered"
+          :text="scheduleSaveErrorText"
+          v-if="
+            scheduleSaveErrorText &&
+            (isActiveTab('schedule') ||
+              (isActiveTab('tasks') && isScheduleVisible))
+          "
+        />
         <task-list
           ref="task-list"
           :disabled-dates="disabledDates"
@@ -453,6 +462,7 @@ import { useStore } from 'vuex'
 
 import { useCellSave } from '@/composables/cellSave'
 import { getEntityMap } from '@/composables/entity'
+import { getBarOrigin, useScheduleSave } from '@/composables/scheduleSave'
 import csv, { getEstimationsCsvLabelKeys } from '@/lib/csv'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
 import func from '@/lib/func'
@@ -565,6 +575,10 @@ const store = useStore()
 const { cellSaveErrorText, saveCell } = useCellSave(task => task.entity_name, {
   rowsAreTasks: true
 })
+// The bars of the schedules, and the dates of the task type.
+const { saveBar, saveTracked, scheduleSaveErrorText } = useScheduleSave(
+  bar => bar.name
+)
 
 const instance = getCurrentInstance()
 const socket = instance.appContext.config.globalProperties.$socket
@@ -1450,9 +1464,13 @@ const saveEstimation = (task, { estimation, item, daysOff }) => {
   return store.dispatch('updateTask', { taskId: task.id, data })
 }
 
-const updateEstimation = ({ taskId, ...change }) => {
+// typed in a schedule, which applied it to the bar
+const updateEstimation = async ({ taskId, ...change }) => {
   const task = taskMap.value.get(taskId)
-  if (task) saveEstimation(task, change).catch(console.error)
+  if (!task) return
+  await saveBar(change.item, () => saveEstimation(task, change), {
+    onPutBack: putBackRow
+  })
 }
 
 const onEstimationCellChanged = ({ taskId, ...change }) => {
@@ -1884,7 +1902,18 @@ const getTaskElementColor = (task, endDate) => {
   return null
 }
 
-const saveTaskScheduleItem = item => {
+// A bar whose save Zou refuses goes back where the widget found it: its
+// row spans its bars again, and adds up their man-days.
+const putBackRow = item => {
+  const row = item.parentElement
+  row.startDate = getMinDate(row)
+  row.endDate = getMaxDate(row)
+  scheduleWidgetRef.value?.refreshManDays(row)
+  scheduleWidgetRef.value?.refreshItemPositions(row)
+}
+
+const saveTaskScheduleItem = async item => {
+  const origin = getBarOrigin(item)
   if (item.estimation) {
     item.endDate = addBusinessDays(
       item.startDate,
@@ -1897,14 +1926,19 @@ const saveTaskScheduleItem = item => {
   if (item.startDate && item.endDate) {
     item.parentElement.startDate = getMinDate(item.parentElement)
     item.parentElement.endDate = getMaxDate(item.parentElement)
-    store.dispatch('updateTask', {
-      taskId: item.id,
-      data: {
-        estimation: item.estimation,
-        start_date: item.startDate.format('YYYY-MM-DD'),
-        due_date: item.endDate.format('YYYY-MM-DD')
-      }
-    })
+    await saveBar(
+      item,
+      () =>
+        store.dispatch('updateTask', {
+          taskId: item.id,
+          data: {
+            estimation: item.estimation,
+            start_date: item.startDate.format('YYYY-MM-DD'),
+            due_date: item.endDate.format('YYYY-MM-DD')
+          }
+        }),
+      { origin, onPutBack: putBackRow }
+    )
   }
 }
 
@@ -2263,21 +2297,49 @@ watch(currentScheduleItem, () => {
   }
 })
 
+// The dates of the task type are those of its bar on the production
+// schedule: its moments hold the dates set last, its raw dates those of the
+// load. Refused, the bar and the fields go back to the dates set before.
 watch(
   [() => schedule.taskTypeStartDate, () => schedule.taskTypeEndDate],
-  () => {
-    if (!currentScheduleItem.value) return
+  async () => {
+    const scheduleItem = currentScheduleItem.value
+    if (!scheduleItem) return
     const startDate = moment(schedule.taskTypeStartDate).utc()
     const endDate = moment(schedule.taskTypeEndDate).utc()
+    const previous = {
+      startDate: (
+        scheduleItem.startDate ?? parseDate(scheduleItem.start_date)
+      ).clone(),
+      endDate: (
+        scheduleItem.endDate ?? parseDate(scheduleItem.end_date)
+      ).clone()
+    }
+    const format = date => date.format('YYYY-MM-DD')
     if (
-      startDate.format('YYYY-MM-DD') !== currentScheduleItem.value.start_date ||
-      endDate.format('YYYY-MM-DD') !== currentScheduleItem.value.end_date
+      format(startDate) !== format(previous.startDate) ||
+      format(endDate) !== format(previous.endDate)
     ) {
       store.commit('SET_SCHEDULE_ITEM_DATES', {
-        scheduleItem: currentScheduleItem.value,
+        scheduleItem,
         dates: { startDate, endDate }
       })
-      store.dispatch('saveScheduleItem', currentScheduleItem.value)
+      await saveTracked(
+        scheduleItem,
+        { id: scheduleItem.id, name: currentTaskType.value?.name },
+        {
+          origin: previous,
+          sent: { startDate, endDate },
+          save: () => store.dispatch('saveScheduleItem', scheduleItem),
+          putBack: dates => {
+            store.commit('SET_SCHEDULE_ITEM_DATES', { scheduleItem, dates })
+            if (currentScheduleItem.value === scheduleItem) {
+              schedule.taskTypeStartDate = dates.startDate.toDate()
+              schedule.taskTypeEndDate = dates.endDate.toDate()
+            }
+          }
+        }
+      )
     }
   }
 )

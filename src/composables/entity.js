@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { getBarOrigin, useScheduleSave } from '@/composables/scheduleSave'
 import { isMissingEntity, logRequestFailure } from '@/lib/errors'
 import { getEntityPath } from '@/lib/path'
 import { getZoomOptions } from '@/lib/productionSchedule'
@@ -87,11 +88,14 @@ export const useEntity = ({
   readEntity,
   onEntityRead,
   isMissingReported = true,
-  loadList
+  loadList,
+  // the template ref of the schedule, which redraws a bar put back
+  scheduleWidget
 }) => {
   const route = useRoute()
   const { t } = useI18n()
   const store = useStore()
+  const { saveBar, scheduleSaveErrorText } = useScheduleSave(bar => bar.name)
 
   // Store getters used by the ported computeds.
   const taskMap = computed(() => store.getters.taskMap)
@@ -383,7 +387,9 @@ export const useEntity = ({
     }
   }
 
-  const saveTaskScheduleItem = item => {
+  // A bar whose save Zou refuses goes back where the widget found it.
+  const saveTaskScheduleItem = async item => {
+    const origin = getBarOrigin(item)
     if (item.estimation) {
       item.endDate = addBusinessDays(
         item.startDate,
@@ -394,17 +400,26 @@ export const useEntity = ({
     item.man_days = item.estimation || 0
 
     if (item.startDate && item.endDate) {
-      store
-        .dispatch('updateTask', {
-          taskId: item.id,
-          data: {
-            estimation: item.estimation,
-            start_date: item.startDate.format('YYYY-MM-DD'),
-            due_date: item.endDate.format('YYYY-MM-DD')
-          }
-        })
-        .catch(console.error)
+      await saveBar(
+        item,
+        () =>
+          store.dispatch('updateTask', {
+            taskId: item.id,
+            data: {
+              estimation: item.estimation,
+              start_date: item.startDate.format('YYYY-MM-DD'),
+              due_date: item.endDate.format('YYYY-MM-DD')
+            }
+          }),
+        { origin, onPutBack: redrawBar }
+      )
     }
+  }
+
+  // a bar put back, and the man-days of its row
+  const redrawBar = bar => {
+    scheduleWidget?.value?.refreshItemPositions(bar.parentElement ?? bar)
+    scheduleWidget?.value?.refreshManDays(bar.parentElement)
   }
 
   // Re-init when the entity id in the URL changes. Compared with the id of
@@ -489,6 +504,7 @@ export const useEntity = ({
     tasksStartDate,
     tasksEndDate,
     onTaskSelected,
-    saveTaskScheduleItem
+    saveTaskScheduleItem,
+    scheduleSaveErrorText
   }
 }

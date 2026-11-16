@@ -126,6 +126,11 @@
           v-if="scheduleItems[0].children.length > 0"
           v-show="currentSection === 'schedule'"
         >
+          <error-text
+            class="has-text-centered"
+            :text="scheduleSaveErrorText"
+            v-if="scheduleSaveErrorText"
+          />
           <div class="wrapper">
             <schedule
               ref="scheduleWidget"
@@ -244,6 +249,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import EmptySection from '@/components/widgets/EmptySection.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
@@ -370,12 +376,14 @@ const {
   tasksStartDate,
   tasksEndDate,
   onTaskSelected,
-  saveTaskScheduleItem
+  saveTaskScheduleItem,
+  scheduleSaveErrorText
 } = useEntity({
   type: 'edit',
   currentEntity: currentEdit,
   entityList,
   readEntity: getCurrentEdit,
+  scheduleWidget,
   onEntityRead: (edit, isListRead) => {
     if (!isListRead) setTimeout(scrollScheduleToStart, 100)
   },

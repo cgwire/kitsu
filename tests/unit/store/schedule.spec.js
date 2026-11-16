@@ -34,6 +34,23 @@ describe('Schedule store', () => {
     expect(commit).not.toHaveBeenCalled()
   })
 
+  // A schedule puts back a bar whose change Zou refuses, and says so: the
+  // refusal has to reach it.
+  test('rejects a schedule item change Zou refuses, the items untouched', async () => {
+    const refusal = Object.assign(new Error('Forbidden'), { status: 403 })
+    vi.spyOn(scheduleApi, 'updateScheduleItem').mockRejectedValue(refusal)
+    const commit = vi.fn()
+    const state = { currentScheduleItems: [{ id: 'item-1' }] }
+
+    await expect(
+      scheduleStore.actions.saveScheduleItem(
+        { commit, state },
+        { id: 'item-1' }
+      )
+    ).rejects.toBe(refusal)
+    expect(commit).not.toHaveBeenCalled()
+  })
+
   // The version modal only sends the fields it edits: the version list is
   // sorted on created_at, which must survive a rename or a lock.
   test('keeps the fields a version update does not send', () => {

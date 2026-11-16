@@ -99,19 +99,16 @@ const actions = {
   },
 
   saveScheduleItem({ commit, state }, scheduleItem) {
-    return scheduleApi
-      .updateScheduleItem(scheduleItem)
-      .then(updatedItem => {
-        const scheduleItems = state.currentScheduleItems.slice()
-        const indexUpdate = scheduleItems.findIndex(
-          item => item.id === updatedItem.id
-        )
-        if (indexUpdate !== -1) {
-          scheduleItems[indexUpdate] = updatedItem
-          commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
-        }
-      })
-      .catch(console.error)
+    return scheduleApi.updateScheduleItem(scheduleItem).then(updatedItem => {
+      const scheduleItems = state.currentScheduleItems.slice()
+      const indexUpdate = scheduleItems.findIndex(
+        item => item.id === updatedItem.id
+      )
+      if (indexUpdate !== -1) {
+        scheduleItems[indexUpdate] = updatedItem
+        commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
+      }
+    })
   },
 
   // the milestones of every production, for the studio schedule: they stay

@@ -1217,6 +1217,9 @@ const actions = {
           )
           error.failedTaskIds = failedTaskIds
           error.successfulTaskIds = successfulTaskIds
+          // Zou answers a refused assignment, a task out of the departments of
+          // a supervisor or deleted meanwhile, with the tasks it assigned only.
+          errors.markRequestFailure(error)
           throw error
         }
       },
@@ -1257,12 +1260,26 @@ const actions = {
         tasks.map(task => task.id),
         person.id
       )
-      .then(() => {
+      .then(clearedTaskIds => {
+        // Zou answers with the tasks it cleared, and skips a refused one.
+        const cleared = new Set(clearedTaskIds)
         tasks.forEach(task => {
-          commit(UNASSIGN_TASK, { task, person })
+          if (cleared.has(task.id)) {
+            commit(UNASSIGN_TASK, { task, person })
+          }
         })
+        const failedTaskIds = tasks
+          .map(task => task.id)
+          .filter(taskId => !cleared.has(taskId))
+        if (failedTaskIds.length) {
+          const error = new Error(
+            `Failed to unassign ${failedTaskIds.length} task(s). Task IDs: ${failedTaskIds.join(', ')}`
+          )
+          error.failedTaskIds = failedTaskIds
+          errors.markRequestFailure(error)
+          throw error
+        }
       })
-      .catch(console.error)
   },
 
   showAssignations({ commit }) {
