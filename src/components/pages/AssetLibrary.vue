@@ -234,12 +234,8 @@ const toggleEntity = entity => {
   })
 }
 
-const updateRoute = ({ production, search }) => {
-  const query = {
-    ...route.query,
-    production: production || undefined,
-    search: search || undefined
-  }
+const setProductionInUrl = production => {
+  const query = { ...route.query, production: production || undefined }
   if (JSON.stringify(query) !== JSON.stringify(route.query)) {
     router.push({ query })
   }
@@ -250,7 +246,7 @@ const updateRoute = ({ production, search }) => {
 watch(
   () => filters.productionId,
   value => {
-    updateRoute({ production: value })
+    setProductionInUrl(value)
     refresh()
   }
 )
