@@ -585,6 +585,9 @@ let isScrollResetAsked = false
 // The store getters follow the route: a load still running when the page
 // is left stops at its next step instead of acting on the next page.
 let isUnmounted = false
+// The query of a navigation still on its way: route.query only changes
+// once it lands, and a write of one key meanwhile builds on this one.
+let pendingQuery = null
 const timesheetByPerson = ref({})
 const displaySettings = ref({
   contactSheetMode: false,
@@ -1006,15 +1009,14 @@ const initData = force => {
           resetTaskTypeDates()
         }, 200)
 
-        dueDateFilter.value = route.query.duedate || 'all'
-        estimationFilter.value = route.query.late || 'all'
-        priorityFilter.value = route.query.priority || '-1'
-        difficultyFilter.value = route.query.difficulty || '-1'
-        retakeCountFilter.value = route.query.retake_count || 'all'
-        assetTypeIdsFilter.value =
-          route.query.asset_type_id?.split(',').filter(Boolean) || []
-        taskStatusIdsFilter.value =
-          route.query.task_status_id?.split(',').filter(Boolean) || []
+        const view = readQueryView(route.query)
+        dueDateFilter.value = view.dueDate
+        estimationFilter.value = view.late
+        priorityFilter.value = view.priority
+        difficultyFilter.value = view.difficulty
+        retakeCountFilter.value = view.retakeCount
+        assetTypeIdsFilter.value = view.assetTypeIds
+        taskStatusIdsFilter.value = view.taskStatusIds
 
         const taskId = route.query.task_id
         const task = taskMap.value.get(taskId)
@@ -1121,6 +1123,40 @@ const getRoute = section => {
   return sectionRoute
 }
 
+// URL
+
+// What a query opens the page on: a value left out reads as its default,
+// and a task id the page cannot find as no task.
+const readQueryView = query => ({
+  search: query.search || '',
+  dueDate: query.duedate || 'all',
+  late: query.late || 'all',
+  priority: query.priority || '-1',
+  difficulty: query.difficulty || '-1',
+  retakeCount: query.retake_count || 'all',
+  assetTypeIds: query.asset_type_id?.split(',').filter(Boolean) || [],
+  taskStatusIds: query.task_status_id?.split(',').filter(Boolean) || [],
+  taskId: taskMap.value.has(query.task_id) ? query.task_id : ''
+})
+
+// A write whose URL opens the page as the landed one does replaces the
+// history entry instead of adding one. On a link to a task, the load's push
+// of the filters, which drops the task id, is canceled by the replace of the
+// selection that follows. The pending URL stays out of the comparison: a
+// filter or a task picked can come with a second write, which would turn
+// its push into a replace.
+const pushQuery = query => {
+  pendingQuery = query
+  const isSameView =
+    JSON.stringify(readQueryView(query)) ===
+    JSON.stringify(readQueryView(route.query))
+  router[isSameView ? 'replace' : 'push']({ query }).finally(() => {
+    if (pendingQuery === query) {
+      pendingQuery = null
+    }
+  })
+}
+
 // Search
 
 const focusSearchField = options => {
@@ -1137,11 +1173,9 @@ const setSearchFromUrl = () => {
 
 const setSearchInUrl = query => {
   const searchQuery = query || searchFieldRef.value?.getValue()
-  router.push({
-    query: {
-      ...route.query,
-      search: searchQuery || undefined
-    }
+  pushQuery({
+    ...(pendingQuery || route.query),
+    search: searchQuery || undefined
   })
 }
 
@@ -1227,17 +1261,15 @@ const saveSearchQuery = searchQuery => {
 
 const updateUrlParams = () => {
   const retakeCount = retakeCountFilter.value
-  router.push({
-    query: {
-      search: searchFieldRef.value.getValue(),
-      duedate: dueDateFilter.value,
-      late: estimationFilter.value,
-      priority: priorityFilter.value,
-      difficulty: difficultyFilter.value,
-      retake_count: retakeCount === 'all' ? undefined : retakeCount,
-      task_status_id: taskStatusIdsFilter.value.join(',') || null,
-      asset_type_id: assetTypeIdsFilter.value.join(',') || null
-    }
+  pushQuery({
+    search: searchFieldRef.value.getValue(),
+    duedate: dueDateFilter.value,
+    late: estimationFilter.value,
+    priority: priorityFilter.value,
+    difficulty: difficultyFilter.value,
+    retake_count: retakeCount === 'all' ? undefined : retakeCount,
+    task_status_id: taskStatusIdsFilter.value.join(',') || null,
+    asset_type_id: assetTypeIdsFilter.value.join(',') || null
   })
 }
 
@@ -1267,18 +1299,14 @@ const toggleSchedule = () => {
 const updateTaskInQuery = () => {
   if (nbSelectedTasks.value === 1) {
     const selectedTaskIds = Array.from(selectedTasks.value.keys())
-    router.push({
-      query: {
-        ...route.query,
-        task_id: selectedTaskIds[0]
-      }
+    pushQuery({
+      ...(pendingQuery || route.query),
+      task_id: selectedTaskIds[0]
     })
   } else {
-    router.push({
-      query: {
-        ...route.query,
-        task_id: undefined
-      }
+    pushQuery({
+      ...(pendingQuery || route.query),
+      task_id: undefined
     })
   }
 }

@@ -357,9 +357,17 @@ describe('TaskType page', () => {
     const TaskListStub = {
       name: 'TaskList',
       props: { tasks: { type: Array, default: () => [] } },
+      emits: ['task-selected'],
       // the tasks tab shows its schedule in the slot of the list
       template: '<div><slot /></div>',
-      methods: { resetSelection: () => {} }
+      methods: {
+        resetSelection: () => {},
+        // as the list does: the store first, then the event
+        selectTask(event, index, task) {
+          this.$store.dispatch('addSelectedTask', { task })
+          this.$emit('task-selected', task)
+        }
+      }
     }
     const statusTasks = ['status-1', 'status-2', 'status-3'].map(
       (statusId, index) => ({
@@ -460,6 +468,140 @@ describe('TaskType page', () => {
       expect(listedTaskIds()).toEqual(['task-11', 'task-12'])
     })
 
+    const mountSelectable = query => {
+      const selection = ref(new Map())
+      return mountTasks(
+        query,
+        {
+          nbSelectedTasks: () => selection.value.size,
+          selectedTasks: () => selection.value
+        },
+        {
+          actions: {
+            addSelectedTask: (context, { task }) => {
+              selection.value = new Map([[task.id, task]])
+            },
+            clearSelectedTasks: () => {
+              selection.value = new Map()
+            }
+          }
+        }
+      )
+    }
+
+    // The load writes the filters a link leaves out back into the URL, then
+    // selects the task of the link.
+    it.each([
+      ['a link with no filter', '', undefined],
+      ['a link with a filter', '?priority=2', undefined],
+      ['a link to a task', '?task_id=task-10', 'task-10'],
+      ['a link to a task the page cannot find', '?task_id=task-9', undefined]
+    ])('opens %s without a new history entry', async (_, query, taskId) => {
+      const historyLength = window.history.length
+      await mountSelectable(query)
+
+      expect(wrapper.vm.$route.query.duedate).toBe('all')
+      expect(wrapper.vm.$route.query.task_id).toBe(taskId)
+      expect(window.history.length).toBe(historyLength)
+    })
+
+    const styledCombo = label => () =>
+      wrapper
+        .findAllComponents({ name: 'ComboboxStyled' })
+        .find(combo => combo.props('label') === label)
+
+    it.each([
+      [
+        'asset type',
+        () => wrapper.findComponent(ComboboxMultiple),
+        ['props'],
+        'asset_type_id',
+        'props'
+      ],
+      [
+        'status',
+        () => wrapper.findComponent(ComboboxStatusMultiple),
+        ['status-2'],
+        'task_status_id',
+        'status-2'
+      ],
+      [
+        'difficulty',
+        styledCombo('tasks.fields.difficulty'),
+        '4',
+        'difficulty',
+        '4'
+      ],
+      ['due date', styledCombo('tasks.due_date'), 'dueweek', 'duedate', 'dueweek'],
+      ['late', styledCombo('tasks.late'), 'donelate', 'late', 'donelate'],
+      ['priority', styledCombo('task_types.fields.priority'), '2', 'priority', '2'],
+      [
+        'retake count',
+        styledCombo('tasks.fields.retake_count'),
+        'none',
+        'retake_count',
+        'none'
+      ]
+    ])(
+      'adds a history entry for a pick in the %s filter',
+      async (_, widget, value, key, valueInUrl) => {
+        await mountTasks('')
+        const historyLength = window.history.length
+
+        widget().vm.$emit('update:modelValue', value)
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query[key]).toBe(valueInUrl)
+        expect(window.history.length).toBe(historyLength + 1)
+      }
+    )
+
+    it('adds a history entry for a task picked', async () => {
+      await mountSelectable('')
+      const historyLength = window.history.length
+
+      wrapper.findComponent(TaskListStub).vm.selectTask({}, 0, statusTasks[0])
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query.task_id).toBe('task-10')
+      expect(window.history.length).toBe(historyLength + 1)
+    })
+
+    it('adds a history entry for a search typed', async () => {
+      const getValue = vi.spyOn(SearchFieldStub.methods, 'getValue')
+      try {
+        await mountTasks('')
+        const historyLength = window.history.length
+
+        getValue.mockReturnValue('chair')
+        wrapper.findComponent(SearchFieldStub).vm.$emit('change', 'chair')
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query.search).toBe('chair')
+        expect(window.history.length).toBe(historyLength + 1)
+      } finally {
+        getValue.mockRestore()
+      }
+    })
+
+    it('adds no history entry for the refresh of a remote update', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      await mountTasks('', {}, { socket })
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      const historyLength = window.history.length
+      expect(wrapper.vm.$route.query.search).toBe('')
+
+      onTaskUpdate({ task_id: 'task-10' })
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+
+      // the refresh wrote the URL again, without its empty search
+      expect(wrapper.vm.$route.query).not.toHaveProperty('search')
+      expect(window.history.length).toBe(historyLength)
+    })
+
     it('combines the asset type and status filters', async () => {
       await mountTasks('?asset_type_id=props&task_status_id=status-1,status-2')
       expect(listedTaskIds()).toEqual(['task-11'])
@@ -543,6 +685,79 @@ describe('TaskType page', () => {
       } finally {
         getValue.mockRestore()
       }
+    })
+
+    // The search and the filters empty the selection: the task id leaves the
+    // URL before their navigation lands, which still adds its history entry.
+    describe('with a task selected', () => {
+      const selected = ref(0)
+      let typed
+      let getValue
+
+      beforeEach(async () => {
+        typed = ''
+        getValue = vi
+          .spyOn(SearchFieldStub.methods, 'getValue')
+          .mockImplementation(() => typed)
+        selected.value = 0
+        await mountTasks(
+          '',
+          {
+            nbSelectedTasks: () => selected.value,
+            selectedTasks: () =>
+              new Map(selected.value ? [['task-10', statusTasks[0]]] : [])
+          },
+          {
+            actions: {
+              clearSelectedTasks: () => {
+                selected.value = 0
+              }
+            }
+          }
+        )
+        selected.value = 1
+        await flushPromises()
+        expect(wrapper.vm.$route.query.task_id).toBe('task-10')
+      })
+
+      afterEach(() => getValue.mockRestore())
+
+      it('keeps a search typed in the URL', async () => {
+        const historyLength = window.history.length
+        typed = 'chair'
+        wrapper.findComponent(SearchFieldStub).vm.$emit('change', 'chair')
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query.search).toBe('chair')
+        expect(wrapper.vm.$route.query.task_id).toBeUndefined()
+        expect(window.history.length).toBe(historyLength + 1)
+      })
+
+      it('keeps a filter picked in the URL', async () => {
+        const historyLength = window.history.length
+        wrapper
+          .findAllComponents({ name: 'ComboboxStyled' })
+          .find(combo => combo.props('label') === 'task_types.fields.priority')
+          .vm.$emit('update:modelValue', '2')
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query.priority).toBe('2')
+        expect(wrapper.vm.$route.query.task_id).toBeUndefined()
+        expect(window.history.length).toBe(historyLength + 1)
+      })
+
+      // The page stays mounted when the schedule tab opens, on a URL without
+      // the filters of the list.
+      it('keeps the filters of the list out of the schedule tab', async () => {
+        await wrapper.vm.$router.push(
+          '/productions/production-1/assets/task-types/task-type-1/schedule'
+        )
+        // the task panel closed
+        selected.value = 0
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query).toEqual({})
+      })
     })
 
     // Rebuilds wait for their days off side by side: the one asked last sets
