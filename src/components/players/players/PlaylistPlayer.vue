@@ -486,11 +486,14 @@
     <div
       id="sound-container"
       :style="{
-        height: isWaveformDisplayed && isCurrentPreviewMovie ? '60px' : '0px',
+        height: isWaveformShown ? '60px' : '0px',
         width: '100%'
       }"
-      v-show="isWaveformDisplayed && isCurrentPreviewMovie"
+      v-show="isWaveformShown"
     >
+      <div class="waveform-loading" v-show="isWaveformLoading">
+        <spinner />
+      </div>
       <div id="waveform"></div>
     </div>
 
@@ -1215,6 +1218,7 @@ const isObjectBackground = ref(false)
 const isShowAnnotationsWhilePlaying = ref(false)
 const isTyping = ref(false)
 const isWaveformDisplayed = ref(false)
+const isWaveformLoading = ref(false)
 const isWireframe = ref(false)
 const maxDuration = ref('00:00:00:00')
 const maxDurationRaw = ref(0)
@@ -1322,6 +1326,14 @@ const {
 // Annotations go on movies and pictures only, as in the task panel.
 const isCurrentPreviewAnnotatable = computed(
   () => isCurrentPreviewMovie.value || isCurrentPreviewPicture.value
+)
+// The toggle stays on through the files that are not movies. A build plays
+// them all in one video, which the waveform would resize at each one.
+const isWaveformShown = computed(
+  () =>
+    isWaveformDisplayed.value &&
+    isCurrentPreviewMovie.value &&
+    !isFullMode.value
 )
 
 // Computed — entity & preview state
@@ -4322,7 +4334,7 @@ const getMediaHeight = availableHeight => {
       height -= playlistProgressRef.value.$el.offsetHeight
     }
   }
-  if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) height -= 60
+  if (isWaveformShown.value) height -= 60
   return height
 }
 
@@ -4336,12 +4348,14 @@ const getPhoneMediaHeight = () => {
   return Math.round(((videoContainer.value?.offsetWidth || 0) * 9) / 16)
 }
 
-const resetHeight = () => {
+// Resolves once the canvas follows the media.
+const resetHeight = () =>
   nextTick(() => {
     let height
     if (isPhone.value) {
       height = getPhoneMediaHeight()
-    } else if (props.tempMode) {
+    } else if (props.tempMode && !fullScreen.value) {
+      // The modal around the player, which full screen leaves out.
       height = getMediaHeight(window.innerHeight - 90)
     } else {
       height = getMediaHeight(
@@ -4360,13 +4374,12 @@ const resetHeight = () => {
     if (isComparing.value && rawPlayerComparison.value) {
       rawPlayerComparison.value.resetHeight(height)
     }
-    nextTick(() => {
-      if (isTypingNote()) resetCanvasSize()
-      else resetCanvas()
+    return nextTick(() => {
+      const canvasReset = isTypingNote() ? resetCanvasSize() : resetCanvas()
       updateProgressBar()
+      return canvasReset
     })
   })
-}
 
 // Comparison side-effect wrappers (broadcast + player re-load belong here,
 // the pure selection state lives in usePlaylistComparison).
@@ -4615,17 +4628,30 @@ const loadWaveForm = () => {
           wavesurfer = null
         }
         configureWaveForm()
+        isWaveformLoading.value = Boolean(wavesurfer)
         // The load still pending from a switch less than 100 ms ago would
         // fetch the movie a second time, into this new waveform.
         clearTimeout(waveformLoadTimeout)
         waveformLoadTimeout = setTimeout(() => {
           // Destroyed meanwhile: the player closed, or moved on to a
           // preview that is no movie.
-          if (!wavesurfer) return
+          if (!wavesurfer) {
+            isWaveformLoading.value = false
+            return
+          }
           // destroy() aborts the in-flight fetch, rejecting load() with an
           // expected AbortError; real failures already reach the 'error'
           // handler, which load() fires before rejecting.
-          wavesurfer.load(rawPlayer.value.currentPlayer.src).catch(() => {})
+          const loading = wavesurfer
+          loading
+            .load(rawPlayer.value.currentPlayer.src)
+            .catch(() => {})
+            .finally(() => {
+              // The waveform of the next movie keeps the spinner.
+              if (wavesurfer === loading || !wavesurfer) {
+                isWaveformLoading.value = false
+              }
+            })
         }, 100)
       } catch (err) {
         console.error('Error loading waveform:', err)
@@ -5413,9 +5439,17 @@ watch(isComparisonOverlay, () => {
   })
 })
 
+// The media gives the waveform its 60 px, and gets them back on hide.
+// The canvas draws again on a new size only, which a movie held by the
+// width of the player does not get: its paused frame draws again here.
+watch(isWaveformShown, () => {
+  resetHeight().then(() => {
+    if (!isPlaying.value && !isTypingNote()) onMainCanvasResized()
+  })
+})
+
 watch(isWaveformDisplayed, () => {
   if (isWaveformDisplayed.value) {
-    resetHeight()
     loadWaveForm()
   }
   nextTick(() => updateRoomStatus())
@@ -5726,6 +5760,19 @@ const playerProxy = {
   align-items: flex-start;
   height: 240px;
   min-height: 240px;
+}
+
+#sound-container {
+  position: relative;
+}
+
+.waveform-loading {
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
 }
 
 .loading-background {

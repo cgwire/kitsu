@@ -703,6 +703,259 @@ describe('PlaylistPlayer.vue', () => {
       expect(waveform.load).toHaveBeenCalledWith('/movie.mp4')
     })
 
+    // The waveform reads the whole movie before it draws anything.
+    describe('spinner', () => {
+      const spinnerDisplay = () =>
+        wrapper.find('.waveform-loading').element.style.display
+
+      it('shows until the waveform has loaded', async () => {
+        const waveform = await showWaveform([movie])
+        let finishLoad = null
+        waveform.load.mockImplementation(
+          () =>
+            new Promise(resolve => {
+              finishLoad = resolve
+            })
+        )
+        const beforeLoad = spinnerDisplay()
+        await vi.advanceTimersByTimeAsync(100)
+        const whileLoading = spinnerDisplay()
+
+        finishLoad()
+        await flushPromises()
+
+        expect([beforeLoad, whileLoading, spinnerDisplay()]).toEqual([
+          '',
+          '',
+          'none'
+        ])
+      })
+
+      it('goes once the waveform fails to load', async () => {
+        const waveform = await showWaveform([movie])
+        waveform.load.mockRejectedValue(new Error('Unable to decode audio'))
+
+        await vi.advanceTimersByTimeAsync(100)
+        await flushPromises()
+
+        expect(spinnerDisplay()).toBe('none')
+      })
+
+      // The load of the movie left ends once the next one has started.
+      it('stays while the next movie loads', async () => {
+        const waveform = await showWaveform([movie, otherMovie])
+        let abortLoad = null
+        waveform.load.mockImplementation(
+          () =>
+            new Promise((_resolve, reject) => {
+              abortLoad = reject
+            })
+        )
+        await vi.advanceTimersByTimeAsync(100)
+        await goToNextShot()
+
+        abortLoad(new Error('The load was aborted'))
+        await flushPromises()
+
+        expect(spinnerDisplay()).toBe('')
+      })
+    })
+
+    // The waveform takes its 60 px from the media while it shows.
+    it('gives the media its height back once hidden', async () => {
+      wrapper = mountPlayer({ entities: [movie] })
+      Object.defineProperty(wrapper.element, 'offsetHeight', {
+        get: () => 600
+      })
+      await flushPromises()
+      const playbackBar = wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+      const mediaHeight = () =>
+        wrapper.find('.video-container').element.style.height
+
+      playbackBar.vm.$emit('update:isWaveformDisplayed', true)
+      await flushPromises()
+      const shownHeight = mediaHeight()
+      playbackBar.vm.$emit('update:isWaveformDisplayed', false)
+      await flushPromises()
+
+      expect([shownHeight, mediaHeight()]).toEqual(['540px', '600px'])
+    })
+
+    // The canvas draws again on a new size only. The stub never gets one,
+    // as a movie held by the width of the player, which only moves.
+    describe('drawing of the paused frame', () => {
+      const drawnMovie = {
+        ...movie,
+        preview_file_annotations: [
+          {
+            time: 0,
+            drawing: {
+              objects: [
+                {
+                  id: 'stroke',
+                  type: 'path',
+                  path: 'M 0 0 L 10 10',
+                  left: 100,
+                  top: 50,
+                  stroke: '#ff0000',
+                  strokeWidth: 2,
+                  canvasWidth: 800,
+                  canvasHeight: 600
+                }
+              ]
+            }
+          }
+        ]
+      }
+
+      // The onion skin wipes a canvas of its own.
+      const mainCanvasStub = canvas => ({
+        name: 'AnnotationCanvas',
+        template: '<div ref="overlay"><canvas /></div>',
+        setup: (_, { attrs }) => ({
+          canvas: markRaw(
+            attrs['canvas-id'] === 'playlist-annotation-canvas'
+              ? canvas
+              : createFakeCanvas()
+          ),
+          overlay: ref(null)
+        })
+      })
+
+      const mountDrawn = async () => {
+        const canvas = createFakeCanvas()
+        wrapper = mountPlayer({
+          entities: [drawnMovie],
+          stubs: { AnnotationCanvas: mainCanvasStub(canvas) }
+        })
+        await flushPromises()
+        return canvas
+      }
+
+      const playbackBar = () =>
+        wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+
+      const toggleWaveform = async isDisplayed => {
+        playbackBar().vm.$emit('update:isWaveformDisplayed', isDisplayed)
+        await flushPromises()
+      }
+
+      // What the canvas holds: the strokes added since it was last wiped.
+      const shownIds = canvas => {
+        const lastClear = Math.max(0, ...canvas.clear.mock.invocationCallOrder)
+        return canvas.add.mock.calls
+          .filter((_, i) => canvas.add.mock.invocationCallOrder[i] > lastClear)
+          .map(([object]) => object.id)
+      }
+
+      it('draws it again once the waveform shows', async () => {
+        const canvas = await mountDrawn()
+
+        await toggleWaveform(true)
+
+        expect(shownIds(canvas)).toEqual(['stroke'])
+      })
+
+      it('draws it again once the waveform hides', async () => {
+        const canvas = await mountDrawn()
+        await toggleWaveform(true)
+
+        await toggleWaveform(false)
+
+        expect(shownIds(canvas)).toEqual(['stroke'])
+      })
+
+      // A drawing shows while playing only with its option, frame by frame.
+      it('draws nothing on a playing movie', async () => {
+        const canvas = await mountDrawn()
+        wrapper.findComponent({ ref: 'raw-player' }).vm.isPlaying = true
+        playbackBar().vm.$emit('play-pause-clicked')
+        await flushPromises()
+        expect(playbackBar().props('isPlaying')).toBe(true)
+
+        await toggleWaveform(true)
+
+        expect(shownIds(canvas)).toEqual([])
+      })
+
+      it('leaves a note being typed', async () => {
+        const canvas = await mountDrawn()
+        canvas.getActiveObject.mockReturnValue({ isEditing: true })
+        canvas.clear.mockClear()
+
+        await toggleWaveform(true)
+
+        expect(canvas.clear).not.toHaveBeenCalled()
+      })
+    })
+
+    // The waveform shows under a movie only, and keeps its toggle on other
+    // files: the media gets its 60 px back there.
+    describe('height across files', () => {
+      const mountShown = async entities => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+        wrapper = mountPlayer({ entities })
+        Object.defineProperty(wrapper.element, 'offsetHeight', {
+          get: () => 600
+        })
+        await flushPromises()
+        playbackBar().vm.$emit('update:isWaveformDisplayed', true)
+        await flushPromises()
+      }
+
+      const playbackBar = () =>
+        wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+      const mediaHeight = () =>
+        wrapper.find('.video-container').element.style.height
+
+      it('gives a picture its full height after a playing movie', async () => {
+        await mountShown([movie, picture])
+        const rawPlayer = wrapper.findComponent({ ref: 'raw-player' })
+        rawPlayer.vm.isPlaying = true
+        playbackBar().vm.$emit('play-pause-clicked')
+        await flushPromises()
+
+        rawPlayer.vm.$emit('play-next')
+        await flushPromises()
+
+        expect(mediaHeight()).toBe('600px')
+      })
+
+      it('gives the waveform its 60 px on a movie after a picture', async () => {
+        await mountShown([movie, picture, otherMovie])
+        await goToNextShot()
+        const pictureHeight = mediaHeight()
+
+        await goToNextShot()
+
+        expect([pictureHeight, mediaHeight()]).toEqual(['600px', '540px'])
+      })
+
+      // A build plays files of every kind in one video.
+      it('hides the waveform while a build plays', async () => {
+        await mountShown([movie])
+        const soundContainer = wrapper.find('#sound-container').element
+        await wrapper.find('.job-button.mr05').trigger('click')
+        await flushPromises()
+        const duringBuild = [mediaHeight(), soundContainer.style.display]
+
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(
+            button =>
+              button.attributes('title') === 'playlists.actions.exit_play_full'
+          )
+          .vm.$emit('click')
+        await flushPromises()
+
+        expect([...duringBuild, mediaHeight()]).toEqual([
+          '600px',
+          'none',
+          '540px'
+        ])
+      })
+    })
+
     it('drops the waveform load of a closed player', async () => {
       const waveform = await showWaveform([movie])
       wrapper.unmount()
@@ -3184,6 +3437,35 @@ describe('PlaylistPlayer.vue', () => {
       )
       expect(wrapper.find('.task-info-column').element.style.height).toBe(
         '600px'
+      )
+    })
+  })
+
+  // The temporary playlist leaves room for the margins of its modal, which
+  // the browser does not show in full screen.
+  describe('temporary playlist in full screen', () => {
+    afterEach(() => {
+      delete document.fullscreen
+      resetFullScreen()
+    })
+
+    it('gives the media the whole screen', async () => {
+      wrapper = mountPlayer({ props: { tempMode: true } })
+      Object.defineProperty(wrapper.element, 'offsetHeight', {
+        get: () => window.innerHeight
+      })
+      await flushPromises()
+
+      Object.defineProperty(document, 'fullscreen', {
+        configurable: true,
+        value: true
+      })
+      setFullScreenElement(wrapper.element)
+      wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+      await flushPromises()
+
+      expect(wrapper.find('.video-container').element.style.height).toBe(
+        `${window.innerHeight}px`
       )
     })
   })
