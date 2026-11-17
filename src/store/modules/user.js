@@ -266,7 +266,7 @@ const getters = {
   // Mirrors zou's metadata access for the trim handles, data keys without a
   // descriptor: admins anywhere, managers and supervisors without department
   // when they belong to the production team.
-  canEditShotTrim: (state, getters, rootState, rootGetters) => task => {
+  canEditTrim: (state, getters, rootState, rootGetters) => task => {
     if (!state.user) return false
     if (state.user.role === 'admin') return true
     const production = rootGetters.productionMap.get(task?.project_id)

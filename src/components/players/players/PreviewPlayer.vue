@@ -487,7 +487,7 @@ import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { useTouchNavigation } from '@/composables/players/touchNavigation'
 import { usePlayerTransport } from '@/composables/players/transport'
-import { useTrimmedShot } from '@/composables/players/trimmedShot'
+import { useTrimmedEntity } from '@/composables/players/trimmedEntity'
 import func from '@/lib/func'
 import { getEntityPath } from '@/lib/path'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
@@ -1473,8 +1473,9 @@ const onProgressChanged = frame => {
   }
 }
 
-// Shot trim handles, shown on the progress bar like in PlaylistPlayer.
-const { canEditTrim, getTrimmedShot, saveTrimmedShot } = useTrimmedShot({
+// Shot and asset trim handles, shown on the progress bar like in
+// PlaylistPlayer.
+const { canEditTrim, getTrimmedEntity, saveTrimmedEntity } = useTrimmedEntity({
   entityType: computed(() => props.entityType),
   store,
   task: computed(() => props.task)
@@ -1489,20 +1490,20 @@ const toFrameNumber = value => {
   return Number.isNaN(frame) ? -1 : frame
 }
 
-// The main preview shows the trim of the shot. The extra previews of the
-// revision have timelines of their own, so each one keeps its own trim on
-// its preview file. Like in PlaylistPlayer, unset handles fall back to the
-// clip bounds so the markers always show on shot movies and dragging them
-// creates the trim.
+// The main preview shows the trim of its shot or asset. The extra previews
+// of the revision have timelines of their own, so each one keeps its own
+// trim on its preview file. Like in PlaylistPlayer, unset handles fall back
+// to the clip bounds so the markers always show on shot and asset movies
+// and dragging them creates the trim.
 const isExtraPreview = computed(() => currentIndex.value > 1)
 
 const getCurrentTrim = () => {
-  const shot = getTrimmedShot()
-  if (!shot) return null
+  const entity = getTrimmedEntity()
+  if (!entity) return null
   if (isExtraPreview.value) {
     return currentPreview.value?.id ? currentPreview.value : null
   }
-  return shot.data || {}
+  return entity.data || {}
 }
 
 const resetHandles = () => {
@@ -1526,11 +1527,12 @@ const saveHandles = handles => {
     preview.id
       ? store.dispatch('updatePreviewTrim', { preview, trim: handles })
       : Promise.resolve()
-  // The trim of the main preview lives on the shot: its preview file keeps
-  // a copy, saved after the shot so a refused trim never reaches it.
+  // The trim of the main preview lives on its shot or asset: its preview
+  // file keeps a copy, saved after the entity so a refused trim never
+  // reaches it.
   const save = isExtraPreview.value
     ? savePreviewTrim()
-    : saveTrimmedShot(handles).then(savePreviewTrim)
+    : saveTrimmedEntity(handles).then(savePreviewTrim)
   save.catch(err => {
     console.error(err)
     resetHandles()
@@ -2588,14 +2590,16 @@ watch(currentIndex, () => {
   lastIndex = currentIndex.value
 })
 
-// isShotsLoading: the shotMap cache is not reactive, re-read it when the
-// shots finish loading. nbFrames: keeps the unset handle-out fallback on
-// the clip end once the real movie duration is known.
+// isAssetsLoading, isShotsLoading: the assetMap and shotMap caches are not
+// reactive, re-read them when their list finishes loading. nbFrames: keeps
+// the unset handle-out fallback on the clip end once the real movie
+// duration is known.
 watch(
   [
     () => props.task,
     currentIndex,
     nbFrames,
+    () => store.getters.isAssetsLoading,
     () => store.getters.isShotsLoading,
     // An extra preview's trim, saved here or by another user.
     () => currentPreview.value?.handle_in,

@@ -160,16 +160,8 @@
           :muted="true"
           :next-handle-in="nextEntityHandleIn"
           :panzoom="true"
-          :handle-in="
-            ['shot', 'edit', 'episode'].includes(playlist.for_entity)
-              ? handleIn
-              : -1
-          "
-          :handle-out="
-            ['shot', 'edit', 'episode'].includes(playlist.for_entity)
-              ? handleOut
-              : -1
-          "
+          :handle-in="isTrimmedPlaylist ? handleIn : -1"
+          :handle-out="isTrimmedPlaylist ? handleOut : -1"
           @metadata-loaded="updateComparisonAnchor"
           @panzoom-ready="onResetZoomClicked"
           v-show="
@@ -477,16 +469,8 @@
       :is-full-screen="fullScreen || isEntitiesHidden"
       :movie-dimensions="movieDimensions"
       :nb-frames="entityProgressNbFrames"
-      :handle-in="
-        playlist.for_entity === 'shot' && currentPreviewIndex === 0
-          ? handleIn
-          : -1
-      "
-      :handle-out="
-        playlist.for_entity === 'shot' && currentPreviewIndex === 0
-          ? handleOut
-          : -1
-      "
+      :handle-in="hasTrimHandles && currentPreviewIndex === 0 ? handleIn : -1"
+      :handle-out="hasTrimHandles && currentPreviewIndex === 0 ? handleOut : -1"
       :preview-id="currentPreview ? currentPreview.id : ''"
       :read-only="areHandlesReadOnly"
       @start-scrub="onScrubStart"
@@ -1277,6 +1261,7 @@ const success = ref({
 
 // Vuex getters
 
+const assetMap = computed(() => store.getters.assetMap)
 const currentProduction = computed(() => store.getters.currentProduction)
 const editMap = computed(() => store.getters.editMap)
 const episodeMap = computed(() => store.getters.episodeMap)
@@ -1431,7 +1416,7 @@ const canKeepTools = computed(
 // Zou refuses the trim to artists, clients and department supervisors: their
 // handles stay visible but frozen, as in the preview player.
 const areHandlesReadOnly = computed(
-  () => !store.getters.canEditShotTrim(task.value)
+  () => !store.getters.canEditTrim(task.value)
 )
 
 const currentPreview = computed(() => {
@@ -1713,6 +1698,15 @@ const panzoomTransform = ref({ x: 0, y: 0, scale: 1 })
 const isAssetPlaylist = computed(() => props.currentEntityType === 'asset')
 const isSequencePlaylist = computed(
   () => props.currentEntityType === 'sequence'
+)
+
+// Playback follows the trim saved on the entities of these playlists. The
+// progress bar shows and moves the handles of the shots and assets only.
+const isTrimmedPlaylist = computed(() =>
+  ['asset', 'edit', 'episode', 'shot'].includes(props.playlist?.for_entity)
+)
+const hasTrimHandles = computed(() =>
+  ['asset', 'shot'].includes(props.playlist?.for_entity)
 )
 
 const isAllowToEdit = computed(() => {
@@ -2845,12 +2839,15 @@ const onProgressChanged = (frame, updatePlaylistProgress = true) => {
 // Only the moved handle is saved: the other one shows either the clip
 // bound of the revision on screen, or a trim set on another revision.
 const _saveHandles = handles => {
-  const shot = shotMap.value.get(currentEntity.value?.id)
-  if (!shot) return
+  const action = { asset: 'editAsset', shot: 'editShot' }[
+    props.playlist?.for_entity
+  ]
+  const source = getTrimSource(currentEntity.value)
+  if (!action || !source) return
   store
-    .dispatch('editShot', {
-      id: shot.id,
-      data: { ...shot.data, ...handles }
+    .dispatch(action, {
+      id: source.id,
+      data: { ...source.data, ...handles }
     })
     .catch(console.error)
 }
@@ -3111,7 +3108,7 @@ const onFrameUpdate = frame => {
     nbFrames.value > 0
   ) {
     const hasHandles =
-      ['shot', 'edit', 'episode'].includes(props.playlist.for_entity) &&
+      isTrimmedPlaylist.value &&
       currentPreviewIndex.value === 0 &&
       handleOut.value < nbFrames.value
     // With rVFC the trim loop is enforced inside MultiVideoViewer at the
@@ -4021,7 +4018,7 @@ const updateProgressBar = f => {
   if (
     isPlaying.value &&
     currentPreviewIndex.value === 0 &&
-    ['shot', 'edit', 'episode'].includes(props.playlist?.for_entity) &&
+    isTrimmedPlaylist.value &&
     handleOut.value < nbFrames.value
   ) {
     frame = Math.min(frame, handleOut.value - 1)
@@ -4637,19 +4634,23 @@ const loadWaveForm = () => {
   }
 }
 
-// Handles straight from the entity's source data — the handleIn /
-// handleOut refs and the global nbFrames may still reflect the previous
-// entity right after a switch.
-const getEntityHandles = entity => {
-  if (!['shot', 'edit', 'episode'].includes(props.playlist?.for_entity)) {
-    return { handleIn: 0, handleOut: 0 }
-  }
+// The entity of the playlist list holding the trim of an entry.
+const getTrimSource = entity => {
+  if (!isTrimmedPlaylist.value) return null
   const entityMapByType = {
+    asset: assetMap.value,
     edit: editMap.value,
     episode: episodeMap.value,
     shot: shotMap.value
   }
-  const source = entityMapByType[props.playlist.for_entity]?.get(entity?.id)
+  return entityMapByType[props.playlist.for_entity]?.get(entity?.id) || null
+}
+
+// Handles straight from the entity's source data — the handleIn /
+// handleOut refs and the global nbFrames may still reflect the previous
+// entity right after a switch.
+const getEntityHandles = entity => {
+  const source = getTrimSource(entity)
   return {
     handleIn: source?.data?.handle_in || 0,
     handleOut: source?.data?.handle_out || 0
@@ -4657,7 +4658,7 @@ const getEntityHandles = entity => {
 }
 
 const resetHandles = entity => {
-  if (!['shot', 'edit', 'episode'].includes(props.playlist?.for_entity)) return
+  if (!isTrimmedPlaylist.value) return
   // No entity argument = reset for what is displayed right now. A
   // sub-preview is not the entity's trimmed main preview, so the entity
   // trim handles don't apply to its timeline.

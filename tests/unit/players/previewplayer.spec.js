@@ -143,7 +143,7 @@ const mountPlayer = ({
   const store = createStore({
     getters: {
       assetMap: () => new Map(),
-      canEditShotTrim: () => () => false,
+      canEditTrim: () => () => false,
       canValidatePreviewFiles: () => () => false,
       getProductionBackgrounds: () => () => [],
       isCurrentUserArtist: () => false,
@@ -535,7 +535,7 @@ describe('PreviewPlayer.vue', () => {
       wrapper = mountPlayer({
         props: { previews: [moviePreview], readOnly: false },
         getterOverrides: {
-          canEditShotTrim: () => () => true,
+          canEditTrim: () => () => true,
           shotMap: () =>
             new Map([[task.entity_id, { id: task.entity_id, data }]])
         }
@@ -578,6 +578,39 @@ describe('PreviewPlayer.vue', () => {
       expect(savedData()).toEqual({ handle_in: 5, handle_out: 300 })
     })
 
+    // The entity type of an asset task is its asset type: the task type
+    // tells the asset apart.
+    it('shows and saves the trim of an asset', async () => {
+      const assetTaskType = { id: 'task-type-modeling', for_entity: 'Asset' }
+      wrapper = mountPlayer({
+        props: {
+          previews: [moviePreview],
+          readOnly: false,
+          task: {
+            ...task,
+            entity_type_name: 'Character',
+            task_type_id: assetTaskType.id
+          }
+        },
+        getterOverrides: {
+          assetMap: () =>
+            new Map([[task.entity_id, { id: task.entity_id, data: { handle_out: 200 } }]]),
+          canEditTrim: () => () => true,
+          taskTypeMap: () => new Map([[assetTaskType.id, assetTaskType]])
+        }
+      })
+      await nextTick()
+      const progress = wrapper.findComponent({ name: 'VideoProgress' })
+      expect(progress.attributes('handle-out')).toBe('200')
+
+      dragHandle('handle-in-changed', 5)
+
+      expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith('editAsset', {
+        id: task.entity_id,
+        data: { handle_in: 5, handle_out: 200 }
+      })
+    })
+
     it('copies the moved handle on the preview file on screen', async () => {
       await mountTrimmable({})
       dragHandle('handle-in-changed', 5)
@@ -606,7 +639,7 @@ describe('PreviewPlayer.vue', () => {
       wrapper = mountPlayer({
         props: { previews: [moviePreview, extra], readOnly: false },
         getterOverrides: {
-          canEditShotTrim: () => () => canEdit,
+          canEditTrim: () => () => canEdit,
           shotMap: () =>
             new Map([
               [

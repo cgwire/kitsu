@@ -219,12 +219,12 @@ describe('User store', () => {
     })
   })
 
-  describe('canEditShotTrim', () => {
+  describe('canEditTrim', () => {
     const task = { project_id: 'production-1' }
     const call = (role, departments, options = {}) => {
       const { team = ['person-1'], projectRoles = {} } = options
       const state = { user: { id: 'person-1', role, departments }, projectRoles }
-      return store.getters.canEditShotTrim(
+      return store.getters.canEditTrim(
         state,
         {
           currentUserRoleForProduction:
@@ -261,7 +261,7 @@ describe('User store', () => {
     test('nobody edits it without a user', () => {
       const rootGetters = { productionMap: new Map() }
       expect(
-        store.getters.canEditShotTrim({ user: null }, {}, {}, rootGetters)(task)
+        store.getters.canEditTrim({ user: null }, {}, {}, rootGetters)(task)
       ).toBe(false)
     })
   })
