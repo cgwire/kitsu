@@ -13,6 +13,8 @@ vi.mock('vue-router', () => ({
 
 import '@/lib/auth'
 import errors from '@/lib/errors'
+import { getPlaylistListKey } from '@/lib/playlist'
+import playlistsApi from '@/store/api/playlists'
 import editStore from '@/store/modules/edits'
 import episodeStore from '@/store/modules/episodes'
 import playlistStore from '@/store/modules/playlists'
@@ -1528,9 +1530,14 @@ describe('Playlist page, modals and navigation', () => {
 
   // Each load answers a new object, as the API does. The edit modal sits in
   // a teleport, disabled out of full screen.
-  const openFirstPlaylist = async (actions = {}) => {
+  const openFirstPlaylist = async (
+    actions = {},
+    { state, query, mutations } = {}
+  ) => {
     const page = await openPlaylist(stored.get('pl-1'), {
-      state: { playlists: [...stored.values()] },
+      state: { playlists: [...stored.values()], ...state },
+      query,
+      mutations,
       getters: { playlistMap: () => stored },
       actions: {
         loadPlaylist: vi.fn((context, { id }) =>
@@ -1962,6 +1969,255 @@ describe('Playlist page, modals and navigation', () => {
     await flushPromises()
 
     expect(routeHolder.router.push).not.toHaveBeenCalled()
+  })
+
+  // The topbar and Back move the page to another production, episode, or
+  // All shots / All assets list without closing the form. A movie has no
+  // current episode.
+  const scopeMoves = [
+    [
+      'production',
+      { state: { currentEpisode: null } },
+      page => moveScope(page.store, { currentProduction: { id: 'p2' } }),
+      {
+        name: 'playlist',
+        params: { production_id: 'p1', playlist_id: 'pl-3' },
+        query: {}
+      }
+    ],
+    [
+      'episode',
+      { state: { isTVShow: true } },
+      page => moveScope(page.store, { currentEpisode: { id: 'ep-b' } }),
+      {
+        name: 'episode-playlist',
+        params: { production_id: 'p1', episode_id: 'ep-a', playlist_id: 'pl-3' },
+        query: {}
+      }
+    ],
+    [
+      'entity type',
+      {
+        state: { isTVShow: true, currentEpisode: { id: 'all' } },
+        query: { for_entity: 'shot' }
+      },
+      async () => {
+        routeHolder.route.query = {}
+        await nextTick()
+      },
+      {
+        name: 'episode-playlist',
+        params: { production_id: 'p1', episode_id: 'all', playlist_id: 'pl-3' },
+        query: { for_entity: 'shot' }
+      }
+    ]
+  ]
+
+  it.each(scopeMoves)(
+    'opens the playlist it creates where it was created once the page moves to another %s',
+    async (_scope, options, move, createdRoute) => {
+      const create = gatedAction()
+      const page = await openFirstPlaylist({ newPlaylist: create.fn }, options)
+      await confirmCreation(page)
+      await move(page)
+      await flushPromises()
+      routeHolder.router.push.mockClear()
+
+      create.release({ id: 'pl-3', name: 'C' })
+      await flushPromises()
+
+      expect(routeHolder.router.push).toHaveBeenCalledTimes(1)
+      expect(routeHolder.router.push).toHaveBeenCalledWith(createdRoute)
+    }
+  )
+
+  // The store's list actions and mutations, on a creation Zou answers late.
+  // Zou holds the two playlists of p1, and none in another production.
+  const openWithStore = async (options = {}) => {
+    let answer
+    vi.spyOn(playlistsApi, 'newPlaylist').mockImplementation(
+      () =>
+        new Promise(resolve => {
+          answer = resolve
+        })
+    )
+    const copies = () => [...stored.values()].map(playlist => ({ ...playlist }))
+    vi.spyOn(playlistsApi, 'getPlaylists').mockImplementation(production =>
+      Promise.resolve(production.id === 'p1' ? copies() : [])
+    )
+    const listed = copies()
+    const page = await openFirstPlaylist(
+      {
+        editPlaylist: playlistStore.actions.editPlaylist,
+        loadPlaylists: playlistStore.actions.loadPlaylists,
+        newPlaylist: playlistStore.actions.newPlaylist
+      },
+      {
+        ...options,
+        state: {
+          playlists: listed,
+          playlistListKey: getPlaylistListKey('p1'),
+          playlistMap: new Map(listed.map(playlist => [playlist.id, playlist])),
+          ...options.state
+        },
+        mutations: {
+          EDIT_PLAYLIST_START: playlistStore.mutations.EDIT_PLAYLIST_START,
+          EDIT_PLAYLIST_END: playlistStore.mutations.EDIT_PLAYLIST_END,
+          LOAD_PLAYLISTS_END: playlistStore.mutations.LOAD_PLAYLISTS_END,
+          SET_PLAYLIST_LIST_KEY: playlistStore.mutations.SET_PLAYLIST_LIST_KEY
+        }
+      }
+    )
+    return { ...page, answer: playlist => answer(playlist) }
+  }
+  const cancelCreation = async options => {
+    const page = await openWithStore(options)
+    await confirmCreation(page)
+    page.modal('EditPlaylistModal').vm.$emit('cancel')
+    await nextTick()
+    return page
+  }
+  const listedIds = page => page.store.state.playlists.map(({ id }) => id)
+  const created = { id: 'pl-3', name: 'C', project_id: 'p1' }
+  const moveToP2 = page =>
+    moveScope(page.store, { currentProduction: { id: 'p2' } })
+
+  it('lists the playlist it creates once its form is closed', async () => {
+    const page = await cancelCreation()
+
+    page.answer(created)
+    await flushPromises()
+
+    expect(listedIds(page)).toEqual(['pl-3', 'pl-1', 'pl-2'])
+  })
+
+  it('lists the playlist it creates in the All shots list', async () => {
+    const page = await cancelCreation({
+      state: { isTVShow: true, currentEpisode: { id: 'all' } },
+      query: { for_entity: 'shot' }
+    })
+
+    page.answer(created)
+    await flushPromises()
+
+    expect(listedIds(page)).toEqual(['pl-3', 'pl-1', 'pl-2'])
+  })
+
+  it.each(scopeMoves)(
+    'keeps the playlist it creates out of the list of another %s',
+    async (_scope, options, move) => {
+      const page = await cancelCreation(options)
+      await move(page)
+      await flushPromises()
+
+      page.answer(created)
+      await flushPromises()
+
+      expect(listedIds(page)).not.toContain('pl-3')
+    }
+  )
+
+  it('keeps the playlist it creates out of the list of another production while its form is shown', async () => {
+    const page = await openWithStore()
+    await confirmCreation(page)
+    await moveToP2(page)
+    await flushPromises()
+
+    page.answer(created)
+    await flushPromises()
+
+    expect(listedIds(page)).not.toContain('pl-3')
+  })
+
+  it('lists the playlist it creates after a switch and back', async () => {
+    const page = await cancelCreation()
+    await moveToP2(page)
+    await flushPromises()
+    await moveScope(page.store, { currentProduction: { id: 'p1' } })
+    await flushPromises()
+
+    page.answer(created)
+    await flushPromises()
+
+    expect(listedIds(page)).toEqual(['pl-3', 'pl-1', 'pl-2'])
+  })
+
+  // Once the page is left, the store keeps the list it showed until another
+  // page loads one.
+  it('lists the playlist it creates when the page is left before a switch', async () => {
+    const page = await cancelCreation()
+    page.wrapper.unmount()
+    await moveToP2(page)
+
+    page.answer(created)
+    await flushPromises()
+
+    expect(listedIds(page)).toEqual(['pl-3', 'pl-1', 'pl-2'])
+  })
+
+  it('keeps the playlist it creates out of a list another page loads once this one is left', async () => {
+    const page = await cancelCreation()
+    page.wrapper.unmount()
+    await moveToP2(page)
+    await page.store.dispatch('loadPlaylists', {})
+
+    page.answer(created)
+    await flushPromises()
+
+    expect(listedIds(page)).not.toContain('pl-3')
+  })
+
+  it('keeps the playlist it creates out of the list of another production when the page is left after the switch', async () => {
+    const page = await cancelCreation()
+    await moveToP2(page)
+    await flushPromises()
+    page.wrapper.unmount()
+
+    page.answer(created)
+    await flushPromises()
+
+    expect(listedIds(page)).not.toContain('pl-3')
+  })
+
+  // A rename of the playlist shown that Zou answers late.
+  const renameLate = async () => {
+    let answer
+    vi.spyOn(playlistsApi, 'updatePlaylist').mockImplementation(
+      () =>
+        new Promise(resolve => {
+          answer = resolve
+        })
+    )
+    const page = await openWithStore()
+    await editFirstPlaylist(page)
+    page
+      .modal('EditPlaylistModal')
+      .vm.$emit('confirm', { id: 'pl-1', name: 'A2', for_client: false })
+    await flushPromises()
+    return { ...page, answerRename: () => answer({ ...stored.get('pl-1'), name: 'A2' }) }
+  }
+
+  it('renames the playlist in the list shown', async () => {
+    const page = await renameLate()
+
+    page.answerRename()
+    await flushPromises()
+
+    expect(page.store.state.playlists.map(({ name }) => name)).toEqual([
+      'A2',
+      'B'
+    ])
+  })
+
+  it('keeps a playlist renamed out of the list of another production', async () => {
+    const page = await renameLate()
+    await moveToP2(page)
+    await flushPromises()
+
+    page.answerRename()
+    await flushPromises()
+
+    expect(listedIds(page)).not.toContain('pl-1')
   })
 })
 

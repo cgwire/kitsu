@@ -6,6 +6,7 @@ import { vi } from 'vitest'
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
 
+import { getPlaylistListKey } from '@/lib/playlist'
 import store from '@/store/modules/playlists'
 import playlistsApi from '@/store/api/playlists'
 
@@ -109,6 +110,162 @@ describe('Playlists store', () => {
       expect(consoleError).toHaveBeenCalledWith(error)
     })
 
+    // A playlist of the All shots list of production-1, created while the
+    // store holds the list of listKey once Zou answers.
+    const createInList = async listKey => {
+      let answer
+      vi.spyOn(playlistsApi, 'newPlaylist').mockImplementation(
+        () =>
+          new Promise(resolve => {
+            answer = resolve
+          })
+      )
+      const commit = vi.fn()
+      const state = {
+        playlistListKey: getPlaylistListKey('production-1', 'all', 'shot')
+      }
+      const creation = store.actions.newPlaylist(
+        { commit, state },
+        {
+          name: 'Review',
+          production_id: 'production-1',
+          episode_id: 'all',
+          listForEntity: 'shot'
+        }
+      )
+      state.playlistListKey = listKey
+      answer({ id: 'playlist-new' })
+      return { commit, playlist: await creation }
+    }
+
+    test('newPlaylist lists the playlist in the list it was created in', async () => {
+      const { commit, playlist } = await createInList(
+        getPlaylistListKey('production-1', 'all', 'shot')
+      )
+
+      expect(playlist).toEqual({ id: 'playlist-new' })
+      expect(playlistsApi.newPlaylist).toHaveBeenCalledWith({
+        name: 'Review',
+        production_id: 'production-1',
+        episode_id: 'all'
+      })
+      expect(commit).toHaveBeenCalledWith('EDIT_PLAYLIST_END', {
+        id: 'playlist-new'
+      })
+    })
+
+    // The page can move to another list while Zou creates the playlist, and
+    // a page opened meanwhile can load another one.
+    test.each([
+      [
+        "another production's list",
+        getPlaylistListKey('production-2', 'all', 'shot')
+      ],
+      ["another episode's list", getPlaylistListKey('production-1', 'episode-2')],
+      ['the All assets list', getPlaylistListKey('production-1', 'all', 'asset')],
+      ['a list that loads again', null]
+    ])(
+      'newPlaylist keeps the playlist out of %s',
+      async (_list, listKey) => {
+        const { commit, playlist } = await createInList(listKey)
+
+        expect(playlist).toEqual({ id: 'playlist-new' })
+        expect(commit).not.toHaveBeenCalledWith(
+          'EDIT_PLAYLIST_END',
+          expect.anything()
+        )
+      }
+    )
+
+    // A movie has no episode: its list key ignores the episode shown.
+    test.each([
+      ['a TV show', true, getPlaylistListKey('production-1', 'all', 'shot')],
+      ['a movie', false, getPlaylistListKey('production-1', null, 'shot')]
+    ])(
+      'loadPlaylists keeps the key of the list it loads for %s',
+      async (_production, isTVShow, listKey) => {
+        vi.spyOn(playlistsApi, 'getPlaylists').mockResolvedValue([
+          { id: 'playlist-1' }
+        ])
+        const commit = vi.fn()
+
+        await store.actions.loadPlaylists(
+          {
+            commit,
+            rootGetters: {
+              currentProduction: { id: 'production-1' },
+              currentEpisode: { id: 'all' },
+              isTVShow
+            }
+          },
+          { forEntity: 'shot' }
+        )
+
+        expect(commit).toHaveBeenLastCalledWith(
+          'SET_PLAYLIST_LIST_KEY',
+          listKey
+        )
+      }
+    )
+
+    // A save Zou answers after a switch of production finds the list of the
+    // other production.
+    const saves = [
+      ['editPlaylist', 'updatePlaylist', { data: { id: 'playlist-1' } }],
+      [
+        'addEntitiesToPlaylist',
+        'addEntitiesToPlaylist',
+        { playlist: { id: 'playlist-1' }, entityIds: ['shot-1'] }
+      ]
+    ]
+    const save = async (action, apiMethod, payload, playlistMap) => {
+      const saved = { id: 'playlist-1', name: 'Dailies v2' }
+      vi.spyOn(playlistsApi, apiMethod).mockResolvedValue(saved)
+      const commit = vi.fn()
+      const playlist = await store.actions[action](
+        {
+          commit,
+          state: { playlistMap },
+          rootGetters: { isCurrentUserClient: false }
+        },
+        payload
+      )
+      return { commit, playlist, saved }
+    }
+
+    test.each(saves)(
+      '%s updates a playlist the list holds',
+      async (action, apiMethod, payload) => {
+        const { commit, playlist, saved } = await save(
+          action,
+          apiMethod,
+          payload,
+          new Map([['playlist-1', { id: 'playlist-1', name: 'Dailies' }]])
+        )
+
+        expect(playlist).toEqual(saved)
+        expect(commit).toHaveBeenCalledWith('EDIT_PLAYLIST_END', saved)
+      }
+    )
+
+    test.each(saves)(
+      '%s leaves a playlist the list does not hold out of it',
+      async (action, apiMethod, payload) => {
+        const { commit, playlist, saved } = await save(
+          action,
+          apiMethod,
+          payload,
+          new Map()
+        )
+
+        expect(playlist).toEqual(saved)
+        expect(commit).not.toHaveBeenCalledWith(
+          'EDIT_PLAYLIST_END',
+          expect.anything()
+        )
+      }
+    )
+
     // Opening a playlist then another: the preview maps belong to the last
     // one opened, whatever order the responses land in.
     test('loadPlaylist commits only the playlist opened last', async () => {
@@ -175,6 +332,7 @@ describe('Playlists store', () => {
         const state = { playlists: [], playlistMap: new Map() }
         const context = {
           commit: (type, payload) => store.mutations[type](state, payload),
+          state,
           rootGetters: { isCurrentUserClient: false }
         }
         context.dispatch = (type, payload) =>
@@ -358,6 +516,20 @@ describe('Playlists store', () => {
   })
 
   describe('Mutations', () => {
+    // The page empties the list when its production, episode, or All shots
+    // or All assets list changes: no key holds until the next load lands.
+    test('LOAD_PLAYLISTS_END forgets the key of the list it replaces', () => {
+      const state = {
+        playlistListKey: getPlaylistListKey('production-1'),
+        playlists: [{ id: 'playlist-1' }],
+        playlistMap: new Map()
+      }
+
+      store.mutations.LOAD_PLAYLISTS_END(state, [])
+
+      expect(state.playlistListKey).toBeNull()
+    })
+
     // Zou drops the pin of an entry whose preview is gone, and the page then
     // shows the entity's main preview: the row holds no preview to match.
     test('CHANGE_PLAYLIST_PREVIEW re-pins an entry whose pin was dropped', () => {

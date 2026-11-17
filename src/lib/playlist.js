@@ -63,3 +63,8 @@ export const isPlaylistInScope = (
   }
   return playlist.episode_id === episodeId
 }
+
+// The playlists of a production, an episode (none for a movie), and an All
+// shots, All episodes, or All assets list make one list.
+export const getPlaylistListKey = (productionId, episodeId, forEntity) =>
+  [productionId, episodeId, forEntity].join('/')

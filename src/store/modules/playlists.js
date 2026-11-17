@@ -1,4 +1,8 @@
-import { DEFAULT_NB_FRAMES_PICTURE, isPlaylistInScope } from '@/lib/playlist'
+import {
+  DEFAULT_NB_FRAMES_PICTURE,
+  getPlaylistListKey,
+  isPlaylistInScope
+} from '@/lib/playlist'
 import playlistsApi from '@/store/api/playlists'
 import { sortByDate } from '@/lib/sorting'
 import { removeModelFromList, updateModelFromList } from '@/lib/models'
@@ -30,6 +34,7 @@ import {
   REMOVE_BUILD_JOB,
   SET_CURRENT_PRODUCTION,
   SET_PLAYLIST_ENTRY_MAP,
+  SET_PLAYLIST_LIST_KEY,
   UPDATE_PREVIEW_ANNOTATION,
   SET_PREVIEW_FILE_ANNOTATIONS,
   UPDATE_PREVIEW_VALIDATION_STATUS,
@@ -76,6 +81,8 @@ const helpers = {
 
 const initialState = {
   playlists: [],
+  // The list the playlists make once loaded, see getPlaylistListKey.
+  playlistListKey: null,
   playlistMap: new Map(),
   previewFileMap: new Map(),
   previewFileEntityMap: new Map(),
@@ -112,6 +119,10 @@ const actions = {
       .getPlaylists(production, episode, taskTypeId, sortBy, page, forEntity)
       .then(playlists => {
         commit(LOAD_PLAYLISTS_END, playlists)
+        commit(
+          SET_PLAYLIST_LIST_KEY,
+          getPlaylistListKey(production.id, episode?.id, forEntity)
+        )
         return playlists
       })
   },
@@ -204,19 +215,32 @@ const actions = {
     return request
   },
 
-  async newPlaylist({ commit }, data) {
+  // The list loaded can change while Zou creates the playlist, through the
+  // topbar or a page opened meanwhile: the playlist joins it only if it is
+  // still the list of its production, episode, and listForEntity, the All
+  // shots, All episodes, or All assets list it was created in.
+  async newPlaylist({ commit, state }, { listForEntity, ...data }) {
+    const listKey = getPlaylistListKey(
+      data.production_id,
+      data.episode_id,
+      listForEntity
+    )
     commit(EDIT_PLAYLIST_START, data)
     const playlist = await playlistsApi.newPlaylist(data)
-    commit(EDIT_PLAYLIST_END, playlist)
+    if (state.playlistListKey === listKey) commit(EDIT_PLAYLIST_END, playlist)
     return playlist
   },
 
-  async editPlaylist({ commit, rootGetters }, { data }) {
+  async editPlaylist({ commit, rootGetters, state }, { data }) {
     if (!rootGetters.isCurrentUserClient) {
       commit(EDIT_PLAYLIST_START)
       try {
         const playlist = await playlistsApi.updatePlaylist(data)
-        commit(EDIT_PLAYLIST_END, playlist)
+        // A switch of production meanwhile loads another list: update only
+        // a playlist it holds, as refreshPlaylist does.
+        if (state.playlistMap.get(playlist.id)) {
+          commit(EDIT_PLAYLIST_END, playlist)
+        }
         return playlist
       } catch (err) {
         console.error(err)
@@ -233,12 +257,15 @@ const actions = {
     return playlist
   },
 
-  async addEntitiesToPlaylist({ commit }, { playlist, entityIds }) {
+  async addEntitiesToPlaylist({ commit, state }, { playlist, entityIds }) {
     const updatedPlaylist = await playlistsApi.addEntitiesToPlaylist(
       playlist,
       entityIds
     )
-    commit(EDIT_PLAYLIST_END, updatedPlaylist)
+    // Same rule as editPlaylist.
+    if (state.playlistMap.get(updatedPlaylist.id)) {
+      commit(EDIT_PLAYLIST_END, updatedPlaylist)
+    }
     return updatedPlaylist
   },
 
@@ -464,6 +491,7 @@ const actions = {
 const mutations = {
   [LOAD_PLAYLISTS_END](state, playlists) {
     state.playlists = playlists
+    state.playlistListKey = null
     state.playlistMap = new Map()
     playlists.forEach(playlist => {
       if (!playlist.entities) playlist.entities = []
@@ -785,6 +813,10 @@ const mutations = {
 
   [SET_PLAYLIST_ENTRY_MAP](state, playlistEntryMap) {
     state.playlistEntryMap = new Map(Object.entries(playlistEntryMap))
+  },
+
+  [SET_PLAYLIST_LIST_KEY](state, playlistListKey) {
+    state.playlistListKey = playlistListKey
   },
 
   [RESET_ALL](state) {

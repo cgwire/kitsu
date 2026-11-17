@@ -838,15 +838,20 @@ const isCurrentProjectEvent = eventData =>
   eventData?.project_id != null &&
   eventData.project_id === currentProduction.value.id
 
-const getPlaylistPath = (playlistId, section) => ({
-  ...buildPlaylistPath(
-    currentProduction.value.id,
-    currentEpisode.value ? currentEpisode.value.id : null,
-    playlistId,
-    section
-  ),
-  query: allEntityQuery.value
-})
+// A getPlaylistPath frozen on the production, episode, and All shots, All
+// episodes, or All assets list shown at the call.
+const freezePlaylistPath = () => {
+  const productionId = currentProduction.value.id
+  const episodeId = currentEpisode.value ? currentEpisode.value.id : null
+  const query = allEntityQuery.value
+  return (playlistId, section) => ({
+    ...buildPlaylistPath(productionId, episodeId, playlistId, section),
+    query
+  })
+}
+
+const getPlaylistPath = (playlistId, section) =>
+  freezePlaylistPath()(playlistId, section)
 
 const playlistElementStyle = playlist => {
   if (isListToggled.value) return
@@ -1431,6 +1436,9 @@ const runAddPlaylist = async form => {
   // the modal and the route alone.
   const shownForm = playlistToEdit.value
   const isFormShown = () => !isUnmounted && playlistToEdit.value === shownForm
+  // The form stays open when the topbar or Back moves the page to another
+  // production or list: the answer opens the playlist where it was created.
+  const getCreatedPlaylistPath = freezePlaylistPath()
   loading.editPlaylist = true
   errors.editPlaylist = false
   try {
@@ -1443,11 +1451,12 @@ const runAddPlaylist = async form => {
       task_type_id: form.task_type_id,
       ...(isTVShow.value && currentEpisode.value
         ? { episode_id: currentEpisode.value.id }
-        : {})
+        : {}),
+      listForEntity: allForEntity.value
     })
-    // Otherwise the new playlist only joins the list.
+    // Otherwise the new playlist at most joins the list.
     if (isFormShown()) {
-      router.push(getPlaylistPath(playlist.id))
+      router.push(getCreatedPlaylistPath(playlist.id))
       modals.isEditDisplayed = false
     }
   } catch (err) {
