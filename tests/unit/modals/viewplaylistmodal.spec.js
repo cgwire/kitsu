@@ -42,6 +42,9 @@ vi.mock('@/components/players/players/PlaylistPlayer.vue', async () => {
 const crisp = vi.hoisted(() => ({ setChatVisibility: vi.fn() }))
 vi.mock('@/lib/crisp', () => ({ default: crisp }))
 
+import { getPlaylistListKey } from '@/lib/playlist'
+import playlistsApi from '@/store/api/playlists'
+import playlistStore from '@/store/modules/playlists'
 import shotStore from '@/store/modules/shots'
 
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
@@ -59,6 +62,11 @@ describe('ViewPlaylistModal', () => {
   let tempEntities
   // The episode the topbar sets, which a test can move.
   const scope = reactive({ episode: null, isTVShow: false })
+  // The playlists of all episodes Zou holds, of shots and of assets.
+  const allEpisodePlaylists = [
+    { id: 'playlist-0', for_entity: 'shot', is_for_all: true },
+    { id: 'playlist-9', for_entity: 'asset', is_for_all: true }
+  ]
 
   beforeEach(() => {
     routeState.path = '/shots'
@@ -68,8 +76,23 @@ describe('ViewPlaylistModal', () => {
     newPlaylistRequest = null
     tempEntities = []
     Object.assign(scope, { episode: null, isTVShow: false })
+    vi.spyOn(playlistsApi, 'getPlaylists').mockImplementation(
+      (production, episode, taskTypeId, sortBy, page, forEntity) =>
+        Promise.resolve(
+          allEpisodePlaylists
+            .filter(({ for_entity }) => !forEntity || for_entity === forEntity)
+            .map(playlist => ({ ...playlist }))
+        )
+    )
+    const listed = { ...allEpisodePlaylists[0] }
     store = createStore({
       strict: true,
+      // The All shots list the Playlist page loaded last.
+      state: () => ({
+        playlists: [listed],
+        playlistListKey: getPlaylistListKey('production-1', 'all', 'shot'),
+        playlistMap: new Map([[listed.id, listed]])
+      }),
       getters: {
         currentEpisode: () => scope.episode,
         currentProduction: () => ({ id: 'production-1' }),
@@ -78,7 +101,9 @@ describe('ViewPlaylistModal', () => {
         selectedTasks: () => new Map()
       },
       mutations: {
-        SET_PLAYLIST_ENTRY_MAP: () => {}
+        LOAD_PLAYLISTS_END: playlistStore.mutations.LOAD_PLAYLISTS_END,
+        SET_PLAYLIST_ENTRY_MAP: () => {},
+        SET_PLAYLIST_LIST_KEY: playlistStore.mutations.SET_PLAYLIST_LIST_KEY
       },
       actions: {
         // The create response does not necessarily echo task_type_id back, so
@@ -94,7 +119,7 @@ describe('ViewPlaylistModal', () => {
           editPlaylistPayload = payload
           return Promise.resolve()
         },
-        loadPlaylists: () => {},
+        loadPlaylists: playlistStore.actions.loadPlaylists,
         loadTempPlaylist: () => Promise.resolve(tempEntities)
       }
     })
@@ -373,6 +398,46 @@ describe('ViewPlaylistModal', () => {
       isLoading: false,
       isError: false
     })
+  })
+
+  // The Playlist page keeps the list it loaded last, and loads its own over
+  // an empty one. Reloaded here under All, the list would mix the playlists
+  // of shots and assets, and keep out the ones the page creates.
+  it('empties the playlist list after a save instead of reloading it', async () => {
+    Object.assign(scope, { episode: { id: 'all' }, isTVShow: true })
+    const player = wrapper.findComponent({ name: 'PlaylistPlayer' })
+    const editModal = wrapper.findComponent(EditPlaylistModal)
+
+    player.vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+    editModal.vm.$emit('confirm', { name: 'My playlist', for_entity: 'shot' })
+    await flushPromises()
+
+    expect(editModal.props('isSuccess')).toBe(true)
+    expect(store.state.playlists).toEqual([])
+    expect(playlistsApi.getPlaylists).not.toHaveBeenCalled()
+  })
+
+  it('keeps the list of a Playlist page opened during the save', async () => {
+    Object.assign(scope, { episode: { id: 'all' }, isTVShow: true })
+    let resolveSave
+    newPlaylistRequest = new Promise(resolve => {
+      resolveSave = resolve
+    })
+    const player = wrapper.findComponent({ name: 'PlaylistPlayer' })
+    const editModal = wrapper.findComponent(EditPlaylistModal)
+    player.vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+    editModal.vm.$emit('confirm', { name: 'My playlist', for_entity: 'shot' })
+
+    // The topbar leaves the page of the modal for the All shots list of the
+    // Playlist page, which loads it.
+    wrapper.unmount()
+    await store.dispatch('loadPlaylists', { forEntity: 'shot' })
+    resolveSave({ id: 'playlist-1', name: 'My playlist', for_entity: 'shot' })
+    await flushPromises()
+
+    expect(store.state.playlists.map(({ id }) => id)).toEqual(['playlist-0'])
   })
 
   it('saves the chosen task type preview for each entity, not the default one', async () => {

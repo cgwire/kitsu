@@ -157,7 +157,9 @@ const actions = {
         return playlist
       })
       .catch(err => {
-        console.error(err)
+        // A deleted playlist, or an internal one read by a client: a link, the
+        // list, or a reload can still name it.
+        if (![403, 404].includes(err?.status)) console.error(err)
         return {}
       })
   },
@@ -167,7 +169,7 @@ const actions = {
   // only while listed: the list may have been replaced during the fetch.
   // Events reach every member of the production, so a client is refused the
   // internal playlists (403), and a deleted one is gone (404): it resolves to
-  // null and leaves the list.
+  // false and leaves the list. A failed fetch resolves to null.
   async refreshPlaylist({ commit, state, rootGetters }, { id, scope = null }) {
     const currentProduction = rootGetters.currentProduction
     let playlist
@@ -179,7 +181,7 @@ const actions = {
       if (isUnreadable && state.playlistMap.get(id)) {
         commit(DELETE_PLAYLIST_END, { id })
       }
-      return null
+      return isUnreadable ? false : null
     }
     const isListed = scope
       ? isPlaylistInScope(playlist, scope)
@@ -728,8 +730,13 @@ const mutations = {
   },
 
   [REMOVE_BUILD_JOB](state, job) {
+    // The Playlist page can show a playlist its list does not hold, or holds
+    // without its builds: the list carries none, and "Load more" can list a
+    // playlist after its load.
     const playlist = state.playlistMap.get(job.playlist_id)
-    playlist.build_jobs = removeModelFromList(playlist.build_jobs, job)
+    if (playlist?.build_jobs) {
+      playlist.build_jobs = removeModelFromList(playlist.build_jobs, job)
+    }
   },
 
   [CHANGE_PLAYLIST_TYPE](state, { playlist, taskTypeId }) {

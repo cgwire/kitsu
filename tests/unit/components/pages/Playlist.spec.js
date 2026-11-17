@@ -1615,9 +1615,9 @@ describe('Playlist page, modals and navigation', () => {
     expect(page.modal('BuildFilterModal').props('active')).toBe(false)
   })
 
-  // The history can open a playlist that the list has not loaded: the page
-  // then shows no playlist, without any load.
-  it('closes the build filter when the playlist opened is not in the list', async () => {
+  // The history can open a playlist the page cannot show, such as a deleted
+  // one: the page then shows no playlist.
+  it('closes the build filter when the playlist opened cannot be shown', async () => {
     const page = await openFirstPlaylist()
     page.player.vm.$emit('show-add-entities')
     await flushPromises()
@@ -2554,7 +2554,7 @@ describe('Playlist page, addition during a reload', () => {
 
 describe('Playlist page, unreadable playlist', () => {
   // Playlist events reach every member of the production. A client can no
-  // longer read a playlist made internal: its refetch resolves to null, and
+  // longer read a playlist made internal: its refetch resolves to false, and
   // the store drops it from the list.
   // An empty playlist opens the addition panel, which holds the updates back.
   const shots = [{ id: 's1' }]
@@ -2577,7 +2577,7 @@ describe('Playlist page, unreadable playlist', () => {
     const wrapper = await updateOpenPlaylist(
       vi.fn(({ getters }) => {
         getters.playlistMap.delete('pl-1')
-        return Promise.resolve(null)
+        return Promise.resolve(false)
       })
     )
 
@@ -2602,6 +2602,463 @@ describe('Playlist page, unreadable playlist', () => {
 
     const player = wrapper.findComponent(PlaylistPlayer)
     expect(player.props('playlist').name).toBe('Renamed')
+  })
+})
+
+describe('Playlist page, playlist past the list loaded', () => {
+  // The list holds the first 20 playlists in the order picked: the playlist
+  // of a link, or the one "View created playlist" opens, can come after.
+  const openPastPlaylist = async ({ listed, past, state = {}, actions }) => {
+    const page = await mountPage({
+      params: { playlist_id: past.id },
+      state: { playlists: [listed], ...state },
+      getters: { playlistMap: () => new Map([[listed.id, listed]]) },
+      actions: {
+        loadPlaylist: vi.fn((context, { id }) =>
+          Promise.resolve(id === past.id ? { ...past } : {})
+        ),
+        ...actions
+      }
+    })
+    await flushPromises()
+    return page
+  }
+
+  // A teammate changes the playlist shown. An empty playlist opens the
+  // addition panel, which holds the updates back.
+  const past = {
+    id: 'pl-9',
+    name: 'Past',
+    project_id: 'p1',
+    shots: [{ id: 's1' }]
+  }
+  const updatePastPlaylist = async refreshPlaylist => {
+    const page = await openPastPlaylist({
+      listed: { id: 'pl-1', name: 'Listed', project_id: 'p1' },
+      past,
+      actions: { refreshPlaylist }
+    })
+    routeHolder.router.push.mockClear()
+    const onPlaylistUpdate = page.socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:update'
+    )[1]
+    await onPlaylistUpdate({ project_id: 'p1', playlist_id: past.id })
+    await flushPromises()
+    return page
+  }
+  const shownName = wrapper =>
+    wrapper.findComponent(PlaylistPlayer).props('playlist').name
+
+  it('shows an update of the playlist it opened past the list', async () => {
+    const { wrapper } = await updatePastPlaylist(
+      vi.fn(() => Promise.resolve({ ...past, name: 'Renamed' }))
+    )
+
+    expect(shownName(wrapper)).toBe('Renamed')
+  })
+
+  it('leaves the playlist it opened past the list once unreadable', async () => {
+    await updatePastPlaylist(vi.fn(() => Promise.resolve(false)))
+
+    expect(routeHolder.router.push).toHaveBeenCalled()
+  })
+
+  it('keeps the playlist it opened past the list when its refresh fails', async () => {
+    const { wrapper } = await updatePastPlaylist(
+      vi.fn(() => Promise.resolve(null))
+    )
+
+    expect(routeHolder.router.push).not.toHaveBeenCalled()
+    expect(shownName(wrapper)).toBe('Past')
+  })
+
+  it('opens the playlist of the address when the list does not hold it', async () => {
+    const { wrapper, store } = await openPastPlaylist({
+      listed: { id: 'pl-1', name: 'Listed', project_id: 'p1' },
+      past: { id: 'pl-9', name: 'Past', project_id: 'p1', shots: [] }
+    })
+
+    expect(wrapper.find('.no-selection').exists()).toBe(false)
+    const player = wrapper.findComponent(PlaylistPlayer)
+    expect(player.props('playlist').name).toBe('Past')
+    expect(store.state.playlists.map(({ id }) => id)).toEqual(['pl-1'])
+  })
+
+  it('keeps the playlist of the address closed when it belongs to another list', async () => {
+    const { wrapper } = await openPastPlaylist({
+      listed: { id: 'pl-1', name: 'Listed', project_id: 'p1', episode_id: 'ep-a' },
+      past: {
+        id: 'pl-9',
+        name: 'Past',
+        project_id: 'p1',
+        episode_id: 'ep-b',
+        shots: []
+      },
+      state: { isTVShow: true }
+    })
+
+    expect(wrapper.find('.no-selection').exists()).toBe(true)
+  })
+
+  // The address still names the playlist the page keeps closed.
+  it('stays on the list when a teammate deletes the playlist of the address kept closed', async () => {
+    const { wrapper, socket } = await openPastPlaylist({
+      listed: { id: 'pl-1', name: 'Listed', project_id: 'p1', episode_id: 'ep-a' },
+      past: {
+        id: 'pl-9',
+        name: 'Past',
+        project_id: 'p1',
+        episode_id: 'ep-b',
+        shots: []
+      },
+      state: { isTVShow: true }
+    })
+    routeHolder.router.push.mockClear()
+    const onPlaylistDelete = socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:delete'
+    )[1]
+
+    onPlaylistDelete({ project_id: 'p1', playlist_id: 'pl-9' })
+    await flushPromises()
+
+    expect(routeHolder.router.push).not.toHaveBeenCalled()
+    expect(wrapper.find('.no-selection').exists()).toBe(true)
+  })
+
+  // A TV show lists the playlists of one episode, or of none in the Main
+  // Pack.
+  it.each([
+    ['an episode', 'ep-a', { episode_id: 'ep-a' }],
+    ['the Main Pack', 'main', {}]
+  ])(
+    'opens the playlist of the address past the list of %s',
+    async (list, episodeId, fields) => {
+      const { wrapper } = await openPastPlaylist({
+        listed: { id: 'pl-1', name: 'Listed', project_id: 'p1', ...fields },
+        past: {
+          id: 'pl-9',
+          name: 'Past',
+          project_id: 'p1',
+          shots: [],
+          ...fields
+        },
+        state: { currentEpisode: { id: episodeId }, isTVShow: true }
+      })
+
+      expect(wrapper.find('.no-selection').exists()).toBe(false)
+      const player = wrapper.findComponent(PlaylistPlayer)
+      expect(player.props('playlist').name).toBe('Past')
+    }
+  )
+
+  // A task type filter can leave the list empty.
+  it('shows the player loading the playlist of the address over an empty list', async () => {
+    const { wrapper } = await mountPage({
+      params: { playlist_id: 'pl-9' },
+      actions: { loadPlaylist: vi.fn(() => new Promise(() => {})) }
+    })
+    await flushPromises()
+
+    expect(wrapper.find('.no-selection').exists()).toBe(false)
+    const player = wrapper.findComponent(PlaylistPlayer)
+    expect(player.props('isLoading')).toBe(true)
+  })
+
+  // Under All, the list shown is the All shots one or the All assets one.
+  const listedAllShots = {
+    id: 'pl-1',
+    name: 'Listed',
+    project_id: 'p1',
+    is_for_all: true,
+    for_entity: 'shot'
+  }
+  const openUnderAllShots = async past => {
+    const { wrapper } = await mountPage({
+      params: { playlist_id: past.id },
+      query: { for_entity: 'shot' },
+      state: {
+        currentEpisode: { id: 'all' },
+        isTVShow: true,
+        playlists: [listedAllShots]
+      },
+      getters: {
+        playlistMap: () => new Map([[listedAllShots.id, listedAllShots]])
+      },
+      actions: { loadPlaylist: vi.fn(() => Promise.resolve({ ...past })) }
+    })
+    await flushPromises()
+    return wrapper
+  }
+  const pastForAll = forEntity => ({
+    id: 'pl-9',
+    name: 'Past',
+    project_id: 'p1',
+    is_for_all: true,
+    for_entity: forEntity,
+    shots: []
+  })
+
+  it('opens an All shots playlist past the All shots list', async () => {
+    const wrapper = await openUnderAllShots(pastForAll('shot'))
+
+    expect(wrapper.find('.no-selection').exists()).toBe(false)
+    const player = wrapper.findComponent(PlaylistPlayer)
+    expect(player.props('playlist').name).toBe('Past')
+  })
+
+  it('keeps an All assets playlist closed under the All shots list', async () => {
+    const wrapper = await openUnderAllShots(pastForAll('asset'))
+
+    expect(wrapper.find('.no-selection').exists()).toBe(true)
+  })
+
+  // Decided: a sort or task type filter change keeps the playlist shown
+  // open, even when the list loaded again does not hold it.
+  it.each([
+    ['sort', wrapper => changeSort(wrapper, 'name')],
+    [
+      'task type filter',
+      wrapper =>
+        wrapper
+          .findComponent(ComboboxTaskType)
+          .vm.$emit('update:modelValue', 'tt-2')
+    ]
+  ])(
+    'keeps the playlist shown open when a %s change leaves it out of the list',
+    async (change, apply) => {
+      const shown = {
+        id: 'pl-1',
+        name: 'Shown',
+        project_id: 'p1',
+        task_type_id: 'tt-1',
+        shots: [{ id: 's1' }]
+      }
+      const other = {
+        id: 'pl-2',
+        name: 'Other',
+        project_id: 'p1',
+        task_type_id: 'tt-2'
+      }
+      const { wrapper } = await mountPage({
+        params: { playlist_id: shown.id },
+        state: { playlists: [shown, other] },
+        getters: {
+          playlistMap: state =>
+            new Map(state.playlists.map(playlist => [playlist.id, playlist]))
+        },
+        actions: {
+          loadPlaylist: vi.fn((context, { id }) =>
+            Promise.resolve(id === shown.id ? { ...shown } : {})
+          ),
+          // The list loaded again holds the other playlist only.
+          loadPlaylists: vi.fn(({ commit }) => {
+            commit('LOAD_PLAYLISTS_END', [other])
+            return Promise.resolve()
+          })
+        }
+      })
+      await flushPromises()
+
+      apply(wrapper)
+      await flushPromises()
+
+      expect(wrapper.find('.no-selection').exists()).toBe(false)
+      const player = wrapper.findComponent(PlaylistPlayer)
+      expect(player.props('playlist').name).toBe('Shown')
+    }
+  )
+
+  it('keeps the playlist shown open when a task type filter empties the list', async () => {
+    const shown = {
+      id: 'pl-1',
+      name: 'Shown',
+      project_id: 'p1',
+      task_type_id: 'tt-1',
+      shots: [{ id: 's1' }]
+    }
+    const { wrapper } = await mountPage({
+      params: { playlist_id: shown.id },
+      state: { playlists: [shown] },
+      getters: {
+        playlistMap: state =>
+          new Map(state.playlists.map(playlist => [playlist.id, playlist]))
+      },
+      actions: {
+        loadPlaylist: vi.fn(() => Promise.resolve({ ...shown })),
+        // No playlist has the task type picked.
+        loadPlaylists: vi.fn(({ commit }) => {
+          commit('LOAD_PLAYLISTS_END', [])
+          return Promise.resolve()
+        })
+      }
+    })
+    await flushPromises()
+
+    wrapper
+      .findComponent(ComboboxTaskType)
+      .vm.$emit('update:modelValue', 'tt-2')
+    await flushPromises()
+
+    expect(wrapper.find('.no-selection').exists()).toBe(false)
+    const player = wrapper.findComponent(PlaylistPlayer)
+    expect(player.props('playlist').name).toBe('Shown')
+  })
+})
+
+describe('Playlist page, playlist deleted by a teammate', () => {
+  // Playlist events reach every member of the production.
+  const shown = { id: 'pl-1', name: 'Shown', project_id: 'p1', shots: [] }
+  const other = { id: 'pl-2', name: 'Other', project_id: 'p1', shots: [] }
+  const openShown = async ({ listed, loadPlaylist }) => {
+    const page = await mountPage({
+      params: { playlist_id: shown.id },
+      state: { playlists: listed },
+      getters: {
+        playlistMap: state =>
+          new Map(state.playlists.map(playlist => [playlist.id, playlist]))
+      },
+      mutations: {
+        DELETE_PLAYLIST_END: (state, { id }) => {
+          state.playlists = state.playlists.filter(
+            playlist => playlist.id !== id
+          )
+        }
+      },
+      actions: {
+        loadPlaylist:
+          loadPlaylist ||
+          vi.fn((context, { id }) =>
+            Promise.resolve({ ...[shown, other].find(p => p.id === id) })
+          )
+      }
+    })
+    await flushPromises()
+    routeHolder.router.push.mockClear()
+    const onPlaylistDelete = page.socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:delete'
+    )[1]
+    return { ...page, onPlaylistDelete }
+  }
+  const pushedPlaylistId = () =>
+    routeHolder.router.push.mock.calls[0][0].params?.playlist_id
+
+  it('leaves the playlist shown once a teammate deletes it', async () => {
+    const { onPlaylistDelete, store } = await openShown({
+      listed: [shown, other]
+    })
+
+    onPlaylistDelete({ project_id: 'p1', playlist_id: shown.id })
+    await flushPromises()
+
+    expect(store.state.playlists.map(({ id }) => id)).toEqual([other.id])
+    expect(routeHolder.router.push).toHaveBeenCalledTimes(1)
+    expect(pushedPlaylistId()).toBe(other.id)
+  })
+
+  it('leaves the playlist shown past the list once a teammate deletes it', async () => {
+    const { onPlaylistDelete } = await openShown({ listed: [other] })
+
+    onPlaylistDelete({ project_id: 'p1', playlist_id: shown.id })
+    await flushPromises()
+
+    expect(routeHolder.router.push).toHaveBeenCalledTimes(1)
+    expect(pushedPlaylistId()).toBe(other.id)
+  })
+
+  it('leaves the last playlist of the list once a teammate deletes it', async () => {
+    const { onPlaylistDelete } = await openShown({ listed: [shown] })
+
+    onPlaylistDelete({ project_id: 'p1', playlist_id: shown.id })
+    await flushPromises()
+
+    expect(routeHolder.router.push).toHaveBeenCalledTimes(1)
+    expect(pushedPlaylistId()).toBeUndefined()
+  })
+
+  it('stays on the playlist shown when a teammate deletes another one', async () => {
+    const { onPlaylistDelete, store } = await openShown({
+      listed: [shown, other]
+    })
+
+    onPlaylistDelete({ project_id: 'p1', playlist_id: other.id })
+    await flushPromises()
+
+    expect(store.state.playlists.map(({ id }) => id)).toEqual([shown.id])
+    expect(routeHolder.router.push).not.toHaveBeenCalled()
+  })
+
+  // The page loads the playlist of the address once its list is there: the
+  // load then finds no playlist to open.
+  it('stays on the address when a teammate deletes its playlist before the page loads it', async () => {
+    let releaseList = null
+    // The store answers a deleted playlist with an empty object.
+    const loadPlaylist = vi.fn(() => Promise.resolve({}))
+    const page = await mountPage({
+      params: { playlist_id: shown.id },
+      state: { playlists: [] },
+      getters: {
+        playlistMap: state =>
+          new Map(state.playlists.map(playlist => [playlist.id, playlist]))
+      },
+      actions: {
+        loadPlaylists: vi.fn(
+          () =>
+            new Promise(resolve => {
+              releaseList = resolve
+            })
+        ),
+        loadPlaylist
+      }
+    })
+    await flushPromises()
+    routeHolder.router.push.mockClear()
+    const onPlaylistDelete = page.socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:delete'
+    )[1]
+
+    onPlaylistDelete({ project_id: 'p1', playlist_id: shown.id })
+    expect(loadPlaylist).not.toHaveBeenCalled()
+    releaseList()
+    await flushPromises()
+
+    expect(loadPlaylist).toHaveBeenCalled()
+    expect(routeHolder.router.push).not.toHaveBeenCalled()
+    expect(page.wrapper.vm.currentPlaylist).toEqual({ name: '' })
+  })
+
+  it('leaves the playlist of the address a teammate deletes while it loads', async () => {
+    const { onPlaylistDelete } = await openShown({
+      listed: [shown, other],
+      loadPlaylist: vi.fn(() => new Promise(() => {}))
+    })
+
+    onPlaylistDelete({ project_id: 'p1', playlist_id: shown.id })
+    await flushPromises()
+
+    expect(routeHolder.router.push).toHaveBeenCalledTimes(1)
+    expect(pushedPlaylistId()).toBe(other.id)
+  })
+
+  // A click changes the address at once, and the playlist shown once the
+  // clicked one loads.
+  it('keeps loading the playlist clicked when a teammate deletes the one still shown', async () => {
+    const { onPlaylistDelete, wrapper } = await openShown({
+      listed: [shown, other],
+      loadPlaylist: vi.fn((context, { id }) =>
+        id === shown.id ? Promise.resolve({ ...shown }) : new Promise(() => {})
+      )
+    })
+    Object.assign(routeHolder.route, {
+      params: { playlist_id: other.id },
+      fullPath: `/${other.id}`
+    })
+    await flushPromises()
+
+    onPlaylistDelete({ project_id: 'p1', playlist_id: shown.id })
+    await flushPromises()
+
+    expect(wrapper.vm.currentPlaylist.id).toBe(shown.id)
+    expect(routeHolder.router.push).not.toHaveBeenCalled()
   })
 })
 

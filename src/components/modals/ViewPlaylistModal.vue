@@ -370,6 +370,11 @@ const savePlaylist = async form => {
   }
   errors.value.edit = false
   loading.value.edit = true
+  // Over an empty list, the Playlist page loads its own once open, as an
+  // All shots, All episodes, or All assets list under All. Emptied now,
+  // while no Playlist page shows the list: a page opened during the save
+  // keeps the list it loads.
+  store.commit('LOAD_PLAYLISTS_END', [])
   try {
     const playlist = retried
       ? { ...retried.playlist, ...newPlaylist }
@@ -402,7 +407,6 @@ const savePlaylist = async form => {
       }
     }
     loading.value.edit = false
-    store.dispatch('loadPlaylists', {})
   } catch (err) {
     console.error(err)
     if (isFormShown()) errors.value.edit = true

@@ -174,7 +174,9 @@
 
       <div
         class="playlist-column no-selection has-text-centered"
-        v-else-if="playlists.length === 0"
+        v-else-if="
+          playlists.length === 0 && !currentPlaylist.id && !loading.playlist
+        "
       >
         <div v-if="!loading.playlists && !loading.playlistsInit">
           <template v-if="!errors.playlistLoading">
@@ -715,16 +717,20 @@ const isEntireAdditionOffered = computed(
   () => !isTVShow.value || !['all', 'main'].includes(currentEpisode.value?.id)
 )
 
+// The production, episode, and All shots, All episodes, or All assets list
+// the page shows.
+const listScope = computed(() => ({
+  productionId: currentProduction.value.id,
+  episodeId: isTVShow.value ? currentEpisode.value?.id : undefined,
+  forEntity: allForEntity.value
+}))
+
 // The store keeps the last loaded list across pages: on mount it can
 // belong to another production, episode or all-mode entity type.
 const isPlaylistListStale = computed(() => {
   const [first] = playlists.value
   if (!first) return false
-  return !isPlaylistInScope(first, {
-    productionId: currentProduction.value.id,
-    episodeId: isTVShow.value ? currentEpisode.value?.id : undefined,
-    forEntity: allForEntity.value
-  })
+  return !isPlaylistInScope(first, listScope.value)
 })
 
 const currentEntityType = computed(() => currentPlaylist.value.for_entity)
@@ -1128,14 +1134,24 @@ const convertEntityToPlaylistFormat = entityInfo => {
   return playlistEntity
 }
 
+const showNoPlaylist = () => {
+  loading.playlist = false
+  currentPlaylist.value = { name: '' }
+}
+
 // Loads the playlist shown and shows the answer with its share links count,
 // unless another playlist opened or a later load of this one started
-// meanwhile. A load can answer after a later one, with an older state.
-const showLoadedPlaylist = async playlist => {
+// meanwhile. A load can answer after a later one, with an older state. An
+// answer isShown refuses shows no playlist.
+const showLoadedPlaylist = async (playlist, isShown = () => true) => {
   loading.playlist = true
   const load = ++playlistLoadCount
   const loadedPlaylist = await store.dispatch('loadPlaylist', playlist)
   if (load !== playlistLoadCount || route.params.playlist_id !== playlist.id) {
+    return null
+  }
+  if (!isShown(loadedPlaylist)) {
+    showNoPlaylist()
     return null
   }
   currentPlaylist.value = loadedPlaylist
@@ -1146,12 +1162,19 @@ const showLoadedPlaylist = async playlist => {
 }
 
 const setCurrentPlaylist = async () => {
-  const playlist = playlistMap.value.get(route.params.playlist_id)
+  const playlistId = route.params.playlist_id
+  const playlist = playlistMap.value.get(playlistId)
   if (playlist) {
     await showLoadedPlaylist(playlist)
+  } else if (playlistId) {
+    // The list holds the pages loaded so far, in the order picked: the
+    // playlist of a link, or of "View created playlist", can come after
+    // them. It loads alone, and opens if it belongs to the list shown.
+    await showLoadedPlaylist({ id: playlistId }, loadedPlaylist =>
+      isPlaylistInScope(loadedPlaylist, listScope.value)
+    )
   } else {
-    loading.playlist = false
-    currentPlaylist.value = { name: '' }
+    showNoPlaylist()
   }
 }
 
@@ -1713,7 +1736,9 @@ const SOCKET_EVENTS = {
   'playlist:update': async eventData => {
     if (
       isCurrentProjectEvent(eventData) &&
-      playlistMap.value.get(eventData.playlist_id) &&
+      // The playlist shown can be past the pages of the list loaded.
+      (playlistMap.value.get(eventData.playlist_id) ||
+        eventData.playlist_id === currentPlaylist.value.id) &&
       !isSilent &&
       !isAddingEntity.value
     ) {
@@ -1722,9 +1747,9 @@ const SOCKET_EVENTS = {
       })
       if (eventData.playlist_id !== currentPlaylist.value.id) return
       if (!playlist) {
-        // Gone from the list once unreadable (made internal for a client, or
-        // deleted); a failed refresh keeps it on screen.
-        if (!playlistMap.value.get(eventData.playlist_id)) goFirstPlaylist()
+        // Left once unreadable (made internal for a client, or deleted); a
+        // failed refresh keeps it on screen.
+        if (playlist === false) goFirstPlaylist()
         return
       }
       currentPlaylist.value = playlist
@@ -1740,6 +1765,16 @@ const SOCKET_EVENTS = {
       playlistMap.value.get(eventData.playlist_id)
     ) {
       store.commit('DELETE_PLAYLIST_END', { id: eventData.playlist_id })
+    }
+    // Left, listed or not, as on an unreadable update, once shown or while it
+    // loads: the address can also name a playlist of another list, which the
+    // page keeps closed. A click changes the address at once, and the
+    // playlist shown only once the clicked one loads.
+    if (
+      eventData.playlist_id === route.params.playlist_id &&
+      (eventData.playlist_id === currentPlaylist.value.id || loading.playlist)
+    ) {
+      goFirstPlaylist()
     }
   },
 

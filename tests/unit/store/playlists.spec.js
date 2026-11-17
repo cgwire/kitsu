@@ -42,7 +42,8 @@ describe('Playlists store', () => {
     })
 
     // Zou answers 403 to a client once a playlist is made internal, and 404
-    // once it is deleted: the live refresh drops it instead of rejecting.
+    // once it is deleted: the live refresh drops it instead of rejecting, and
+    // tells it from a failed refresh, which answers null.
     test('refreshPlaylist drops a listed playlist the user may no longer read', async () => {
       vi.spyOn(playlistsApi, 'getPlaylist').mockRejectedValue({ status: 403 })
       const commit = vi.fn()
@@ -58,7 +59,7 @@ describe('Playlists store', () => {
         { id: 'playlist-1' }
       )
 
-      expect(playlist).toBeNull()
+      expect(playlist).toBe(false)
       expect(commit).toHaveBeenCalledWith('DELETE_PLAYLIST_END', {
         id: 'playlist-1'
       })
@@ -81,7 +82,7 @@ describe('Playlists store', () => {
         { id: 'playlist-internal', scope: { productionId: 'production-1' } }
       )
 
-      expect(playlist).toBeNull()
+      expect(playlist).toBe(false)
       expect(commit).not.toHaveBeenCalled()
       expect(consoleError).not.toHaveBeenCalled()
     })
@@ -296,6 +297,94 @@ describe('Playlists store', () => {
         ([type]) => type === 'LOAD_PLAYLIST_END'
       )
       expect(ends.map(([, playlist]) => playlist.id)).toEqual(['playlist-b'])
+    })
+
+    // The link of a deleted playlist, or of an internal one for a client.
+    test.each([403, 404])(
+      'loadPlaylist quietly answers no playlist on a %s',
+      async status => {
+        vi.spyOn(playlistsApi, 'getPlaylist').mockRejectedValue({ status })
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+
+        const playlist = await store.actions.loadPlaylist(
+          {
+            commit: vi.fn(),
+            rootGetters: { currentProduction: { id: 'production-1' } }
+          },
+          { id: 'playlist-gone' }
+        )
+
+        expect(playlist).toEqual({})
+        expect(consoleError).not.toHaveBeenCalled()
+      }
+    )
+
+    test('loadPlaylist logs any other failure', async () => {
+      const error = { status: 500 }
+      vi.spyOn(playlistsApi, 'getPlaylist').mockRejectedValue(error)
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+
+      const playlist = await store.actions.loadPlaylist(
+        {
+          commit: vi.fn(),
+          rootGetters: { currentProduction: { id: 'production-1' } }
+        },
+        { id: 'playlist-1' }
+      )
+
+      expect(playlist).toEqual({})
+      expect(consoleError).toHaveBeenCalledWith(error)
+    })
+
+    // The Playlist page can show a playlist its list does not hold.
+    test('removeBuildJob deletes a build of a playlist the list does not hold', async () => {
+      const deleteBuildJob = vi
+        .spyOn(playlistsApi, 'deleteBuildJob')
+        .mockResolvedValue({})
+      const state = { playlistMap: new Map() }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+      const job = { id: 'job-1', playlist_id: 'playlist-past' }
+
+      await store.actions.removeBuildJob({ commit }, job)
+
+      expect(deleteBuildJob).toHaveBeenCalledWith(job)
+    })
+
+    test('removeBuildJob takes the build out of a listed playlist', async () => {
+      vi.spyOn(playlistsApi, 'deleteBuildJob').mockResolvedValue({})
+      const playlist = {
+        id: 'playlist-1',
+        build_jobs: [{ id: 'job-1' }, { id: 'job-2' }]
+      }
+      const state = { playlistMap: new Map([[playlist.id, playlist]]) }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+
+      await store.actions.removeBuildJob(
+        { commit },
+        { id: 'job-1', playlist_id: 'playlist-1' }
+      )
+
+      expect(playlist.build_jobs).toEqual([{ id: 'job-2' }])
+    })
+
+    // The list carries no builds: the load of a playlist copies them onto its
+    // entry, and "Load more" can list a playlist after its load.
+    test('removeBuildJob deletes a build of a playlist listed without its builds', async () => {
+      const deleteBuildJob = vi
+        .spyOn(playlistsApi, 'deleteBuildJob')
+        .mockResolvedValue({})
+      const playlist = { id: 'playlist-1', name: 'Dailies' }
+      const state = { playlistMap: new Map([[playlist.id, playlist]]) }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+      const job = { id: 'job-1', playlist_id: 'playlist-1' }
+
+      await store.actions.removeBuildJob({ commit }, job)
+
+      expect(deleteBuildJob).toHaveBeenCalledWith(job)
     })
 
     describe('changePlaylistOrder', () => {
