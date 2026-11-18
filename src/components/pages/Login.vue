@@ -48,7 +48,7 @@
                 autocomplete="username"
                 :placeholder="$t('login.fields.email')"
                 @input="updateEmail"
-                @keyup.enter="confirmLogIn()"
+                @keyup.enter="onEmailEnter"
                 v-model="email"
                 v-focus
               />
@@ -239,6 +239,16 @@ const confirmLogIn = async twoFactorPayload => {
       console.error(err)
     }
   }
+}
+
+// No password required: a Zou set up with auth_local_no_password logs people
+// in without one, so the button still sends an empty password.
+const onEmailEnter = () => {
+  if (store.state.login.email && !store.state.login.password) {
+    passwordFieldRef.value?.focus()
+    return
+  }
+  confirmLogIn()
 }
 
 const saveSSORedirect = () => {

@@ -11,9 +11,9 @@ import i18n from '@/lib/i18n'
 
 import Login from '@/components/pages/Login.vue'
 
-const mountPage = (email, logIn = vi.fn()) => {
+const mountPage = (email, logIn = vi.fn(), password = '') => {
   const store = createStore({
-    state: { login: { email, password: '' } },
+    state: { login: { email, password } },
     getters: {
       isAuthenticated: () => false,
       isDarkTheme: () => false,
@@ -69,7 +69,8 @@ describe('pages/Login', () => {
     )
   })
 
-  test('logs in with the email filled in', async () => {
+  // A Zou set up without passwords logs people in with an empty one.
+  test('logs in from the button with the password left empty', async () => {
     // A login that goes through opens the next page after a fade.
     vi.useFakeTimers()
     const logIn = vi.fn()
@@ -78,5 +79,40 @@ describe('pages/Login', () => {
     await wrapper.find('.main-button').trigger('click')
 
     expect(logIn).toHaveBeenCalledTimes(1)
+  })
+
+  test('moves on to the empty password field on Enter in the email field', async () => {
+    const logIn = vi.fn()
+    wrapper = mountPage('jane@example.com', logIn)
+    const emailField = wrapper.find('input[type="email"]')
+    emailField.element.focus()
+
+    await emailField.trigger('keyup.enter')
+
+    expect(logIn).not.toHaveBeenCalled()
+    expect(document.activeElement).toBe(
+      wrapper.find('input[type="password"]').element
+    )
+  })
+
+  test('logs in on Enter in the email field with the password filled in', async () => {
+    vi.useFakeTimers()
+    const logIn = vi.fn()
+    wrapper = mountPage('jane@example.com', logIn, 'secret')
+
+    await wrapper.find('input[type="email"]').trigger('keyup.enter')
+
+    expect(logIn).toHaveBeenCalledTimes(1)
+  })
+
+  test('stays on the empty email field on Enter', async () => {
+    const logIn = vi.fn()
+    wrapper = mountPage('', logIn)
+    const emailField = wrapper.find('input[type="email"]')
+
+    await emailField.trigger('keyup.enter')
+
+    expect(logIn).not.toHaveBeenCalled()
+    expect(document.activeElement).toBe(emailField.element)
   })
 })
