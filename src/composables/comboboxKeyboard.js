@@ -90,8 +90,10 @@ export const useComboboxKeyboard = ({
   if (listRef) {
     watch(activeIndex, index => {
       if (index === -1) return
+      // By role: a group title can sit between two options.
       nextTick(() => {
-        listRef.value?.children[index]?.scrollIntoView?.({ block: 'nearest' })
+        const options = listRef.value?.querySelectorAll('[role="option"]')
+        options?.[index]?.scrollIntoView?.({ block: 'nearest' })
       })
     })
   }

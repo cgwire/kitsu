@@ -39,21 +39,38 @@
           v-if="showList"
         >
           <div
-            :id="optionId(index)"
-            :key="option.value"
-            class="option-line flexrow"
-            role="option"
-            :aria-selected="!!modelValue[option.value]"
-            @click="onUpdateValue(option.value)"
-            v-for="(option, index) in optionList"
+            :key="sectionIndex"
+            :role="section.title ? 'group' : 'none'"
+            :aria-labelledby="
+              section.title ? groupTitleId(sectionIndex) : undefined
+            "
+            v-for="(section, sectionIndex) in optionSections"
           >
-            <toggle-button
-              :label="$slots.option ? '' : option.label"
-              :model-value="!!modelValue[option.value]"
-            />
-            <span class="ml05" v-if="$slots.option">
-              <slot name="option" :option="option" />
-            </span>
+            <div
+              :id="groupTitleId(sectionIndex)"
+              class="option-group-title"
+              role="presentation"
+              v-if="section.title"
+            >
+              {{ section.title }}
+            </div>
+            <div
+              :id="optionId(index)"
+              :key="option.value"
+              class="option-line flexrow"
+              role="option"
+              :aria-selected="!!modelValue[option.value]"
+              @click="onUpdateValue(option.value)"
+              v-for="{ option, index } in section.options"
+            >
+              <toggle-button
+                :label="$slots.option ? '' : option.label"
+                :model-value="!!modelValue[option.value]"
+              />
+              <span class="ml05" v-if="$slots.option">
+                <slot name="option" :option="option" />
+              </span>
+            </div>
           </div>
         </div>
       </teleport>
@@ -69,8 +86,8 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
 import { ChevronDownIcon } from 'lucide-vue-next'
+import { computed, nextTick, ref, useId } from 'vue'
 
 import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
 import { getPopupStyle } from '@/lib/popup'
@@ -119,6 +136,24 @@ const listStyle = ref({})
 const optionList = computed(() => {
   return props.isReversed ? props.options.slice().reverse() : props.options
 })
+
+// Consecutive options of a group share one title, and each keeps its index
+// in the whole list: the keyboard counts the options only.
+const optionSections = computed(() =>
+  optionList.value.reduce((sections, option, index) => {
+    const title = option.group || ''
+    const lastSection = sections[sections.length - 1]
+    if (lastSection && lastSection.title === title) {
+      lastSection.options.push({ option, index })
+    } else {
+      sections.push({ title, options: [{ option, index }] })
+    }
+    return sections
+  }, [])
+)
+
+const groupIdPrefix = useId()
+const groupTitleId = sectionIndex => `${groupIdPrefix}-group-${sectionIndex}`
 
 // Placed once rendered: its size depends on its options.
 const placeTeleportedList = () => {
@@ -239,6 +274,19 @@ const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
   &:hover {
     background: $purple;
   }
+}
+
+// Like the field labels: a caption, not an option
+.option-group-title {
+  border-bottom: 1px solid var(--border);
+  color: var(--text-alt);
+  cursor: default;
+  font-size: 0.8em;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 1em 1em 0.5em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .down-icon {

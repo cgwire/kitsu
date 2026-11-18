@@ -55,7 +55,8 @@ const mountPage = async productions => {
   const store = createStore({
     getters: {
       openProductions: () => productions,
-      getTaskTypeOptions: () => [],
+      taskTypes: () => [],
+      archivedTaskTypes: () => [],
       taskTypeMap: () => new Map()
     },
     actions: { loadAllMilestones: () => [] }
@@ -83,10 +84,36 @@ describe('MainSchedule page', () => {
   })
 })
 
+// in no order: the page sorts them
 const taskTypes = [
-  { id: 'tt-anim', name: 'Animation', color: '#f00' },
-  { id: 'tt-light', name: 'Lighting', color: '#0f0' },
-  { id: 'tt-roto', name: 'Roto', color: '#00f', archived: true }
+  { id: 'tt-edit', name: 'Conform', color: '#ff0', for_entity: 'Edit' },
+  { id: 'tt-light', name: 'Lighting', color: '#0f0', for_entity: 'Shot' },
+  { id: 'tt-anim', name: 'Animation', color: '#f00', for_entity: 'Shot' },
+  { id: 'tt-design', name: 'Design', color: '#0ff', for_entity: 'Concept' },
+  { id: 'tt-story', name: 'Storyboard', color: '#f0f', for_entity: 'Episode' },
+  { id: 'tt-model', name: 'Modeling', color: '#888', for_entity: 'Asset' },
+  { id: 'tt-layout', name: 'Layout', color: '#808', for_entity: 'Sequence' },
+  {
+    id: 'tt-roto',
+    name: 'Roto',
+    color: '#00f',
+    for_entity: 'Shot',
+    archived: true
+  },
+  {
+    id: 'tt-block',
+    name: 'Blocking',
+    color: '#080',
+    for_entity: 'Shot',
+    archived: true
+  },
+  {
+    id: 'tt-sketch',
+    name: 'Sketch',
+    color: '#088',
+    for_entity: 'Concept',
+    archived: true
+  }
 ]
 
 const filteredProductions = [
@@ -121,12 +148,9 @@ const mountFilteredPage = async (
   const store = createStore({
     getters: {
       openProductions: () => productions,
-      taskTypeMap: () => new Map(taskTypes.map(t => [t.id, t])),
-      getTaskTypeOptions: () =>
-        taskTypes.map(taskType => ({
-          label: taskType.name,
-          value: taskType.id
-        }))
+      taskTypes: () => taskTypes.filter(taskType => !taskType.archived),
+      archivedTaskTypes: () => taskTypes.filter(taskType => taskType.archived),
+      taskTypeMap: () => new Map(taskTypes.map(t => [t.id, t]))
     },
     actions: {
       loadAllMilestones: () => [
@@ -161,8 +185,8 @@ describe('MainSchedule filters', () => {
       { label: 'Other', value: 'production-2' }
     ])
     expect(taskTypeCombo.props('options')).toEqual([
-      { label: 'Animation', value: 'tt-anim' },
-      { label: 'Lighting', value: 'tt-light' }
+      { label: 'Animation', value: 'tt-anim', group: 'shots.title' },
+      { label: 'Lighting', value: 'tt-light', group: 'shots.title' }
     ])
   })
 
@@ -181,17 +205,43 @@ describe('MainSchedule filters', () => {
     expect(offeredTaskTypeIds(wrapper)).toEqual(['tt-anim', 'tt-roto'])
   })
 
-  it('offers every task type once a production lists none', async () => {
-    const wrapper = await mountFilteredPage('/main-schedule', {
+  const mountWithEveryTaskType = () =>
+    mountFilteredPage('/main-schedule', {
       productions: [
         { ...production, task_types: ['tt-anim'] },
         { ...production, id: 'production-2', task_types: [] }
       ]
     })
-    expect(offeredTaskTypeIds(wrapper)).toEqual([
+
+  it('offers every task type once a production lists none, concept ones aside', async () => {
+    const wrapper = await mountWithEveryTaskType()
+    expect(offeredTaskTypeIds(wrapper).sort()).toEqual([
       'tt-anim',
+      'tt-block',
+      'tt-edit',
+      'tt-layout',
       'tt-light',
-      'tt-roto'
+      'tt-model',
+      'tt-roto',
+      'tt-story'
+    ])
+  })
+
+  it('groups the task types by entity as the Task Types page, archived ones last, by name', async () => {
+    const wrapper = await mountWithEveryTaskType()
+    expect(
+      taskTypeComboOf(wrapper)
+        .props('options')
+        .map(option => `${option.group}: ${option.label}`)
+    ).toEqual([
+      'assets.title: Modeling',
+      'shots.title: Animation',
+      'shots.title: Lighting',
+      'sequences.title: Layout',
+      'episodes.title: Storyboard',
+      'edits.title: Conform',
+      'main.archived: Blocking',
+      'main.archived: Roto'
     ])
   })
 
