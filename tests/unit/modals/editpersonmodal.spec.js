@@ -6,6 +6,8 @@ import { createStore } from 'vuex'
 vi.mock('@/store', () => ({ default: {} }))
 
 import EditPersonModal from '@/components/modals/EditPersonModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
@@ -79,6 +81,56 @@ describe('EditPersonModal', () => {
       )
 
       expect(wrapper.text()).toContain('people.invite_link_refused')
+    })
+  })
+
+  // An inactive account cannot log in, and an LDAP account logs in with the
+  // password of its directory: an invitation would lead them nowhere.
+  describe('invitation buttons', () => {
+    const person = { id: 'p1', first_name: 'Ada', email: 'ada@studio.com' }
+    const invitationButtons = wrapper =>
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .filter(button => ['send', 'link'].includes(button.props('icon')))
+    const activeField = wrapper =>
+      wrapper
+        .findAllComponents(Combobox)
+        .find(combobox => combobox.props('label') === 'people.fields.active')
+
+    it('offers them for an active account', () => {
+      const wrapper = mountModal({ ...person, active: true })
+      expect(invitationButtons(wrapper)).toHaveLength(2)
+    })
+
+    it.each([
+      ['an inactive account', { active: false }],
+      ['an LDAP account', { active: true, is_generated_from_ldap: true }]
+    ])('hides them for %s', (_, fields) => {
+      const wrapper = mountModal({ ...person, ...fields })
+      expect(invitationButtons(wrapper)).toHaveLength(0)
+    })
+
+    // The invitation buttons do not save the form: an account set active
+    // there stays inactive for Zou until the form is saved.
+    it('keeps them hidden until the activation is saved', async () => {
+      const wrapper = mountModal({ ...person, active: false })
+
+      await activeField(wrapper).vm.$emit('update:modelValue', 'true')
+
+      expect(invitationButtons(wrapper)).toHaveLength(0)
+    })
+
+    it('creates an inactive user without an invitation', async () => {
+      const wrapper = mountModal({ role: 'user' })
+      const createAndInvite = () =>
+        wrapper
+          .findAll('button')
+          .filter(button => button.text() === 'people.create_invite')
+      expect(createAndInvite()).toHaveLength(1)
+
+      await activeField(wrapper).vm.$emit('update:modelValue', 'false')
+
+      expect(createAndInvite()).toHaveLength(0)
     })
   })
 

@@ -134,7 +134,7 @@
         v-model="form.active"
       />
 
-      <div class="field" v-if="isEditing && !isBot">
+      <div class="field" v-if="isEditing && !isBot && canBeInvited">
         <label class="label">Invitation</label>
         <div>
           <button-simple
@@ -165,7 +165,7 @@
           :disabled="!isValidForm"
           type="button"
           @click="emitForm('confirm-invite')"
-          v-if="!isEditing && !isBot"
+          v-if="!isEditing && !isBot && isFormActive"
         >
           {{ $t('people.create_invite') }}
         </button>
@@ -336,6 +336,17 @@ const user = computed(() => store.getters.user)
 
 const isEditing = computed(() => Boolean(props.personToEdit?.id))
 
+const isFormActive = computed(
+  () => form.value.active === 'true' || form.value.active === true
+)
+
+// An inactive account cannot log in, and an LDAP account logs in with the
+// password of its directory: an invitation would lead them nowhere. The
+// invitation buttons do not save the form, hence the stored account.
+const canBeInvited = computed(
+  () => props.personToEdit.active && !props.personToEdit.is_generated_from_ldap
+)
+
 // Zou asks for the current password to change one's own email: the profile
 // page does that.
 const isCurrentUser = computed(
@@ -395,7 +406,7 @@ const emitForm = event => {
   emit(event, {
     ...form.value,
     last_name: form.value.last_name || '',
-    active: form.value.active === 'true' || form.value.active === true,
+    active: isFormActive.value,
     // Don't store a country for excluded roles (field hidden but value kept).
     country: showCountryField.value ? form.value.country : null
   })
