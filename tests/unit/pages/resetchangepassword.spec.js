@@ -23,7 +23,7 @@ import ResetChangePassword from '@/components/pages/ResetChangePassword.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 import { mountWithI18n } from '../fixtures/i18n'
-import { pressEnter } from '../fixtures/keyboard'
+import { pressEnter, pressSpace } from '../fixtures/keyboard'
 
 const i18n = createI18n({
   legacy: false,
@@ -229,6 +229,24 @@ describe('pages/ResetChangePassword', () => {
     await pressEnter(password2, { isComposing: true })
 
     expect(resetChangePassword).not.toHaveBeenCalled()
+  })
+
+  // The form stays after a failure, and the focus on its button.
+  it.each([
+    ['Enter', pressEnter],
+    ['Space', pressSpace]
+  ])('sends the new password once while %s is held on the button', async (key, press) => {
+    const resetChangePassword = vi.fn(() => Promise.reject(new Error('down')))
+    const wrapper = await openPage(resetChangePassword)
+    await fillPasswords(wrapper)
+    const submit = wrapper.find('a.main-button')
+
+    await press(submit)
+    await flushPromises()
+    expect(resetChangePassword).toHaveBeenCalledTimes(1)
+    await press(submit, { repeat: true })
+
+    expect(resetChangePassword).toHaveBeenCalledTimes(1)
   })
 
   describe('when the page opens', () => {
@@ -467,6 +485,23 @@ describe('pages/ResetChangePassword', () => {
       )
     })
 
+    it.each([
+      ['Enter', pressEnter],
+      ['Space', pressSpace]
+    ])('asks for one link while %s is held on the button', async (key, press) => {
+      const resetPassword = vi.fn(() => Promise.reject(requestFailure('down')))
+      const wrapper = await openPage(vi.fn(rejectDeadLink), resetPassword)
+      await submitPasswords(wrapper)
+      const send = wrapper.find('a.main-button')
+
+      await press(send)
+      await flushPromises()
+      expect(resetPassword).toHaveBeenCalledTimes(1)
+      await press(send, { repeat: true })
+
+      expect(resetPassword).toHaveBeenCalledTimes(1)
+    })
+
     it('leaves a bug of the sending to Sentry', async () => {
       const bug = new TypeError('a bug')
       const errorHandler = vi.fn()
@@ -486,6 +521,24 @@ describe('pages/ResetChangePassword', () => {
       expect(wrapper.find('[role="alert"]').text()).toBe(
         'login.send_new_link_failed'
       )
+    })
+
+    it('leaves a bug of a sending from the keyboard to Sentry', async () => {
+      const bug = new TypeError('a bug')
+      const errorHandler = vi.fn()
+      const wrapper = mountWithErrorHandler(
+        errorHandler,
+        vi.fn(rejectDeadLink),
+        vi.fn(() => Promise.reject(bug))
+      )
+      await flushPromises()
+      await submitPasswords(wrapper)
+
+      await pressEnter(wrapper.find('a.main-button'))
+      await flushPromises()
+
+      expect(errorHandler).toHaveBeenCalledTimes(1)
+      expect(errorHandler.mock.calls[0][0]).toBe(bug)
     })
 
     it('keeps the focus on the page as the form and the button go', async () => {

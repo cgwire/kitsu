@@ -50,8 +50,8 @@
             role="button"
             tabindex="0"
             @click="confirmResetPassword"
-            @keydown.enter.prevent="confirmResetPassword"
-            @keydown.space.prevent="confirmResetPassword"
+            @keydown.enter.prevent="onButtonKeydown"
+            @keydown.space.prevent="onButtonKeydown"
             v-if="!isSuccess"
           >
             {{ $t('login.reset_password') }}
@@ -126,6 +126,12 @@ const confirmResetPassword = async () => {
 
 const onEmailEnter = event => {
   if (isSendingEnter(event)) {
+    confirmResetPassword()
+  }
+}
+
+const onButtonKeydown = event => {
+  if (!event.repeat) {
     confirmResetPassword()
   }
 }

@@ -4,7 +4,7 @@ import { createStore } from 'vuex'
 
 import ResetPassword from '@/components/pages/ResetPassword.vue'
 
-import { pressEnter } from '../fixtures/keyboard'
+import { pressEnter, pressSpace } from '../fixtures/keyboard'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
@@ -35,8 +35,8 @@ describe('pages/ResetPassword', () => {
     let resetPassword
     let wrapper
 
-    const mountPage = email => {
-      resetPassword = vi.fn()
+    const mountPage = (email, answer) => {
+      resetPassword = vi.fn(answer)
       const store = createStore({
         state: { login: { email } },
         actions: { resetPassword }
@@ -103,6 +103,21 @@ describe('pages/ResetPassword', () => {
       await pressEnter(wrapper.find('input[type="email"]'), { isComposing: true })
 
       expect(resetPassword).not.toHaveBeenCalled()
+    })
+
+    // Each request sends an email.
+    it.each([
+      ['Enter', pressEnter],
+      ['Space', pressSpace]
+    ])('sends the request once while %s is held on the button', async (key, press) => {
+      mountPage('jane@example.com', () => new Promise(() => {}))
+      const button = wrapper.find('.main-button')
+
+      await press(button)
+      expect(resetPassword).toHaveBeenCalledTimes(1)
+      await press(button, { repeat: true })
+
+      expect(resetPassword).toHaveBeenCalledTimes(1)
     })
   })
 })

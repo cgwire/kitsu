@@ -55,8 +55,8 @@
               role="button"
               tabindex="0"
               @click="confirmResetChangePassword"
-              @keydown.enter.prevent="confirmResetChangePassword"
-              @keydown.space.prevent="confirmResetChangePassword"
+              @keydown.enter.prevent="onButtonKeydown"
+              @keydown.space.prevent="onButtonKeydown"
               v-if="!isSuccess && !isTokenError"
             >
               {{
@@ -106,8 +106,8 @@
               role="button"
               tabindex="0"
               @click="sendNewLink"
-              @keydown.enter.prevent="sendNewLink"
-              @keydown.space.prevent="sendNewLink"
+              @keydown.enter.prevent="onNewLinkKeydown"
+              @keydown.space.prevent="onNewLinkKeydown"
             >
               {{ $t('login.send_new_link') }}
             </a>
@@ -241,6 +241,12 @@ const onPasswordEnter = event => {
   }
 }
 
+const onButtonKeydown = event => {
+  if (!event.repeat) {
+    confirmResetChangePassword()
+  }
+}
+
 const checkToken = async () => {
   try {
     const isValid = await store.dispatch('checkResetToken', {
@@ -278,6 +284,13 @@ const sendNewLink = async () => {
     if (!errors.isRequestFailure(err)) throw err
   } finally {
     isSendingLink.value = false
+  }
+}
+
+const onNewLinkKeydown = event => {
+  // Returned, a bug of the sending reaches the error handler of the app.
+  if (!event.repeat) {
+    return sendNewLink()
   }
 }
 

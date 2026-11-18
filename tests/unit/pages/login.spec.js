@@ -11,7 +11,7 @@ import i18n from '@/lib/i18n'
 
 import Login from '@/components/pages/Login.vue'
 
-import { pressEnter } from '../fixtures/keyboard'
+import { pressEnter, pressSpace } from '../fixtures/keyboard'
 
 const mountPage = (email, logIn = vi.fn(), password = '') => {
   const store = createStore({
@@ -160,5 +160,21 @@ describe('pages/Login', () => {
     await pressEnter(wrapper.find('input[type="password"]'), { repeat: true })
 
     expect(logIn).not.toHaveBeenCalled()
+  })
+
+  // Five failed logins in a row lock the account for a minute.
+  test.each([
+    ['Enter', pressEnter],
+    ['Space', pressSpace]
+  ])('logs in once while %s is held on the button', async (key, press) => {
+    const logIn = vi.fn(() => new Promise(() => {}))
+    wrapper = mountPage('jane@example.com', logIn, 'secret')
+    const button = wrapper.find('.main-button')
+
+    await press(button)
+    expect(logIn).toHaveBeenCalledTimes(1)
+    await press(button, { repeat: true })
+
+    expect(logIn).toHaveBeenCalledTimes(1)
   })
 })

@@ -94,8 +94,8 @@
             role="button"
             tabindex="0"
             @click="confirmLogIn()"
-            @keydown.enter.prevent="confirmLogIn()"
-            @keydown.space.prevent="confirmLogIn()"
+            @keydown.enter.prevent="onButtonKeydown"
+            @keydown.space.prevent="onButtonKeydown"
           >
             {{ $t('login.login') }}
           </a>
@@ -255,6 +255,12 @@ const onEmailEnter = event => {
 
 const onPasswordEnter = event => {
   if (isSendingEnter(event)) {
+    confirmLogIn()
+  }
+}
+
+const onButtonKeydown = event => {
+  if (!event.repeat) {
     confirmLogIn()
   }
 }
