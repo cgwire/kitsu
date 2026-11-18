@@ -1483,8 +1483,8 @@ const runTaskStatusChange = async () => {
       taskStatusId: taskStatusId.value,
       comment: statusComment.value
     })
+    // Only the comment goes: the next tasks often get the same status.
     statusComment.value = ''
-    taskStatusId.value = ''
     modals.statusChange = false
   } catch (err) {
     errors.changeStatus = true
@@ -1728,7 +1728,7 @@ const autoChooseSelectBar = () => {
     return
   }
   window.addEventListener('keydown', onKeyDown)
-  // The watcher of the task count may run after this choice.
+  // The watcher of the selection may run after this choice.
   refreshSelectionActions()
   if (isCurrentViewAsset.value && nbSelectedAssets.value > 0) {
     selectedBar.value = 'delete-assets'
@@ -1788,10 +1788,14 @@ const getSelectionCustomActions = () => {
 }
 
 // The bars offered to a selection of tasks depend on its statuses and custom
-// actions.
+// actions. A chosen status leaves when the list no longer offers it.
 const refreshSelectionActions = () => {
   if (nbSelectedTasks.value === 0) return
   availableTaskStatuses.value = getAvailableStatuses()
+  const isStatusAvailable = availableTaskStatuses.value.some(
+    status => status.id === taskStatusId.value
+  )
+  if (!isStatusAvailable) taskStatusId.value = ''
   customActions.value = getSelectionCustomActions()
   const isActionStillAvailable =
     customAction.value.url &&
@@ -1886,7 +1890,9 @@ watch(availableBars, bars => {
   if (selectedBar.value && !bars.has(selectedBar.value)) autoChooseSelectBar()
 })
 
-watch(nbSelectedTasks, refreshSelectionActions, { immediate: true })
+// A click on a task replaces the selection: its size stays, not its
+// productions.
+watch(selectedTaskIds, refreshSelectionActions, { immediate: true })
 
 watch(selectedTaskIds, () => {
   errors.changeStatus = false

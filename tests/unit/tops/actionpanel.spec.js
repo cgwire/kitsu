@@ -74,6 +74,8 @@ const mountPanel = async (
     lines = [],
     customActions = [],
     statuses = [],
+    // The productions of the tasks, with the statuses each one uses.
+    productions = [],
     errorHandler = null,
     isAdmin = false,
     isArtist = false,
@@ -120,6 +122,11 @@ const mountPanel = async (
         path: '/productions/:production_id/edits/:edit_id',
         name: 'edit',
         component: { template: '<div />' }
+      },
+      {
+        path: '/my-tasks',
+        name: 'todos',
+        component: { template: '<div />' }
       }
     ]
   })
@@ -149,7 +156,7 @@ const mountPanel = async (
       isShowAssignations: () => true,
       nbSelectedTasks: state => state.nbSelectedTasks,
       nbSelectedValidations: state => state.nbSelectedValidations,
-      productionMap: () => new Map(),
+      productionMap: () => toSelection(productions),
       selectedAssets: state => state.selectedLines,
       selectedConcepts: state => state.selectedConcepts,
       selectedEdits: state => state.selectedLines,
@@ -856,15 +863,29 @@ describe('ActionPanel, status change', () => {
       expect(modal(wrapper).props('isError')).toBe(false)
     })
 
-    test('starts over with no status after the change', async () => {
-      const { wrapper } = await mountOnShots()
+    // The same status often goes to one batch of tasks after another.
+    test('keeps the status sent for the next tasks', async () => {
+      const { store, wrapper } = await mountOnShots()
       await chooseStatus(wrapper, 'status-retake')
+      await commentField(wrapper).setValue('Check the timing')
       await confirmButton(wrapper).trigger('click')
-
       modal(wrapper).vm.$emit('confirm')
       await flushPromises()
 
-      expect(statusCombo(wrapper).props('modelValue')).toBe('')
+      expect(statusCombo(wrapper).props('modelValue')).toBe('status-retake')
+      expect(commentField(wrapper).element.value).toBe('')
+
+      store.state.selectedTasks.delete('task-3')
+      store.state.nbSelectedTasks = 2
+      await flushPromises()
+      await confirmButton(wrapper).trigger('click')
+      modal(wrapper).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(statusChanges(store)).toEqual([
+        { taskStatusId: 'status-retake', comment: 'Check the timing' },
+        { taskStatusId: 'status-retake', comment: '' }
+      ])
     })
 
     test('keeps the chosen status after a failure', async () => {
@@ -1075,6 +1096,63 @@ describe('ActionPanel, status change', () => {
         expect(isButtonDisabled(wrapper)).toBe(isStopped)
       }
     )
+  })
+
+  // My Tasks lists the tasks of several productions: the bar offers the
+  // statuses they all use.
+  describe('on My Tasks', () => {
+    const productions = [
+      { id: 'production-1', task_statuses: ['status-retake', 'status-wip'] },
+      { id: 'production-2', task_statuses: ['status-wip'] }
+    ]
+    const otherTask = { ...tasks[0], id: 'task-4', project_id: 'production-2' }
+
+    const mountOnMyTasks = selection => {
+      localStorage.setItem('todos--selected-bar', 'change-status')
+      return mountPanel([], {
+        path: '/my-tasks',
+        productions,
+        statuses,
+        tasks: selection
+      })
+    }
+
+    const select = async (store, selection) => {
+      store.state.selectedTasks = toSelection(selection)
+      store.state.nbSelectedTasks = selection.length
+      await flushPromises()
+    }
+
+    // A click on a task replaces the selection, whose size stays.
+    test('offers the statuses of a task clicked in place of another', async () => {
+      const { store, wrapper } = await mountOnMyTasks([tasks[0]])
+      expect(statusCombo(wrapper).props('taskStatusList')).toEqual(statuses)
+
+      await select(store, [otherTask])
+
+      expect(statusCombo(wrapper).props('taskStatusList')).toEqual([
+        statuses[1]
+      ])
+    })
+
+    test('drops a chosen status a selected task does not use', async () => {
+      const { store, wrapper } = await mountOnMyTasks([tasks[0]])
+      await chooseStatus(wrapper, 'status-retake')
+
+      await select(store, [tasks[0], otherTask])
+
+      expect(statusCombo(wrapper).props('modelValue')).toBe('')
+      expect(isButtonDisabled(wrapper)).toBe(true)
+    })
+
+    test('keeps a chosen status every selected task uses', async () => {
+      const { store, wrapper } = await mountOnMyTasks([tasks[0]])
+      await chooseStatus(wrapper, 'status-wip')
+
+      await select(store, [otherTask])
+
+      expect(statusCombo(wrapper).props('modelValue')).toBe('status-wip')
+    })
   })
 })
 
