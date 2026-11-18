@@ -1221,8 +1221,10 @@
       "user_limit_error": "Osiągnięto limit użytkowników. Skontaktuj się z naszym zespołem, aby rozszerzyć plan.",
       "change_password_for": "Zmień hasło użytkownika:",
       "change_password_error": "Wystąpił błąd podczas zmiany hasła. Sprawdź poprawność nowego hasła.",
+      "change_password_refused": "Hasło tego użytkownika jest chronione. Tylko sam użytkownik może je zmienić.",
       "disable_2FA": "Wyłącz 2FA",
       "disable_2FA_error": "Wystąpił błąd podczas wyłączania uwierzytelniania dwuskładnikowego.",
+      "disable_2FA_refused": "Uwierzytelnianie dwuskładnikowe tego użytkownika jest chronione. Tylko sam użytkownik może je wyłączyć.",
       "self_role_downgrade_confirm": "Obniżyć własną rolę ({currentRole}) do roli {newRole}? Natychmiast tracisz uprawnienia administratora: tworzenie produkcji i zarządzanie użytkownikami nie będzie już możliwe, a przywrócić Twoją rolę może tylko inna osoba z rolą {currentRole}.",
       "fields": {
         "active": "Aktywny",

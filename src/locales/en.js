@@ -1268,8 +1268,10 @@ export default {
     user_limit_error: 'You have reached your user limit. Please contact our team to upgrade your plan.',
     change_password_for: 'Change password for',
     change_password_error: 'An error occurred while changing password. Please verify the new password.',
+    change_password_refused: 'This user\'s password is protected. Only they can change it.',
     disable_2FA: 'Disable 2FA',
     disable_2FA_error: 'An error occurred while disabling two-factor authentication.',
+    disable_2FA_refused: 'This user\'s two-factor authentication is protected. Only they can disable it.',
     self_role_downgrade_confirm: 'Lower your own role from {currentRole} to {newRole}? You lose your administrator rights right away: creating productions and managing users will no longer be possible, and only another {currentRole} will be able to restore your role.',
     fields: {
       active: 'Active',

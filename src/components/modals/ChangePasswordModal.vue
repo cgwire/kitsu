@@ -64,11 +64,20 @@
     <div class="error has-text-right mt1" v-if="isError">
       {{ $t('people.change_password_error') }}
     </div>
+    <div class="error has-text-right mt1" v-if="isPasswordChangeRefused">
+      {{ $t('people.change_password_refused') }}
+    </div>
     <div
       class="error has-text-right mt1"
       v-if="isErrorDisableTwoFactorAuthentication"
     >
       {{ $t('people.disable_2FA_error') }}
+    </div>
+    <div
+      class="error has-text-right mt1"
+      v-if="isDisableTwoFactorAuthenticationRefused"
+    >
+      {{ $t('people.disable_2FA_refused') }}
     </div>
   </base-modal>
 </template>
@@ -99,7 +108,9 @@ const form = ref({ password: '', password2: '' })
 const firstPassword = ref(null)
 const isError = ref(false)
 const isErrorDisableTwoFactorAuthentication = ref(false)
+const isDisableTwoFactorAuthenticationRefused = ref(false)
 const isLoading = ref(false)
+const isPasswordChangeRefused = ref(false)
 const isValid = ref(true)
 
 // Computed
@@ -110,9 +121,27 @@ const modalTitle = computed(
 
 // Functions
 
-const confirmClicked = async () => {
-  isErrorDisableTwoFactorAuthentication.value = false
+// Zou keeps the password of another admin who has one, or of a protected
+// account, for its owner. Its 400 also refuses a short or mismatched
+// password: only the message tells them apart.
+const isPasswordChangeRefusal = err =>
+  /protected accounts|another admin's password/.test(err.body?.message ?? '')
+
+// Same for the two-factor authentication of another admin, with the 400
+// it also gives when the person has none.
+const isTwoFactorAuthenticationRefusal = err =>
+  /other admins/.test(err.body?.message ?? '')
+
+const clearMessages = () => {
   isError.value = false
+  isErrorDisableTwoFactorAuthentication.value = false
+  isDisableTwoFactorAuthenticationRefused.value = false
+  isPasswordChangeRefused.value = false
+  isValid.value = true
+}
+
+const confirmClicked = async () => {
+  clearMessages()
   isLoading.value = true
   try {
     await store.dispatch('changePasswordPerson', {
@@ -121,20 +150,28 @@ const confirmClicked = async () => {
     })
     emit('confirm')
   } catch (err) {
-    if (err.isValidPassword === false) isValid.value = false
-    else isError.value = true
+    if (err.isValidPassword === false) {
+      isValid.value = false
+    } else if (isPasswordChangeRefusal(err)) {
+      isPasswordChangeRefused.value = true
+    } else {
+      isError.value = true
+    }
   }
   isLoading.value = false
 }
 
 const disableTwoFactorAuthenticationClicked = async () => {
-  isErrorDisableTwoFactorAuthentication.value = false
-  isError.value = false
+  clearMessages()
   isLoading.value = true
   try {
     await store.dispatch('disableTwoFactorAuthenticationPerson', props.person)
-  } catch {
-    isErrorDisableTwoFactorAuthentication.value = true
+  } catch (err) {
+    if (isTwoFactorAuthenticationRefusal(err)) {
+      isDisableTwoFactorAuthenticationRefused.value = true
+    } else {
+      isErrorDisableTwoFactorAuthentication.value = true
+    }
   }
   isLoading.value = false
 }
@@ -143,9 +180,7 @@ const resetForm = () => {
   if (!props.person) return
   form.value = { password: '', password2: '' }
   isLoading.value = false
-  isError.value = false
-  isErrorDisableTwoFactorAuthentication.value = false
-  isValid.value = true
+  clearMessages()
 }
 
 // Watchers
