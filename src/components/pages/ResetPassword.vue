@@ -11,6 +11,7 @@
         <div class="field mt2">
           <p class="control has-icon">
             <input
+              ref="emailFieldRef"
               class="input is-medium email"
               type="email"
               autocomplete="username"
@@ -73,6 +74,7 @@ const store = useStore()
 // --------------------------------------------------------------------------
 
 const email = ref('')
+const emailFieldRef = ref(null)
 const isError = ref(false)
 const isLoading = ref(false)
 const isSuccess = ref(false)
@@ -81,6 +83,10 @@ const isSuccess = ref(false)
 // --------------------------------------------------------------------------
 
 const confirmResetPassword = async () => {
+  if (!email.value) {
+    emailFieldRef.value.focus()
+    return
+  }
   isLoading.value = true
   isError.value = false
   isSuccess.value = false

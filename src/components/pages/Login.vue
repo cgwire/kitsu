@@ -42,6 +42,7 @@
           <div class="field mt2">
             <p class="control has-icon">
               <input
+                ref="emailFieldRef"
                 class="input is-medium email"
                 type="email"
                 autocomplete="username"
@@ -149,6 +150,7 @@ const store = useStore()
 // --------------------------------------------------------------------------
 
 const email = ref('')
+const emailFieldRef = ref(null)
 const password = ref('')
 const passwordFieldRef = ref(null)
 const fadeAway = ref(false)
@@ -197,6 +199,11 @@ const updatePassword = event => {
 }
 
 const confirmLogIn = async twoFactorPayload => {
+  // The login request sends the email of the store.
+  if (!store.state.login.email) {
+    emailFieldRef.value?.focus()
+    return
+  }
   isInactiveUserError.value = false
   isTooMuchLoginFailedAttemps.value = false
   isWrongOTP.value = false
