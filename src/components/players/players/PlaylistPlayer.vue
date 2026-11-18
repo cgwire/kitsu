@@ -4618,8 +4618,15 @@ const configureWaveForm = () => {
   }
 }
 
+// The waveform reads the low def movie whatever the quality played: the
+// same sound for a fraction of the bytes. Chrome caches the range reads of
+// the video apart from a whole-file read: on the video's address, each
+// return to the shot downloaded the movie again, so the waveform has its own.
+const getWaveformPath = preview =>
+  `/api/movies/low/preview-files/${preview.id}.mp4?waveform`
+
 const loadWaveForm = () => {
-  if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) {
+  if (isWaveformShown.value) {
     if (rawPlayer.value?.currentPlayer?.src) {
       try {
         if (wavesurfer) {
@@ -4633,8 +4640,9 @@ const loadWaveForm = () => {
         // fetch the movie a second time, into this new waveform.
         clearTimeout(waveformLoadTimeout)
         waveformLoadTimeout = setTimeout(() => {
-          // Destroyed meanwhile: the player closed, or moved on to a
-          // preview that is no movie.
+          // Destroyed meanwhile: hidden, under a build, or off the movie
+          // (another entry, a file of the revision that is no movie, or a
+          // list emptied).
           if (!wavesurfer) {
             isWaveformLoading.value = false
             return
@@ -4644,7 +4652,7 @@ const loadWaveForm = () => {
           // handler, which load() fires before rejecting.
           const loading = wavesurfer
           loading
-            .load(rawPlayer.value.currentPlayer.src)
+            .load(getWaveformPath(currentPreview.value))
             .catch(() => {})
             .finally(() => {
               // The waveform of the next movie keeps the spinner.
@@ -4660,7 +4668,7 @@ const loadWaveForm = () => {
   } else {
     if (wavesurfer) {
       wavesurfer.destroy()
-      // Null it so the playback seek sync cannot touch a destroyed instance.
+      // Null it: the seek sync and a pending load skip a missing waveform.
       wavesurfer = null
     }
   }
@@ -5311,7 +5319,6 @@ watch(
     const currentId = currentEntity.value?.id
     if (currentId) entityIdBeforeRebuild = currentId
     resetPlaylist()
-    warmMovies()
     if (newEntities?.length) {
       const index = newEntities.findIndex(
         entity => entity.id === entityIdBeforeRebuild
@@ -5319,6 +5326,8 @@ watch(
       if (index > 0) playEntity(index)
       entityIdBeforeRebuild = null
     }
+    // The warm-ups start from the entity kept on screen.
+    warmMovies()
   }
 )
 
@@ -5448,12 +5457,26 @@ watch(isWaveformShown, () => {
   })
 })
 
+// On hide, loadWaveForm destroys the waveform: its download stops, and the
+// sound it decoded goes.
 watch(isWaveformDisplayed, () => {
-  if (isWaveformDisplayed.value) {
-    loadWaveForm()
-  }
+  loadWaveForm()
+  warmWaveformMovies()
   nextTick(() => updateRoomStatus())
 })
+
+// A new movie on the entry on screen: another file of its revision, another
+// revision, or a new list starting on it. A switch of entry loads its own
+// waveform, in the playingEntityIndex watcher. The load waits for the
+// render, where the viewer takes the new movie as its source.
+watch(
+  [playingEntityIndex, () => currentPreview.value?.id],
+  ([index], [previousIndex]) => {
+    if (index === previousIndex) {
+      nextTick(() => loadWaveForm())
+    }
+  }
+)
 
 // The pencil the laser turned on goes off with it where the user may not keep
 // the tools, such as a document the laser started over.
@@ -5467,6 +5490,8 @@ watch(isLaserModeOn, () => {
 
 watch(isFullMode, () => {
   isComparing.value = false
+  // The waveform goes with the build, and comes back for the entry on screen.
+  loadWaveForm()
   if (isFullMode.value) {
     nextTick(() => playEntity(0))
   } else {
@@ -5521,14 +5546,30 @@ watch(isHd, () => warmMovies())
 // clips, from the one on screen, as soon as the list or the quality is
 // known, so playback never starts cold.
 let stopMovieWarmup = null
-const warmMovies = () => {
-  if (stopMovieWarmup) stopMovieWarmup()
+let stopWaveformWarmup = null
+const getClipsFromScreen = () => {
   const index = playingEntityIndex.value
   const list = entityList.value
-  stopMovieWarmup = warmPlaylistMovies(
-    [...list.slice(index), ...list.slice(0, index)],
-    { isHd: isHd.value }
-  )
+  return [...list.slice(index), ...list.slice(0, index)]
+}
+// The waveform reads the low def movies, which an HD playback leaves cold.
+// From the next clip on: the waveform on screen reads its whole movie at
+// once, which a warm-up would only make the server fetch twice.
+const warmWaveformMovies = () => {
+  if (stopWaveformWarmup) stopWaveformWarmup()
+  stopWaveformWarmup = null
+  if (isHd.value && isWaveformDisplayed.value) {
+    stopWaveformWarmup = warmPlaylistMovies(getClipsFromScreen().slice(1), {
+      isHd: false
+    })
+  }
+}
+const warmMovies = () => {
+  if (stopMovieWarmup) stopMovieWarmup()
+  stopMovieWarmup = warmPlaylistMovies(getClipsFromScreen(), {
+    isHd: isHd.value
+  })
+  warmWaveformMovies()
 }
 
 onMounted(() => {
@@ -5599,6 +5640,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   isMounted = false
   if (stopMovieWarmup) stopMovieWarmup()
+  if (stopWaveformWarmup) stopWaveformWarmup()
   endAnnotationSaving()
   cancelProgressiveRender()
   _stopPlaylistProgressUpdateLoop()

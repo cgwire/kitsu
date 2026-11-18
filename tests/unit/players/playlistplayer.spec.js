@@ -669,22 +669,33 @@ describe('PlaylistPlayer.vue', () => {
       vi.useRealTimers()
     })
 
-    const showWaveform = async entities => {
+    const waveformPath = previewId =>
+      `/api/movies/low/preview-files/${previewId}.mp4?waveform`
+
+    const mountForWaveform = async (entities, options = {}) => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
       // The player sets the waveform up only in a container it finds.
       vi.spyOn(document, 'getElementById').mockReturnValue(
         document.createElement('div')
       )
-      wrapper = mountPlayer({ entities })
+      wrapper = mountPlayer({ entities, ...options })
       await flushPromises()
       wrapper.findComponent({ ref: 'raw-player' }).vm.currentPlayer = {
         src: '/movie.mp4'
       }
+    }
+
+    const toggleWaveform = async isDisplayed => {
       wrapper
         .findComponent({ name: 'PlayerPlaybackBar' })
-        .vm.$emit('update:isWaveformDisplayed', true)
+        .vm.$emit('update:isWaveformDisplayed', isDisplayed)
       await flushPromises()
       return waveSurfer.create.mock.results.at(-1).value
+    }
+
+    const showWaveform = async (entities, options = {}) => {
+      await mountForWaveform(entities, options)
+      return toggleWaveform(true)
     }
 
     const goToNextShot = async () => {
@@ -697,10 +708,25 @@ describe('PlaylistPlayer.vue', () => {
       await flushPromises()
     }
 
+    const loadsSince = created =>
+      waveSurfer.create.mock.results
+        .slice(created)
+        .flatMap(({ value }) => value.load.mock.calls)
+
+    // An address of its own, apart from the one the video reads.
     it('loads the waveform of the movie on screen', async () => {
       const waveform = await showWaveform([movie])
       await vi.advanceTimersByTimeAsync(100)
-      expect(waveform.load).toHaveBeenCalledWith('/movie.mp4')
+      expect(waveform.load).toHaveBeenCalledWith(waveformPath('preview-1'))
+    })
+
+    // The low def movie holds the same sound for a fraction of the bytes.
+    it('reads the low def movie in HD as well', async () => {
+      const waveform = await showWaveform([movie], {
+        organisation: { hd_by_default: true }
+      })
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).toHaveBeenCalledWith(waveformPath('preview-1'))
     })
 
     // The waveform reads the whole movie before it draws anything.
@@ -956,6 +982,21 @@ describe('PlaylistPlayer.vue', () => {
       })
     })
 
+    it('drops the waveform load once hidden', async () => {
+      const waveform = await showWaveform([movie])
+      await toggleWaveform(false)
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).not.toHaveBeenCalled()
+    })
+
+    // destroy() stops the download, and frees the sound decoded.
+    it('destroys the waveform once hidden', async () => {
+      const waveform = await showWaveform([movie])
+      await vi.advanceTimersByTimeAsync(100)
+      await toggleWaveform(false)
+      expect(waveform.destroy).toHaveBeenCalled()
+    })
+
     it('drops the waveform load of a closed player', async () => {
       const waveform = await showWaveform([movie])
       wrapper.unmount()
@@ -971,6 +1012,174 @@ describe('PlaylistPlayer.vue', () => {
       expect(waveform.load).not.toHaveBeenCalled()
     })
 
+    it('drops the waveform load of a picture reached once hidden', async () => {
+      const waveform = await showWaveform([movie, picture])
+      await toggleWaveform(false)
+      await goToNextShot()
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).not.toHaveBeenCalled()
+    })
+
+    // The temporary playlist empties its list on close, and keeps the player.
+    it('drops the waveform load of a list emptied meanwhile', async () => {
+      const waveform = await showWaveform([movie])
+      await wrapper.setProps({ entities: [] })
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).not.toHaveBeenCalled()
+      expect(wrapper.find('.waveform-loading').element.style.display).toBe(
+        'none'
+      )
+    })
+
+    // Next goes through the files of a revision first.
+    it('drops the waveform load of a picture file reached meanwhile', async () => {
+      const waveform = await showWaveform([
+        {
+          ...movie,
+          preview_file_previews: [{ id: 'preview-1b', extension: 'png' }]
+        }
+      ])
+      await goToNextShot()
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).not.toHaveBeenCalled()
+    })
+
+    it('loads the waveform of the file shown', async () => {
+      await mountForWaveform([
+        {
+          ...movie,
+          preview_file_previews: [{ id: 'preview-1b', extension: 'mp4' }]
+        }
+      ])
+      await goToNextShot()
+      const waveform = await toggleWaveform(true)
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).toHaveBeenCalledWith(waveformPath('preview-1b'))
+    })
+
+    describe('on a new movie of the entry on screen', () => {
+      it('loads the waveform of the next file', async () => {
+        await showWaveform([
+          {
+            ...movie,
+            preview_file_previews: [{ id: 'preview-1b', extension: 'mp4' }]
+          }
+        ])
+        await vi.advanceTimersByTimeAsync(100)
+        const created = waveSurfer.create.mock.results.length
+
+        await goToNextShot()
+        await vi.advanceTimersByTimeAsync(100)
+
+        expect(loadsSince(created)).toEqual([[waveformPath('preview-1b')]])
+      })
+
+      it('loads the waveform of another revision', async () => {
+        const shot = { ...movie }
+        await showWaveform([shot])
+        await vi.advanceTimersByTimeAsync(100)
+        const created = waveSurfer.create.mock.results.length
+
+        wrapper
+          .findComponent({ name: 'PlaylistedEntity' })
+          .vm.$emit('preview-changed', {
+            entity: shot,
+            previewFile: { id: 'preview-1-v2', extension: 'mp4', revision: 2 },
+            previousPreviewFileId: 'preview-1'
+          })
+        await flushPromises()
+        await vi.advanceTimersByTimeAsync(100)
+
+        expect(loadsSince(created)).toEqual([[waveformPath('preview-1-v2')]])
+      })
+
+      // The temporary playlist empties its list on close, and the viewer
+      // drops its movie: it takes the next one as the new list renders.
+      it('loads the waveform of a new list', async () => {
+        await showWaveform([movie])
+        const viewer = wrapper.findComponent({ ref: 'raw-player' }).vm
+        viewer.$watch('entities', entities => {
+          viewer.currentPlayer.src = entities.length ? '/movie.mp4' : ''
+        })
+        await vi.advanceTimersByTimeAsync(100)
+        await wrapper.setProps({ entities: [] })
+        const created = waveSurfer.create.mock.results.length
+
+        await wrapper.setProps({ entities: [otherMovie] })
+        await vi.advanceTimersByTimeAsync(100)
+
+        expect(loadsSince(created)).toEqual([[waveformPath('preview-3')]])
+      })
+
+      // A switch of entry loads its waveform already.
+      it('sets one waveform up on a switch of entry', async () => {
+        await showWaveform([movie, otherMovie])
+        const created = waveSurfer.create.mock.results.length
+
+        await goToNextShot()
+
+        expect(waveSurfer.create.mock.results.length - created).toBe(1)
+      })
+    })
+
+    // A build plays files of every kind in one video, under no waveform.
+    describe('during a build', () => {
+      const startBuild = async () => {
+        await wrapper.find('.job-button.mr05').trigger('click')
+        await flushPromises()
+      }
+      const endBuild = async () => {
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(
+            button =>
+              button.attributes('title') === 'playlists.actions.exit_play_full'
+          )
+          .vm.$emit('click')
+        await flushPromises()
+      }
+      const playEntry = async index => {
+        wrapper
+          .findAllComponents({ name: 'PlaylistedEntity' })
+          [index].vm.$emit('play-click', index)
+        await flushPromises()
+      }
+
+      it('destroys the waveform', async () => {
+        const waveform = await showWaveform([movie, otherMovie])
+        await vi.advanceTimersByTimeAsync(100)
+
+        await startBuild()
+
+        expect(waveform.destroy).toHaveBeenCalled()
+      })
+
+      it('loads no waveform', async () => {
+        await showWaveform([movie, otherMovie])
+        await vi.advanceTimersByTimeAsync(100)
+        const created = waveSurfer.create.mock.results.length
+
+        await startBuild()
+        await playEntry(1)
+        await vi.advanceTimersByTimeAsync(100)
+
+        expect(loadsSince(created)).toEqual([])
+      })
+
+      it('loads the waveform of the entry on screen once it ends', async () => {
+        await showWaveform([movie, otherMovie])
+        await startBuild()
+        await playEntry(1)
+        await vi.advanceTimersByTimeAsync(100)
+        const created = waveSurfer.create.mock.results.length
+
+        await endBuild()
+        await vi.advanceTimersByTimeAsync(100)
+
+        expect(loadsSince(created)).toEqual([[waveformPath('preview-3')]])
+      })
+    })
+
     // Each switch sets a new waveform up: the load still pending from the
     // previous one fetched the movie a second time, into the new waveform.
     it('loads the movie once on two quick switches', async () => {
@@ -981,7 +1190,7 @@ describe('PlaylistPlayer.vue', () => {
       const loads = waveSurfer.create.mock.results
         .slice(created)
         .flatMap(({ value }) => value.load.mock.calls)
-      expect(loads).toEqual([['/movie.mp4']])
+      expect(loads).toEqual([[waveformPath('preview-3')]])
     })
 
     it('loads nothing into the waveform it destroyed', async () => {
@@ -2130,6 +2339,25 @@ describe('PlaylistPlayer.vue', () => {
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
       })
     const warmedUrls = fetch => fetch.mock.calls.map(([url]) => url)
+    const goToNextShot = async () => {
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      await flushPromises()
+    }
+    // A task type change rebuilds the list through an empty one: the player
+    // goes back to the entity it showed.
+    const rebuildList = async () => {
+      const entities = wrapper.props('entities')
+      await wrapper.setProps({ entities: [] })
+      await wrapper.setProps({
+        entities: entities.map(entity => ({ ...entity }))
+      })
+      await flushPromises()
+    }
 
     // The originals an HD switch plays were never asked for: the server had
     // to fetch them from its storage while the playback waited.
@@ -2139,11 +2367,7 @@ describe('PlaylistPlayer.vue', () => {
         entities: [movie('shot-1'), movie('shot-2'), movie('shot-3')]
       })
       await flushPromises()
-      wrapper
-        .findAllComponents({ name: 'ButtonSimple' })
-        .find(button => button.attributes('title') === 'playlists.actions.next_shot')
-        .vm.$emit('click')
-      await flushPromises()
+      await goToNextShot()
       fetch.mockClear()
 
       wrapper
@@ -2171,6 +2395,151 @@ describe('PlaylistPlayer.vue', () => {
         original('shot-2'),
         original('shot-3')
       ])
+    })
+
+    it('warms the originals from the entity on screen once the list is rebuilt', async () => {
+      const fetch = stubFetch()
+      wrapper = mountPlayer({
+        entities: [movie('shot-1'), movie('shot-2'), movie('shot-3')],
+        organisation: { hd_by_default: true }
+      })
+      await flushPromises()
+      await goToNextShot()
+      fetch.mockClear()
+
+      await rebuildList()
+
+      expect(warmedUrls(fetch)).toEqual([
+        original('shot-2'),
+        original('shot-3'),
+        original('shot-1')
+      ])
+    })
+
+    // The waveform reads the low def movies, which an HD playback leaves
+    // in the storage: the server fetched each one before sending a byte.
+    describe('for the waveform', () => {
+      const lowDef = id => `/api/movies/low/preview-files/${id}-movie.mp4`
+      const entities = [movie('shot-1'), movie('shot-2'), movie('shot-3')]
+      const toggleWaveform = async isDisplayed => {
+        wrapper
+          .findComponent({ name: 'PlayerPlaybackBar' })
+          .vm.$emit('update:isWaveformDisplayed', isDisplayed)
+        await flushPromises()
+      }
+      const showWaveform = () => toggleWaveform(true)
+      // Requests that never end keep the warm-up waiting on them.
+      const hangFetch = () =>
+        vi.spyOn(globalThis, 'fetch').mockReturnValue(new Promise(() => {}))
+      const mountInHd = async () => {
+        wrapper = mountPlayer({
+          entities,
+          organisation: { hd_by_default: true }
+        })
+        await flushPromises()
+      }
+
+      // From the next clip on: the waveform of the clip on screen reads its
+      // whole movie right away.
+      it('warms the next low def movies once the waveform shows in HD', async () => {
+        const fetch = stubFetch()
+        await mountInHd()
+        fetch.mockClear()
+
+        await showWaveform()
+
+        expect(warmedUrls(fetch)).toEqual([lowDef('shot-2'), lowDef('shot-3')])
+      })
+
+      it('warms the next low def movies once the list is rebuilt', async () => {
+        const fetch = stubFetch()
+        await mountInHd()
+        await showWaveform()
+        await goToNextShot()
+        fetch.mockClear()
+
+        await rebuildList()
+
+        expect(
+          warmedUrls(fetch).filter(url => url.includes('/movies/low/'))
+        ).toEqual([lowDef('shot-3'), lowDef('shot-1')])
+      })
+
+      it('stops warming them once the waveform hides', async () => {
+        const fetch = hangFetch()
+        await mountInHd()
+        fetch.mockClear()
+        await showWaveform()
+
+        await toggleWaveform(false)
+
+        expect(
+          fetch.mock.calls.map(([, { signal }]) => signal.aborted)
+        ).toEqual([true, true])
+      })
+
+      it('stops warming them on a switch back to LD', async () => {
+        const fetch = hangFetch()
+        await mountInHd()
+        fetch.mockClear()
+        await showWaveform()
+        const waveformCalls = [...fetch.mock.calls]
+
+        wrapper
+          .findComponent({ name: 'PlayerPlaybackBar' })
+          .vm.$emit('update:isHd', false)
+        await flushPromises()
+
+        expect(
+          waveformCalls.map(([url, { signal }]) => [url, signal.aborted])
+        ).toEqual([
+          [lowDef('shot-2'), true],
+          [lowDef('shot-3'), true]
+        ])
+      })
+
+      it('warms them on an HD switch under the waveform', async () => {
+        const fetch = stubFetch()
+        wrapper = mountPlayer({ entities })
+        await flushPromises()
+        await showWaveform()
+        fetch.mockClear()
+
+        wrapper
+          .findComponent({ name: 'PlayerPlaybackBar' })
+          .vm.$emit('update:isHd', true)
+        await flushPromises()
+
+        expect(
+          warmedUrls(fetch).filter(url => url.includes('/movies/low/'))
+        ).toEqual([lowDef('shot-2'), lowDef('shot-3')])
+      })
+
+      // The low def playback warmed them already.
+      it('warms nothing more in LD', async () => {
+        const fetch = stubFetch()
+        wrapper = mountPlayer({ entities })
+        await flushPromises()
+        fetch.mockClear()
+
+        await showWaveform()
+
+        expect(warmedUrls(fetch)).toEqual([])
+      })
+
+      it('stops warming them once the player closes', async () => {
+        const fetch = stubFetch()
+        await mountInHd()
+        fetch.mockClear()
+        await showWaveform()
+
+        wrapper.unmount()
+        wrapper = null
+
+        expect(
+          fetch.mock.calls.map(([, { signal }]) => signal.aborted)
+        ).toEqual([true, true])
+      })
     })
   })
 
