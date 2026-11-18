@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
 
+import en from '@/locales/en'
+
 import MainSchedule from '@/components/pages/MainSchedule.vue'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
@@ -10,6 +12,10 @@ vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
   useI18n: () => ({ t: key => key })
 }))
+
+// t() returns its key: reading the English text also proves the key exists
+const inEnglish = key =>
+  key.split('.').reduce((messages, part) => messages?.[part], en)
 
 const Page = { template: '<div />' }
 const ScheduleStub = {
@@ -225,6 +231,32 @@ describe('MainSchedule filters', () => {
       'months'
     ])
     expect(unitCombo().props('modelValue')).toBe('weeks')
+  })
+
+  it('names the arrows after the chosen step', async () => {
+    const wrapper = await mountFilteredPage()
+    const unitCombo = wrapper.findComponent({ name: 'Combobox' })
+    const titles = () =>
+      [
+        wrapper.find('.previous-period').attributes('title'),
+        wrapper.find('.next-period').attributes('title')
+      ].map(inEnglish)
+
+    expect(titles()).toEqual(['Previous week', 'Next week'])
+    unitCombo.vm.$emit('update:model-value', 'days')
+    await flushPromises()
+    expect(titles()).toEqual(['Previous day', 'Next day'])
+    unitCombo.vm.$emit('update:model-value', 'months')
+    await flushPromises()
+    expect(titles()).toEqual(['Previous month', 'Next month'])
+  })
+
+  it('says what the step selector sets', async () => {
+    const wrapper = await mountFilteredPage()
+
+    expect(inEnglish(wrapper.find('.period-unit').attributes('title'))).toBe(
+      'Arrow step'
+    )
   })
 
   it('keeps the filters in the URL, for a reload', async () => {

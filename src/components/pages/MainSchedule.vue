@@ -29,7 +29,7 @@
           <button-simple
             class="flexrow-item previous-period"
             icon="left"
-            :title="$t('main.previous')"
+            :title="$t(periodTitleKeys.previous)"
             @click="scrollScheduleByPeriod(-1)"
           />
           <button-simple
@@ -41,12 +41,13 @@
           <button-simple
             class="flexrow-item next-period"
             icon="right"
-            :title="$t('main.next')"
+            :title="$t(periodTitleKeys.next)"
             @click="scrollScheduleByPeriod(1)"
           />
           <combobox
             class="flexrow-item period-unit"
             :aria-label="$t('schedule.period_unit')"
+            :title="$t('schedule.period_unit')"
             locale-key-prefix="main."
             :options="periodUnitOptions"
             :with-margin="false"
@@ -135,6 +136,13 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import DateField from '@/components/widgets/DateField.vue'
+
+// a whole title per unit: "next" agrees with it in other languages
+const PERIOD_TITLE_KEYS = {
+  days: { previous: 'schedule.previous_day', next: 'schedule.next_day' },
+  weeks: { previous: 'schedule.previous_week', next: 'schedule.next_week' },
+  months: { previous: 'schedule.previous_month', next: 'schedule.next_month' }
+}
 
 // Composables
 const { t } = useI18n()
@@ -233,6 +241,8 @@ const periodUnitOptions = computed(() =>
     { label: 'month', value: 'months' }
   ].filter(option => zoomLevel.value > 0 || option.value !== 'days')
 )
+
+const periodTitleKeys = computed(() => PERIOD_TITLE_KEYS[periodUnit.value])
 
 const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
