@@ -124,6 +124,7 @@ import {
   parseHiddenIds,
   setVisibility
 } from '@/lib/productionSchedule'
+import { sortByName } from '@/lib/sorting'
 import {
   getEndDateFromString,
   getFirstStartDate,
@@ -138,6 +139,18 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import DateField from '@/components/widgets/DateField.vue'
+
+// Constants
+// --------------------------------------------------------------------------
+// The entities Zou plans, in the order of the Task Types page tabs: a concept
+// task type never gets a row.
+const SCHEDULE_ENTITIES = [
+  { entity: 'Asset', labelKey: 'assets.title' },
+  { entity: 'Shot', labelKey: 'shots.title' },
+  { entity: 'Sequence', labelKey: 'sequences.title' },
+  { entity: 'Episode', labelKey: 'episodes.title' },
+  { entity: 'Edit', labelKey: 'edits.title' }
+]
 
 // a whole title per unit: "next" agrees with it in other languages
 const PERIOD_TITLE_KEYS = {
@@ -171,6 +184,7 @@ const scheduleRef = useTemplateRef('schedule')
 // Computed
 // --------------------------------------------------------------------------
 const openProductions = computed(() => store.getters.openProductions)
+const archivedTaskTypes = computed(() => store.getters.archivedTaskTypes)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const taskTypes = computed(() => store.getters.taskTypes)
 
@@ -193,14 +207,35 @@ const productionFilterTitle = computed(() =>
   )
 )
 
-// in the studio order, the task types of the open productions only
+// Every task type a row can have, or the filter could not hide it: an
+// archived one keeps its rows, and Zou sends all the task types with tasks
+// for a production whose settings list none.
 const taskTypeFilterOptions = computed(() => {
+  const isEveryTaskTypeUsed = openProductions.value.some(
+    production => !production.task_types?.length
+  )
   const usedIds = new Set(
     openProductions.value.flatMap(production => production.task_types || [])
   )
-  return taskTypes.value
-    .filter(taskType => usedIds.has(taskType.id))
-    .map(taskType => ({ label: taskType.name, value: taskType.id }))
+  const toOptions = (list, labelKey) =>
+    sortByName(
+      list.filter(taskType => isEveryTaskTypeUsed || usedIds.has(taskType.id))
+    ).map(taskType => ({
+      label: taskType.name,
+      value: taskType.id,
+      group: t(labelKey)
+    }))
+  const isPlanned = taskType =>
+    SCHEDULE_ENTITIES.some(({ entity }) => entity === taskType.for_entity)
+  return [
+    ...SCHEDULE_ENTITIES.flatMap(({ entity, labelKey }) =>
+      toOptions(
+        taskTypes.value.filter(taskType => taskType.for_entity === entity),
+        labelKey
+      )
+    ),
+    ...toOptions(archivedTaskTypes.value.filter(isPlanned), 'main.archived')
+  ]
 })
 
 const taskTypeVisibilityMap = computed(() =>

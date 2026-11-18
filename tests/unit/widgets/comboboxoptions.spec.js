@@ -1,4 +1,4 @@
-import { flushPromises, shallowMount } from '@vue/test-utils'
+import { flushPromises, mount, shallowMount } from '@vue/test-utils'
 
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 
@@ -148,5 +148,72 @@ describe('ComboboxOptions', () => {
     expect(wrapper.find('.select-input').exists()).toBe(true)
     await trigger.trigger('keydown', { key: 'Escape' })
     expect(wrapper.find('.select-input').exists()).toBe(false)
+  })
+
+  it('draws no group title for options without a group', async () => {
+    await wrapper.find('.flexrow').trigger('click')
+    expect(wrapper.findAll('.option-line')).toHaveLength(3)
+    expect(wrapper.find('.option-group-title').exists()).toBe(false)
+    expect(wrapper.find('[role="group"]').exists()).toBe(false)
+  })
+
+  describe('with grouped options', () => {
+    const groupedOptions = [
+      { label: 'Modeling', value: 'tt-model', group: 'Assets' },
+      { label: 'Rigging', value: 'tt-rig', group: 'Assets' },
+      { label: 'Animation', value: 'tt-anim', group: 'Shots' }
+    ]
+
+    const mountGrouped = () =>
+      mount(ComboboxOptions, {
+        props: { options: groupedOptions, modelValue: {} },
+        global: { stubs: { teleport: false } }
+      })
+
+    it('titles each group of options', async () => {
+      const grouped = mountGrouped()
+      await grouped.find('.flexrow').trigger('click')
+
+      const groups = grouped.findAll('[role="group"]')
+      expect(
+        groups.map(group => ({
+          title: group.find('.option-group-title').text(),
+          options: group.findAll('[role="option"]').map(line => line.text())
+        }))
+      ).toEqual([
+        { title: 'Assets', options: ['Modeling', 'Rigging'] },
+        { title: 'Shots', options: ['Animation'] }
+      ])
+      groups.forEach(group => {
+        const titleId = group.find('.option-group-title').attributes('id')
+        expect(titleId).toBeTruthy()
+        expect(group.attributes('aria-labelledby')).toBe(titleId)
+      })
+    })
+
+    it('moves the keyboard over the options only, past the group titles', async () => {
+      const scrolled = []
+      Element.prototype.scrollIntoView = function () {
+        scrolled.push(this.textContent.trim())
+      }
+      try {
+        const grouped = mountGrouped()
+        const trigger = grouped.find('.flexrow')
+        // the first ArrowDown opens the list, the next three reach Animation
+        await trigger.trigger('keydown', { key: 'ArrowDown' })
+        await trigger.trigger('keydown', { key: 'ArrowDown' })
+        await trigger.trigger('keydown', { key: 'ArrowDown' })
+        await trigger.trigger('keydown', { key: 'ArrowDown' })
+        await flushPromises()
+        await trigger.trigger('keydown', { key: 'Enter' })
+
+        expect(grouped.emitted('change')).toEqual([
+          [{ key: 'tt-anim', value: true }]
+        ])
+        expect(scrolled).toEqual(['Modeling', 'Rigging', 'Animation'])
+      } finally {
+        delete Element.prototype.scrollIntoView
+      }
+    })
   })
 })

@@ -269,7 +269,10 @@
                       />
                       {{ durationUnit }}
                     </span>
-                    <span class="man-days-unit flexrow-item" v-else>
+                    <span
+                      class="man-days-unit flexrow-item"
+                      v-else-if="!hideManDays"
+                    >
                       {{ formatDuration(childElement.man_days) }}
                       {{ durationUnit }}
                     </span>

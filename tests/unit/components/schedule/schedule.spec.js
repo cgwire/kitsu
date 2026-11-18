@@ -1247,6 +1247,31 @@ describe('Schedule widget - estimation field', () => {
     expect(typedEstimations(wrapper)).toEqual([480, 720, 720])
     wrapper.unmount()
   })
+
+  // As on the Main Schedule: editable child rows, man-days hidden.
+  it('shows no estimation on a child row when the man-days are hidden', () => {
+    const wrapper = mountSchedule({
+      hierarchy: [{ ...person, children: [buildTaskElement()] }],
+      hideManDays: true
+    })
+    const childLine = wrapper.find('.child-name .entity-line')
+
+    expect(childLine.text()).toBe('Characters / Cat')
+    expect(childLine.find('.man-days-unit').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  it('shows the estimation of a read-only child row', () => {
+    const wrapper = mountSchedule({
+      hierarchy: [
+        { ...person, children: [{ ...buildTaskElement(), editable: false }] }
+      ]
+    })
+    const childLine = wrapper.find('.child-name .entity-line')
+
+    expect(childLine.find('span.man-days-unit').text()).toMatch(/^1\b/)
+    wrapper.unmount()
+  })
 })
 
 // Production schedule shape: a task type row, entity rows below it, and one

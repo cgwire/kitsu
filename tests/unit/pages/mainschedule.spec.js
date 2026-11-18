@@ -20,7 +20,7 @@ const inEnglish = key =>
 const Page = { template: '<div />' }
 const ScheduleStub = {
   name: 'Schedule',
-  props: ['hierarchy', 'milestones'],
+  props: { hierarchy: Array, milestones: Array, hideManDays: Boolean },
   emits: ['root-element-expanded'],
   template: '<div />',
   methods: { scrollByPeriod: vi.fn(), scrollToToday() {} }
@@ -56,6 +56,7 @@ const mountPage = async productions => {
     getters: {
       openProductions: () => productions,
       taskTypes: () => [],
+      archivedTaskTypes: () => [],
       taskTypeMap: () => new Map()
     },
     actions: { loadAllMilestones: () => [] }
@@ -83,12 +84,55 @@ describe('MainSchedule page', () => {
   })
 })
 
+// in no order: the page sorts them
 const taskTypes = [
-  { id: 'tt-anim', name: 'Animation', color: '#f00' },
-  { id: 'tt-light', name: 'Lighting', color: '#0f0' }
+  { id: 'tt-edit', name: 'Conform', color: '#ff0', for_entity: 'Edit' },
+  { id: 'tt-light', name: 'Lighting', color: '#0f0', for_entity: 'Shot' },
+  { id: 'tt-anim', name: 'Animation', color: '#f00', for_entity: 'Shot' },
+  { id: 'tt-design', name: 'Design', color: '#0ff', for_entity: 'Concept' },
+  { id: 'tt-story', name: 'Storyboard', color: '#f0f', for_entity: 'Episode' },
+  { id: 'tt-model', name: 'Modeling', color: '#888', for_entity: 'Asset' },
+  { id: 'tt-layout', name: 'Layout', color: '#808', for_entity: 'Sequence' },
+  {
+    id: 'tt-roto',
+    name: 'Roto',
+    color: '#00f',
+    for_entity: 'Shot',
+    archived: true
+  },
+  {
+    id: 'tt-block',
+    name: 'Blocking',
+    color: '#080',
+    for_entity: 'Shot',
+    archived: true
+  },
+  {
+    id: 'tt-sketch',
+    name: 'Sketch',
+    color: '#088',
+    for_entity: 'Concept',
+    archived: true
+  }
 ]
 
-const mountFilteredPage = async (path = '/main-schedule') => {
+const filteredProductions = [
+  { ...production, task_types: ['tt-anim', 'tt-light'] },
+  { ...production, id: 'production-2', name: 'Other', task_types: ['tt-anim'] }
+]
+
+const filteredScheduleItems = [
+  { id: 'item-1', task_type_id: 'tt-anim', start_date: '2026-01-01' },
+  { id: 'item-2', task_type_id: 'tt-light', start_date: '2026-02-01' }
+]
+
+const mountFilteredPage = async (
+  path = '/main-schedule',
+  {
+    productions = filteredProductions,
+    scheduleItems = filteredScheduleItems
+  } = {}
+) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -103,11 +147,9 @@ const mountFilteredPage = async (path = '/main-schedule') => {
   await router.push(path)
   const store = createStore({
     getters: {
-      openProductions: () => [
-        { ...production, task_types: ['tt-anim', 'tt-light'] },
-        { ...production, id: 'production-2', name: 'Other', task_types: [] }
-      ],
-      taskTypes: () => taskTypes,
+      openProductions: () => productions,
+      taskTypes: () => taskTypes.filter(taskType => !taskType.archived),
+      archivedTaskTypes: () => taskTypes.filter(taskType => taskType.archived),
       taskTypeMap: () => new Map(taskTypes.map(t => [t.id, t]))
     },
     actions: {
@@ -116,10 +158,7 @@ const mountFilteredPage = async (path = '/main-schedule') => {
         { id: 'm2', project_id: 'production-2', name: 'Review' },
         { id: 'm3', project_id: 'closed-production', name: 'Old' }
       ],
-      loadScheduleItems: () => [
-        { id: 'item-1', task_type_id: 'tt-anim', start_date: '2026-01-01' },
-        { id: 'item-2', task_type_id: 'tt-light', start_date: '2026-02-01' }
-      ]
+      loadScheduleItems: () => scheduleItems
     }
   })
   const wrapper = shallowMount(MainSchedule, {
@@ -146,9 +185,89 @@ describe('MainSchedule filters', () => {
       { label: 'Other', value: 'production-2' }
     ])
     expect(taskTypeCombo.props('options')).toEqual([
-      { label: 'Animation', value: 'tt-anim' },
-      { label: 'Lighting', value: 'tt-light' }
+      { label: 'Animation', value: 'tt-anim', group: 'shots.title' },
+      { label: 'Lighting', value: 'tt-light', group: 'shots.title' }
     ])
+  })
+
+  const taskTypeComboOf = wrapper =>
+    wrapper.findAllComponents({ name: 'ComboboxOptions' })[1]
+
+  const offeredTaskTypeIds = wrapper =>
+    taskTypeComboOf(wrapper)
+      .props('options')
+      .map(option => option.value)
+
+  it('offers the archived task types a production still lists', async () => {
+    const wrapper = await mountFilteredPage('/main-schedule', {
+      productions: [{ ...production, task_types: ['tt-anim', 'tt-roto'] }]
+    })
+    expect(offeredTaskTypeIds(wrapper)).toEqual(['tt-anim', 'tt-roto'])
+  })
+
+  const mountWithEveryTaskType = () =>
+    mountFilteredPage('/main-schedule', {
+      productions: [
+        { ...production, task_types: ['tt-anim'] },
+        { ...production, id: 'production-2', task_types: [] }
+      ]
+    })
+
+  it('offers every task type once a production lists none, concept ones aside', async () => {
+    const wrapper = await mountWithEveryTaskType()
+    expect(offeredTaskTypeIds(wrapper).sort()).toEqual([
+      'tt-anim',
+      'tt-block',
+      'tt-edit',
+      'tt-layout',
+      'tt-light',
+      'tt-model',
+      'tt-roto',
+      'tt-story'
+    ])
+  })
+
+  it('groups the task types by entity as the Task Types page, archived ones last, by name', async () => {
+    const wrapper = await mountWithEveryTaskType()
+    expect(
+      taskTypeComboOf(wrapper)
+        .props('options')
+        .map(option => `${option.group}: ${option.label}`)
+    ).toEqual([
+      'assets.title: Modeling',
+      'shots.title: Animation',
+      'shots.title: Lighting',
+      'sequences.title: Layout',
+      'episodes.title: Storyboard',
+      'edits.title: Conform',
+      'main.archived: Blocking',
+      'main.archived: Roto'
+    ])
+  })
+
+  it('shows only the checked task type, in a production without it', async () => {
+    const wrapper = await mountFilteredPage('/main-schedule', {
+      productions: [
+        { ...production, task_types: ['tt-anim'] },
+        { ...production, id: 'production-2', task_types: [] }
+      ],
+      scheduleItems: [
+        { id: 'item-2', task_type_id: 'tt-light', start_date: '2026-02-01' },
+        { id: 'item-3', task_type_id: 'tt-roto', start_date: '2026-03-01' }
+      ]
+    })
+    const taskTypeCombo = taskTypeComboOf(wrapper)
+    taskTypeCombo
+      .props('options')
+      .filter(option => option.value !== 'tt-anim')
+      .forEach(option =>
+        taskTypeCombo.vm.$emit('change', { key: option.value, value: false })
+      )
+    const schedule = wrapper.findComponent(ScheduleStub)
+    schedule.vm.$emit('root-element-expanded', hierarchyOf(wrapper)[1])
+    await flushPromises()
+
+    expect(hierarchyOf(wrapper)[1].children).toEqual([])
   })
 
   it('hides the unchecked productions', async () => {
@@ -314,6 +433,22 @@ describe('MainSchedule filters', () => {
     })
   })
 
+  it('keeps hidden on reload a type only a production without settings or an archive brings', async () => {
+    const wrapper = await mountFilteredPage(
+      '/main-schedule?hiddenTypes=tt-light,tt-roto',
+      {
+        productions: [
+          { ...production, task_types: ['tt-anim', 'tt-roto'] },
+          { ...production, id: 'production-2', task_types: [] }
+        ]
+      }
+    )
+    const visibility = taskTypeComboOf(wrapper).props('modelValue')
+    expect(visibility['tt-anim']).toBe(true)
+    expect(visibility['tt-light']).toBe(false)
+    expect(visibility['tt-roto']).toBe(false)
+  })
+
   const isFilterRowShown = wrapper =>
     wrapper.findAll('.toolbar-row')[1].element.style.display !== 'none'
 
@@ -335,5 +470,12 @@ describe('MainSchedule filters', () => {
       '/main-schedule?hiddenProductions=gone'
     )
     expect(isFilterRowShown(wrapper)).toBe(false)
+  })
+})
+
+describe('MainSchedule rows', () => {
+  it('hides the man-days, which no field of the page fills', async () => {
+    const wrapper = await mountFilteredPage()
+    expect(wrapper.findComponent(ScheduleStub).props('hideManDays')).toBe(true)
   })
 })
