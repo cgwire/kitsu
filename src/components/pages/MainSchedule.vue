@@ -27,31 +27,34 @@
           />
           <div class="filler"></div>
           <button-simple
-            class="flexrow-item previous-period"
-            icon="left"
-            :title="$t('main.previous')"
-            @click="scrollScheduleByPeriod(-1)"
-          />
-          <button-simple
             class="flexrow-item"
             icon="clock"
             :text="$t('schedule.today')"
             @click="scrollScheduleToToday"
           />
-          <button-simple
-            class="flexrow-item next-period"
-            icon="right"
-            :title="$t('main.next')"
-            @click="scrollScheduleByPeriod(1)"
-          />
-          <combobox
-            class="flexrow-item period-unit"
-            :aria-label="$t('schedule.period_unit')"
-            locale-key-prefix="main."
-            :options="periodUnitOptions"
-            :with-margin="false"
-            v-model="periodUnit"
-          />
+          <div class="flexrow-item period-stepper">
+            <button-simple
+              class="previous-period"
+              icon="left"
+              :title="$t(periodTitleKeys.previous)"
+              @click="scrollScheduleByPeriod(-1)"
+            />
+            <combobox
+              class="period-unit"
+              :aria-label="$t('schedule.period_unit')"
+              :title="$t('schedule.period_unit')"
+              locale-key-prefix="schedule."
+              :options="periodUnitOptions"
+              :with-margin="false"
+              v-model="periodUnit"
+            />
+            <button-simple
+              class="next-period"
+              icon="right"
+              :title="$t(periodTitleKeys.next)"
+              @click="scrollScheduleByPeriod(1)"
+            />
+          </div>
           <button-simple
             class="flexrow-item toggle-filters"
             :active="showMoreFilters"
@@ -135,6 +138,13 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import DateField from '@/components/widgets/DateField.vue'
+
+// a whole title per unit: "next" agrees with it in other languages
+const PERIOD_TITLE_KEYS = {
+  days: { previous: 'schedule.previous_day', next: 'schedule.next_day' },
+  weeks: { previous: 'schedule.previous_week', next: 'schedule.next_week' },
+  months: { previous: 'schedule.previous_month', next: 'schedule.next_month' }
+}
 
 // Composables
 const { t } = useI18n()
@@ -228,11 +238,13 @@ const shownMilestones = computed(() => {
 // a day stays in the same column on the week zoom: its arrows would not move
 const periodUnitOptions = computed(() =>
   [
-    { label: 'day', value: 'days' },
-    { label: 'week', value: 'weeks' },
-    { label: 'month', value: 'months' }
+    { label: 'step_day', value: 'days' },
+    { label: 'step_week', value: 'weeks' },
+    { label: 'step_month', value: 'months' }
   ].filter(option => zoomLevel.value > 0 || option.value !== 'days')
 )
+
+const periodTitleKeys = computed(() => PERIOD_TITLE_KEYS[periodUnit.value])
 
 const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
@@ -438,6 +450,44 @@ useHead({
   .zoom-level :deep(.control),
   .zoom-level :deep(.select) {
     height: 42px;
+  }
+}
+
+.period-stepper {
+  display: flex;
+
+  .button,
+  :deep(select) {
+    position: relative;
+
+    // the borders overlap: the focused one goes over its neighbors, the
+    // hovered one over the focused one
+    &:focus {
+      z-index: 1;
+    }
+
+    &:hover {
+      z-index: 2;
+    }
+  }
+
+  .previous-period {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  .period-unit {
+    margin: 0 -1px;
+
+    :deep(select) {
+      border-radius: 0;
+      height: 42px;
+    }
+  }
+
+  .next-period {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
   }
 }
 
