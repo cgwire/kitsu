@@ -211,6 +211,9 @@ const props = defineProps({
   dataMatchers: { type: Array, default: () => [] },
   database: { type: Object, default: () => ({}) },
   disableUpdate: { type: Boolean, default: false },
+  // The entity type of the imported rows ('Edit', 'Sequence', ...): their
+  // metadata columns are known. Without it, the route tells.
+  entityType: { type: String, default: null },
   importError: { type: Error, default: null },
   // The row count of a confirmed import, which then shows instead of a
   // second import of the same rows.
@@ -259,6 +262,11 @@ const columnsOptional = computed(() => {
 })
 
 const metadataDescriptors = computed(() => {
+  // The route of the sequences of a TV show holds "episodes" too.
+  if (props.entityType) {
+    const type = props.entityType.toLowerCase()
+    return store.getters[`${type}MetadataDescriptors`] || []
+  }
   const path = route.path
   // The task type route also contains the entity type segment
   // (/productions/:id/:type/task-types/:id), so check task-types first.

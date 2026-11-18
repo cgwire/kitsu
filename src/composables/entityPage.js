@@ -15,6 +15,7 @@ import { useStore } from 'vuex'
 
 import { getEntityName, useCellSave } from '@/composables/cellSave'
 import csv from '@/lib/csv'
+import { getExportDescriptors } from '@/lib/descriptors'
 import func from '@/lib/func'
 import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
@@ -50,6 +51,14 @@ const CSV_LABEL_KEYS = {
     FPS: 'main.fps',
     Resolution: 'shots.fields.resolution'
   }
+}
+
+// The pages whose CSV export and import share their columns: the name, the
+// description, the metadata, and the tasks of an entity. In a TV show, an
+// edit or a sequence hangs under an episode, and the export of the All
+// pseudo-episode is named after the label of its list.
+const ENTITY_CSV = {
+  edit: { hasEpisode: true, allEpisodesKey: 'main.all_edits' }
 }
 
 const DISPLAY_SETTINGS = {
@@ -111,8 +120,9 @@ const ERRORS = {
  *   importModalRef: template refs
  * - reset: () => void, reloads the entities of the page
  * - loadEntities: () => Promise, the plain load run after a CSV import
- * - dataMatchers: ref of the CSV columns identifying an entity
- * - optionalColumns: ref of the other CSV columns
+ * - dataMatchers: ref of the CSV columns identifying an entity (the pages
+ *   of ENTITY_CSV get theirs)
+ * - optionalColumns: ref of the other CSV columns (same)
  * - hasAssignationColumns: the CSV import takes the assignations too
  * - canCancel: deleting an entity with tasks cancels it instead
  * - displaySettings, modals, loading, errors: extra keys of the page
@@ -127,8 +137,8 @@ export const useEntityPage = ({
   importModalRef = ref(null),
   reset,
   loadEntities = () => Promise.resolve(),
-  dataMatchers = computed(() => ['Name']),
-  optionalColumns = ref([]),
+  dataMatchers: pageDataMatchers = null,
+  optionalColumns: pageOptionalColumns = null,
   hasAssignationColumns = false,
   canCancel = false,
   displaySettings: extraDisplaySettings = {},
@@ -149,6 +159,7 @@ export const useEntityPage = ({
   const entityTypeName = stringHelpers.capitalize(type)
   const TYPE = type.toUpperCase()
   const csvLabelKeys = CSV_LABEL_KEYS[type] || {}
+  const entityCsv = ENTITY_CSV[type]
 
   // State
   // --------------------------------------------------------------------------
@@ -234,6 +245,31 @@ export const useEntityPage = ({
     return t(`${type}s.${isCanceled ? 'cancel_text' : 'delete_text'}`, {
       name: entity.name
     })
+  })
+
+  // The CSV columns of the pages of ENTITY_CSV
+  const isCsvEpisode = computed(
+    () => Boolean(entityCsv?.hasEpisode) && isTVShow.value
+  )
+  const dataMatchers =
+    pageDataMatchers ||
+    computed(() => (isCsvEpisode.value ? ['Episode', 'Name'] : ['Name']))
+  const optionalColumns =
+    pageOptionalColumns || ref(entityCsv ? ['Description'] : [])
+
+  // The names the production holds, for the preview to tell the new rows:
+  // taken from the whole cache, not from the displayed rows. The cache Map
+  // is not reactive: the displayed list, which the same mutations update,
+  // invalidates it.
+  const importDatabase = computed(() => {
+    store.getters[`displayed${entityTypeName}s`] // eslint-disable-line no-unused-expressions
+    const episodeMap = store.getters.episodeMap
+    return Object.fromEntries(
+      Array.from(store.getters[`${type}Map`].values()).map(entity => {
+        const episode = isCsvEpisode.value && episodeMap.get(entity.episode_id)
+        return [`${episode ? episode.name : ''}${entity.name}`, true]
+      })
+    )
   })
 
   const renderColumns = computed(() => [
@@ -500,6 +536,37 @@ export const useEntityPage = ({
       ].join('_')
     )
     csv.buildCsvFile(name, [headers, ...lines])
+  }
+
+  // The export of the pages of ENTITY_CSV: its headers follow the order of
+  // the lines of csv.getEntityCsvLines, and read the same task types.
+  const exportEntityCsv = () => {
+    const isAllEpisodes = currentEpisode.value?.id === 'all'
+    const episodeName =
+      isAllEpisodes && entityCsv.allEpisodesKey
+        ? t(entityCsv.allEpisodesKey)
+        : currentEpisode.value?.name
+    return exportCsv(
+      [
+        ...(isCsvEpisode.value ? ['Episode'] : []),
+        csvLabel('Name'),
+        csvLabel('Description'),
+        ...getExportDescriptors(currentProduction.value, entityTypeName).map(
+          descriptor => descriptor.name
+        ),
+        ...(store.getters[`is${entityTypeName}Time`]
+          ? [t(`${type}s.fields.time_spent`)]
+          : []),
+        ...(store.getters[`is${entityTypeName}Estimation`]
+          ? [t('main.estimation_short')]
+          : []),
+        ...store.getters[`${type}ValidationColumns`].flatMap(taskTypeId => [
+          taskTypeMap.value.get(taskTypeId)?.name || '',
+          'Assignations'
+        ])
+      ],
+      entityCsv.hasEpisode ? episodeName : null
+    )
   }
 
   // Metadata descriptors
@@ -817,6 +884,7 @@ export const useEntityPage = ({
     errors,
     loading,
     modals,
+    optionalColumns,
     parsedCSV,
     selectedDepartment,
     success,
@@ -824,6 +892,7 @@ export const useEntityPage = ({
     cellSaveErrorText,
     deleteAllTasksText,
     deleteText,
+    importDatabase,
     isTaskSidePanelOpen,
     nbSelectedEntities,
     renderColumns,
@@ -847,6 +916,7 @@ export const useEntityPage = ({
     confirmRestore,
     csvLabel,
     exportCsv,
+    exportEntityCsv,
     focusSearchField,
     getPath,
     hideAddThumbnailsModal,

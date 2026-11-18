@@ -4,7 +4,12 @@ import { downloadBlob } from '@/lib/download'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { getPercentage } from '@/lib/stats'
 import stringHelpers from '@/lib/string'
-import { getDayRange, getMonthRange, getWeekRange } from '@/lib/time'
+import {
+  getDayRange,
+  getMonthRange,
+  getWeekRange,
+  minutesToDays
+} from '@/lib/time'
 import { convertHours } from '@/lib/timesheet'
 
 // The errors of the imported files the browser could not read (moved,
@@ -45,6 +50,65 @@ export const getEstimationsCsvLabelKeys = (
 
 export const getEstimationsParentField = entityType =>
   ESTIMATIONS_PARENTS[entityType]?.field
+
+const getDescriptorCsvValue = (entity, descriptor, personMap) => {
+  const value = entity.data[descriptor.field_name]
+  if (descriptor.data_type === 'boolean') {
+    return value?.toLowerCase() === 'true'
+  }
+  if (descriptor.data_type === 'person') {
+    return personMap.get(value)?.full_name || ''
+  }
+  return value
+}
+
+/*
+ * The lines of the export of an edit, sequence, or episode list: the
+ * episode in a TV show, the name, the description, the values only the
+ * entity type has, the metadata, the time spent and the estimation in days,
+ * then the status and the assignees of each task type. A row received live
+ * may have no task yet.
+ */
+export const getEntityCsvLines = (
+  entities,
+  {
+    descriptors,
+    extraValues = [],
+    hasEpisode = false,
+    isEstimation = false,
+    isTime = false,
+    organisation,
+    personMap,
+    taskMap,
+    validationColumns = []
+  }
+) =>
+  entities.map(entity => [
+    ...(hasEpisode ? [entity.episode_name] : []),
+    entity.name,
+    entity.description || '',
+    ...extraValues.map(getValue => getValue(entity)),
+    ...descriptors.map(descriptor =>
+      getDescriptorCsvValue(entity, descriptor, personMap)
+    ),
+    ...(isTime
+      ? [minutesToDays(organisation, entity.timeSpent).toFixed(2)]
+      : []),
+    ...(isEstimation
+      ? [minutesToDays(organisation, entity.estimation).toFixed(2)]
+      : []),
+    ...validationColumns.flatMap(taskTypeId => {
+      const task = taskMap.get(entity.validations?.get(taskTypeId))
+      if (!task) return ['', '']
+      return [
+        task.task_status_short_name,
+        task.assignees
+          .map(personId => personMap.get(personId)?.full_name)
+          .filter(Boolean)
+          .join(',')
+      ]
+    })
+  ])
 
 const csv = {
   generateTimesheet({

@@ -11,6 +11,8 @@ import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Edits from '@/components/pages/Edits.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import csv from '@/lib/csv'
+import en from '@/locales/en'
 import fr from '@/locales/fr.json'
 
 import {
@@ -174,6 +176,128 @@ describe('Edits page, CSV import', () => {
     const { edits } = fr.default
     expect(exported).toEqual([edits.fields.name, edits.fields.description])
     expect(imported).toEqual(['Name', 'Description'])
+  })
+
+  test('tells the preview which edits exist, by episode', async () => {
+    const { wrapper } = await mountPage({
+      getters: {
+        isTVShow: true,
+        currentEpisode: { id: 'ep-a', name: 'E01' },
+        editMap: new Map([
+          [
+            'edit-1',
+            {
+              id: 'edit-1',
+              name: 'Opening',
+              episode_id: 'ep-a',
+              project_id: production.id,
+              validations: new Map()
+            }
+          ],
+          [
+            'edit-2',
+            {
+              id: 'edit-2',
+              name: 'Teaser',
+              episode_id: null,
+              project_id: production.id,
+              validations: new Map()
+            }
+          ]
+        ]),
+        episodeMap: new Map([['ep-a', { id: 'ep-a', name: 'E01' }]])
+      }
+    })
+
+    const modal = wrapper.findComponent(ImportRenderModal)
+    expect(modal.props('dataMatchers')).toEqual(['Episode', 'Name'])
+    expect(modal.props('database')).toEqual({ E01Opening: true, Teaser: true })
+  })
+})
+
+describe('Edits page, CSV export', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  const exportFile = async ({ getters = {}, ...options } = {}) => {
+    const buildCsvFile = vi.spyOn(csv, 'buildCsvFile').mockReturnValue('')
+    const { wrapper, dispatched } = await mountPage({
+      getters: { isCurrentUserProductionManager: true, ...getters },
+      actions: { getEditsCsvLines: () => [['line']] },
+      locale: 'en',
+      messages: en,
+      ...options
+    })
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'export')
+      .vm.$emit('click')
+    await flushPromises()
+    const [name, [headers, ...lines]] = buildCsvFile.mock.calls[0]
+    return { name, headers, lines, dispatched }
+  }
+
+  test('writes the columns of the list', async () => {
+    const { headers, lines } = await exportFile({
+      getters: {
+        isTVShow: true,
+        currentEpisode: { id: 'ep-a', name: 'E01' },
+        currentProduction: {
+          ...production,
+          descriptors: [
+            {
+              name: 'Contractor',
+              field_name: 'contractor',
+              entity_type: 'Edit',
+              data_type: 'string'
+            },
+            {
+              name: 'Budget',
+              field_name: 'budget',
+              entity_type: 'Shot',
+              data_type: 'string'
+            }
+          ]
+        },
+        isEditTime: true,
+        isEditEstimation: true,
+        editValidationColumns: ['tt-1', 'tt-2'],
+        taskTypeMap: new Map([
+          ['tt-1', { name: 'Edit' }],
+          ['tt-2', { name: 'Compositing' }]
+        ])
+      }
+    })
+
+    expect(headers).toEqual([
+      'Episode',
+      en.edits.fields.name,
+      en.edits.fields.description,
+      'Contractor',
+      en.edits.fields.time_spent,
+      en.main.estimation_short,
+      'Edit',
+      'Assignations',
+      'Compositing',
+      'Assignations'
+    ])
+    expect(lines).toEqual([['line']])
+  })
+
+  test('names the file after the production and the episode', async () => {
+    const { name } = await exportFile({
+      getters: { isTVShow: true, currentEpisode: { id: 'ep-a', name: 'E01' } }
+    })
+
+    expect(name).toMatch(/_kitsu_production_e01_edits$/)
+  })
+
+  // The All pseudo-episode has no name of its own.
+  test('names the file after all the edits in All mode', async () => {
+    const { name } = await exportFile({
+      getters: { isTVShow: true, currentEpisode: { id: 'all' } }
+    })
+
+    expect(name).toMatch(/_kitsu_production_all_edits_edits$/)
   })
 })
 

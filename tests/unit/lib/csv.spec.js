@@ -10,7 +10,7 @@ vi.mock('@/lib/download', () => ({ downloadBlob: vi.fn() }))
 
 import moment from 'moment'
 
-import csv from '@/lib/csv'
+import csv, { getEntityCsvLines } from '@/lib/csv'
 import { downloadBlob } from '@/lib/download'
 
 import { GoneFileReader, TextFileReader } from '../fixtures/file-reader'
@@ -644,5 +644,92 @@ describe('lib/csv', () => {
         ['']
       ])
     })
+  })
+})
+
+// The lines of the edit, sequence, and episode exports.
+describe('getEntityCsvLines', () => {
+  const personMap = new Map([
+    ['person-1', { full_name: 'Jane Doe' }],
+    ['person-2', { full_name: 'John Doe' }]
+  ])
+  const taskMap = new Map([
+    [
+      'task-1',
+      {
+        task_status_short_name: 'wip',
+        assignees: ['person-1', 'person-2', 'person-gone']
+      }
+    ]
+  ])
+
+  test('writes the name and the description of each row', () => {
+    expect(
+      getEntityCsvLines(
+        [{ name: 'SQ01' }, { name: 'SQ02', description: 'Night' }],
+        { descriptors: [] }
+      )
+    ).toEqual([
+      ['SQ01', ''],
+      ['SQ02', 'Night']
+    ])
+  })
+
+  test('writes every column of the list in its order', () => {
+    const row = {
+      name: 'SQ01',
+      description: 'Night',
+      episode_name: 'E01',
+      data: { done: 'True', owner: 'person-1', color: 'blue' },
+      timeSpent: 960,
+      estimation: 480,
+      validations: new Map([['tt-1', 'task-1']])
+    }
+
+    expect(
+      getEntityCsvLines([row], {
+        descriptors: [
+          { field_name: 'done', data_type: 'boolean' },
+          { field_name: 'owner', data_type: 'person' },
+          { field_name: 'color', data_type: 'string' }
+        ],
+        extraValues: [entity => entity.name.toLowerCase()],
+        hasEpisode: true,
+        isEstimation: true,
+        isTime: true,
+        organisation: { hours_by_day: 8 },
+        personMap,
+        taskMap,
+        validationColumns: ['tt-1', 'tt-2']
+      })
+    ).toEqual([
+      [
+        'E01',
+        'SQ01',
+        'Night',
+        'sq01',
+        true,
+        'Jane Doe',
+        'blue',
+        '2.00',
+        '1.00',
+        'wip',
+        'Jane Doe,John Doe',
+        '',
+        ''
+      ]
+    ])
+  })
+
+  // An episode received live joins the list before its tasks.
+  test('leaves the task columns empty for a row without tasks', () => {
+    expect(
+      getEntityCsvLines([{ name: 'E02', data: {} }], {
+        descriptors: [],
+        personMap,
+        taskMap,
+        validationColumns: ['tt-1']
+      })
+    ).toEqual([['E02', '', '', '']])
   })
 })

@@ -52,7 +52,7 @@
                 class="flexrow-item"
                 icon="export"
                 :title="$t('main.csv.export_file')"
-                @click="onExportClick"
+                @click="exportEntityCsv"
               />
               <button-simple
                 class="flexrow-item"
@@ -177,10 +177,10 @@
       :is-error="errors.importing"
       :import-error="errors.importingError"
       :parsed-csv="parsedCSV"
-      :form-data="editsCsvFormData"
       :columns="renderColumns"
       :data-matchers="dataMatchers"
-      :database="filteredEdits"
+      :database="importDatabase"
+      entity-type="Edit"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
@@ -191,7 +191,6 @@
       :active="modals.isImportDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
-      :form-data="editsCsvFormData"
       :columns="dataMatchers"
       :optional-columns="optionalColumns"
       :generic-columns="genericColumns"
@@ -270,7 +269,6 @@ import {
   GENERIC_IMPORT_COLUMNS as genericColumns,
   useEntityPage
 } from '@/composables/entityPage'
-import { getExportDescriptors } from '@/lib/descriptors'
 import { isNotFound } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
@@ -312,7 +310,6 @@ const searchQueryListRef = useTemplateRef('edit-search-query-list')
 
 const historyEdit = ref({})
 const initialLoading = ref(true)
-const optionalColumns = ref(['Description'])
 
 // Computed
 // --------------------------------------------------------------------------
@@ -322,7 +319,6 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const departments = computed(() => store.getters.departments)
 const displayedEdits = computed(() => store.getters.displayedEdits)
 const editMap = computed(() => store.getters.editMap)
-const editsCsvFormData = computed(() => store.getters.editsCsvFormData)
 const editSearchQueries = computed(() => store.getters.editSearchQueries)
 const editSearchText = computed(() => store.getters.editSearchText)
 const editSorting = computed(() => store.getters.editSorting)
@@ -331,35 +327,14 @@ const editValidationColumns = computed(() =>
     store.getters.clientAccess.isTaskTypeVisible
   )
 )
-const episodeMap = computed(() => store.getters.episodeMap)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
-const isEditEstimation = computed(() => store.getters.isEditEstimation)
 const isEditsLoading = computed(() => store.getters.isEditsLoading)
 const isEditsLoadingError = computed(() => store.getters.isEditsLoadingError)
-const isEditTime = computed(() => store.getters.isEditTime)
 const isTVShow = computed(() => store.getters.isTVShow)
 const selectedTasks = computed(() => store.getters.selectedTasks)
-const taskTypeMap = computed(() => store.getters.taskTypeMap)
-
-const dataMatchers = computed(() =>
-  isTVShow.value ? ['Episode', 'Name'] : ['Name']
-)
-
-// Built from the full edit cache, not the filtered display list, so the
-// import creation check sees every edit. The cache Map is not reactive:
-// depend on displayedEdits (updated by the same mutations) to invalidate.
-const filteredEdits = computed(() => {
-  displayedEdits.value // eslint-disable-line no-unused-expressions
-  return Object.fromEntries(
-    Array.from(editMap.value.values()).map(edit => {
-      const episode = isTVShow.value && episodeMap.value.get(edit.episode_id)
-      return [`${episode ? episode.name : ''}${edit.name}`, true]
-    })
-  )
-})
 
 // Functions
 // --------------------------------------------------------------------------
@@ -389,7 +364,7 @@ const {
   confirmDeleteAllTasks,
   confirmDeleteMetadata,
   confirmRestore: confirmRestoreEdit,
-  csvLabel,
+  dataMatchers,
   deleteAllTasksLockText,
   deleteAllTasksText,
   deleteText,
@@ -398,11 +373,12 @@ const {
   displaySettings,
   entityToEdit: editToEdit,
   errors,
-  exportCsv,
+  exportEntityCsv,
   hideAddThumbnailsModal,
   hideCreateTasksModal,
   hideImportModal,
   hideImportRenderModal,
+  importDatabase,
   isLoadedScopeStale,
   isTaskSidePanelOpen,
   loading,
@@ -417,6 +393,7 @@ const {
   onMetadataChanged,
   onRestoreClicked,
   openEditModal: onEditClicked,
+  optionalColumns,
   parsedCSV,
   renderColumns,
   renderImport,
@@ -443,8 +420,6 @@ const {
   importModalRef,
   reset,
   loadEntities: () => store.dispatch('loadEdits'),
-  dataMatchers,
-  optionalColumns,
   canCancel: true,
   modals: { isEditHistoryDisplayed: false }
 })
@@ -456,25 +431,6 @@ const reloadEpisodeEditsIfNeeded = () => {
   clearSearchAndScroll()
   reset()
 }
-
-const onExportClick = () =>
-  exportCsv(
-    [
-      ...(currentEpisode.value ? ['Episode'] : []),
-      csvLabel('Name'),
-      csvLabel('Description'),
-      ...getExportDescriptors(currentProduction.value, 'Edit').map(
-        descriptor => descriptor.name
-      ),
-      ...(isEditTime.value ? [t('edits.fields.time_spent')] : []),
-      ...(isEditEstimation.value ? [t('main.estimation_short')] : []),
-      ...editValidationColumns.value.flatMap(taskTypeId => [
-        taskTypeMap.value.get(taskTypeId)?.name || '',
-        'Assignations'
-      ])
-    ],
-    currentEpisode.value?.name
-  )
 
 // The edit map is not reactive: its size is read as the search is typed.
 // Like the shot list, a long list is only searched on Enter.
