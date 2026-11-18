@@ -16,7 +16,7 @@
               type="email"
               autocomplete="username"
               :placeholder="$t('login.fields.email')"
-              @keyup.enter="confirmResetPassword"
+              @keydown.enter="onEmailEnter"
               v-model.trim="email"
               v-focus
             />
@@ -64,6 +64,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { isSendingEnter } from '@/lib/keyboard'
+
 // Composables
 // --------------------------------------------------------------------------
 
@@ -97,6 +99,12 @@ const confirmResetPassword = async () => {
     isError.value = true
   } finally {
     isLoading.value = false
+  }
+}
+
+const onEmailEnter = event => {
+  if (isSendingEnter(event)) {
+    confirmResetPassword()
   }
 }
 

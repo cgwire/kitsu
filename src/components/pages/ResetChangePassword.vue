@@ -25,7 +25,7 @@
                 type="password"
                 autocomplete="new-password"
                 :placeholder="$t('login.fields.password')"
-                @keyup.enter="confirmResetChangePassword"
+                @keydown.enter="onPasswordEnter"
                 v-model="password"
                 v-focus
               />
@@ -39,7 +39,7 @@
                 type="password"
                 autocomplete="new-password"
                 :placeholder="$t('login.fields.password2')"
-                @keyup.enter="confirmResetChangePassword"
+                @keydown.enter="onPasswordEnter"
                 v-model="password2"
               />
               <span class="icon">
@@ -141,6 +141,7 @@ import { useStore } from 'vuex'
 
 import auth from '@/lib/auth'
 import errors from '@/lib/errors'
+import { isSendingEnter } from '@/lib/keyboard'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -231,6 +232,12 @@ const confirmResetChangePassword = async () => {
     }
   } finally {
     isLoading.value = false
+  }
+}
+
+const onPasswordEnter = event => {
+  if (isSendingEnter(event)) {
+    confirmResetChangePassword()
   }
 }
 

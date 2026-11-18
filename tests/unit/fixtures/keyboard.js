@@ -1,0 +1,4 @@
+// An Enter pressed on the given element, with the key a browser gives it:
+// trigger('keydown.enter') names the key "enter".
+export const pressEnter = (wrapper, init = {}) =>
+  wrapper.trigger('keydown', { key: 'Enter', keyCode: 13, ...init })

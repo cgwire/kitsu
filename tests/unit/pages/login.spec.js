@@ -11,6 +11,8 @@ import i18n from '@/lib/i18n'
 
 import Login from '@/components/pages/Login.vue'
 
+import { pressEnter } from '../fixtures/keyboard'
+
 const mountPage = (email, logIn = vi.fn(), password = '') => {
   const store = createStore({
     state: { login: { email, password } },
@@ -87,7 +89,7 @@ describe('pages/Login', () => {
     const emailField = wrapper.find('input[type="email"]')
     emailField.element.focus()
 
-    await emailField.trigger('keyup.enter')
+    await pressEnter(emailField)
 
     expect(logIn).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(
@@ -100,7 +102,7 @@ describe('pages/Login', () => {
     const logIn = vi.fn()
     wrapper = mountPage('jane@example.com', logIn, 'secret')
 
-    await wrapper.find('input[type="email"]').trigger('keyup.enter')
+    await pressEnter(wrapper.find('input[type="email"]'))
 
     expect(logIn).toHaveBeenCalledTimes(1)
   })
@@ -110,9 +112,53 @@ describe('pages/Login', () => {
     wrapper = mountPage('', logIn)
     const emailField = wrapper.find('input[type="email"]')
 
-    await emailField.trigger('keyup.enter')
+    await pressEnter(emailField)
 
     expect(logIn).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(emailField.element)
+  })
+
+  test('logs in on Enter in the password field', async () => {
+    vi.useFakeTimers()
+    const logIn = vi.fn()
+    wrapper = mountPage('jane@example.com', logIn, 'secret')
+
+    await pressEnter(wrapper.find('input[type="password"]'))
+
+    expect(logIn).toHaveBeenCalledTimes(1)
+  })
+
+  // The Enter that opened the page from a link ends on its focused field.
+  test('sends nothing on the release of an Enter pressed before', async () => {
+    const logIn = vi.fn()
+    wrapper = mountPage('jane@example.com', logIn, 'secret')
+
+    await wrapper.find('input[type="email"]').trigger('keyup.enter')
+    await wrapper.find('input[type="password"]').trigger('keyup.enter')
+
+    expect(logIn).not.toHaveBeenCalled()
+  })
+
+  test('ignores the Enter that confirms an IME composition', async () => {
+    const logIn = vi.fn()
+    wrapper = mountPage('jane@example.com', logIn, 'secret')
+
+    await pressEnter(wrapper.find('input[type="email"]'), { isComposing: true })
+    await pressEnter(wrapper.find('input[type="password"]'), { isComposing: true })
+
+    expect(logIn).not.toHaveBeenCalled()
+  })
+
+  // Held down, the Enter that moved on repeats in the password field.
+  test('keeps a held Enter from logging in without a password', async () => {
+    const logIn = vi.fn()
+    wrapper = mountPage('jane@example.com', logIn)
+    const emailField = wrapper.find('input[type="email"]')
+    emailField.element.focus()
+
+    await pressEnter(emailField)
+    await pressEnter(wrapper.find('input[type="password"]'), { repeat: true })
+
+    expect(logIn).not.toHaveBeenCalled()
   })
 })

@@ -1,4 +1,9 @@
-import { isCaretMoveOnMac, isFreeEscape, isSearchShortcut } from '@/lib/keyboard'
+import {
+  isCaretMoveOnMac,
+  isFreeEscape,
+  isSearchShortcut,
+  isSendingEnter
+} from '@/lib/keyboard'
 
 import { onPlatform } from '../fixtures/platform'
 
@@ -180,6 +185,31 @@ describe('lib/keyboard', () => {
     it('ignores another letter typed on the physical F key', () => {
       // bépo types its e on the physical F key
       expect(shortcut({ key: 'e', code: 'KeyF' })).toBe(false)
+    })
+  })
+
+  describe('isSendingEnter', () => {
+    const enter = init =>
+      isSendingEnter(
+        new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, ...init })
+      )
+
+    it('takes a plain Enter', () => {
+      expect(enter()).toBe(true)
+    })
+
+    it('ignores the repeats of a held key', () => {
+      expect(enter({ repeat: true })).toBe(false)
+    })
+
+    // Chrome flags it with isComposing, Safari with the keyCode 229.
+    it('ignores the Enter that confirms an IME composition', () => {
+      expect(enter({ isComposing: true })).toBe(false)
+      expect(enter({ keyCode: 229 })).toBe(false)
+    })
+
+    it('ignores another key', () => {
+      expect(enter({ key: 'a', keyCode: 65 })).toBe(false)
     })
   })
 

@@ -4,6 +4,8 @@ import { createStore } from 'vuex'
 
 import FirstConnection from '@/components/pages/FirstConnection.vue'
 
+import { pressEnter } from '../fixtures/keyboard'
+
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 const i18n = createI18n({
@@ -30,7 +32,7 @@ describe('pages/FirstConnection', () => {
     )
   })
 
-  describe('reset button', () => {
+  describe('sending', () => {
     let resetPassword
     let wrapper
 
@@ -75,6 +77,34 @@ describe('pages/FirstConnection', () => {
         expect.anything(),
         'jane@example.com'
       )
+    })
+
+    it('sends the request on Enter in the email field', async () => {
+      mountPage('jane@example.com')
+
+      await pressEnter(wrapper.find('input[type="email"]'))
+
+      expect(resetPassword).toHaveBeenCalledWith(
+        expect.anything(),
+        'jane@example.com'
+      )
+    })
+
+    // The Enter that opened the page from a link ends on its field.
+    it('sends nothing on the release of an Enter pressed before', async () => {
+      mountPage('jane@example.com')
+
+      await wrapper.find('input[type="email"]').trigger('keyup.enter')
+
+      expect(resetPassword).not.toHaveBeenCalled()
+    })
+
+    it('ignores the Enter that confirms an IME composition', async () => {
+      mountPage('jane@example.com')
+
+      await pressEnter(wrapper.find('input[type="email"]'), { isComposing: true })
+
+      expect(resetPassword).not.toHaveBeenCalled()
     })
   })
 })

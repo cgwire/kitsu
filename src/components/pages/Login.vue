@@ -48,7 +48,7 @@
                 autocomplete="username"
                 :placeholder="$t('login.fields.email')"
                 @input="updateEmail"
-                @keyup.enter="onEmailEnter"
+                @keydown.enter="onEmailEnter"
                 v-model="email"
                 v-focus
               />
@@ -66,7 +66,7 @@
                 autocomplete="current-password"
                 :placeholder="$t('login.fields.password')"
                 @input="updatePassword"
-                @keyup.enter="confirmLogIn()"
+                @keydown.enter="onPasswordEnter"
                 v-model="password"
               />
               <span class="icon">
@@ -135,6 +135,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import auth from '@/lib/auth'
+import { isSendingEnter } from '@/lib/keyboard'
 
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 
@@ -243,12 +244,19 @@ const confirmLogIn = async twoFactorPayload => {
 
 // No password required: a Zou set up with auth_local_no_password logs people
 // in without one, so the button still sends an empty password.
-const onEmailEnter = () => {
+const onEmailEnter = event => {
+  if (!isSendingEnter(event)) return
   if (store.state.login.email && !store.state.login.password) {
     passwordFieldRef.value?.focus()
     return
   }
   confirmLogIn()
+}
+
+const onPasswordEnter = event => {
+  if (isSendingEnter(event)) {
+    confirmLogIn()
+  }
 }
 
 const saveSSORedirect = () => {
