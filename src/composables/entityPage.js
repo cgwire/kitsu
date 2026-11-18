@@ -41,6 +41,10 @@ const CSV_LABEL_KEYS = {
     Name: 'edits.fields.name',
     Description: 'edits.fields.description'
   },
+  sequence: {
+    Name: 'sequences.fields.name',
+    Description: 'sequences.fields.description'
+  },
   shot: {
     Sequence: 'shots.fields.sequence',
     Name: 'shots.fields.name',
@@ -56,9 +60,11 @@ const CSV_LABEL_KEYS = {
 // The pages whose CSV export and import share their columns: the name, the
 // description, the metadata, and the tasks of an entity. In a TV show, an
 // edit or a sequence hangs under an episode, and the export of the All
-// pseudo-episode is named after the label of its list.
+// pseudo-episode is named after the label of its list. Zou refuses a
+// sequence of a TV show without its episode.
 const ENTITY_CSV = {
-  edit: { hasEpisode: true, allEpisodesKey: 'main.all_edits' }
+  edit: { hasEpisode: true, allEpisodesKey: 'main.all_edits' },
+  sequence: { hasEpisode: true, isEpisodeRequired: true }
 }
 
 const DISPLAY_SETTINGS = {
@@ -258,8 +264,14 @@ export const useEntityPage = ({
   const optionalColumns =
     pageOptionalColumns || ref(entityCsv ? ['Description'] : [])
   const hasAssignations = hasAssignationColumns || Boolean(entityCsv)
-  // Zou refuses a line without name: the preview points at it first.
-  const importRequiredValues = computed(() => (entityCsv ? ['Name'] : []))
+  // Zou refuses a line without these values: the preview points at it
+  // first.
+  const importRequiredValues = computed(() => {
+    if (!entityCsv) return []
+    return isCsvEpisode.value && entityCsv.isEpisodeRequired
+      ? ['Episode', 'Name']
+      : ['Name']
+  })
 
   // The names the production holds, for the preview to tell the new rows:
   // taken from the whole cache, not from the displayed rows. The cache Map

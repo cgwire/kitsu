@@ -4,6 +4,8 @@ import shotStore from '@/store/modules/shots'
 import tasksStore from '@/store/modules/tasks'
 import taskTypesStore from '@/store/modules/tasktypes'
 
+import { getEntityCsvLines } from '@/lib/csv'
+import { getExportDescriptors } from '@/lib/descriptors'
 import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { buildSequenceIndex, indexSearch } from '@/lib/indexing'
@@ -35,6 +37,7 @@ import {
   CREATE_TASKS_END,
   DELETE_TASK_END,
   EDIT_SEQUENCE_END,
+  IMPORT_SEQUENCES_END,
   LOAD_SEQUENCES_END,
   LOCK_SEQUENCE,
   NEW_SEQUENCE_END,
@@ -43,6 +46,7 @@ import {
   REMOVE_SEQUENCE_SEARCH,
   REMOVE_SELECTED_TASK,
   SAVE_SEQUENCE_SEARCH_END,
+  SEQUENCE_CSV_FILE_SELECTED,
   SET_CURRENT_EPISODE,
   SET_CURRENT_PRODUCTION,
   SET_SEQUENCE_LIST_SCROLL_POSITION,
@@ -241,6 +245,7 @@ const initialState = {
   sequenceListScrollPosition: 0,
   sequenceSearchText: '',
   sequenceSearchQueries: [],
+  sequencesCsvFormData: null,
   searchSequenceFilters: [],
   sequenceSorting: [],
   selectedSequences: new Map(),
@@ -253,6 +258,7 @@ const state = { ...initialState }
 
 const getters = {
   sequenceSearchQueries: state => state.sequenceSearchQueries,
+  sequencesCsvFormData: state => state.sequencesCsvFormData,
   sequenceSorting: state => state.sequenceSorting,
 
   isSequencesLoading: state => state.isSequencesLoading,
@@ -621,6 +627,33 @@ const actions = {
 
   resetSequences({ commit }) {
     commit(RESET_SEQUENCES)
+  },
+
+  uploadSequenceFile({ commit, state, rootGetters }, toUpdate) {
+    const production = rootGetters.currentProduction
+    return shotsApi
+      .postSequencesCsv(production, state.sequencesCsvFormData, toUpdate)
+      .then(() => {
+        commit(IMPORT_SEQUENCES_END)
+      })
+  },
+
+  getSequencesCsvLines({ state, rootGetters }) {
+    // The rows of the search, or every row when it matches nothing.
+    const sequences = cache.result?.length > 0 ? cache.result : cache.sequences
+    return getEntityCsvLines(sequences, {
+      descriptors: getExportDescriptors(
+        rootGetters.currentProduction,
+        'Sequence'
+      ),
+      hasEpisode: rootGetters.isTVShow,
+      isEstimation: state.isSequenceEstimation,
+      isTime: state.isSequenceTime,
+      organisation: rootGetters.organisation,
+      personMap: rootGetters.personMap,
+      taskMap: rootGetters.taskMap,
+      validationColumns: state.sequenceValidationColumns
+    })
   }
 }
 
@@ -631,6 +664,14 @@ const mutations = {
     cache.result = []
     cache.sorting = null
     cache.sequenceIndex = {}
+  },
+
+  [SEQUENCE_CSV_FILE_SELECTED](state, formData) {
+    state.sequencesCsvFormData = formData
+  },
+
+  [IMPORT_SEQUENCES_END](state) {
+    state.sequencesCsvFormData = null
   },
 
   [CHANGE_SEQUENCE_SORT](
