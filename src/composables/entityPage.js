@@ -123,7 +123,8 @@ const ERRORS = {
  * - dataMatchers: ref of the CSV columns identifying an entity (the pages
  *   of ENTITY_CSV get theirs)
  * - optionalColumns: ref of the other CSV columns (same)
- * - hasAssignationColumns: the CSV import takes the assignations too
+ * - hasAssignationColumns: the CSV import takes the assignations too (the
+ *   pages of ENTITY_CSV do)
  * - canCancel: deleting an entity with tasks cancels it instead
  * - displaySettings, modals, loading, errors: extra keys of the page
  */
@@ -256,6 +257,9 @@ export const useEntityPage = ({
     computed(() => (isCsvEpisode.value ? ['Episode', 'Name'] : ['Name']))
   const optionalColumns =
     pageOptionalColumns || ref(entityCsv ? ['Description'] : [])
+  const hasAssignations = hasAssignationColumns || Boolean(entityCsv)
+  // Zou refuses a line without name: the preview points at it first.
+  const importRequiredValues = computed(() => (entityCsv ? ['Name'] : []))
 
   // The names the production holds, for the preview to tell the new rows:
   // taken from the whole cache, not from the displayed rows. The cache Map
@@ -278,7 +282,7 @@ export const useEntityPage = ({
     ...productionTaskTypes.value.flatMap(taskType => [
       taskType.name,
       `${taskType.name} comment`,
-      ...(hasAssignationColumns ? [`${taskType.name} assignations`] : [])
+      ...(hasAssignations ? [`${taskType.name} assignations`] : [])
     ])
   ])
 
@@ -560,10 +564,12 @@ export const useEntityPage = ({
         ...(store.getters[`is${entityTypeName}Estimation`]
           ? [t('main.estimation_short')]
           : []),
-        ...store.getters[`${type}ValidationColumns`].flatMap(taskTypeId => [
-          taskTypeMap.value.get(taskTypeId)?.name || '',
-          'Assignations'
-        ])
+        // Qualified by the task type so a re-import can tell the columns
+        // apart: bare duplicated headers collapse in the server's reader.
+        ...store.getters[`${type}ValidationColumns`].flatMap(taskTypeId => {
+          const taskTypeName = taskTypeMap.value.get(taskTypeId)?.name || ''
+          return [taskTypeName, `${taskTypeName} assignations`]
+        })
       ],
       entityCsv.hasEpisode ? episodeName : null
     )
@@ -893,6 +899,7 @@ export const useEntityPage = ({
     deleteAllTasksText,
     deleteText,
     importDatabase,
+    importRequiredValues,
     isTaskSidePanelOpen,
     nbSelectedEntities,
     renderColumns,

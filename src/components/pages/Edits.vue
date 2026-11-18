@@ -180,6 +180,7 @@
       :columns="renderColumns"
       :data-matchers="dataMatchers"
       :database="importDatabase"
+      :required-values="importRequiredValues"
       entity-type="Edit"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
@@ -379,6 +380,7 @@ const {
   hideImportModal,
   hideImportRenderModal,
   importDatabase,
+  importRequiredValues,
   isLoadedScopeStale,
   isTaskSidePanelOpen,
   loading,

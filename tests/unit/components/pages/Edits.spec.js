@@ -148,6 +148,29 @@ describe('Edits page, CSV import', () => {
     expect(dispatched('loadEdits')).toHaveLength(1)
   })
 
+  test('offers the assignations of each task type', async () => {
+    const { wrapper } = await mountPage({
+      getters: { productionEditTaskTypes: [{ name: 'Edit' }] }
+    })
+
+    expect(wrapper.findComponent(ImportRenderModal).props('columns')).toEqual([
+      'Name',
+      'Description',
+      'Edit',
+      'Edit comment',
+      'Edit assignations'
+    ])
+  })
+
+  // Zou refuses a line without name: the preview points at it first.
+  test('requires a name on every line', async () => {
+    const { wrapper } = await mountPage({ getters: { isTVShow: true } })
+
+    expect(
+      wrapper.findComponent(ImportRenderModal).props('requiredValues')
+    ).toEqual(['Name'])
+  })
+
   test('offers the description as an optional column', async () => {
     const { wrapper } = await mountPage()
 
@@ -276,9 +299,9 @@ describe('Edits page, CSV export', () => {
       en.edits.fields.time_spent,
       en.main.estimation_short,
       'Edit',
-      'Assignations',
+      'Edit assignations',
       'Compositing',
-      'Assignations'
+      'Compositing assignations'
     ])
     expect(lines).toEqual([['line']])
   })
