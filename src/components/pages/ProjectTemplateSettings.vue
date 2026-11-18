@@ -812,7 +812,8 @@ const openEditDescriptor = index => {
   descriptorToEditIndex.value = index
   descriptorToEdit.value = {
     id: getTemplateDescriptorId(index),
-    name: d.name,
+    // Zou keeps a template column whose name came as null.
+    name: d.name ?? '',
     data_type: d.data_type,
     task_type_id: d.task_type_id ?? null,
     for_client: Boolean(d.for_client),

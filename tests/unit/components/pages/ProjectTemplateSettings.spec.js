@@ -196,6 +196,21 @@ describe('ProjectTemplateSettings page, column names', () => {
     ).toEqual([expect.objectContaining({ name: null, field_name: null })])
   })
 
+  it('opens a column with no name for an edit', async () => {
+    const { wrapper } = await mountPage({
+      loaded: {
+        ...template,
+        metadata_descriptors: [{ name: null, entity_type: 'Asset' }]
+      }
+    })
+
+    await wrapper.findComponent(RowActionsCell).vm.$emit('edit-clicked')
+
+    expect(
+      wrapper.findComponent(AddMetadataModal).props('descriptorToEdit').name
+    ).toBe('')
+  })
+
   // The modal stays open until the save answers: the new column is no other
   // column for it meanwhile.
   it('keeps a new column out of the names to check while it saves', async () => {
