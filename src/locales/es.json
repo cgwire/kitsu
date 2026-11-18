@@ -373,6 +373,8 @@
       "login_failed": "Error de inicio de sesión, por favor verifique sus credenciales.",
       "login_inactive": "El inicio de sesión ha fallado, su cuenta está inactiva.",
       "login_page": "Cancelar",
+      "new_link_sent_to": "Se ha enviado un nuevo enlace a:",
+      "new_link_use_most_recent": "Utilice el correo electrónico más reciente.",
       "redirecting": "Redirigiendo en {count} segundo... | Redirigiendo en {count} segundos...",
       "reset_change_password": "Cambiar contraseña",
       "reset_change_password_form_failed": "Hay un problema con la contraseña que dio. Por favor, verifique que tenga al menos 8 caracteres y que ambas contraseñas coincidan.",
@@ -403,6 +405,8 @@
       "unable_to_verify_totp": "¿No puede hacer la verificación con TOTP?",
       "unable_to_verify_email_otp": "¿No puede hacer la verificación con el correo electrónico?",
       "send_email_otp": "Reenviar OTP por correo electrónico",
+      "send_new_link": "Enviarme un nuevo enlace",
+      "send_new_link_failed": "No se ha podido enviar un nuevo enlace. Por favor, inténtelo de nuevo.",
       "unable_to_verify_recovery_code": "¿No tiene un código de recuperación?",
       "choose_totp": "Introducir código de autenticación de dos factores mediante TOTP",
       "choose_email_otp": "Introducir código de autenticación de dos factores mediante correo electrónico",
@@ -424,7 +428,7 @@
       "oidc": "Inicio de sesión SSO",
       "set_password_title": "¡Bienvenido a Kitsu!",
       "set_password": "Establezca su contraseña",
-      "reset_change_password_token_failed": "El enlace para restablecer la contraseña no es válido o ha caducado. Por favor, reinicie el procedimiento."
+      "reset_change_password_token_failed": "Este enlace ha caducado o ya se ha utilizado."
     },
     "main": {
       "technical_details": "Detalles técnicos:",

@@ -373,6 +373,8 @@
       "login_failed": "Login mislykkedes, kontrollér venligst dine loginoplysninger.",
       "login_inactive": "Login mislykkedes, din konto er inaktiv.",
       "login_page": "Annuller",
+      "new_link_sent_to": "Et nyt link er blevet sendt til:",
+      "new_link_use_most_recent": "Brug venligst den seneste e-mail.",
       "redirecting": "Omdirigerer om {count} sekund... | Omdirigerer om {count} sekunder...",
       "reset_change_password": "Skift adgangskode",
       "reset_change_password_form_failed": "Der er et problem med den adgangskode, du har angivet. Kontrollér venligst, at den er mindst 8 tegn lang, og at begge adgangskoder stemmer overens.",
@@ -403,6 +405,8 @@
       "unable_to_verify_totp": "Kan ikke bekræfte med TOTP?",
       "unable_to_verify_email_otp": "Kan ikke bekræfte med e-mail?",
       "send_email_otp": "Gensend OTP via e-mail",
+      "send_new_link": "Send mig et nyt link",
+      "send_new_link_failed": "Et nyt link kunne ikke sendes. Prøv venligst igen.",
       "unable_to_verify_recovery_code": "Har du ikke en gendannelseskode?",
       "choose_totp": "Indtast tofaktorgodkendelseskoden via TOTP",
       "choose_email_otp": "Indtast tofaktorgodkendelseskoden via e-mail",
@@ -424,7 +428,7 @@
       "oidc": "SSO-login",
       "set_password_title": "Velkommen til Kitsu!",
       "set_password": "Indstil din adgangskode",
-      "reset_change_password_token_failed": "Linket til nulstilling af adgangskode er ugyldigt eller udløbet. Genstart venligst proceduren."
+      "reset_change_password_token_failed": "Dette link er udløbet eller er allerede blevet brugt."
     },
     "main": {
       "technical_details": "Tekniske detaljer:",

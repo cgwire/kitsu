@@ -373,6 +373,8 @@
       "login_failed": "خطا در ورود، لطفا مشخصات خود را بررسی کنید.",
       "login_inactive": "ورود ناموفق بود، حساب کاربری شما غیرفعال است.",
       "login_page": "لغو",
+      "new_link_sent_to": "یک پیوند جدید به این نشانی ارسال شد:",
+      "new_link_use_most_recent": "لطفاً از جدیدترین ایمیل استفاده کنید.",
       "redirecting": "هدایت در {count} ثانیه... | هدایت در {count} ثانیه...",
       "reset_change_password": "تغییر رمز عبور",
       "reset_change_password_form_failed": "رمز وارد شده معتبر نیست. رمز باید حداقل ۸ کاراکتر باشد و هر دو رمز با هم تطابق داشته باشند.",
@@ -403,6 +405,8 @@
       "unable_to_verify_totp": "نمی توانید با TOTP تأیید کنید؟",
       "unable_to_verify_email_otp": "نمی توانید با ایمیل تأیید کنید؟",
       "send_email_otp": "OTP را مجدداً از طریق ایمیل ارسال کنید",
+      "send_new_link": "ارسال پیوند جدید",
+      "send_new_link_failed": "پیوند جدید ارسال نشد. لطفاً دوباره امتحان کنید.",
       "unable_to_verify_recovery_code": "کد بازیابی ندارید؟",
       "choose_totp": "کد احراز هویت دو مرحله‌ای را از طریق TOTP وارد کنید",
       "choose_email_otp": "وارد کردن کد احراز هویت دو مرحله‌ای از طریق ایمیل",
@@ -424,7 +428,7 @@
       "oidc": "ورود به سیستم SSO",
       "set_password_title": "به Kitsu خوش آمدید!",
       "set_password": "رمز عبور خود را تنظیم کنید",
-      "reset_change_password_token_failed": "پیوند بازنشانی رمز عبور نامعتبر است یا منقضی شده است. لطفاً روال را از ابتدا انجام دهید."
+      "reset_change_password_token_failed": "این پیوند منقضی شده یا قبلاً استفاده شده است."
     },
     "main": {
       "technical_details": "جزئیات فنی:",

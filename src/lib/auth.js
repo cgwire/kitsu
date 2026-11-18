@@ -88,6 +88,18 @@ const auth = {
     return client.ppost('/api/auth/reset-password', data)
   },
 
+  // The reset page hides its form until the answer: with no answer after 5
+  // seconds, or 10 in all, it shows it anyway, and setting the password
+  // checks the link.
+  checkResetToken(email, token) {
+    return client.request(
+      'POST',
+      '/api/auth/reset-password/check',
+      { email, token },
+      { response: 5000, deadline: 10000 }
+    )
+  },
+
   resetChangePassword(email, token, password, password2) {
     const data = {
       email,
