@@ -103,6 +103,11 @@ describe('store/api endpoints', () => {
         '/api/import/csv/projects/p1/sequences?update=true'
       ],
       [
+        'episodes CSV',
+        () => shotsApi.postEpisodesCsv(production, formData, false),
+        '/api/import/csv/projects/p1/episodes'
+      ],
+      [
         'people CSV',
         () => peopleApi.postCsv(formData, false),
         '/api/import/csv/persons'

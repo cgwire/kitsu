@@ -36,6 +36,18 @@
             <div class="flexrow" v-if="isCurrentUserManager">
               <button-simple
                 class="flexrow-item"
+                :title="$t('main.csv.import_file')"
+                icon="import"
+                @click="showImportModal"
+              />
+              <button-simple
+                class="flexrow-item"
+                icon="export"
+                :title="$t('main.csv.export_file')"
+                @click="exportEntityCsv"
+              />
+              <button-simple
+                class="flexrow-item"
                 :text="$t('episodes.new_episodes')"
                 icon="plus"
                 @click="showNewModal"
@@ -155,6 +167,34 @@
       v-if="false"
     />
 
+    <import-render-modal
+      :active="modals.isImportRenderDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :import-error="errors.importingError"
+      :parsed-csv="parsedCSV"
+      :columns="renderColumns"
+      :data-matchers="dataMatchers"
+      :database="importDatabase"
+      :required-values="importRequiredValues"
+      entity-type="Episode"
+      @reupload="resetImport"
+      @cancel="hideImportRenderModal"
+      @confirm="uploadImportFile"
+    />
+
+    <import-modal
+      ref="import-modal"
+      :active="modals.isImportDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :columns="dataMatchers"
+      :optional-columns="optionalColumns"
+      :generic-columns="genericColumns"
+      @cancel="hideImportModal"
+      @confirm="renderImport"
+    />
+
     <build-filter-modal
       :active="modals.isBuildFilterDisplayed"
       entity-type="episode"
@@ -199,7 +239,10 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
-import { useEntityPage } from '@/composables/entityPage'
+import {
+  GENERIC_IMPORT_COLUMNS as genericColumns,
+  useEntityPage
+} from '@/composables/entityPage'
 import { isNotFound, logRequestFailure } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
@@ -211,6 +254,8 @@ import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
@@ -229,6 +274,7 @@ const type = 'episode'
 // State
 // --------------------------------------------------------------------------
 
+const importModalRef = useTemplateRef('import-modal')
 const listRef = useTemplateRef('episode-list')
 const searchFieldRef = useTemplateRef('episode-search-field')
 const searchQueryListRef = useTemplateRef('episode-search-query-list')
@@ -309,6 +355,7 @@ const {
   confirmDelete: confirmDeleteEpisode,
   confirmDeleteAllTasks,
   confirmDeleteMetadata,
+  dataMatchers,
   deleteAllTasksLockText,
   deleteAllTasksText,
   deleteText,
@@ -318,8 +365,13 @@ const {
   entityToDelete: episodeToDelete,
   entityToEdit: episodeToEdit,
   errors,
+  exportEntityCsv,
   hideAddThumbnailsModal,
   hideCreateTasksModal,
+  hideImportModal,
+  hideImportRenderModal,
+  importDatabase,
+  importRequiredValues,
   isTaskSidePanelOpen,
   loading,
   modals,
@@ -333,6 +385,11 @@ const {
   onMetadataChanged,
   onSearchChange,
   openEditModal: onEditClicked,
+  optionalColumns,
+  parsedCSV,
+  renderColumns,
+  renderImport,
+  resetImport,
   saveCell,
   saveScrollPosition,
   saveSearchQuery,
@@ -340,14 +397,18 @@ const {
   selectedDepartment,
   setScrollPosition,
   setSearchFromUrl,
-  showCreateTasksModal
+  showCreateTasksModal,
+  showImportModal,
+  uploadImportFile
 } = useEntityPage({
   type,
   pageName: 'Episodes',
   listRef,
   searchFieldRef,
   searchQueryListRef,
-  reset
+  importModalRef,
+  reset,
+  loadEntities: loadList
 })
 
 const showNewModal = () => onEditClicked()

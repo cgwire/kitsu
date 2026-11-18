@@ -291,6 +291,41 @@ describe('lib/csv', () => {
     })
   })
 
+  describe('renameValues', () => {
+    test('gives a label of the column its value back, in any case', () => {
+      expect(
+        csv.renameValues(
+          [
+            ['Name', 'Status'],
+            ['E01', 'En cours'],
+            ['E02', ' terminé '],
+            ['E03', 'complete'],
+            ['E04', '']
+          ],
+          'Status',
+          new Map([
+            ['en cours', 'running'],
+            ['terminé', 'complete']
+          ])
+        )
+      ).toEqual([
+        ['Name', 'Status'],
+        ['E01', 'running'],
+        ['E02', 'complete'],
+        ['E03', 'complete'],
+        ['E04', '']
+      ])
+    })
+
+    test('leaves a file without the column as it is', () => {
+      const entries = [['Name'], ['E01']]
+
+      expect(
+        csv.renameValues(entries, 'Status', new Map([['en cours', 'running']]))
+      ).toEqual([['Name'], ['E01']])
+    })
+  })
+
   describe('getNewEntityNames', () => {
     const parsedCsv = [
       ['Sequence', 'Name', 'Description'],

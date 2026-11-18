@@ -41,6 +41,11 @@ const CSV_LABEL_KEYS = {
     Name: 'edits.fields.name',
     Description: 'edits.fields.description'
   },
+  episode: {
+    Name: 'episodes.fields.name',
+    Description: 'episodes.fields.description',
+    Status: 'main.status'
+  },
   sequence: {
     Name: 'sequences.fields.name',
     Description: 'sequences.fields.description'
@@ -62,8 +67,26 @@ const CSV_LABEL_KEYS = {
 // edit or a sequence hangs under an episode, and the export of the All
 // pseudo-episode is named after the label of its list. Zou refuses a
 // sequence of a TV show without its episode.
+//
+// `valueColumns` follow the description: the export writes the label of a
+// value in the language of the user, and the import gives the label its
+// value back, the only form Zou reads.
 const ENTITY_CSV = {
   edit: { hasEpisode: true, allEpisodesKey: 'main.all_edits' },
+  episode: {
+    hasEpisode: false,
+    valueColumns: {
+      Status: {
+        field: 'status',
+        valueKeys: {
+          canceled: 'episodes.status.canceled',
+          complete: 'episodes.status.complete',
+          running: 'episodes.status.running',
+          standby: 'episodes.status.standby'
+        }
+      }
+    }
+  },
   sequence: { hasEpisode: true, isEpisodeRequired: true }
 }
 
@@ -261,8 +284,10 @@ export const useEntityPage = ({
   const dataMatchers =
     pageDataMatchers ||
     computed(() => (isCsvEpisode.value ? ['Episode', 'Name'] : ['Name']))
+  const valueColumns = entityCsv?.valueColumns || {}
   const optionalColumns =
-    pageOptionalColumns || ref(entityCsv ? ['Description'] : [])
+    pageOptionalColumns ||
+    ref(entityCsv ? ['Description', ...Object.keys(valueColumns)] : [])
   const hasAssignations = hasAssignationColumns || Boolean(entityCsv)
   // Zou refuses a line without these values: the preview points at it
   // first.
@@ -539,9 +564,10 @@ export const useEntityPage = ({
   // The header the export writes for the column Zou reads as `name`.
   const csvLabel = name => t(csvLabelKeys[name])
 
-  // `episodeName` goes in the file name when given.
-  const exportCsv = async (headers, episodeName) => {
-    const lines = await store.dispatch(`get${entityTypeName}sCsvLines`)
+  // `episodeName` goes in the file name when given, and `options` go to the
+  // action that writes the lines.
+  const exportCsv = async (headers, episodeName, options) => {
+    const lines = await store.dispatch(`get${entityTypeName}sCsvLines`, options)
     const name = stringHelpers.slugify(
       [
         moment().format('YYYY-MM-DD'),
@@ -567,6 +593,7 @@ export const useEntityPage = ({
         ...(isCsvEpisode.value ? ['Episode'] : []),
         csvLabel('Name'),
         csvLabel('Description'),
+        ...Object.keys(valueColumns).map(csvLabel),
         ...getExportDescriptors(currentProduction.value, entityTypeName).map(
           descriptor => descriptor.name
         ),
@@ -583,7 +610,16 @@ export const useEntityPage = ({
           return [taskTypeName, `${taskTypeName} assignations`]
         })
       ],
-      entityCsv.hasEpisode ? episodeName : null
+      entityCsv.hasEpisode ? episodeName : null,
+      {
+        extraValues: Object.values(valueColumns).map(
+          ({ field, valueKeys }) =>
+            entity =>
+              valueKeys[entity[field]]
+                ? t(valueKeys[entity[field]])
+                : (entity[field] ?? '')
+        )
+      }
     )
   }
 
@@ -759,9 +795,26 @@ export const useEntityPage = ({
     }
   }
 
+  // A cell the export wrote as the label of a value gets its value back.
+  const renameExportValues = entries =>
+    Object.entries(valueColumns).reduce(
+      (renamed, [column, { valueKeys }]) =>
+        csv.renameValues(
+          renamed,
+          column,
+          new Map(
+            Object.entries(valueKeys).map(([value, key]) => [
+              t(key).toLowerCase(),
+              value
+            ])
+          )
+        ),
+      entries
+    )
+
   const uploadImportFile = async (data, toUpdate) => {
     const formData = new FormData()
-    const csvContent = csv.turnEntriesToCsvString(data)
+    const csvContent = csv.turnEntriesToCsvString(renameExportValues(data))
     formData.append(
       'file',
       new File([csvContent], 'import.csv', { type: 'text/csv' })

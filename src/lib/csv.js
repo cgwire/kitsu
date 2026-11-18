@@ -393,6 +393,27 @@ const csv = {
     })
   },
 
+  /*
+   * Give each cell of the column `column` that is a label its value
+   * (`names` maps lowercase labels to values), whatever its case and the
+   * spaces around it. The other cells and columns stay as they are.
+   */
+  renameValues(entries, column, names) {
+    const [headers = [], ...lines] = entries
+    const index = headers.indexOf(column)
+    if (index < 0) return entries
+    return [
+      headers,
+      ...lines.map(line =>
+        line.map((cell, cellIndex) => {
+          const value =
+            cellIndex === index && names.get(String(cell).trim().toLowerCase())
+          return value || cell
+        })
+      )
+    ]
+  },
+
   turnEntriesToCsvString(entries, config = {}) {
     return Papa.unparse(entries, {
       delimiter: ';',

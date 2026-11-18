@@ -1815,3 +1815,62 @@ describe('Episodes store, through a store', () => {
     expect(store.getters.episodes).toEqual([])
   })
 })
+
+describe('Episodes store, CSV', () => {
+  const rootGetters = {
+    currentProduction: { id: 'p1', descriptors: [] },
+    isTVShow: true,
+    organisation: { hours_by_day: 8 },
+    personMap: new Map(),
+    taskMap: new Map()
+  }
+  const state = { episodeValidationColumns: [] }
+
+  afterEach(() => {
+    episodesStore.cache.episodes = []
+    episodesStore.cache.result = []
+    vi.restoreAllMocks()
+  })
+
+  // An episode hangs under no episode: no Episode column, even in a TV
+  // show. The page writes the status in the language of the user.
+  test('exports the values the page gives after the description', () => {
+    episodesStore.cache.episodes = [
+      { id: 'e1', name: 'E01', description: 'Pilot', status: 'complete' }
+    ]
+    episodesStore.cache.result = []
+
+    expect(
+      episodesStore.actions.getEpisodesCsvLines(
+        { state, rootGetters },
+        { extraValues: [episode => episode.status.toUpperCase()] }
+      )
+    ).toEqual([['E01', 'Pilot', 'COMPLETE']])
+  })
+
+  test('sends the file picked for the import, then forgets it', async () => {
+    const formData = { file: 'import.csv' }
+    vi.spyOn(shotsApi, 'postEpisodesCsv').mockResolvedValue([])
+    const commit = vi.fn()
+    const csvState = {}
+    episodesStore.mutations.EPISODE_CSV_FILE_SELECTED(csvState, formData)
+
+    await episodesStore.actions.uploadEpisodeFile(
+      {
+        commit,
+        state: csvState,
+        rootGetters: { currentProduction: { id: 'p1' } }
+      },
+      false
+    )
+
+    expect(shotsApi.postEpisodesCsv).toHaveBeenCalledWith(
+      { id: 'p1' },
+      formData,
+      false
+    )
+    expect(commit).toHaveBeenCalledWith('IMPORT_EPISODES_END')
+    episodesStore.mutations.IMPORT_EPISODES_END(csvState)
+    expect(episodesStore.getters.episodesCsvFormData(csvState)).toBe(null)
+  })
+})
