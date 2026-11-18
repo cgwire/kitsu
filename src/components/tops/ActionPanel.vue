@@ -1483,8 +1483,8 @@ const runTaskStatusChange = async () => {
       taskStatusId: taskStatusId.value,
       comment: statusComment.value
     })
+    // Only the comment goes: the next tasks often get the same status.
     statusComment.value = ''
-    taskStatusId.value = ''
     modals.statusChange = false
   } catch (err) {
     errors.changeStatus = true

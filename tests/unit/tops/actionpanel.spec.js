@@ -863,15 +863,29 @@ describe('ActionPanel, status change', () => {
       expect(modal(wrapper).props('isError')).toBe(false)
     })
 
-    test('starts over with no status after the change', async () => {
-      const { wrapper } = await mountOnShots()
+    // The same status often goes to one batch of tasks after another.
+    test('keeps the status sent for the next tasks', async () => {
+      const { store, wrapper } = await mountOnShots()
       await chooseStatus(wrapper, 'status-retake')
+      await commentField(wrapper).setValue('Check the timing')
       await confirmButton(wrapper).trigger('click')
-
       modal(wrapper).vm.$emit('confirm')
       await flushPromises()
 
-      expect(statusCombo(wrapper).props('modelValue')).toBe('')
+      expect(statusCombo(wrapper).props('modelValue')).toBe('status-retake')
+      expect(commentField(wrapper).element.value).toBe('')
+
+      store.state.selectedTasks.delete('task-3')
+      store.state.nbSelectedTasks = 2
+      await flushPromises()
+      await confirmButton(wrapper).trigger('click')
+      modal(wrapper).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(statusChanges(store)).toEqual([
+        { taskStatusId: 'status-retake', comment: 'Check the timing' },
+        { taskStatusId: 'status-retake', comment: '' }
+      ])
     })
 
     test('keeps the chosen status after a failure', async () => {
