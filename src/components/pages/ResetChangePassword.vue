@@ -25,7 +25,7 @@
                 type="password"
                 autocomplete="new-password"
                 :placeholder="$t('login.fields.password')"
-                @keyup.enter="confirmResetChangePassword"
+                @keydown.enter="onPasswordEnter"
                 v-model="password"
                 v-focus
               />
@@ -39,7 +39,7 @@
                 type="password"
                 autocomplete="new-password"
                 :placeholder="$t('login.fields.password2')"
-                @keyup.enter="confirmResetChangePassword"
+                @keydown.enter="onPasswordEnter"
                 v-model="password2"
               />
               <span class="icon">
@@ -55,8 +55,8 @@
               role="button"
               tabindex="0"
               @click="confirmResetChangePassword"
-              @keydown.enter.prevent="confirmResetChangePassword"
-              @keydown.space.prevent="confirmResetChangePassword"
+              @keydown.enter.prevent="onButtonKeydown"
+              @keydown.space.prevent="onButtonKeydown"
               v-if="!isSuccess && !isTokenError"
             >
               {{
@@ -106,8 +106,8 @@
               role="button"
               tabindex="0"
               @click="sendNewLink"
-              @keydown.enter.prevent="sendNewLink"
-              @keydown.space.prevent="sendNewLink"
+              @keydown.enter.prevent="onNewLinkKeydown"
+              @keydown.space.prevent="onNewLinkKeydown"
             >
               {{ $t('login.send_new_link') }}
             </a>
@@ -141,6 +141,7 @@ import { useStore } from 'vuex'
 
 import auth from '@/lib/auth'
 import errors from '@/lib/errors'
+import { isSendingEnter } from '@/lib/keyboard'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -234,6 +235,18 @@ const confirmResetChangePassword = async () => {
   }
 }
 
+const onPasswordEnter = event => {
+  if (isSendingEnter(event)) {
+    confirmResetChangePassword()
+  }
+}
+
+const onButtonKeydown = event => {
+  if (!event.repeat) {
+    confirmResetChangePassword()
+  }
+}
+
 const checkToken = async () => {
   try {
     const isValid = await store.dispatch('checkResetToken', {
@@ -271,6 +284,13 @@ const sendNewLink = async () => {
     if (!errors.isRequestFailure(err)) throw err
   } finally {
     isSendingLink.value = false
+  }
+}
+
+const onNewLinkKeydown = event => {
+  // Returned, a bug of the sending reaches the error handler of the app.
+  if (!event.repeat) {
+    return sendNewLink()
   }
 }
 

@@ -66,3 +66,13 @@ export const isSearchShortcut = event =>
   event.altKey &&
   (event.key.toLowerCase() === 'f' ||
     (event.code === 'KeyF' && !/^[a-z]$/i.test(event.key)))
+
+// The Enter that sends a form, read on keydown: the release of an Enter that
+// opened a page lands on the field it focuses. A held key repeats its
+// keydown, and the Enter that confirms an IME composition belongs to it:
+// Chrome flags that one with isComposing, Safari with the keyCode 229.
+export const isSendingEnter = event =>
+  event.key === 'Enter' &&
+  !event.repeat &&
+  !event.isComposing &&
+  event.keyCode !== 229

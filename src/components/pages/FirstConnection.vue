@@ -26,11 +26,12 @@
         <div class="field mt2">
           <p class="control has-icon">
             <input
+              ref="emailFieldRef"
               class="input is-medium email"
               type="email"
               autocomplete="email"
               :placeholder="$t('login.fields.email')"
-              @keyup.enter="confirmResetPassword"
+              @keydown.enter="onEmailEnter"
               v-model="email"
               v-focus
             />
@@ -49,8 +50,8 @@
             role="button"
             tabindex="0"
             @click="confirmResetPassword"
-            @keydown.enter.prevent="confirmResetPassword"
-            @keydown.space.prevent="confirmResetPassword"
+            @keydown.enter.prevent="onButtonKeydown"
+            @keydown.space.prevent="onButtonKeydown"
             v-if="!isSuccess"
           >
             {{ $t('login.reset_password') }}
@@ -81,6 +82,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { isSendingEnter } from '@/lib/keyboard'
+
 // Composables
 // --------------------------------------------------------------------------
 
@@ -91,6 +94,7 @@ const store = useStore()
 // --------------------------------------------------------------------------
 
 const email = ref('')
+const emailFieldRef = ref(null)
 const isError = ref(false)
 const isLoading = ref(false)
 const isSuccess = ref(false)
@@ -104,6 +108,10 @@ const isDarkTheme = computed(() => store.getters.isDarkTheme)
 // --------------------------------------------------------------------------
 
 const confirmResetPassword = async () => {
+  if (!email.value) {
+    emailFieldRef.value.focus()
+    return
+  }
   isLoading.value = true
   isError.value = false
   isSuccess.value = false
@@ -114,6 +122,18 @@ const confirmResetPassword = async () => {
     isError.value = true
   }
   isLoading.value = false
+}
+
+const onEmailEnter = event => {
+  if (isSendingEnter(event)) {
+    confirmResetPassword()
+  }
+}
+
+const onButtonKeydown = event => {
+  if (!event.repeat) {
+    confirmResetPassword()
+  }
 }
 
 // Lifecycle

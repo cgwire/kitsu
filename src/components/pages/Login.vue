@@ -42,12 +42,13 @@
           <div class="field mt2">
             <p class="control has-icon">
               <input
+                ref="emailFieldRef"
                 class="input is-medium email"
                 type="email"
                 autocomplete="username"
                 :placeholder="$t('login.fields.email')"
                 @input="updateEmail"
-                @keyup.enter="confirmLogIn()"
+                @keydown.enter="onEmailEnter"
                 v-model="email"
                 v-focus
               />
@@ -65,7 +66,7 @@
                 autocomplete="current-password"
                 :placeholder="$t('login.fields.password')"
                 @input="updatePassword"
-                @keyup.enter="confirmLogIn()"
+                @keydown.enter="onPasswordEnter"
                 v-model="password"
               />
               <span class="icon">
@@ -93,8 +94,8 @@
             role="button"
             tabindex="0"
             @click="confirmLogIn()"
-            @keydown.enter.prevent="confirmLogIn()"
-            @keydown.space.prevent="confirmLogIn()"
+            @keydown.enter.prevent="onButtonKeydown"
+            @keydown.space.prevent="onButtonKeydown"
           >
             {{ $t('login.login') }}
           </a>
@@ -134,6 +135,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import auth from '@/lib/auth'
+import { isSendingEnter } from '@/lib/keyboard'
 
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 
@@ -149,6 +151,7 @@ const store = useStore()
 // --------------------------------------------------------------------------
 
 const email = ref('')
+const emailFieldRef = ref(null)
 const password = ref('')
 const passwordFieldRef = ref(null)
 const fadeAway = ref(false)
@@ -197,6 +200,11 @@ const updatePassword = event => {
 }
 
 const confirmLogIn = async twoFactorPayload => {
+  // The login request sends the email of the store.
+  if (!store.state.login.email) {
+    emailFieldRef.value?.focus()
+    return
+  }
   isInactiveUserError.value = false
   isTooMuchLoginFailedAttemps.value = false
   isWrongOTP.value = false
@@ -231,6 +239,29 @@ const confirmLogIn = async twoFactorPayload => {
     } else {
       console.error(err)
     }
+  }
+}
+
+// No password required: a Zou set up with auth_local_no_password logs people
+// in without one, so the button still sends an empty password.
+const onEmailEnter = event => {
+  if (!isSendingEnter(event)) return
+  if (store.state.login.email && !store.state.login.password) {
+    passwordFieldRef.value?.focus()
+    return
+  }
+  confirmLogIn()
+}
+
+const onPasswordEnter = event => {
+  if (isSendingEnter(event)) {
+    confirmLogIn()
+  }
+}
+
+const onButtonKeydown = event => {
+  if (!event.repeat) {
+    confirmLogIn()
   }
 }
 
