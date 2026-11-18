@@ -20,7 +20,7 @@ const inEnglish = key =>
 const Page = { template: '<div />' }
 const ScheduleStub = {
   name: 'Schedule',
-  props: ['hierarchy', 'milestones'],
+  props: { hierarchy: Array, milestones: Array, hideManDays: Boolean },
   emits: ['root-element-expanded'],
   template: '<div />',
   methods: { scrollByPeriod: vi.fn(), scrollToToday() {} }
@@ -470,5 +470,12 @@ describe('MainSchedule filters', () => {
       '/main-schedule?hiddenProductions=gone'
     )
     expect(isFilterRowShown(wrapper)).toBe(false)
+  })
+})
+
+describe('MainSchedule rows', () => {
+  it('hides the man-days, which no field of the page fills', async () => {
+    const wrapper = await mountFilteredPage()
+    expect(wrapper.findComponent(ScheduleStub).props('hideManDays')).toBe(true)
   })
 })
