@@ -55,7 +55,7 @@ const mountPage = async productions => {
   const store = createStore({
     getters: {
       openProductions: () => productions,
-      taskTypes: () => [],
+      getTaskTypeOptions: () => [],
       taskTypeMap: () => new Map()
     },
     actions: { loadAllMilestones: () => [] }
@@ -85,10 +85,27 @@ describe('MainSchedule page', () => {
 
 const taskTypes = [
   { id: 'tt-anim', name: 'Animation', color: '#f00' },
-  { id: 'tt-light', name: 'Lighting', color: '#0f0' }
+  { id: 'tt-light', name: 'Lighting', color: '#0f0' },
+  { id: 'tt-roto', name: 'Roto', color: '#00f', archived: true }
 ]
 
-const mountFilteredPage = async (path = '/main-schedule') => {
+const filteredProductions = [
+  { ...production, task_types: ['tt-anim', 'tt-light'] },
+  { ...production, id: 'production-2', name: 'Other', task_types: ['tt-anim'] }
+]
+
+const filteredScheduleItems = [
+  { id: 'item-1', task_type_id: 'tt-anim', start_date: '2026-01-01' },
+  { id: 'item-2', task_type_id: 'tt-light', start_date: '2026-02-01' }
+]
+
+const mountFilteredPage = async (
+  path = '/main-schedule',
+  {
+    productions = filteredProductions,
+    scheduleItems = filteredScheduleItems
+  } = {}
+) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -103,12 +120,13 @@ const mountFilteredPage = async (path = '/main-schedule') => {
   await router.push(path)
   const store = createStore({
     getters: {
-      openProductions: () => [
-        { ...production, task_types: ['tt-anim', 'tt-light'] },
-        { ...production, id: 'production-2', name: 'Other', task_types: [] }
-      ],
-      taskTypes: () => taskTypes,
-      taskTypeMap: () => new Map(taskTypes.map(t => [t.id, t]))
+      openProductions: () => productions,
+      taskTypeMap: () => new Map(taskTypes.map(t => [t.id, t])),
+      getTaskTypeOptions: () =>
+        taskTypes.map(taskType => ({
+          label: taskType.name,
+          value: taskType.id
+        }))
     },
     actions: {
       loadAllMilestones: () => [
@@ -116,10 +134,7 @@ const mountFilteredPage = async (path = '/main-schedule') => {
         { id: 'm2', project_id: 'production-2', name: 'Review' },
         { id: 'm3', project_id: 'closed-production', name: 'Old' }
       ],
-      loadScheduleItems: () => [
-        { id: 'item-1', task_type_id: 'tt-anim', start_date: '2026-01-01' },
-        { id: 'item-2', task_type_id: 'tt-light', start_date: '2026-02-01' }
-      ]
+      loadScheduleItems: () => scheduleItems
     }
   })
   const wrapper = shallowMount(MainSchedule, {
@@ -149,6 +164,60 @@ describe('MainSchedule filters', () => {
       { label: 'Animation', value: 'tt-anim' },
       { label: 'Lighting', value: 'tt-light' }
     ])
+  })
+
+  const taskTypeComboOf = wrapper =>
+    wrapper.findAllComponents({ name: 'ComboboxOptions' })[1]
+
+  const offeredTaskTypeIds = wrapper =>
+    taskTypeComboOf(wrapper)
+      .props('options')
+      .map(option => option.value)
+
+  it('offers the archived task types a production still lists', async () => {
+    const wrapper = await mountFilteredPage('/main-schedule', {
+      productions: [{ ...production, task_types: ['tt-anim', 'tt-roto'] }]
+    })
+    expect(offeredTaskTypeIds(wrapper)).toEqual(['tt-anim', 'tt-roto'])
+  })
+
+  it('offers every task type once a production lists none', async () => {
+    const wrapper = await mountFilteredPage('/main-schedule', {
+      productions: [
+        { ...production, task_types: ['tt-anim'] },
+        { ...production, id: 'production-2', task_types: [] }
+      ]
+    })
+    expect(offeredTaskTypeIds(wrapper)).toEqual([
+      'tt-anim',
+      'tt-light',
+      'tt-roto'
+    ])
+  })
+
+  it('shows only the checked task type, in a production without it', async () => {
+    const wrapper = await mountFilteredPage('/main-schedule', {
+      productions: [
+        { ...production, task_types: ['tt-anim'] },
+        { ...production, id: 'production-2', task_types: [] }
+      ],
+      scheduleItems: [
+        { id: 'item-2', task_type_id: 'tt-light', start_date: '2026-02-01' },
+        { id: 'item-3', task_type_id: 'tt-roto', start_date: '2026-03-01' }
+      ]
+    })
+    const taskTypeCombo = taskTypeComboOf(wrapper)
+    taskTypeCombo
+      .props('options')
+      .filter(option => option.value !== 'tt-anim')
+      .forEach(option =>
+        taskTypeCombo.vm.$emit('change', { key: option.value, value: false })
+      )
+    const schedule = wrapper.findComponent(ScheduleStub)
+    schedule.vm.$emit('root-element-expanded', hierarchyOf(wrapper)[1])
+    await flushPromises()
+
+    expect(hierarchyOf(wrapper)[1].children).toEqual([])
   })
 
   it('hides the unchecked productions', async () => {
@@ -312,6 +381,22 @@ describe('MainSchedule filters', () => {
       'tt-anim': false,
       'tt-light': true
     })
+  })
+
+  it('keeps hidden on reload a type only a production without settings or an archive brings', async () => {
+    const wrapper = await mountFilteredPage(
+      '/main-schedule?hiddenTypes=tt-light,tt-roto',
+      {
+        productions: [
+          { ...production, task_types: ['tt-anim', 'tt-roto'] },
+          { ...production, id: 'production-2', task_types: [] }
+        ]
+      }
+    )
+    const visibility = taskTypeComboOf(wrapper).props('modelValue')
+    expect(visibility['tt-anim']).toBe(true)
+    expect(visibility['tt-light']).toBe(false)
+    expect(visibility['tt-roto']).toBe(false)
   })
 
   const isFilterRowShown = wrapper =>

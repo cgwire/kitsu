@@ -172,7 +172,7 @@ const scheduleRef = useTemplateRef('schedule')
 // --------------------------------------------------------------------------
 const openProductions = computed(() => store.getters.openProductions)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
-const taskTypes = computed(() => store.getters.taskTypes)
+const taskTypeOptions = computed(() => store.getters.getTaskTypeOptions)
 
 const productionFilterOptions = computed(() =>
   openProductions.value.map(production => ({
@@ -193,14 +193,19 @@ const productionFilterTitle = computed(() =>
   )
 )
 
-// in the studio order, the task types of the open productions only
+// Every task type a row can have, in the studio order, or the filter could
+// not hide it: an archived one keeps its rows, and Zou sends all the task
+// types with tasks for a production whose settings list none.
 const taskTypeFilterOptions = computed(() => {
+  const isEveryTaskTypeUsed = openProductions.value.some(
+    production => !production.task_types?.length
+  )
   const usedIds = new Set(
     openProductions.value.flatMap(production => production.task_types || [])
   )
-  return taskTypes.value
-    .filter(taskType => usedIds.has(taskType.id))
-    .map(taskType => ({ label: taskType.name, value: taskType.id }))
+  return taskTypeOptions.value.filter(
+    option => isEveryTaskTypeUsed || usedIds.has(option.value)
+  )
 })
 
 const taskTypeVisibilityMap = computed(() =>
