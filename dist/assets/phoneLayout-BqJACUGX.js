@@ -1,0 +1,2 @@
+import{St as e,Tt as t,d as n}from"./vue-vendor-C9HfIGBc.js";n();var r=`(max-width: 768px)`,i=`(max-height: 500px) and (orientation: landscape)`,a=()=>{let n=t(!1),a=t(!1),o=globalThis.matchMedia?.(r),s=globalThis.matchMedia?.(i),c=()=>{a.value=!!s?.matches,n.value=!!o?.matches||a.value};return c(),o?.addEventListener?.(`change`,c),s?.addEventListener?.(`change`,c),e(()=>{o?.removeEventListener?.(`change`,c),s?.removeEventListener?.(`change`,c)}),{isPhone:n,isPhoneLandscape:a}};export{a as t};
+//# sourceMappingURL=phoneLayout-BqJACUGX.js.map
