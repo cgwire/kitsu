@@ -259,6 +259,32 @@ describe('MainSchedule filters', () => {
     )
   })
 
+  it('puts the step selector between the arrows, right after Today', async () => {
+    const wrapper = await mountFilteredPage()
+    const parts = ['previous-period', 'period-unit', 'next-period']
+
+    const stepper = wrapper.find('.period-stepper').element
+    expect(
+      [...stepper.children].map(child =>
+        parts.find(part => child.classList.contains(part))
+      )
+    ).toEqual(parts)
+    expect(inEnglish(stepper.previousElementSibling.getAttribute('text'))).toBe(
+      'Today'
+    )
+  })
+
+  it('words the steps as lengths of time', async () => {
+    const wrapper = await mountFilteredPage()
+    const { localeKeyPrefix, options } = wrapper
+      .findComponent({ name: 'Combobox' })
+      .props()
+
+    expect(
+      options.map(option => inEnglish(localeKeyPrefix + option.label))
+    ).toEqual(['1 day', '1 week', '1 month'])
+  })
+
   it('keeps the filters in the URL, for a reload', async () => {
     const wrapper = await mountFilteredPage()
     const [productionCombo, taskTypeCombo] = wrapper.findAllComponents({
