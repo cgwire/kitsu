@@ -50,6 +50,8 @@ const mountPage = async ({
   const resolved = () => vi.fn(() => Promise.resolve())
   const actions = {
     editPerson: resolved(),
+    getResetPasswordLink: resolved(),
+    invitePerson: resolved(),
     loadGuests: resolved(),
     loadPeople: resolved(),
     newPerson: resolved(),
@@ -204,6 +206,90 @@ describe('People page', () => {
       const modal = wrapper.findComponent(EditPersonModal)
       expect(modal.props('isEmailDomainError')).toBe(true)
       expect(modal.props('isError')).toBe(false)
+    })
+  })
+
+  describe('invitation link', () => {
+    afterEach(() => vi.restoreAllMocks())
+
+    const person = { id: 'person-2', role: 'admin', email: 'ada@studio.com' }
+    // Zou's only 400 on this route: another admin who has a password, or a
+    // protected account.
+    const refusal = {
+      status: 400,
+      body: { message: "An admin can't change another admin's password." }
+    }
+
+    const openPersonModal = async () => {
+      const page = await mountPage()
+      await page.wrapper
+        .findComponent(PeopleList)
+        .vm.$emit('edit-clicked', person)
+      const modal = () => page.wrapper.findComponent(EditPersonModal)
+      const click = async event => {
+        await modal().vm.$emit(event, { ...person })
+        await flushPromises()
+      }
+      return { ...page, modal, click }
+    }
+
+    it('says why Zou refuses the link', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { actions, modal, click } = await openPersonModal()
+      actions.getResetPasswordLink.mockRejectedValueOnce(refusal)
+
+      await click('copy-invite-link')
+
+      expect(modal().props('isInviteLinkRefused')).toBe(true)
+      expect(modal().props('isInviteLinkError')).toBe(false)
+      expect(console.error).toHaveBeenCalledWith(refusal)
+    })
+
+    it('keeps the generic error for any other failure', async () => {
+      const failure = { status: 500, body: '' }
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { actions, modal, click } = await openPersonModal()
+      actions.getResetPasswordLink.mockRejectedValueOnce(failure)
+
+      await click('copy-invite-link')
+
+      expect(modal().props('isInviteLinkError')).toBe(true)
+      expect(modal().props('isInviteLinkRefused')).toBe(false)
+      expect(console.error).toHaveBeenCalledWith(failure)
+    })
+
+    // The refusal points to the invitation: sending it answers the refusal.
+    it('clears the refusal once the invitation is sent', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { actions, modal, click } = await openPersonModal()
+      actions.getResetPasswordLink.mockRejectedValueOnce(refusal)
+      await click('copy-invite-link')
+
+      await click('invite')
+
+      expect(actions.invitePerson).toHaveBeenCalled()
+      expect(modal().props('isInvitationSuccess')).toBe(true)
+      expect(modal().props('isInviteLinkRefused')).toBe(false)
+      expect(console.error).toHaveBeenCalledWith(refusal)
+    })
+
+    // A failed invitation left its error next to the refusal, which then
+    // pointed to the email that had just failed.
+    it('clears the invitation error once the link is asked', async () => {
+      const failure = { status: 500, body: '' }
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { actions, modal, click } = await openPersonModal()
+      actions.invitePerson.mockRejectedValueOnce(failure)
+      await click('invite')
+      expect(modal().props('isInvitationError')).toBe(true)
+      actions.getResetPasswordLink.mockRejectedValueOnce(refusal)
+
+      await click('copy-invite-link')
+
+      expect(modal().props('isInvitationError')).toBe(false)
+      expect(modal().props('isInviteLinkRefused')).toBe(true)
+      expect(console.error).toHaveBeenCalledWith(failure)
+      expect(console.error).toHaveBeenCalledWith(refusal)
     })
   })
 

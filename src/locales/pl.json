@@ -1199,6 +1199,7 @@
       "copy_invite_link": "Kopiuj link zaproszenia",
       "invite_link_copied": "Link zaproszenia skopiowano do schowka!",
       "invite_link_error": "Wystąpił błąd podczas generowania linku zaproszenia",
+      "invite_link_refused": "Hasło tego użytkownika jest chronione. Zamiast tego wyślij zaproszenie e-mailem.",
       "new_person": "Dodaj nowego użytkownika",
       "no_task_assigned": "Nie masz przypisanych żadnych bieżących zadań",
       "no_task_done": "Nie masz jeszcze zatwierdzonych zadań",

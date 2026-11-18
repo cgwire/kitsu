@@ -793,6 +793,7 @@
       "copy_invite_link": "复制邀请链接",
       "invite_link_copied": "邀请链接已复制到剪贴板！",
       "invite_link_error": "生成邀请链接时发生错误",
+      "invite_link_refused": "该用户的密码受保护。请改为通过电子邮件发送邀请。",
       "new_person": "添加新用户",
       "no_task_assigned": "没有分配给您正在执行的任务",
       "no_task_done": "您还没有已通过的任务",

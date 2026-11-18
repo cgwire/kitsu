@@ -204,6 +204,9 @@
       <div class="error has-text-right mt1" v-if="isInviteLinkError">
         {{ $t('people.invite_link_error') }}
       </div>
+      <div class="error has-text-right mt1" v-if="isInviteLinkRefused">
+        {{ $t('people.invite_link_refused') }}
+      </div>
       <div class="error has-text-right mt1" v-if="isUserLimitError">
         {{ $t('people.user_limit_error') }}
       </div>
@@ -248,6 +251,7 @@ const props = defineProps({
   isInviteLinkLoading: { type: Boolean, default: false },
   isInviteLinkCopied: { type: Boolean, default: false },
   isInviteLinkError: { type: Boolean, default: false },
+  isInviteLinkRefused: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   isUserLimitError: { type: Boolean, default: false },
   personToEdit: { type: Object, default: () => ({}) }

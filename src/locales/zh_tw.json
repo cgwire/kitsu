@@ -793,6 +793,7 @@
       "copy_invite_link": "複製邀請連結",
       "invite_link_copied": "邀請連結已複製到剪貼簿！",
       "invite_link_error": "產生邀請連結時發生錯誤",
+      "invite_link_refused": "此使用者的密碼受到保護。請改為透過電子郵件發送邀請。",
       "new_person": "新增使用者",
       "no_task_assigned": "沒有分配給您正在執行的任務",
       "no_task_done": "您還沒有已通過的任務",

@@ -793,6 +793,7 @@
       "copy_invite_link": "Uitnodigingslink kopiëren",
       "invite_link_copied": "Uitnodigingslink gekopieerd naar klembord!",
       "invite_link_error": "Er is een fout opgetreden tijdens het genereren van de uitnodigingslink",
+      "invite_link_refused": "Het wachtwoord van deze gebruiker is beschermd. Stuur de uitnodiging in plaats daarvan per e-mail.",
       "new_person": "Voeg een nieuwe gebruiker toe",
       "no_task_assigned": "Er zijn geen lopende taken aan jou toegewezen",
       "no_task_done": "Je hebt nog geen goedgekeurde taken",

@@ -1246,6 +1246,7 @@ export default {
     copy_invite_link: 'Copy invitation link',
     invite_link_copied: 'Invitation link copied to clipboard!',
     invite_link_error: 'An error occurred while generating the invitation link',
+    invite_link_refused: 'This user\'s password is protected. Send the invitation by email instead.',
     new_person: 'Add a new user',
     no_task_assigned: 'There are no running tasks assigned to you',
     no_task_done: 'You have no validated task yet',

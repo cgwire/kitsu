@@ -133,6 +133,7 @@
       :is-invite-link-loading="loading.inviteLink"
       :is-invite-link-copied="success.inviteLinkCopied"
       :is-invite-link-error="errors.inviteLink"
+      :is-invite-link-refused="errors.inviteLinkRefused"
       :is-loading="loading.edit"
       :is-user-limit-error="errors.userLimit"
       :person-to-edit="personToEdit"
@@ -269,6 +270,7 @@ const errors = reactive({
   importingError: null,
   invite: false,
   inviteLink: false,
+  inviteLinkRefused: false,
   invalidEmailDomain: false,
   userLimit: false
 })
@@ -634,6 +636,8 @@ const confirmInvite = async form => {
   success.invite = false
   success.inviteLinkCopied = false
   errors.invite = false
+  errors.inviteLink = false
+  errors.inviteLinkRefused = false
   try {
     await store.dispatch('invitePerson', {
       ...form,
@@ -653,7 +657,9 @@ const confirmCopyInviteLink = async form => {
   loading.inviteLink = true
   success.inviteLinkCopied = false
   success.invite = false
+  errors.invite = false
   errors.inviteLink = false
+  errors.inviteLinkRefused = false
   try {
     const result = await store.dispatch('getResetPasswordLink', {
       ...form,
@@ -667,7 +673,13 @@ const confirmCopyInviteLink = async form => {
     success.inviteLinkCopied = true
   } catch (err) {
     console.error(err)
-    errors.inviteLink = true
+    // Zou keeps the link of another admin who has a password, or of a
+    // protected account: only its owner gets it, through the invitation.
+    if (err.status === 400) {
+      errors.inviteLinkRefused = true
+    } else {
+      errors.inviteLink = true
+    }
   } finally {
     loading.inviteLink = false
   }
@@ -766,6 +778,7 @@ watch(
         edit: false,
         invite: false,
         inviteLink: false,
+        inviteLinkRefused: false,
         invalidEmailDomain: false,
         userLimit: false
       })

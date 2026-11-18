@@ -793,6 +793,7 @@
       "copy_invite_link": "Copiar link do convite",
       "invite_link_copied": "Link do convite copiado para a área de transferência!",
       "invite_link_error": "Ocorreu um erro ao gerar o link do convite",
+      "invite_link_refused": "A senha deste usuário está protegida. Em vez disso, envie o convite por e-mail.",
       "new_person": "Adicionar um novo usuário",
       "no_task_assigned": "Não há tarefas em execução atribuídas a você",
       "no_task_done": "Você ainda não tem tarefas validadas",

@@ -793,6 +793,7 @@
       "copy_invite_link": "Meghívó link másolása",
       "invite_link_copied": "Meghívó link a vágólapra másolva!",
       "invite_link_error": "Hiba történt a meghívó link generálásakor",
+      "invite_link_refused": "Ennek a felhasználónak a jelszava védett. Helyette küldd el a meghívót e-mailben.",
       "new_person": "Felhasználó hozzáadása",
       "no_task_assigned": "Nincs neked kiosztott folyamatban lévő feladat",
       "no_task_done": "Még nincs jóváhagyott feladatod",

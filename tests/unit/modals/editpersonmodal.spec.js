@@ -26,10 +26,10 @@ const store = createStore({
   }
 })
 
-const mountModal = personToEdit =>
+const mountModal = (personToEdit, props = {}) =>
   shallowMount(EditPersonModal, {
     global: { plugins: [store, i18n], renderStubDefaultSlot: true },
-    props: { active: true, personToEdit }
+    props: { active: true, personToEdit, ...props }
   })
 
 const emailField = wrapper =>
@@ -68,6 +68,17 @@ describe('EditPersonModal', () => {
       )
       expect(emailField(other).props('disabled')).toBe(false)
       expect(emailField(other).props('description')).toBe('')
+    })
+  })
+
+  describe('invitation link', () => {
+    it('says why the link is refused', () => {
+      const wrapper = mountModal(
+        { id: 'p1', first_name: 'Ada', email: 'ada@studio.com', active: true },
+        { isInviteLinkRefused: true }
+      )
+
+      expect(wrapper.text()).toContain('people.invite_link_refused')
     })
   })
 

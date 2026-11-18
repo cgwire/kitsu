@@ -793,6 +793,7 @@
       "copy_invite_link": "초대 링크 복사",
       "invite_link_copied": "초대 링크가 클립보드에 복사되었습니다!",
       "invite_link_error": "초대 링크를 생성하는 도중 오류가 발생했습니다.",
+      "invite_link_refused": "이 사용자의 비밀번호는 보호되어 있습니다. 대신 이메일로 초대장을 보내 주세요.",
       "new_person": "새 사용자 추가",
       "no_task_assigned": "귀하에게 할당된 진행 중인 작업이 없습니다.",
       "no_task_done": "아직 승인된 작업이 없습니다",

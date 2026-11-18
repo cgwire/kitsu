@@ -793,6 +793,7 @@
       "copy_invite_link": "Einladungslink kopieren",
       "invite_link_copied": "Einladungslink in die Zwischenablage kopiert!",
       "invite_link_error": "Beim Erstellen des Einladungslinks ist ein Fehler aufgetreten.",
+      "invite_link_refused": "Das Passwort dieses Benutzers ist geschützt. Senden Sie die Einladung stattdessen per E-Mail.",
       "new_person": "Einen neuen Benutzer hinzufügen",
       "no_task_assigned": "Es gibt keine laufenden Aufgaben, die Ihnen zugewiesen sind.",
       "no_task_done": "Sie haben noch keine freigegebenen Aufgaben",
