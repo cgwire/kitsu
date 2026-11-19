@@ -105,6 +105,8 @@ export default {
     return client.pget(path)
   },
 
+  // The temporary playlists are heavy reads: on a large selection Zou may
+  // need minutes, so they wait as long as a write.
   loadTempPlaylist(production, taskIds, sort) {
     let path = `/api/data/projects/${production.id}/playlists/temp`
     if (sort) path += '?sort=true'

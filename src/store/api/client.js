@@ -33,15 +33,16 @@ function handleError(err, method, path, startedAt) {
   throw err
 }
 
-// Bound regular API calls so a hung request cannot leave a spinner
-// alive forever: 60s for the server to start answering, 5 min total.
+// Bound reads so a hung request cannot leave a spinner alive forever:
+// 60s for the server to start answering, 5 min total.
 // File uploads (ppostFile) stay unbounded — multi-GB movies are legit.
 const REQUEST_TIMEOUT = { response: 60000, deadline: 300000 }
 
-// Zou answers an import only once every row is processed, so there is
-// no early answer to wait for. 10 min matches the documented nginx
-// proxy_read_timeout.
-const IMPORT_TIMEOUT = { deadline: 600000 }
+// Zou carries a write through even once Kitsu stops waiting, and answers
+// an import only once every row is processed: a write cut early reads as a
+// failure although it went through, and sending it again runs it twice.
+// Writes wait 10 min, the proxy_read_timeout of the documented nginx setup.
+const WRITE_TIMEOUT = { deadline: 600000 }
 
 // Build a query string from a plain object. Empty values are dropped so an
 // unset filter never reaches the API, and array values become one repeated
@@ -178,11 +179,11 @@ const client = {
   },
 
   ppost(path, data) {
-    return client.request('POST', path, data)
+    return client.request('POST', path, data, WRITE_TIMEOUT)
   },
 
   ppostImport(path, data) {
-    return client.request('POST', path, data, IMPORT_TIMEOUT)
+    return client.request('POST', path, data, WRITE_TIMEOUT)
   },
 
   ppostFile(path, data) {
@@ -204,11 +205,11 @@ const client = {
   },
 
   pput(path, data) {
-    return client.request('PUT', path, data)
+    return client.request('PUT', path, data, WRITE_TIMEOUT)
   },
 
   pdel(path, data) {
-    return client.request('DELETE', path, data)
+    return client.request('DELETE', path, data, WRITE_TIMEOUT)
   },
 
   getText(path) {
@@ -268,11 +269,13 @@ const client = {
     return client.pget(`/api/data/events/login-logs/last?${query}`)
   },
 
+  // A read sent as POST keeps the budget of a read: the search field shows
+  // whichever answer comes last, and a late one would replace newer results.
   searchData(query, limit, offset, index_names, productionId) {
     const path = '/api/data/search'
     const data = { query, limit, offset, index_names }
     if (productionId && productionId !== 'all') data.project_id = productionId
-    return client.ppost(path, data)
+    return client.request('POST', path, data)
   }
 }
 

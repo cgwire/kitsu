@@ -111,10 +111,24 @@ describe('store/api/client', () => {
     })
   })
 
-  test('regular requests stop waiting for an answer after 60s', async () => {
+  test('reads stop waiting for an answer after 60s', async () => {
     h.response = { body: {} }
-    await client.ppost('/api/data/foo', { name: 'foo' })
+    await client.pget('/api/data/foo')
     expect(h.timeout).toEqual({ response: 60000, deadline: 300000 })
+  })
+
+  // Zou carries a write through even once Kitsu stops waiting: a comment
+  // posted with a preview and cut at 60s read as a failure while Zou kept
+  // it, and publishing again posted it twice.
+  test.each([
+    ['ppost', 'POST'],
+    ['pput', 'PUT'],
+    ['pdel', 'DELETE']
+  ])('%s waits up to 10 minutes for the write to finish', async (name, method) => {
+    h.response = { body: {} }
+    await client[name]('/api/data/foo', { name: 'foo' })
+    expect(h.calls).toEqual([{ method, path: '/api/data/foo' }])
+    expect(h.timeout).toEqual({ deadline: 600000 })
   })
 
   // Zou answers an import only once every row is processed, which takes
@@ -134,9 +148,9 @@ describe('store/api/client', () => {
   })
 
   test('a request that timed out rejects as a timeout', async () => {
-    h.error = Object.assign(new Error('Response timeout of 60000ms exceeded'), {
+    h.error = Object.assign(new Error('Timeout of 600000ms exceeded'), {
       code: 'ECONNABORTED',
-      timeout: 60000
+      timeout: 600000
     })
     await expect(client.ppost('/api/data/foo')).rejects.toMatchObject({
       isTimeout: true
@@ -222,6 +236,15 @@ describe('store/api/client', () => {
     expect(h.sent.project_id).toBeUndefined()
     await client.searchData('rabbit', 10, 0, ['assets'], 'production-1')
     expect(h.sent.project_id).toEqual('production-1')
+  })
+
+  // The search field shows whichever answer comes last: a late one would
+  // replace the results of a newer query.
+  test('searchData keeps the budget of a read', async () => {
+    h.response = { body: {} }
+    await client.searchData('rabbit', 10, 0, ['assets'], 'all')
+    expect(h.calls).toEqual([{ method: 'POST', path: '/api/data/search' }])
+    expect(h.timeout).toEqual({ response: 60000, deadline: 300000 })
   })
 
   describe('pgetNdjson', () => {

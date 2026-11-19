@@ -536,6 +536,29 @@ describe('store/api endpoints', () => {
     ])
   })
 
+  // A generated playlist is a read that Zou may build for minutes: ppost
+  // gives it the 10 minutes of a write, where a read gives up after 60 s.
+  test.each([
+    [
+      'from tasks',
+      () => playlistsApi.loadTempPlaylist({ id: 'p1' }, ['task-1'], false),
+      { task_ids: ['task-1'] }
+    ],
+    [
+      'from entities',
+      () =>
+        playlistsApi.loadTempPlaylistFromEntities({ id: 'p1' }, ['shot-1'], false),
+      { entity_ids: ['shot-1'] }
+    ]
+  ])('waits for a playlist generated %s as long as for a write', (label, load, data) => {
+    load()
+
+    expect(client.ppost).toHaveBeenCalledWith(
+      '/api/data/projects/p1/playlists/temp',
+      data
+    )
+  })
+
   // The list route of Zou filters on a JSON list of ids.
   test('reads the statuses of several preview files in one request', () => {
     previewsApi.getPreviewFileStatuses(['p1', 'p2'])
