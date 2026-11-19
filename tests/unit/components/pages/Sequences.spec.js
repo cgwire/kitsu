@@ -565,6 +565,76 @@ describe('Sequences page, CSV', () => {
     expect(imported).toEqual(['Name', 'Description'])
   })
 
+  // A film has no episode: its preview shows the Episode column as ignored.
+  test.each([
+    [false, [['Name', 'Description'], ['SQ02', 'Night']]],
+    [true, [['Name', 'Episode', 'Description'], ['SQ02', 'E01', 'Night']]]
+  ])(
+    'sends the Episode column only in a TV show (TV show: %s)',
+    async (isTVShow, uploaded) => {
+      const turnEntriesToCsvString = vi.spyOn(csv, 'turnEntriesToCsvString')
+      const { wrapper } = await mountCsvPage({
+        actions: { uploadSequenceFile: vi.fn(() => Promise.resolve()) },
+        getters: { isTVShow, currentEpisode: { id: 'ep-a', name: 'E01' } }
+      })
+
+      await wrapper
+        .findComponent(ImportRenderModal)
+        .vm.$emit(
+          'confirm',
+          [
+            ['Name', 'Episode', 'Description'],
+            ['SQ02', 'E01', 'Night']
+          ],
+          false
+        )
+      await flushPromises()
+
+      expect(turnEntriesToCsvString).toHaveBeenCalledWith(uploaded)
+    }
+  )
+
+  // There, the preview imports the column, as the upload has to.
+  test.each([
+    [
+      'a metadata column',
+      {
+        sequenceMetadataDescriptors: [
+          {
+            name: 'Episode',
+            field_name: 'episode',
+            entity_type: 'Sequence',
+            data_type: 'string'
+          }
+        ]
+      }
+    ],
+    [
+      'a task type',
+      { productionSequenceTaskTypes: [{ id: 'tt-ep', name: 'Episode' }] }
+    ]
+  ])(
+    'sends the Episode column of a film that %s names',
+    async (_, getters) => {
+      const turnEntriesToCsvString = vi.spyOn(csv, 'turnEntriesToCsvString')
+      const { wrapper } = await mountCsvPage({
+        actions: { uploadSequenceFile: vi.fn(() => Promise.resolve()) },
+        getters: { isTVShow: false, ...getters }
+      })
+      const entries = [
+        ['Name', 'Episode'],
+        ['SQ02', 'Pilot']
+      ]
+
+      await wrapper
+        .findComponent(ImportRenderModal)
+        .vm.$emit('confirm', entries, false)
+      await flushPromises()
+
+      expect(turnEntriesToCsvString).toHaveBeenCalledWith(entries)
+    }
+  )
+
   test('uploads the file, then reloads the list', async () => {
     const uploadSequenceFile = vi.fn(() => Promise.resolve())
     const { wrapper, store, dispatched } = await mountCsvPage({

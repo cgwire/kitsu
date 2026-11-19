@@ -814,7 +814,18 @@ export const useEntityPage = ({
 
   const uploadImportFile = async (data, toUpdate) => {
     const formData = new FormData()
-    const csvContent = csv.turnEntriesToCsvString(renameExportValues(data))
+    // A film has no episode: the preview shows its Episode column as
+    // ignored, so the upload leaves it out instead of having Zou refuse it.
+    // Named after a task type or a metadata column, it is shown and sent.
+    const isEpisodeIgnored =
+      entityCsv?.hasEpisode &&
+      !isTVShow.value &&
+      !renderColumns.value.includes('Episode') &&
+      !(store.getters[`${type}MetadataDescriptors`] || []).some(
+        descriptor => descriptor.name === 'Episode'
+      )
+    const entries = isEpisodeIgnored ? csv.removeColumn(data, 'Episode') : data
+    const csvContent = csv.turnEntriesToCsvString(renameExportValues(entries))
     formData.append(
       'file',
       new File([csvContent], 'import.csv', { type: 'text/csv' })

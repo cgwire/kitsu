@@ -326,6 +326,32 @@ describe('lib/csv', () => {
     })
   })
 
+  describe('removeColumn', () => {
+    test('drops the column and its cells', () => {
+      expect(
+        csv.removeColumn(
+          [
+            ['Name', 'Episode', 'Description'],
+            ['SQ01', 'E01', 'Night'],
+            ['SQ02', '', 'Day']
+          ],
+          'Episode'
+        )
+      ).toEqual([
+        ['Name', 'Description'],
+        ['SQ01', 'Night'],
+        ['SQ02', 'Day']
+      ])
+    })
+
+    test('leaves a file without the column as it is', () => {
+      expect(csv.removeColumn([['Name'], ['SQ01']], 'Episode')).toEqual([
+        ['Name'],
+        ['SQ01']
+      ])
+    })
+  })
+
   describe('getNewEntityNames', () => {
     const parsedCsv = [
       ['Sequence', 'Name', 'Description'],

@@ -148,6 +148,35 @@ describe('Edits page, CSV import', () => {
     expect(dispatched('loadEdits')).toHaveLength(1)
   })
 
+  // A film has no episode: its preview shows the Episode column as ignored.
+  test.each([
+    [false, [['Name', 'Description'], ['E01', 'intro']]],
+    [true, [['Name', 'Episode', 'Description'], ['E01', 'E02', 'intro']]]
+  ])(
+    'sends the Episode column only in a TV show (TV show: %s)',
+    async (isTVShow, uploaded) => {
+      const turnEntriesToCsvString = vi.spyOn(csv, 'turnEntriesToCsvString')
+      const { wrapper } = await mountPage({
+        actions: { uploadEditFile: () => Promise.resolve() },
+        getters: { isTVShow }
+      })
+
+      await wrapper
+        .findComponent(ImportRenderModal)
+        .vm.$emit(
+          'confirm',
+          [
+            ['Name', 'Episode', 'Description'],
+            ['E01', 'E02', 'intro']
+          ],
+          false
+        )
+      await flushPromises()
+
+      expect(turnEntriesToCsvString).toHaveBeenCalledWith(uploaded)
+    }
+  )
+
   test('offers the assignations of each task type', async () => {
     const { wrapper } = await mountPage({
       getters: { productionEditTaskTypes: [{ name: 'Edit' }] }

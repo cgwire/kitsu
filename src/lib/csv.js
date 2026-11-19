@@ -414,6 +414,16 @@ const csv = {
     ]
   },
 
+  // Drop the column `column`, header and cells. A file without it stays as
+  // it is.
+  removeColumn(entries, column) {
+    const [headers = [], ...lines] = entries
+    const index = headers.indexOf(column)
+    if (index < 0) return entries
+    const isKept = (cell, cellIndex) => cellIndex !== index
+    return [headers.filter(isKept), ...lines.map(line => line.filter(isKept))]
+  },
+
   turnEntriesToCsvString(entries, config = {}) {
     return Papa.unparse(entries, {
       delimiter: ';',
