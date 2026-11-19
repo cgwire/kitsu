@@ -93,7 +93,7 @@ import TextField from '@/components/widgets/TextField.vue'
 
 // The lengths of the Zou columns.
 const NAME_MAX_LENGTH = 200
-const QUERY_MAX_LENGTH = 500
+const QUERY_MAX_LENGTH = 5000
 
 const { t } = useI18n()
 const store = useStore()

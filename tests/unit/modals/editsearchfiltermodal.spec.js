@@ -214,11 +214,11 @@ describe('EditSearchFilterModal', () => {
     const [name, query] = wrapper.findAllComponents(TextField)
 
     expect(name.props('maxlength')).toBe(200)
-    expect(query.props('maxlength')).toBe(500)
+    expect(query.props('maxlength')).toBe(5000)
   })
 
   describe('on a query too long to save', () => {
-    const tooLong = 'x'.repeat(501)
+    const tooLong = 'x'.repeat(5001)
 
     test('tells it and refuses to confirm', () => {
       const wrapper = mountModal({
@@ -241,7 +241,7 @@ describe('EditSearchFilterModal', () => {
 
       await wrapper
         .findAllComponents(TextField)[1]
-        .vm.$emit('update:modelValue', 'x'.repeat(500))
+        .vm.$emit('update:modelValue', 'x'.repeat(5000))
 
       expect(wrapper.findComponent(ModalFooter).props('isDisabled')).toBe(false)
     })
@@ -272,7 +272,7 @@ describe('EditSearchFilterModal', () => {
     test('tells a query too long and refuses to confirm', () => {
       const wrapper = mountModal({
         isQueryEditable: false,
-        searchQueryToEdit: { name: 'long', search_query: 'x'.repeat(501) }
+        searchQueryToEdit: { name: 'long', search_query: 'x'.repeat(5001) }
       })
 
       expect(wrapper.find('.query-error').text()).toBe(
