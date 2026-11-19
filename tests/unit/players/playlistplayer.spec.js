@@ -227,6 +227,48 @@ const annotationCanvasStub = canvas => ({
   setup: () => ({ canvas: markRaw(canvas), overlay: ref(null) })
 })
 
+// The main canvas: the onion skin wipes a canvas of its own.
+const mainCanvasStub = canvas => ({
+  name: 'AnnotationCanvas',
+  template: '<div ref="overlay"><canvas /></div>',
+  setup: (_, { attrs }) => ({
+    canvas: markRaw(
+      attrs['canvas-id'] === 'playlist-annotation-canvas'
+        ? canvas
+        : createFakeCanvas()
+    ),
+    overlay: ref(null)
+  })
+})
+
+// What the canvas holds: the strokes added since it was last wiped.
+const shownIds = canvas => {
+  const lastClear = Math.max(0, ...canvas.clear.mock.invocationCallOrder)
+  return canvas.add.mock.calls
+    .filter((_, i) => canvas.add.mock.invocationCallOrder[i] > lastClear)
+    .map(([object]) => object.id)
+}
+
+// A stroke drawn at a time of a movie.
+const drawing = (time, id) => ({
+  time,
+  drawing: {
+    objects: [
+      {
+        id,
+        type: 'path',
+        path: 'M 0 0 L 10 10',
+        left: 100,
+        top: 50,
+        stroke: '#ff0000',
+        strokeWidth: 2,
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+    ]
+  }
+})
+
 const pointer = (target, type, { id, x, y }) =>
   target.dispatchEvent(
     new PointerEvent(type, {
@@ -834,20 +876,6 @@ describe('PlaylistPlayer.vue', () => {
         ]
       }
 
-      // The onion skin wipes a canvas of its own.
-      const mainCanvasStub = canvas => ({
-        name: 'AnnotationCanvas',
-        template: '<div ref="overlay"><canvas /></div>',
-        setup: (_, { attrs }) => ({
-          canvas: markRaw(
-            attrs['canvas-id'] === 'playlist-annotation-canvas'
-              ? canvas
-              : createFakeCanvas()
-          ),
-          overlay: ref(null)
-        })
-      })
-
       const mountDrawn = async () => {
         const canvas = createFakeCanvas()
         wrapper = mountPlayer({
@@ -864,14 +892,6 @@ describe('PlaylistPlayer.vue', () => {
       const toggleWaveform = async isDisplayed => {
         playbackBar().vm.$emit('update:isWaveformDisplayed', isDisplayed)
         await flushPromises()
-      }
-
-      // What the canvas holds: the strokes added since it was last wiped.
-      const shownIds = canvas => {
-        const lastClear = Math.max(0, ...canvas.clear.mock.invocationCallOrder)
-        return canvas.add.mock.calls
-          .filter((_, i) => canvas.add.mock.invocationCallOrder[i] > lastClear)
-          .map(([object]) => object.id)
       }
 
       it('draws it again once the waveform shows', async () => {
@@ -4052,6 +4072,228 @@ describe('PlaylistPlayer.vue', () => {
         expect(setPanZoom).not.toHaveBeenCalled()
       }
     )
+  })
+
+  // A switch of entry wipes the canvas once the new media renders.
+  describe('drawing of a paused movie', () => {
+    const movies = ['shot-1', 'shot-2'].map((id, index) => ({
+      ...entity,
+      id,
+      preview_file_id: `preview-${index + 1}`,
+      preview_file_extension: 'mp4'
+    }))
+    const drawnSecond = [
+      movies[0],
+      { ...movies[1], preview_file_annotations: [drawing(0, 'stroke')] }
+    ]
+
+    const mountDrawn = async entities => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        entities,
+        stubs: { AnnotationCanvas: mainCanvasStub(canvas) }
+      })
+      await flushPromises()
+      return canvas
+    }
+
+    const playbackBar = () =>
+      wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+
+    // A movie already loaded brings no drawing back: in a playlist of two
+    // movies, both decoders hold them.
+    it('draws the frame of the entry reached', async () => {
+      const canvas = await mountDrawn(drawnSecond)
+
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      await flushPromises()
+
+      expect(shownIds(canvas)).toEqual(['stroke'])
+    })
+
+    // A drawing shows while playing only with its option, frame by frame.
+    it('draws nothing once playback moves on', async () => {
+      const canvas = await mountDrawn(drawnSecond)
+      const viewer = wrapper.findComponent({ ref: 'raw-player' })
+      viewer.vm.isPlaying = true
+      playbackBar().vm.$emit('play-pause-clicked')
+      await flushPromises()
+
+      viewer.vm.$emit('entity-change', 1)
+      await flushPromises()
+
+      expect(playbackBar().props('isPlaying')).toBe(true)
+      expect(shownIds(canvas)).toEqual([])
+    })
+
+    // In full screen with the strip and the comments folded, the bars hide
+    // 2 s after the mouse stops, and the media takes their room.
+    describe('in full screen', () => {
+      afterEach(() => {
+        vi.useRealTimers()
+        resetFullScreen()
+        delete document.fullscreen
+      })
+
+      const mountFullScreen = async () => {
+        const canvas = await mountDrawn([drawnSecond[1]])
+        // jsdom has no full screen
+        Object.defineProperty(document, 'fullscreen', {
+          configurable: true,
+          value: true
+        })
+        setFullScreenElement(wrapper.element)
+        wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(
+            button =>
+              button.attributes('title') === 'playlists.actions.entity_list'
+          )
+          .vm.$emit('click')
+        await flushPromises()
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        return canvas
+      }
+
+      const hideBars = async () => {
+        wrapper.element.dispatchEvent(new MouseEvent('mousemove'))
+        await vi.advanceTimersByTimeAsync(2000)
+      }
+
+      it('draws the paused frame again once the bars hide', async () => {
+        const canvas = await mountFullScreen()
+
+        await hideBars()
+
+        expect(shownIds(canvas)).toEqual(['stroke'])
+      })
+
+      it('draws it again once the bars show', async () => {
+        const canvas = await mountFullScreen()
+        await hideBars()
+
+        wrapper.element.dispatchEvent(new MouseEvent('mousemove'))
+        await vi.advanceTimersByTimeAsync(0)
+
+        expect(shownIds(canvas)).toEqual(['stroke'])
+      })
+
+      it('draws nothing on a playing movie', async () => {
+        const canvas = await mountFullScreen()
+        wrapper.findComponent({ ref: 'raw-player' }).vm.isPlaying = true
+        playbackBar().vm.$emit('play-pause-clicked')
+        await vi.advanceTimersByTimeAsync(0)
+
+        await hideBars()
+
+        expect(playbackBar().props('isPlaying')).toBe(true)
+        expect(shownIds(canvas)).toEqual([])
+      })
+
+      it('leaves a note being typed', async () => {
+        const canvas = await mountFullScreen()
+        canvas.getActiveObject.mockReturnValue({ isEditing: true })
+        canvas.clear.mockClear()
+
+        await hideBars()
+
+        expect(canvas.clear).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('once its movie loads', () => {
+      const drawnFirst = [
+        {
+          ...movies[0],
+          preview_file_annotations: [drawing(0, 'start'), drawing(1.2, 'later')]
+        },
+        movies[1]
+      ]
+
+      // Like the real one, the movie stands a hair past the start of its
+      // frame.
+      const loadMovieAt = (frame, fps = 25) => {
+        const viewer = wrapper.findComponent({ ref: 'raw-player' }).vm
+        viewer.getCurrentFrame = () => frame
+        viewer.getCurrentTimeRaw = () => frame / fps + 0.001
+        const setCurrentFrame = vi.spyOn(viewer, 'setCurrentFrame')
+        viewer.$emit('video-loaded')
+        return setCurrentFrame
+      }
+
+      it('draws the first frame of a movie at its start', async () => {
+        const canvas = await mountDrawn(drawnFirst)
+
+        loadMovieAt(0)
+        await flushPromises()
+
+        expect(shownIds(canvas)).toEqual(['start'])
+      })
+
+      // The decoder that preloads the next movie tells it too.
+      it('stays on the frame the movie stands on', async () => {
+        const canvas = await mountDrawn(drawnFirst)
+
+        const setCurrentFrame = loadMovieAt(30)
+        await flushPromises()
+
+        expect(shownIds(canvas)).toEqual(['later'])
+        expect(setCurrentFrame).not.toHaveBeenCalledWith(0)
+      })
+
+      // A drawing sits on its frame times 1/fps rounded to 4 decimals: deep
+      // in a 24 fps movie, that time drifts more than half a frame from the
+      // movie's.
+      it('draws the frame of a 24 fps movie deep in it', async () => {
+        const at = frame => Math.round(frame * 0.0417 * 10000) / 10000
+        const canvas = await mountDrawn([
+          {
+            ...movies[0],
+            fps: '24',
+            preview_file_annotations: [
+              drawing(at(699), 'before'),
+              drawing(at(700), 'on')
+            ]
+          },
+          movies[1]
+        ])
+
+        loadMovieAt(700, 24)
+        await flushPromises()
+
+        expect(shownIds(canvas)).toEqual(['on'])
+      })
+
+      it('draws nothing on a playing movie', async () => {
+        const canvas = await mountDrawn(drawnFirst)
+        wrapper.findComponent({ ref: 'raw-player' }).vm.isPlaying = true
+        playbackBar().vm.$emit('play-pause-clicked')
+        await flushPromises()
+
+        loadMovieAt(30)
+        await flushPromises()
+
+        expect(playbackBar().props('isPlaying')).toBe(true)
+        expect(shownIds(canvas)).toEqual([])
+      })
+
+      it('leaves a note being typed', async () => {
+        const canvas = await mountDrawn(drawnFirst)
+        canvas.getActiveObject.mockReturnValue({ isEditing: true })
+        canvas.clear.mockClear()
+
+        loadMovieAt(30)
+        await flushPromises()
+
+        expect(canvas.clear).not.toHaveBeenCalled()
+      })
+    })
   })
 
   describe('on a phone', () => {

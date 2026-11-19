@@ -4164,7 +4164,15 @@ const onVideoLoaded = () => {
       width: currentPreview.value.width,
       height: currentPreview.value.height
     }
-    if (!isPlaying.value) loadAnnotation(getAnnotation(0))
+    // The movie does not always stand on its first frame: a click on the
+    // playlist bar seeks it, and the decoder that preloads the next movie
+    // sends this event too, even while a note is being typed. A drawing sits
+    // on its frame, whose time is rounded: look the frame up, not the time.
+    if (!isPlaying.value && !isTypingNote()) {
+      loadAnnotation(
+        getAnnotation(rawPlayer.value.getCurrentFrame() * frameDuration.value)
+      )
+    }
   }
 }
 
@@ -5220,7 +5228,11 @@ watch(playingEntityIndex, () => {
         resetHeight()
         resetPictureCanvas()
       } else {
-        resetCanvas()
+        // The reset wipes the drawing of a paused movie, which only a movie
+        // loaded afterwards drew again.
+        resetCanvas().then(() => {
+          if (!isPlaying.value) onMainCanvasResized()
+        })
       }
       resetPanZoom()
       panzoomTransform.value = { x: 0, y: 0, scale: 1 }
@@ -5515,7 +5527,13 @@ watch(isMuted, () => {
   if (!isMuted.value) preferences.setPreference('player:volume', volume.value)
 })
 
-watch(isMediaFullScreen, () => resetHeight())
+// The bars of full screen hide and show again: the canvas draws again on a
+// new size only, which a movie held by the width does not get.
+watch(isMediaFullScreen, () => {
+  resetHeight().then(() => {
+    if (!isPlaying.value && !isTypingNote()) onMainCanvasResized()
+  })
+})
 
 // a rotation lays the phone out again: the strip folds in landscape
 watch(isPhoneLandscape, isLandscape => {
