@@ -11,11 +11,18 @@
         <page-title :text="title" />
         <p>{{ text }}</p>
         <form @submit.prevent class="widden">
-          <combobox-task-type
-            class="mb1"
-            :task-type-list="getApplicableTaskTypes()"
-            v-model="form.task_type_id"
-          />
+          <div class="fields mb1">
+            <combobox-task-type
+              :task-type-list="getApplicableTaskTypes()"
+              :with-margin="false"
+              v-model="form.task_type_id"
+            />
+            <combobox
+              :options="selectionOptions"
+              :with-margin="false"
+              v-model="selectionOnly"
+            />
+          </div>
           <div class="disclaimer">
             <router-link
               :to="{
@@ -33,14 +40,7 @@
             </router-link>
           </div>
         </form>
-        <div class="flexrow">
-          <div class="filler"></div>
-          <combobox
-            class="flexrow-item"
-            :options="selectionOptions"
-            :with-margin="false"
-            v-model="selectionOnly"
-          />
+        <div class="flexrow actions">
           <a
             :class="{
               button: true,
@@ -261,6 +261,24 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+.modal-content {
+  width: 800px;
+  max-width: calc(100vw - 4rem);
+}
+
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em 1em;
+}
+
+.actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 0.5em;
+}
+
 .info-message {
   margin-top: 1em;
 }
