@@ -208,6 +208,86 @@ describe('ImportRenderModal', () => {
     })
   })
 
+  // A page leaves a column unmatched on purpose: under the menu that can
+  // match it, the column keeps the name it has in the file.
+  describe('file headers', () => {
+    const headerTexts = wrapper =>
+      wrapper
+        .findAll('thead th')
+        .filter(th => th.find('.render-select').exists())
+        .map(th => th.element.lastChild.textContent.trim())
+
+    test('name a column the page left unmatched', () => {
+      const wrapper = mountModal({
+        parsedCsv: [
+          ['Sequence', 'Name', 'main.csv.unknown'],
+          ['0010', '00010', '198']
+        ],
+        fileHeaders: ['Séquence', 'Nom', 'Images']
+      })
+
+      expect(headerTexts(wrapper)).toEqual(['Sequence', 'Name', 'Images'])
+    })
+
+    test('call an unmatched column unknown without them', () => {
+      const wrapper = mountModal({
+        parsedCsv: [
+          ['Sequence', 'Name', 'main.csv.unknown'],
+          ['0010', '00010', '198']
+        ]
+      })
+
+      expect(headerTexts(wrapper)).toEqual([
+        'Sequence',
+        'Name',
+        'main.csv.unknown'
+      ])
+    })
+
+    const mountWithRealDate = () =>
+      mountModal({
+        columns: ['Sequence', 'Name', 'WIP date'],
+        parsedCsv: [
+          ['Sequence', 'Name', 'main.csv.unknown'],
+          ['0010', '00010', '2024-01-05']
+        ],
+        fileHeaders: ['Séquence', 'Nom', 'Date de WIP']
+      })
+    const pickColumn = (wrapper, index, label) =>
+      wrapper.findAll('thead select')[index].setValue(label)
+    const confirmedHeaders = wrapper => {
+      wrapper.findComponent(ModalFooter).vm.$emit('confirm')
+      return wrapper.emitted('confirm').at(-1)[0][0]
+    }
+
+    test('send a picked column under the name Zou reads', async () => {
+      const wrapper = mountWithRealDate()
+
+      await pickColumn(wrapper, 2, 'WIP date')
+
+      expect(headerTexts(wrapper)).toEqual(['Sequence', 'Name', 'WIP date'])
+      expect(confirmedHeaders(wrapper)).toEqual([
+        'Sequence',
+        'Name',
+        'WIP date'
+      ])
+    })
+
+    test('name the column of the file again once set back to Choose', async () => {
+      const wrapper = mountWithRealDate()
+
+      await pickColumn(wrapper, 2, 'WIP date')
+      await pickColumn(wrapper, 2, 'main.csv.choose')
+
+      expect(headerTexts(wrapper)).toEqual(['Sequence', 'Name', 'Date de WIP'])
+      expect(confirmedHeaders(wrapper)).toEqual([
+        'Sequence',
+        'Name',
+        'main.csv.unknown'
+      ])
+    })
+  })
+
   describe('existing entries', () => {
     test('match the right line after an empty one', () => {
       const wrapper = mountModal({

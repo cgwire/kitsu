@@ -1808,7 +1808,7 @@ describe('TaskType page', () => {
       wrapper = null
     })
 
-    const importColumns = async forEntity => {
+    const importColumns = async (forEntity, getters = {}) => {
       // the data load the page starts 100 ms after mounting is not under test
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
       const mounted = await mountPage({
@@ -1817,7 +1817,8 @@ describe('TaskType page', () => {
             id: 'task-type-1',
             name: 'Layout',
             for_entity: forEntity
-          })
+          }),
+          ...getters
         },
         section: 'tasks'
       })
@@ -1874,6 +1875,25 @@ describe('TaskType page', () => {
         })
       }
     )
+
+    // Zou reads them in expert mode, for the studio managers.
+    it('take the real dates of whoever can edit them', async () => {
+      const columns = await importColumns('Asset', {
+        canEditRealDates: () => true
+      })
+      const withRealDates = [
+        'Estimation',
+        'Start date',
+        'Due date',
+        'WIP date',
+        'Feedback date',
+        'Approval date',
+        'Difficulty'
+      ]
+
+      expect(columns.columns).toEqual(['Parent', 'Entity', ...withRealDates])
+      expect(columns.listedOptionalColumns).toEqual(withRealDates)
+    })
   })
 
   // The page posts with the store episode, which a route without episode

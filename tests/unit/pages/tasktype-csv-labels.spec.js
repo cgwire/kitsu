@@ -21,6 +21,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 // The task type page with the real messages and its real task list: the
 // other task type specs mock vue-i18n for the whole file.
 const mountPage = async ({
+  canEditRealDates = false,
   descriptors = [],
   forEntity,
   isPaperProduction = false,
@@ -30,6 +31,7 @@ const mountPage = async ({
 }) => {
   const store = createStore({
     getters: {
+      canEditRealDates: () => canEditRealDates,
       currentEpisode: () => null,
       currentProduction: () => ({ id: 'production-1', name: 'Production' }),
       currentTaskType: () => ({
@@ -124,9 +126,12 @@ const reimportExport = async options => {
     .findComponent(ImportModal)
     .vm.$emit('confirm', csv.turnEntriesToCsvString(entries), 'text')
   await flushPromises()
-  const imported = wrapper.findComponent(ImportRenderModal).props('parsedCsv')
+  const renderModal = wrapper.findComponent(ImportRenderModal)
+  const [imported] = renderModal.props('parsedCsv')
+  const fileHeaders = renderModal.props('fileHeaders')
+  const columns = renderModal.props('columns')
   wrapper.unmount()
-  return { exported: entries[0], imported: imported[0] }
+  return { exported: entries[0], imported, fileHeaders, columns }
 }
 
 // What the Zou estimations import reads, among the other columns, in the
@@ -226,5 +231,89 @@ describe('TaskType page, estimations export labels', () => {
 
     expect(imported.filter(header => header === 'Nom')).toHaveLength(2)
     expect(readByZou(imported)).toEqual(['Parent', ...zouColumns])
+  })
+
+  // Zou reads them in expert mode, for the studio managers.
+  describe('real dates', () => {
+    const realDateColumns = ['WIP date', 'Feedback date', 'Approval date']
+    const frenchLabels = [
+      'Date de WIP',
+      'Date de demande de retours',
+      "Date d'approbation"
+    ]
+    const realDatesOf = headers =>
+      headers.filter(header =>
+        [...realDateColumns, ...frenchLabels].includes(header)
+      )
+
+    // A re-imported export would write back days that status changes may
+    // have moved since: the preview leaves them unmatched until picked.
+    it.each([
+      ['fr', frenchLabels, 'Colonne inconnue'],
+      ['en', realDateColumns, 'Unknown column']
+    ])(
+      'leaves the ones of an export in %s unmatched',
+      async (locale, labels, unknown) => {
+        const { exported, imported, fileHeaders, columns } =
+          await reimportExport({
+            canEditRealDates: true,
+            forEntity: 'Asset',
+            locale,
+            type: 'assets'
+          })
+        const indexes = exported.flatMap((header, index) =>
+          labels.includes(header) ? [index] : []
+        )
+
+        expect(indexes.map(index => exported[index])).toEqual(labels)
+        expect(indexes.map(index => imported[index])).toEqual([
+          unknown,
+          unknown,
+          unknown
+        ])
+        // named as in the file, and offered by the menu of each column
+        expect(indexes.map(index => fileHeaders[index])).toEqual(labels)
+        expect(columns).toEqual(expect.arrayContaining(realDateColumns))
+        // the other columns stay matched
+        expect(readByZou(imported)).toEqual(['Parent', 'Entity', ...zouColumns])
+      }
+    )
+
+    it('keeps the column of a descriptor named like one', async () => {
+      const descriptor = {
+        id: 'descriptor-1',
+        task_type_id: 'task-type-1',
+        name: 'WIP date',
+        field_name: 'wip_date',
+        data_type: 'string',
+        departments: []
+      }
+
+      const { imported } = await reimportExport({
+        canEditRealDates: true,
+        descriptors: [descriptor],
+        forEntity: 'Asset',
+        locale: 'en',
+        type: 'assets'
+      })
+
+      expect(imported.filter(header => header === 'WIP date')).toHaveLength(2)
+    })
+
+    it.each([
+      ['fr', frenchLabels],
+      ['en', realDateColumns]
+    ])(
+      'leaves the ones of an export in %s as is for whoever cannot edit them',
+      async (locale, labels) => {
+        const { imported } = await reimportExport({
+          forEntity: 'Asset',
+          locale,
+          type: 'assets'
+        })
+
+        expect(realDatesOf(imported)).toEqual(labels)
+      }
+    )
   })
 })

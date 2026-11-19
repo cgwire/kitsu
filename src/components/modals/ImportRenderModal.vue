@@ -62,7 +62,7 @@
                   @update:model-value="checkForDuplicate"
                 />
               </div>
-              {{ cell || '-' }}
+              {{ getHeaderText(cell, index) }}
             </th>
             <th
               class="optional-header"
@@ -214,6 +214,9 @@ const props = defineProps({
   // The entity type of the imported rows ('Edit', 'Sequence', ...): their
   // metadata columns are known. Without it, the route tells.
   entityType: { type: String, default: null },
+  // The headers of the file: a column left unmatched shows its own header
+  // under its menu.
+  fileHeaders: { type: Array, default: () => [] },
   importError: { type: Error, default: null },
   // The row count of a confirmed import, which then shows instead of a
   // second import of the same rows.
@@ -409,6 +412,9 @@ const errorLine = computed(() => {
   )
   return entry?.lineNumber ?? uploadedLineNumber
 })
+
+const getHeaderText = (cell, index) =>
+  (cell === t('main.csv.unknown') && props.fileHeaders[index]) || cell || '-'
 
 const stateColumn = data =>
   columnsAllowed.value.includes(data) ? undefined : 'ignored'

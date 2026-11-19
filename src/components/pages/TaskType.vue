@@ -386,6 +386,7 @@
           :import-error="errors.importingError"
           :imported-rows="importedRows"
           :parsed-csv="parsedCSV"
+          :file-headers="importFileHeaders"
           :form-data="importCsvFormData"
           :columns="[...dataMatchers, ...optionalColumns]"
           :data-matchers="dataMatchers"
@@ -465,7 +466,10 @@ import { useStore } from 'vuex'
 import { useCellSave } from '@/composables/cellSave'
 import { getEntityMap } from '@/composables/entity'
 import { getBarOrigin, useScheduleSave } from '@/composables/scheduleSave'
-import csv, { getEstimationsCsvLabelKeys } from '@/lib/csv'
+import csv, {
+  ESTIMATIONS_REAL_DATES,
+  getEstimationsCsvLabelKeys
+} from '@/lib/csv'
 import {
   isSupervisorInDepartments,
   isTakenDescriptorNameError
@@ -627,6 +631,8 @@ const estimationFilter = ref('all')
 const importCsvFormData = ref({})
 const isScheduleVisible = ref(false)
 const parsedCSV = ref([])
+// The headers of the imported file, before the page renames them.
+const importFileHeaders = ref([])
 const importedRows = ref(null)
 const priorityFilter = ref('-1')
 const retakeCountFilter = ref('all')
@@ -639,6 +645,7 @@ let taskIndex = null
 
 const genericColumns = ['Metadata column name (text value)']
 const pageEntityTypes = ['Asset', 'Shot', 'Sequence', 'Edit', 'Episode']
+const realDateColumns = Object.keys(ESTIMATIONS_REAL_DATES)
 const allEpisodesLabelKeys = {
   Asset: 'main.all_assets',
   Edit: 'main.all_edits',
@@ -749,6 +756,7 @@ const currentEpisode = computed(() => store.getters.currentEpisode)
 const taskListSaveErrorText = computed(
   () => taskListRef.value?.cellSaveErrorText
 )
+const canEditRealDates = computed(() => store.getters.canEditRealDates)
 const currentTaskTypeEpisode = computed(
   () => store.getters.currentTaskTypeEpisode
 )
@@ -898,7 +906,13 @@ const dataMatchers = computed(() =>
 )
 
 const optionalColumns = computed(() => {
-  const columns = ['Estimation', 'Start date', 'Due date', 'Difficulty']
+  const columns = [
+    'Estimation',
+    'Start date',
+    'Due date',
+    ...(canEditRealDates.value ? realDateColumns : []),
+    'Difficulty'
+  ]
   if (isPaperProduction.value) columns.unshift('Drawings')
   if (['Sequence', 'Edit'].includes(currentTaskType.value?.for_entity)) {
     columns.unshift('Parent')
@@ -2112,12 +2126,31 @@ const uploadImportFile = data => {
 const renameExportLabels = headers => {
   const labelKeys = getEstimationsCsvLabelKeys(
     currentTaskType.value?.for_entity,
-    { isPaperProduction: isPaperProduction.value, isTVShow: isTVShow.value }
+    {
+      isPaperProduction: isPaperProduction.value,
+      isTVShow: isTVShow.value,
+      withRealDates: canEditRealDates.value
+    }
   )
   return csv.renameHeaders(
     headers,
     new Map(Object.entries(labelKeys).map(([name, key]) => [t(key), name])),
     taskMetadataDescriptors.value.map(descriptor => descriptor.name)
+  )
+}
+
+// A re-imported export would write back the real dates it holds, which
+// status changes may have moved since: the preview leaves their columns
+// unmatched until the user picks them in the menu of the column.
+const leaveRealDatesUnmatched = headers => {
+  if (!canEditRealDates.value) return headers
+  const descriptorNames = taskMetadataDescriptors.value.map(
+    descriptor => descriptor.name
+  )
+  return headers.map(header =>
+    realDateColumns.includes(header) && !descriptorNames.includes(header)
+      ? t('main.csv.unknown')
+      : header
   )
 }
 
@@ -2128,7 +2161,11 @@ const renderImport = async (data, mode) => {
     const [headers, ...lines] = await csv.processCSV(
       mode === 'file' ? data.get('file') : data
     )
-    parsedCSV.value = [renameExportLabels(headers), ...lines]
+    importFileHeaders.value = headers
+    parsedCSV.value = [
+      leaveRealDatesUnmatched(renameExportLabels(headers)),
+      ...lines
+    ]
     importedRows.value = null
     hideImportModal()
     showImportRenderModal()
