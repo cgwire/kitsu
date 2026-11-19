@@ -16,6 +16,47 @@ import { convertHours } from '@/lib/timesheet'
 // deleted or changed since they were picked) and of the empty ones.
 const readFailures = new WeakSet()
 
+const addReadFailure = err => {
+  if (Object(err) === err) readFailures.add(err)
+}
+
+// Windows-1252 leaves these bytes undefined: its decoder turns them into
+// invisible control characters.
+const WINDOWS_1252_UNDEFINED_BYTES = [0x81, 0x8d, 0x8f, 0x90, 0x9d]
+
+// The characters beyond ASCII that UTF-8 does read, its "�" aside.
+const UTF8_NON_ASCII = /[\u0080-\ufffc\ufffe\uffff]/g
+
+// A spreadsheet saves a plain "CSV" in the encoding of the system,
+// Windows-1252 in Western Europe and the Americas: read as UTF-8, its accented
+// letters would turn into "�". A file that is not valid UTF-8 reads as
+// Windows-1252, unless it holds a byte Windows-1252 leaves undefined (another
+// encoding) or UTF-8 reads more of its characters beyond ASCII than it fails
+// on (a UTF-8 file with a stray byte): it then reads as UTF-8, as before. A
+// few bytes of Windows-1252 text can make a UTF-8 character, as "é", a
+// no-break space, and "»" make "頻", but rarely more than the letters UTF-8
+// fails on. A byte order mark still wins: FileReader follows it whatever
+// encoding it is given.
+const getFileEncoding = async file => {
+  const bytes = new Uint8Array(
+    await file.arrayBuffer().catch(err => {
+      addReadFailure(err)
+      throw err
+    })
+  )
+  try {
+    new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+    return 'UTF-8'
+  } catch {
+    const text = new TextDecoder().decode(bytes)
+    const isWindows1252 =
+      !bytes.some(byte => WINDOWS_1252_UNDEFINED_BYTES.includes(byte)) &&
+      (text.match(UTF8_NON_ASCII) || []).length <=
+        text.split('\ufffd').length - 1
+    return isWindows1252 ? 'windows-1252' : 'UTF-8'
+  }
+}
+
 const ESTIMATIONS_PARENTS = {
   Asset: { field: 'asset_type_name', labelKey: 'tasks.fields.asset_type' },
   Edit: { field: 'episode_name', labelKey: 'shots.fields.episode' },
@@ -667,14 +708,16 @@ const csv = {
     return entries
   },
 
-  processCSV: (data, config = {}) => {
+  processCSV: async (data, config = {}) => {
+    const encoding =
+      typeof data === 'string' ? 'UTF-8' : await getFileEncoding(data)
     return new Promise((resolve, reject) => {
       const fail = err => {
-        if (Object(err) === err) readFailures.add(err)
+        addReadFailure(err)
         reject(err)
       }
       Papa.parse(data, {
-        encoding: 'UTF-8',
+        encoding,
         error: fail,
         transform: value => value.trim(),
         // For a file, this runs in a FileReader callback, outside the

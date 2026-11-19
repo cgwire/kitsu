@@ -13,7 +13,11 @@ import moment from 'moment'
 import csv, { getEntityCsvLines } from '@/lib/csv'
 import { downloadBlob } from '@/lib/download'
 
-import { GoneFileReader, TextFileReader } from '../fixtures/file-reader'
+import {
+  GoneFileReader,
+  TextFileReader,
+  goneFile
+} from '../fixtures/file-reader'
 
 describe('lib/csv', () => {
   describe('processCSV', () => {
@@ -44,6 +48,85 @@ describe('lib/csv', () => {
       ])
     })
 
+    test('parses a pasted CSV text', async () => {
+      expect(await csv.processCSV('Name\nE01')).toEqual([['Name'], ['E01']])
+    })
+
+    test('reads a UTF-8 file as UTF-8', async () => {
+      vi.stubGlobal('FileReader', TextFileReader)
+      const file = new File(['Name;Description\nCœur;L’été'], 'sequences.csv')
+
+      expect(await csv.processCSV(file)).toEqual([
+        ['Name', 'Description'],
+        ['Cœur', 'L’été']
+      ])
+    })
+
+    test('reads a file that is not UTF-8 as Windows-1252', async () => {
+      // A spreadsheet saves a plain "CSV" in this encoding in Western Europe
+      // and the Americas: here "Cœur;L’été", a byte per character.
+      vi.stubGlobal('FileReader', TextFileReader)
+      const bytes = Uint8Array.from(
+        'Name;Description\nC\x9cur;L\x92\xe9t\xe9',
+        char => char.charCodeAt(0)
+      )
+      const file = new File([bytes], 'sequences.csv')
+
+      expect(await csv.processCSV(file)).toEqual([
+        ['Name', 'Description'],
+        ['Cœur', 'L’été']
+      ])
+    })
+
+    test.each([
+      ['French spacing', 'Le \xab\xa0caf\xe9\xa0\xbb', 'Le «\u00a0café\u00a0»'],
+      ['a capital before a space', 'R\xc9SUM\xc9\xa0: fin', 'RÉSUMÉ\u00a0: fin'],
+      ['German quotes', '\x84Gru\xdf\x93 an alle', '„Gruß“ an alle']
+    ])(
+      'reads a Windows-1252 file with %s as Windows-1252',
+      async (_, cell, expected) => {
+        // A few of its bytes happen to make UTF-8 characters, as "é", a
+        // no-break space, and "»" make "頻".
+        vi.stubGlobal('FileReader', TextFileReader)
+        const bytes = Uint8Array.from(`Name\n${cell}`, char =>
+          char.charCodeAt(0)
+        )
+        const file = new File([bytes], 'sequences.csv')
+
+        expect(await csv.processCSV(file)).toEqual([['Name'], [expected]])
+      }
+    )
+
+    test('reads a UTF-8 file with a stray byte as UTF-8', async () => {
+      // UTF-8 reads more of its characters beyond ASCII than it fails on.
+      // Read as Windows-1252, its every accented letter would be garbled.
+      vi.stubGlobal('FileReader', TextFileReader)
+      const file = new File(
+        ['Name;Description\nScène;Été;Caf', Uint8Array.of(0xe9)],
+        'sequences.csv'
+      )
+
+      expect(await csv.processCSV(file)).toEqual([
+        ['Name', 'Description'],
+        ['Scène', 'Été', 'Caf\ufffd']
+      ])
+    })
+
+    test.each(['0x81', '0x8d', '0x8f', '0x90', '0x9d'])(
+      'reads a file holding the byte %s, undefined in Windows-1252, as UTF-8',
+      async byte => {
+        // As a Mac Roman "Scène", whose è is 0x8f: Windows-1252 would read
+        // it as an invisible control character.
+        vi.stubGlobal('FileReader', TextFileReader)
+        const file = new File(
+          ['Name\nSc', Uint8Array.of(Number(byte)), 'ne'],
+          'sequences.csv'
+        )
+
+        expect(await csv.processCSV(file)).toEqual([['Name'], ['Sc\ufffdne']])
+      }
+    )
+
     test('rejects an empty file as a read failure', async () => {
       vi.stubGlobal('FileReader', TextFileReader)
       const error = await failedReading(new File([], 'assets.csv'))
@@ -60,6 +143,18 @@ describe('lib/csv', () => {
       csv.logReadFailure(error)
 
       expect(error.name).toBe('NotFoundError')
+      expect(console.error).toHaveBeenCalledWith(error)
+    })
+
+    test('rejects a file gone since it was picked as a read failure', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      const file = goneFile('assets.csv')
+      const error = await failedReading(file)
+
+      csv.logReadFailure(error)
+
+      // The error of its first read, the one that picks its encoding.
+      expect(error).toBe(file.readError)
       expect(console.error).toHaveBeenCalledWith(error)
     })
 
