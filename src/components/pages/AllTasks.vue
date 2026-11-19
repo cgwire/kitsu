@@ -73,6 +73,12 @@
             v-model="filters.dueDate"
           />
         </div>
+        <search-query-list
+          class="query-list"
+          :queries="allTasksSearchQueries"
+          type="allTasks"
+          with-route-query
+        />
         <template v-if="showBurndown">
           <burndown-chart
             :burndown="burndown"
@@ -142,6 +148,7 @@ import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import StatusStats from '@/components/widgets/StatusStats.vue'
 import TasksStatsLine from '@/components/widgets/TasksStatsLine.vue'
 
@@ -166,29 +173,41 @@ const showFilters = ref(false)
 const stats = ref({ status: [] })
 const tasks = ref([])
 
-// reading the query here instead of in onMounted spares the double reload
-// the deep filters watcher used to trigger on pages opened with filters
-const filters = reactive({
-  departmentId: route.query.department_id || null,
-  dueDate: route.query.due_date || null,
-  person: route.query.person_id
-    ? store.getters.activePeopleWithoutBot.filter(person =>
-        route.query.person_id.split(',').includes(person.id)
-      )
+// A filter missing from the query is unset: a saved search replaces the
+// whole query. The person map holds the people gone inactive since the search
+// was saved, whom dropping would widen it to everybody.
+const filtersFromQuery = query => ({
+  departmentId: query.department_id || null,
+  dueDate: query.due_date || null,
+  person: query.person_id
+    ? query.person_id
+        .split(',')
+        .map(personId => store.getters.personMap.get(personId))
+        .filter(Boolean)
     : null,
-  productionId: route.query.project_id || null,
-  startDate: route.query.start_date || null,
-  studioId: route.query.studio_id || null,
-  taskStatusId: route.query.task_status_id || null,
-  taskTypeId: route.query.task_type_id || null
+  productionId: query.project_id || null,
+  startDate: query.start_date || null,
+  studioId: query.studio_id || null,
+  taskStatusId: query.task_status_id || null,
+  taskTypeId: query.task_type_id || null
 })
 
+// reading the query here instead of in onMounted spares the double reload
+// the deep filters watcher used to trigger on pages opened with filters
+const filters = reactive(filtersFromQuery(route.query))
+
 let page = 1
+// The route watcher sees the query of the next page too, before this one
+// unmounts.
+const pagePath = route.path
 
 // Computed
 // --------------------------------------------------------------------------
 const activePeopleWithoutBot = computed(
   () => store.getters.activePeopleWithoutBot
+)
+const allTasksSearchQueries = computed(
+  () => store.getters.allTasksSearchQueries
 )
 const getProductionTaskStatuses = computed(
   () => store.getters.getProductionTaskStatuses
@@ -226,7 +245,7 @@ const taskTypeList = computed(() =>
   )
 )
 
-const personList = computed(() => {
+const selectablePeople = computed(() => {
   const production = productionMap.value.get(filters.productionId)
   if (!production) return activePeopleWithoutBot.value
   return sortPeople(
@@ -234,6 +253,17 @@ const personList = computed(() => {
       .map(personId => personMap.value.get(personId))
       .filter(person => person && !person.is_bot)
   )
+})
+
+// The field drops a selected person it does not list: the people of the
+// filter stay listed, gone inactive or out of the team.
+const personList = computed(() => {
+  const missingPeople = (filters.person || []).filter(
+    person => !selectablePeople.value.some(({ id }) => id === person.id)
+  )
+  return missingPeople.length > 0
+    ? sortPeople([...selectablePeople.value, ...missingPeople])
+    : selectablePeople.value
 })
 
 const params = computed(() => ({
@@ -246,6 +276,14 @@ const params = computed(() => ({
   start_date: filters.startDate,
   due_date: filters.dueDate
 }))
+
+const pageQuery = computed(() => {
+  const query = Object.fromEntries(
+    Object.entries(params.value).filter(([, value]) => value)
+  )
+  if (showBurndown.value) query.view = 'burndown'
+  return query
+})
 
 // statusStats would shadow the StatusStats component tag in the template
 const statusStatsList = computed(() =>
@@ -266,12 +304,17 @@ const statusStatsList = computed(() =>
 // Functions
 // --------------------------------------------------------------------------
 const syncRouteQuery = () => {
-  const query = Object.fromEntries(
-    Object.entries(params.value).filter(([, value]) => value)
-  )
-  if (showBurndown.value) query.view = 'burndown'
-  router.push({ query })
+  router.push({ query: pageQuery.value })
 }
+
+const toSortedQueryString = query => {
+  const searchParams = new URLSearchParams(query)
+  searchParams.sort()
+  return searchParams.toString()
+}
+
+const isPageQuery = query =>
+  toSortedQueryString(query) === toSortedQueryString(pageQuery.value)
 
 const loadBurndown = async () => {
   isBurndownLoading.value = true
@@ -292,7 +335,6 @@ const reload = async () => {
   store.dispatch('clearSelectedTasks')
   tasks.value = []
   syncRouteQuery()
-  if (showBurndown.value) loadBurndown()
   try {
     const taskInfos = await store.dispatch('loadOpenTasks', params.value)
     tasks.value = taskInfos.data
@@ -337,14 +379,30 @@ watch(filters, () => {
 
 watch(showBurndown, () => {
   syncRouteQuery()
-  if (showBurndown.value) loadBurndown()
 })
+
+// A query setting the filters and the view at once loads the burndown once.
+watch([params, showBurndown], ([, isShown]) => {
+  if (isShown) loadBurndown()
+})
+
+// A saved search, or the back button, sets a query the page did not write.
+watch(
+  () => route.query,
+  query => {
+    if (route.path === pagePath && !isPageQuery(query)) {
+      Object.assign(filters, filtersFromQuery(query))
+      showBurndown.value = query.view === 'burndown'
+    }
+  }
+)
 
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
   socket.on('task:update', onTaskUpdate)
   reload()
+  if (showBurndown.value) loadBurndown()
 })
 
 onBeforeUnmount(() => {
@@ -453,6 +511,11 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
   .burndown-button,
   .burndown-chart,
   .burndown-stats {
+    display: none;
+  }
+
+  // read-only: the saved searches stay, without their editing
+  .query-list :deep(.tag.folder) {
     display: none;
   }
 

@@ -52,7 +52,8 @@ const mountList = async ({
   queries = [search],
   role = 'manager',
   throughRef = false,
-  url = '/'
+  url = '/',
+  withRouteQuery = false
 } = {}) => {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -78,7 +79,8 @@ const mountList = async ({
     groups,
     isGroupEnabled: true,
     entityType,
-    productionId
+    productionId,
+    withRouteQuery
   }
   const stubs = { RouterLink: RouterLinkStub }
   if (throughRef) {
@@ -189,6 +191,7 @@ describe('SearchQueryList, removals', () => {
 
 // The lists whose removal action does not follow remove<Type>Search.
 describe.each([
+  ['allTasks', 'removeAllTasksSearch'],
   ['asset', 'removeAssetSearch'],
   ['person', 'removePersonTasksSearch'],
   ['sequenceStat', 'removeSequenceSearch'],
@@ -209,6 +212,7 @@ describe.each([
 
 // The lists whose action does not follow save<Type>Search are listed too.
 describe.each([
+  ['allTasks', 'saveAllTasksSearch'],
   ['asset', 'saveAssetSearch'],
   ['breakdown', 'saveBreakdownSearch'],
   ['edit', 'saveEditSearch'],
@@ -458,6 +462,79 @@ describe('SearchQueryList, links', () => {
     await clickTag(wrapper)
 
     expect(pageSearch(wrapper)).toBe('new')
+  })
+})
+
+// A page whose filters all live in its URL query saves that query whole.
+describe('SearchQueryList, searches of the page query', () => {
+  const pageSearch = { ...search, search_query: 'task_type_id=type-1' }
+  const url = '/?project_id=production-1&view=burndown'
+  const addButton = wrapper => wrapper.find('.tag.add')
+  const modal = wrapper => wrapper.findComponent(EditSearchFilterModal)
+  const mountPageList = async (options = {}) => {
+    const wrapper = await mountList({
+      queries: [pageSearch],
+      url,
+      withRouteQuery: true,
+      ...options
+    })
+    await flushPromises()
+    return wrapper
+  }
+
+  test('offers no such saving to a list of text searches', async () => {
+    const wrapper = await mountList({ url })
+
+    expect(addButton(wrapper).exists()).toBe(false)
+  })
+
+  test('names the query of the page in the modal', async () => {
+    const wrapper = await mountPageList()
+
+    await addButton(wrapper).trigger('click')
+
+    expect(modal(wrapper).props('isQueryEditable')).toBe(false)
+    expect(modal(wrapper).props('searchQueryToEdit')).toEqual({
+      name: '',
+      search_query: 'project_id=production-1&view=burndown'
+    })
+  })
+
+  test('saves nothing while the page has no filter', async () => {
+    const wrapper = await mountPageList({ url: '/' })
+
+    expect(addButton(wrapper).attributes('aria-disabled')).toBe('true')
+    await addButton(wrapper).trigger('click')
+    expect(modal(wrapper).exists()).toBe(false)
+  })
+
+  test('keeps the query of a saved search out of its modal', async () => {
+    const wrapper = await mountPageList()
+
+    await wrapper
+      .find('.tag:not(.folder):not(.group) button.edit')
+      .trigger('click')
+
+    expect(modal(wrapper).props('isQueryEditable')).toBe(false)
+  })
+
+  // The filters the search leaves unset must not stay from the page.
+  test('links a search to its query in place of the one of the page', async () => {
+    const wrapper = await mountPageList()
+    const link = wrapper.findAllComponents(RouterLinkStub).at(-1)
+
+    expect(link.props('to').query).toEqual({ task_type_id: 'type-1' })
+  })
+
+  test('runs its query', async () => {
+    const wrapper = await mountPageList()
+
+    await wrapper.find('.tag:not(.folder):not(.group)').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.vm.$router.currentRoute.value.query).toEqual({
+      task_type_id: 'type-1'
+    })
   })
 })
 

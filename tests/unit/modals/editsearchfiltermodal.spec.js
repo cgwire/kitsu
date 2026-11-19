@@ -247,6 +247,41 @@ describe('EditSearchFilterModal', () => {
     })
   })
 
+  // A page saving its whole URL query, IDs included, gives a query nobody
+  // could read or edit.
+  describe('on a query left out of the form', () => {
+    const pageSearch = { name: '', search_query: 'project_id=production-1' }
+
+    test('names the search only and confirms the query it was given', async () => {
+      const wrapper = mountModal({
+        isQueryEditable: false,
+        searchQueryToEdit: pageSearch
+      })
+      const fields = wrapper.findAllComponents(TextField)
+      expect(fields).toHaveLength(1)
+
+      await fields[0].vm.$emit('update:modelValue', 'Mine')
+      wrapper.findComponent(ModalFooter).vm.$emit('confirm')
+
+      expect(wrapper.emitted('confirm')[0][0]).toMatchObject({
+        name: 'Mine',
+        search_query: 'project_id=production-1'
+      })
+    })
+
+    test('tells a query too long and refuses to confirm', () => {
+      const wrapper = mountModal({
+        isQueryEditable: false,
+        searchQueryToEdit: { name: 'long', search_query: 'x'.repeat(501) }
+      })
+
+      expect(wrapper.find('.query-error').text()).toBe(
+        'main.search_query_too_long'
+      )
+      expect(wrapper.findComponent(ModalFooter).props('isDisabled')).toBe(true)
+    })
+  })
+
   describe('on a name the list holds', () => {
     const queries = [
       search,
