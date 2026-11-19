@@ -4259,6 +4259,8 @@ const onEntityDropped = info => {
     const toMoveIndex = findEntityIndex(info.after)
     let targetIndex = findEntityIndex(info.before)
     if (toMoveIndex > targetIndex) targetIndex += 1
+    // Dropped next to where it stands: nothing moves.
+    if (toMoveIndex === targetIndex) return
     silentMode = true
     moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
     nextTick(() => {
@@ -4306,6 +4308,13 @@ const moveSelectedEntity = (entityToMove, toMoveIndex, targetIndex) => {
   if (!currentEntity.value) return
   if (playingEntityIndex.value >= 0) {
     if (toMoveIndex >= 0 && targetIndex >= 0) {
+      // A new list takes the viewers back to the start of its first entry,
+      // and the entry back to its first file: read the time of the entry on
+      // screen first. Another of its files has a time of its own.
+      const keepsFrame =
+        toMoveIndex === playingEntityIndex.value &&
+        currentPreviewIndex.value === 0
+      const time = keepsFrame ? rawPlayer.value?.getCurrentTimeRaw() || 0 : 0
       // Single replacement: the transient empty list unmounted every
       // PlaylistedEntity and remounted the whole strip on each reorder
       // (the keyed v-for just moves nodes on a same-content swap).
@@ -4313,8 +4322,51 @@ const moveSelectedEntity = (entityToMove, toMoveIndex, targetIndex) => {
       tmp.splice(toMoveIndex, 1)
       tmp.splice(targetIndex, 0, entityToMove)
       entityList.value = tmp
+      // The playlist bar draws and plays the entries in the new order.
+      resetPlaylistFrameData()
       nextTick(() => {
         playingEntityIndex.value = targetIndex
+        // A picture counts the frames it held: another entry starts from its
+        // first.
+        if (!keepsFrame) framesSeenOfPicture.value = 1
+        // Playback starts from the start handle: a dropped shot takes its
+        // own, not the one of the shot shown before.
+        resetHandles(entityToMove)
+        rawPlayer.value?.loadEntity(targetIndex, time, true)
+        // The counter and the drawing follow the frame: the decoder of the
+        // movie can stand there already, and then sends none.
+        onFrameUpdate(Math.round(time * fps.value))
+        // The comparison shows movies only.
+        if (
+          isComparing.value &&
+          isMoviePreview(entityToMove.preview_file_extension)
+        ) {
+          rawPlayerComparison.value?.loadEntity(targetIndex, time)
+        }
+        // Paused, the video sends no time to move the playhead of the
+        // playlist bar to the new place of the entry.
+        onRawPlayerTimeUpdate(time)
+        if (isPlaying.value) {
+          if (isSoundPreview(entityToMove.preview_file_extension)) {
+            // The player of a sound comes back paused: the list change took
+            // it away, or loaded other sounds in it on the way. A build holds
+            // the movies only, and plays its own sound.
+            if (!isFullMode.value) playSound()
+          } else if (
+            // A picture plays on a timer, which kept the place it started
+            // from.
+            isPicturePreview(entityToMove.preview_file_extension) ||
+            !entityToMove.preview_file_id
+          ) {
+            playPicture()
+          } else if (isModelPreview(entityToMove.preview_file_extension)) {
+            // As on a click: the viewer gets the model on the next render, and
+            // a model loaded before sends no load to start its animation.
+            nextTick(() => {
+              if (isPlaying.value && isCurrentPreviewModel.value) playModel()
+            })
+          }
+        }
         scrollToEntity(playingEntityIndex.value)
       })
     }
@@ -5205,6 +5257,10 @@ watch(playingEntityIndex, () => {
   currentComparisonPreviewIndex.value = 0
   if (isCurrentPreviewMovie.value) {
     nextTick(() => {
+      // A reorder passes through the first entry of the new list: by now,
+      // the entry on screen can be of another kind, which the reorder or its
+      // viewer starts.
+      if (!isCurrentPreviewMovie.value) return
       loadWaveForm()
       if (isPlaying.value) play()
     })

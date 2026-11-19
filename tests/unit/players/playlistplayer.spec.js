@@ -282,6 +282,21 @@ const pointer = (target, type, { id, x, y }) =>
     })
   )
 
+// Like the real one, a viewer takes a new list back to the start of its
+// first entry, and says so. Until then, its movie is at `time`.
+const resetOnNewList = (wrapper, ref, time = 0) => {
+  const viewer = wrapper.findComponent({ ref }).vm
+  let currentTime = time
+  viewer.getCurrentTimeRaw = () => currentTime
+  viewer.$watch('entities', () => {
+    currentTime = 0
+    viewer.loadEntity(0)
+    viewer.$emit('entity-change', 0)
+    viewer.$emit('frame-update', 0)
+  })
+  return vi.spyOn(viewer, 'loadEntity')
+}
+
 describe('PlaylistPlayer.vue', () => {
   let wrapper = null
 
@@ -3080,13 +3095,18 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
-  // Ctrl or Cmd+Shift+Left/Right moves the entry played.
-  describe('reorder shortcut', () => {
+  // Ctrl or Cmd+Shift+Left/Right moves the entry played. A drop puts the
+  // dragged entry right after the one it lands on.
+  describe('reorder', () => {
     const entities = ['shot-1', 'shot-2', 'shot-3'].map((id, index) => ({
       ...entity,
       id,
       preview_file_id: `preview-${index + 1}`
     }))
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
 
     const press = async code => {
       window.dispatchEvent(
@@ -3102,6 +3122,22 @@ describe('PlaylistPlayer.vue', () => {
 
     const strip = () => wrapper.findAllComponents({ name: 'PlaylistedEntity' })
     const stripIds = () => strip().map(entry => entry.props('entity').id)
+    const playingId = () =>
+      strip()
+        .find(entry => entry.props('isPlaying'))
+        ?.props('entity').id
+
+    const drop = async (draggedIndex, targetIndex) => {
+      const orderEntry = index => {
+        const { id, preview_file_id } = strip()[index].props('entity')
+        return { entity_id: id, preview_file_id }
+      }
+      strip()[targetIndex].vm.$emit('entity-dropped', {
+        before: orderEntry(targetIndex),
+        after: orderEntry(draggedIndex)
+      })
+      await flushPromises()
+    }
 
     // The page saves each move on the order it saved before, by putting
     // the `after` entry right after the `before` one.
@@ -3153,6 +3189,558 @@ describe('PlaylistPlayer.vue', () => {
       await press('ArrowRight')
       expect(wrapper.emitted('order-change')).toHaveLength(2)
       expect(stripIds()).toEqual(['shot-2', 'shot-3', 'shot-1'])
+    })
+
+    const movies = entities.map(entry => ({
+      ...entry,
+      preview_file_extension: 'mp4'
+    }))
+
+    const compare = async () => {
+      wrapper
+        .findComponent({ name: 'PlayerComparisonBar' })
+        .vm.$emit('compare-clicked')
+      await flushPromises()
+    }
+
+    it('shows the moved entry in the video, at the same time', async () => {
+      wrapper = mountPlayer({ entities: movies })
+      await flushPromises()
+      const loadEntity = resetOnNewList(wrapper, 'raw-player', 1.2)
+
+      await press('ArrowRight')
+
+      expect(stripIds()).toEqual(['shot-2', 'shot-1', 'shot-3'])
+      expect(loadEntity).toHaveBeenLastCalledWith(1, 1.2, true)
+    })
+
+    it('shows the moved entry in the comparison video, at the same time', async () => {
+      wrapper = mountPlayer({
+        entities: ['shot-1', 'shot-2', 'shot-3'].map(id => comparedEntity(id)),
+        taskTypeMap: comparedTaskTypeMap
+      })
+      await flushPromises()
+      await compare()
+      resetOnNewList(wrapper, 'raw-player', 1.2)
+      const loadEntity = resetOnNewList(wrapper, 'raw-player-comparison')
+
+      await press('ArrowRight')
+
+      expect(stripIds()).toEqual(['shot-2', 'shot-1', 'shot-3'])
+      expect(loadEntity).toHaveBeenLastCalledWith(1, 1.2)
+    })
+
+    // The comparison shows movies only.
+    it('loads no moved picture in the comparison video', async () => {
+      wrapper = mountPlayer({
+        entities: [
+          comparedEntity('shot-1', 'png'),
+          comparedEntity('shot-2'),
+          comparedEntity('shot-3')
+        ],
+        taskTypeMap: comparedTaskTypeMap
+      })
+      await flushPromises()
+      await compare()
+      resetOnNewList(wrapper, 'raw-player')
+      const loadEntity = resetOnNewList(wrapper, 'raw-player-comparison')
+
+      await press('ArrowRight')
+
+      expect(stripIds()).toEqual(['shot-2', 'shot-1', 'shot-3'])
+      expect(loadEntity).toHaveBeenLastCalledWith(0)
+    })
+
+    it('keeps the moved entry playing at the same time', async () => {
+      wrapper = mountPlayer({ entities: movies })
+      await flushPromises()
+      const viewer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      viewer.isPlaying = true
+      const playbackBar = wrapper.findComponent({ name: 'PlayerPlaybackBar' })
+      playbackBar.vm.$emit('play-pause-clicked')
+      await flushPromises()
+      const loadEntity = resetOnNewList(wrapper, 'raw-player', 1.2)
+      const play = vi.spyOn(viewer, 'play')
+
+      await press('ArrowRight')
+
+      expect(loadEntity).toHaveBeenLastCalledWith(1, 1.2, true)
+      expect(play).toHaveBeenCalled()
+      expect(playbackBar.props('isPlaying')).toBe(true)
+    })
+
+    // The movie stood on frame 31 at 25 fps.
+    const pauseAtFrame31 = () =>
+      wrapper.findComponent({ ref: 'raw-player' }).vm.$emit('frame-update', 30)
+
+    // The counter stops at the last frame of the movie.
+    it('shows the frame of the moved entry in the counter', async () => {
+      wrapper = mountPlayer({
+        entities: movies.map(movie => ({ ...movie, preview_file_duration: 4 }))
+      })
+      await flushPromises()
+      pauseAtFrame31()
+      resetOnNewList(wrapper, 'raw-player', 1.2)
+
+      await press('ArrowRight')
+
+      expect(
+        wrapper
+          .findComponent({ name: 'PlayerPlaybackBar' })
+          .props('currentFrameLabel')
+      ).toBe('031')
+    })
+
+    it('draws the frame of the moved entry', async () => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        entities: [
+          { ...movies[0], preview_file_annotations: [drawing(1.2, 'stroke')] },
+          ...movies.slice(1)
+        ],
+        stubs: { AnnotationCanvas: mainCanvasStub(canvas) }
+      })
+      await flushPromises()
+      pauseAtFrame31()
+      resetOnNewList(wrapper, 'raw-player', 1.2)
+
+      await press('ArrowRight')
+
+      expect(shownIds(canvas)).toEqual(['stroke'])
+    })
+
+    // The viewers go back to the first file of the entry, where the time of
+    // another file means nothing.
+    it('starts the moved entry over from another of its files', async () => {
+      wrapper = mountPlayer({
+        entities: [
+          {
+            ...movies[0],
+            preview_file_previews: [{ id: 'preview-1b', extension: 'mp4' }]
+          },
+          ...movies.slice(1)
+        ]
+      })
+      await flushPromises()
+      // Next goes through the files of a revision first.
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      await flushPromises()
+      const loadEntity = resetOnNewList(wrapper, 'raw-player', 1.2)
+
+      await press('ArrowRight')
+
+      expect(stripIds()).toEqual(['shot-2', 'shot-1', 'shot-3'])
+      expect(loadEntity).toHaveBeenLastCalledWith(1, 0, true)
+    })
+
+    it('keeps the entry on screen dropped elsewhere at the same time', async () => {
+      wrapper = mountPlayer({ entities: movies })
+      await flushPromises()
+      const loadEntity = resetOnNewList(wrapper, 'raw-player', 1.2)
+
+      await drop(0, 2)
+
+      expect(stripIds()).toEqual(['shot-2', 'shot-3', 'shot-1'])
+      expect(playingId()).toBe('shot-1')
+      expect(loadEntity).toHaveBeenLastCalledWith(2, 1.2, true)
+    })
+
+    // The drop area of an entry lies right after it.
+    it('moves nothing on a drop where the entry already is', async () => {
+      wrapper = mountPlayer({ entities: movies })
+      await flushPromises()
+      const loadEntity = resetOnNewList(wrapper, 'raw-player', 1.2)
+
+      await drop(0, 0)
+
+      expect(stripIds()).toEqual(['shot-1', 'shot-2', 'shot-3'])
+      expect(wrapper.emitted('order-change')).toBeUndefined()
+      expect(loadEntity).not.toHaveBeenCalled()
+    })
+
+    // The trim belongs to each shot: playing on, a dropped shot does not
+    // start from the trim of the shot shown before.
+    it('plays a dropped shot from its own start', async () => {
+      wrapper = mountPlayer({
+        playlistProp: { ...playlist, for_entity: 'shot' },
+        entities: movies.map(movie => ({ ...movie, preview_file_duration: 4 })),
+        shotMap: new Map([
+          ['shot-1', { id: 'shot-1', data: { handle_in: 20 } }],
+          ['shot-3', { id: 'shot-3', data: { handle_in: 10 } }]
+        ])
+      })
+      await flushPromises()
+      const viewer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      // The handles are set once the movie metadata gives the duration.
+      viewer.$emit('max-duration-update', 4)
+      viewer.isPlaying = true
+      wrapper
+        .findComponent({ name: 'PlayerPlaybackBar' })
+        .vm.$emit('play-pause-clicked')
+      await flushPromises()
+      resetOnNewList(wrapper, 'raw-player')
+      const setCurrentTimeRaw = vi.spyOn(viewer, 'setCurrentTimeRaw')
+
+      await drop(2, 0)
+
+      expect(playingId()).toBe('shot-3')
+      // Frame 10 at 25 fps, a hair past its start.
+      expect(setCurrentTimeRaw).toHaveBeenCalledTimes(1)
+      expect(setCurrentTimeRaw.mock.calls[0][0]).toBeCloseTo(0.401, 6)
+    })
+
+    it('starts another entry dropped from its start', async () => {
+      wrapper = mountPlayer({ entities: movies })
+      await flushPromises()
+      const loadEntity = resetOnNewList(wrapper, 'raw-player', 1.2)
+
+      await drop(1, 2)
+
+      expect(stripIds()).toEqual(['shot-1', 'shot-3', 'shot-2'])
+      expect(playingId()).toBe('shot-2')
+      expect(loadEntity).toHaveBeenLastCalledWith(2, 0, true)
+    })
+
+    // Two seconds, then four, then two, at 25 fps.
+    const clips = [2, 4, 2].map((duration, index) => ({
+      ...movies[index],
+      preview_file_duration: duration
+    }))
+    const playlistBar = () =>
+      wrapper.findComponent({ name: 'PlaylistProgress' })
+
+    it('draws the playlist bar in the new order', async () => {
+      wrapper = mountPlayer({ entities: clips })
+      await flushPromises()
+
+      await press('ArrowRight')
+
+      const slots = playlistBar()
+        .props('entityList')
+        .map(entry => [entry.id, entry.playlist_start_frame])
+      expect(slots).toEqual([
+        ['shot-2', 0],
+        ['shot-1', 100],
+        ['shot-3', 150]
+      ])
+    })
+
+    it('plays the entry clicked on the playlist bar in the new order', async () => {
+      wrapper = mountPlayer({ entities: clips })
+      await flushPromises()
+      await press('ArrowRight')
+
+      // Within the four seconds of shot-2, now first.
+      playlistBar().vm.$emit('progress-playlist-changed', 75)
+      await flushPromises()
+
+      expect(playingId()).toBe('shot-2')
+    })
+
+    it('moves the playhead of the playlist bar with the entry on screen', async () => {
+      wrapper = mountPlayer({ entities: clips })
+      await flushPromises()
+      resetOnNewList(wrapper, 'raw-player', 1.2)
+
+      await press('ArrowRight')
+
+      // Past the 100 frames of shot-2, shot-1 starts on frame 101.
+      expect(playlistBar().props('playlistProgress')).toBeCloseTo(
+        101 / 25 + 1.2
+      )
+    })
+
+    // One second, then ten, then one, at 25 fps.
+    const pictures = [25, 250, 25].map((frames, index) => ({
+      ...entities[index],
+      preview_file_extension: 'png',
+      preview_nb_frames: frames
+    }))
+
+    const playFakeTimed = async (entries, stubs = {}) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({ entities: entries, stubs })
+      await flushPromises()
+      wrapper
+        .findComponent({ name: 'PlayerPlaybackBar' })
+        .vm.$emit('play-pause-clicked')
+    }
+
+    // A picture plays on a timer, which kept the place it started from.
+    it('holds a moved picture for its own length', async () => {
+      await playFakeTimed(pictures)
+      await vi.advanceTimersByTimeAsync(300)
+
+      await press('ArrowRight')
+      expect(playingId()).toBe('shot-1')
+      await vi.advanceTimersByTimeAsync(1000)
+
+      expect(playingId()).toBe('shot-3')
+    })
+
+    // An entry without preview holds its slot on the same timer, once
+    // playback reaches it.
+    it('holds a moved entry without preview for its own length', async () => {
+      await playFakeTimed([
+        pictures[0],
+        { ...entities[1], preview_file_id: '', preview_nb_frames: 25 },
+        pictures[1],
+        { ...pictures[2], id: 'shot-4', preview_file_id: 'preview-4' }
+      ])
+      await vi.advanceTimersByTimeAsync(1300)
+      expect(playingId()).toBe('shot-2')
+
+      await press('ArrowRight')
+      await vi.advanceTimersByTimeAsync(1000)
+
+      expect(playingId()).toBe('shot-4')
+    })
+
+    // The viewer goes back to the first entry of the new list for a moment:
+    // the play the player lines up for a movie there comes once the entry
+    // without preview is back.
+    it('holds a moved entry without preview after a first movie', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({
+        entities: [
+          movies[0],
+          { ...entities[1], preview_file_id: '', preview_nb_frames: 100 },
+          movies[2],
+          { ...movies[2], id: 'shot-4', preview_file_id: 'preview-4' }
+        ]
+      })
+      await flushPromises()
+      wrapper.findComponent({ ref: 'raw-player' }).vm.isPlaying = true
+      wrapper
+        .findComponent({ name: 'PlayerPlaybackBar' })
+        .vm.$emit('play-pause-clicked')
+      await flushPromises()
+      strip()[1].vm.$emit('play-click', 1)
+      await vi.advanceTimersByTimeAsync(400)
+      resetOnNewList(wrapper, 'raw-player')
+
+      await press('ArrowRight')
+      expect(playingId()).toBe('shot-2')
+      await vi.advanceTimersByTimeAsync(4000)
+
+      expect(playingId()).toBe('shot-4')
+    })
+
+    // Ten seconds, then one, then four.
+    const longPictures = [250, 25, 100].map((frames, index) => ({
+      ...pictures[index],
+      preview_nb_frames: frames
+    }))
+
+    // The picture on screen had held three of its ten seconds.
+    it('holds a dropped picture for its own length', async () => {
+      await playFakeTimed(longPictures)
+      await vi.advanceTimersByTimeAsync(3000)
+
+      await drop(2, 0)
+      expect(playingId()).toBe('shot-3')
+      await vi.advanceTimersByTimeAsync(3500)
+      expect(playingId()).toBe('shot-3')
+      await vi.advanceTimersByTimeAsync(700)
+
+      expect(playingId()).toBe('shot-2')
+    })
+
+    const pictureFrame = () =>
+      Number(
+        wrapper
+          .find('[title="playlists.actions.frame_number"]')
+          .text()
+          .split('/')[0]
+      )
+
+    // The counter of a picture sits in the extra controls of the bar.
+    const pauseAfterThreeSeconds = async entries => {
+      await playFakeTimed(entries, { PlayerPlaybackBar: PlaybackBarWithSlot })
+      await vi.advanceTimersByTimeAsync(3000)
+      wrapper
+        .findComponent({ name: 'PlayerPlaybackBar' })
+        .vm.$emit('play-pause-clicked')
+      await flushPromises()
+    }
+
+    it('keeps the frame of a moved picture', async () => {
+      await pauseAfterThreeSeconds(longPictures)
+      const frame = pictureFrame()
+      expect(frame).toBeGreaterThan(1)
+
+      await press('ArrowRight')
+
+      expect(playingId()).toBe('shot-1')
+      expect(pictureFrame()).toBe(frame)
+    })
+
+    it('shows a dropped picture from its first frame', async () => {
+      await pauseAfterThreeSeconds(longPictures)
+
+      await drop(2, 0)
+
+      expect(playingId()).toBe('shot-3')
+      expect(pictureFrame()).toBe(1)
+    })
+
+    // Two seconds on its first file, then on to the second.
+    it('starts a moved picture over from another of its files', async () => {
+      await pauseAfterThreeSeconds([
+        {
+          ...longPictures[0],
+          preview_nb_frames: 50,
+          preview_file_previews: [{ id: 'preview-1b', extension: 'png' }]
+        },
+        ...longPictures.slice(1)
+      ])
+      expect(wrapper.vm.currentPreviewIndex).toBe(1)
+      expect(pictureFrame()).toBeGreaterThan(1)
+
+      await press('ArrowRight')
+
+      expect(playingId()).toBe('shot-1')
+      expect(wrapper.vm.currentPreviewIndex).toBe(0)
+      expect(pictureFrame()).toBe(1)
+    })
+
+    // No load comes, as for a model loaded before: the reorder starts the
+    // animation, as a click does.
+    it('plays a model dropped while a picture plays', async () => {
+      await playFakeTimed([
+        longPictures[0],
+        longPictures[1],
+        { ...entities[2], preview_file_extension: 'glb' }
+      ])
+      await vi.advanceTimersByTimeAsync(3000)
+      const play = vi.spyOn(
+        wrapper.findComponent({ ref: 'object-player' }).vm,
+        'play'
+      )
+
+      await drop(2, 0)
+      await vi.advanceTimersByTimeAsync(8000)
+
+      expect(play).toHaveBeenCalled()
+      expect(playingId()).toBe('shot-3')
+    })
+
+    // The player of a sound comes back paused from a list change, which
+    // takes it away or loads other sounds in it on the way.
+    describe('of a sound', () => {
+      const sound = { ...entities[1], preview_file_extension: 'mp3' }
+
+      const mountPaused = async entries => {
+        const soundPlay = vi.fn()
+        wrapper = mountPlayer({
+          entities: entries,
+          stubs: {
+            SoundViewer: withMethods(['pause', 'setCurrentTime'], {
+              // A viewer the list change took away plays nothing.
+              play() {
+                if (!this.$.isUnmounted) soundPlay()
+              }
+            })
+          }
+        })
+        await flushPromises()
+        return soundPlay
+      }
+
+      const mountPlaying = async entries => {
+        const soundPlay = await mountPaused(entries)
+        wrapper.findComponent({ ref: 'raw-player' }).vm.isPlaying = true
+        wrapper
+          .findComponent({ name: 'PlayerPlaybackBar' })
+          .vm.$emit('play-pause-clicked')
+        await flushPromises()
+        return soundPlay
+      }
+
+      it.each(['ArrowRight', 'ArrowLeft'])(
+        'starts a sound moved with %s again',
+        async code => {
+          const soundPlay = await mountPlaying([movies[0], sound, movies[2]])
+          strip()[1].vm.$emit('play-click', 1)
+          await flushPromises()
+          resetOnNewList(wrapper, 'raw-player')
+          soundPlay.mockClear()
+
+          await press(code)
+
+          expect(playingId()).toBe('shot-2')
+          expect(soundPlay).toHaveBeenCalled()
+        }
+      )
+
+      it('starts a sound dropped while a movie plays', async () => {
+        const soundPlay = await mountPlaying([
+          movies[0],
+          movies[1],
+          { ...entities[2], preview_file_extension: 'mp3' }
+        ])
+        strip()[1].vm.$emit('play-click', 1)
+        await flushPromises()
+        resetOnNewList(wrapper, 'raw-player')
+
+        await drop(2, 0)
+
+        expect(playingId()).toBe('shot-3')
+        expect(soundPlay).toHaveBeenCalled()
+      })
+
+      // A build holds the movies only, and plays its own sound.
+      it('leaves the sound to a build', async () => {
+        const soundPlay = await mountPlaying([movies[0], sound, movies[2]])
+        wrapper.vm.isFullMode = true
+        await flushPromises()
+        wrapper.vm.isPlaying = true
+        wrapper
+          .findComponent({ name: 'PlaylistProgress' })
+          .vm.$emit('progress-playlist-changed', 75)
+        await flushPromises()
+        expect(playingId()).toBe('shot-2')
+        resetOnNewList(wrapper, 'raw-player')
+        soundPlay.mockClear()
+
+        await press('ArrowRight')
+
+        expect(soundPlay).not.toHaveBeenCalled()
+      })
+
+      it('leaves a moved sound paused', async () => {
+        const soundPlay = await mountPaused([movies[0], sound, movies[2]])
+        strip()[1].vm.$emit('play-click', 1)
+        await flushPromises()
+        resetOnNewList(wrapper, 'raw-player')
+
+        await press('ArrowRight')
+
+        expect(playingId()).toBe('shot-2')
+        expect(soundPlay).not.toHaveBeenCalled()
+        expect(
+          wrapper.findComponent({ name: 'PlayerPlaybackBar' }).props('isPlaying')
+        ).toBe(false)
+      })
+    })
+
+    it('leaves a moved picture paused', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      wrapper = mountPlayer({ entities: pictures })
+      await flushPromises()
+
+      await press('ArrowRight')
+      await vi.advanceTimersByTimeAsync(2000)
+
+      expect(
+        wrapper.findComponent({ name: 'PlayerPlaybackBar' }).props('isPlaying')
+      ).toBe(false)
+      expect(playingId()).toBe('shot-1')
     })
 
     // During the load, the entries are still those of the playlist shown
