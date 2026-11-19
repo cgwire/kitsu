@@ -362,13 +362,17 @@ describe('lib/filtering', () => {
         expect(keptBy('[anim body]=[-empty]')).toEqual(['shot-with-task'])
       })
 
-      it('narrows a negated status to the entries with the task', () => {
-        expect(keptBy('[anim body]=-done')).toEqual([
-          'shot-with-task',
-          'shot-without-task'
-        ])
+      it('leaves the entries without the task out of a negated status', () => {
+        expect(keptBy('[anim body]=-done')).toEqual(['shot-with-task'])
         expect(keptBy('[anim body]=-done [anim body]=-empty')).toEqual([
           'shot-with-task'
+        ])
+      })
+
+      it('lists the entries without the task too with an or filter', () => {
+        expect(keptBy('+([anim body]=-done [anim body]=empty)')).toEqual([
+          'shot-with-task',
+          'shot-without-task'
         ])
       })
 
@@ -388,6 +392,83 @@ describe('lib/filtering', () => {
         expect(filters).toHaveLength(1)
         expect(filters[0].type).toBe('status')
         expect(filters[0].taskStatuses).toEqual(['task-status-empty'])
+      })
+    })
+
+    describe('negated filters on tasks', () => {
+      const shotTaskTypes = [
+        { name: 'Animation', id: 'task-type-anim' },
+        { name: 'Layout', id: 'task-type-layout' }
+      ]
+      const task = (id, taskTypeId, taskStatusId, assignees = []) => ({
+        id,
+        task_type_id: taskTypeId,
+        task_status_id: taskStatusId,
+        assignees
+      })
+      const animDone = task('anim-1', 'task-type-anim', 'task-status-3')
+      const animWip = task('anim-2', 'task-type-anim', 'task-status-1', [
+        'person-1'
+      ])
+      const layoutWip = task('layout-3', 'task-type-layout', 'task-status-1')
+      const shot = (id, tasks) => ({
+        id,
+        validations: new Map(tasks.map(t => [t.task_type_id, t.id])),
+        tasks: tasks.map(t => t.id)
+      })
+      // shot-3 has no Animation task, shot-4 no task at all.
+      const shots = [
+        shot('shot-1', [animDone]),
+        shot('shot-2', [animWip]),
+        shot('shot-3', [layoutWip]),
+        shot('shot-4', [])
+      ]
+      const shotTaskMap = new Map(
+        [animDone, animWip, layoutWip].map(t => [t.id, t])
+      )
+      const keptBy = query =>
+        applyFilters(
+          shots,
+          getFilters({
+            entryIndex,
+            assetTypes,
+            taskTypes: shotTaskTypes,
+            taskStatuses,
+            descriptors,
+            persons,
+            query
+          }),
+          shotTaskMap
+        ).map(entry => entry.id)
+
+      it('keeps only the entries with the task on a not equal status', () => {
+        expect(keptBy('[Animation]=-done')).toEqual(['shot-2'])
+      })
+
+      it('keeps only the entries with the task on a not in status', () => {
+        expect(keptBy('[Animation]=[-done,wfa]')).toEqual(['shot-2'])
+        expect(keptBy('[Animation]=[-done,wip]')).toEqual([])
+      })
+
+      it('keeps only the entries with a task on a not equal status of any task type', () => {
+        expect(keptBy('status=-done')).toEqual(['shot-2', 'shot-3'])
+      })
+
+      it('keeps only the entries with the task on a not assigned to', () => {
+        expect(keptBy('assignedto[Animation]=[-John Doe]')).toEqual([
+          'shot-1'
+        ])
+      })
+
+      it('keeps only the entries with a task on a not assigned to of any task type', () => {
+        expect(keptBy('assignedto[]=[-John Doe]')).toEqual([
+          'shot-1',
+          'shot-3'
+        ])
+      })
+
+      it('keeps only the entries with the task on a no assignment exists for', () => {
+        expect(keptBy('[Animation]=unassigned')).toEqual(['shot-1'])
       })
     })
 
@@ -1336,7 +1417,37 @@ describe('lib/filtering', () => {
           type: 'status'
         }
       ],
-      ['priority', { taskTypeId: 'task-type-1', type: 'priority', value: 3 }]
+      ['priority', { taskTypeId: 'task-type-1', type: 'priority', value: 3 }],
+      [
+        'not equal status',
+        {
+          taskType: taskTypes[0],
+          taskStatuses: ['task-status-1'],
+          type: 'status',
+          excluding: true
+        }
+      ],
+      [
+        'not equal status of any task type',
+        { taskStatuses: ['task-status-1'], type: 'statusAny', excluding: true }
+      ],
+      [
+        'not assigned to',
+        {
+          taskType: taskTypes[0],
+          personIds: ['person-1'],
+          type: 'assignedto',
+          excluding: true
+        }
+      ],
+      [
+        'not assigned to of any task type',
+        { personIds: ['person-1'], type: 'assignedto', excluding: true }
+      ],
+      [
+        'no assignment exists for',
+        { taskType: taskTypes[0], type: 'assignation', assigned: false }
+      ]
     ])('keeps no entry without tasks on a %s filter', (name, filter) => {
       const episodes = [{ id: 'episode-1', name: 'E01' }]
       expect(applyFilters(episodes, [filter], taskMap)).toEqual([])
@@ -1354,7 +1465,7 @@ describe('lib/filtering', () => {
 
       expect(filterIds()).toEqual(['shot-4', 'shot-5'])
       filters[0].excluding = true
-      expect(filterIds()).toEqual(['shot-1', 'shot-2', 'shot-3', 'asset-1'])
+      expect(filterIds()).toEqual(['shot-1', 'shot-2', 'shot-3'])
     })
 
     it('department=Modeling keeps the people of the department', () => {

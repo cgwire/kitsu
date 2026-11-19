@@ -52,6 +52,12 @@ modeling=wip,wfa
 `status=<status>` (the literal word `status`) matches across **all** task
 types instead of one, and also accepts a comma list: `status=wip,done`.
 
+A leading `-` excludes every listed status: `modeling=-wip`,
+`modeling=[-wip,wfa]` (neither wip nor wfa), `status=-wip`. These negated
+statuses and `modeling=unassigned` keep only the entries that have the
+task: an entry without a Modeling task is left out, and `status=-wip`
+leaves out the entries without any task.
+
 ## Asset type
 
 ```
@@ -121,6 +127,9 @@ assignedto[Modeling]=[John Doe]
 assignedto[]=[John Doe]
 assignedto[Modeling]=[-John Doe]
 ```
+
+Excluding a person keeps only the entries that have a task of that type
+(any task with `assignedto[]`).
 
 ## Thumbnail presence
 
