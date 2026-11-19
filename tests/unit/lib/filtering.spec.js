@@ -470,6 +470,15 @@ describe('lib/filtering', () => {
       it('keeps only the entries with the task on a no assignment exists for', () => {
         expect(keptBy('[Animation]=unassigned')).toEqual(['shot-1'])
       })
+
+      it('ignores a not assigned to on an unknown task type', () => {
+        expect(keptBy('assignedto[Unknown]=[-John Doe]')).toEqual([
+          'shot-1',
+          'shot-2',
+          'shot-3',
+          'shot-4'
+        ])
+      })
     })
 
     describe('archived task type sharing a live task type name', () => {
@@ -886,6 +895,34 @@ describe('lib/filtering', () => {
       expect(filters[0].personIds[0]).toEqual('person-1')
       expect(filters[0].taskType.id).toEqual('task-type-2')
       expect(filters[0].excluding).toEqual(false)
+    })
+
+    it('assignedto[]=[John Doe] matches every task type', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'assignedto[]=[John Doe]'
+      })
+      expect(filters).toHaveLength(1)
+      expect(filters[0].type).toEqual('assignedto')
+      expect(filters[0].taskType).toBeNull()
+    })
+
+    it('ignores assignedto on an unknown task type', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'assignedto[Unknown]=[John Doe]'
+      })
+      expect(filters).toHaveLength(0)
     })
 
     it('type=[chars] in query case', () => {

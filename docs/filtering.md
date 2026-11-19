@@ -120,7 +120,8 @@ priority-animation=3
 ## Assigned to
 
 The task type is required but can be left empty (`[]`) to match any task
-type. `-` on the person name excludes instead of matches:
+type; an unknown task type drops the filter. `-` on the person name
+excludes instead of matches:
 
 ```
 assignedto[Modeling]=[John Doe]

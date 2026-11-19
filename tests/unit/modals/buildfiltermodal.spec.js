@@ -644,6 +644,11 @@ describe('BuildFilterModal', () => {
             expect(wrapper.vm.assignation.taskTypeId).toBe('task-type-1')
             expect(wrapper.vm.assignation.person.id).toBe('person-1')
           })
+          it('leaves out assigned to on an unknown task type', () => {
+            changeSearch('assignedto[Unknown]=[John]')
+            wrapper.vm.setFiltersFromCurrentQuery()
+            expect(wrapper.vm.assignation.value).toBe('nofilter')
+          })
         })
         describe('thumbnail', () => {
           it('with', () => {

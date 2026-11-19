@@ -662,8 +662,11 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       const excluding = value.startsWith('-')
       if (excluding) value = value.substring(1)
       const simplifiedValue = hashName(value)
+      // [] means every task type, but an unknown name drops the filter, as
+      // it does for a status.
+      const isTaskTypeKnown = !taskTypeName || Boolean(matchedTaskTypes)
 
-      if (personIndex[simplifiedValue]) {
+      if (personIndex[simplifiedValue] && isTaskTypeKnown) {
         results.push({
           personIds: personIndex[simplifiedValue],
           taskType,
