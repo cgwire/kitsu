@@ -24,4 +24,18 @@ describe('main store', () => {
       )
     })
   })
+
+  describe('isExpertMode', () => {
+    const isExpertMode = mainConfig =>
+      mainStore.getters.isExpertMode({ mainConfig })
+
+    it('follows the expert mode of the server config', () => {
+      expect(isExpertMode({ expert_mode_enabled: true })).toBe(true)
+      expect(isExpertMode({ expert_mode_enabled: false })).toBe(false)
+    })
+
+    it('stays off before the config loads', () => {
+      expect(isExpertMode({})).toBe(false)
+    })
+  })
 })
