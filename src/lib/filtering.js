@@ -640,7 +640,7 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
   const rgxMatches = queryText.match(EQUAL_ASSIGNATION_REGEX)
   if (rgxMatches) {
     const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
-    const personIndex = {}
+    const personIndex = Object.create(null)
     persons.forEach(person => {
       const name = hashName(person.name)
       if (!personIndex[name]) {

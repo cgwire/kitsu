@@ -925,6 +925,36 @@ describe('lib/filtering', () => {
       expect(filters).toHaveLength(0)
     })
 
+    it.each(['constructor', '__proto__'])(
+      'ignores assignedto on an unknown person named %s',
+      name => {
+        const filters = getFilters({
+          entryIndex,
+          assetTypes,
+          taskTypes,
+          taskStatuses,
+          descriptors,
+          persons,
+          query: `assignedto[Modeling]=[${name}]`
+        })
+        expect(filters).toHaveLength(0)
+      }
+    )
+
+    it('matches assignedto on a person named Constructor', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons: [...persons, { id: 'person-c', name: 'Constructor' }],
+        query: 'assignedto[Modeling]=[Constructor]'
+      })
+      expect(filters).toHaveLength(1)
+      expect(filters[0].personIds).toEqual(['person-c'])
+    })
+
     it('type=[chars] in query case', () => {
       const filters = getFilters({
         entryIndex,
