@@ -182,10 +182,6 @@ const client = {
     return client.request('POST', path, data, WRITE_TIMEOUT)
   },
 
-  ppostImport(path, data) {
-    return client.request('POST', path, data, WRITE_TIMEOUT)
-  },
-
   ppostFile(path, data) {
     const startedAt = Date.now()
     let isBodySent = false

@@ -131,22 +131,6 @@ describe('store/api/client', () => {
     expect(h.timeout).toEqual({ deadline: 600000 })
   })
 
-  // Zou answers an import only once every row is processed, which takes
-  // minutes on a large file: a 60s wait made Kitsu report an error while
-  // the import kept running on the server.
-  test('ppostImport waits up to 10 minutes for the import to finish', async () => {
-    h.response = { body: [{ id: 'shot-1' }] }
-    const formData = { file: 'import.csv' }
-    await expect(
-      client.ppostImport('/api/import/csv/projects/p1/shots', formData)
-    ).resolves.toEqual([{ id: 'shot-1' }])
-    expect(h.calls).toEqual([
-      { method: 'POST', path: '/api/import/csv/projects/p1/shots' }
-    ])
-    expect(h.sent).toBe(formData)
-    expect(h.timeout).toEqual({ deadline: 600000 })
-  })
-
   test('a request that timed out rejects as a timeout', async () => {
     h.error = Object.assign(new Error('Timeout of 600000ms exceeded'), {
       code: 'ECONNABORTED',

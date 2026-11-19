@@ -13,7 +13,6 @@ vi.mock('@/store/api/client', () => ({
     pdel: vi.fn(),
     pget: vi.fn(),
     ppost: vi.fn(),
-    ppostImport: vi.fn(),
     pput: vi.fn()
   }
 }))
@@ -2319,11 +2318,11 @@ describe('Shots store, through a store', () => {
       const formData = { file: 'shots.csv' }
       store.commit(SHOT_CSV_FILE_SELECTED, formData)
       expect(store.getters.shotsCsvFormData).toEqual(formData)
-      client.ppostImport.mockResolvedValueOnce({})
+      client.ppost.mockResolvedValueOnce({})
 
       await store.dispatch('uploadShotFile', true)
 
-      expect(client.ppostImport).toHaveBeenCalledWith(
+      expect(client.ppost).toHaveBeenCalledWith(
         '/api/import/csv/projects/p1/shots?update=true',
         formData
       )
@@ -2341,7 +2340,7 @@ describe('Shots store, through a store', () => {
 
     test('creates shots in bulk through a CSV import', async () => {
       const store = buildStore({ isTVShow: true })
-      client.ppostImport.mockResolvedValueOnce({})
+      client.ppost.mockResolvedValueOnce({})
 
       await store.dispatch('bulkCreateShots', {
         shotNames: ['SH010', 'SH"020'],
@@ -2349,7 +2348,7 @@ describe('Shots store, through a store', () => {
         episodeName: 'E01'
       })
 
-      const [path, formData] = client.ppostImport.mock.calls[0]
+      const [path, formData] = client.ppost.mock.calls[0]
       expect(path).toBe('/api/import/csv/projects/p1/shots')
       expect(await formData.get('file').text()).toBe(
         'Episode,Sequence,Name\n"E01","SQ01","SH010"\n"E01","SQ01","SH""020"'
@@ -2358,14 +2357,14 @@ describe('Shots store, through a store', () => {
 
     test('creates shots in bulk without episodes outside TV shows', async () => {
       const store = buildStore()
-      client.ppostImport.mockResolvedValueOnce({})
+      client.ppost.mockResolvedValueOnce({})
 
       await store.dispatch('bulkCreateShots', {
         shotNames: ['SH010'],
         sequenceName: 'SQ01'
       })
 
-      const [, formData] = client.ppostImport.mock.calls[0]
+      const [, formData] = client.ppost.mock.calls[0]
       expect(await formData.get('file').text()).toBe(
         'Sequence,Name\n"SQ01","SH010"'
       )
@@ -2377,7 +2376,7 @@ describe('Shots store, through a store', () => {
     ])('imports an EDL file, TV show %s', async (isTVShow, path) => {
       const store = buildStore({ isTVShow, currentEpisode: { id: 'ep1' } })
       const edlFile = new Blob(['TITLE: cut'])
-      client.ppostImport.mockResolvedValueOnce({})
+      client.ppost.mockResolvedValueOnce({})
 
       await store.dispatch('uploadEdlFile', {
         edl_file: edlFile,
@@ -2385,7 +2384,7 @@ describe('Shots store, through a store', () => {
         matchCase: true
       })
 
-      const [sentPath, formData] = client.ppostImport.mock.calls[0]
+      const [sentPath, formData] = client.ppost.mock.calls[0]
       expect(sentPath).toBe(path)
       expect(formData.get('naming_convention')).toBe(
         '${project}_${sequence}-${shot}'
