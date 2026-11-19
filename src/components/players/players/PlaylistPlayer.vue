@@ -1610,7 +1610,7 @@ const frameNumber = computed(() => {
 
 // Production start frame of the playing shot (data.frame_in, e.g. 1001).
 // Forwarded to the playback bar / progress bar as a display-only offset —
-// currentFrame stays 1-based since annotation seeks round-trip on it.
+// currentFrame stays 1-based.
 // Opt-in through the production option; a missing field means disabled.
 const frameStart = computed(() =>
   currentProduction.value?.is_frame_in_numbering
@@ -3015,16 +3015,17 @@ const getCurrentTime = () => {
   if (!isCurrentPreviewMovie.value) return 0
   // 4-decimal rounding only: toPrecision(4) keeps 4 significant digits and
   // quantized times past 100s, landing annotations on neighbouring frames.
-  return roundToFrame(currentTimeRaw.value, fps.value) || 0
+  // Chromium can stand a new list a frame before its start: a stroke drawn
+  // then belongs to the first frame.
+  return Math.max(roundToFrame(currentTimeRaw.value, fps.value) || 0, 0)
 }
 
 const getCurrentFrame = () => {
-  // Persist exactly the frame the user sees (currentFrame is the on-screen
-  // 1-based label), as a number. It was stored as the zero-padded display
-  // string from formatFrame. The annotation seek round-trips on this value
-  // (goPreviousDrawing / goNextDrawing read `Number(frame) - 1`), so it is
-  // the navigation source of truth, not the player time.
-  return parseInt(currentFrame.value)
+  // Persist the 1-based frame of the movie (currentFrame; a production can
+  // start the counter at the shot's frame_in instead), as a number. It was
+  // stored as the zero-padded display string from formatFrame. Before the
+  // start, as for the time, the first frame.
+  return Math.max(parseInt(currentFrame.value), 1)
 }
 
 const setCurrentTimeRaw = time => {
@@ -3404,7 +3405,8 @@ const hideCanvas = () => {
 const loadAnnotation = ann => {
   if (!ann) return
   pause()
-  const time = ann.time || 0
+  // A stroke saved before the start belongs to the first frame.
+  const time = Math.max(ann.time || 0, 0)
   if (rawPlayer.value || picturePlayer.value) {
     if (rawPlayer.value) {
       const frame = time / frameDuration.value
@@ -3589,12 +3591,17 @@ const getAnnotation = time => {
   if (!annotations.value) {
     annotations.value = currentEntity.value?.preview_file_annotations || []
   }
-  time = roundToFrame(time, fps.value)
+  // Nothing comes before the first frame: Chromium can stand a new list a
+  // frame before it, and strokes drawn then were saved on that time.
+  time = roundToFrame(Math.max(time, 0), fps.value)
   if (annotations.value?.find) {
     let ann = annotations.value.find(a => a.time === time)
     if (!ann) {
+      // Compare frames: an older drawing can hold an unrounded time, and a
+      // window in seconds reaches the next frame at 60 fps.
       ann = annotations.value.find(
-        a => a.time > time - 0.02 && a.time < time + 0.02
+        a =>
+          Math.abs(roundToFrame(Math.max(a.time, 0), fps.value) - time) < 0.0001
       )
     }
     if (!ann && isCurrentPreviewPicture.value && annotations.value.length > 0) {

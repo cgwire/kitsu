@@ -4796,6 +4796,10 @@ describe('PlaylistPlayer.vue', () => {
     })
 
     describe('once its movie loads', () => {
+      afterEach(() => {
+        vi.useRealTimers()
+      })
+
       const drawnFirst = [
         {
           ...movies[0],
@@ -4856,6 +4860,159 @@ describe('PlaylistPlayer.vue', () => {
         await flushPromises()
 
         expect(shownIds(canvas)).toEqual(['on'])
+      })
+
+      // An older drawing can hold the raw time of the movie.
+      it.each([
+        ['25', 1.21],
+        ['60', 0.505]
+      ])(
+        'draws a drawing saved on an unrounded time of its frame at %s fps',
+        async (fps, time) => {
+          const canvas = await mountDrawn([
+            {
+              ...movies[0],
+              fps,
+              preview_file_annotations: [drawing(time, 'raw')]
+            },
+            movies[1]
+          ])
+
+          loadMovieAt(30, Number(fps))
+          await flushPromises()
+
+          expect(shownIds(canvas)).toEqual(['raw'])
+        }
+      )
+
+      // Chromium can stand a new list a frame before its start, and strokes
+      // drawn then were saved on that time.
+      it.each([
+        ['25', -0.04],
+        ['60', -0.0167]
+      ])(
+        'draws a stroke saved before the start on the first frame at %s fps',
+        async (fps, time) => {
+          const canvas = await mountDrawn([
+            {
+              ...movies[0],
+              fps,
+              preview_file_annotations: [drawing(time, 'before')]
+            },
+            movies[1]
+          ])
+
+          const setCurrentFrame = loadMovieAt(0, Number(fps))
+          await flushPromises()
+
+          expect(shownIds(canvas)).toEqual(['before'])
+          expect(setCurrentFrame).not.toHaveBeenCalledWith(-1)
+          expect(playbackBar().props('currentFrameLabel')).toBe('001')
+        }
+      )
+
+      it('draws the first frame from before the start', async () => {
+        const canvas = await mountDrawn(drawnFirst)
+        wrapper.findComponent({ ref: 'raw-player' }).vm.$emit('frame-update', -1)
+
+        wrapper
+          .findComponent({ ref: 'main-annotation-canvas' })
+          .vm.$emit('resized')
+        await flushPromises()
+
+        expect(shownIds(canvas)).toEqual(['start'])
+      })
+
+      // A frame lasts 0.0167 s at 60 fps.
+      const at60 = frame => Math.round(frame * 0.0167 * 10000) / 10000
+      const drawnOn31 = [
+        {
+          ...movies[0],
+          fps: '60',
+          preview_file_annotations: [drawing(at60(31), 'next')]
+        },
+        movies[1]
+      ]
+
+      it('draws nothing on the frame before a drawn one at 60 fps', async () => {
+        const canvas = await mountDrawn(drawnOn31)
+
+        const setCurrentFrame = loadMovieAt(30, 60)
+        await flushPromises()
+
+        expect(shownIds(canvas)).toEqual([])
+        expect(setCurrentFrame).not.toHaveBeenCalled()
+      })
+
+      // The composable saves the objects the canvas holds, which a clear
+      // takes away.
+      const mountDrawing = async entities => {
+        const objects = []
+        const canvas = {
+          ...createFakeCanvas(),
+          _objects: objects,
+          add: vi.fn(object => objects.push(object)),
+          clear: vi.fn(() => objects.splice(0)),
+          getObjects: () => objects
+        }
+        wrapper = mountPlayer({
+          entities,
+          stubs: { AnnotationCanvas: mainCanvasStub(canvas) }
+        })
+        await flushPromises()
+        return canvas
+      }
+
+      const drawStroke = (canvas, id) => {
+        const fields = drawing(0, id).drawing.objects[0]
+        const stroke = {
+          ...fields,
+          set(key, value) {
+            if (typeof key === 'object') Object.assign(this, key)
+            else this[key] = value
+          },
+          setControlsVisibility: () => {},
+          toJSON: () => ({ ...fields })
+        }
+        canvas._objects.push(stroke)
+        canvas.fire('object:added', { target: stroke })
+        canvas.isDrawingMode = true
+        canvas.fire('mouse:up', {})
+      }
+
+      it('leaves the drawing of the next frame on it at 60 fps', async () => {
+        const canvas = await mountDrawing(drawnOn31)
+        wrapper.findComponent({ ref: 'raw-player' }).vm.$emit('frame-update', 30)
+        drawStroke(canvas, 'drawn-on-30')
+        await flushPromises()
+
+        loadMovieAt(31, 60)
+        await flushPromises()
+
+        expect(shownIds(canvas)).toEqual(['next'])
+        expect(wrapper.vm.$store.commit).toHaveBeenCalledWith(
+          'ADD_ANNOTATION',
+          expect.objectContaining({
+            annotation: expect.objectContaining({ time: at60(30) })
+          })
+        )
+      })
+
+      // Chromium can stand a new list a frame before its start: the stroke
+      // goes to the first frame, where the player keeps its own copy.
+      it('saves a stroke drawn before the start on the first frame', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const canvas = await mountDrawing(movies)
+        wrapper.findComponent({ ref: 'raw-player' }).vm.$emit('frame-update', -1)
+
+        drawStroke(canvas, 'drawn-before')
+        // The changes go out 3 s after the first one.
+        await vi.advanceTimersByTimeAsync(3000)
+
+        const [{ additions }] = wrapper.emitted('annotation-changed').at(-1)
+        expect(additions).toEqual([
+          expect.objectContaining({ time: 0, frame: 1 })
+        ])
       })
 
       it('draws nothing on a playing movie', async () => {
