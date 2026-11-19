@@ -343,6 +343,55 @@ describe('useEntityPage', () => {
       expect(page.modals.isCreateTasksDisplayed).toBe(false)
       expect(page.loading.creatingAllTasks).toBe(false)
     })
+
+    it('keeps the modal open with its error on a failed creation', async () => {
+      const error = new Error('refused')
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { page, reset, store } = await mountPage()
+      store.dispatch.mockImplementation(() => Promise.reject(error))
+      page.showCreateTasksModal()
+
+      await page.confirmCreateTasks({
+        form: { task_type_id: 'animation' },
+        selectionOnly: true
+      })
+
+      expect(page.modals.isCreateTasksDisplayed).toBe(true)
+      expect(page.errors.creatingTasks).toBe(true)
+      expect(page.loading.creatingTasks).toBe(false)
+      expect(reset).not.toHaveBeenCalled()
+      expect(consoleError).toHaveBeenCalledWith(error)
+      consoleError.mockRestore()
+    })
+
+    it('reloads the list when Add all missing fails after a created type', async () => {
+      const error = new Error('refused')
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { page, reset, store } = await mountPage()
+      store.dispatch
+        .mockImplementationOnce(() => Promise.resolve())
+        .mockImplementationOnce(() => Promise.reject(error))
+      page.showCreateTasksModal()
+
+      await page.confirmCreateAllMissingTasks({
+        missingTaskTypeIds: ['animation', 'layout', 'blocking'],
+        selectionOnly: false
+      })
+
+      expect(
+        dispatched(store, 'createTasks').map(([, data]) => data.task_type_id)
+      ).toEqual(['animation', 'layout'])
+      expect(reset).toHaveBeenCalledTimes(1)
+      expect(page.modals.isCreateTasksDisplayed).toBe(true)
+      expect(page.errors.creatingTasks).toBe(true)
+      expect(page.loading.creatingAllTasks).toBe(false)
+      expect(consoleError).toHaveBeenCalledWith(error)
+      consoleError.mockRestore()
+    })
   })
 
   describe('CSV import', () => {
