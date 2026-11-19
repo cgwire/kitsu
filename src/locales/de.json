@@ -1296,7 +1296,7 @@
         "bitrates": "Bitraten",
         "encoding_explanation": "Hochgeladene Videos werden in diese Bildrate, dieses Seitenverhältnis und diese Auflösung umgewandelt; vorhandene Vorschauen werden nicht neu enkodiert.",
         "encoding_title": "Kodierung",
-        "frame_in_description": "Der Zähler des Players beginnt beim Frame-In des Shots statt bei 0.",
+        "frame_in_description": "Der Zähler des Players beginnt beim Frame-In des Shots statt bei 1.",
         "hd_bitrate_description": "Version in voller Auflösung, die im HD-Modus abgespielt und für Downloads verwendet wird.",
         "ld_bitrate_description": "Kleinere, 1280 Pixel breite Version, die im LD-Modus abgespielt wird.",
         "ld_bitrate_max": "Maximum: {value} Mbit/s (HD-Bitrate)",

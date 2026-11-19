@@ -1296,7 +1296,7 @@
         "bitrates": "码率",
         "encoding_explanation": "上传的视频会被转换为此帧率、宽高比和分辨率；现有预览不会重新编码。",
         "encoding_title": "编码",
-        "frame_in_description": "播放器计数器从镜头的入点帧开始，而不是从 0 开始。",
+        "frame_in_description": "播放器计数器从镜头的入点帧开始，而不是从 1 开始。",
         "hd_bitrate_description": "全分辨率版本，在 HD 模式下播放，也用于下载。",
         "ld_bitrate_description": "宽度为 1280 像素的轻量版本，在 LD 模式下播放。",
         "ld_bitrate_max": "最大值：{value} Mbit/s (HD 码率)",

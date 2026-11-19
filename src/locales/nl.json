@@ -1296,7 +1296,7 @@
         "bitrates": "Bitrates",
         "encoding_explanation": "Geüploade video's worden omgezet naar deze framerate, ratio en resolutie; bestaande previews worden niet opnieuw gecodeerd.",
         "encoding_title": "Codering",
-        "frame_in_description": "De teller van de speler begint bij de frame-in van de opname in plaats van bij 0.",
+        "frame_in_description": "De teller van de speler begint bij de frame-in van de opname in plaats van bij 1.",
         "hd_bitrate_description": "Versie in volledige resolutie, afgespeeld in HD-modus en gebruikt voor downloads.",
         "ld_bitrate_description": "Lichtere versie, 1280 pixels breed, afgespeeld in LD-modus.",
         "ld_bitrate_max": "Maximum: {value} Mbit/s (HD-bitrate)",

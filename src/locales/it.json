@@ -1296,7 +1296,7 @@
         "bitrates": "Bitrate",
         "encoding_explanation": "I video caricati vengono convertiti a questa frequenza fotogrammi, a queste proporzioni e a questa risoluzione; le anteprime esistenti non vengono ricodificate.",
         "encoding_title": "Codifica",
-        "frame_in_description": "Il contatore del player parte dal fotogramma in dello shot invece che da 0.",
+        "frame_in_description": "Il contatore del player parte dal fotogramma in dello shot invece che da 1.",
         "hd_bitrate_description": "Versione a piena risoluzione, riprodotta in modalità HD e usata per i download.",
         "ld_bitrate_description": "Versione più leggera, larga 1280 pixel, riprodotta in modalità LD.",
         "ld_bitrate_max": "Massimo: {value} Mbit/s (bitrate HD)",

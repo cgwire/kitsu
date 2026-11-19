@@ -1296,7 +1296,7 @@
         "bitrates": "Taxas de bits",
         "encoding_explanation": "Os vídeos enviados são convertidos para esta taxa de quadros, proporção e resolução; as visualizações existentes não são recodificadas.",
         "encoding_title": "Codificação",
-        "frame_in_description": "O contador do player começa no quadro de entrada do shot em vez de 0.",
+        "frame_in_description": "O contador do player começa no quadro de entrada do shot em vez de 1.",
         "hd_bitrate_description": "Versão em resolução completa, reproduzida no modo HD e usada para downloads.",
         "ld_bitrate_description": "Versão mais leve, com 1280 pixels de largura, reproduzida no modo LD.",
         "ld_bitrate_max": "Máximo: {value} Mbit/s (taxa de bits HD)",

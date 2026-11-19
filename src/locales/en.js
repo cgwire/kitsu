@@ -1728,7 +1728,7 @@ export default {
       bitrates: 'Bitrates',
       encoding_explanation: 'Uploaded videos are converted to this frame rate, ratio and resolution; existing previews are not re-encoded.',
       encoding_title: 'Encoding',
-      frame_in_description: "The player counter starts at the shot's frame in instead of 0.",
+      frame_in_description: "The player counter starts at the shot's frame in instead of 1.",
       hd_bitrate_description: 'Full-resolution version, played in HD mode and used for downloads.',
       ld_bitrate_description: 'Lighter version, 1280 pixels wide, played in LD mode.',
       ld_bitrate_max: 'Maximum: {value} Mbit/s (HD bitrate)',

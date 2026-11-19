@@ -148,7 +148,7 @@ export default {
       shots: 'Only maps'
     },
     video: {
-      frame_in_description: "The player counter starts at the map's frame in instead of 0."
+      frame_in_description: "The player counter starts at the map's frame in instead of 1."
     }
   },
 

@@ -600,7 +600,7 @@
         "upload_edl": "EDL をアップロード",
         "naming_convention": "命名規則",
         "match_case": "大文字小文字を区別",
-        "explanation": "OpenTimelineIO 対応の一般的なファイル（otio、fcp_xml、fcpx_xml、edl）をインポートできます。記載されたフレーム範囲・開始フレーム・最終フレームに従ってショットが作成または更新されます。フレームは 0 起点です。"
+        "explanation": "OpenTimelineIO 対応の一般的なファイル（otio、fcp_xml、fcpx_xml、edl）をインポートできます。記載されたフレーム範囲・開始フレーム・最終フレームに従ってショットが作成または更新されます。開始フレームは 0 起点です。"
       },
       "active": "アクティブ",
       "activity": "アクティビティ",
@@ -1296,7 +1296,7 @@
         "bitrates": "ビットレート",
         "encoding_explanation": "アップロードされた動画はこのフレームレート、アスペクト比、解像度に変換されます。既存のプレビューは再エンコードされません。",
         "encoding_title": "エンコード",
-        "frame_in_description": "プレイヤーのカウンターは 0 ではなくショットの開始フレームから始まります。",
+        "frame_in_description": "プレイヤーのカウンターは 1 ではなくショットの開始フレームから始まります。",
         "hd_bitrate_description": "フル解像度のバージョンです。HDモードで再生され、ダウンロードにも使用されます。",
         "ld_bitrate_description": "幅1280ピクセルの軽量バージョンです。LDモードで再生されます。",
         "ld_bitrate_max": "最大: {value} Mbit/s (HDビットレート)",

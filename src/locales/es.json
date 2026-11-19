@@ -1296,7 +1296,7 @@
         "bitrates": "Tasas de bits",
         "encoding_explanation": "Los vídeos subidos se convierten a esta velocidad de fotogramas, relación de aspecto y resolución; las vistas previas existentes no se vuelven a codificar.",
         "encoding_title": "Codificación",
-        "frame_in_description": "El contador del reproductor empieza en el fotograma de entrada de la toma en lugar de 0.",
+        "frame_in_description": "El contador del reproductor empieza en el fotograma de entrada de la toma en lugar de 1.",
         "hd_bitrate_description": "Versión a resolución completa, que se reproduce en modo HD y se usa para las descargas.",
         "ld_bitrate_description": "Versión más ligera, de 1280 píxeles de ancho, que se reproduce en modo LD.",
         "ld_bitrate_max": "Máximo: {value} Mbit/s (tasa de bits HD)",

@@ -1661,7 +1661,7 @@
         "bitrates": "Przepływności",
         "encoding_explanation": "Przesłane filmy są konwertowane do tej liczby klatek na sekundę, proporcji i rozdzielczości; istniejące podglądy nie są ponownie kodowane.",
         "encoding_title": "Kodowanie",
-        "frame_in_description": "Licznik odtwarzacza zaczyna się od klatki początkowej ujęcia zamiast od 0.",
+        "frame_in_description": "Licznik odtwarzacza zaczyna się od klatki początkowej ujęcia zamiast od 1.",
         "hd_bitrate_description": "Wersja w pełnej rozdzielczości, odtwarzana w trybie HD i używana przy pobieraniu.",
         "ld_bitrate_description": "Lżejsza wersja o szerokości 1280 pikseli, odtwarzana w trybie LD.",
         "ld_bitrate_max": "Maksymalnie: {value} Mbit/s (przepływność HD)",

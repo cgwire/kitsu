@@ -1220,7 +1220,7 @@
         "bitrates": "Débits",
         "encoding_explanation": "Les vidéos envoyées sont converties à cette fréquence d'images, ce ratio et cette résolution ; les previews existantes ne sont pas réencodées.",
         "encoding_title": "Encodage",
-        "frame_in_description": "Le compteur du lecteur démarre au frame in du plan au lieu de 0.",
+        "frame_in_description": "Le compteur du lecteur démarre au frame in du plan au lieu de 1.",
         "hd_bitrate_description": "Version en pleine résolution, lue en mode haute définition et utilisée pour les téléchargements.",
         "ld_bitrate_description": "Version plus légère, de 1280 pixels de large, lue en mode basse définition.",
         "ld_bitrate_max": "Maximum : {value} Mbit/s (débit HD)",

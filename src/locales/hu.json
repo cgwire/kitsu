@@ -1279,7 +1279,7 @@
         "bitrates": "Bitráták",
         "encoding_explanation": "A feltöltött videók erre a képkockasebességre, képarányra és felbontásra lesznek átalakítva; a meglévő előnézetek nem kerülnek újrakódolásra.",
         "encoding_title": "Kódolás",
-        "frame_in_description": "A lejátszó számlálója a shot kezdő kockájánál indul 0 helyett.",
+        "frame_in_description": "A lejátszó számlálója a shot kezdő kockájánál indul 1 helyett.",
         "hd_bitrate_description": "Teljes felbontású változat: HD módban ez kerül lejátszásra, és ez tölthető le.",
         "ld_bitrate_description": "Kisebb méretű, 1280 pixel széles változat: LD módban ez kerül lejátszásra.",
         "ld_bitrate_max": "Maximum: {value} Mbit/s (HD-bitráta)",

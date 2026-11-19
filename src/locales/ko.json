@@ -1296,7 +1296,7 @@
         "bitrates": "비트레이트",
         "encoding_explanation": "업로드된 영상은 이 프레임 레이트, 비율, 해상도로 변환되며, 기존 미리 보기는 다시 인코딩되지 않습니다.",
         "encoding_title": "인코딩",
-        "frame_in_description": "플레이어 카운터가 0 대신 샷의 프레임 인에서 시작합니다.",
+        "frame_in_description": "플레이어 카운터가 1 대신 샷의 프레임 인에서 시작합니다.",
         "hd_bitrate_description": "전체 해상도 버전으로, HD 모드에서 재생되며 다운로드에도 사용됩니다.",
         "ld_bitrate_description": "가로 1280픽셀의 가벼운 버전으로, LD 모드에서 재생됩니다.",
         "ld_bitrate_max": "최댓값: {value}Mbit/s (HD 비트레이트)",
