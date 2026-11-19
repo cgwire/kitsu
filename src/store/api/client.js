@@ -4,14 +4,32 @@ import errors from '@/lib/errors'
 // Hears of every failed request, whether the caller catches it or not.
 let errorReporter = null
 
+// Hears of the API answers that took over 2 minutes: a write may take up to
+// 10 minutes and still go through, and no failure would tell of it. File
+// uploads and downloads stay out: their time follows the size of the files.
+let slowReporter = null
+const SLOW_ANSWER_MS = 120000
+
 export function setErrorReporter(reporter) {
   errorReporter = reporter
+}
+
+export function setSlowReporter(reporter) {
+  slowReporter = reporter
 }
 
 function reportError(err, request) {
   // Reporting must never change how a request fails.
   Promise.resolve()
     .then(() => errorReporter?.(err, request))
+    .catch(console.error)
+}
+
+function reportSlowAnswer(method, path, startedAt) {
+  const duration = Date.now() - startedAt
+  if (duration <= SLOW_ANSWER_MS) return
+  Promise.resolve()
+    .then(() => slowReporter?.({ method, path, duration }))
     .catch(console.error)
 }
 
@@ -123,7 +141,12 @@ const client = {
     return superagent(method, path)
       .timeout(timeout)
       .send(data)
-      .then(handleResponse)
+      .then(res => {
+        if (!(data instanceof FormData)) {
+          reportSlowAnswer(method, path, startedAt)
+        }
+        return handleResponse(res)
+      })
       .catch(err => handleError(err, method, path, startedAt))
   },
 
@@ -171,7 +194,12 @@ const client = {
             // with the error shape the stores already handle.
             return client.pget(path)
           }
-          return handleNdjsonResponse(response, onReadFailure)
+          return handleNdjsonResponse(response, onReadFailure).then(
+            entities => {
+              reportSlowAnswer('GET', streamPath, startedAt)
+              return entities
+            }
+          )
         },
         () => client.pget(path)
       )

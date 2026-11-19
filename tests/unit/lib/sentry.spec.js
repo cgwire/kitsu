@@ -6,6 +6,7 @@ const h = vi.hoisted(() => ({
   init: null,
   captureMessage: null,
   setErrorReporter: null,
+  setSlowReporter: null,
   authenticated: null
 }))
 
@@ -31,11 +32,19 @@ vi.mock('@/lib/chunk-error', () => ({ isChunkError: () => false }))
 
 vi.mock('@/store/api/client', () => {
   h.setErrorReporter = vi.fn()
-  return { setErrorReporter: h.setErrorReporter }
+  h.setSlowReporter = vi.fn()
+  return {
+    setErrorReporter: h.setErrorReporter,
+    setSlowReporter: h.setSlowReporter
+  }
 })
 
 import errors from '@/lib/errors'
-import sentry, { reportApiError, scrubSharedToken } from '@/lib/sentry'
+import sentry, {
+  reportApiError,
+  reportApiSlowAnswer,
+  scrubSharedToken
+} from '@/lib/sentry'
 
 const OWN_ID = '11111111-1111-4111-8111-111111111111'
 const OTHER_ID = '22222222-2222-4222-8222-222222222222'
@@ -63,6 +72,11 @@ describe('lib/sentry', () => {
   test('init hands the API error reporter to the client', () => {
     sentry.init({}, {}, { dsn: 'https://key@sentry.example.com/1' })
     expect(h.setErrorReporter).toHaveBeenCalledWith(reportApiError)
+  })
+
+  test('init hands the slow answer reporter to the client', () => {
+    sentry.init({}, {}, { dsn: 'https://key@sentry.example.com/1' })
+    expect(h.setSlowReporter).toHaveBeenCalledWith(reportApiSlowAnswer)
   })
 
   test('init strips the share token from the API paths of the breadcrumbs', () => {
@@ -814,6 +828,77 @@ describe('lib/sentry', () => {
         fingerprint: ['api-error', `404 GET ${fileRoute}`],
         tags: { 'api.route': fileRoute }
       })
+    })
+  })
+
+  // A write may run for 10 minutes and still go through: Sentry hears of
+  // an answer that came after 2 minutes too.
+  describe('reportApiSlowAnswer', () => {
+    let routeCount = 0
+    const nextRoute = () => `/api/data/slow-${routeCount++}`
+    const report = (method, path, duration = 150000) =>
+      reportApiSlowAnswer({ method, path, duration })
+
+    test('captures in a later task, after the breadcrumb of the request', async () => {
+      const reported = report('PUT', nextRoute())
+      for (let tick = 0; tick < 10; tick++) await Promise.resolve()
+      expect(h.captureMessage).not.toHaveBeenCalled()
+      await reported
+      expect(h.captureMessage).toHaveBeenCalledTimes(1)
+    })
+
+    test('reports a slow answer as a warning, one issue per route', async () => {
+      const route = nextRoute()
+      await report('POST', `${route}/${OTHER_ID}/comment?relations=true`)
+      expect(h.captureMessage).toHaveBeenCalledWith(
+        `API slow on POST ${route}/:id/comment`,
+        {
+          level: 'warning',
+          fingerprint: ['api-error', `slow POST ${route}/:id/comment`],
+          tags: {
+            'api.status': 'slow',
+            'api.method': 'POST',
+            'api.route': `${route}/:id/comment`
+          },
+          contexts: {
+            api: {
+              path: `${route}/${OTHER_ID}/comment`,
+              duration_ms: 150000
+            }
+          }
+        }
+      )
+    })
+
+    test('reports a route once per session', async () => {
+      const route = nextRoute()
+      await Promise.all([
+        report('PUT', `${route}/${OTHER_ID}`),
+        report('PUT', `${route}/${THIRD_ID}`)
+      ])
+      await report('PUT', `${route}/${OWN_ID}`)
+      expect(h.captureMessage).toHaveBeenCalledTimes(1)
+    })
+
+    test('keeps a slow answer apart from a failure of the route', async () => {
+      const route = nextRoute()
+      await reportApiError({ status: 500, body: {} }, { method: 'GET', path: route })
+      await report('GET', route)
+      expect(h.captureMessage.mock.calls.map(([message]) => message)).toEqual([
+        `API 500 on GET ${route}`,
+        `API slow on GET ${route}`
+      ])
+    })
+
+    test('strips the share token from the route', async () => {
+      await report('POST', '/api/shared/playlists/s3cr3t/comments')
+      const [message, context] = h.captureMessage.mock.calls[0]
+      expect(message).toBe(
+        'API slow on POST /api/shared/playlists/[token]/comments'
+      )
+      expect(context.contexts.api.path).toBe(
+        '/api/shared/playlists/[token]/comments'
+      )
     })
   })
 })

@@ -5,7 +5,7 @@ import { name, version } from '@/../package.json'
 import { isChunkError } from '@/lib/chunk-error'
 import errors from '@/lib/errors'
 import { getNavigationFailureKind } from '@/lib/navigation-failure'
-import { setErrorReporter } from '@/store/api/client'
+import { setErrorReporter, setSlowReporter } from '@/store/api/client'
 
 // The guest share URL carries its access token in the path, and so do the
 // API paths behind it and the routes that revoke the link or invite people
@@ -240,6 +240,28 @@ export const reportApiError = async (err, { method, path, duration }) => {
   })
 }
 
+// An answer that came after 2 minutes: one warning per route and session,
+// like a failure.
+export const reportApiSlowAnswer = async ({ method, path, duration }) => {
+  const cleanPath = scrubSharedToken(path.split('?')[0])
+  const route = getPathPattern(cleanPath)
+  const key = `slow ${method} ${route}`
+  if (reportedRoutes.has(key)) return
+  reportedRoutes.add(key)
+  // Same wait as a failure, for the breadcrumb of the request.
+  await new Promise(resolve => setTimeout(resolve))
+  Sentry.captureMessage(`API slow on ${method} ${route}`, {
+    level: 'warning',
+    fingerprint: ['api-error', key],
+    tags: {
+      'api.status': 'slow',
+      'api.method': method,
+      'api.route': route
+    },
+    contexts: { api: { path: cleanPath, duration_ms: duration } }
+  })
+}
+
 export default {
   init(app, router, { dsn, sampleRate = 0.1 }) {
     Sentry.init({
@@ -273,6 +295,7 @@ export default {
       }
     })
     setErrorReporter(reportApiError)
+    setSlowReporter(reportApiSlowAnswer)
     window.addEventListener('pagehide', () => {
       isPageHidden = true
     })
