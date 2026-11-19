@@ -14,6 +14,7 @@ import { trackTaskSelection } from '../../fixtures/task-selection'
 
 import MetadataInput from '@/components/cells/MetadataInput.vue'
 import TaskList from '@/components/lists/TaskList.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import assetStore from '@/store/modules/assets'
 import editStore from '@/store/modules/edits'
 import episodeStore from '@/store/modules/episodes'
@@ -522,6 +523,151 @@ describe('lists/TaskList', () => {
       expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
         'task-1'
       ])
+
+      wrapper.unmount()
+    })
+  })
+
+  // Status changes set the real dates: the expert mode of the instance lets
+  // the studio managers set them too.
+  describe('real dates', () => {
+    const datedTask = {
+      ...task,
+      real_start_date: '2026-11-02T09:30:00',
+      end_date: '2026-11-10T17:00:00',
+      done_date: null
+    }
+    const realDateCells = ['real-start-date', 'real-end-date', 'done-date']
+
+    const mountDatedList = ({
+      canEditRealDates = true,
+      tasks = [datedTask],
+      updateTask = vi.fn()
+    } = {}) =>
+      mountList(undefined, {
+        getters: {
+          canEditRealDates: () => canEditRealDates,
+          isCurrentUserProductionManager: () => true,
+          taskMap: () => new Map(tasks.map(entry => [entry.id, entry]))
+        },
+        actions: { updateTask },
+        props: { disabledDates: {}, tasks }
+      })
+    const dateField = (wrapper, cell) =>
+      wrapper.find(`tbody td.${cell}`).findComponent(DateField)
+    const payloads = updateTask =>
+      updateTask.mock.calls.map(([, payload]) => payload)
+
+    test('shows them as text on a row not selected', () => {
+      const wrapper = mountDatedList()
+
+      realDateCells.forEach(cell => {
+        expect(dateField(wrapper, cell).exists()).toBe(false)
+      })
+      expect(wrapper.find('tbody td.real-start-date').text()).toBe('2026-11-02')
+      expect(wrapper.find('tbody td.real-end-date').text()).toBe('2026-11-10')
+      expect(wrapper.find('tbody td.done-date').text()).toBe('')
+
+      wrapper.unmount()
+    })
+
+    test('gives a date field per real date of a selected row', async () => {
+      const wrapper = mountDatedList()
+      await wrapper.find('tbody td.name').trigger('click')
+
+      expect(dateField(wrapper, 'real-start-date').props('modelValue')).toEqual(
+        new Date(2026, 10, 2)
+      )
+      expect(dateField(wrapper, 'real-end-date').props('modelValue')).toEqual(
+        new Date(2026, 10, 10)
+      )
+      expect(dateField(wrapper, 'done-date').props('modelValue')).toBe(null)
+
+      wrapper.unmount()
+    })
+
+    // As the import of Zou: a mistyped year would spread the task over
+    // decades of quota days.
+    test('offers the days from 2000 to 2100 only', async () => {
+      const wrapper = mountDatedList()
+      await wrapper.find('tbody td.name').trigger('click')
+
+      realDateCells.forEach(cell => {
+        expect(dateField(wrapper, cell).props('minDate')).toEqual(
+          new Date(2000, 0, 1)
+        )
+        expect(dateField(wrapper, cell).props('maxDate')).toEqual(
+          new Date(2100, 11, 31)
+        )
+      })
+
+      wrapper.unmount()
+    })
+
+    test('keeps them as text for a user who cannot edit them', async () => {
+      const wrapper = mountDatedList({ canEditRealDates: false })
+      await wrapper.find('tbody td.name').trigger('click')
+
+      realDateCells.forEach(cell => {
+        expect(dateField(wrapper, cell).exists()).toBe(false)
+      })
+      expect(wrapper.find('tbody td.real-start-date').text()).toBe('2026-11-02')
+      // the planned dates stay editable
+      expect(dateField(wrapper, 'start-date').exists()).toBe(true)
+
+      wrapper.unmount()
+    })
+
+    // Zou counts a real date on the calendar day of each user: 10:00 UTC is
+    // the same day from UTC-10 to UTC+13, midnight the day before west of
+    // UTC.
+    test('saves each real date at 10:00 UTC on every selected task', async () => {
+      const other = {
+        ...datedTask,
+        id: 'task-2',
+        entity: { id: 'asset-2' },
+        real_start_date: null
+      }
+      const updateTask = vi.fn()
+      const wrapper = mountDatedList({ tasks: [datedTask, other], updateTask })
+      const names = wrapper.findAll('tbody td.name')
+      await names[0].trigger('click')
+      await names[1].trigger('click', { ctrlKey: true })
+
+      dateField(wrapper, 'real-start-date').vm.$emit(
+        'update:model-value',
+        new Date(2026, 10, 3)
+      )
+      dateField(wrapper, 'real-end-date').vm.$emit('update:model-value', null)
+      dateField(wrapper, 'done-date').vm.$emit(
+        'update:model-value',
+        new Date(2026, 10, 12)
+      )
+
+      expect(payloads(updateTask)).toEqual([
+        { taskId: 'task-1', data: { real_start_date: '2026-11-03T10:00:00' } },
+        { taskId: 'task-2', data: { real_start_date: '2026-11-03T10:00:00' } },
+        { taskId: 'task-1', data: { end_date: null } },
+        { taskId: 'task-2', data: { end_date: null } },
+        { taskId: 'task-1', data: { done_date: '2026-11-12T10:00:00' } },
+        { taskId: 'task-2', data: { done_date: '2026-11-12T10:00:00' } }
+      ])
+
+      wrapper.unmount()
+    })
+
+    test('skips a task whose real date stays the same', async () => {
+      const updateTask = vi.fn()
+      const wrapper = mountDatedList({ updateTask })
+      await wrapper.find('tbody td.name').trigger('click')
+
+      dateField(wrapper, 'real-start-date').vm.$emit(
+        'update:model-value',
+        new Date(2026, 10, 2)
+      )
+      dateField(wrapper, 'done-date').vm.$emit('update:model-value', null)
+
+      expect(updateTask).not.toHaveBeenCalled()
 
       wrapper.unmount()
     })

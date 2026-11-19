@@ -342,21 +342,59 @@
             </td>
             <td
               class="real-start-date"
+              :class="{ editing: isRealDateEditable(task) }"
               v-if="!withSchedule && isColumnVisible('realStartDate')"
             >
-              {{ formatDisplayDate(task.real_start_date) }}
+              <date-field
+                class="flexrow-item"
+                :with-margin="false"
+                :min-date="realDateMin"
+                :max-date="realDateMax"
+                :model-value="getDate(task.real_start_date)"
+                @update:model-value="
+                  date => updateRealDate('real_start_date', date)
+                "
+                v-if="isRealDateEditable(task)"
+              />
+              <template v-else>
+                {{ formatDisplayDate(task.real_start_date) }}
+              </template>
             </td>
             <td
               class="real-end-date"
+              :class="{ editing: isRealDateEditable(task) }"
               v-if="!withSchedule && isColumnVisible('realEndDate')"
             >
-              {{ formatDisplayDate(task.end_date) }}
+              <date-field
+                class="flexrow-item"
+                :with-margin="false"
+                :min-date="realDateMin"
+                :max-date="realDateMax"
+                :model-value="getDate(task.end_date)"
+                @update:model-value="date => updateRealDate('end_date', date)"
+                v-if="isRealDateEditable(task)"
+              />
+              <template v-else>
+                {{ formatDisplayDate(task.end_date) }}
+              </template>
             </td>
             <td
               class="done-date"
+              :class="{ editing: isRealDateEditable(task) }"
               v-if="!withSchedule && isColumnVisible('doneDate')"
             >
-              {{ formatDisplayDate(task.done_date) }}
+              <date-field
+                class="flexrow-item"
+                :with-margin="false"
+                :min-date="realDateMin"
+                :max-date="realDateMax"
+                :model-value="getDate(task.done_date)"
+                @update:model-value="date => updateRealDate('done_date', date)"
+                v-if="isRealDateEditable(task)"
+              />
+              <template v-else>
+                {{ formatDisplayDate(task.done_date) }}
+              </template>
             </td>
             <td
               class="last-comment-date"
@@ -551,6 +589,11 @@ const difficultyOptions = [
   { label: '•••••', value: 5 }
 ]
 
+// As the import of Zou: a mistyped year would spread a task over decades of
+// quota days.
+const realDateMin = new Date(2000, 0, 1)
+const realDateMax = new Date(2100, 11, 31)
+
 const page = ref(1)
 
 // Column show/hide, mirroring the assets/shots lists' selector menu. Keys
@@ -625,6 +668,7 @@ const { applySelection, resetSelection, selectionGrid } = useTaskListSelection({
 })
 
 // Computed
+const canEditRealDates = computed(() => store.getters.canEditRealDates)
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isTVShow = computed(() => store.getters.isTVShow)
@@ -741,7 +785,13 @@ const isTaskChanged = (task, data) => {
     (data.due_date !== undefined && taskDue !== data.due_date) ||
     (data.estimation !== undefined && task.estimation !== data.estimation) ||
     (data.difficulty !== undefined && task.difficulty !== data.difficulty) ||
-    (data.nb_drawings !== undefined && task.nb_drawings !== data.nb_drawings)
+    (data.nb_drawings !== undefined && task.nb_drawings !== data.nb_drawings) ||
+    ['real_start_date', 'end_date', 'done_date'].some(
+      field =>
+        data[field] !== undefined &&
+        (task[field]?.substring(0, 10) ?? null) !==
+          (data[field]?.substring(0, 10) ?? null)
+    )
   )
 }
 
@@ -843,6 +893,18 @@ const updateTasksEstimation = ({ estimation }) => {
     )
     data.estimation = estimation
     return data
+  })
+}
+
+const isRealDateEditable = task =>
+  canEditRealDates.value && Boolean(selectionGrid.value[task.id])
+
+// Zou counts a real date on the calendar day of each user: 10:00 UTC is the
+// same day from UTC-10 to UTC+13, where midnight is the day before west of
+// UTC.
+const updateRealDate = (field, date) => {
+  updateTasksData({
+    [field]: date ? `${formatSimpleDate(date)}T10:00:00` : null
   })
 }
 
@@ -1167,6 +1229,12 @@ td.start-date,
 td.due-date {
   text-align: center;
   margin: 0;
+  padding: 0;
+}
+
+// The date field of a real date widens its column, as a planned date does.
+td.editing {
+  max-width: none;
   padding: 0;
 }
 
