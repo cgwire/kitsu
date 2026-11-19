@@ -1165,6 +1165,64 @@ describe('Assets store, ADD_ASSET', () => {
       expect([...state.assetSelectionGrid]).toEqual(['0-1', '2-1'])
     })
 
+    // The list reads its search with the asset task types, and its ready
+    // for filter with the shot ones.
+    describe('with the task types of its list', () => {
+      const addWithTaskTypes = (state, asset) =>
+        assetsStore.mutations.ADD_ASSET(state, {
+          taskStatusMap: new Map([
+            ['ts-todo', { id: 'ts-todo', name: 'Todo', short_name: 'todo' }]
+          ]),
+          taskTypeMap: new Map([
+            ['tt-anim', { id: 'tt-anim', name: 'Animation', for_entity: 'Shot' }],
+            ['tt-model', { id: 'tt-model', name: 'Modeling', for_entity: 'Asset' }]
+          ]),
+          taskMap: new Map(),
+          persons: [],
+          personMap: new Map(),
+          production: { id: 'p1', name: 'Prod', descriptors: [] },
+          asset
+        })
+
+      test('ignores a status filter on a shot task type, as the list does', () => {
+        const state = loadList([buildAsset('a1', 'Rock')], 'animation=todo')
+
+        addWithTaskTypes(state, buildAsset('a2', 'Tree'))
+
+        expect(names(state.displayedAssets)).toEqual(['Rock', 'Tree'])
+      })
+
+      test('still applies a status filter on an asset task type', () => {
+        const state = loadList([], 'modeling=todo', [])
+
+        addWithTaskTypes(state, buildAsset('a2', 'Tree'))
+
+        expect(state.displayedAssets).toEqual([])
+      })
+
+      test('ignores a ready for filter on an asset task type, as the list does', () => {
+        const state = loadList([], 'readyfor=[Modeling]', [])
+
+        addWithTaskTypes(state, {
+          ...buildAsset('a2', 'Tree'),
+          ready_for: 'tt-other'
+        })
+
+        expect(names(state.displayedAssets)).toEqual(['Tree'])
+      })
+
+      test('still applies a ready for filter on a shot task type', () => {
+        const state = loadList([], 'readyfor=[Animation]', [])
+
+        addWithTaskTypes(state, {
+          ...buildAsset('a2', 'Tree'),
+          ready_for: 'tt-other'
+        })
+
+        expect(state.displayedAssets).toEqual([])
+      })
+    })
+
     describe('on a full page', () => {
       const loadPage = () => {
         const assets = Array.from({ length: PAGE_SIZE + 5 }, (_, index) =>

@@ -1158,6 +1158,22 @@ describe('Shots store, ADD_SHOT', () => {
       expect(state.displayedShots).toEqual([])
       expect(state.displayedShotsCount).toBe(0)
     })
+
+    // The list reads its search with the shot task types only.
+    test('ignores a filter on an asset task type, as the list does', () => {
+      const shots = [buildShot('s1', 'SH010')]
+      const state = loadList(shots, 'modeling=todo')
+
+      addShot(state, buildShot('s2', 'SH020'), {
+        taskStatusMap,
+        taskTypeMap: new Map([
+          ...taskTypeMap,
+          ['tt-model', { id: 'tt-model', name: 'Modeling', for_entity: 'Asset' }]
+        ])
+      })
+
+      expect(names(state.displayedShots)).toEqual(['SH010', 'SH020'])
+    })
   })
 })
 
