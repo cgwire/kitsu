@@ -141,12 +141,17 @@ withthumbnail
 
 ## Unions (OR)
 
-Wrap several `key=value` expressions in `+(...)` to OR them; everything
-outside still ANDs with the group:
+Wrap several `key=value` expressions in `+(...)` to OR them:
 
 ```
-+(modeling=wip animation=wfa)
++(layout=wip animation=wfa)
 ```
+
+Outside the group, only plain words count: they still narrow the list by
+name, while `key=value` expressions, `-word` exclusions, and
+`withthumbnail` are ignored, so `layout=wip +(animation=wip)` filters like
+`+(animation=wip)`. The filter builder puts the whole query in the group
+when "Match one of the following filters" is picked.
 
 ## Task list page: `[a,b,c]` name union
 
@@ -174,4 +179,4 @@ general `getFilters` pipeline above.
 | `priority-animation=3` | Animation task priority is 3 |
 | `assignedto[Modeling]=[John Doe]` | John Doe assigned on Modeling |
 | `withthumbnail` | Entry has a preview thumbnail |
-| `+(modeling=wip animation=wfa)` | Modeling wip OR Animation wfa |
+| `+(layout=wip animation=wfa)` | Layout wip OR Animation wfa |
