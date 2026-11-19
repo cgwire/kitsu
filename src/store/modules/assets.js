@@ -1176,13 +1176,7 @@ const mutations = {
     // Test the new asset only against existing filters
     const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
-    const addedAssetIndex = buildAssetIndex(
-      [asset],
-      taskTypes,
-      taskStatuses,
-      production?.descriptors || [],
-      persons
-    )
+    const addedAssetIndex = buildAssetIndex([asset])
     const query = state.assetSearchText
     const keywords = getKeyWords(query) || []
     const filters = getFilters({

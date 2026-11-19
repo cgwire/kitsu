@@ -1424,15 +1424,8 @@ const mutations = {
     updateEntryInIndex(cache.shotIndex, shot, getShotIndexWords(shot))
 
     // Test the new shot only against existing filters
-    const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
-    const addedShotIndex = buildShotIndex(
-      [shot],
-      taskTypes,
-      taskStatuses,
-      production?.descriptors || [],
-      persons
-    )
+    const addedShotIndex = buildShotIndex([shot])
     const query = state.shotSearchText
     const keywords = getKeyWords(query) || []
     const filters = getFilters({
