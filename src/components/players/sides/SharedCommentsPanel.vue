@@ -190,6 +190,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useFullScreenContainer } from '@/composables/fullScreen'
+import { isNotFound, isRequestFailure } from '@/lib/errors'
 import { replaceTimeWithTimecode } from '@/lib/render'
 import stringHelpers from '@/lib/string'
 import { DEFAULT_FPS } from '@/lib/video'
@@ -241,11 +242,11 @@ const fullScreenContainer = useFullScreenContainer(() => panelRef.value)
 const loading = ref(true)
 const submitting = ref(false)
 const isEditing = ref(false)
-const isDeleting = ref(false)
 const editError = ref(false)
 const deleteError = ref(false)
 const postError = ref('')
 
+const deletingCommentIds = reactive(new Set())
 const modals = reactive({ edit: false, delete: false, attachment: false })
 
 // Computed
@@ -274,6 +275,12 @@ const canPost = computed(
 
 const canSubmit = computed(
   () => canPost.value && !submitting.value && selectedStatusId.value
+)
+
+// The guest may close the modal before Zou answers, then open it for another
+// comment, or for the same one again.
+const isDeleting = computed(() =>
+  deletingCommentIds.has(commentToEdit.value?.id)
 )
 
 const taskComments = computed(() =>
@@ -541,22 +548,51 @@ const confirmEditComment = async updatedComment => {
   isEditing.value = false
 }
 
+// Zou answers 404 for a comment deleted since the comments were last loaded
+// (the page gets no live updates), and for a link revoked or expired
+// meanwhile: only a new load tells them apart.
+const isDeletedElsewhere = async (err, commentId) => {
+  if (!isNotFound(err)) return false
+  try {
+    await loadComments()
+  } catch (reloadError) {
+    if (!isRequestFailure(reloadError)) throw reloadError
+    return false
+  }
+  return !comments.value.some(c => c.id === commentId)
+}
+
 const confirmDeleteComment = async () => {
-  if (!commentToEdit.value) return
-  isDeleting.value = true
+  // DeleteModal takes the Enter key even while it shows the spinner.
+  if (!commentToEdit.value || isDeleting.value) return
+  // Read now: the guest may open the deletion of another comment before Zou
+  // answers.
+  const commentId = commentToEdit.value.id
+  let isDeleted = false
+  deletingCommentIds.add(commentId)
   deleteError.value = false
   try {
     await store.dispatch('deleteSharedPlaylistComment', {
       shareToken: props.token,
-      commentId: commentToEdit.value.id,
+      commentId,
       guestId: props.guestId
     })
-    comments.value = comments.value.filter(c => c.id !== commentToEdit.value.id)
-    modals.delete = false
-  } catch {
-    deleteError.value = true
+    comments.value = comments.value.filter(c => c.id !== commentId)
+    isDeleted = true
+  } catch (err) {
+    isDeleted = await isDeletedElsewhere(err, commentId)
+    if (!isDeleted && !isRequestFailure(err)) throw err
+  } finally {
+    deletingCommentIds.delete(commentId)
+    // The modal may show the deletion of another comment by now.
+    if (commentToEdit.value?.id === commentId) {
+      if (isDeleted) {
+        modals.delete = false
+      } else {
+        deleteError.value = true
+      }
+    }
   }
-  isDeleting.value = false
 }
 
 // Functions: checklist
