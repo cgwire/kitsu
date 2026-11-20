@@ -355,7 +355,7 @@
         <p
           :style="{ width: '100%' }"
           class="preview-standard-file has-text-centered"
-          v-show="isCurrentPreviewFile && !isLoading"
+          v-show="isCurrentPreviewFile && !isLoading && !loadingError"
         >
           <a
             class="button"
@@ -402,8 +402,9 @@
           />
         </div>
 
-        <div class="loading-wrapper" v-if="isLoading">
-          <spinner />
+        <div class="loading-wrapper" v-if="isLoading || loadingError">
+          <spinner v-if="isLoading" />
+          <p class="error" v-else>{{ loadingError }}</p>
         </div>
 
         <div
@@ -1101,6 +1102,11 @@ const props = defineProps({
   isLoading: {
     type: Boolean,
     default: false
+  },
+  // shown where the spinner was when the entities could not be loaded
+  loadingError: {
+    type: String,
+    default: ''
   },
   playlist: {
     type: Object,

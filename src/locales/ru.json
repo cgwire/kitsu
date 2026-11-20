@@ -906,6 +906,7 @@
       "building": "Сборка...",
       "client_playlist": "Клиентский плейлист",
       "create_for_selection": "Создать плейлист из выбранных задач",
+      "create_for_selection_error": "Ошибка при создании плейлиста.",
       "create_title": "Создать плейлист",
       "created_at": "Создан:",
       "delete_text": "Вы уверены, что хотите удалить {name} из базы данных?",

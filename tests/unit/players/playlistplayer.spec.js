@@ -2154,6 +2154,43 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // A temporary playlist the server could not generate.
+  describe('loading error', () => {
+    const loadingBlock = () => wrapper.find('.loading-wrapper')
+
+    it('shows the error where the spinner was', async () => {
+      wrapper = mountPlayer({
+        entities: [],
+        props: { loadingError: 'Could not generate.', tempMode: true }
+      })
+      await flushPromises()
+
+      expect(loadingBlock().find('.error').text()).toBe('Could not generate.')
+      expect(loadingBlock().findComponent({ name: 'Spinner' }).exists()).toBe(
+        false
+      )
+      // The empty file block took half the row and pushed the text aside.
+      expect(wrapper.find('.preview-standard-file').isVisible()).toBe(false)
+    })
+
+    it('shows the spinner alone while loading', async () => {
+      wrapper = mountPlayer({
+        entities: [],
+        props: {
+          isLoading: true,
+          loadingError: 'Could not generate.',
+          tempMode: true
+        }
+      })
+      await flushPromises()
+
+      expect(loadingBlock().findComponent({ name: 'Spinner' }).exists()).toBe(
+        true
+      )
+      expect(loadingBlock().find('.error').exists()).toBe(false)
+    })
+  })
+
   // A plain link navigates the tab: the browser fires beforeunload, which
   // closes the socket in Firefox and asks about unsaved annotations.
   describe('downloads', () => {

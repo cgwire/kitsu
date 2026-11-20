@@ -906,6 +906,7 @@
       "building": "建立中...",
       "client_playlist": "客戶播放清單",
       "create_for_selection": "從選取的任務生成播放清單",
+      "create_for_selection_error": "生成播放清單時發生錯誤。",
       "create_title": "建立播放清單",
       "created_at": "建立於：",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
