@@ -708,6 +708,8 @@
       "move_entity_left": "Przesuń zaznaczony obiekt w lewo",
       "move_entity_right": "Przesuń zaznaczony obiekt w prawo",
       "scrub_anywhere": "Przewijaj oś czasu z dowolnego miejsca odtwarzacza",
+      "move_annotation_marker": "Na znaczniku osi czasu: przenieś swoje rysunki na inną klatkę",
+      "hold_annotation_marker": "Na znaczniku osi czasu: zachowaj widoczność swoich rysunków na kolejnych klatkach",
       "focus_comment": "Przełącz fokus między odtwarzaczem a polem komentarza",
       "first_frame": "Przejdź do pierwszej klatki",
       "last_frame": "Przejdź do ostatniej klatki"

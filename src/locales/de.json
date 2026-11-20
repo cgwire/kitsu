@@ -360,6 +360,8 @@
       "previous_annotation": "Vorherige Anmerkung",
       "previous_frame": "Vorheriges Bild",
       "scrub_anywhere": "Von überall im Player durch die Zeitleiste scrubben",
+      "move_annotation_marker": "Auf einer Zeitleisten-Markierung: Ihre Zeichnungen auf einen anderen Frame verschieben",
+      "hold_annotation_marker": "Auf einer Zeitleisten-Markierung: Ihre Zeichnungen auf den folgenden Frames sichtbar halten",
       "focus_comment": "Fokus zwischen Player und Kommentarfeld umschalten",
       "first_frame": "Zum ersten Bild gehen",
       "last_frame": "Zum letzten Bild gehen",

@@ -360,6 +360,8 @@
       "previous_annotation": "Annotazione precedente",
       "previous_frame": "Fotogramma precedente",
       "scrub_anywhere": "Scorri la timeline da qualsiasi punto del player",
+      "move_annotation_marker": "Su un marcatore della timeline: sposta i tuoi disegni su un altro fotogramma",
+      "hold_annotation_marker": "Su un marcatore della timeline: mantieni visibili i tuoi disegni nei fotogrammi successivi",
       "focus_comment": "Alterna il focus tra il player e la casella dei commenti",
       "first_frame": "Vai al primo fotogramma",
       "last_frame": "Vai all'ultimo fotogramma",

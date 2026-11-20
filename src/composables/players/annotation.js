@@ -124,6 +124,8 @@ if (PSStroke) {
  *   local deletion is recorded. Receives `(currentTime, serializedObject)`.
  * @param {Function} [options.postAnnotationUpdate] - hook fired after a
  *   local update is recorded. Receives `(currentTime, serializedObject)`.
+ * @param {import('vue').Ref} [options.heldCanvasComponent] - read-only
+ *   canvas showing the drawings of earlier frames held on the current one.
  * @param {Function} [options.getAdditionalPreviews] - extra store previews
  *   that mirror the current one and must receive the same annotations
  *   (playlist revision copies). Returns `[{ taskId, preview }]` pairs.
@@ -132,6 +134,7 @@ export const useAnnotation = ({
   mainCanvasComponent,
   comparisonCanvasComponent,
   onionCanvasComponent,
+  heldCanvasComponent,
   canvasWrapper,
   annotations,
   isCurrentUserArtist,
@@ -157,6 +160,7 @@ export const useAnnotation = ({
   const fabricCanvas = ref(null)
   const fabricCanvasComparison = ref(null)
   const fabricCanvasOnion = ref(null)
+  const fabricCanvasHeld = ref(null)
   const lastAnnotationTime = ref('')
   const additions = ref([])
   const deletions = ref([])
@@ -188,7 +192,6 @@ export const useAnnotation = ({
   // it was superseded and stop repopulating a canvas meant to be cleared.
   let comparisonLoadToken = 0
   let mainLoadToken = 0
-  let onionLoadToken = 0
   let annotatedPreview = null
   let annotationToSave = null
   let pendingSave = null
@@ -481,6 +484,38 @@ export const useAnnotation = ({
       })
     }
     postAnnotationUpdate(currentTime, obj)
+  }
+
+  // Edits made outside the canvas (a timeline marker moved or held), each
+  // entry on its own time. They join the buffers the next save flushes.
+  const queueAnnotationEdits = edits => {
+    markLastAnnotationTime()
+    edits.additions.forEach(({ time, frame, drawing }) => {
+      const entry = findAnnotation(additions.value, time)
+      if (entry) entry.drawing.objects.push(...drawing.objects)
+      else additions.value.push({ time, frame, drawing: { ...drawing } })
+      drawing.objects.forEach(obj => postAnnotationAddition(time, obj))
+    })
+    edits.updates.forEach(({ time, frame, drawing }) => {
+      const ids = new Set(drawing.objects.map(obj => obj.id))
+      const entry = findAnnotation(updates.value, time)
+      if (entry) {
+        entry.drawing.objects = [
+          ...entry.drawing.objects.filter(obj => !ids.has(obj.id)),
+          ...drawing.objects
+        ]
+      } else {
+        updates.value.push({ time, frame, drawing: { ...drawing } })
+      }
+      drawing.objects.forEach(obj => postAnnotationUpdate(time, obj))
+    })
+    edits.deletions.forEach(({ time, frame, objects }) => {
+      const entry = findAnnotation(deletions.value, time)
+      if (entry) entry.objects.push(...objects)
+      else deletions.value.push({ time, frame, objects: [...objects] })
+      objects.forEach(id => postAnnotationDeletion(time, { id }))
+    })
+    updateAnnotationsInStore()
   }
 
   const clearModifications = () => {
@@ -850,6 +885,7 @@ export const useAnnotation = ({
     // Reattach the serialized eraser mask (local coords) to whatever was built.
     // Text is non-erasable so it never carries one; the helper is a no-op then.
     const built = path || text || psstroke || shape
+    if (built && obj.holdFrames) built.set('holdFrames', obj.holdFrames)
     if (built) await reviveObjectEraser(built, obj)
     return built
   }
@@ -1146,12 +1182,24 @@ export const useAnnotation = ({
     if (action.removed?.length) saveAnnotationsCb()
   }
 
+  // An edit made outside the canvas ({ undo, redo }), such as a timeline
+  // marker moved or held. It has no time: it replays from any frame.
+  const pushHistoryAction = ({ undo, redo }) => {
+    doneActionStack.push({ type: 'custom', undo, redo })
+    clearUndoneStack()
+  }
+
   const undoLastAction = () => {
     const lastAction = doneActionStack[doneActionStack.length - 1]
     if (!lastAction) return
     if (isStaleAction(lastAction)) return
     replayingHistory = true
     try {
+      if (lastAction.type === 'custom') {
+        undoneActionStack.push(doneActionStack.pop())
+        lastAction.undo()
+        return
+      }
       if (lastAction.type === 'erase') {
         const action = doneActionStack.pop()
         undoEraseAction(action)
@@ -1195,6 +1243,11 @@ export const useAnnotation = ({
     if (isStaleAction(lastUndone)) return
     replayingHistory = true
     try {
+      if (lastUndone.type === 'custom') {
+        doneActionStack.push(undoneActionStack.pop())
+        lastUndone.redo()
+        return
+      }
       if (lastUndone.type === 'erase') {
         const action = undoneActionStack.pop()
         redoEraseAction(action)
@@ -1506,48 +1559,60 @@ export const useAnnotation = ({
     }
   }
 
-  const clearOnionCanvas = () => {
-    onionLoadToken++
-    if (isFabricReady(fabricCanvasOnion.value)) {
-      fabricCanvasOnion.value.clear()
-    }
-  }
+  // A read-only canvas painted with whole annotations, each at its own
+  // opacity (onion ghosts, held drawings). Newest load wins: a load is
+  // dropped once a fresher load or a clear has bumped the token, so a
+  // superseded load never repopulates a canvas meant for another frame.
+  // Object creation is async and addObjectToCanvas mutates shared state, so
+  // the objects are added one after another.
+  const useReadOnlyLayer = canvasRef => {
+    let token = 0
 
-  // Add one ghost annotation's objects at the given opacity. Sequential
-  // because object creation is async and addObjectToCanvas mutates shared
-  // state (so it can't run in parallel). Token-checked around every await
-  // so a clear or a fresher load mid-ghost can't leave a partial ghost
-  // painted on the cleared canvas.
-  const renderOnionGhost = async (canvas, { annotation, opacity }, token) => {
-    for (const obj of annotation.drawing.objects) {
-      if (token !== onionLoadToken) return
-      const built = await addObjectToCanvas(annotation, obj, canvas)
-      if (token !== onionLoadToken) {
-        if (built) canvas.remove(built)
-        return
+    const clear = () => {
+      token++
+      if (isFabricReady(canvasRef.value)) canvasRef.value.clear()
+    }
+
+    const renderGhost = async (canvas, { annotation, opacity }, loadToken) => {
+      for (const obj of annotation.drawing.objects) {
+        if (loadToken !== token) return
+        const built = await addObjectToCanvas(annotation, obj, canvas)
+        if (loadToken !== token) {
+          if (built) canvas.remove(built)
+          return
+        }
+        built?.set('opacity', opacity)
       }
-      built?.set('opacity', opacity)
     }
+
+    // ghosts: [{ annotation, opacity }]
+    const load = async ghosts => {
+      const canvas = canvasRef.value
+      // A 0×0 canvas (not laid out yet) would scale every object to nothing.
+      if (!canvas || !canvas.width || !canvas.height) return
+      const loadToken = ++token
+      canvas.clear()
+      for (const ghost of ghosts) {
+        if (loadToken !== token) return
+        await renderGhost(canvas, ghost, loadToken)
+      }
+      if (loadToken === token && isFabricReady(canvas)) {
+        canvas.requestRenderAll()
+      }
+    }
+
+    return { clear, load }
   }
 
-  // Paint the ghosts (each { annotation, opacity }) onto the read-only onion
-  // canvas. Newest load wins: ghosts are skipped once a fresher load or a
-  // clear has bumped onionLoadToken, so a superseded load never repopulates a
-  // canvas meant for another frame.
-  const loadOnionSkin = async ghosts => {
-    const canvas = fabricCanvasOnion.value
-    // A 0×0 canvas (not laid out yet) would scale every object to nothing.
-    if (!canvas || !canvas.width || !canvas.height) return
-    const token = ++onionLoadToken
-    canvas.clear()
-    for (const ghost of ghosts) {
-      if (token !== onionLoadToken) return
-      await renderOnionGhost(canvas, ghost, token)
-    }
-    if (token === onionLoadToken && isFabricReady(canvas)) {
-      canvas.requestRenderAll()
-    }
-  }
+  const { clear: clearOnionCanvas, load: loadOnionSkin } =
+    useReadOnlyLayer(fabricCanvasOnion)
+  const { clear: clearHeldCanvas, load: loadHeldLayer } =
+    useReadOnlyLayer(fabricCanvasHeld)
+
+  const loadHeldAnnotations = heldAnnotations =>
+    loadHeldLayer(
+      heldAnnotations.map(annotation => ({ annotation, opacity: 1 }))
+    )
 
   // Clipboard
 
@@ -1832,6 +1897,15 @@ export const useAnnotation = ({
       { immediate: true, flush: 'sync' }
     )
   }
+  if (heldCanvasComponent) {
+    watch(
+      () => heldCanvasComponent.value?.canvas || null,
+      canvas => {
+        fabricCanvasHeld.value = canvas
+      },
+      { immediate: true, flush: 'sync' }
+    )
+  }
 
   // fabric disposes a text still in editing without the object:modified of
   // a regular exit, which a text typed back to its start skips anyway: the
@@ -1937,6 +2011,8 @@ export const useAnnotation = ({
     clearComparisonCanvas,
     loadOnionSkin,
     clearOnionCanvas,
+    loadHeldAnnotations,
+    clearHeldCanvas,
     copyAnnotations,
     pasteAnnotations,
     applyGroupChanges,
@@ -1944,6 +2020,8 @@ export const useAnnotation = ({
 
     // Saving
     markLastAnnotationTime,
+    queueAnnotationEdits,
+    pushHistoryAction,
     startAnnotationSaving,
     endAnnotationSaving,
     confirmAnnotationsSaved,

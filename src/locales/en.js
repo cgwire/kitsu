@@ -741,6 +741,10 @@ export default {
     move_entity_left: 'Move selected entity to the left',
     move_entity_right: 'Move selected entity to the right',
     scrub_anywhere: 'Scrub the timeline from anywhere in the player',
+    move_annotation_marker:
+      'On a timeline marker: move your drawings to another frame',
+    hold_annotation_marker:
+      'On a timeline marker: keep your drawings visible on the next frames',
     focus_comment: 'Toggle focus between the player and the comment box',
     first_frame: 'Go to the first frame',
     last_frame: 'Go to the last frame'
