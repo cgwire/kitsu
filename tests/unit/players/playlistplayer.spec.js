@@ -3229,6 +3229,90 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  describe('review room pan/zoom', () => {
+    const socketHandler = event => {
+      const [, handler] = wrapper.vm.$store.$socket.on.mock.calls.find(
+        ([name]) => name === event
+      )
+      return handler
+    }
+
+    it('moves the annotation overlays with a remote pan/zoom', async () => {
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'mp4' }]
+      })
+      await flushPromises()
+      socketHandler('preview-room:room-people-updated')({ people: ['user-1'] })
+      socketHandler('preview-room:panzoom-changed')({
+        playlist_id: 'playlist-1',
+        data: { local_id: 'other', user_id: 'user-2', x: 10, y: 20, zoom: 2 }
+      })
+      await flushPromises()
+      const canvases = wrapper.findAllComponents({ name: 'AnnotationCanvas' })
+      expect(canvases.length).toBeGreaterThan(0)
+      canvases.forEach(canvas => {
+        expect(canvas.props('panzoomTransform')).toEqual({
+          x: 10,
+          y: 20,
+          scale: 2
+        })
+      })
+    })
+
+    it.each([
+      ['mp4', 'raw-player'],
+      ['png', 'picture-player']
+    ])(
+      'replays remote pan/zoom when the %s viewer becomes ready',
+      async (extension, viewerRef) => {
+        wrapper = mountPlayer({
+          entities: [
+            { ...entity, preview_file_extension: extension },
+            {
+              id: 'shot-2',
+              preview_file_id: 'preview-2',
+              preview_file_extension: extension
+            }
+          ]
+        })
+        await flushPromises()
+        const viewer = wrapper.findComponent({ ref: viewerRef })
+        const setPanZoom = vi.spyOn(viewer.vm, 'setPanZoom')
+        socketHandler('preview-room:room-people-updated')({
+          people: ['user-1']
+        })
+        socketHandler('preview-room:panzoom-changed')({
+          playlist_id: 'playlist-1',
+          data: { local_id: 'other', user_id: 'user-2', x: 10, y: 20, zoom: 2 }
+        })
+        await flushPromises()
+        // The call before readiness is a no-op in the real viewer.
+        setPanZoom.mockClear()
+        viewer.vm.$emit('panzoom-ready')
+        await flushPromises()
+        expect(setPanZoom).toHaveBeenCalledExactlyOnceWith(10, 20, 2)
+        expect(wrapper.vm.$store.$socket.emit).not.toHaveBeenCalledWith(
+          'preview-room:panzoom-changed',
+          expect.anything()
+        )
+        // The transform is cleared by the entity change: a ready
+        // notification from the next viewer replays nothing.
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(
+            button =>
+              button.attributes('title') === 'playlists.actions.next_shot'
+          )
+          .vm.$emit('click')
+        await flushPromises()
+        setPanZoom.mockClear()
+        viewer.vm.$emit('panzoom-ready')
+        await flushPromises()
+        expect(setPanZoom).not.toHaveBeenCalled()
+      }
+    )
+  })
+
   describe('on a phone', () => {
     const PORTRAIT = '(max-width: 768px)'
     const LANDSCAPE = '(max-height: 500px) and (orientation: landscape)'

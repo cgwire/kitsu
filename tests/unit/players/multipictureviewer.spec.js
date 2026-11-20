@@ -62,6 +62,34 @@ describe('players/MultiPictureViewer', () => {
     wrapper.unmount()
   })
 
+  test('only reports panzoom readiness for the picture on screen', () => {
+    const wrapper = mount(MultiPictureViewer, {
+      props: {
+        currentPreview: preview(1),
+        previews: [preview(0), preview(1), preview(2)]
+      },
+      global: {
+        stubs: {
+          PictureViewer: {
+            name: 'PictureViewer',
+            props: ['preview'],
+            template: '<div />'
+          }
+        }
+      }
+    })
+    const pictures = wrapper.findAllComponents({ name: 'PictureViewer' })
+    pictures
+      .find(picture => picture.props('preview').entry === 0)
+      .vm.$emit('panzoom-ready')
+    expect(wrapper.emitted('panzoom-ready')).toBeUndefined()
+    pictures
+      .find(picture => picture.props('preview').entry === 1)
+      .vm.$emit('panzoom-ready')
+    expect(wrapper.emitted('panzoom-ready')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
   // The snapshots read it after switching to another file.
   test('tells whether the picture on screen is ready', async () => {
     const ready = new Set(['preview-0'])
