@@ -24,6 +24,11 @@ describe('TopbarEpisodeList', () => {
       episodeList: [
         { label: 'All assets', value: 'all' },
         { label: 'All shots', value: 'all', query: { for_entity: 'shot' } },
+        {
+          label: 'All episodes',
+          value: 'all',
+          query: { for_entity: 'episode' }
+        },
         { label: 'Main pack', value: 'main' }
       ]
     }
@@ -45,15 +50,22 @@ describe('TopbarEpisodeList', () => {
   it('labels the all pseudo-episode from the route query', () => {
     expect(mountWith({}).vm.episodeLabel).toBe('All assets')
     expect(mountWith({ for_entity: 'shot' }).vm.episodeLabel).toBe('All shots')
+    expect(mountWith({ for_entity: 'episode' }).vm.episodeLabel).toBe(
+      'All episodes'
+    )
   })
 
   it('carries the option query into the episode path', () => {
     const wrapper = mountWith({})
-    const [allAssets, allShots] = episodeGroups[0].episodeList
+    const [allAssets, allShots, allEpisodes] = episodeGroups[0].episodeList
     expect(wrapper.vm.getEpisodePath(allAssets).query).toBeUndefined()
     expect(wrapper.vm.getEpisodePath(allShots)).toMatchObject({
       params: { production_id: 'production-1', episode_id: 'all' },
       query: { for_entity: 'shot' }
+    })
+    expect(wrapper.vm.getEpisodePath(allEpisodes)).toMatchObject({
+      params: { production_id: 'production-1', episode_id: 'all' },
+      query: { for_entity: 'episode' }
     })
   })
 })
@@ -94,6 +106,14 @@ describe('TopbarSectionList', () => {
         playlists
       ).query
     ).toEqual({ for_entity: 'shot' })
+  })
+
+  it('keeps the episode side when going from all episodes back to the playlists', () => {
+    expect(
+      mountWith('playlists', { for_entity: 'episode' }).vm.getSectionPath(
+        playlists
+      ).query
+    ).toEqual({ for_entity: 'episode' })
   })
 
   it('lands on all assets from the asset side', () => {

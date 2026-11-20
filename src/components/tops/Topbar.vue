@@ -458,9 +458,14 @@ const currentEpisodeOptionGroups = computed(() => {
       value: 'all',
       query: { for_entity: 'shot' }
     }
+    const allEpisodes = {
+      label: t('main.all_episodes'),
+      value: 'all',
+      query: { for_entity: 'episode' }
+    }
     return withPseudoEpisodes(
       section === 'playlists'
-        ? [allAssets, allShots, ...others]
+        ? [allAssets, allShots, allEpisodes, ...others]
         : [allAssets, ...others]
     )
   }

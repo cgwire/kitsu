@@ -872,6 +872,7 @@ export default {
     all: 'All',
     all_assets: 'All assets',
     all_edits: 'All edits',
+    all_episodes: 'All episodes',
     all_shots: 'All shots',
     apply: 'Apply',
     archived: 'Archived',
