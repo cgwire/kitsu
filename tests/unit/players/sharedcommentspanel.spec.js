@@ -231,20 +231,24 @@ describe('players/SharedCommentsPanel', () => {
     await flushPromises()
   }
 
-  const uncheckedComment = {
+  // A new one for each list: the checklist widget checks the boxes in place.
+  const uncheckedComment = () => ({
     ...ownComment,
     checklist: [{ text: 'Arm', checked: false }]
-  }
-  const checkedComment = {
+  })
+  const checkedComment = () => ({
     ...ownComment,
     checklist: [{ text: 'Arm', checked: true }]
-  }
+  })
 
-  const checkBox = wrapper =>
-    findComment(wrapper, 'comment-2').vm.$emit('checklist-updated', {
-      id: 'comment-2',
-      checklist: checkedComment.checklist
-    })
+  // As Comment.vue and Checklist.vue do: the box is checked in place, on the
+  // items the comment received.
+  const checkBox = (wrapper, index = 0) => {
+    const comment = findComment(wrapper, 'comment-2')
+    const checklist = [...comment.props('comment').checklist]
+    checklist[index].checked = true
+    comment.vm.$emit('checklist-updated', { id: 'comment-2', checklist })
+  }
 
   const isBoxChecked = wrapper =>
     findComment(wrapper, 'comment-2').props('comment').checklist[0].checked
@@ -541,11 +545,20 @@ describe('players/SharedCommentsPanel', () => {
       actions.loadSharedPlaylistContext.mockResolvedValue({ task_statuses: [] })
       actions.loadSharedPlaylistComments.mockResolvedValue([
         staffComment,
-        uncheckedComment
+        uncheckedComment()
       ])
     })
 
-    it('lets a bug of its save through', async () => {
+    it('unchecks the box when its save fails', async () => {
+      actions.editSharedPlaylistComment.mockRejectedValue(httpError(500))
+      const wrapper = await mountGuestPanel()
+
+      checkBox(wrapper)
+      await flushPromises()
+      expect(isBoxChecked(wrapper)).toBe(false)
+    })
+
+    it('unchecks the box and lets a bug of its save through', async () => {
       const bug = new TypeError('checklist is undefined')
       const errorHandler = vi.fn()
       actions.editSharedPlaylistComment.mockRejectedValue(bug)
@@ -558,6 +571,51 @@ describe('players/SharedCommentsPanel', () => {
         expect.anything(),
         expect.anything()
       )
+      expect(isBoxChecked(wrapper)).toBe(false)
+    })
+
+    // The save of the second click holds both boxes: Zou has them checked.
+    it('keeps the boxes a later save holds when an earlier one fails', async () => {
+      let failFirstSave = null
+      const twoBoxes = checked => ({
+        ...ownComment,
+        checklist: [
+          { text: 'Arm', checked },
+          { text: 'Leg', checked }
+        ]
+      })
+      actions.loadSharedPlaylistComments.mockResolvedValue([
+        staffComment,
+        twoBoxes(false)
+      ])
+      actions.editSharedPlaylistComment
+        .mockImplementationOnce(
+          () => new Promise((resolve, reject) => (failFirstSave = reject))
+        )
+        .mockResolvedValueOnce(twoBoxes(true))
+      const wrapper = await mountGuestPanel()
+
+      checkBox(wrapper, 0)
+      await flushPromises()
+      checkBox(wrapper, 1)
+      await flushPromises()
+      failFirstSave(httpError(504))
+      await flushPromises()
+      const { checklist } = findComment(wrapper, 'comment-2').props('comment')
+      expect(checklist.map(item => item.checked)).toEqual([true, true])
+    })
+
+    // The checklist widget skips them.
+    it('shows no box for a null entry of a checklist', async () => {
+      actions.loadSharedPlaylistComments.mockResolvedValue([
+        staffComment,
+        { ...ownComment, checklist: [null, { text: 'Arm', checked: false }] }
+      ])
+      const wrapper = await mountGuestPanel()
+
+      expect(
+        findComment(wrapper, 'comment-2').props('comment').checklist
+      ).toEqual([{ text: 'Arm', checked: false }])
     })
   })
 
@@ -810,13 +868,13 @@ describe('players/SharedCommentsPanel', () => {
       let answerSave = null
       actions.loadSharedPlaylistComments.mockResolvedValue([
         staffComment,
-        uncheckedComment
+        uncheckedComment()
       ])
       const wrapper = await mountGuestPanel()
       const answerReload = holdNextFetch()
       actions.loadSharedPlaylistComments.mockResolvedValue([
         staffComment,
-        checkedComment
+        checkedComment()
       ])
       actions.editSharedPlaylistComment.mockImplementationOnce(
         () => new Promise(resolve => (answerSave = resolve))
@@ -825,11 +883,36 @@ describe('players/SharedCommentsPanel', () => {
       comeBackLater()
       checkBox(wrapper)
       await flushPromises()
-      answerReload([staffComment, uncheckedComment])
+      answerReload([staffComment, uncheckedComment()])
       await flushPromises()
       expect(isBoxChecked(wrapper)).toBe(true)
 
-      answerSave(checkedComment)
+      answerSave(checkedComment())
+      await flushPromises()
+      expect(isBoxChecked(wrapper)).toBe(true)
+    })
+
+    // Zou saved the checked box, but its answer got lost on the way back.
+    it('keeps a box the reload shows checked when its save fails', async () => {
+      let failSave = null
+      actions.loadSharedPlaylistComments.mockResolvedValue([
+        staffComment,
+        uncheckedComment()
+      ])
+      const wrapper = await mountGuestPanel()
+      actions.loadSharedPlaylistComments.mockResolvedValue([
+        staffComment,
+        checkedComment()
+      ])
+      actions.editSharedPlaylistComment.mockImplementationOnce(
+        () => new Promise((resolve, reject) => (failSave = reject))
+      )
+
+      checkBox(wrapper)
+      await flushPromises()
+      comeBackLater()
+      await flushPromises()
+      failSave(httpError(504))
       await flushPromises()
       expect(isBoxChecked(wrapper)).toBe(true)
     })

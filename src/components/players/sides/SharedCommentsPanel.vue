@@ -185,7 +185,15 @@
 
 <script setup>
 import { FilmIcon, ListIcon, PaperclipIcon, XIcon } from 'lucide-vue-next'
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  toRaw,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
@@ -321,7 +329,12 @@ const normalizeComment = comment => {
     ...comment,
     person: sharedPerson(comment.person_id, comment.person) || {},
     text: comment.text || '',
-    checklist: comment.checklist || [],
+    // The checklist widget checks its boxes in place: copies keep the items
+    // of the panel as they were, to uncheck a box whose save fails. A copy of
+    // a null entry would show as an empty box.
+    checklist: (comment.checklist || [])
+      .filter(Boolean)
+      .map(item => ({ ...item })),
     attachment_files: comment.attachment_files || [],
     previews: comment.previews || [],
     acknowledgements: comment.acknowledgements || [],
@@ -700,7 +713,12 @@ const onChecklistUpdated = async updated => {
     })
     replaceComment(saved)
   } catch (err) {
-    setChecklist(updated.id, existing.checklist)
+    // Only while the comment shows the list this save sent: a later click,
+    // save, or reload brought a newer one.
+    const current = comments.value.find(c => c.id === updated.id)
+    if (toRaw(current?.checklist) === toRaw(updated.checklist)) {
+      setChecklist(updated.id, existing.checklist)
+    }
     if (!isRequestFailure(err)) throw err
   }
 }
