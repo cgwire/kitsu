@@ -2191,6 +2191,35 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // The save creates a playlist of the entities shown: an empty one while
+  // they load or when they could not be loaded.
+  describe('save button of a temporary playlist', () => {
+    const saveButton = () =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.props('icon') === 'save')
+
+    it.each([
+      ['while the entities load', { isLoading: true }],
+      ['when they could not be loaded', { loadingError: 'Could not generate.' }]
+    ])('is off %s', async (_, props) => {
+      wrapper = mountPlayer({
+        entities: [],
+        props: { tempMode: true, ...props }
+      })
+      await flushPromises()
+
+      expect(saveButton().props('disabled')).toBe(true)
+    })
+
+    it('is on once the entities are loaded', async () => {
+      wrapper = mountPlayer({ props: { tempMode: true } })
+      await flushPromises()
+
+      expect(saveButton().props('disabled')).toBe(false)
+    })
+  })
+
   // A plain link navigates the tab: the browser fires beforeunload, which
   // closes the socket in Firefox and asks about unsaved annotations.
   describe('downloads', () => {

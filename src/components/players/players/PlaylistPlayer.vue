@@ -700,6 +700,7 @@
           class="playlist-button flexrow-item"
           :title="$t('playlists.actions.save_playlist')"
           icon="save"
+          :disabled="isLoading || Boolean(loadingError)"
         />
       </template>
 
