@@ -63,6 +63,19 @@ const getFilterTasks = (entry, filter, taskMap) =>
     .map(taskType => taskMap.get(entry.validations?.get(taskType.id)))
     .filter(Boolean)
 
+const getEntryTasks = (taskIds, taskMap) =>
+  Array.from(taskIds ?? [], taskId => taskMap.get(taskId)).filter(Boolean)
+
+/*
+ * A negated status or assignment filter keeps only the entries that have a
+ * task to check: "Animation not Done" leaves out the shots without an
+ * Animation task.
+ */
+const matchTasks = (tasks, excluding, isMatch) => {
+  const isOk = tasks.some(isMatch)
+  return excluding ? tasks.length > 0 && !isOk : isOk
+}
+
 const applyFiltersFunctions = {
   assettype(entry, filter, taskMap) {
     let isOk = filter.assetTypes.some(
@@ -73,23 +86,23 @@ const applyFiltersFunctions = {
   },
 
   assignation(entry, filter, taskMap) {
-    const isAssigned = getFilterTasks(entry, filter, taskMap).some(
+    return matchTasks(
+      getFilterTasks(entry, filter, taskMap),
+      !filter.assigned,
       task => task.assignees?.length > 0
     )
-    return filter.assigned ? isAssigned : !isAssigned
   },
 
   assignedto(entry, filter, taskMap) {
     const hasPerson = task =>
       filter.personIds.some(personId => task?.assignees.includes(personId))
-    let isOk
+    let tasks
     if (getFilterTaskTypes(filter).length > 0) {
-      isOk = getFilterTasks(entry, filter, taskMap).some(hasPerson)
+      tasks = getFilterTasks(entry, filter, taskMap)
     } else {
-      isOk =
-        entry.tasks?.some(taskId => hasPerson(taskMap.get(taskId))) ?? false
+      tasks = getEntryTasks(entry.tasks, taskMap)
     }
-    return filter.excluding ? !isOk : isOk
+    return matchTasks(tasks, filter.excluding, hasPerson)
   },
 
   descriptor(entry, filter, taskMap) {
@@ -173,20 +186,18 @@ const applyFiltersFunctions = {
   },
 
   status(entry, filter, taskMap) {
-    let isOk = getFilterTasks(entry, filter, taskMap).some(task =>
-      filter.taskStatuses.includes(task.task_status_id)
+    return matchTasks(
+      getFilterTasks(entry, filter, taskMap),
+      filter.excluding,
+      task => filter.taskStatuses.includes(task.task_status_id)
     )
-    if (filter.excluding) isOk = !isOk
-    return isOk
   },
 
   statusAny(entry, filter, taskMap) {
-    let isOk = Array.from(entry.validations?.values() || []).some(taskId => {
-      const task = taskMap.get(taskId)
-      return task && filter.taskStatuses.includes(task.task_status_id)
-    })
-    if (filter.excluding) isOk = !isOk
-    return isOk
+    const tasks = getEntryTasks(entry.validations?.values(), taskMap)
+    return matchTasks(tasks, filter.excluding, task =>
+      filter.taskStatuses.includes(task.task_status_id)
+    )
   },
 
   thumbnail(entry, filter, taskMap) {
@@ -629,7 +640,7 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
   const rgxMatches = queryText.match(EQUAL_ASSIGNATION_REGEX)
   if (rgxMatches) {
     const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
-    const personIndex = {}
+    const personIndex = Object.create(null)
     persons.forEach(person => {
       const name = hashName(person.name)
       if (!personIndex[name]) {
@@ -651,8 +662,11 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       const excluding = value.startsWith('-')
       if (excluding) value = value.substring(1)
       const simplifiedValue = hashName(value)
+      // [] means every task type, but an unknown name drops the filter, as
+      // it does for a status.
+      const isTaskTypeKnown = !taskTypeName || Boolean(matchedTaskTypes)
 
-      if (personIndex[simplifiedValue]) {
+      if (personIndex[simplifiedValue] && isTaskTypeKnown) {
         results.push({
           personIds: personIndex[simplifiedValue],
           taskType,

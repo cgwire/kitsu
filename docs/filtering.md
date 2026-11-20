@@ -52,6 +52,12 @@ modeling=wip,wfa
 `status=<status>` (the literal word `status`) matches across **all** task
 types instead of one, and also accepts a comma list: `status=wip,done`.
 
+A leading `-` excludes every listed status: `modeling=-wip`,
+`modeling=[-wip,wfa]` (neither wip nor wfa), `status=-wip`. These negated
+statuses and `modeling=unassigned` keep only the entries that have the
+task: an entry without a Modeling task is left out, and `status=-wip`
+leaves out the entries without any task.
+
 ## Asset type
 
 ```
@@ -114,13 +120,17 @@ priority-animation=3
 ## Assigned to
 
 The task type is required but can be left empty (`[]`) to match any task
-type. `-` on the person name excludes instead of matches:
+type; an unknown task type drops the filter. `-` on the person name
+excludes instead of matches:
 
 ```
 assignedto[Modeling]=[John Doe]
 assignedto[]=[John Doe]
 assignedto[Modeling]=[-John Doe]
 ```
+
+Excluding a person keeps only the entries that have a task of that type
+(any task with `assignedto[]`).
 
 ## Thumbnail presence
 
@@ -131,12 +141,17 @@ withthumbnail
 
 ## Unions (OR)
 
-Wrap several `key=value` expressions in `+(...)` to OR them; everything
-outside still ANDs with the group:
+Wrap several `key=value` expressions in `+(...)` to OR them:
 
 ```
-+(modeling=wip animation=wfa)
++(layout=wip animation=wfa)
 ```
+
+Outside the group, only plain words count: they still narrow the list by
+name, while `key=value` expressions, `-word` exclusions, and
+`withthumbnail` are ignored, so `layout=wip +(animation=wip)` filters like
+`+(animation=wip)`. The filter builder puts the whole query in the group
+when "Match one of the following filters" is picked.
 
 ## Task list page: `[a,b,c]` name union
 
@@ -164,4 +179,4 @@ general `getFilters` pipeline above.
 | `priority-animation=3` | Animation task priority is 3 |
 | `assignedto[Modeling]=[John Doe]` | John Doe assigned on Modeling |
 | `withthumbnail` | Entry has a preview thumbnail |
-| `+(modeling=wip animation=wfa)` | Modeling wip OR Animation wfa |
+| `+(layout=wip animation=wfa)` | Layout wip OR Animation wfa |

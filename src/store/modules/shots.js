@@ -140,6 +140,12 @@ const undoShotEdit = ({ commit, rootGetters }, trackedEdit) => {
   }
 }
 
+// The list and a shot added live read the search with the same task types.
+const getShotTaskTypes = taskTypeMap =>
+  Array.from(taskTypeMap.values()).filter(
+    taskType => taskType.for_entity === 'Shot'
+  )
+
 const helpers = {
   getCurrentProduction() {
     return productionsStore.getters.currentProduction(productionsStore.state)
@@ -227,9 +233,7 @@ const helpers = {
       taskMap
     }
   ) {
-    const taskTypes = Array.from(taskTypeMap.values()).filter(
-      taskType => taskType.for_entity === 'Shot'
-    )
+    const taskTypes = getShotTaskTypes(taskTypeMap)
     const taskStatuses = Array.from(taskStatusMap.values())
 
     const query = shotSearch
@@ -1420,21 +1424,14 @@ const mutations = {
     updateEntryInIndex(cache.shotIndex, shot, getShotIndexWords(shot))
 
     // Test the new shot only against existing filters
-    const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
-    const addedShotIndex = buildShotIndex(
-      [shot],
-      taskTypes,
-      taskStatuses,
-      production?.descriptors || [],
-      persons
-    )
+    const addedShotIndex = buildShotIndex([shot])
     const query = state.shotSearchText
     const keywords = getKeyWords(query) || []
     const filters = getFilters({
       entryIndex: addedShotIndex,
       assetTypes: [],
-      taskTypes,
+      taskTypes: getShotTaskTypes(taskTypeMap),
       taskStatuses,
       descriptors: production?.descriptors || [],
       persons,

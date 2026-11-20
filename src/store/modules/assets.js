@@ -96,6 +96,15 @@ import {
   LOAD_TASK_END
 } from '@/store/mutation-types'
 
+// The list and an asset added live read the search with the same task types.
+// An asset is ready for a shot task type.
+const getAssetFilterTaskTypes = taskTypes => ({
+  taskTypes: taskTypes.filter(taskType => taskType.for_entity === 'Asset'),
+  readyForTaskTypes: taskTypes.filter(
+    taskType => taskType.for_entity === 'Shot'
+  )
+})
+
 const helpers = {
   getCurrentProduction() {
     return productionsStore.getters.currentProduction(productionsStore.state)
@@ -243,11 +252,7 @@ const helpers = {
     const filters = getFilters({
       entryIndex: cache.assetIndex,
       assetTypes: state.assetTypes,
-      taskTypes: taskTypes.filter(taskType => taskType.for_entity === 'Asset'),
-      // An asset is ready for a shot task type.
-      readyForTaskTypes: taskTypes.filter(
-        taskType => taskType.for_entity === 'Shot'
-      ),
+      ...getAssetFilterTaskTypes(taskTypes),
       taskStatuses,
       descriptors: production?.descriptors || [],
       persons,
@@ -1171,19 +1176,13 @@ const mutations = {
     // Test the new asset only against existing filters
     const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
-    const addedAssetIndex = buildAssetIndex(
-      [asset],
-      taskTypes,
-      taskStatuses,
-      production?.descriptors || [],
-      persons
-    )
+    const addedAssetIndex = buildAssetIndex([asset])
     const query = state.assetSearchText
     const keywords = getKeyWords(query) || []
     const filters = getFilters({
       entryIndex: addedAssetIndex,
       assetTypes: state.assetTypes,
-      taskTypes,
+      ...getAssetFilterTaskTypes(taskTypes),
       taskStatuses,
       descriptors: production?.descriptors || [],
       persons,
