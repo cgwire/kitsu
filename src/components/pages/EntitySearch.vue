@@ -60,6 +60,9 @@
       <div v-else-if="isLoading">
         <spinner />
       </div>
+      <div class="has-text-centered error" v-else-if="isError">
+        {{ $t('main.loading_error') }}
+      </div>
       <div v-else>
         <div class="pb1" v-if="searchFilter.assets">
           <h2 class="mt0">
@@ -202,6 +205,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { logRequestFailure } from '@/lib/errors'
 import { isSearchShortcut } from '@/lib/keyboard'
 import { getEntityPath } from '@/lib/path'
 
@@ -220,6 +224,7 @@ const store = useStore()
 
 // State
 
+const isError = ref(false)
 const isLoading = ref(false)
 const isLoadingMoreAssets = ref(false)
 const isLoadingMoreShots = ref(false)
@@ -233,6 +238,10 @@ const limitOptions = AVAILABLE_LIMITS.map(value => ({ label: value, value }))
 
 const results = reactive({ assets: [], shots: [], persons: [] })
 const searchFilter = reactive({ assets: true, shots: true, persons: false })
+
+// A slow search can answer after the next one has started: only the answers
+// of the last one show, its more results included.
+let lastSearch = 0
 
 // Computed
 
@@ -259,7 +268,11 @@ const productionList = computed(() => [
 // Functions
 
 const search = () => {
+  const searchId = ++lastSearch
   isLoading.value = true
+  isError.value = false
+  isLoadingMoreAssets.value = false
+  isLoadingMoreShots.value = false
   const index_names = Object.entries(searchFilter)
     .map(([k, v]) => (v ? k : undefined))
     .filter(Boolean)
@@ -272,12 +285,21 @@ const search = () => {
       index_names
     })
     .then(found => {
-      delete found.persons
-      Object.assign(results, found)
+      if (searchId === lastSearch) {
+        delete found.persons
+        Object.assign(results, found)
+      }
     })
-    .catch(console.error)
+    .catch(err => {
+      if (searchId === lastSearch) {
+        isError.value = true
+      }
+      logRequestFailure(err)
+    })
     .finally(() => {
-      isLoading.value = false
+      if (searchId === lastSearch) {
+        isLoading.value = false
+      }
     })
 }
 
@@ -288,6 +310,7 @@ const clearSearchResult = () => {
 }
 
 const loadMoreResults = indexName => {
+  const searchId = lastSearch
   const loadingRef =
     indexName === 'assets' ? isLoadingMoreAssets : isLoadingMoreShots
   loadingRef.value = true
@@ -301,11 +324,15 @@ const loadMoreResults = indexName => {
       index_names: [indexName]
     })
     .then(found => {
-      results[indexName] = results[indexName].concat(found[indexName])
+      if (searchId === lastSearch) {
+        results[indexName] = results[indexName].concat(found[indexName])
+      }
     })
-    .catch(console.error)
+    .catch(logRequestFailure)
     .finally(() => {
-      loadingRef.value = false
+      if (searchId === lastSearch) {
+        loadingRef.value = false
+      }
     })
 }
 

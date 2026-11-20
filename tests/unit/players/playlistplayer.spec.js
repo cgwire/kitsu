@@ -2154,6 +2154,72 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // A temporary playlist the server could not generate.
+  describe('loading error', () => {
+    const loadingBlock = () => wrapper.find('.loading-wrapper')
+
+    it('shows the error where the spinner was', async () => {
+      wrapper = mountPlayer({
+        entities: [],
+        props: { loadingError: 'Could not generate.', tempMode: true }
+      })
+      await flushPromises()
+
+      expect(loadingBlock().find('.error').text()).toBe('Could not generate.')
+      expect(loadingBlock().findComponent({ name: 'Spinner' }).exists()).toBe(
+        false
+      )
+      // The empty file block took half the row and pushed the text aside.
+      expect(wrapper.find('.preview-standard-file').isVisible()).toBe(false)
+    })
+
+    it('shows the spinner alone while loading', async () => {
+      wrapper = mountPlayer({
+        entities: [],
+        props: {
+          isLoading: true,
+          loadingError: 'Could not generate.',
+          tempMode: true
+        }
+      })
+      await flushPromises()
+
+      expect(loadingBlock().findComponent({ name: 'Spinner' }).exists()).toBe(
+        true
+      )
+      expect(loadingBlock().find('.error').exists()).toBe(false)
+    })
+  })
+
+  // The save creates a playlist of the entities shown: an empty one while
+  // they load or when they could not be loaded.
+  describe('save button of a temporary playlist', () => {
+    const saveButton = () =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.props('icon') === 'save')
+
+    it.each([
+      ['while the entities load', { isLoading: true }],
+      ['when they could not be loaded', { loadingError: 'Could not generate.' }]
+    ])('is off %s', async (_, props) => {
+      wrapper = mountPlayer({
+        entities: [],
+        props: { tempMode: true, ...props }
+      })
+      await flushPromises()
+
+      expect(saveButton().props('disabled')).toBe(true)
+    })
+
+    it('is on once the entities are loaded', async () => {
+      wrapper = mountPlayer({ props: { tempMode: true } })
+      await flushPromises()
+
+      expect(saveButton().props('disabled')).toBe(false)
+    })
+  })
+
   // A plain link navigates the tab: the browser fires beforeunload, which
   // closes the socket in Firefox and asks about unsaved annotations.
   describe('downloads', () => {

@@ -906,6 +906,7 @@
       "building": "Építés...",
       "client_playlist": "Ügyfeleknek szóló lejátszási lista",
       "create_for_selection": "Lejátszási lista generálása a kiválasztott feladatokból",
+      "create_for_selection_error": "Hiba történt a lejátszási lista generálásakor.",
       "create_title": "Lejátszási lista készítése",
       "created_at": "Létrehozva:",
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból?",

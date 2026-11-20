@@ -25,7 +25,6 @@ vi.mock('@/store/api/client', () => ({
     pdel: vi.fn(),
     pget: vi.fn(),
     ppost: vi.fn(),
-    ppostImport: vi.fn(),
     pput: vi.fn()
   }
 }))
@@ -611,11 +610,11 @@ describe('Breakdown store, through a store', () => {
     test('imports a casting file', async () => {
       const store = buildStore()
       const formData = { file: 'casting.csv' }
-      client.ppostImport.mockResolvedValueOnce({ count: 3 })
+      client.ppost.mockResolvedValueOnce({ count: 3 })
 
       const result = await store.dispatch('uploadCastingFile', formData)
 
-      expect(client.ppostImport).toHaveBeenCalledWith(
+      expect(client.ppost).toHaveBeenCalledWith(
         '/api/import/csv/projects/p1/casting',
         formData
       )

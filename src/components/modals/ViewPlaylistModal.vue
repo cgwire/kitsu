@@ -26,6 +26,9 @@
             :playlist="currentPlaylist"
             :entities="currentEntities"
             :is-loading="isLoading"
+            :loading-error="
+              errors.load ? $t('playlists.create_for_selection_error') : ''
+            "
             :temp-mode="true"
             :can-save="isSaveAllowed"
             :current-entity-type="currentEntityType"
@@ -80,6 +83,7 @@ import { useFullScreenTarget } from '@/composables/fullScreen'
 import { useModal } from '@/composables/modal'
 import { usePhoneLayout } from '@/composables/phoneLayout'
 import crisp from '@/lib/crisp'
+import { logRequestFailure } from '@/lib/errors'
 import { getPlaylistPath } from '@/lib/path'
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
@@ -123,7 +127,7 @@ const currentPlaylist = ref({
   shots: [],
   for_entity: 'shot'
 })
-const errors = ref({ edit: false })
+const errors = ref({ edit: false, load: false })
 const isLoading = ref(false)
 const loading = ref({ edit: false })
 const modals = ref({ edit: false })
@@ -134,6 +138,9 @@ const fullScreenPlayer = useFullScreenTarget(() => playlistPlayer.value?.$el)
 const playlistToEdit = ref({})
 let previewFileMap = new Map()
 let previewFileEntityMap = new Map()
+// A large selection can take the server minutes: an answer that comes once
+// the modal closed, or opened again, belongs to an earlier selection.
+let lastTempLoad = 0
 
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
@@ -395,6 +402,7 @@ onBeforeUnmount(() => setChatHidden(false))
 watch(
   () => props.active,
   active => {
+    const tempLoad = ++lastTempLoad
     if (active) {
       currentEntities.value = []
       previewFileMap = new Map()
@@ -402,6 +410,7 @@ watch(
       editSuccess.value = false
       createdPlaylist.value = null
       modals.value.edit = false
+      errors.value.load = false
       isLoading.value = true
       const load = props.entityIds
         ? store.dispatch('loadTempPlaylistFromEntities', {
@@ -414,11 +423,19 @@ watch(
           })
       load
         .then(entities => {
-          currentPlaylist.value.for_entity = currentEntityType.value
-          setupEntities(entities)
-          isLoading.value = false
+          if (tempLoad === lastTempLoad) {
+            currentPlaylist.value.for_entity = currentEntityType.value
+            setupEntities(entities)
+            isLoading.value = false
+          }
         })
-        .catch(console.error)
+        .catch(err => {
+          if (tempLoad === lastTempLoad) {
+            isLoading.value = false
+            errors.value.load = true
+          }
+          logRequestFailure(err)
+        })
     } else {
       playlistPlayer.value?.pause()
       playlistPlayer.value?.clearCanvas()
@@ -427,6 +444,11 @@ watch(
   },
   { immediate: true }
 )
+
+// The parents close the modal by unmounting it.
+onBeforeUnmount(() => {
+  lastTempLoad++
+})
 </script>
 
 <style lang="scss" scoped>

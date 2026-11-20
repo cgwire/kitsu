@@ -906,6 +906,7 @@
       "building": "ビルド中…",
       "client_playlist": "クライアントプレイリスト",
       "create_for_selection": "選択したタスクからプレイリストを作成",
+      "create_for_selection_error": "プレイリストの作成中にエラーが発生しました。",
       "create_title": "プレイリストを作成",
       "created_at": "作成日時:",
       "delete_text": "{name} をデータベースから削除してもよろしいですか？",

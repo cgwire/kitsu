@@ -6,6 +6,7 @@ import { createStore } from 'vuex'
 // Load @/store first to avoid a circular-import race when ViewPlaylistModal
 // transitively imports the assets/shots/sequences store modules.
 import '@/lib/auth'
+import { markRequestFailure } from '@/lib/errors'
 
 const routeState = vi.hoisted(() => ({
   path: '/shots',
@@ -29,7 +30,12 @@ vi.mock('@/components/players/players/PlaylistPlayer.vue', async () => {
   const { h } = await import('vue')
   // Its root is the element the browser puts in full screen.
   return {
-    default: { name: 'PlaylistPlayer', props: ['canSave'], render: () => h('div') }
+    default: {
+      name: 'PlaylistPlayer',
+      props: ['canSave', 'entities', 'isLoading', 'loadingError'],
+      methods: { clearCanvas() {}, pause() {} },
+      render: () => h('div')
+    }
   }
 })
 
@@ -104,8 +110,12 @@ describe('ViewPlaylistModal', () => {
     })
 
     wrapper = shallowMount(ViewPlaylistModal, {
-      // the modal sits in a teleport, disabled off a phone: render it in place
-      global: { plugins: [store, i18n], stubs: { teleport: false } },
+      global: {
+        plugins: [store, i18n],
+        // the modal sits in a teleport, disabled off a phone: render it in
+        // place; the mocked player keeps the methods a close calls
+        stubs: { teleport: false, PlaylistPlayer: false }
+      },
       props: { active: false }
     })
   })
@@ -334,6 +344,133 @@ describe('ViewPlaylistModal', () => {
     expect(
       localWrapper.findComponent({ name: 'PlaylistPlayer' }).props('canSave')
     ).toBe(false)
+  })
+
+  // A large selection can take the server minutes: the modal may be gone, or
+  // closed and opened again through its active prop, before the answer comes.
+  describe('playlist generation', () => {
+    const shot = id => ({
+      id,
+      name: id,
+      preview_file_id: `pf-${id}`,
+      preview_files: { 'tt-anim': [{ id: `pf-${id}` }] }
+    })
+    const player = () => wrapper.findComponent({ name: 'PlaylistPlayer' })
+    const shownShots = () => player().props('entities').map(entity => entity.id)
+    const failure = () => {
+      const err = new Error('Gateway Timeout')
+      markRequestFailure(err)
+      return err
+    }
+    // Opens the modal on a temporary playlist answered when a test says so.
+    const open = async () => {
+      const load = {}
+      tempEntities = new Promise((resolve, reject) => {
+        Object.assign(load, { resolve, reject })
+      })
+      await wrapper.setProps({ active: true })
+      return load
+    }
+    const close = () => wrapper.setProps({ active: false })
+
+    it('stops loading and tells when the playlist cannot be generated', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const err = failure()
+      const load = await open()
+      load.reject(err)
+      await flushPromises()
+
+      expect(console.error).toHaveBeenCalledWith(err)
+      expect(player().props('isLoading')).toBe(false)
+      expect(player().props('loadingError')).toBe(
+        'playlists.create_for_selection_error'
+      )
+    })
+
+    it('opens without the error of an earlier generation', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const first = await open()
+      first.reject(failure())
+      await flushPromises()
+      await close()
+      const second = await open()
+
+      expect(player().props('isLoading')).toBe(true)
+      expect(player().props('loadingError')).toBe('')
+
+      second.resolve([shot('shot-2')])
+      await flushPromises()
+
+      expect(player().props('isLoading')).toBe(false)
+      expect(shownShots()).toEqual(['shot-2'])
+    })
+
+    it('keeps loading when a closed generation answers first', async () => {
+      const first = await open()
+      await close()
+      const second = await open()
+      first.resolve([shot('shot-1')])
+      await flushPromises()
+
+      expect(player().props('isLoading')).toBe(true)
+      expect(shownShots()).toEqual([])
+
+      second.resolve([shot('shot-2')])
+      await flushPromises()
+
+      expect(player().props('isLoading')).toBe(false)
+      expect(shownShots()).toEqual(['shot-2'])
+    })
+
+    it('keeps the last playlist when a closed generation answers last', async () => {
+      const first = await open()
+      await close()
+      const second = await open()
+      second.resolve([shot('shot-2')])
+      await flushPromises()
+      first.resolve([shot('shot-1')])
+      await flushPromises()
+
+      expect(shownShots()).toEqual(['shot-2'])
+    })
+
+    // The entry map is the one of the playlist page too.
+    it('leaves the playlist entries alone when a closed generation answers', async () => {
+      const load = await open()
+      await close()
+      const commit = vi.spyOn(store, 'commit')
+      load.resolve([shot('shot-1')])
+      await flushPromises()
+
+      expect(commit).not.toHaveBeenCalled()
+    })
+
+    // Its parents close the modal by unmounting it.
+    it('leaves the playlist entries alone once the modal is gone', async () => {
+      const load = await open()
+      wrapper.unmount()
+      const commit = vi.spyOn(store, 'commit')
+      load.resolve([shot('shot-1')])
+      await flushPromises()
+
+      expect(commit).not.toHaveBeenCalled()
+    })
+
+    it('shows no error when a closed generation fails', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const err = failure()
+      const first = await open()
+      await close()
+      const second = await open()
+      second.resolve([shot('shot-2')])
+      await flushPromises()
+      first.reject(err)
+      await flushPromises()
+
+      expect(console.error).toHaveBeenCalledWith(err)
+      expect(player().props('loadingError')).toBe('')
+      expect(shownShots()).toEqual(['shot-2'])
+    })
   })
 
   describe('on a phone', () => {

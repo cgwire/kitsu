@@ -906,6 +906,7 @@
       "building": "در حال ساختن...",
       "client_playlist": "لیست پخش مشتری",
       "create_for_selection": "ایجاد لیست پخش از وظایف انتخاب شده",
+      "create_for_selection_error": "هنگام ایجاد لیست پخش خطایی رخ داد.",
       "create_title": "ساخت لیست پخش",
       "created_at": "ساخته شده در:",
       "delete_text": "آیا مطمئن هستید که می‌خواهید {name} را از پایگاه داده خود حذف کنید؟",

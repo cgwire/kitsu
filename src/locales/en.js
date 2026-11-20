@@ -1367,6 +1367,7 @@ export default {
     clients_to_notify: 'Clients to notify',
     comparing_missing_plan: 'Entity missing for current type',
     create_for_selection: 'Generate a playlist from selected tasks',
+    create_for_selection_error: 'An error occurred while generating the playlist.',
     create_title: 'Create playlist',
     created: 'Playlist “{name}” created.',
     created_at: 'Created at:',

@@ -906,6 +906,7 @@
       "building": "创建中...",
       "client_playlist": "客户播放列表",
       "create_for_selection": "从所选任务生成播放列表",
+      "create_for_selection_error": "生成播放列表时出现错误。",
       "create_title": "创建播放列表",
       "created_at": "创建于：",
       "delete_text": "您确定要从您的数据库移除{name}吗？",

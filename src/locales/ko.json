@@ -906,6 +906,7 @@
       "building": "빌드 중...",
       "client_playlist": "클라이언트 재생 목록",
       "create_for_selection": "선택한 작업으로부터 재생 목록 생성",
+      "create_for_selection_error": "재생 목록을 생성하는 도중에 오류가 발생했습니다.",
       "create_title": "재생 목록 만들기",
       "created_at": "작성 시각:",
       "delete_text": "데이터베이스에서 {name}을(를) 정말로 제거하시겠습니까?",

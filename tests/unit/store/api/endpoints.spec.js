@@ -8,7 +8,6 @@ vi.mock('@/store/api/client', () => ({
     pdel: vi.fn(),
     pget: vi.fn(),
     ppost: vi.fn(),
-    ppostImport: vi.fn(),
     pput: vi.fn()
   }
 }))
@@ -34,7 +33,6 @@ describe('store/api endpoints', () => {
     client.pdel.mockClear()
     client.pget.mockClear()
     client.ppost.mockClear()
-    client.ppostImport.mockClear()
     client.pput.mockClear()
   })
 
@@ -75,8 +73,6 @@ describe('store/api endpoints', () => {
     })
   })
 
-  // Zou answers an import only once every row is processed: the imports
-  // must not go through the 60s response timeout of regular requests.
   describe('imports', () => {
     const production = { id: 'p1' }
     const formData = { file: 'import.csv' }
@@ -139,21 +135,19 @@ describe('store/api endpoints', () => {
           ),
         '/api/import/csv/projects/p1/task-types/t1/estimations'
       ]
-    ])('%s posts through ppostImport', (label, post, path) => {
+    ])('%s posts the file to its route', (label, post, path) => {
       post()
 
-      expect(client.ppostImport).toHaveBeenCalledWith(path, formData)
-      expect(client.ppost).not.toHaveBeenCalled()
+      expect(client.ppost).toHaveBeenCalledWith(path, formData)
     })
 
-    test('the OTIO import posts through ppostImport', () => {
+    test('the OTIO import posts the file to its route', () => {
       shotsApi.postEdl(production, 'cut.otio', 'naming', true, { id: 'e1' })
 
-      expect(client.ppostImport).toHaveBeenCalledWith(
+      expect(client.ppost).toHaveBeenCalledWith(
         '/api/import/otio/projects/p1/episodes/e1',
         expect.any(FormData)
       )
-      expect(client.ppost).not.toHaveBeenCalled()
     })
   })
 
@@ -534,6 +528,29 @@ describe('store/api endpoints', () => {
       { entity_id: 'shot-1', preview_file_id: 'preview-1' },
       { entity_id: 'shot-2', preview_file_id: null }
     ])
+  })
+
+  // A generated playlist is a read that Zou may build for minutes: ppost
+  // gives it the 10 minutes of a write, where a read gives up after 60 s.
+  test.each([
+    [
+      'from tasks',
+      () => playlistsApi.loadTempPlaylist({ id: 'p1' }, ['task-1'], false),
+      { task_ids: ['task-1'] }
+    ],
+    [
+      'from entities',
+      () =>
+        playlistsApi.loadTempPlaylistFromEntities({ id: 'p1' }, ['shot-1'], false),
+      { entity_ids: ['shot-1'] }
+    ]
+  ])('waits for a playlist generated %s as long as for a write', (label, load, data) => {
+    load()
+
+    expect(client.ppost).toHaveBeenCalledWith(
+      '/api/data/projects/p1/playlists/temp',
+      data
+    )
   })
 
   // The list route of Zou filters on a JSON list of ids.

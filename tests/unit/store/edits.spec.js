@@ -13,7 +13,6 @@ vi.mock('@/store/api/client', () => ({
     pdel: vi.fn(),
     pget: vi.fn(),
     ppost: vi.fn(),
-    ppostImport: vi.fn(),
     pput: vi.fn()
   }
 }))
@@ -1580,11 +1579,11 @@ describe('Edits store, through a store', () => {
       const formData = { file: 'edits.csv' }
       store.commit(EDIT_CSV_FILE_SELECTED, formData)
       expect(store.getters.editsCsvFormData).toEqual(formData)
-      client.ppostImport.mockResolvedValueOnce({})
+      client.ppost.mockResolvedValueOnce({})
 
       await store.dispatch('uploadEditFile', true)
 
-      expect(client.ppostImport).toHaveBeenCalledWith(
+      expect(client.ppost).toHaveBeenCalledWith(
         '/api/import/csv/projects/p1/edits?update=true',
         formData
       )

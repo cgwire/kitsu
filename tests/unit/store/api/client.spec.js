@@ -54,7 +54,11 @@ vi.mock('@/lib/errors', () => ({
   default: { backToLogin: vi.fn(), markRequestFailure: vi.fn() }
 }))
 
-import client, { buildQuery, setErrorReporter } from '@/store/api/client'
+import client, {
+  buildQuery,
+  setErrorReporter,
+  setSlowReporter
+} from '@/store/api/client'
 import errors from '@/lib/errors'
 
 describe('store/api/client', () => {
@@ -111,32 +115,30 @@ describe('store/api/client', () => {
     })
   })
 
-  test('regular requests stop waiting for an answer after 60s', async () => {
+  test('reads stop waiting for an answer after 60s', async () => {
     h.response = { body: {} }
-    await client.ppost('/api/data/foo', { name: 'foo' })
+    await client.pget('/api/data/foo')
     expect(h.timeout).toEqual({ response: 60000, deadline: 300000 })
   })
 
-  // Zou answers an import only once every row is processed, which takes
-  // minutes on a large file: a 60s wait made Kitsu report an error while
-  // the import kept running on the server.
-  test('ppostImport waits up to 10 minutes for the import to finish', async () => {
-    h.response = { body: [{ id: 'shot-1' }] }
-    const formData = { file: 'import.csv' }
-    await expect(
-      client.ppostImport('/api/import/csv/projects/p1/shots', formData)
-    ).resolves.toEqual([{ id: 'shot-1' }])
-    expect(h.calls).toEqual([
-      { method: 'POST', path: '/api/import/csv/projects/p1/shots' }
-    ])
-    expect(h.sent).toBe(formData)
+  // Zou carries a write through even once Kitsu stops waiting: a comment
+  // posted with a preview and cut at 60s read as a failure while Zou kept
+  // it, and publishing again posted it twice.
+  test.each([
+    ['ppost', 'POST'],
+    ['pput', 'PUT'],
+    ['pdel', 'DELETE']
+  ])('%s waits up to 10 minutes for the write to finish', async (name, method) => {
+    h.response = { body: {} }
+    await client[name]('/api/data/foo', { name: 'foo' })
+    expect(h.calls).toEqual([{ method, path: '/api/data/foo' }])
     expect(h.timeout).toEqual({ deadline: 600000 })
   })
 
   test('a request that timed out rejects as a timeout', async () => {
-    h.error = Object.assign(new Error('Response timeout of 60000ms exceeded'), {
+    h.error = Object.assign(new Error('Timeout of 600000ms exceeded'), {
       code: 'ECONNABORTED',
-      timeout: 60000
+      timeout: 600000
     })
     await expect(client.ppost('/api/data/foo')).rejects.toMatchObject({
       isTimeout: true
@@ -224,6 +226,14 @@ describe('store/api/client', () => {
     expect(h.sent.project_id).toEqual('production-1')
   })
 
+  // A search is a read, though sent as POST.
+  test('searchData keeps the budget of a read', async () => {
+    h.response = { body: {} }
+    await client.searchData('rabbit', 10, 0, ['assets'], 'all')
+    expect(h.calls).toEqual([{ method: 'POST', path: '/api/data/search' }])
+    expect(h.timeout).toEqual({ response: 60000, deadline: 300000 })
+  })
+
   describe('pgetNdjson', () => {
     // NDJSON body split in two chunks, cutting a line in half, to
     // exercise the buffering.
@@ -246,6 +256,8 @@ describe('store/api/client', () => {
     }
 
     afterEach(() => {
+      setSlowReporter(null)
+      vi.restoreAllMocks()
       vi.unstubAllGlobals()
     })
 
@@ -297,6 +309,32 @@ describe('store/api/client', () => {
       expect(h.calls).toEqual([
         { method: 'GET', path: '/api/data/shots/with-tasks' }
       ])
+    })
+
+    // The heaviest reads: past 2 minutes, their answer is worth knowing of.
+    test('tells the slow reporter of a list that took over 2 minutes', async () => {
+      const reporter = vi.fn()
+      setSlowReporter(reporter)
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () =>
+          ndjsonResponse([
+            { compact: true, asset_fields: ['id'], task_fields: [] },
+            ['asset-1']
+          ])
+        )
+      )
+      let now = 0
+      vi.spyOn(Date, 'now').mockImplementation(() => (now += 200000))
+      await expect(
+        client.pgetNdjson('/api/data/assets/with-tasks')
+      ).resolves.toEqual([{ id: 'asset-1' }])
+      await new Promise(resolve => setTimeout(resolve))
+      expect(reporter).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/api/data/assets/with-tasks?stream=true&compact=true',
+        duration: 200000
+      })
     })
 
     test('a 401 redirects to login and never settles the promise', async () => {
@@ -491,6 +529,99 @@ describe('store/api/client', () => {
       expect(rejections).toEqual([])
       expect(consoleError).toHaveBeenCalledTimes(2)
       consoleError.mockRestore()
+    })
+  })
+
+  // A write may run for 10 minutes and still go through: past 2 minutes, an
+  // answer is worth knowing of too.
+  describe('slow answer reporter', () => {
+    const settle = () => new Promise(resolve => setTimeout(resolve))
+    // Every request seems to run for the given time.
+    const runFor = duration => {
+      let now = 0
+      return vi.spyOn(Date, 'now').mockImplementation(() => (now += duration))
+    }
+
+    afterEach(() => {
+      setSlowReporter(null)
+      vi.restoreAllMocks()
+    })
+
+    test('hears of an answer that came after 2 minutes', async () => {
+      const reporter = vi.fn()
+      setSlowReporter(reporter)
+      h.response = { body: {} }
+      runFor(120001)
+      await client.pput('/api/data/a', {})
+      await settle()
+      expect(reporter).toHaveBeenCalledWith({
+        method: 'PUT',
+        path: '/api/data/a',
+        duration: 120001
+      })
+    })
+
+    test('says nothing of an answer within 2 minutes', async () => {
+      const reporter = vi.fn()
+      setSlowReporter(reporter)
+      h.response = { body: {} }
+      runFor(120000)
+      await client.ppost('/api/data/a', {})
+      await settle()
+      expect(reporter).not.toHaveBeenCalled()
+    })
+
+    test('leaves a failure to the error reporter', async () => {
+      const reporter = vi.fn()
+      setSlowReporter(reporter)
+      h.error = { status: 500, response: { status: 500, body: {} } }
+      runFor(200000)
+      await client.pget('/api/data/a').catch(() => {})
+      await settle()
+      expect(reporter).not.toHaveBeenCalled()
+    })
+
+    // Their time follows the size of the files: the attachments of a
+    // comment, for one, go through ppost.
+    test('leaves the uploads and downloads of files out', async () => {
+      const reporter = vi.fn()
+      setSlowReporter(reporter)
+      h.response = { body: {}, text: '' }
+      runFor(200000)
+      await client.ppostFile('/api/pictures/p1', {}).promise
+      await client.ppost('/api/actions/tasks/t1/comment', new FormData())
+      await client.getText('/api/d.txt')
+      await client.getBlob('/api/e.png')
+      await client.pget('/api/data/f')
+      await settle()
+      expect(reporter.mock.calls).toEqual([
+        [{ method: 'GET', path: '/api/data/f', duration: 200000 }]
+      ])
+    })
+
+    test('a failing reporter leaves the answer as it was', async () => {
+      const rejections = []
+      const onRejection = reason => rejections.push(reason)
+      process.on('unhandledRejection', onRejection)
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      h.response = { body: { id: 'a' } }
+      runFor(200000)
+
+      setSlowReporter(() => {
+        throw new Error('reporter bug')
+      })
+      await expect(client.pget('/api/data/a')).resolves.toEqual({ id: 'a' })
+      setSlowReporter(async () => {
+        throw new Error('reporter bug')
+      })
+      await expect(client.pget('/api/data/a')).resolves.toEqual({ id: 'a' })
+      await settle()
+      process.off('unhandledRejection', onRejection)
+
+      expect(rejections).toEqual([])
+      expect(consoleError).toHaveBeenCalledTimes(2)
     })
   })
 

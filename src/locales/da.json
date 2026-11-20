@@ -906,6 +906,7 @@
       "building": "Genererer...",
       "client_playlist": "Klientplaylist",
       "create_for_selection": "Generer en playlist fra markerede opgaver",
+      "create_for_selection_error": "Der opstod en fejl under generering af playlisten.",
       "create_title": "Opret playlist",
       "created_at": "Oprettet den:",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
