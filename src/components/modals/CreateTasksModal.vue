@@ -13,6 +13,7 @@
         <form @submit.prevent class="widden">
           <div class="fields mb1">
             <combobox-task-type
+              :aria-label="$t('news.task_type')"
               :task-type-list="getApplicableTaskTypes()"
               :with-margin="false"
               v-model="form.task_type_id"

@@ -10,6 +10,7 @@ import { createStore } from 'vuex'
 
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 
 const i18n = createI18n({
   legacy: false,
@@ -133,6 +134,14 @@ describe('modals/CreateTasksModal', () => {
 
     expect(wrapper.findComponent(Combobox).props('ariaLabel')).toBe(
       'main.entities'
+    )
+  })
+
+  it('names the task type choice', () => {
+    const wrapper = mountModal()
+
+    expect(wrapper.findComponent(ComboboxTaskType).props('ariaLabel')).toBe(
+      'news.task_type'
     )
   })
 

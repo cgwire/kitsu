@@ -9,6 +9,7 @@
         ref="triggerRef"
         role="combobox"
         :aria-labelledby="label.length > 0 ? labelId : undefined"
+        :aria-label="ariaLabel || undefined"
         :tabindex="disabled ? -1 : 0"
         aria-haspopup="listbox"
         :aria-expanded="showTaskTypeList"
@@ -75,6 +76,11 @@ const props = defineProps({
     type: Boolean
   },
   label: {
+    default: '',
+    type: String
+  },
+  // Names the combobox when it shows no label.
+  ariaLabel: {
     default: '',
     type: String
   },
