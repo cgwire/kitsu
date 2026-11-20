@@ -697,8 +697,8 @@ describe('composables/previewRoom', () => {
       })
       const handler = handlerFor(socket, 'preview-room:panzoom-changed')
       handler({
-        local_id: 'local-abc',
-        data: { x: 1, y: 2, zoom: 3 }
+        playlist_id: 'playlist-1',
+        data: { local_id: 'local-abc', user_id: 'user-1', x: 1, y: 2, zoom: 3 }
       })
       expect(setPanZoom).not.toHaveBeenCalled()
       wrapper.unmount()
@@ -715,10 +715,64 @@ describe('composables/previewRoom', () => {
       })
       const handler = handlerFor(socket, 'preview-room:panzoom-changed')
       handler({
-        local_id: 'other-localId',
-        data: { x: 1, y: 2, zoom: 3 }
+        playlist_id: 'playlist-1',
+        data: {
+          local_id: 'other-localId',
+          user_id: 'user-2',
+          x: 1,
+          y: 2,
+          zoom: 3
+        }
       })
       expect(setPanZoom).toHaveBeenCalledWith(1, 2, 3)
+      wrapper.unmount()
+    })
+
+    it("'preview-room:comparison-panzoom-changed' ignores own broadcasts", () => {
+      const socket = makeSocket()
+      const setComparisonPanZoom = vi.fn()
+      const { wrapper } = mountWithRoom({
+        room: makeRoom({ people: ['user-1'] }),
+        userId: 'user-1',
+        socket,
+        setComparisonPanZoom
+      })
+      const handler = handlerFor(
+        socket,
+        'preview-room:comparison-panzoom-changed'
+      )
+      handler({
+        playlist_id: 'playlist-1',
+        data: { local_id: 'local-abc', user_id: 'user-1', x: 1, y: 2, zoom: 3 }
+      })
+      expect(setComparisonPanZoom).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it("'preview-room:comparison-panzoom-changed' applies remote broadcasts", () => {
+      const socket = makeSocket()
+      const setComparisonPanZoom = vi.fn()
+      const { wrapper } = mountWithRoom({
+        room: makeRoom({ people: ['user-1'] }),
+        userId: 'user-1',
+        socket,
+        setComparisonPanZoom
+      })
+      const handler = handlerFor(
+        socket,
+        'preview-room:comparison-panzoom-changed'
+      )
+      handler({
+        playlist_id: 'playlist-1',
+        data: {
+          local_id: 'other-localId',
+          user_id: 'user-2',
+          x: 1,
+          y: 2,
+          zoom: 3
+        }
+      })
+      expect(setComparisonPanZoom).toHaveBeenCalledWith(1, 2, 3)
       wrapper.unmount()
     })
 
