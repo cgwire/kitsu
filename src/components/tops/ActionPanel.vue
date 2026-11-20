@@ -1575,13 +1575,10 @@ const confirmClientCommentsCopy = async () => {
 }
 
 const confirmTaskCreation = async () => {
-  const type =
-    ['shots', 'assets', 'edits'].find(name => route.path.includes(name)) ||
-    'episodes'
   loading.taskCreation = true
   try {
     await store.dispatch('createSelectedTasks', {
-      type,
+      type: `${currentEntityType.value}s`,
       projectId: props.productionId
     })
   } catch (err) {

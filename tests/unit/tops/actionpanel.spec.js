@@ -104,6 +104,16 @@ const mountPanel = async (
         component: { template: '<div />' }
       },
       {
+        path: '/productions/:production_id/episodes',
+        name: 'episodes',
+        component: { template: '<div />' }
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/sequences',
+        name: 'episode-sequences',
+        component: { template: '<div />' }
+      },
+      {
         path: '/productions/:production_id/sequences',
         name: 'sequences',
         component: { template: '<div />' }
@@ -1265,6 +1275,33 @@ describe('ActionPanel, opened on empty cells', () => {
     await flushPromises()
 
     expect(wrapper.find('.custom-action-combobox').exists()).toBe(true)
+  })
+})
+
+describe('ActionPanel, task creation', () => {
+  const createButton = wrapper => wrapper.find('.action-bar .confirm-button')
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  // The sequences went through the episode route, whatever the production.
+  test.each([
+    ['/productions/production-1/assets', 'assets'],
+    ['/productions/production-1/shots', 'shots'],
+    ['/productions/production-1/edits', 'edits'],
+    ['/productions/production-1/sequences', 'sequences'],
+    ['/productions/production-1/episodes/episode-1/sequences', 'sequences'],
+    ['/productions/production-1/episodes', 'episodes']
+  ])('creates the tasks of %s as %s', async (path, type) => {
+    const { store, wrapper } = await mountPanel([], { path, validations: 1 })
+
+    await createButton(wrapper).trigger('click')
+
+    expect(store.dispatch).toHaveBeenCalledWith('createSelectedTasks', {
+      type,
+      projectId: 'production-1'
+    })
   })
 })
 
