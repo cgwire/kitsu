@@ -6,10 +6,21 @@ vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import errors from '@/lib/errors'
 
-import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
-import Sequences from '@/components/pages/Sequences.vue'
+import csv from '@/lib/csv'
+import en from '@/locales/en'
+import fr from '@/locales/fr.json'
 
-import { mountEntityPage, production } from '../../fixtures/entity-page'
+import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import Sequences from '@/components/pages/Sequences.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+
+import {
+  mountEntityPage,
+  production,
+  reimportExport
+} from '../../fixtures/entity-page'
 import { buildSearchQueryListStub } from '../../fixtures/search-query-list'
 import { recordUnhandledRejections } from '../../fixtures/unhandled-rejections'
 
@@ -390,5 +401,258 @@ describe('Sequences page, saved searches', () => {
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('save', 's01')
 
     expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('s01')
+  })
+})
+
+describe('Sequences page, CSV', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  const mountCsvPage = ({ getters = {}, ...options } = {}) =>
+    mountEntityPage(Sequences, {
+      listName: 'SequenceList',
+      getters: {
+        isCurrentUserProductionManager: true,
+        sequenceMap: new Map([
+          [
+            'sequence-1',
+            {
+              id: 'sequence-1',
+              name: 'SQ01',
+              episode_id: 'ep-a',
+              project_id: production.id
+            }
+          ]
+        ]),
+        sequenceValidationColumns: ['task-type-1'],
+        ...getters
+      },
+      ...options
+    })
+
+  const exportFile = async options => {
+    const buildCsvFile = vi.spyOn(csv, 'buildCsvFile').mockReturnValue('')
+    const { wrapper } = await mountCsvPage({
+      actions: { getSequencesCsvLines: () => [['line']] },
+      locale: 'en',
+      messages: en,
+      ...options
+    })
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'export')
+      .vm.$emit('click')
+    await flushPromises()
+    const [name, [headers, ...lines]] = buildCsvFile.mock.calls[0]
+    return { name, headers, lines }
+  }
+
+  test('offers the import and the export to the managers only', async () => {
+    const icons = async isManager => {
+      const { wrapper } = await mountCsvPage({
+        getters: { isCurrentUserProductionManager: isManager }
+      })
+      return wrapper
+        .findAllComponents(ButtonSimple)
+        .map(button => button.props('icon'))
+    }
+
+    expect(await icons(true)).toEqual(
+      expect.arrayContaining(['import', 'export'])
+    )
+    expect(await icons(false)).not.toEqual(
+      expect.arrayContaining(['import'])
+    )
+    expect(await icons(false)).not.toEqual(
+      expect.arrayContaining(['export'])
+    )
+  })
+
+  test('writes the columns of the list', async () => {
+    const { headers, lines } = await exportFile({
+      getters: {
+        isTVShow: true,
+        currentEpisode: { id: 'ep-a', name: 'E01' },
+        currentProduction: {
+          ...production,
+          descriptors: [
+            {
+              name: 'Contractor',
+              field_name: 'contractor',
+              entity_type: 'Sequence',
+              data_type: 'string'
+            }
+          ]
+        },
+        isSequenceTime: true,
+        isSequenceEstimation: true,
+        sequenceValidationColumns: ['tt-1'],
+        taskTypeMap: new Map([['tt-1', { name: 'Storyboard' }]])
+      }
+    })
+
+    expect(headers).toEqual([
+      'Episode',
+      en.sequences.fields.name,
+      en.sequences.fields.description,
+      'Contractor',
+      en.sequences.fields.time_spent,
+      en.main.estimation_short,
+      'Storyboard',
+      'Storyboard assignations'
+    ])
+    expect(lines).toEqual([['line']])
+  })
+
+  test('names the file after the episode', async () => {
+    const { name } = await exportFile({
+      getters: { isTVShow: true, currentEpisode: { id: 'ep-a', name: 'E01' } }
+    })
+
+    expect(name).toMatch(/_kitsu_production_e01_sequences$/)
+  })
+
+  // A film has no episode.
+  test('writes no episode column outside a TV show', async () => {
+    const { headers, name } = await exportFile()
+
+    expect(headers.slice(0, 2)).toEqual([
+      en.sequences.fields.name,
+      en.sequences.fields.description
+    ])
+    expect(name).toMatch(/_kitsu_production_sequences$/)
+  })
+
+  // Zou refuses a line of a TV show without its episode.
+  test('requires the episode of each line in a TV show', async () => {
+    const { wrapper } = await mountCsvPage({
+      getters: { isTVShow: true, currentEpisode: { id: 'ep-a', name: 'E01' } }
+    })
+
+    const modal = wrapper.findComponent(ImportRenderModal)
+    expect(modal.props('dataMatchers')).toEqual(['Episode', 'Name'])
+    expect(modal.props('requiredValues')).toEqual(['Episode', 'Name'])
+    expect(modal.props('entityType')).toBe('Sequence')
+  })
+
+  test('identifies a line by its name outside a TV show', async () => {
+    const { wrapper } = await mountCsvPage()
+
+    const modal = wrapper.findComponent(ImportRenderModal)
+    expect(modal.props('dataMatchers')).toEqual(['Name'])
+    expect(modal.props('requiredValues')).toEqual(['Name'])
+    expect(modal.props('database')).toEqual({ SQ01: true })
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description']
+    )
+  })
+
+  // The export writes the labels of the language of the user.
+  test('imports back a file exported in the language of the user', async () => {
+    const { wrapper } = await mountCsvPage({
+      getters: { sequenceValidationColumns: [] },
+      actions: { getSequencesCsvLines: () => [] },
+      locale: 'fr',
+      messages: fr.default
+    })
+
+    const { exported, imported } = await reimportExport(wrapper)
+
+    const { sequences } = fr.default
+    expect(exported).toEqual([
+      sequences.fields.name,
+      sequences.fields.description
+    ])
+    expect(imported).toEqual(['Name', 'Description'])
+  })
+
+  // A film has no episode: its preview shows the Episode column as ignored.
+  test.each([
+    [false, [['Name', 'Description'], ['SQ02', 'Night']]],
+    [true, [['Name', 'Episode', 'Description'], ['SQ02', 'E01', 'Night']]]
+  ])(
+    'sends the Episode column only in a TV show (TV show: %s)',
+    async (isTVShow, uploaded) => {
+      const turnEntriesToCsvString = vi.spyOn(csv, 'turnEntriesToCsvString')
+      const { wrapper } = await mountCsvPage({
+        actions: { uploadSequenceFile: vi.fn(() => Promise.resolve()) },
+        getters: { isTVShow, currentEpisode: { id: 'ep-a', name: 'E01' } }
+      })
+
+      await wrapper
+        .findComponent(ImportRenderModal)
+        .vm.$emit(
+          'confirm',
+          [
+            ['Name', 'Episode', 'Description'],
+            ['SQ02', 'E01', 'Night']
+          ],
+          false
+        )
+      await flushPromises()
+
+      expect(turnEntriesToCsvString).toHaveBeenCalledWith(uploaded)
+    }
+  )
+
+  // There, the preview imports the column, as the upload has to.
+  test.each([
+    [
+      'a metadata column',
+      {
+        sequenceMetadataDescriptors: [
+          {
+            name: 'Episode',
+            field_name: 'episode',
+            entity_type: 'Sequence',
+            data_type: 'string'
+          }
+        ]
+      }
+    ],
+    [
+      'a task type',
+      { productionSequenceTaskTypes: [{ id: 'tt-ep', name: 'Episode' }] }
+    ]
+  ])(
+    'sends the Episode column of a film that %s names',
+    async (_, getters) => {
+      const turnEntriesToCsvString = vi.spyOn(csv, 'turnEntriesToCsvString')
+      const { wrapper } = await mountCsvPage({
+        actions: { uploadSequenceFile: vi.fn(() => Promise.resolve()) },
+        getters: { isTVShow: false, ...getters }
+      })
+      const entries = [
+        ['Name', 'Episode'],
+        ['SQ02', 'Pilot']
+      ]
+
+      await wrapper
+        .findComponent(ImportRenderModal)
+        .vm.$emit('confirm', entries, false)
+      await flushPromises()
+
+      expect(turnEntriesToCsvString).toHaveBeenCalledWith(entries)
+    }
+  )
+
+  test('uploads the file, then reloads the list', async () => {
+    const uploadSequenceFile = vi.fn(() => Promise.resolve())
+    const { wrapper, store, dispatched } = await mountCsvPage({
+      actions: { uploadSequenceFile }
+    })
+    const loadsBefore = dispatched('loadSequencesWithTasks').length
+
+    await wrapper
+      .findComponent(ImportRenderModal)
+      .vm.$emit('confirm', [['Name'], ['SQ02']], true)
+    await flushPromises()
+
+    expect(store.commit).toHaveBeenCalledWith(
+      'SEQUENCE_CSV_FILE_SELECTED',
+      expect.any(FormData)
+    )
+    expect(uploadSequenceFile).toHaveBeenCalledWith(true)
+    expect(dispatched('loadSequencesWithTasks')).toHaveLength(loadsBefore + 1)
+    expect(wrapper.findComponent(ImportRenderModal).props('active')).toBe(false)
   })
 })

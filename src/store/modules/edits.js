@@ -7,6 +7,7 @@ import tasksStore from '@/store/modules/tasks'
 import taskTypesStore from '@/store/modules/tasktypes'
 import taskStatusStore from '@/store/modules/taskstatus'
 
+import { getEntityCsvLines } from '@/lib/csv'
 import { getExportDescriptors } from '@/lib/descriptors'
 import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { PAGE_SIZE } from '@/lib/pagination'
@@ -25,7 +26,6 @@ import {
   setCanceled,
   trackEdit
 } from '@/lib/models'
-import { minutesToDays } from '@/lib/time'
 import { buildEditIndex, indexSearch } from '@/lib/indexing'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
 
@@ -507,59 +507,18 @@ const actions = {
   },
 
   getEditsCsvLines({ state, rootGetters }) {
-    const production = rootGetters.currentProduction
-    const isTVShow = rootGetters.isTVShow
-    const organisation = rootGetters.organisation
-    const personMap = rootGetters.personMap
-    let edits = cache.edits
-    if (cache.result && cache.result.length > 0) {
-      edits = cache.result
-    }
-    const sortedDescriptors = getExportDescriptors(production, 'Edit')
-    const lines = edits.map(edit => {
-      let editLine = []
-      if (isTVShow) {
-        editLine.push(edit.episode_name)
-      }
-      editLine = editLine.concat([edit.name, edit.description || ''])
-      sortedDescriptors.forEach(descriptor => {
-        if (descriptor.data_type === 'boolean') {
-          editLine.push(
-            edit.data[descriptor.field_name]?.toLowerCase() === 'true'
-          )
-        } else if (descriptor.data_type === 'person') {
-          const person = personMap.get(edit.data[descriptor.field_name])
-          editLine.push(person ? person.full_name : '')
-        } else {
-          editLine.push(edit.data[descriptor.field_name])
-        }
-      })
-      if (state.isEditTime) {
-        editLine.push(minutesToDays(organisation, edit.timeSpent).toFixed(2))
-      }
-      if (state.isEditEstimation) {
-        editLine.push(minutesToDays(organisation, edit.estimation).toFixed(2))
-      }
-      state.editValidationColumns.forEach(validationColumn => {
-        const task = rootGetters.taskMap.get(
-          edit.validations.get(validationColumn)
-        )
-        if (task) {
-          editLine.push(task.task_status_short_name)
-          editLine.push(
-            task.assignees
-              .map(id => personMap.get(id)?.full_name)
-              .filter(Boolean)
-              .join(',')
-          )
-        } else {
-          editLine.push('') // Status
-          editLine.push('') // Assignations
-        }
-      })
-      return editLine
+    // The rows of the search, or every row when it matches nothing.
+    const edits = cache.result?.length > 0 ? cache.result : cache.edits
+    return getEntityCsvLines(edits, {
+      descriptors: getExportDescriptors(rootGetters.currentProduction, 'Edit'),
+      hasEpisode: rootGetters.isTVShow,
+      isEstimation: state.isEditEstimation,
+      isTime: state.isEditTime,
+      organisation: rootGetters.organisation,
+      personMap: rootGetters.personMap,
+      taskMap: rootGetters.taskMap,
+      validationColumns: state.editValidationColumns
     })
-    return lines
   },
 
   loadEditHistory({ commit, state }, editId) {

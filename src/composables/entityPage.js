@@ -15,6 +15,7 @@ import { useStore } from 'vuex'
 
 import { getEntityName, useCellSave } from '@/composables/cellSave'
 import csv from '@/lib/csv'
+import { getExportDescriptors } from '@/lib/descriptors'
 import func from '@/lib/func'
 import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
@@ -40,6 +41,15 @@ const CSV_LABEL_KEYS = {
     Name: 'edits.fields.name',
     Description: 'edits.fields.description'
   },
+  episode: {
+    Name: 'episodes.fields.name',
+    Description: 'episodes.fields.description',
+    Status: 'main.status'
+  },
+  sequence: {
+    Name: 'sequences.fields.name',
+    Description: 'sequences.fields.description'
+  },
   shot: {
     Sequence: 'shots.fields.sequence',
     Name: 'shots.fields.name',
@@ -50,6 +60,34 @@ const CSV_LABEL_KEYS = {
     FPS: 'main.fps',
     Resolution: 'shots.fields.resolution'
   }
+}
+
+// The pages whose CSV export and import share their columns: the name, the
+// description, the metadata, and the tasks of an entity. In a TV show, an
+// edit or a sequence hangs under an episode, and the export of the All
+// pseudo-episode is named after the label of its list. Zou refuses a
+// sequence of a TV show without its episode.
+//
+// `valueColumns` follow the description: the export writes the label of a
+// value in the language of the user, and the import gives the label its
+// value back, the only form Zou reads.
+const ENTITY_CSV = {
+  edit: { hasEpisode: true, allEpisodesKey: 'main.all_edits' },
+  episode: {
+    hasEpisode: false,
+    valueColumns: {
+      Status: {
+        field: 'status',
+        valueKeys: {
+          canceled: 'episodes.status.canceled',
+          complete: 'episodes.status.complete',
+          running: 'episodes.status.running',
+          standby: 'episodes.status.standby'
+        }
+      }
+    }
+  },
+  sequence: { hasEpisode: true, isEpisodeRequired: true }
 }
 
 const DISPLAY_SETTINGS = {
@@ -111,9 +149,11 @@ const ERRORS = {
  *   importModalRef: template refs
  * - reset: () => void, reloads the entities of the page
  * - loadEntities: () => Promise, the plain load run after a CSV import
- * - dataMatchers: ref of the CSV columns identifying an entity
- * - optionalColumns: ref of the other CSV columns
- * - hasAssignationColumns: the CSV import takes the assignations too
+ * - dataMatchers: ref of the CSV columns identifying an entity (the pages
+ *   of ENTITY_CSV get theirs)
+ * - optionalColumns: ref of the other CSV columns (same)
+ * - hasAssignationColumns: the CSV import takes the assignations too (the
+ *   pages of ENTITY_CSV do)
  * - canCancel: deleting an entity with tasks cancels it instead
  * - displaySettings, modals, loading, errors: extra keys of the page
  */
@@ -127,8 +167,8 @@ export const useEntityPage = ({
   importModalRef = ref(null),
   reset,
   loadEntities = () => Promise.resolve(),
-  dataMatchers = computed(() => ['Name']),
-  optionalColumns = ref([]),
+  dataMatchers: pageDataMatchers = null,
+  optionalColumns: pageOptionalColumns = null,
   hasAssignationColumns = false,
   canCancel = false,
   displaySettings: extraDisplaySettings = {},
@@ -149,6 +189,7 @@ export const useEntityPage = ({
   const entityTypeName = stringHelpers.capitalize(type)
   const TYPE = type.toUpperCase()
   const csvLabelKeys = CSV_LABEL_KEYS[type] || {}
+  const entityCsv = ENTITY_CSV[type]
 
   // State
   // --------------------------------------------------------------------------
@@ -236,13 +277,49 @@ export const useEntityPage = ({
     })
   })
 
+  // The CSV columns of the pages of ENTITY_CSV
+  const isCsvEpisode = computed(
+    () => Boolean(entityCsv?.hasEpisode) && isTVShow.value
+  )
+  const dataMatchers =
+    pageDataMatchers ||
+    computed(() => (isCsvEpisode.value ? ['Episode', 'Name'] : ['Name']))
+  const valueColumns = entityCsv?.valueColumns || {}
+  const optionalColumns =
+    pageOptionalColumns ||
+    ref(entityCsv ? ['Description', ...Object.keys(valueColumns)] : [])
+  const hasAssignations = hasAssignationColumns || Boolean(entityCsv)
+  // Zou refuses a line without these values: the preview points at it
+  // first.
+  const importRequiredValues = computed(() => {
+    if (!entityCsv) return []
+    return isCsvEpisode.value && entityCsv.isEpisodeRequired
+      ? ['Episode', 'Name']
+      : ['Name']
+  })
+
+  // The names the production holds, for the preview to tell the new rows:
+  // taken from the whole cache, not from the displayed rows. The cache Map
+  // is not reactive: the displayed list, which the same mutations update,
+  // invalidates it.
+  const importDatabase = computed(() => {
+    store.getters[`displayed${entityTypeName}s`] // eslint-disable-line no-unused-expressions
+    const episodeMap = store.getters.episodeMap
+    return Object.fromEntries(
+      Array.from(store.getters[`${type}Map`].values()).map(entity => {
+        const episode = isCsvEpisode.value && episodeMap.get(entity.episode_id)
+        return [`${episode ? episode.name : ''}${entity.name}`, true]
+      })
+    )
+  })
+
   const renderColumns = computed(() => [
     ...dataMatchers.value,
     ...optionalColumns.value,
     ...productionTaskTypes.value.flatMap(taskType => [
       taskType.name,
       `${taskType.name} comment`,
-      ...(hasAssignationColumns ? [`${taskType.name} assignations`] : [])
+      ...(hasAssignations ? [`${taskType.name} assignations`] : [])
     ])
   ])
 
@@ -487,9 +564,10 @@ export const useEntityPage = ({
   // The header the export writes for the column Zou reads as `name`.
   const csvLabel = name => t(csvLabelKeys[name])
 
-  // `episodeName` goes in the file name when given.
-  const exportCsv = async (headers, episodeName) => {
-    const lines = await store.dispatch(`get${entityTypeName}sCsvLines`)
+  // `episodeName` goes in the file name when given, and `options` go to the
+  // action that writes the lines.
+  const exportCsv = async (headers, episodeName, options) => {
+    const lines = await store.dispatch(`get${entityTypeName}sCsvLines`, options)
     const name = stringHelpers.slugify(
       [
         moment().format('YYYY-MM-DD'),
@@ -500,6 +578,49 @@ export const useEntityPage = ({
       ].join('_')
     )
     csv.buildCsvFile(name, [headers, ...lines])
+  }
+
+  // The export of the pages of ENTITY_CSV: its headers follow the order of
+  // the lines of csv.getEntityCsvLines, and read the same task types.
+  const exportEntityCsv = () => {
+    const isAllEpisodes = currentEpisode.value?.id === 'all'
+    const episodeName =
+      isAllEpisodes && entityCsv.allEpisodesKey
+        ? t(entityCsv.allEpisodesKey)
+        : currentEpisode.value?.name
+    return exportCsv(
+      [
+        ...(isCsvEpisode.value ? ['Episode'] : []),
+        csvLabel('Name'),
+        csvLabel('Description'),
+        ...Object.keys(valueColumns).map(csvLabel),
+        ...getExportDescriptors(currentProduction.value, entityTypeName).map(
+          descriptor => descriptor.name
+        ),
+        ...(store.getters[`is${entityTypeName}Time`]
+          ? [t(`${type}s.fields.time_spent`)]
+          : []),
+        ...(store.getters[`is${entityTypeName}Estimation`]
+          ? [t('main.estimation_short')]
+          : []),
+        // Qualified by the task type so a re-import can tell the columns
+        // apart: bare duplicated headers collapse in the server's reader.
+        ...store.getters[`${type}ValidationColumns`].flatMap(taskTypeId => {
+          const taskTypeName = taskTypeMap.value.get(taskTypeId)?.name || ''
+          return [taskTypeName, `${taskTypeName} assignations`]
+        })
+      ],
+      entityCsv.hasEpisode ? episodeName : null,
+      {
+        extraValues: Object.values(valueColumns).map(
+          ({ field, valueKeys }) =>
+            entity =>
+              valueKeys[entity[field]]
+                ? t(valueKeys[entity[field]])
+                : (entity[field] ?? '')
+        )
+      }
+    )
   }
 
   // Metadata descriptors
@@ -680,9 +801,37 @@ export const useEntityPage = ({
     }
   }
 
+  // A cell the export wrote as the label of a value gets its value back.
+  const renameExportValues = entries =>
+    Object.entries(valueColumns).reduce(
+      (renamed, [column, { valueKeys }]) =>
+        csv.renameValues(
+          renamed,
+          column,
+          new Map(
+            Object.entries(valueKeys).map(([value, key]) => [
+              t(key).toLowerCase(),
+              value
+            ])
+          )
+        ),
+      entries
+    )
+
   const uploadImportFile = async (data, toUpdate) => {
     const formData = new FormData()
-    const csvContent = csv.turnEntriesToCsvString(data)
+    // A film has no episode: the preview shows its Episode column as
+    // ignored, so the upload leaves it out instead of having Zou refuse it.
+    // Named after a task type or a metadata column, it is shown and sent.
+    const isEpisodeIgnored =
+      entityCsv?.hasEpisode &&
+      !isTVShow.value &&
+      !renderColumns.value.includes('Episode') &&
+      !(store.getters[`${type}MetadataDescriptors`] || []).some(
+        descriptor => descriptor.name === 'Episode'
+      )
+    const entries = isEpisodeIgnored ? csv.removeColumn(data, 'Episode') : data
+    const csvContent = csv.turnEntriesToCsvString(renameExportValues(entries))
     formData.append(
       'file',
       new File([csvContent], 'import.csv', { type: 'text/csv' })
@@ -823,6 +972,7 @@ export const useEntityPage = ({
     errors,
     loading,
     modals,
+    optionalColumns,
     parsedCSV,
     selectedDepartment,
     success,
@@ -830,6 +980,8 @@ export const useEntityPage = ({
     cellSaveErrorText,
     deleteAllTasksText,
     deleteText,
+    importDatabase,
+    importRequiredValues,
     isTaskSidePanelOpen,
     nbSelectedEntities,
     renderColumns,
@@ -853,6 +1005,7 @@ export const useEntityPage = ({
     confirmRestore,
     csvLabel,
     exportCsv,
+    exportEntityCsv,
     focusSearchField,
     getPath,
     hideAddThumbnailsModal,

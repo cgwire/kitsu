@@ -4,6 +4,8 @@ import shotStore from '@/store/modules/shots'
 import tasksStore from '@/store/modules/tasks'
 import taskTypesStore from '@/store/modules/tasktypes'
 
+import { getEntityCsvLines } from '@/lib/csv'
+import { getExportDescriptors } from '@/lib/descriptors'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { buildEpisodeIndex, indexSearch } from '@/lib/indexing'
 import {
@@ -34,6 +36,8 @@ import {
   CREATE_TASKS_END,
   DELETE_TASK_END,
   EDIT_EPISODE_END,
+  EPISODE_CSV_FILE_SELECTED,
+  IMPORT_EPISODES_END,
   LOAD_EPISODES_END,
   NEW_EPISODE_END,
   NEW_TASK_END,
@@ -225,6 +229,7 @@ const initialState = {
   episodeListScrollPosition: 0,
   episodeSearchText: '',
   episodeSearchQueries: [],
+  episodesCsvFormData: null,
   episodeSorting: [],
   selectedEpisodes: new Map(),
 
@@ -239,6 +244,7 @@ const getters = {
   currentEpisode: state => state.currentEpisode,
 
   episodeSearchQueries: state => state.episodeSearchQueries,
+  episodesCsvFormData: state => state.episodesCsvFormData,
   episodeSorting: state => state.episodeSorting,
 
   isEpisodesLoading: state => state.isEpisodesLoading,
@@ -550,10 +556,47 @@ const actions = {
     } else {
       dispatch('loadEpisodeStats', rootGetters.currentProduction.id)
     }
+  },
+
+  uploadEpisodeFile({ commit, state, rootGetters }, toUpdate) {
+    const production = rootGetters.currentProduction
+    return shotsApi
+      .postEpisodesCsv(production, state.episodesCsvFormData, toUpdate)
+      .then(() => {
+        commit(IMPORT_EPISODES_END)
+      })
+  },
+
+  // `extraValues` write the columns that follow the description: the page
+  // writes the status in the language of the user.
+  getEpisodesCsvLines({ state, rootGetters }, { extraValues = [] } = {}) {
+    // The rows of the search, or every row when it matches nothing.
+    const episodes = cache.result?.length > 0 ? cache.result : cache.episodes
+    return getEntityCsvLines(episodes, {
+      descriptors: getExportDescriptors(
+        rootGetters.currentProduction,
+        'Episode'
+      ),
+      extraValues,
+      isEstimation: state.isEpisodeEstimation,
+      isTime: state.isEpisodeTime,
+      organisation: rootGetters.organisation,
+      personMap: rootGetters.personMap,
+      taskMap: rootGetters.taskMap,
+      validationColumns: state.episodeValidationColumns
+    })
   }
 }
 
 const mutations = {
+  [EPISODE_CSV_FILE_SELECTED](state, formData) {
+    state.episodesCsvFormData = formData
+  },
+
+  [IMPORT_EPISODES_END](state) {
+    state.episodesCsvFormData = null
+  },
+
   [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
     cache.episodes = []

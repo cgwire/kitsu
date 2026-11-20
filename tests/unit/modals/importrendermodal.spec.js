@@ -22,6 +22,8 @@ const store = createStore({
   getters: {
     assetMetadataDescriptors: () => [],
     editMetadataDescriptors: () => [],
+    episodeMetadataDescriptors: () => [],
+    sequenceMetadataDescriptors: () => [{ name: 'Contractor' }],
     shotMetadataDescriptors: () => [],
     taskMetadataDescriptors: () => []
   }
@@ -57,6 +59,37 @@ const isConfirmDisabled = wrapper =>
   wrapper.findComponent(ModalFooter).props('isDisabled')
 
 describe('ImportRenderModal', () => {
+  describe('metadata columns', () => {
+    const mountWithColumn = props =>
+      mount(ImportRenderModal, {
+        props: {
+          active: true,
+          columns: ['Name'],
+          dataMatchers: ['Name'],
+          parsedCsv: [
+            ['Name', 'Contractor'],
+            ['SQ01', 'Studio']
+          ],
+          ...props
+        },
+        global: { plugins: [store, i18n] }
+      })
+    const contractorColumn = wrapper => wrapper.findAll('colgroup col')[1]
+
+    // The route of the sequences of a TV show holds "episodes" too.
+    test('come from the entity type the page gives', () => {
+      const wrapper = mountWithColumn({ entityType: 'Sequence' })
+
+      expect(contractorColumn(wrapper).classes()).not.toContain('ignored')
+    })
+
+    test('come from the route without an entity type', () => {
+      const wrapper = mountWithColumn()
+
+      expect(contractorColumn(wrapper).classes()).toContain('ignored')
+    })
+  })
+
   describe('required values', () => {
     test('flags the lines missing a required value and blocks the import', () => {
       const wrapper = mountModal({ requiredValues: ['Sequence', 'Name'] })

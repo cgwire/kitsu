@@ -1919,3 +1919,70 @@ describe('Sequences store, through a store', () => {
     })
   })
 })
+
+describe('Sequences store, CSV', () => {
+  const rootGetters = {
+    currentProduction: { id: 'p1', descriptors: [] },
+    isTVShow: true,
+    organisation: { hours_by_day: 8 },
+    personMap: new Map(),
+    taskMap: new Map()
+  }
+  const state = { sequenceValidationColumns: [] }
+
+  afterEach(() => {
+    sequencesStore.cache.sequences = []
+    sequencesStore.cache.result = []
+    vi.restoreAllMocks()
+  })
+
+  test('exports the episode of each sequence in a TV show', () => {
+    sequencesStore.cache.sequences = [
+      { id: 's1', name: 'SQ01', description: 'Night', episode_name: 'E01' }
+    ]
+    sequencesStore.cache.result = []
+
+    expect(
+      sequencesStore.actions.getSequencesCsvLines({ state, rootGetters })
+    ).toEqual([['E01', 'SQ01', 'Night']])
+  })
+
+  test('exports the searched sequences only', () => {
+    const night = { id: 's2', name: 'SQ02', episode_name: 'E01' }
+    sequencesStore.cache.sequences = [
+      { id: 's1', name: 'SQ01', episode_name: 'E01' },
+      night
+    ]
+    sequencesStore.cache.result = [night]
+
+    expect(
+      sequencesStore.actions.getSequencesCsvLines({ state, rootGetters })
+    ).toEqual([['E01', 'SQ02', '']])
+  })
+
+  test('sends the file picked for the import, then forgets it', async () => {
+    const formData = { file: 'import.csv' }
+    vi.spyOn(shotsApi, 'postSequencesCsv').mockResolvedValue([])
+    const commit = vi.fn()
+    const csvState = {}
+    sequencesStore.mutations.SEQUENCE_CSV_FILE_SELECTED(csvState, formData)
+
+    await sequencesStore.actions.uploadSequenceFile(
+      {
+        commit,
+        state: csvState,
+        rootGetters: { currentProduction: { id: 'p1' } }
+      },
+      true
+    )
+
+    expect(shotsApi.postSequencesCsv).toHaveBeenCalledWith(
+      { id: 'p1' },
+      formData,
+      true
+    )
+    expect(commit).toHaveBeenCalledWith('IMPORT_SEQUENCES_END')
+    sequencesStore.mutations.IMPORT_SEQUENCES_END(csvState)
+    expect(sequencesStore.getters.sequencesCsvFormData(csvState)).toBe(null)
+  })
+})

@@ -4,12 +4,58 @@ import { downloadBlob } from '@/lib/download'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { getPercentage } from '@/lib/stats'
 import stringHelpers from '@/lib/string'
-import { getDayRange, getMonthRange, getWeekRange } from '@/lib/time'
+import {
+  getDayRange,
+  getMonthRange,
+  getWeekRange,
+  minutesToDays
+} from '@/lib/time'
 import { convertHours } from '@/lib/timesheet'
 
 // The errors of the imported files the browser could not read (moved,
 // deleted or changed since they were picked) and of the empty ones.
 const readFailures = new WeakSet()
+
+const addReadFailure = err => {
+  if (Object(err) === err) readFailures.add(err)
+}
+
+// Windows-1252 leaves these bytes undefined: its decoder turns them into
+// invisible control characters.
+const WINDOWS_1252_UNDEFINED_BYTES = [0x81, 0x8d, 0x8f, 0x90, 0x9d]
+
+// The characters beyond ASCII that UTF-8 does read, its "�" aside.
+const UTF8_NON_ASCII = /[\u0080-\ufffc\ufffe\uffff]/g
+
+// A spreadsheet saves a plain "CSV" in the encoding of the system,
+// Windows-1252 in Western Europe and the Americas: read as UTF-8, its accented
+// letters would turn into "�". A file that is not valid UTF-8 reads as
+// Windows-1252, unless it holds a byte Windows-1252 leaves undefined (another
+// encoding) or UTF-8 reads more of its characters beyond ASCII than it fails
+// on (a UTF-8 file with a stray byte): it then reads as UTF-8, as before. A
+// few bytes of Windows-1252 text can make a UTF-8 character, as "é", a
+// no-break space, and "»" make "頻", but rarely more than the letters UTF-8
+// fails on. A byte order mark still wins: FileReader follows it whatever
+// encoding it is given.
+const getFileEncoding = async file => {
+  const bytes = new Uint8Array(
+    await file.arrayBuffer().catch(err => {
+      addReadFailure(err)
+      throw err
+    })
+  )
+  try {
+    new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+    return 'UTF-8'
+  } catch {
+    const text = new TextDecoder().decode(bytes)
+    const isWindows1252 =
+      !bytes.some(byte => WINDOWS_1252_UNDEFINED_BYTES.includes(byte)) &&
+      (text.match(UTF8_NON_ASCII) || []).length <=
+        text.split('\ufffd').length - 1
+    return isWindows1252 ? 'windows-1252' : 'UTF-8'
+  }
+}
 
 const ESTIMATIONS_PARENTS = {
   Asset: { field: 'asset_type_name', labelKey: 'tasks.fields.asset_type' },
@@ -45,6 +91,65 @@ export const getEstimationsCsvLabelKeys = (
 
 export const getEstimationsParentField = entityType =>
   ESTIMATIONS_PARENTS[entityType]?.field
+
+const getDescriptorCsvValue = (entity, descriptor, personMap) => {
+  const value = entity.data[descriptor.field_name]
+  if (descriptor.data_type === 'boolean') {
+    return value?.toLowerCase() === 'true'
+  }
+  if (descriptor.data_type === 'person') {
+    return personMap.get(value)?.full_name || ''
+  }
+  return value
+}
+
+/*
+ * The lines of the export of an edit, sequence, or episode list: the
+ * episode in a TV show, the name, the description, the values only the
+ * entity type has, the metadata, the time spent and the estimation in days,
+ * then the status and the assignees of each task type. A row received live
+ * may have no task yet.
+ */
+export const getEntityCsvLines = (
+  entities,
+  {
+    descriptors,
+    extraValues = [],
+    hasEpisode = false,
+    isEstimation = false,
+    isTime = false,
+    organisation,
+    personMap,
+    taskMap,
+    validationColumns = []
+  }
+) =>
+  entities.map(entity => [
+    ...(hasEpisode ? [entity.episode_name] : []),
+    entity.name,
+    entity.description || '',
+    ...extraValues.map(getValue => getValue(entity)),
+    ...descriptors.map(descriptor =>
+      getDescriptorCsvValue(entity, descriptor, personMap)
+    ),
+    ...(isTime
+      ? [minutesToDays(organisation, entity.timeSpent).toFixed(2)]
+      : []),
+    ...(isEstimation
+      ? [minutesToDays(organisation, entity.estimation).toFixed(2)]
+      : []),
+    ...validationColumns.flatMap(taskTypeId => {
+      const task = taskMap.get(entity.validations?.get(taskTypeId))
+      if (!task) return ['', '']
+      return [
+        task.task_status_short_name,
+        task.assignees
+          .map(personId => personMap.get(personId)?.full_name)
+          .filter(Boolean)
+          .join(',')
+      ]
+    })
+  ])
 
 const csv = {
   generateTimesheet({
@@ -329,6 +434,37 @@ const csv = {
     })
   },
 
+  /*
+   * Give each cell of the column `column` that is a label its value
+   * (`names` maps lowercase labels to values), whatever its case and the
+   * spaces around it. The other cells and columns stay as they are.
+   */
+  renameValues(entries, column, names) {
+    const [headers = [], ...lines] = entries
+    const index = headers.indexOf(column)
+    if (index < 0) return entries
+    return [
+      headers,
+      ...lines.map(line =>
+        line.map((cell, cellIndex) => {
+          const value =
+            cellIndex === index && names.get(String(cell).trim().toLowerCase())
+          return value || cell
+        })
+      )
+    ]
+  },
+
+  // Drop the column `column`, header and cells. A file without it stays as
+  // it is.
+  removeColumn(entries, column) {
+    const [headers = [], ...lines] = entries
+    const index = headers.indexOf(column)
+    if (index < 0) return entries
+    const isKept = (cell, cellIndex) => cellIndex !== index
+    return [headers.filter(isKept), ...lines.map(line => line.filter(isKept))]
+  },
+
   turnEntriesToCsvString(entries, config = {}) {
     return Papa.unparse(entries, {
       delimiter: ';',
@@ -572,14 +708,16 @@ const csv = {
     return entries
   },
 
-  processCSV: (data, config = {}) => {
+  processCSV: async (data, config = {}) => {
+    const encoding =
+      typeof data === 'string' ? 'UTF-8' : await getFileEncoding(data)
     return new Promise((resolve, reject) => {
       const fail = err => {
-        if (Object(err) === err) readFailures.add(err)
+        addReadFailure(err)
         reject(err)
       }
       Papa.parse(data, {
-        encoding: 'UTF-8',
+        encoding,
         error: fail,
         transform: value => value.trim(),
         // For a file, this runs in a FileReader callback, outside the

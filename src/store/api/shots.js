@@ -167,6 +167,18 @@ export default {
     return client.ppostImport(path, formData)
   },
 
+  postSequencesCsv(production, formData, toUpdate) {
+    let path = `/api/import/csv/projects/${production.id}/sequences`
+    if (toUpdate) path += '?update=true'
+    return client.ppostImport(path, formData)
+  },
+
+  postEpisodesCsv(production, formData, toUpdate) {
+    let path = `/api/import/csv/projects/${production.id}/episodes`
+    if (toUpdate) path += '?update=true'
+    return client.ppostImport(path, formData)
+  },
+
   postEdl(production, edl_file, namingConvention, matchCase, episode) {
     const formData = new FormData()
     formData.append('file', edl_file)

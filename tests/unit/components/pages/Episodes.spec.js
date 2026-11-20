@@ -4,16 +4,26 @@ import { reactive } from 'vue'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import csv from '@/lib/csv'
 import errors from '@/lib/errors'
+import en from '@/locales/en'
+import fr from '@/locales/fr.json'
 
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Episodes from '@/components/pages/Episodes.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
-import { mountEntityPage, production } from '../../fixtures/entity-page'
+import {
+  mountEntityPage,
+  production,
+  reimportExport
+} from '../../fixtures/entity-page'
 import { buildSearchQueryListStub } from '../../fixtures/search-query-list'
 import { recordUnhandledRejections } from '../../fixtures/unhandled-rejections'
 
@@ -544,5 +554,179 @@ describe('Episodes page, first load', () => {
     })
 
     expect(rejections).toEqual([bug])
+  })
+})
+
+describe('Episodes page, CSV', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  const mountCsvPage = ({ getters = {}, ...options } = {}) =>
+    mountPage({
+      getters: {
+        isCurrentUserProductionManager: true,
+        isTVShow: true,
+        isEpisodeListLoadedWithTasks: true,
+        episodeMap: new Map([
+          [
+            'episode-1',
+            {
+              id: 'episode-1',
+              name: 'E01',
+              project_id: production.id,
+              validations: new Map()
+            }
+          ]
+        ]),
+        episodeValidationColumns: ['task-type-1'],
+        ...getters
+      },
+      ...options
+    })
+
+  const exportFile = async options => {
+    const buildCsvFile = vi.spyOn(csv, 'buildCsvFile').mockReturnValue('')
+    const { wrapper } = await mountCsvPage({
+      // The page tells how to write the status of an episode.
+      actions: {
+        getEpisodesCsvLines: ({ extraValues }) => [
+          extraValues.map(getValue => getValue({ status: 'running' }))
+        ]
+      },
+      locale: 'en',
+      messages: en,
+      ...options
+    })
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'export')
+      .vm.$emit('click')
+    await flushPromises()
+    const [name, [headers, ...lines]] = buildCsvFile.mock.calls[0]
+    return { name, headers, lines }
+  }
+
+  test('offers the import and the export to the managers', async () => {
+    const { wrapper } = await mountCsvPage()
+
+    expect(
+      wrapper.findAllComponents(ButtonSimple).map(button => button.props('icon'))
+    ).toEqual(expect.arrayContaining(['import', 'export']))
+  })
+
+  test('writes the status in the language of the user', async () => {
+    const { headers, lines } = await exportFile({
+      getters: {
+        currentProduction: {
+          ...production,
+          descriptors: [
+            {
+              name: 'Contractor',
+              field_name: 'contractor',
+              entity_type: 'Episode',
+              data_type: 'string'
+            }
+          ]
+        },
+        isEpisodeTime: true,
+        isEpisodeEstimation: true,
+        episodeValidationColumns: ['tt-1'],
+        taskTypeMap: new Map([['tt-1', { name: 'Script' }]])
+      },
+      locale: 'fr',
+      messages: fr.default
+    })
+
+    const { episodes, main } = fr.default
+    expect(headers).toEqual([
+      episodes.fields.name,
+      episodes.fields.description,
+      main.status,
+      'Contractor',
+      episodes.fields.time_spent,
+      main.estimation_short,
+      'Script',
+      'Script assignations'
+    ])
+    expect(lines).toEqual([[episodes.status.running]])
+  })
+
+  // The Episodes page shows every episode, whatever the topbar holds.
+  test('names the file after the production only', async () => {
+    const { name } = await exportFile({
+      getters: { currentEpisode: { id: 'episode-1', name: 'E01' } }
+    })
+
+    expect(name).toMatch(/_kitsu_production_episodes$/)
+  })
+
+  test('identifies a line by its name and reads its status', async () => {
+    const { wrapper } = await mountCsvPage()
+
+    const modal = wrapper.findComponent(ImportRenderModal)
+    expect(modal.props('dataMatchers')).toEqual(['Name'])
+    expect(modal.props('requiredValues')).toEqual(['Name'])
+    expect(modal.props('entityType')).toBe('Episode')
+    expect(modal.props('database')).toEqual({ E01: true })
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description', 'Status']
+    )
+  })
+
+  // The export writes the labels of the language of the user.
+  test('imports back a file exported in the language of the user', async () => {
+    const { wrapper } = await mountCsvPage({
+      getters: { episodeValidationColumns: [] },
+      actions: { getEpisodesCsvLines: () => [] },
+      locale: 'fr',
+      messages: fr.default
+    })
+
+    const { exported, imported } = await reimportExport(wrapper)
+
+    const { episodes, main } = fr.default
+    expect(exported).toEqual([
+      episodes.fields.name,
+      episodes.fields.description,
+      main.status
+    ])
+    expect(imported).toEqual(['Name', 'Description', 'Status'])
+  })
+
+  // Zou reads the values only, in any case, and refuses the others.
+  test('uploads a status written in the language of the user as its value', async () => {
+    const turnEntriesToCsvString = vi.spyOn(csv, 'turnEntriesToCsvString')
+    const uploadEpisodeFile = vi.fn(() => Promise.resolve())
+    const { wrapper, store, dispatched } = await mountCsvPage({
+      actions: { uploadEpisodeFile },
+      locale: 'fr',
+      messages: fr.default
+    })
+    const loadsBefore = dispatched('loadEpisodesWithTasks').length
+    const { status } = fr.default.episodes
+
+    await wrapper.findComponent(ImportRenderModal).vm.$emit(
+      'confirm',
+      [
+        ['Name', 'Status'],
+        ['E01', status.running.toUpperCase()],
+        ['E02', 'complete'],
+        ['E03', 'Bogus']
+      ],
+      true
+    )
+    await flushPromises()
+
+    expect(turnEntriesToCsvString.mock.calls[0][0]).toEqual([
+      ['Name', 'Status'],
+      ['E01', 'running'],
+      ['E02', 'complete'],
+      ['E03', 'Bogus']
+    ])
+    expect(store.commit).toHaveBeenCalledWith(
+      'EPISODE_CSV_FILE_SELECTED',
+      expect.any(FormData)
+    )
+    expect(uploadEpisodeFile).toHaveBeenCalledWith(true)
+    expect(dispatched('loadEpisodesWithTasks')).toHaveLength(loadsBefore + 1)
   })
 })
