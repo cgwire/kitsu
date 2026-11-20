@@ -4768,6 +4768,10 @@ const setPanZoom = (x, y, scale) => {
   } else if (isCurrentPreviewPicture.value) {
     picturePlayer.value?.setPanZoom(x, y, scale)
   }
+  // The viewers apply remote transforms silently (no pan event), so
+  // panzoomTransform must be updated here or the annotation overlays
+  // bound to it stay behind while the media moves.
+  panzoomTransform.value = { x, y, scale }
 }
 
 const setComparisonPanZoom = (x, y, scale) => {

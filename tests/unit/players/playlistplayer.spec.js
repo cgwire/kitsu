@@ -3229,6 +3229,37 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  describe('review room pan/zoom', () => {
+    const socketHandler = event => {
+      const [, handler] = wrapper.vm.$store.$socket.on.mock.calls.find(
+        ([name]) => name === event
+      )
+      return handler
+    }
+
+    it('moves the annotation overlays with a remote pan/zoom', async () => {
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'mp4' }]
+      })
+      await flushPromises()
+      socketHandler('preview-room:room-people-updated')({ people: ['user-1'] })
+      socketHandler('preview-room:panzoom-changed')({
+        playlist_id: 'playlist-1',
+        data: { local_id: 'other', user_id: 'user-2', x: 10, y: 20, zoom: 2 }
+      })
+      await flushPromises()
+      const canvases = wrapper.findAllComponents({ name: 'AnnotationCanvas' })
+      expect(canvases.length).toBeGreaterThan(0)
+      canvases.forEach(canvas => {
+        expect(canvas.props('panzoomTransform')).toEqual({
+          x: 10,
+          y: 20,
+          scale: 2
+        })
+      })
+    })
+  })
+
   describe('on a phone', () => {
     const PORTRAIT = '(max-width: 768px)'
     const LANDSCAPE = '(max-height: 500px) and (orientation: landscape)'
