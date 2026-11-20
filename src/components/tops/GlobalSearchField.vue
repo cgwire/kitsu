@@ -26,6 +26,9 @@
       <div class="search-loader" v-else-if="isLoading">
         <spinner />
       </div>
+      <div class="result-line error" v-else-if="isError">
+        {{ $t('main.loading_error') }}
+      </div>
       <div v-else-if="nbResults > 0">
         <div
           :key="asset.id"
@@ -156,6 +159,7 @@ import {
   exitDocumentFullScreen,
   useFullScreenElement
 } from '@/composables/fullScreen'
+import { logRequestFailure } from '@/lib/errors'
 import { isSearchShortcut } from '@/lib/keyboard'
 import { getEntityPath, getPersonPath } from '@/lib/path'
 import peopleStore from '@/store/modules/people'
@@ -177,6 +181,7 @@ const fullScreenElement = useFullScreenElement()
 const searchInput = useTemplateRef('searchInput')
 
 const assets = ref([])
+const isError = ref(false)
 const isFocusPending = ref(false)
 const isLoading = ref(false)
 const isSearchActive = ref(false)
@@ -184,6 +189,10 @@ const persons = ref([])
 const searchQuery = ref('')
 const selectedIndex = ref(0)
 const shots = ref([])
+
+// A slow search can answer after the next one has started: only the answer
+// of the last one shows.
+let lastSearch = 0
 
 // Computed
 // --------------------------------------------------------------------------
@@ -266,26 +275,40 @@ const onKeyDown = event => {
 // --------------------------------------------------------------------------
 
 watch(searchQuery, async () => {
+  const search = ++lastSearch
   if (searchQuery.value.length > 0) {
     isSearchActive.value = true
   }
 
   if (searchQuery.value.length > 2) {
     isLoading.value = true
+    isError.value = false
     try {
       const results = await store.dispatch('searchData', {
         query: searchQuery.value
       })
-      assets.value = results.assets
-      persons.value = results.persons.map(
-        peopleStore.helpers.addAdditionalInformation
-      )
-      shots.value = results.shots
+      if (search === lastSearch) {
+        assets.value = results.assets
+        persons.value = results.persons.map(
+          peopleStore.helpers.addAdditionalInformation
+        )
+        shots.value = results.shots
+      }
     } catch (error) {
-      console.error(error)
+      if (search === lastSearch) {
+        assets.value = []
+        persons.value = []
+        shots.value = []
+        isError.value = true
+      }
+      logRequestFailure(error)
+    } finally {
+      if (search === lastSearch) {
+        isLoading.value = false
+      }
     }
-    isLoading.value = false
   } else {
+    isLoading.value = false
     assets.value = []
     persons.value = []
     shots.value = []

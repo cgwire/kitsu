@@ -293,8 +293,7 @@ const client = {
     return client.pget(`/api/data/events/login-logs/last?${query}`)
   },
 
-  // A read sent as POST keeps the budget of a read: the search field shows
-  // whichever answer comes last, and a late one would replace newer results.
+  // A search is a read sent as POST: it keeps the budget of a read.
   searchData(query, limit, offset, index_names, productionId) {
     const path = '/api/data/search'
     const data = { query, limit, offset, index_names }

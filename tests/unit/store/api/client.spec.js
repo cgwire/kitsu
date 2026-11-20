@@ -226,8 +226,7 @@ describe('store/api/client', () => {
     expect(h.sent.project_id).toEqual('production-1')
   })
 
-  // The search field shows whichever answer comes last: a late one would
-  // replace the results of a newer query.
+  // A search is a read, though sent as POST.
   test('searchData keeps the budget of a read', async () => {
     h.response = { body: {} }
     await client.searchData('rabbit', 10, 0, ['assets'], 'all')
