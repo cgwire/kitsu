@@ -45,7 +45,6 @@
           class="search-limit flexrow-item"
           :options="limitOptions"
           :with-margin="false"
-          @update:model-value="search"
           v-model="limit"
         />
       </div>
@@ -229,7 +228,11 @@ const searchField = ref(null)
 const searchQuery = ref('')
 const selectedIndex = ref(0)
 
-const limitOptions = AVAILABLE_LIMITS.map(value => ({ label: value, value }))
+// The combobox matches the select value, a string, against the option labels.
+const limitOptions = AVAILABLE_LIMITS.map(value => ({
+  label: String(value),
+  value
+}))
 
 const results = reactive({ assets: [], shots: [], persons: [] })
 const searchFilter = reactive({ assets: true, shots: true, persons: false })
@@ -367,6 +370,7 @@ const onKeyDown = event => {
 // Watchers
 
 watch(productionId, search)
+watch(limit, search)
 
 watch(searchQuery, () => {
   if (searchQuery.value.length) {
