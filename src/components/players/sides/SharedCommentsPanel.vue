@@ -185,12 +185,12 @@
 
 <script setup>
 import { FilmIcon, ListIcon, PaperclipIcon, XIcon } from 'lucide-vue-next'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useFullScreenContainer } from '@/composables/fullScreen'
-import { isNotFound, isRequestFailure } from '@/lib/errors'
+import { isNotFound, isRequestFailure, logRequestFailure } from '@/lib/errors'
 import { replaceTimeWithTimecode } from '@/lib/render'
 import stringHelpers from '@/lib/string'
 import { DEFAULT_FPS } from '@/lib/video'
@@ -223,6 +223,10 @@ const props = defineProps({
 
 const emit = defineEmits(['status-changed', 'time-code-clicked'])
 
+// Coming back to the tab reloads the comments only when the last fetch was
+// sent at least this long ago.
+const TAB_RELOAD_DELAY = 10 * 1000
+
 // State
 // --------------------------------------------------------------------------
 
@@ -248,6 +252,13 @@ const postError = ref('')
 
 const deletingCommentIds = reactive(new Set())
 const modals = reactive({ edit: false, delete: false, attachment: false })
+
+// Counts the changes the guest made to the list: a reload answered after one
+// of them may have been sent before it, and must not undo it.
+let localChangeCount = 0
+let commentsLoad = null
+let isReloadAsked = false
+let lastFetchTime = 0
 
 // Computed
 // --------------------------------------------------------------------------
@@ -386,12 +397,45 @@ const loadContext = async () => {
   }
 }
 
-const loadComments = async () => {
-  comments.value = await store.dispatch(
-    'loadSharedPlaylistComments',
-    props.token
-  )
+const fetchComments = async () => {
+  isReloadAsked = false
+  lastFetchTime = Date.now()
+  const changeCount = localChangeCount
+  let loadedComments
+  try {
+    loadedComments = await store.dispatch(
+      'loadSharedPlaylistComments',
+      props.token
+    )
+  } catch (err) {
+    // The load asked for meanwhile needs a request sent after it. A bug
+    // would fail again: it goes to Sentry at once.
+    if (isReloadAsked && isRequestFailure(err)) return fetchComments()
+    throw err
+  }
+  if (isReloadAsked || changeCount !== localChangeCount) return fetchComments()
+  comments.value = loadedComments
   populatePersonMap()
+}
+
+// One fetch at a time, so that an older answer never overwrites a newer one:
+// a load asked for meanwhile, or a change the guest made meanwhile, makes the
+// fetch run again before its list is shown. A load asked for meanwhile also
+// makes it run again when its request fails.
+const loadComments = () => {
+  if (commentsLoad) {
+    isReloadAsked = true
+  } else {
+    commentsLoad = fetchComments().finally(() => {
+      commentsLoad = null
+    })
+  }
+  return commentsLoad
+}
+
+const changeCommentsLocally = list => {
+  comments.value = list
+  localChangeCount += 1
 }
 
 const refresh = async () => {
@@ -402,6 +446,15 @@ const refresh = async () => {
     // Silent: panel will show empty state
   }
   loading.value = false
+}
+
+// The page gets no live updates: coming back to the tab brings the comments
+// posted, edited, or deleted meanwhile.
+const onVisibilityChange = () => {
+  const isFetchRecent = Date.now() - lastFetchTime < TAB_RELOAD_DELAY
+  if (document.visibilityState === 'visible' && !isFetchRecent) {
+    loadComments().catch(logRequestFailure)
+  }
 }
 
 // Functions: submit
@@ -428,8 +481,8 @@ const emitStatusChanged = (status, taskStatusId) => {
 }
 
 const replaceComment = saved => {
-  comments.value = comments.value.map(c =>
-    c.id === saved.id ? { ...c, ...saved } : c
+  changeCommentsLocally(
+    comments.value.map(c => (c.id === saved.id ? { ...c, ...saved } : c))
   )
 }
 
@@ -467,7 +520,11 @@ const submitComment = async () => {
     })
     const withAttachments = await uploadAttachments(comment.id)
     if (withAttachments) comment = withAttachments
-    comments.value = [comment, ...comments.value]
+    // A reload that reached Zou after the post already lists it.
+    changeCommentsLocally([
+      comment,
+      ...comments.value.filter(c => c.id !== comment.id)
+    ])
     // Make sure the freshly created guest lands in personMap so the
     // Comment widget treats them as a client author and renders the
     // name + avatar without waiting for a page reload.
@@ -577,7 +634,7 @@ const confirmDeleteComment = async () => {
       commentId,
       guestId: props.guestId
     })
-    comments.value = comments.value.filter(c => c.id !== commentId)
+    changeCommentsLocally(comments.value.filter(c => c.id !== commentId))
     isDeleted = true
   } catch (err) {
     isDeleted = await isDeletedElsewhere(err, commentId)
@@ -620,11 +677,16 @@ const removeChecklistEntry = entry => {
   checklistItems.value = checklistItems.value.filter(e => e !== entry)
 }
 
+const setChecklist = (commentId, checklist) => {
+  changeCommentsLocally(
+    comments.value.map(c => (c.id === commentId ? { ...c, checklist } : c))
+  )
+}
+
 const onChecklistUpdated = async updated => {
   const existing = comments.value.find(c => c.id === updated.id)
   if (!existing) return
-  const previous = existing.checklist
-  existing.checklist = updated.checklist
+  setChecklist(updated.id, updated.checklist)
   try {
     const saved = await store.dispatch('editSharedPlaylistComment', {
       shareToken: props.token,
@@ -637,8 +699,9 @@ const onChecklistUpdated = async updated => {
       }
     })
     replaceComment(saved)
-  } catch {
-    existing.checklist = previous
+  } catch (err) {
+    setChecklist(updated.id, existing.checklist)
+    if (!isRequestFailure(err)) throw err
   }
 }
 
@@ -736,6 +799,11 @@ watch(
 
 onMounted(() => {
   if (props.token) refresh()
+  document.addEventListener('visibilitychange', onVisibilityChange)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
 })
 </script>
 
