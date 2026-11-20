@@ -102,6 +102,7 @@ const nameField = ref(null)
 
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
+const isTVShow = computed(() => store.getters.isTVShow)
 const productionTaskTypes = computed(() => store.getters.productionTaskTypes)
 
 const isEditing = computed(() => Boolean(props.playlistToEdit?.id))
@@ -129,12 +130,14 @@ const forEntityOptions = computed(() => {
     { label: t('shots.title'), value: 'shot' },
     { label: t('sequences.title'), value: 'sequence' },
     { label: t('edits.title'), value: 'edit' }
-    // { label: t('episodes.title'), value: 'episode' }
-    // Episode playlists need an "all shots" cross-episode view first.
   ]
+  if (isTVShow.value) {
+    options.push({ label: t('episodes.title'), value: 'episode' })
+  }
   if (isPseudoEpisode.value) {
     // Pseudo-episodes are typed: All assets and the main pack hold asset
-    // playlists, All shots holds shot playlists (preset by the caller).
+    // playlists, All shots and All episodes hold theirs (preset by the
+    // caller).
     const entity = props.playlistToEdit.for_entity || 'asset'
     return options.filter(option => option.value === entity)
   }

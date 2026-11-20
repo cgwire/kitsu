@@ -264,28 +264,30 @@
                 {{ $t('playlists.add_selection') }}
               </button>
               <span class="filler"></span>
-              <button
-                :class="{
-                  button: true,
-                  'add-sequence': true,
-                  'is-loading': loading.addDaily
-                }"
-                :disabled="isAdditionLoading"
-                @click="addDailyPending"
-              >
-                {{ $t('playlists.build_daily') }}
-              </button>
-              <button
-                :class="{
-                  button: true,
-                  'add-sequence': true,
-                  'is-loading': loading.addWeekly
-                }"
-                :disabled="isAdditionLoading"
-                @click="addAllPending"
-              >
-                {{ $t('playlists.build_weekly') }}
-              </button>
+              <template v-if="!isEpisodePlaylist">
+                <button
+                  :class="{
+                    button: true,
+                    'add-sequence': true,
+                    'is-loading': loading.addDaily
+                  }"
+                  :disabled="isAdditionLoading"
+                  @click="addDailyPending"
+                >
+                  {{ $t('playlists.build_daily') }}
+                </button>
+                <button
+                  :class="{
+                    button: true,
+                    'add-sequence': true,
+                    'is-loading': loading.addWeekly
+                  }"
+                  :disabled="isAdditionLoading"
+                  @click="addAllPending"
+                >
+                  {{ $t('playlists.build_weekly') }}
+                </button>
+              </template>
               <template v-if="isEntireAdditionOffered">
                 <button
                   :class="{
@@ -669,6 +671,9 @@ const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserProductionSupervisor
 )
 const isEditsLoading = computed(() => store.getters.isEditsLoading)
+const isEpisodeListLoadedWithTasks = computed(
+  () => store.getters.isEpisodeListLoadedWithTasks
+)
 const isEpisodesLoading = computed(() => store.getters.isEpisodesLoading)
 const isShotsLoading = computed(() => store.getters.isShotsLoading)
 const isTVShow = computed(() => store.getters.isTVShow)
@@ -688,15 +693,19 @@ const isAdditionLoading = computed(
   () => loading.addWeekly || loading.addDaily || loading.addEpisode
 )
 
-// The all pseudo-episode is split by entity type: "All assets" (default)
-// and "All shots" (?for_entity=shot). Undefined outside of it.
+// The all pseudo-episode is split by entity type: "All assets" (default),
+// "All shots" and "All episodes" (?for_entity=...). Undefined outside of it.
 const allForEntity = computed(() => {
   if (!isTVShow.value || currentEpisode.value?.id !== 'all') return undefined
-  return route.query.for_entity === 'shot' ? 'shot' : 'asset'
+  return ['shot', 'episode'].includes(route.query.for_entity)
+    ? route.query.for_entity
+    : 'asset'
 })
 
-const allShotsQuery = computed(() =>
-  allForEntity.value === 'shot' ? { for_entity: 'shot' } : {}
+const allEntityQuery = computed(() =>
+  ['shot', 'episode'].includes(allForEntity.value)
+    ? { for_entity: allForEntity.value }
+    : {}
 )
 
 // The entire episode and movie additions add every loaded shot: those of
@@ -756,6 +765,7 @@ const addEntitiesText = computed(() => {
 const episodeName = computed(() => {
   if (!currentEpisode.value) return ''
   if (currentEpisode.value.id === 'all') {
+    if (allForEntity.value === 'episode') return t('main.all_episodes')
     return t(
       allForEntity.value === 'shot' ? 'main.all_shots' : 'main.all_assets'
     )
@@ -835,7 +845,7 @@ const getPlaylistPath = (playlistId, section) => ({
     playlistId,
     section
   ),
-  query: allShotsQuery.value
+  query: allEntityQuery.value
 })
 
 const playlistElementStyle = playlist => {
@@ -880,11 +890,11 @@ const loadShotsData = async () => {
     isShotsLoading.value ||
     shotsLoadingKey.value !== `${currentProduction.value.id}/${scope}`
   ) {
-    // The main pack and All assets list no shot: only let the load in
-    // flight refill the map it emptied. All shots loads every episode.
+    // Only All shots needs the production-wide shot dataset. Let an
+    // in-flight load refill the map it emptied.
     const isWithoutShots =
       (isTVShow.value && currentEpisode.value?.id === 'main') ||
-      allForEntity.value === 'asset'
+      ['asset', 'episode'].includes(allForEntity.value)
     if (isWithoutShots) {
       if (isShotsLoading.value) await shotStore.cache.shotsLoadingPromise
     } else {
@@ -917,12 +927,16 @@ const loadEditsData = async () => {
 }
 
 const loadEpisodesData = async () => {
+  // Episode playlists resolve the task of each entry through taskMap and
+  // the status dots through validations: the plain selector list carries
+  // neither, so an episode list lacking its tasks is upgraded.
   if (
     isTVShow.value &&
     (displayedEpisodes.value.length === 0 ||
-      displayedEpisodes.value[0].project_id !== currentProduction.value.id)
+      displayedEpisodes.value[0].project_id !== currentProduction.value.id ||
+      !isEpisodeListLoadedWithTasks.value)
   ) {
-    await store.dispatch('loadEpisodes')
+    await store.dispatch('loadEpisodesWithTasks')
   }
 }
 
@@ -1471,16 +1485,9 @@ const confirmEditPlaylist = form => {
 
 const goFirstPlaylist = () => {
   if (playlists.value.length > 0) {
-    router.push({
-      name: 'playlist',
-      params: {
-        production_id: currentProduction.value.id,
-        playlist_id: playlists.value[0].id
-      },
-      query: allShotsQuery.value
-    })
+    router.push(getPlaylistPath(playlists.value[0].id))
   } else {
-    router.push({ ...playlistsPath.value, query: allShotsQuery.value })
+    router.push({ ...playlistsPath.value, query: allEntityQuery.value })
   }
 }
 
@@ -1786,7 +1793,7 @@ watch(currentEpisode, () => {
 })
 
 watch(allForEntity, (forEntity, previous) => {
-  // All assets <-> All shots: same episode, different query.
+  // All assets, All shots and All episodes share the same episode id.
   if (forEntity && previous) resetPlaylistsAndReload()
 })
 

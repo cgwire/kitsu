@@ -61,6 +61,7 @@ const mountPage = async ({
     loadAssets: resolved(),
     loadEdits: resolved(),
     loadEpisodes: resolved(),
+    loadEpisodesWithTasks: resolved(),
     loadMorePlaylists: vi.fn(() => Promise.resolve([])),
     loadPlaylist: resolved(),
     loadPlaylistShareLinks: vi.fn(() => Promise.resolve([])),
@@ -82,6 +83,7 @@ const mountPage = async ({
       displayedEpisodes: [],
       editsLoadingKey: 'p1/',
       isEditsLoading: false,
+      isEpisodeListLoadedWithTasks: false,
       isShotsLoading: false,
       isTVShow: false,
       playlists: [],
@@ -108,6 +110,7 @@ const mountPage = async ({
       isCurrentUserProductionManager: () => true,
       isCurrentUserProductionSupervisor: () => false,
       isEditsLoading: fromState('isEditsLoading'),
+      isEpisodeListLoadedWithTasks: fromState('isEpisodeListLoadedWithTasks'),
       isEpisodesLoading: () => false,
       isShotsLoading: fromState('isShotsLoading'),
       isTVShow: fromState('isTVShow'),
@@ -186,8 +189,10 @@ describe('Playlist page, stale playlist list', () => {
   })
   const allShots = playlist({ is_for_all: true, for_entity: 'shot' })
   const allAssets = playlist({ is_for_all: true, for_entity: 'asset' })
+  const allEpisodes = playlist({ is_for_all: true, for_entity: 'episode' })
   const episodeOne = playlist({ episode_id: 'ep-1', for_entity: 'shot' })
   const shotQuery = { for_entity: 'shot' }
+  const episodeQuery = { for_entity: 'episode' }
 
   // The store keeps the last loaded list across pages: it is fetched again
   // on mount only when it belongs to another scope.
@@ -196,6 +201,8 @@ describe('Playlist page, stale playlist list', () => {
     ['another all-mode entity type', allShots, 'all', {}, 'p1', true],
     ['the all assets list', allAssets, 'all', {}, 'p1', false],
     ['the all shots list', allShots, 'all', shotQuery, 'p1', false],
+    ['the all episodes list', allEpisodes, 'all', episodeQuery, 'p1', false],
+    ['all episodes under all assets', allEpisodes, 'all', {}, 'p1', true],
     ['another episode', episodeOne, 'ep-2', {}, 'p1', true],
     ['the displayed episode', episodeOne, 'ep-1', {}, 'p1', false],
     ['the all pack on an episode', allAssets, 'ep-1', {}, 'p1', true],
@@ -271,6 +278,62 @@ describe.each([
   })
 })
 
+describe('Playlist page, loadEpisodesData', () => {
+  // Episode playlists resolve their entries' tasks through taskMap and the
+  // status dots through validations: the selector list has neither, only
+  // episodes loaded with their tasks carry both.
+  const mountOn = async state => {
+    const { actions } = await mountPage({
+      state: {
+        isTVShow: true,
+        currentEpisode: { id: 'ep-a' },
+        ...state
+      }
+    })
+    await flushPromises()
+    return actions
+  }
+
+  it('loads the episodes with their tasks on mount', async () => {
+    const actions = await mountOn({})
+    expect(actions.loadEpisodesWithTasks).toHaveBeenCalledTimes(1)
+  })
+
+  // The selector or a socket event may have filled the list first: plain
+  // episodes carry no validations and the load upgrades them.
+  it('upgrades a list loaded without the tasks', async () => {
+    const actions = await mountOn({
+      displayedEpisodes: [{ id: 'ep-a', project_id: 'p1' }]
+    })
+    expect(actions.loadEpisodesWithTasks).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the list already loaded with its tasks', async () => {
+    const actions = await mountOn({
+      isEpisodeListLoadedWithTasks: true,
+      displayedEpisodes: [
+        { id: 'ep-a', project_id: 'p1', validations: new Map() }
+      ]
+    })
+    expect(actions.loadEpisodesWithTasks).not.toHaveBeenCalled()
+  })
+
+  it('replaces the list of another production', async () => {
+    const actions = await mountOn({
+      isEpisodeListLoadedWithTasks: true,
+      displayedEpisodes: [
+        { id: 'ep-x', project_id: 'p2', validations: new Map() }
+      ]
+    })
+    expect(actions.loadEpisodesWithTasks).toHaveBeenCalledTimes(1)
+  })
+
+  it('loads no episodes outside TV shows', async () => {
+    const actions = await mountOn({ isTVShow: false, currentEpisode: null })
+    expect(actions.loadEpisodesWithTasks).not.toHaveBeenCalled()
+  })
+})
+
 describe('Playlist page, loadShots under a pseudo-episode', () => {
   const shotQuery = { for_entity: 'shot' }
 
@@ -290,7 +353,8 @@ describe('Playlist page, loadShots under a pseudo-episode', () => {
 
   it.each([
     ['the main pack', 'main', {}],
-    ['all assets', 'all', {}]
+    ['all assets', 'all', {}],
+    ['all episodes', 'all', { for_entity: 'episode' }]
   ])('loads nothing for %s', async (_, episodeId, query) => {
     expect(await mountOn(episodeId, query)).not.toHaveBeenCalled()
   })
@@ -697,7 +761,36 @@ const openPlaylist = (playlist = {}, options = {}) => {
   })
 }
 
+describe('Playlist page, deletion navigation', () => {
+  it('opens the remaining playlist in the all episodes scope', async () => {
+    const scope = { is_for_all: true, for_entity: 'episode' }
+    const remaining = { id: 'pl-2', project_id: 'p1', ...scope }
+    const { store, wrapper } = await openPlaylist(scope, {
+      query: { for_entity: 'episode' },
+      state: { isTVShow: true, currentEpisode: { id: 'all' } }
+    })
+    await flushPromises()
+    store.commit('LOAD_PLAYLISTS_END', [remaining])
+    wrapper.findComponent(PlaylistPlayer).vm.$emit('playlist-deleted')
+
+    expect(routeHolder.router.push).toHaveBeenCalledWith({
+      name: 'episode-playlist',
+      params: { production_id: 'p1', episode_id: 'all', playlist_id: 'pl-2' },
+      query: { for_entity: 'episode' }
+    })
+  })
+})
+
 describe('Playlist page, addition buttons', () => {
+  it('does not offer shot builds for an episode playlist', async () => {
+    const { wrapper } = await openPlaylist({ for_entity: 'episode' })
+    await flushPromises()
+
+    const labels = wrapper.findAll('button').map(button => button.text())
+    expect(labels).not.toContain('playlists.build_daily')
+    expect(labels).not.toContain('playlists.build_weekly')
+  })
+
   it('shows the weekly build as loading on its own button', async () => {
     const pending = gatedAction()
     const { wrapper } = await openPlaylist(

@@ -87,6 +87,7 @@ export default {
   },
 
   main: {
+    all_episodes: 'All chapters',
     all_shots: 'All maps',
     csv: {
       preview_episode_name: 'Chapter name'
