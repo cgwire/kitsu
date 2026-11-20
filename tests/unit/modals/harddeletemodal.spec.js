@@ -42,6 +42,14 @@ describe('HardDeleteModal', () => {
     expect(getConfirmButton(wrapper).attributes('aria-disabled')).toBe('false')
   })
 
+  it('names the choice between the list and the production', () => {
+    const wrapper = mountModal({ selectionOption: true })
+
+    expect(wrapper.get('select.combobox').attributes('aria-label')).toBe(
+      'Entities'
+    )
+  })
+
   it('confirms once the name is typed', async () => {
     const wrapper = mountModal()
 

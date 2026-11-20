@@ -23,6 +23,7 @@
           <div class="filler"></div>
           <combobox
             class="flexrow-item"
+            :aria-label="$t('main.entities')"
             :options="selectionOptions"
             :with-margin="false"
             v-model="selectionOnly"

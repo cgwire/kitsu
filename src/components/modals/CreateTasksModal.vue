@@ -18,6 +18,7 @@
               v-model="form.task_type_id"
             />
             <combobox
+              :aria-label="$t('main.entities')"
               :options="selectionOptions"
               :with-margin="false"
               v-model="selectionOnly"
