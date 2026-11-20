@@ -29,7 +29,9 @@
             locale-key-prefix="entities.build_filter."
             :options="operatorOptions"
             :with-margin="false"
-            @update:model-value="onOperatorChanged(assetTypeFilters)"
+            @update:model-value="
+              operator => onOperatorChanged(assetTypeFilters, operator)
+            "
             v-model="assetTypeFilters.operator"
           />
           <div class="flexrow-item flexrow value-column">
@@ -73,7 +75,9 @@
               taskTypeFilter.id ? taskTypeOperatorOptions : operatorOptions
             "
             :with-margin="false"
-            @update:model-value="onOperatorChanged(taskTypeFilter)"
+            @update:model-value="
+              operator => onOperatorChanged(taskTypeFilter, operator)
+            "
             v-model="taskTypeFilter.operator"
           />
           <div
@@ -155,7 +159,9 @@
               locale-key-prefix="entities.build_filter."
               :options="operatorOptions"
               :with-margin="false"
-              @update:model-value="onOperatorChanged(descriptorFilter)"
+              @update:model-value="
+                operator => onOperatorChanged(descriptorFilter, operator)
+              "
               v-model="descriptorFilter.operator"
               v-else
             />
@@ -842,10 +848,11 @@ const removeDescriptorFilter = descriptorFilter => {
   )
 }
 
-const onOperatorChanged = filter => {
+// Runs before v-model writes the new operator into the filter.
+const onOperatorChanged = (filter, operator) => {
   if (!filter.values.length) {
     filter.values = [taskStatuses.value[0].id]
-  } else if (!isMultiple(filter.operator)) {
+  } else if (!isMultiple(operator)) {
     filter.values = [filter.values[0]]
   }
 }
