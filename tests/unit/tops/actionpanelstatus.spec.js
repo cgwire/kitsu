@@ -65,6 +65,7 @@ describe('ActionPanel, status change messages', () => {
         selectedEdits: () => new Map(),
         selectedShots: () => new Map(),
         selectedTasks: () => new Map(tasks.map(task => [task.id, task])),
+        selectedValidations: () => new Map(),
         taskMap: () => new Map(tasks.map(task => [task.id, task])),
         taskStatusForCurrentUser: () => statuses,
         taskStatusMap: () =>

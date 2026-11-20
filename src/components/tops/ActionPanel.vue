@@ -505,7 +505,7 @@
           </p>
         </div>
 
-        <div class="flexrow is-wide" v-if="selectedBar === 'create-tasks'">
+        <div class="flexcolumn is-wide" v-if="selectedBar === 'create-tasks'">
           <button
             class="button confirm-button is-wide"
             :class="{
@@ -516,6 +516,13 @@
           >
             {{ $t('tasks.create_for_selection') }}
           </button>
+          <p
+            class="is-danger has-text-centered mt05 task-creation-error"
+            role="alert"
+            v-if="errors.taskCreation"
+          >
+            {{ $t(`tasks.create_tasks_${currentEntityType}_failed`) }}
+          </p>
         </div>
 
         <div class="flexrow-item is-wide" v-if="selectedBar === 'thumbnails'">
@@ -1027,6 +1034,7 @@ const errors = reactive({
   editDeletion: false,
   shotDeletion: false,
   taskAssignation: false,
+  taskCreation: false,
   taskDeletion: false
 })
 
@@ -1053,6 +1061,7 @@ const selectedConcepts = computed(() => store.getters.selectedConcepts)
 const selectedEdits = computed(() => store.getters.selectedEdits)
 const selectedShots = computed(() => store.getters.selectedShots)
 const selectedTasks = computed(() => store.getters.selectedTasks)
+const selectedValidations = computed(() => store.getters.selectedValidations)
 const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskStatusForCurrentUser = computed(
@@ -1310,6 +1319,9 @@ const isHidden = computed(
 )
 
 const selectedTaskIds = computed(() => Array.from(selectedTasks.value.keys()))
+const selectedValidationKeys = computed(() =>
+  Array.from(selectedValidations.value.keys())
+)
 
 const isInDepartment = computed(() =>
   selectedTaskIds.value.every(taskId => {
@@ -1576,6 +1588,7 @@ const confirmClientCommentsCopy = async () => {
 
 const confirmTaskCreation = async () => {
   loading.taskCreation = true
+  errors.taskCreation = false
   try {
     await store.dispatch('createSelectedTasks', {
       type: `${currentEntityType.value}s`,
@@ -1583,6 +1596,7 @@ const confirmTaskCreation = async () => {
     })
   } catch (err) {
     console.error(err)
+    errors.taskCreation = true
   }
   loading.taskCreation = false
 }
@@ -1893,6 +1907,12 @@ watch(selectedTaskIds, refreshSelectionActions, { immediate: true })
 
 watch(selectedTaskIds, () => {
   errors.changeStatus = false
+})
+
+// A failed creation is about the cells it was tried on. The cells of the
+// created tasks leave the selection before the error shows, so it stays.
+watch(selectedValidationKeys, () => {
+  errors.taskCreation = false
 })
 
 watch(

@@ -203,6 +203,7 @@ const getters = {
   isPublishingComment: () => commentId => publishingCommentIds.has(commentId),
 
   selectedTasks: state => state.selectedTasks,
+  selectedValidations: state => state.selectedValidations,
   nbSelectedTasks: state => state.nbSelectedTasks,
   nbSelectedValidations: state => state.nbSelectedValidations,
   taskSearchQueries: state => state.taskSearchQueries,
@@ -423,41 +424,61 @@ const actions = {
       }
       entityIdsByTaskType[taskTypeId].push(entityId)
     })
-    return func.runPromiseMapAsSeries(
-      Object.keys(entityIdsByTaskType),
-      taskTypeId => {
+    // The created tasks take the place of their cells in the selection once
+    // every type is created. A failed request does not stop the other types;
+    // an error while storing a type's tasks does. After a failure, only the
+    // cells still empty stay selected: a selection of tasks closes the task
+    // creation bar, which shows the error. The selected cell carries its place
+    // in the list, for the highlight of the list.
+    const createdTasks = []
+    let failure = null
+    const releaseCreatedCells = isDone => {
+      createdTasks.forEach(task => {
+        const cell = state.selectedValidations.get(
+          `${task.entity_id}-${task.task_type_id}`
+        )
+        if (cell) {
+          commit(REMOVE_SELECTED_TASK, cell)
+          if (isDone) {
+            commit(ADD_SELECTED_TASK, { ...cell, task })
+          }
+        }
+      })
+    }
+    return func
+      .runPromiseMapAsSeries(Object.keys(entityIdsByTaskType), taskTypeId => {
         const data = {
           task_type_id: taskTypeId,
           type,
           project_id: projectId,
           entityIds: entityIdsByTaskType[taskTypeId]
         }
-        return tasksApi
-          .createTasks(data)
-          .then(tasks => {
+        return tasksApi.createTasks(data).then(
+          tasks => {
             commit(CREATE_TASKS_END, {
               tasks,
               production,
               taskStatusMap,
               taskTypeMap
             })
-            tasks.forEach(task => {
-              const validationInfo = {
-                column: { id: task.task_type_id },
-                entity: { id: task.entity_id }
-              }
-              commit(REMOVE_SELECTED_TASK, validationInfo)
-              validationInfo.task = task
-              commit(ADD_SELECTED_TASK, validationInfo)
-            })
-            return tasks
-          })
-          .catch(err => {
-            console.error(err)
-            return []
-          })
-      }
-    )
+            createdTasks.push(...tasks)
+          },
+          err => {
+            failure ||= err
+          }
+        )
+      })
+      .then(
+        () => {
+          releaseCreatedCells(!failure)
+          if (failure) throw failure
+          return createdTasks
+        },
+        err => {
+          releaseCreatedCells(false)
+          throw err
+        }
+      )
   },
 
   async deleteSelectedTasks({ commit, state }) {
@@ -1577,8 +1598,13 @@ const mutations = {
 
   [REMOVE_SELECTED_TASK](state, validationInfo) {
     if (validationInfo.task) {
-      state.selectedTasks.delete(validationInfo.task.id)
+      const task = validationInfo.task
+      state.selectedTasks.delete(task.id)
       state.nbSelectedTasks = state.selectedTasks.size
+      // A created task stays selected as an empty cell until the creation of
+      // every type ends (createSelectedTasks).
+      state.selectedValidations.delete(`${task.entity_id}-${task.task_type_id}`)
+      state.nbSelectedValidations = state.selectedValidations.size
     } else {
       const taskTypeId = validationInfo.column.id
       const entityId = validationInfo.entity.id
