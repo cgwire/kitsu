@@ -397,21 +397,15 @@ const actions = {
       project_id: payload.project_id,
       entityIds
     }
-    return tasksApi
-      .createTasks(data)
-      .then(tasks => {
-        commit(CREATE_TASKS_END, {
-          tasks,
-          production,
-          taskStatusMap,
-          taskTypeMap
-        })
-        return tasks
+    return tasksApi.createTasks(data).then(tasks => {
+      commit(CREATE_TASKS_END, {
+        tasks,
+        production,
+        taskStatusMap,
+        taskTypeMap
       })
-      .catch(err => {
-        console.error(err)
-        return []
-      })
+      return tasks
+    })
   },
 
   createSelectedTasks({ commit, state, rootGetters }, { type, projectId }) {

@@ -634,9 +634,15 @@ export const useEntityPage = ({
     runTasksCreation(
       'creatingAllTasks',
       () =>
-        func.runPromiseMapAsSeries(missingTaskTypeIds, taskTypeId =>
-          createTasksForType(taskTypeId, selectionOnly)
-        ),
+        func
+          .runPromiseMapAsSeries(missingTaskTypeIds, taskTypeId =>
+            createTasksForType(taskTypeId, selectionOnly)
+          )
+          .catch(err => {
+            // The task types created before the failure need their columns.
+            reset()
+            throw err
+          }),
       true
     )
 

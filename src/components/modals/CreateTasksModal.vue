@@ -11,11 +11,18 @@
         <page-title :text="title" />
         <p>{{ text }}</p>
         <form @submit.prevent class="widden">
-          <combobox-task-type
-            class="mb1"
-            :task-type-list="getApplicableTaskTypes()"
-            v-model="form.task_type_id"
-          />
+          <div class="fields mb1">
+            <combobox-task-type
+              :task-type-list="getApplicableTaskTypes()"
+              :with-margin="false"
+              v-model="form.task_type_id"
+            />
+            <combobox
+              :options="selectionOptions"
+              :with-margin="false"
+              v-model="selectionOnly"
+            />
+          </div>
           <div class="disclaimer">
             <router-link
               :to="{
@@ -33,14 +40,7 @@
             </router-link>
           </div>
         </form>
-        <div class="flexrow">
-          <div class="filler"></div>
-          <combobox
-            class="flexrow-item"
-            :options="selectionOptions"
-            :with-margin="false"
-            v-model="selectionOnly"
-          />
+        <div class="flexrow actions">
           <a
             :class="{
               button: true,
@@ -69,10 +69,12 @@
               button: true,
               'flexrow-item': true,
               'is-primary': true,
-              'is-loading': isLoadingStay
+              'is-loading': isLoadingStay,
+              'is-disabled': !isTaskTypeSelected
             }"
             role="button"
-            tabindex="0"
+            :aria-disabled="!isTaskTypeSelected"
+            :tabindex="isTaskTypeSelected ? 0 : -1"
             @click="confirmAndStayClicked"
             @keydown.enter.prevent="confirmAndStayClicked"
             @keydown.space.prevent="confirmAndStayClicked"
@@ -84,10 +86,12 @@
               button: true,
               'flexrow-item': true,
               'is-primary': true,
-              'is-loading': isLoading
+              'is-loading': isLoading,
+              'is-disabled': !isTaskTypeSelected
             }"
             role="button"
-            tabindex="0"
+            :aria-disabled="!isTaskTypeSelected"
+            :tabindex="isTaskTypeSelected ? 0 : -1"
             @click="confirmClicked"
             @keydown.enter.prevent="confirmClicked"
             @keydown.space.prevent="confirmClicked"
@@ -107,7 +111,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, toRef } from 'vue'
+import { computed, ref, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
@@ -185,6 +189,12 @@ const missingTaskTypes = computed(() => {
   )
 })
 
+const isTaskTypeSelected = computed(() =>
+  getApplicableTaskTypes().some(
+    taskType => taskType.id === form.value.task_type_id
+  )
+)
+
 const selectionOptions = computed(() => [
   { label: t('tasks.for_selection'), value: 'true' },
   { label: t('tasks.for_project'), value: 'false' }
@@ -218,11 +228,15 @@ const buildPayload = () => ({
 // The loading and disabled looks only stop the mouse: Enter and Space still
 // reach the buttons.
 const confirmClicked = () => {
-  if (!props.isLoading) emit('confirm', buildPayload())
+  if (isTaskTypeSelected.value && !props.isLoading) {
+    emit('confirm', buildPayload())
+  }
 }
 
 const confirmAndStayClicked = () => {
-  if (!props.isLoadingStay) emit('confirm-and-stay', buildPayload())
+  if (isTaskTypeSelected.value && !props.isLoadingStay) {
+    emit('confirm-and-stay', buildPayload())
+  }
 }
 
 const confirmAllMissingClicked = () => {
@@ -233,15 +247,38 @@ const confirmAllMissingClicked = () => {
   })
 }
 
-onMounted(() => {
-  const taskTypes = getApplicableTaskTypes()
-  if (taskTypes.length > 0) {
-    form.value.task_type_id = taskTypes[0].id
-  }
-})
+// The page keeps its modal across a production change: a task type of the
+// previous production would be sent with the new one.
+watch(
+  getApplicableTaskTypes,
+  taskTypes => {
+    if (!isTaskTypeSelected.value) {
+      form.value.task_type_id = taskTypes[0]?.id || ''
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>
+.modal-content {
+  width: 800px;
+  max-width: calc(100vw - 4rem);
+}
+
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em 1em;
+}
+
+.actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 0.5em;
+}
+
 .info-message {
   margin-top: 1em;
 }

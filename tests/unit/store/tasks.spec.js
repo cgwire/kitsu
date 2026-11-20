@@ -41,6 +41,7 @@ vi.mock('@/store/api/tasks', () => ({
     createEntityTasks: vi.fn(() =>
       Promise.resolve([{ id: 'task-1' }, { id: 'task-2' }])
     ),
+    createTasks: vi.fn(),
     setTasksPriority: vi.fn(() =>
       Promise.resolve([{ id: 'task-1', priority: 2, task_type_id: 'type-1' }])
     ),
@@ -481,6 +482,43 @@ describe('Tasks store', () => {
       expect(commit).toHaveBeenCalledTimes(2)
       expect(commit.mock.calls[0][0]).toEqual('NEW_TASK_END')
       expect(commit.mock.calls[0][1].task).toEqual(tasks[0])
+    })
+  })
+
+  describe('createTasks action', () => {
+    const rootGetters = { currentProduction: { id: 'production-1' } }
+    const payload = {
+      type: 'sequences',
+      task_type_id: 'type-1',
+      project_id: 'production-1',
+      selectionOnly: false
+    }
+
+    test('commits and returns the created tasks', async () => {
+      const commit = vi.fn()
+      tasksApi.createTasks.mockResolvedValueOnce([{ id: 'task-1' }])
+
+      const tasks = await tasksStore.actions.createTasks(
+        { commit, rootGetters },
+        payload
+      )
+
+      expect(tasks).toEqual([{ id: 'task-1' }])
+      expect(commit.mock.calls.map(([type]) => type)).toEqual([
+        'CREATE_TASKS_END'
+      ])
+    })
+
+    // The Add tasks modal shows the failure and stays open.
+    test('rethrows a failed creation', async () => {
+      const commit = vi.fn()
+      const error = Object.assign(new Error('HTTP 404'), { status: 404 })
+      tasksApi.createTasks.mockRejectedValueOnce(error)
+
+      await expect(
+        tasksStore.actions.createTasks({ commit, rootGetters }, payload)
+      ).rejects.toBe(error)
+      expect(commit).not.toHaveBeenCalled()
     })
   })
 
