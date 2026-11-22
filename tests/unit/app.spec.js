@@ -76,6 +76,7 @@ describe('App', () => {
     wrapper?.unmount()
     wrapper = null
     vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   describe('socket events', () => {
@@ -335,6 +336,31 @@ describe('App', () => {
         await flushPromises()
 
         expect(reloadTeamRoles).toHaveBeenCalledWith(expect.anything(), 'prod-1')
+      })
+
+      // Zou sends one update per change, to every user: a batch of changes
+      // must not cost one reload per change and per user.
+      it('reloads a production at once, then once for the updates that follow', async () => {
+        const loadProduction = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { loadProduction, reloadTeamRoles: () => Promise.resolve() },
+          getters
+        })
+        vi.useFakeTimers()
+
+        for (let update = 0; update < 5; update++) {
+          emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
+        }
+        expect(loadProduction).toHaveBeenCalledTimes(1)
+
+        await vi.advanceTimersByTimeAsync(2000)
+        expect(loadProduction).toHaveBeenCalledTimes(2)
+
+        await vi.advanceTimersByTimeAsync(2000)
+        expect(loadProduction).toHaveBeenCalledTimes(2)
+
+        emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
+        expect(loadProduction).toHaveBeenCalledTimes(3)
       })
 
       // Deleted, or no longer shared with the user.

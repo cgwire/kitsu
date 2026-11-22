@@ -248,6 +248,52 @@ const setupAuthChannel = () => {
   }
 }
 
+const reloadProduction = productionId => {
+  if (productionMap.value.get(productionId)) {
+    store
+      .dispatch('loadProduction', productionId)
+      .then(() => {
+        // Zou also announces a team role change as a project update,
+        // possibly one changing the role of the user.
+        store
+          .dispatch('reloadTeamRoles', productionId)
+          .catch(errors.logRequestFailure)
+      })
+      .catch(err => {
+        // Deleted, or no longer shared with the user.
+        if ([403, 404].includes(err?.status)) {
+          store.commit('REMOVE_PRODUCTION', { id: productionId })
+        } else {
+          errors.logRequestFailure(err)
+        }
+      })
+  } else {
+    store
+      .dispatch('loadProductionIfOpen', productionId)
+      .catch(errors.logRequestFailure)
+  }
+}
+
+// Zou sends one project:update per change, to every user: a batch of changes
+// would make each of them reload the production once per change. The first
+// update reloads at once, those of the delay that follows share one reload.
+const PRODUCTION_RELOAD_DELAY = 2000
+const updatedProductions = new Map()
+
+const onProductionUpdate = productionId => {
+  if (updatedProductions.has(productionId)) {
+    updatedProductions.set(productionId, true)
+    return
+  }
+  updatedProductions.set(productionId, false)
+  reloadProduction(productionId)
+  setTimeout(() => {
+    const isUpdatedAgain = updatedProductions.get(productionId)
+    updatedProductions.delete(productionId)
+    if (isUpdatedAgain) onProductionUpdate(productionId)
+  }, PRODUCTION_RELOAD_DELAY)
+}
+
 // Socket events
 // --------------------------------------------------------------------------
 
@@ -262,32 +308,7 @@ const socketEvents = {
     }
   },
 
-  'project:update': eventData => {
-    const productionId = eventData.project_id
-    if (productionMap.value.get(productionId)) {
-      store
-        .dispatch('loadProduction', productionId)
-        .then(() => {
-          // Zou also announces a team role change as a project update,
-          // possibly one changing the role of the user.
-          store
-            .dispatch('reloadTeamRoles', productionId)
-            .catch(errors.logRequestFailure)
-        })
-        .catch(err => {
-          // Deleted, or no longer shared with the user.
-          if ([403, 404].includes(err?.status)) {
-            store.commit('REMOVE_PRODUCTION', { id: productionId })
-          } else {
-            errors.logRequestFailure(err)
-          }
-        })
-    } else {
-      store
-        .dispatch('loadProductionIfOpen', productionId)
-        .catch(errors.logRequestFailure)
-    }
-  },
+  'project:update': eventData => onProductionUpdate(eventData.project_id),
 
   'project:delete': eventData => {
     if (productionMap.value.get(eventData.project_id)) {
