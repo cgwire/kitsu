@@ -1,0 +1,2 @@
+import{Lt as e,M as t,d as n,rt as r}from"./vue-vendor-BS-eaoY4.js";import{t as i}from"./_plugin-vue_export-helper-BDNMzG2s.js";n();var a={class:`subtitle`},o=i({__name:`PageSubtitle`,props:{text:{default:``,type:String}},setup(n){return(i,o)=>(r(),t(`h2`,a,e(n.text),1))}},[[`__scopeId`,`data-v-85eea490`]]);export{o as t};
+//# sourceMappingURL=PageSubtitle-BoZVPd4N.js.map

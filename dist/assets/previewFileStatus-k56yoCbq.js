@@ -1,0 +1,2 @@
+import{O as e,Tt as t,W as n,d as r,i,jt as a,mt as o}from"./vue-vendor-BS-eaoY4.js";import{h as s}from"./preview-DFPlqQNw.js";r();var c=(r,c)=>{let l=n(i,null),u=t(``),d=e(()=>l?.getters.previewFileStatusMap?.get(a(r))),f=e(()=>s(a(c),d.value)||`ready`),p=e(()=>f.value===`processing`),m=e(()=>[`broken`,`missing`].includes(f.value)),h=()=>{u.value=`?t=${Date.now()}`};return o(d,e=>{e===`ready`&&h()}),{isBroken:m,isProcessing:p,reload:h,reloadQuery:u}};export{c as t};
+//# sourceMappingURL=previewFileStatus-k56yoCbq.js.map

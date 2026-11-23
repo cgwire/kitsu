@@ -1,2 +1,0 @@
-import{Tt as e,d as t}from"./vue-vendor-C9HfIGBc.js";t();var n=t=>{let n=e(!1);return{showList:n,toggle:()=>{n.value=!n.value},select:e=>{t(`update:model-value`,e.id),n.value=!1}}};export{n as t};
-//# sourceMappingURL=combobox-c4VUdvm_.js.map
