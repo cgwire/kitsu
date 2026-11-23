@@ -577,6 +577,17 @@ describe('PreviewPlayer.vue', () => {
       dragHandle('handle-in-changed', 5)
       expect(savedData()).toEqual({ handle_in: 5, handle_out: 300 })
     })
+
+    it('copies the moved handle on the preview file on screen', async () => {
+      await mountTrimmable({})
+      dragHandle('handle-in-changed', 5)
+      await flushPromises()
+      const [, payload] = wrapper.vm.$store.dispatch.mock.calls.find(
+        ([action]) => action === 'updatePreviewTrim'
+      )
+      expect(payload.preview.id).toBe(moviePreview.id)
+      expect(payload.trim).toEqual({ handle_in: 5 })
+    })
   })
 
   // An extra preview of the revision has a timeline of its own: it keeps

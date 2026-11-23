@@ -1521,12 +1521,16 @@ const resetHandles = () => {
 // Only the moved handle is saved: the other one shows either the clip
 // bound of the revision on screen, or a trim set on another revision.
 const saveHandles = handles => {
+  const preview = currentPreview.value
+  const savePreviewTrim = () =>
+    preview.id
+      ? store.dispatch('updatePreviewTrim', { preview, trim: handles })
+      : Promise.resolve()
+  // The trim of the main preview lives on the shot: its preview file keeps
+  // a copy, saved after the shot so a refused trim never reaches it.
   const save = isExtraPreview.value
-    ? store.dispatch('updatePreviewTrim', {
-        preview: currentPreview.value,
-        trim: handles
-      })
-    : saveTrimmedShot(handles)
+    ? savePreviewTrim()
+    : saveTrimmedShot(handles).then(savePreviewTrim)
   save.catch(err => {
     console.error(err)
     resetHandles()
