@@ -92,7 +92,7 @@ describe('App', () => {
       errors.markRequestFailure(error)
 
       const { socket } = await mountApp({
-        actions: { loadTask: () => Promise.reject(error) },
+        actions: { reloadTasks: () => Promise.reject(error) },
         getters: { taskMap: () => new Map([['task-1', { id: 'task-1' }]]) }
       })
       emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
@@ -112,7 +112,7 @@ describe('App', () => {
 
       const rejections = await recordUnhandledRejections(async () => {
         const { socket } = await mountApp({
-          actions: { loadTask: () => Promise.reject(bug) },
+          actions: { reloadTasks: () => Promise.reject(bug) },
           getters: { taskMap: () => new Map([['task-1', { id: 'task-1' }]]) }
         })
         emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
@@ -139,6 +139,40 @@ describe('App', () => {
       expect(loadTask).toHaveBeenCalledWith(expect.anything(), {
         taskId: 'task-1'
       })
+    })
+
+    // Zou sends one update per task: a batch of 500 statuses asked every
+    // tab for 500 tasks, one request each.
+    it('reloads a task at once, then those updated meanwhile in one request', async () => {
+      const reloadTasks = vi.fn(() => Promise.resolve())
+      const ids = ['task-1', 'task-2', 'task-3']
+      const { socket } = await mountApp({
+        actions: { reloadTasks },
+        getters: {
+          taskMap: () => new Map(ids.map(id => [id, { id }])),
+          todoMap: () => new Map()
+        }
+      })
+      const reloaded = () => reloadTasks.mock.calls.map(([, taskIds]) => taskIds)
+      vi.useFakeTimers()
+
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
+      expect(reloaded()).toEqual([['task-1']])
+
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-2' })
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-3' })
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-2' })
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-unknown' })
+      expect(reloaded()).toEqual([['task-1']])
+
+      await vi.advanceTimersByTimeAsync(1000)
+      expect(reloaded()).toEqual([['task-1'], ['task-2', 'task-3']])
+
+      await vi.advanceTimersByTimeAsync(2000)
+      expect(reloaded()).toHaveLength(2)
+
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
+      expect(reloaded()).toHaveLength(3)
     })
 
     // Zou builds the files of an uploaded preview in a job, and announces

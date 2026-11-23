@@ -294,6 +294,36 @@ const onProductionUpdate = productionId => {
   }, PRODUCTION_RELOAD_DELAY)
 }
 
+// Zou sends one task:update per task, and a batch of changes sends them for
+// a while. The first update reloads its task at once, the tasks updated in
+// the delay that follows share one reload. A task out of the map, a todo
+// under a production page, needs its names: it reloads in full.
+const TASK_RELOAD_DELAY = 1000
+const updatedTaskIds = new Set()
+let taskReloadTimer = null
+
+const reloadUpdatedTasks = () => {
+  taskReloadTimer = null
+  if (updatedTaskIds.size === 0) return
+  const taskIds = [...updatedTaskIds]
+  updatedTaskIds.clear()
+  const listedIds = taskIds.filter(taskId => taskMap.value.has(taskId))
+  if (listedIds.length > 0) {
+    store.dispatch('reloadTasks', listedIds).catch(errors.logRequestFailure)
+  }
+  taskIds
+    .filter(taskId => !taskMap.value.has(taskId))
+    .forEach(taskId => {
+      store.dispatch('loadTask', { taskId }).catch(errors.logRequestFailure)
+    })
+  taskReloadTimer = setTimeout(reloadUpdatedTasks, TASK_RELOAD_DELAY)
+}
+
+const onTaskUpdate = taskId => {
+  updatedTaskIds.add(taskId)
+  if (!taskReloadTimer) reloadUpdatedTasks()
+}
+
 // Socket events
 // --------------------------------------------------------------------------
 
@@ -672,13 +702,7 @@ const socketEvents = {
   },
 
   'task:update': eventData => {
-    if (getHeldTask(eventData.task_id)) {
-      nextTick(() => {
-        store
-          .dispatch('loadTask', { taskId: eventData.task_id })
-          .catch(errors.logRequestFailure)
-      })
-    }
+    if (getHeldTask(eventData.task_id)) onTaskUpdate(eventData.task_id)
   },
 
   'task:update-casting-stats': eventData => {
