@@ -1496,6 +1496,8 @@
       "delete_force": "解除關聯並刪除",
       "edit_title": "編輯任務類型",
       "create_error": "建立任務類型時發生錯誤。請檢查是否沒有名稱相似的任務類型。",
+      "name_taken": "另一個任務類型已使用此名稱：{name}（{entity}）。",
+      "name_taken_archived": "一個已封存的任務類型已使用此名稱：{name}（{entity}）。",
       "new_task_type": "新增任務類型",
       "number": "任務類型 | 任務類型",
       "title": "任務類型",

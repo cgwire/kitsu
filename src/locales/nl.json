@@ -1496,6 +1496,8 @@
       "delete_force": "Loskoppelen en verwijderen",
       "edit_title": "Bewerk taaktype",
       "create_error": "Er is een fout opgetreden bij het maken van het taaktype. Controleer of er geen taaktype is met een vergelijkbare naam.",
+      "name_taken": "Een ander taaktype gebruikt deze naam al: {name} ({entity}).",
+      "name_taken_archived": "Een gearchiveerd taaktype gebruikt deze naam al: {name} ({entity}).",
       "new_task_type": "Voeg een taaktype toe",
       "number": "taaktype | taaktypes",
       "title": "Taaktypes",

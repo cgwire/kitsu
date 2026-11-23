@@ -1496,6 +1496,8 @@
       "delete_force": "解除关联并删除",
       "edit_title": "编辑任务类型",
       "create_error": "创建任务类型时发生错误。请检查是否没有名称相似的任务类型。",
+      "name_taken": "另一个任务类型已使用此名称：{name}（{entity}）。",
+      "name_taken_archived": "一个已归档的任务类型已使用此名称：{name}（{entity}）。",
       "new_task_type": "添加任务类型",
       "number": "任务类型 | 任务类型",
       "title": "任务类型",

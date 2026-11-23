@@ -1496,6 +1496,8 @@
       "delete_force": "Desvincular e excluir",
       "edit_title": "Editar tipo de tarefa",
       "create_error": "Ocorreu um erro ao criar o tipo de tarefa. Por favor, verifique se não há tipo de tarefa com nome semelhante.",
+      "name_taken": "Outro tipo de tarefa já usa este nome: {name} ({entity}).",
+      "name_taken_archived": "Um tipo de tarefa arquivado já usa este nome: {name} ({entity}).",
       "new_task_type": "Adicionar um tipo de tarefa",
       "number": "tipo de tarefa | tipos de tarefa",
       "title": "Tipos de Tarefa",

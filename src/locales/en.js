@@ -2003,6 +2003,8 @@ export default {
     delete_force: 'Detach and delete',
     edit_title: 'Edit task type',
     create_error: 'An error occurred while creating the task type. Please check that there is no task type with a similar name.',
+    name_taken: 'Another task type already uses this name: {name} ({entity}).',
+    name_taken_archived: 'An archived task type already uses this name: {name} ({entity}).',
     new_task_type: 'Add a task type',
     no_task_types: 'There is no task type for this entity type',
     number: 'task type | task types',

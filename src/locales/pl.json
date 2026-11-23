@@ -1922,6 +1922,8 @@
       "delete_force": "Odłącz i usuń",
       "edit_title": "Edytuj typ zadania",
       "create_error": "Wystąpił błąd podczas tworzenia typu zadania. Sprawdź, czy nie istnieje już typ zadania o podobnej nazwie.",
+      "name_taken": "Inny typ zadania używa już tej nazwy: {name} ({entity}).",
+      "name_taken_archived": "Zarchiwizowany typ zadania używa już tej nazwy: {name} ({entity}).",
       "new_task_type": "Dodaj typ zadania",
       "no_task_types": "Dla tego typu obiektu nie ma żadnych typów zadań",
       "number": "typ zadania | typów zadań",

@@ -1496,6 +1496,8 @@
       "delete_force": "Loslösen und löschen",
       "edit_title": "Aufgabentyp bearbeiten",
       "create_error": "Beim Erstellen des Aufgabentyps ist ein Fehler aufgetreten. Bitte überprüfen Sie, ob es keinen Aufgabentyp mit einem ähnlichen Namen gibt.",
+      "name_taken": "Ein anderer Aufgabentyp verwendet diesen Namen bereits: {name} ({entity}).",
+      "name_taken_archived": "Ein archivierter Aufgabentyp verwendet diesen Namen bereits: {name} ({entity}).",
       "new_task_type": "Hinzufügen eines Aufgabentyps",
       "number": "Aufgabentyp | Aufgabentypen",
       "title": "Aufgabentypen",

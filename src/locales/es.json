@@ -1496,6 +1496,8 @@
       "delete_force": "Desvincular y borrar",
       "edit_title": "Modificar tipo de tarea",
       "create_error": "Se ha producido un error al crear el tipo de tarea. Asegúrese que no haya otro tipo de tarea con un nombre similar.",
+      "name_taken": "Otro tipo de tarea ya usa este nombre: {name} ({entity}).",
+      "name_taken_archived": "Un tipo de tarea archivado ya usa este nombre: {name} ({entity}).",
       "new_task_type": "Añadir un tipo de tarea",
       "number": "tipo de tarea | tipos de tarea",
       "title": "Tipos de tarea",

@@ -1496,6 +1496,8 @@
       "delete_force": "Frakobl og slet",
       "edit_title": "Rediger opgavetype",
       "create_error": "Der opstod en fejl under oprettelse af opgavetypen. Kontrollér venligst, at der ikke allerede findes en opgavetype med et lignende navn.",
+      "name_taken": "En anden opgavetype bruger allerede dette navn: {name} ({entity}).",
+      "name_taken_archived": "En arkiveret opgavetype bruger allerede dette navn: {name} ({entity}).",
       "new_task_type": "Tilføj opgavetype",
       "number": "opgavetype | opgavetyper",
       "title": "Opgavetyper",

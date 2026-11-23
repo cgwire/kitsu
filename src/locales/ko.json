@@ -1496,6 +1496,8 @@
       "delete_force": "분리 후 삭제",
       "edit_title": "작업 유형 수정",
       "create_error": "작업 유형을 생성하는 동안 오류가 발생했습니다. 비슷한 이름의 작업 유형이 없는지 확인해 주세요.",
+      "name_taken": "다른 작업 유형이 이미 이 이름을 사용하고 있습니다: {name} ({entity}).",
+      "name_taken_archived": "아카이브된 작업 유형이 이미 이 이름을 사용하고 있습니다: {name} ({entity}).",
       "new_task_type": "작업 유형 추가",
       "number": "작업 유형 | 작업 유형",
       "title": "작업 유형",
