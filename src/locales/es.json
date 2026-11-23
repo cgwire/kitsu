@@ -906,6 +906,7 @@
       "building": "Generando...",
       "client_playlist": "Lista de reproducción del cliente",
       "create_for_selection": "Generar una lista de reproducción a partir de las tareas seleccionadas",
+      "create_for_selection_error": "Se ha producido un error al generar la lista de reproducción.",
       "create_title": "Crear lista de reproducción",
       "created_at": "Creada el:",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",

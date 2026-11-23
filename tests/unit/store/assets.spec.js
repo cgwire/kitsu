@@ -15,7 +15,6 @@ vi.mock('@/store/api/client', () => ({
     pget: vi.fn(),
     pgetNdjson: vi.fn(),
     ppost: vi.fn(),
-    ppostImport: vi.fn(),
     pput: vi.fn()
   }
 }))
@@ -2894,12 +2893,12 @@ describe('Assets store, list workflow', () => {
       productionsStore.state.currentProduction = production
       const store = buildStore()
       const formData = { file: 'assets.csv' }
-      client.ppostImport.mockResolvedValueOnce({})
+      client.ppost.mockResolvedValueOnce({})
 
       store.commit('ASSET_CSV_FILE_SELECTED', formData)
       await store.dispatch('uploadAssetFile', true)
 
-      expect(client.ppostImport).toHaveBeenCalledWith(
+      expect(client.ppost).toHaveBeenCalledWith(
         '/api/import/csv/projects/p1/assets?update=true',
         formData
       )

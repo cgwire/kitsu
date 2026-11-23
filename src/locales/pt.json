@@ -906,6 +906,7 @@
       "building": "Exportando...",
       "client_playlist": "Playlist de Cliente",
       "create_for_selection": "Gerar uma playlist a partir das tarefas selecionadas",
+      "create_for_selection_error": "Ocorreu um erro ao gerar a playlist.",
       "create_title": "Criar playlist",
       "created_at": "Criado em:",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",

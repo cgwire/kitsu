@@ -906,6 +906,7 @@
       "building": "Maken...",
       "client_playlist": "Klantafspeellijst",
       "create_for_selection": "Genereer een afspeellijst van geselecteerde taken",
+      "create_for_selection_error": "Er is een fout opgetreden tijdens het genereren van de afspeellijst.",
       "create_title": "Afspeellijst aanmaken",
       "created_at": "Gecreëerd op:",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",

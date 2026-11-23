@@ -31,7 +31,7 @@ export default {
 
   postCastingCsv(production, formData) {
     const path = `/api/import/csv/projects/${production.id}/casting`
-    return client.ppostImport(path, formData)
+    return client.ppost(path, formData)
   },
 
   getAssetCastIn(asset) {

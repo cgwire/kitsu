@@ -164,19 +164,19 @@ export default {
   postCsv(production, formData, toUpdate) {
     let path = `/api/import/csv/projects/${production.id}/shots`
     if (toUpdate) path += '?update=true'
-    return client.ppostImport(path, formData)
+    return client.ppost(path, formData)
   },
 
   postSequencesCsv(production, formData, toUpdate) {
     let path = `/api/import/csv/projects/${production.id}/sequences`
     if (toUpdate) path += '?update=true'
-    return client.ppostImport(path, formData)
+    return client.ppost(path, formData)
   },
 
   postEpisodesCsv(production, formData, toUpdate) {
     let path = `/api/import/csv/projects/${production.id}/episodes`
     if (toUpdate) path += '?update=true'
-    return client.ppostImport(path, formData)
+    return client.ppost(path, formData)
   },
 
   postEdl(production, edl_file, namingConvention, matchCase, episode) {
@@ -186,7 +186,7 @@ export default {
     formData.append('match_case', matchCase)
     let path = `/api/import/otio/projects/${production.id}`
     if (episode) path += `/episodes/${episode.id}`
-    return client.ppostImport(path, formData)
+    return client.ppost(path, formData)
   },
 
   getEpisodeStats(productionId) {

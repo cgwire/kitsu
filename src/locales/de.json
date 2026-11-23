@@ -906,6 +906,7 @@
       "building": "Wird erstellt …",
       "client_playlist": "Kunden-Playlist",
       "create_for_selection": "Eine Playlist aus den ausgewählten Aufgaben erstellen",
+      "create_for_selection_error": "Beim Erstellen der Playlist ist ein Fehler aufgetreten.",
       "create_title": "Playlist erstellen",
       "created_at": "Erstellt am:",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",

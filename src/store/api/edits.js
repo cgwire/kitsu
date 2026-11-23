@@ -53,7 +53,7 @@ export default {
   postCsv(production, formData, toUpdate) {
     let path = `/api/import/csv/projects/${production.id}/edits`
     if (toUpdate) path += '?update=true'
-    return client.ppostImport(path, formData)
+    return client.ppost(path, formData)
   },
 
   loadEditHistory(editId) {

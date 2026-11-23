@@ -1317,6 +1317,7 @@
       "clients_to_notify": "Klienci do powiadomienia",
       "comparing_missing_plan": "Brak obiektu dla bieżącego typu",
       "create_for_selection": "Wygeneruj playlistę z wybranych zadań",
+      "create_for_selection_error": "Wystąpił błąd podczas generowania playlisty.",
       "create_title": "Utwórz playlistę",
       "created": "Playlista „{name}” została utworzona.",
       "created_at": "Utworzono:",

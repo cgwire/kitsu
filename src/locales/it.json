@@ -906,6 +906,7 @@
       "building": "Generazione in corso...",
       "client_playlist": "Playlist cliente",
       "create_for_selection": "Genera una playlist dai task selezionati",
+      "create_for_selection_error": "Si è verificato un errore durante la generazione della playlist.",
       "create_title": "Crea playlist",
       "created_at": "Creata il:",
       "delete_text": "Sei sicuro di voler rimuovere {name} dal database?",
