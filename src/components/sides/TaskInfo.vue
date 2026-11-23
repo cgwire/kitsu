@@ -417,6 +417,7 @@ import { isSupervisorInDepartments } from '@/lib/descriptors'
 import drafts from '@/lib/drafts'
 import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
+import { getEntityTasks } from '@/lib/models'
 import {
   getDownloadAttachmentPath,
   getTaskEntityPath,
@@ -652,12 +653,12 @@ const currentTaskTypes = computed(() => {
   const taskTypeEntity = taskType.for_entity
   const taskTypeEntitySlug = taskTypeEntity.toLowerCase() + 's'
 
-  const entityTasks = {}
-  taskMap.value.forEach(task => {
-    if (task.entity_id === props.task.entity_id) {
-      entityTasks[task.task_type_id] = task
-    }
-  })
+  const entityTasks = Object.fromEntries(
+    getEntityTasks(taskMap.value, props.task.entity_id).map(task => [
+      task.task_type_id,
+      task
+    ])
+  )
 
   return currentProduction.value.task_types
     .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
