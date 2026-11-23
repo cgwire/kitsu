@@ -138,15 +138,15 @@ const getSectionPath = section => {
     section.plugin_id
   )
   // The all pseudo-episode is typed on the playlists page: coming from
-  // the shot side, stay on the shot side.
-  const isShotContext =
-    props.section === 'shots' || route.query.for_entity === 'shot'
+  // a typed side, stay on it.
+  const allForEntity =
+    props.section === 'shots' ? 'shot' : route.query.for_entity
   if (
     section.value === 'playlists' &&
     props.episodeId === 'all' &&
-    isShotContext
+    ['shot', 'episode'].includes(allForEntity)
   ) {
-    result.query = { ...result.query, for_entity: 'shot' }
+    result.query = { ...result.query, for_entity: allForEntity }
   }
   return result
 }

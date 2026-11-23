@@ -1524,8 +1524,9 @@ describe('Topbar.vue', () => {
 
   describe('playlists episode selector', () => {
     // The playlists page splits the all pseudo-episode by entity type: All
-    // assets (default) and All shots (?for_entity=shot), plus the main pack.
-    it('offers all assets, all shots and the main pack', async () => {
+    // assets (default), All shots and All episodes (?for_entity=...), plus
+    // the main pack.
+    it('offers all assets, all shots, all episodes and the main pack', async () => {
       const production = {
         id: 'production-1',
         production_type: 'tvshow',
@@ -1580,6 +1581,11 @@ describe('Topbar.vue', () => {
               label: 'main.all_shots',
               value: 'all',
               query: { for_entity: 'shot' }
+            },
+            {
+              label: 'main.all_episodes',
+              value: 'all',
+              query: { for_entity: 'episode' }
             },
             { label: 'main.main_pack', value: 'main' }
           ]
