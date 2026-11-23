@@ -57,7 +57,9 @@ const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
 const targetTasksByTypeId = computed(() => {
   const byType = new Map()
-  if (!props.sourceTask) return byType
+  // Closed, the modal still gets each task selected in the lists: reading
+  // every task of the production there made each cell click slow.
+  if (!props.active || !props.sourceTask) return byType
   for (const task of taskMap.value.values()) {
     if (
       task.entity_id === props.sourceTask.entity_id &&

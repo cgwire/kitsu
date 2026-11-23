@@ -1,3 +1,5 @@
+import { toRaw } from 'vue'
+
 export const populateTask = task => {
   const type = task.entity_type_name
   const parts = []
@@ -44,6 +46,14 @@ export const setTasksEntityPreview = (tasks, entityId, previewId) => {
     }
   })
 }
+
+// Walks the raw map: the walk of a reactive one subscribes its reader to
+// every task it holds, 50,000 on a big production. The size read first
+// still tells the reader when a task comes, goes or is replaced.
+export const getEntityTasks = (taskMap, entityId) =>
+  taskMap.size === 0
+    ? []
+    : [...toRaw(taskMap).values()].filter(task => task.entity_id === entityId)
 
 export const applyTaskEdit = (task, { data: metadata, ...fields }) => {
   Object.assign(task, fields)

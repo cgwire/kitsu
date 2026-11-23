@@ -3,7 +3,7 @@
     :class="{
       canceled,
       disabled,
-      selected: selectable & selected,
+      selected: selectable && isSelected,
       validation: selectable
     }"
     :style="cellStyle"
@@ -96,7 +96,7 @@
 
 <script setup>
 import { EyeIcon } from 'lucide-vue-next'
-import { computed, onMounted, ref, toRef, watch } from 'vue'
+import { computed, inject, onMounted, ref, toRef, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import { useFormat } from '@/composables/format'
@@ -131,6 +131,10 @@ const props = defineProps({
 
 const emit = defineEmits(['select', 'unselect'])
 
+// The entity lists provide it: their cells follow the selection grid
+// without a render of the list.
+const isCellSelected = inject('isCellSelected', null)
+
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const personMap = computed(() => store.getters.personMap)
@@ -161,6 +165,12 @@ const assignees = computed(() =>
       .map(personId => personMap.value.get(personId))
       .filter(Boolean) ?? []
   )
+)
+
+const isSelected = computed(() =>
+  isCellSelected
+    ? isCellSelected(props.rowX, props.columnY, props.sticked)
+    : props.selected
 )
 
 const priority = computed(() => formatPrioritySymbol(task.value.priority))
@@ -234,7 +244,7 @@ const select = event => {
     isShiftKey: event.shiftKey,
     isUserClick: event.isUserClick !== false
   }
-  if (props.selected) {
+  if (isSelected.value) {
     emit('unselect', payload)
   } else {
     emit('select', payload)

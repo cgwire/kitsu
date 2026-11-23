@@ -207,7 +207,10 @@ describe('lists/AssetList task selection', () => {
     listedAssets = displayedAssets.flat()
     listedAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
     assetStore.cache.result = listedAssets
-    const selectionState = { assetSelectionGrid: reactive(new Set()) }
+    const selectionState = {
+      assetSelectionGrid: reactive(new Set()),
+      selectedAssets: new Map()
+    }
     const wrapper = await mountEntityList(AssetList, {
       getters: {
         assetSelectionGrid: selectionState.assetSelectionGrid,
@@ -221,7 +224,12 @@ describe('lists/AssetList task selection', () => {
           listedAssets.flatMap(asset =>
             Array.from(asset.validations, ([taskTypeId, taskId]) => [
               taskId,
-              { id: taskId, entity_id: asset.id, task_type_id: taskTypeId }
+              {
+                id: taskId,
+                entity_id: asset.id,
+                task_type_id: taskTypeId,
+                assignees: []
+              }
             ])
           )
         ),
@@ -240,7 +248,9 @@ describe('lists/AssetList task selection', () => {
         displayedAssets,
         validationColumns: [layout.id, color.id]
       },
-      query
+      query,
+      // The cell reads its selection from the grid by itself.
+      stubs: { ValidationCell: false }
     })
     // The real mutations fill the grid the cells read their state from.
     wrapper.vm.$store.commit.mockImplementation((type, payload) =>
@@ -264,7 +274,7 @@ describe('lists/AssetList task selection', () => {
   const selectedCells = wrapper =>
     wrapper
       .findAllComponents(ValidationCell)
-      .filter(cell => cell.props('selected'))
+      .filter(cell => cell.classes('selected'))
       .map(cell => `${cell.props('entity').name} ${cell.props('column').name}`)
 
   // The tasks the action panel changes.

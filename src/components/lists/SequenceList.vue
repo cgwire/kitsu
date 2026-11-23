@@ -304,7 +304,6 @@
                   "
                   :minimized="hiddenColumns[columnId]"
                   :row-x="i"
-                  :selected="isSelected(i, j)"
                   :sticked="true"
                   :task-href="taskHref(sequence.validations?.get(columnId))"
                   :task-test="taskMap.get(sequence.validations?.get(columnId))"
@@ -433,9 +432,6 @@
                     )
                   "
                   :minimized="hiddenColumns[columnId]"
-                  :selected="
-                    isSelected(i, j + stickedDisplayedValidationColumns.length)
-                  "
                   :row-x="i"
                   :column-y="j"
                   :is-assignees="displaySettings.showAssignations"
@@ -599,9 +595,6 @@ const sequenceMetadataDescriptors = computed(
   () => store.getters.sequenceMetadataDescriptors
 )
 const sequenceSearchText = computed(() => store.getters.sequenceSearchText)
-const sequenceSelectionGrid = computed(
-  () => store.getters.sequenceSelectionGrid
-)
 const taskMap = computed(() => store.getters.taskMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
@@ -670,9 +663,6 @@ const {
 
 // Functions
 // --------------------------------------------------------------------------
-
-const isSelected = (lineIndex, columnIndex) =>
-  sequenceSelectionGrid.value.has(`${lineIndex}-${columnIndex}`)
 
 const taskHref = taskId =>
   getTaskHref(

@@ -109,11 +109,28 @@ const buildStore = getters => ({
   dispatch: vi.fn()
 })
 
+// Counts the updates of the real components, by name: a stub has no __name.
+// The lists update once on their own right after the mount (sticky offsets):
+// reset before the interaction to count.
+export const countUpdates = () => {
+  const counts = {}
+  return {
+    counts,
+    reset: () => Object.keys(counts).forEach(name => delete counts[name]),
+    mixin: {
+      updated() {
+        const name = this.$options.__name
+        if (name) counts[name] = (counts[name] || 0) + 1
+      }
+    }
+  }
+}
+
 // The store is both mocked for the Options API lists and provided for the
 // script setup ones: useStore() injects it under the 'store' key.
 export const mountEntityList = async (
   component,
-  { getters, props, query, stubs }
+  { getters, mixins, props, query, stubs }
 ) => {
   const store = buildStore(getters)
   const router = createRouter({
@@ -133,6 +150,7 @@ export const mountEntityList = async (
   const wrapper = shallowMount(component, {
     global: {
       // No task in the rows: task links never resolve a route.
+      mixins,
       mocks: { $router: {}, $store: store },
       plugins: [resizableColumn, router, i18n],
       provide: { store },

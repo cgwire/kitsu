@@ -248,6 +248,82 @@ const setupAuthChannel = () => {
   }
 }
 
+const reloadProduction = productionId => {
+  if (productionMap.value.get(productionId)) {
+    store
+      .dispatch('loadProduction', productionId)
+      .then(() => {
+        // Zou also announces a team role change as a project update,
+        // possibly one changing the role of the user.
+        store
+          .dispatch('reloadTeamRoles', productionId)
+          .catch(errors.logRequestFailure)
+      })
+      .catch(err => {
+        // Deleted, or no longer shared with the user.
+        if ([403, 404].includes(err?.status)) {
+          store.commit('REMOVE_PRODUCTION', { id: productionId })
+        } else {
+          errors.logRequestFailure(err)
+        }
+      })
+  } else {
+    store
+      .dispatch('loadProductionIfOpen', productionId)
+      .catch(errors.logRequestFailure)
+  }
+}
+
+// Zou sends one project:update per change, to every user: a batch of changes
+// would make each of them reload the production once per change. The first
+// update reloads at once, those of the delay that follows share one reload.
+const PRODUCTION_RELOAD_DELAY = 2000
+const updatedProductions = new Map()
+
+const onProductionUpdate = productionId => {
+  if (updatedProductions.has(productionId)) {
+    updatedProductions.set(productionId, true)
+    return
+  }
+  updatedProductions.set(productionId, false)
+  reloadProduction(productionId)
+  setTimeout(() => {
+    const isUpdatedAgain = updatedProductions.get(productionId)
+    updatedProductions.delete(productionId)
+    if (isUpdatedAgain) onProductionUpdate(productionId)
+  }, PRODUCTION_RELOAD_DELAY)
+}
+
+// Zou sends one task:update per task, and a batch of changes sends them for
+// a while. The first update reloads its task at once, the tasks updated in
+// the delay that follows share one reload. A task out of the map, a todo
+// under a production page, needs its names: it reloads in full.
+const TASK_RELOAD_DELAY = 1000
+const updatedTaskIds = new Set()
+let taskReloadTimer = null
+
+const reloadUpdatedTasks = () => {
+  taskReloadTimer = null
+  if (updatedTaskIds.size === 0) return
+  const taskIds = [...updatedTaskIds]
+  updatedTaskIds.clear()
+  const listedIds = taskIds.filter(taskId => taskMap.value.has(taskId))
+  if (listedIds.length > 0) {
+    store.dispatch('reloadTasks', listedIds).catch(errors.logRequestFailure)
+  }
+  taskIds
+    .filter(taskId => !taskMap.value.has(taskId))
+    .forEach(taskId => {
+      store.dispatch('loadTask', { taskId }).catch(errors.logRequestFailure)
+    })
+  taskReloadTimer = setTimeout(reloadUpdatedTasks, TASK_RELOAD_DELAY)
+}
+
+const onTaskUpdate = taskId => {
+  updatedTaskIds.add(taskId)
+  if (!taskReloadTimer) reloadUpdatedTasks()
+}
+
 // Socket events
 // --------------------------------------------------------------------------
 
@@ -262,32 +338,7 @@ const socketEvents = {
     }
   },
 
-  'project:update': eventData => {
-    const productionId = eventData.project_id
-    if (productionMap.value.get(productionId)) {
-      store
-        .dispatch('loadProduction', productionId)
-        .then(() => {
-          // Zou also announces a team role change as a project update,
-          // possibly one changing the role of the user.
-          store
-            .dispatch('reloadTeamRoles', productionId)
-            .catch(errors.logRequestFailure)
-        })
-        .catch(err => {
-          // Deleted, or no longer shared with the user.
-          if ([403, 404].includes(err?.status)) {
-            store.commit('REMOVE_PRODUCTION', { id: productionId })
-          } else {
-            errors.logRequestFailure(err)
-          }
-        })
-    } else {
-      store
-        .dispatch('loadProductionIfOpen', productionId)
-        .catch(errors.logRequestFailure)
-    }
-  },
+  'project:update': eventData => onProductionUpdate(eventData.project_id),
 
   'project:delete': eventData => {
     if (productionMap.value.get(eventData.project_id)) {
@@ -591,6 +642,8 @@ const socketEvents = {
   'task:unassign': eventData => onAssignation(eventData, false),
 
   'comment:new': eventData => {
+    // The answer of Zou brings the comment this tab posted.
+    if (store.getters.isOwnCommentEvent(eventData)) return
     const commentId = eventData.comment_id
     const task = getHeldTask(eventData.task_id)
     if (!isSavingCommentPreview.value && task) {
@@ -649,13 +702,7 @@ const socketEvents = {
   },
 
   'task:update': eventData => {
-    if (getHeldTask(eventData.task_id)) {
-      nextTick(() => {
-        store
-          .dispatch('loadTask', { taskId: eventData.task_id })
-          .catch(errors.logRequestFailure)
-      })
-    }
+    if (getHeldTask(eventData.task_id)) onTaskUpdate(eventData.task_id)
   },
 
   'task:update-casting-stats': eventData => {

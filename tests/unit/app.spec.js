@@ -76,6 +76,7 @@ describe('App', () => {
     wrapper?.unmount()
     wrapper = null
     vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   describe('socket events', () => {
@@ -91,7 +92,7 @@ describe('App', () => {
       errors.markRequestFailure(error)
 
       const { socket } = await mountApp({
-        actions: { loadTask: () => Promise.reject(error) },
+        actions: { reloadTasks: () => Promise.reject(error) },
         getters: { taskMap: () => new Map([['task-1', { id: 'task-1' }]]) }
       })
       emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
@@ -111,7 +112,7 @@ describe('App', () => {
 
       const rejections = await recordUnhandledRejections(async () => {
         const { socket } = await mountApp({
-          actions: { loadTask: () => Promise.reject(bug) },
+          actions: { reloadTasks: () => Promise.reject(bug) },
           getters: { taskMap: () => new Map([['task-1', { id: 'task-1' }]]) }
         })
         emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
@@ -138,6 +139,40 @@ describe('App', () => {
       expect(loadTask).toHaveBeenCalledWith(expect.anything(), {
         taskId: 'task-1'
       })
+    })
+
+    // Zou sends one update per task: a batch of 500 statuses asked every
+    // tab for 500 tasks, one request each.
+    it('reloads a task at once, then those updated meanwhile in one request', async () => {
+      const reloadTasks = vi.fn(() => Promise.resolve())
+      const ids = ['task-1', 'task-2', 'task-3']
+      const { socket } = await mountApp({
+        actions: { reloadTasks },
+        getters: {
+          taskMap: () => new Map(ids.map(id => [id, { id }])),
+          todoMap: () => new Map()
+        }
+      })
+      const reloaded = () => reloadTasks.mock.calls.map(([, taskIds]) => taskIds)
+      vi.useFakeTimers()
+
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
+      expect(reloaded()).toEqual([['task-1']])
+
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-2' })
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-3' })
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-2' })
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-unknown' })
+      expect(reloaded()).toEqual([['task-1']])
+
+      await vi.advanceTimersByTimeAsync(1000)
+      expect(reloaded()).toEqual([['task-1'], ['task-2', 'task-3']])
+
+      await vi.advanceTimersByTimeAsync(2000)
+      expect(reloaded()).toHaveLength(2)
+
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
+      expect(reloaded()).toHaveLength(3)
     })
 
     // Zou builds the files of an uploaded preview in a job, and announces
@@ -335,6 +370,31 @@ describe('App', () => {
         await flushPromises()
 
         expect(reloadTeamRoles).toHaveBeenCalledWith(expect.anything(), 'prod-1')
+      })
+
+      // Zou sends one update per change, to every user: a batch of changes
+      // must not cost one reload per change and per user.
+      it('reloads a production at once, then once for the updates that follow', async () => {
+        const loadProduction = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { loadProduction, reloadTeamRoles: () => Promise.resolve() },
+          getters
+        })
+        vi.useFakeTimers()
+
+        for (let update = 0; update < 5; update++) {
+          emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
+        }
+        expect(loadProduction).toHaveBeenCalledTimes(1)
+
+        await vi.advanceTimersByTimeAsync(2000)
+        expect(loadProduction).toHaveBeenCalledTimes(2)
+
+        await vi.advanceTimersByTimeAsync(2000)
+        expect(loadProduction).toHaveBeenCalledTimes(2)
+
+        emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
+        expect(loadProduction).toHaveBeenCalledTimes(3)
       })
 
       // Deleted, or no longer shared with the user.
@@ -679,6 +739,7 @@ describe('App', () => {
     describe('new comments', () => {
       const task = { id: 'task-1' }
       const getters = {
+        isOwnCommentEvent: () => () => false,
         isSavingCommentPreview: () => false,
         taskComments: () => ({}),
         taskMap: () => new Map([['task-1', task]]),
@@ -716,6 +777,23 @@ describe('App', () => {
           commentId: 'comment-9',
           taskId: 'task-1'
         })
+      })
+
+      // The answer of Zou brings the comment the tab posted: its event has
+      // nothing to reload, nor a status to move.
+      it('leaves alone the comment the tab itself posted', async () => {
+        const loadComment = vi.fn(() => Promise.resolve())
+        const updateTask = vi.fn()
+        const { socket } = await mountApp({
+          actions: { loadComment },
+          getters: { ...getters, isOwnCommentEvent: () => () => true },
+          mutations: { UPDATE_TASK: updateTask }
+        })
+
+        emitSocketEvent(socket, 'comment:new', newComment)
+
+        expect(loadComment).not.toHaveBeenCalled()
+        expect(updateTask).not.toHaveBeenCalled()
       })
 
       it('leaves a bug in the reload to Sentry', async () => {
@@ -756,6 +834,7 @@ describe('App', () => {
         currentUserRoleForProduction: () => () => role,
         // The page has no production: the route role is the global one.
         isCurrentUserClient: () => globalRole === 'client',
+        isOwnCommentEvent: () => () => false,
         isPublishingComment: () => () => false,
         isSavingCommentPreview: () => false,
         personMap: () =>

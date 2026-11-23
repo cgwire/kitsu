@@ -316,7 +316,6 @@
                   "
                   :minimized="hiddenColumns[columnId]"
                   :row-x="i"
-                  :selected="isSelected(i, j)"
                   :sticked="true"
                   :task-href="taskHref(episode.validations?.get(columnId))"
                   :task-test="taskMap.get(episode.validations?.get(columnId))"
@@ -466,9 +465,6 @@
                     )
                   "
                   :minimized="hiddenColumns[columnId]"
-                  :selected="
-                    isSelected(i, j + stickedDisplayedValidationColumns.length)
-                  "
                   :row-x="i"
                   :column-y="j"
                   :is-assignees="displaySettings.showAssignations"
@@ -617,7 +613,6 @@ const episodeMetadataDescriptors = computed(
   () => store.getters.episodeMetadataDescriptors
 )
 const episodeSearchText = computed(() => store.getters.episodeSearchText)
-const episodeSelectionGrid = computed(() => store.getters.episodeSelectionGrid)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 // Production-scoped: effective role on the current production (global
 // admins/managers still pass, but a per-project override wins).
@@ -699,9 +694,6 @@ const {
 
 // Functions
 // --------------------------------------------------------------------------
-
-const isSelected = (lineIndex, columnIndex) =>
-  episodeSelectionGrid.value.has(`${lineIndex}-${columnIndex}`)
 
 const taskHref = taskId =>
   getTaskHref(

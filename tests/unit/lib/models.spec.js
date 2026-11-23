@@ -1,9 +1,12 @@
 // @vitest-environment node
 
+import { effect, reactive, stop } from 'vue'
+
 import {
   addToIdList,
   arrayMove,
   removeFromIdList,
+  getEntityTasks,
   getFilledColumns,
   groupEntitiesByParents,
   populateTask,
@@ -359,5 +362,62 @@ describe('trackEdit', () => {
 
     expect(applyEdit).toHaveBeenCalledTimes(1)
     expect(edit.undo()).toBeNull()
+  })
+})
+
+// The task panel asks for the tasks of the entity at each task selected:
+// the walk of the reactive map subscribed it to every task of the production.
+describe('getEntityTasks', () => {
+  const buildTaskMap = () =>
+    reactive(
+      new Map(
+        [
+          { id: 'task-1', entity_id: 'shot-1', task_type_id: 'layout' },
+          { id: 'task-2', entity_id: 'shot-2', task_type_id: 'layout' },
+          { id: 'task-3', entity_id: 'shot-1', task_type_id: 'animation' }
+        ].map(task => [task.id, task])
+      )
+    )
+
+  const watchEntityTasks = taskMap => {
+    const reads = []
+    const runner = effect(() => {
+      reads.push(getEntityTasks(taskMap, 'shot-1').map(task => task.id))
+    })
+    return { reads, stop: () => stop(runner) }
+  }
+
+  it('gives the tasks of the entity', () => {
+    expect(
+      getEntityTasks(buildTaskMap(), 'shot-1').map(task => task.id)
+    ).toEqual(['task-1', 'task-3'])
+  })
+
+  it('does not follow the fields of every task', () => {
+    const taskMap = buildTaskMap()
+    const { reads, stop } = watchEntityTasks(taskMap)
+
+    taskMap.get('task-2').task_type_id = 'compositing'
+    taskMap.get('task-2').entity_id = 'shot-3'
+
+    expect(reads).toHaveLength(1)
+    stop()
+  })
+
+  it('follows the tasks added, replaced and removed', () => {
+    const taskMap = buildTaskMap()
+    const { reads, stop } = watchEntityTasks(taskMap)
+
+    taskMap.set('task-4', { id: 'task-4', entity_id: 'shot-1' })
+    taskMap.set('task-3', { id: 'task-3', entity_id: 'shot-2' })
+    taskMap.delete('task-1')
+
+    expect(reads).toEqual([
+      ['task-1', 'task-3'],
+      ['task-1', 'task-3', 'task-4'],
+      ['task-1', 'task-4'],
+      ['task-4']
+    ])
+    stop()
   })
 })

@@ -1,10 +1,12 @@
 vi.mock('@/store', () => ({ default: {} }))
 
 import { flushPromises } from '@vue/test-utils'
+import { nextTick, reactive } from 'vue'
 
 import ShotList from '@/components/lists/ShotList.vue'
 
 import {
+  countUpdates,
   descriptor,
   filledColumns,
   mountEntityList,
@@ -209,6 +211,46 @@ describe('lists/ShotList in and out timecodes', () => {
       ['00:00:42:06', '00:00:48:00'],
       ['00:00:42:06', '00:00:48:00']
     ])
+
+    wrapper.unmount()
+  })
+})
+
+describe('lists/ShotList selection', () => {
+  const shot = id => ({
+    id,
+    name: id,
+    data: {},
+    validations: new Map([[taskTypeId, `task-${id}`]])
+  })
+
+  // The list read the grid for every cell: one click rendered all the rows.
+  test('updates only the cell whose selection changes', async () => {
+    const updates = countUpdates()
+    const shotSelectionGrid = reactive(new Set())
+    const wrapper = await mountEntityList(ShotList, {
+      getters: {
+        currentProduction: production,
+        displayedShotsCount: 3,
+        shotFilledColumns: filledColumns,
+        shotSelectionGrid
+      },
+      mixins: [updates.mixin],
+      props: {
+        displayedShots: [[shot('shot-1'), shot('shot-2')], [shot('shot-3')]]
+      },
+      stubs: { ValidationCell: false }
+    })
+
+    updates.reset()
+
+    shotSelectionGrid.add('2-0')
+    await nextTick()
+
+    expect(updates.counts).toEqual({ ValidationCell: 1 })
+    expect(
+      wrapper.findAll('td.validation').map(cell => cell.classes('selected'))
+    ).toEqual([false, false, true])
 
     wrapper.unmount()
   })

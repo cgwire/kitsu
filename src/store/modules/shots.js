@@ -1308,7 +1308,9 @@ const mutations = {
 
   [ADD_SELECTED_TASK](state, validationInfo) {
     state.shotSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
-    state.selectedShots = new Map() // unselect all previously selected lines
+    // Unselect the lines. An empty selection keeps its Map: the lists read
+    // it in every row, and a new one renders them all at each cell click.
+    if (state.selectedShots.size > 0) state.selectedShots = new Map()
   },
 
   [CLEAR_SELECTED_TASKS](state) {
@@ -1378,7 +1380,7 @@ const mutations = {
     selection.forEach(validationInfo => {
       state.shotSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
     })
-    state.selectedShots = new Map()
+    if (state.selectedShots.size > 0) state.selectedShots = new Map()
   },
 
   [ADD_SHOT](
@@ -1625,7 +1627,7 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_SHOTS](state) {
-    state.selectedShots = new Map()
+    if (state.selectedShots.size > 0) state.selectedShots = new Map()
   }
 }
 

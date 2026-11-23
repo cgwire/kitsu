@@ -415,7 +415,6 @@
                   "
                   :minimized="hiddenColumns[columnId]"
                   :row-x="getIndex(i, k)"
-                  :selected="isSelected(i, k, j)"
                   :sticked="true"
                   :task-href="taskHref(shot.validations.get(columnId))"
                   :task-test="taskMap.get(shot.validations.get(columnId))"
@@ -731,13 +730,6 @@
                     )
                   "
                   :minimized="hiddenColumns[columnId]"
-                  :selected="
-                    isSelected(
-                      i,
-                      k,
-                      j + stickedDisplayedValidationColumns.length
-                    )
-                  "
                   :row-x="getIndex(i, k)"
                   :column-y="j"
                   :is-assignees="displaySettings.showAssignations"
@@ -927,7 +919,6 @@ const shotMetadataDescriptors = computed(
   () => store.getters.shotMetadataDescriptors
 )
 const shotSearchText = computed(() => store.getters.shotSearchText)
-const shotSelectionGrid = computed(() => store.getters.shotSelectionGrid)
 const taskMap = computed(() => store.getters.taskMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
@@ -1028,11 +1019,6 @@ const groupHeader = group => {
 }
 
 const getIndex = (i, k) => getEntityLineNumber(props.displayedShots, i, k)
-
-const isSelected = (indexInGroup, groupIndex, columnIndex) =>
-  shotSelectionGrid.value.has(
-    `${getIndex(indexInGroup, groupIndex)}-${columnIndex}`
-  )
 
 const getCastingTask = (shot, columnId) =>
   shot.nb_entities_out
