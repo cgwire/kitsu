@@ -78,7 +78,8 @@ const PlaybackBarWithSlot = {
 const mountPlayer = ({
   playlistProp = playlist,
   entities = [entity],
-  canEditShotTrim = () => true,
+  assetMap = new Map(),
+  canEditTrim = () => true,
   isArtist = false,
   isClient = false,
   isManager = true,
@@ -96,7 +97,8 @@ const mountPlayer = ({
 } = {}) => {
   const store = createStore({
     getters: {
-      canEditShotTrim: () => canEditShotTrim,
+      assetMap: () => assetMap,
+      canEditTrim: () => canEditTrim,
       currentProduction: () => ({ id: 'production-1', fps: '25' }),
       currentUserRoleForProduction: () => roleForProduction,
       dateFormat: () => 'yyyy-MM-dd',
@@ -2605,7 +2607,7 @@ describe('PlaylistPlayer.vue', () => {
       ['editable for a user who may trim the shot', true],
       ['frozen for a user Zou refuses the trim to', false]
     ])('keeps the handles %s', async (_, isAllowed) => {
-      await mountShotPlayer({}, { canEditShotTrim: () => isAllowed })
+      await mountShotPlayer({}, { canEditTrim: () => isAllowed })
       expect(progressBar().props('readOnly')).toBe(!isAllowed)
     })
 
@@ -2616,7 +2618,7 @@ describe('PlaylistPlayer.vue', () => {
     ])(
       'ignores the %s handle moved by a user Zou refuses the trim to',
       async (_, event, frameNumber, prop, value) => {
-        await mountShotPlayer({}, { canEditShotTrim: () => false })
+        await mountShotPlayer({}, { canEditTrim: () => false })
         dragHandle(event, frameNumber)
         await flushPromises()
         expect(savedData()).toBeUndefined()
@@ -2624,15 +2626,37 @@ describe('PlaylistPlayer.vue', () => {
       }
     )
 
+    it('shows and saves the trim of an asset in an asset playlist', async () => {
+      wrapper = mountPlayer({
+        playlistProp: { ...playlist, for_entity: 'asset' },
+        entities: [movie],
+        assetMap: new Map([['shot-1', { id: 'shot-1', data: { handle_in: 5 } }]])
+      })
+      await flushPromises()
+      wrapper
+        .findComponent({ ref: 'raw-player' })
+        .vm.$emit('max-duration-update', movie.preview_file_duration)
+      await flushPromises()
+      expect(progressBar().props('handleIn')).toBe(5)
+      expect(progressBar().props('handleOut')).toBe(69)
+
+      dragHandle('handle-out-changed', 60)
+
+      expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith('editAsset', {
+        id: 'shot-1',
+        data: { handle_in: 5, handle_out: 60 }
+      })
+    })
+
     // A temporary playlist can mix shots of several productions.
     it('checks the trim right on the task of the shot on screen', async () => {
       const task = { id: 'task-1', project_id: 'production-2' }
-      const canEditShotTrim = vi.fn(() => true)
+      const canEditTrim = vi.fn(() => true)
       await mountShotPlayer(
         {},
-        { canEditShotTrim, taskMap: new Map([[task.id, task]]) }
+        { canEditTrim, taskMap: new Map([[task.id, task]]) }
       )
-      expect(canEditShotTrim).toHaveBeenCalledWith(task)
+      expect(canEditTrim).toHaveBeenCalledWith(task)
     })
 
     it('keeps a failed save from going unhandled', async () => {
