@@ -63,12 +63,14 @@
             <emoji-button @select="onSelectEmoji" />
             <button-simple
               class="attach-button"
+              :title="$t('comments.add_attachment')"
               icon="attach"
               @click="modals.addAttachment = true"
             />
             <div class="filler"></div>
             <button-simple
               class="send-button"
+              :title="$t('chats.send')"
               icon="send"
               :is-loading="loading.send"
               @click="sendMessage"
@@ -83,6 +85,7 @@
           >
             {{ attachment.get('file').name }}
             <span
+              :title="$t('main.remove')"
               role="button"
               tabindex="0"
               @click="removeAttachment(attachment)"

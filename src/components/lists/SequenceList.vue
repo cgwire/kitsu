@@ -54,6 +54,7 @@
                 <template #actions>
                   <button-simple
                     class="is-small flexrow-item"
+                    :title="$t('productions.metadata.title')"
                     icon="plus"
                     :text="''"
                     @click="onAddMetadataClicked"
@@ -203,6 +204,7 @@
 
               <button-simple
                 class="is-small is-pulled-right mr05"
+                :title="$t('main.column_visibility')"
                 icon="down"
                 @click="toggleColumnSelector"
                 v-if="

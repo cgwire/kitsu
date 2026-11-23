@@ -9,7 +9,7 @@
       :name="icon"
       v-else-if="['export', 'export-lines'].includes(icon)"
     />
-    <span class="is-hidden-touch" v-if="text">
+    <span class="visuallyhidden-touch" v-if="text">
       {{ text }}
     </span>
   </a>

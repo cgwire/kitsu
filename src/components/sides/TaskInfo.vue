@@ -49,6 +49,7 @@
             <span class="flexrow-item">{{ task.entity_name }}</span>
             <span
               class="flexrow-item pointer"
+              :title="$t('main.remove')"
               role="button"
               tabindex="0"
               @click="removeTaskFromSelection(task)"
@@ -126,6 +127,7 @@
                 >
                   <combobox-styled
                     class="preview-combo flexrow-item"
+                    :aria-label="$t('entities.preview_files.revision')"
                     :options="previewOptions"
                     is-preview
                     thin
@@ -137,6 +139,7 @@
                 <div>
                   <router-link
                     class="history-button flexrow-item"
+                    :title="$t('tasks.open_page')"
                     :to="taskPath"
                   >
                     <corner-right-up-icon :size="12" />

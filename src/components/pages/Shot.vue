@@ -8,6 +8,7 @@
       <div class="page-header flexrow">
         <router-link
           class="flexrow-item has-text-centered back-link ml1"
+          :title="$t('main.back')"
           :to="shotsPath"
         >
           <corner-left-up-icon />
@@ -28,6 +29,7 @@
         <div class="filler"></div>
         <router-link
           class="flexrow-item has-text-centered back-link ml1"
+          :title="$t('main.previous_entity')"
           :to="previousEntityPath"
           v-if="previousEntityPath && entityList.length > 1"
         >
@@ -35,6 +37,7 @@
         </router-link>
         <router-link
           class="flexrow-item has-text-centered back-link"
+          :title="$t('main.next_entity')"
           :to="nextEntityPath"
           v-if="nextEntityPath && entityList.length > 1"
         >

@@ -4,7 +4,11 @@
       <div class="task-type page">
         <div class="task-type-header page-header flexrow-item">
           <div class="flexcolumn-item flexrow">
-            <router-link class="back-link flexrow-item" :to="backPath">
+            <router-link
+              class="back-link flexrow-item"
+              :title="$t('main.back')"
+              :to="backPath"
+            >
               <corner-left-up-icon />
             </router-link>
             <div class="flexrow-item"></div>

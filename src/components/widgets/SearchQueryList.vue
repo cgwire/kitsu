@@ -55,6 +55,8 @@
         }"
         role="button"
         tabindex="0"
+        :aria-label="group.name"
+        :aria-expanded="`${toggleGroupId === group.id}`"
         @click="toggleFilterGroup(group)"
         @keydown.enter.prevent="toggleFilterGroup(group)"
         @keydown.space.prevent="toggleFilterGroup(group)"
@@ -78,6 +80,7 @@
           <chevron-up-icon class="chevron ml05" :size="12" v-else />
           <button
             class="edit"
+            :title="$t('main.filter_group_edit')"
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="editGroup(group)"
             v-if="canChange(group)"
@@ -86,6 +89,7 @@
           </button>
           <button
             class="del"
+            :title="$t('main.remove')"
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="confirmRemoveGroup(group)"
             v-if="!group.queries.length && canChange(group)"
@@ -123,6 +127,7 @@
               </router-link>
               <button
                 class="edit"
+                :title="$t('main.search_query_edit')"
                 :style="{
                   backgroundColor: `${group.color}53`
                 }"
@@ -133,6 +138,7 @@
               </button>
               <button
                 class="del"
+                :title="$t('main.remove')"
                 :style="{ backgroundColor: `${group.color}53` }"
                 @click.stop="confirmRemoveSearch(searchQuery)"
                 v-if="canChange(searchQuery)"
@@ -170,6 +176,7 @@
       </router-link>
       <button
         class="edit"
+        :title="$t('main.search_query_edit')"
         @click.stop="editSearch(searchQuery)"
         v-if="canChange(searchQuery)"
       >
@@ -177,6 +184,7 @@
       </button>
       <button
         class="del"
+        :title="$t('main.remove')"
         @click.stop="confirmRemoveSearch(searchQuery)"
         v-if="canChange(searchQuery)"
       >

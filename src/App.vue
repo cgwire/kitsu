@@ -1140,7 +1140,7 @@ body {
   display: none !important;
 }
 
-.visuallyhidden {
+@mixin visually-hidden {
   border: 0 !important;
   clip: rect(1px, 1px, 1px, 1px) !important;
   -webkit-clip-path: inset(50%) !important;
@@ -1152,6 +1152,18 @@ body {
   position: absolute !important;
   width: 1px !important;
   white-space: nowrap !important;
+}
+
+.visuallyhidden {
+  @include visually-hidden;
+}
+
+// Hidden on touch screens like is-hidden-touch, but still read by screen
+// readers: the text of a responsive button stays its name there.
+@media screen and (max-width: 999px) {
+  .visuallyhidden-touch {
+    @include visually-hidden;
+  }
 }
 
 .page {

@@ -8,6 +8,7 @@
     <div class="production-menu">
       <div
         class="flexrow"
+        :title="$t('library.select_production')"
         role="button"
         tabindex="0"
         @click="toggleProductionList"

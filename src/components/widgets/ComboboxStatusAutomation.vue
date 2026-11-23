@@ -5,13 +5,15 @@
       'field--narrow': narrow
     }"
   >
-    <label class="label" v-if="label.length > 0">
+    <label class="label" :id="labelId" v-if="label.length > 0">
       {{ label }}
     </label>
     <div class="status-automation-combo">
       <div
         class="flexrow"
         role="combobox"
+        :aria-labelledby="label.length > 0 ? labelId : undefined"
+        :aria-label="ariaLabel || undefined"
         tabindex="0"
         aria-haspopup="listbox"
         :aria-expanded="showStatusAutomationsList"
@@ -62,7 +64,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
 
@@ -76,6 +78,11 @@ const store = useStore()
 
 const props = defineProps({
   label: {
+    default: '',
+    type: String
+  },
+  // Names the combobox when it shows no label.
+  ariaLabel: {
     default: '',
     type: String
   },
@@ -109,6 +116,7 @@ const {
   select: selectStatusAutomation
 } = useCombobox(emit)
 
+const labelId = useId()
 const listRef = ref(null)
 const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
   isOpen: showStatusAutomationsList,

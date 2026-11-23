@@ -9,10 +9,12 @@
       }"
       ref="select"
     >
+      <!-- Chromium names no combobox by a title that repeats its text. -->
       <div
         class="flexrow"
         :title="title"
         role="combobox"
+        :aria-label="ariaLabel || title || undefined"
         tabindex="0"
         aria-haspopup="listbox"
         :aria-expanded="showList"
@@ -99,6 +101,11 @@ const MAX_VISIBLE_OPTIONS = 7
 const emit = defineEmits(['change', 'update:model-value'])
 
 const props = defineProps({
+  // Names the combobox in place of a title that sums up the selection.
+  ariaLabel: {
+    type: String,
+    default: ''
+  },
   isReversed: {
     type: Boolean,
     default: false

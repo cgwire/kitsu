@@ -10,10 +10,12 @@
       }"
       ref="select"
     >
+      <!-- Chromium names no combobox by a title that repeats its text. -->
       <div
         class="flexrow"
         :title="title"
         role="combobox"
+        :aria-label="title || undefined"
         tabindex="0"
         aria-haspopup="listbox"
         :aria-expanded="showList"

@@ -32,6 +32,14 @@ describe('ComboboxTaskTypeOptions', () => {
     )
   })
 
+  it('names the combobox by its aria-label', () => {
+    const wrapper = mountWidget({ ariaLabel: 'Workflow' })
+
+    expect(wrapper.find('[role="combobox"]').attributes('aria-label')).toBe(
+      'Workflow'
+    )
+  })
+
   it('names the options the way task types are named everywhere', async () => {
     const wrapper = mountWidget()
     await wrapper.find('[role="combobox"]').trigger('click')

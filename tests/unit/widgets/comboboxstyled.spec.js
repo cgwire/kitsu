@@ -109,6 +109,39 @@ describe('ComboboxStyled', () => {
     expect(wrapper.find('label').text()).toBe('Revision')
   })
 
+  it('names the combobox by its label', () => {
+    const labeled = shallowMountWithI18n(ComboboxStyled, {
+      props: { label: 'Version', options, modelValue: 'v1' },
+      global: { plugins: [router] }
+    })
+
+    const labelId = labeled.find('label').attributes('id')
+    expect(labelId).toBeTruthy()
+    expect(
+      labeled.find('[role="combobox"]').attributes('aria-labelledby')
+    ).toBe(labelId)
+    expect(
+      wrapper.find('[role="combobox"]').attributes('aria-labelledby')
+    ).toBeUndefined()
+    labeled.unmount()
+  })
+
+  // The players and the task panel show no label next to the picker.
+  it('names the combobox without a label', () => {
+    const named = shallowMountWithI18n(ComboboxStyled, {
+      props: { ariaLabel: 'Revision', options, modelValue: 'v1' },
+      global: { plugins: [router] }
+    })
+
+    expect(named.find('[role="combobox"]').attributes('aria-label')).toBe(
+      'Revision'
+    )
+    expect(
+      wrapper.find('[role="combobox"]').attributes('aria-label')
+    ).toBeUndefined()
+    named.unmount()
+  })
+
   it('applies disabled attribute', async () => {
     await wrapper.setProps({ disabled: true })
     expect(wrapper.element.getAttribute('disabled')).not.toBeNull()

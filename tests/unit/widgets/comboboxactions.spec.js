@@ -29,6 +29,13 @@ describe('ComboboxActions', () => {
     )
   })
 
+  // Chromium drops a title that repeats the text shown in a combobox.
+  it('names the combobox by its title', () => {
+    expect(wrapper.find('[role="combobox"]').attributes('aria-label')).toBe(
+      'Actions'
+    )
+  })
+
   it('runs the handler and closes when selecting via keyboard', async () => {
     const trigger = wrapper.find('.flexrow')
     await trigger.trigger('keydown', { key: 'ArrowDown' })

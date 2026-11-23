@@ -834,6 +834,7 @@
               <template v-else>
                 <button
                   class="job-button mr05"
+                  :title="$t('playlists.actions.play')"
                   v-if="!joinedRoom"
                   @click="playBuild(job)"
                 >

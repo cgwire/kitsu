@@ -8,6 +8,7 @@
         <div class="flexrow header-title" v-else-if="task">
           <router-link
             class="flexrow-item has-text-centered back-link"
+            :title="$t('main.back')"
             :to="taskEntitiesPath"
           >
             <corner-left-up-icon />
@@ -16,6 +17,7 @@
           <div class="flexrow-item block flexrow task-type">
             <router-link
               class="flexrow-item mt05"
+              :title="$t('tasks.previous')"
               :to="previousEntityTaskPath"
               v-if="previousEntityTaskPath"
             >
@@ -24,6 +26,7 @@
 
             <router-link
               class="flexrow-item mt05"
+              :title="$t('tasks.next')"
               :to="nextEntityTaskPath"
               v-if="nextEntityTaskPath"
             >
@@ -99,6 +102,7 @@
 
             <router-link
               class="flexrow-item"
+              :title="$t('main.previous_entity')"
               :to="previousTaskPath"
               v-if="previousTaskPath"
             >
@@ -107,6 +111,7 @@
 
             <router-link
               class="flexrow-item"
+              :title="$t('main.next_entity')"
               :to="nextTaskPath"
               v-if="nextTaskPath"
             >
@@ -123,6 +128,7 @@
               <div class="flexrow-item" v-if="isPreviews">
                 <combobox-styled
                   class="preview-combo flexrow-item"
+                  :aria-label="$t('entities.preview_files.revision')"
                   :options="previewOptions"
                   is-preview
                   :model-value="currentPreviewId"

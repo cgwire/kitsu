@@ -31,6 +31,7 @@
       </multiselect>
       <span
         class="clear-button"
+        :title="$t('main.clear_selection')"
         role="button"
         tabindex="0"
         @click="clear"

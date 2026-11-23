@@ -103,6 +103,39 @@ describe('ComboboxTag', () => {
     expect(wrapper.find('label').exists()).toBe(false)
   })
 
+  it('names the combobox by its label', () => {
+    const labeled = shallowMountWithI18n(ComboboxTag, {
+      props: { label: 'Fruits', options, modelValue: '' },
+      global: inPlace
+    })
+
+    const labelId = labeled.find('label').attributes('id')
+    expect(labelId).toBeTruthy()
+    expect(
+      labeled.find('[role="combobox"]').attributes('aria-labelledby')
+    ).toBe(labelId)
+    expect(
+      wrapper.find('[role="combobox"]').attributes('aria-labelledby')
+    ).toBeUndefined()
+    labeled.unmount()
+  })
+
+  // A list cell shows no label next to the picker.
+  it('names the combobox without a label', () => {
+    const named = shallowMountWithI18n(ComboboxTag, {
+      props: { ariaLabel: 'Fruits', options, modelValue: '' },
+      global: inPlace
+    })
+
+    expect(named.find('[role="combobox"]').attributes('aria-label')).toBe(
+      'Fruits'
+    )
+    expect(
+      wrapper.find('[role="combobox"]').attributes('aria-label')
+    ).toBeUndefined()
+    named.unmount()
+  })
+
   it('shows empty text when no values selected', () => {
     const w = shallowMountWithI18n(ComboboxTag, {
       props: { options, modelValue: '' },

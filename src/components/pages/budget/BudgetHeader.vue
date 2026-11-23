@@ -29,6 +29,7 @@
     <div class="flexrow mt1" v-else>
       <h3 class="selected-budget flexrow-item">
         <combobox-styled
+          :aria-label="$t('budget.title')"
           :options="budgetOptions"
           :model-value="budget"
           @change="value => $emit('change-budget', value)"

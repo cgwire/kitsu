@@ -88,7 +88,7 @@
     />
     <span
       :class="{
-        'is-hidden-touch': isResponsive
+        'visuallyhidden-touch': isResponsive
       }"
       v-if="text"
     >

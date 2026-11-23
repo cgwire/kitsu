@@ -124,6 +124,7 @@
             <th class="column-selector">
               <button-simple
                 class="is-small"
+                :title="$t('main.column_visibility')"
                 icon="down"
                 @click="toggleColumnSelector"
               />

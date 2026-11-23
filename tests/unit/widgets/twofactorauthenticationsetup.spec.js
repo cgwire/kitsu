@@ -6,10 +6,17 @@ import { createStore } from 'vuex'
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 import TwoFactorAuthenticationSetup from '@/components/widgets/TwoFactorAuthenticationSetup.vue'
 
+// Only the message that takes a name: the other keys show their path.
 const i18n = createI18n({
   legacy: false,
   locale: 'en',
-  messages: {},
+  messages: {
+    en: {
+      profile: {
+        two_factor_authentication: { fido: { delete_device: 'Delete {name}' } }
+      }
+    }
+  },
   missingWarn: false,
   fallbackWarn: false
 })
@@ -398,16 +405,17 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
   describe('FIDO key removal', () => {
     const user = {
       fido_enabled: true,
-      fido_devices: ['Yubikey', 'Phone'],
+      // A key whose name starts like another one's is listed first.
+      fido_devices: ['Yubikey 2', 'Yubikey', 'Phone'],
       totp_enabled: true,
       preferred_two_factor_authentication: 'totp'
     }
 
+    // Each trash icon is named after its key, as a screen reader reads it.
     const findTrash = (wrapper, device) =>
       wrapper
-        .findAll('ul li')
-        .find(item => item.text() === device)
-        .find('.action-icon')
+        .findAll('ul li .action-icon')
+        .find(icon => icon.find('title').text() === `Delete ${device}`)
 
     it('removes a key with the 2FA code typed for it', async () => {
       const unregisterFIDO = vi.fn()
@@ -699,5 +707,29 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
 
       expect(findPanel(wrapper).exists()).toBe(false)
     })
+  })
+
+  // Screen readers announced a bare "button", and the mouse got no tooltip.
+  it('names its icon buttons', async () => {
+    const wrapper = mountSetup(
+      { totp_enabled: true, fido_enabled: true, fido_devices: ['Key'] },
+      { newRecoveryCodes: () => ['AAAA'] }
+    )
+    await findButton(wrapper, label('recovery_codes.button_new')).trigger(
+      'click'
+    )
+    findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+    await flushPromises()
+
+    const names = wrapper
+      .findAll('[role="button"]')
+      .map(icon => icon.element.querySelector('title')?.textContent ?? null)
+
+    expect(names).toEqual([
+      'main.close',
+      'main.download',
+      'main.copy',
+      'Delete Key'
+    ])
   })
 })

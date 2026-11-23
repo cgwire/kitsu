@@ -1,6 +1,9 @@
 <template>
   <div class="notification-bell" :class="{ active: isNotificationPage }">
-    <router-link :to="{ name: 'notifications' }">
+    <router-link
+      :title="$t('notifications.title')"
+      :to="{ name: 'notifications' }"
+    >
       <bell-icon
         class="align-middle"
         :class="

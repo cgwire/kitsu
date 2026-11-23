@@ -99,6 +99,7 @@
         </div>
         <div class="flexrow">
           <combobox-department
+            :aria-label="$t('people.fields.departments')"
             class="flexrow-item"
             :selectable-departments="selectableDepartments"
             v-model="selectedDepartment"

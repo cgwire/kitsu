@@ -121,6 +121,7 @@
 
           <button-simple
             class="is-small mr05"
+            :title="$t('main.column_visibility')"
             icon="down"
             @click="toggleColumnSelector"
             v-if="isShowInfosBreakdown"

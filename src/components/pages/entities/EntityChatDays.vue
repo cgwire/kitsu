@@ -71,6 +71,7 @@
             </div>
             <div
               class="delete-message-button"
+              :title="$t('chats.delete_message_confirm')"
               role="button"
               tabindex="0"
               @click="$emit('delete-message', chatMessage.data.id)"

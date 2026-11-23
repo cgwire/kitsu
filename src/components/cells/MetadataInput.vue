@@ -155,6 +155,7 @@
     </span>
     <!-- tag list input -->
     <combobox-tag
+      :aria-label="descriptor.name"
       :disabled="!isEditable"
       :options="getDescriptorChoicesOptions(descriptor, false)"
       :shy="true"

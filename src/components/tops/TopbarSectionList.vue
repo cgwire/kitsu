@@ -8,6 +8,7 @@
     <div class="section-menu">
       <div
         class="flexrow unselectable"
+        :title="$t('main.select_section')"
         role="button"
         tabindex="0"
         @click="toggleSectionList"

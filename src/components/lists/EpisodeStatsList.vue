@@ -77,6 +77,9 @@
             <tr class="datatable-row">
               <td
                 class="expander"
+                :title="
+                  expanded[entry.id] ? $t('main.collapse') : $t('main.expand')
+                "
                 role="button"
                 tabindex="0"
                 @click="toggleExpanded(entry.id)"

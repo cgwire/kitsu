@@ -20,6 +20,7 @@
             <div class="filler"></div>
             <div class="flexrow flexrow-item">
               <combobox-department
+                :aria-label="$t('main.department')"
                 class="combobox-department flexrow-item"
                 :selectable-departments="selectableDepartments('Episode')"
                 :display-all-and-my-departments="true"

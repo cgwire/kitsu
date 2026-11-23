@@ -29,6 +29,45 @@ describe('Checklist', () => {
     expect(entries).toHaveLength(3)
   })
 
+  // A screen reader announced a bare "button", without the entry or its state.
+  it('names each box after its entry and tells whether it is ticked', () => {
+    const boxes = wrapper
+      .findAll('.checklist-checkbox')
+      .map(box => [
+        box.attributes('role'),
+        box.attributes('aria-label'),
+        box.attributes('aria-checked')
+      ])
+
+    expect(boxes).toEqual([
+      ['checkbox', 'Fix eyes', 'false'],
+      ['checkbox', 'Adjust timing', 'true'],
+      ['checkbox', 'Add blur', 'false']
+    ])
+  })
+
+  // Space does nothing there: the box says so instead of promising a toggle.
+  it('disables the boxes where the entries cannot be ticked', () => {
+    const readOnly = mountChecklist({ isEditable: false })
+    const disabled = list =>
+      list
+        .findAll('.checklist-checkbox')
+        .map(box => box.attributes('aria-disabled'))
+
+    expect(disabled(readOnly)).toEqual(['true', 'true', 'true'])
+    expect(disabled(wrapper)).toEqual([undefined, undefined, undefined])
+  })
+
+  it('names the box of an entry still without text', () => {
+    const empty = mountChecklist({
+      checklist: [{ text: '', checked: false, frame: -1, revision: -1 }]
+    })
+
+    expect(empty.find('.checklist-checkbox').attributes('aria-label')).toBe(
+      'comments.checklist'
+    )
+  })
+
   it('filters out falsy entries', () => {
     const w = shallowMount(Checklist, {
       props: {

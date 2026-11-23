@@ -43,6 +43,7 @@
             />
             <button-simple
               class="mt05"
+              :title="$t('entities.build_filter.add_value')"
               icon="plus"
               @click="assetTypeFilters.values.push('-')"
               v-if="isMultiple(assetTypeFilters.operator)"
@@ -89,6 +90,7 @@
             />
             <button-simple
               class="mt05"
+              :title="$t('entities.build_filter.add_value')"
               icon="plus"
               @click="addInTaskTypeFilter(taskTypeFilter)"
               v-if="isMultiple(taskTypeFilter.operator)"
@@ -96,12 +98,14 @@
           </div>
           <button-simple
             class="mt05"
+            :title="$t('main.remove')"
             icon="minus"
             @click="removeTaskTypeFilter(taskTypeFilter)"
           />
         </div>
         <div class="add-button">
           <button-simple
+            :title="$t('entities.build_filter.add_status_filter')"
             :disabled="!taskTypeList.length"
             icon="plus"
             @click="addTaskTypeFilter"
@@ -197,6 +201,7 @@
               </template>
               <button-simple
                 class="mt05"
+                :title="$t('entities.build_filter.add_value')"
                 icon="plus"
                 @click="addInDescriptorFilter(descriptorFilter)"
                 v-if="isMultiple(descriptorFilter.operator)"
@@ -204,12 +209,17 @@
             </div>
             <button-simple
               class="mt05"
+              :title="$t('main.remove')"
               icon="minus"
               @click="removeDescriptorFilter(descriptorFilter)"
             />
           </div>
           <div class="add-button">
-            <button-simple icon="plus" @click="addDescriptorFilter" />
+            <button-simple
+              :title="$t('entities.build_filter.add_descriptor_filter')"
+              icon="plus"
+              @click="addDescriptorFilter"
+            />
           </div>
         </div>
 
@@ -284,6 +294,7 @@
           />
           <combobox-styled
             class="flexrow-item"
+            :aria-label="$t('task_types.fields.priority')"
             :options="priorityOptions"
             locale-key-prefix="tasks."
             v-model="priority.value"

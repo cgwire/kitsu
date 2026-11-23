@@ -582,6 +582,40 @@ describe('SearchQueryList, tooltips', () => {
   })
 })
 
+describe('SearchQueryList, group buttons', () => {
+  // A group holds the edit and delete buttons of the edit mode, and the
+  // filters it lists when open: their names would join its own.
+  test('names a group after itself alone', async () => {
+    const held = { ...search, search_filter_group_id: group.id }
+    const wrapper = await mountList({ queries: [held] })
+    await wrapper.find('.tag.folder[title="main.edit_mode_on"]').trigger('click')
+    await wrapper.find('.tag.group').trigger('click')
+    const tag = wrapper.find('.tag.group')
+
+    expect(tag.classes()).toContain('is-editing')
+    expect(tag.find('.group-header button.edit').exists()).toBe(true)
+    expect(tag.find('.group-list .filter-label').text()).toBe('wip')
+    expect(tag.attributes('aria-label')).toBe('Mine')
+  })
+
+  test('tells whether a group is open', async () => {
+    const wrapper = await mountList({ groups: [group, sharedGroup] })
+    const tags = () => wrapper.findAll('.tag.group')
+    const expanded = () => tags().map(tag => tag.attributes('aria-expanded'))
+    expect(expanded()).toEqual(['false', 'false'])
+
+    await tags()[0].trigger('click')
+    expect(tags()[0].find('.group-list').exists()).toBe(true)
+    expect(expanded()).toEqual(['true', 'false'])
+
+    await tags()[1].trigger('click')
+    expect(expanded()).toEqual(['false', 'true'])
+
+    await tags()[1].trigger('keydown', { key: 'Enter' })
+    expect(expanded()).toEqual(['false', 'false'])
+  })
+})
+
 describe('SearchQueryList, buttons of a row', () => {
   const buttonsOf = node => [
     node.find('button.edit').exists(),

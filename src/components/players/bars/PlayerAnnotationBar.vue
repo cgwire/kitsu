@@ -232,6 +232,7 @@
     <combobox-styled
       class="background-combo mr05"
       :active="Boolean(currentBackground)"
+      :aria-label="$t('playlists.actions.select_background')"
       :disabled="!productionBackgrounds.length"
       :is-compact="(light && !fullScreen) || !productionBackgrounds.length"
       is-reversed

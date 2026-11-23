@@ -14,6 +14,7 @@
 
     <combobox-styled
       class="flexrow-item"
+      :aria-label="$t('playlists.actions.select_animation')"
       :options="available3DAnimations"
       :is-dark="true"
       is-reversed

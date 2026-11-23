@@ -1,6 +1,6 @@
 <template>
   <div :class="{ active }" :disabled="disabled || null">
-    <label class="label" v-if="label.length">
+    <label class="label" :id="labelId" v-if="label.length">
       {{ label }}
     </label>
     <div
@@ -13,6 +13,8 @@
       }"
       ref="select"
       role="combobox"
+      :aria-labelledby="label.length ? labelId : undefined"
+      :aria-label="ariaLabel || undefined"
       :tabindex="disabled ? -1 : 0"
       aria-haspopup="listbox"
       :aria-expanded="showList"
@@ -88,7 +90,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { ChevronDownIcon } from 'lucide-vue-next'
@@ -110,6 +112,11 @@ const props = defineProps({
     type: Boolean
   },
   label: {
+    default: '',
+    type: String
+  },
+  // Names the combobox when it shows no label.
+  ariaLabel: {
     default: '',
     type: String
   },
@@ -153,6 +160,7 @@ const props = defineProps({
 
 const emit = defineEmits(['change', 'update:model-value'])
 
+const labelId = useId()
 const select = ref(null)
 const selectedOption = ref({
   label: '',

@@ -43,6 +43,7 @@
         <div class="filler">
           <span
             class="close-contributions"
+            :title="$t('main.close')"
             role="button"
             tabindex="0"
             @click="hideContributions"
@@ -105,6 +106,7 @@
     <div class="client-welcome" v-if="isWelcome">
       <span
         class="close-welcome"
+        :title="$t('main.close')"
         role="button"
         tabindex="0"
         @click="hideWelcome"

@@ -17,7 +17,9 @@
         @click="closeRecoveryCodes"
         @keydown.enter.prevent="closeRecoveryCodes"
         @keydown.space.prevent="closeRecoveryCodes"
-      />
+      >
+        <title>{{ $t('main.close') }}</title>
+      </x-circle-icon>
       <save-icon
         class="action-icon"
         :size="20"
@@ -26,7 +28,9 @@
         @click="saveRecoveryCodesToFile"
         @keydown.enter.prevent="saveRecoveryCodesToFile"
         @keydown.space.prevent="saveRecoveryCodesToFile"
-      />
+      >
+        <title>{{ $t('main.download') }}</title>
+      </save-icon>
       <copy-icon
         class="action-icon"
         :size="20"
@@ -35,7 +39,9 @@
         @click="copyRecoveryCodesToClipboard"
         @keydown.enter.prevent="copyRecoveryCodesToClipboard"
         @keydown.space.prevent="copyRecoveryCodesToClipboard"
-      />
+      >
+        <title>{{ $t('main.copy') }}</title>
+      </copy-icon>
       <textarea
         class="input recovery-codes"
         v-text="twoFA.OTPRecoveryCodes.join('\t')"
@@ -441,7 +447,9 @@
           @click="unregisterFIDORequested(device)"
           @keydown.enter.prevent="unregisterFIDORequested(device)"
           @keydown.space.prevent="unregisterFIDORequested(device)"
-        />
+        >
+          <title>{{ deleteDeviceLabel(device) }}</title>
+        </trash-icon>
       </li>
     </ul>
 
@@ -818,6 +826,13 @@ const registerFIDORequested = twoFactorPayload => {
       twoFA.FIDONewDeviceName = ''
     })
 }
+
+// A <title> keeps its text as written, line breaks included: a short call
+// keeps the name on one line.
+const deleteDeviceLabel = deviceName =>
+  t('profile.two_factor_authentication.fido.delete_device', {
+    name: deviceName
+  })
 
 const unregisterFIDORequested = deviceName => {
   if (twoFAButtonsDisabled.value) return

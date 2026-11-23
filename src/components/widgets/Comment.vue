@@ -105,7 +105,9 @@
                 @click="emit('duplicate-comment', comment)"
                 @keydown.enter.prevent="emit('duplicate-comment', comment)"
                 @keydown.space.prevent="emit('duplicate-comment', comment)"
-              />
+              >
+                <title>{{ $t('comments.copy_to_new_comment') }}</title>
+              </copy-icon>
             </p>
             <p
               class="for-client-tag"

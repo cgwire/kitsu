@@ -126,6 +126,7 @@
           </div>
           <div class="flexrow" v-if="selectableDepartments.length">
             <combobox-department
+              :aria-label="$t('people.fields.departments')"
               class="flexrow-item"
               :selectable-departments="selectableDepartments"
               :max-height-select-input="160"

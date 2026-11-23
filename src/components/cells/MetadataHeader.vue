@@ -23,6 +23,7 @@
 
       <span
         class="metadata-menu-button header-icon pointer"
+        :title="$t('main.column_options')"
         role="button"
         tabindex="0"
         @click="$emit('show-metadata-header-menu', $event)"

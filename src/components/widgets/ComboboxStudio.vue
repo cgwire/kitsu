@@ -1,6 +1,6 @@
 <template>
   <div>
-    <label class="label" v-if="label.length">
+    <label class="label" :id="labelId" v-if="label.length">
       {{ label }}
     </label>
     <div
@@ -14,6 +14,7 @@
       <div
         class="flexrow"
         role="combobox"
+        :aria-labelledby="label.length ? labelId : undefined"
         tabindex="0"
         aria-haspopup="listbox"
         :aria-expanded="showStudioList"
@@ -57,7 +58,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
@@ -110,6 +111,7 @@ const {
   select: selectStudio
 } = useCombobox(emit)
 
+const labelId = useId()
 const listRef = ref(null)
 const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
   isOpen: showStudioList,

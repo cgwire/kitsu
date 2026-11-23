@@ -55,6 +55,9 @@
             >
               <span
                 class="expand flexrow-item"
+                :title="
+                  rootElement.expanded ? $t('main.collapse') : $t('main.expand')
+                "
                 :style="{
                   color: isDarkTheme ? '#EEE' : '#999',
                   'margin-top': '4px'

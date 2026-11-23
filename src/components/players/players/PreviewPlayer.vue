@@ -348,6 +348,7 @@
           >
             <combobox-styled
               class="preview-combo flexrow-item"
+              :aria-label="$t('entities.preview_files.revision')"
               :options="lastPreviewFileOptions"
               is-reversed
               is-preview
