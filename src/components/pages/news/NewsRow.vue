@@ -143,7 +143,11 @@
         </div>
       </div>
 
-      <div class="has-text-centered">
+      <div
+        ref="playerWrapper"
+        class="has-text-centered"
+        :style="isPlayerShown ? null : { height: `${playerHeight || 300}px` }"
+      >
         <preview-player
           :canvas-id="canvasId"
           :previews="previews"
@@ -151,6 +155,7 @@
           :read-only="true"
           :light="true"
           :big="true"
+          v-if="isPlayerShown"
         />
       </div>
     </div>
@@ -158,7 +163,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
@@ -187,8 +192,18 @@ defineEmits(['select'])
 
 // Template refs
 
+const playerWrapper = ref(null)
 const root = ref(null)
 defineExpose({ root })
+
+// State
+
+// Only the rows on screen hold a player: a long feed of videos loading at
+// once starves the requests of the page, and of the next page left to.
+const isPlayerShown = ref(false)
+// The row keeps its height without its player, or the feed jumps.
+const playerHeight = ref(null)
+let observer = null
 
 // Computed
 
@@ -237,6 +252,22 @@ const hasRetakeValue = computed(() => {
 const hasDoneValue = computed(() => {
   const status = taskStatusMap.value.get(props.news.task_status_id)
   return status ? props.news.change && status.is_done : false
+})
+
+// Lifecycle
+
+onMounted(() => {
+  observer = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting && playerWrapper.value) {
+      playerHeight.value = playerWrapper.value.offsetHeight
+    }
+    isPlayerShown.value = entry.isIntersecting
+  })
+  observer.observe(root.value)
+})
+
+onBeforeUnmount(() => {
+  observer?.disconnect()
 })
 </script>
 
