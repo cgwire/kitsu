@@ -63,6 +63,7 @@ import errors from '@/lib/errors'
 import tasksApi from '@/store/api/tasks'
 import tasksStore from '@/store/modules/tasks'
 import peopleStore from '@/store/modules/people'
+import sequencesStore from '@/store/modules/sequences'
 import taskStatusStore from '@/store/modules/taskstatus'
 import userStore from '@/store/modules/user'
 
@@ -521,6 +522,222 @@ describe('Tasks store', () => {
         tasksStore.actions.createTasks({ commit, rootGetters }, payload)
       ).rejects.toBe(error)
       expect(commit).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('createSelectedTasks action', () => {
+    const payload = { type: 'sequences', projectId: 'production-1' }
+    // A cell of the list carries its place in the list grid.
+    const emptyCell = (entityId, taskTypeId, x, y) => ({
+      entity: { id: entityId },
+      column: { id: taskTypeId },
+      x,
+      y
+    })
+    const createdTask = (entityId, taskTypeId) => ({
+      id: `task-${entityId}`,
+      entity_id: entityId,
+      task_type_id: taskTypeId
+    })
+    let vuexStore
+
+    const selection = () => ({
+      cells: [...vuexStore.state.tasks.selectedValidations.keys()],
+      tasks: [...vuexStore.state.tasks.selectedTasks.keys()]
+    })
+    // The highlighted cells of the Sequences list.
+    const highlight = () =>
+      [...vuexStore.state.sequences.sequenceSelectionGrid].sort()
+
+    beforeEach(() => {
+      tasksApi.createTasks.mockReset()
+      vuexStore = createStore({
+        modules: {
+          sequences: {
+            ...sequencesStore,
+            state: {
+              ...sequencesStore.state,
+              selectedSequences: new Map(),
+              sequenceSelectionGrid: new Set()
+            }
+          },
+          tasks: {
+            ...tasksStore,
+            state: {
+              ...tasksStore.state,
+              selectedTasks: new Map(),
+              selectedValidations: new Map(),
+              taskMap: new Map()
+            }
+          }
+        }
+      })
+      vuexStore.commit(
+        'ADD_SELECTED_TASK',
+        emptyCell('sequence-1', 'type-1', 0, 1)
+      )
+      vuexStore.commit(
+        'ADD_SELECTED_TASK',
+        emptyCell('sequence-2', 'type-2', 1, 0)
+      )
+    })
+
+    test('selects the created tasks in place of their cells', async () => {
+      tasksApi.createTasks
+        .mockResolvedValueOnce([createdTask('sequence-1', 'type-1')])
+        .mockResolvedValueOnce([createdTask('sequence-2', 'type-2')])
+
+      await vuexStore.dispatch('createSelectedTasks', payload)
+
+      expect(selection()).toEqual({
+        cells: [],
+        tasks: ['task-sequence-1', 'task-sequence-2']
+      })
+      expect(highlight()).toEqual(['0-1', '1-0'])
+    })
+
+    // The action panel gets the first failure.
+    test('rethrows the first failure and keeps the failed cells', async () => {
+      const error = new Error('HTTP 500')
+      tasksApi.createTasks
+        .mockRejectedValueOnce(error)
+        .mockRejectedValueOnce(new Error('HTTP 404'))
+
+      await expect(
+        vuexStore.dispatch('createSelectedTasks', payload)
+      ).rejects.toBe(error)
+      expect(tasksApi.createTasks).toHaveBeenCalledTimes(2)
+      expect(selection()).toEqual({
+        cells: ['sequence-1-type-1', 'sequence-2-type-2'],
+        tasks: []
+      })
+      expect(highlight()).toEqual(['0-1', '1-0'])
+    })
+
+    // A task type that keeps failing must not block the others.
+    test('creates the other task types after a failed one', async () => {
+      const error = new Error('HTTP 404')
+      tasksApi.createTasks
+        .mockRejectedValueOnce(error)
+        .mockResolvedValueOnce([createdTask('sequence-2', 'type-2')])
+
+      await expect(
+        vuexStore.dispatch('createSelectedTasks', payload)
+      ).rejects.toBe(error)
+      expect(tasksApi.createTasks).toHaveBeenCalledTimes(2)
+      expect(tasksApi.createTasks).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          task_type_id: 'type-2',
+          entityIds: ['sequence-2']
+        })
+      )
+      expect(vuexStore.state.tasks.taskMap.has('task-sequence-2')).toBe(true)
+      expect(selection()).toEqual({ cells: ['sequence-1-type-1'], tasks: [] })
+      expect(highlight()).toEqual(['0-1'])
+    })
+
+    // A selected task would close the task creation bar, and its error with
+    // it: the selection keeps the cells still to create.
+    test('keeps only the cells still empty selected after a failure', async () => {
+      const error = new Error('HTTP 500')
+      tasksApi.createTasks
+        .mockResolvedValueOnce([createdTask('sequence-1', 'type-1')])
+        .mockRejectedValueOnce(error)
+
+      await expect(
+        vuexStore.dispatch('createSelectedTasks', payload)
+      ).rejects.toBe(error)
+      expect(selection()).toEqual({ cells: ['sequence-2-type-2'], tasks: [] })
+      expect(highlight()).toEqual(['1-0'])
+      expect(vuexStore.state.tasks.taskMap.has('task-sequence-1')).toBe(true)
+    })
+
+    // An answer the store cannot read stands for an error while storing.
+    test('unselects the created cells when storing fails', async () => {
+      tasksApi.createTasks
+        .mockResolvedValueOnce([createdTask('sequence-1', 'type-1')])
+        .mockResolvedValueOnce(null)
+
+      await expect(
+        vuexStore.dispatch('createSelectedTasks', payload)
+      ).rejects.toThrow(TypeError)
+      expect(selection()).toEqual({ cells: ['sequence-2-type-2'], tasks: [] })
+      expect(highlight()).toEqual(['1-0'])
+    })
+
+    test('leaves a selection cleared during the creation alone', async () => {
+      let answer
+      tasksApi.createTasks
+        .mockReturnValueOnce(
+          new Promise(resolve => {
+            answer = resolve
+          })
+        )
+        .mockResolvedValueOnce([createdTask('sequence-2', 'type-2')])
+
+      const creation = vuexStore.dispatch('createSelectedTasks', payload)
+      vuexStore.commit('CLEAR_SELECTED_TASKS')
+      answer([createdTask('sequence-1', 'type-1')])
+      await creation
+
+      expect(selection()).toEqual({ cells: [], tasks: [] })
+      expect(highlight()).toEqual([])
+    })
+
+    // The list shows a created task before the other types are created, and
+    // a Ctrl+click on its cell unselects it.
+    test('does not select again a task unselected during the creation', async () => {
+      let answer
+      let isSecondTypeSent
+      const secondTypeSent = new Promise(resolve => {
+        isSecondTypeSent = resolve
+      })
+      tasksApi.createTasks
+        .mockResolvedValueOnce([createdTask('sequence-1', 'type-1')])
+        .mockImplementationOnce(() => {
+          isSecondTypeSent()
+          return new Promise(resolve => {
+            answer = resolve
+          })
+        })
+
+      const creation = vuexStore.dispatch('createSelectedTasks', payload)
+      await secondTypeSent
+      vuexStore.commit('REMOVE_SELECTED_TASK', {
+        ...emptyCell('sequence-1', 'type-1', 0, 1),
+        task: vuexStore.state.tasks.taskMap.get('task-sequence-1'),
+        isCtrlKey: true
+      })
+      const countAfterClick = vuexStore.getters.nbSelectedValidations
+      answer([createdTask('sequence-2', 'type-2')])
+      await creation
+
+      expect(countAfterClick).toBe(1)
+      expect(selection()).toEqual({ cells: [], tasks: ['task-sequence-2'] })
+      expect(highlight()).toEqual(['1-0'])
+    })
+
+    // The action panel hides a failure once the selected cells change.
+    test('lets a computed over the selected cells follow a new selection', () => {
+      const scope = effectScope()
+      const cells = scope.run(() =>
+        computed(() => [...vuexStore.getters.selectedValidations.keys()])
+      )
+      const cellsBefore = cells.value
+      vuexStore.commit('CLEAR_SELECTED_TASKS')
+      const cellsCleared = cells.value
+      vuexStore.commit(
+        'ADD_SELECTED_TASK',
+        emptyCell('sequence-3', 'type-1', 0, 2)
+      )
+      const cellsAfter = cells.value
+      scope.stop()
+
+      expect([cellsBefore, cellsCleared, cellsAfter]).toEqual([
+        ['sequence-1-type-1', 'sequence-2-type-2'],
+        [],
+        ['sequence-3-type-1']
+      ])
     })
   })
 

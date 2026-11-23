@@ -104,6 +104,16 @@ const mountPanel = async (
         component: { template: '<div />' }
       },
       {
+        path: '/productions/:production_id/episodes',
+        name: 'episodes',
+        component: { template: '<div />' }
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/sequences',
+        name: 'episode-sequences',
+        component: { template: '<div />' }
+      },
+      {
         path: '/productions/:production_id/sequences',
         name: 'sequences',
         component: { template: '<div />' }
@@ -141,7 +151,13 @@ const mountPanel = async (
       nbSelectedValidations: validations,
       selectedConcepts: toSelection(concepts),
       selectedLines: toSelection(lines),
-      selectedTasks: toSelection(tasks)
+      selectedTasks: toSelection(tasks),
+      selectedValidations: new Map(
+        Array.from({ length: validations }, (_, index) => [
+          `cell-${index + 1}`,
+          {}
+        ])
+      )
     },
     getters: {
       assetsByType: () => [assets],
@@ -162,6 +178,7 @@ const mountPanel = async (
       selectedEdits: state => state.selectedLines,
       selectedShots: state => state.selectedLines,
       selectedTasks: state => state.selectedTasks,
+      selectedValidations: state => state.selectedValidations,
       taskMap: () => toSelection(tasks),
       taskStatusForCurrentUser: () => statuses,
       taskStatusMap: () => new Map(statuses.map(status => [status.id, status])),
@@ -1265,6 +1282,137 @@ describe('ActionPanel, opened on empty cells', () => {
     await flushPromises()
 
     expect(wrapper.find('.custom-action-combobox').exists()).toBe(true)
+  })
+})
+
+describe('ActionPanel, task creation', () => {
+  const createButton = wrapper => wrapper.find('.action-bar .confirm-button')
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  // The sequences went through the episode route, whatever the production.
+  test.each([
+    ['/productions/production-1/assets', 'assets'],
+    ['/productions/production-1/shots', 'shots'],
+    ['/productions/production-1/edits', 'edits'],
+    ['/productions/production-1/sequences', 'sequences'],
+    ['/productions/production-1/episodes/episode-1/sequences', 'sequences'],
+    ['/productions/production-1/episodes', 'episodes']
+  ])('creates the tasks of %s as %s', async (path, type) => {
+    const { store, wrapper } = await mountPanel([], { path, validations: 1 })
+
+    await createButton(wrapper).trigger('click')
+
+    expect(store.dispatch).toHaveBeenCalledWith('createSelectedTasks', {
+      type,
+      projectId: 'production-1'
+    })
+  })
+
+  describe('after a failure', () => {
+    const error = new Error('HTTP 500')
+    const failure = wrapper => wrapper.find('.action-bar .task-creation-error')
+    let consoleError
+
+    const mountFailing = async ({ validations = 1 } = {}) => {
+      const mounted = await mountPanel([], {
+        path: '/productions/production-1/sequences',
+        validations
+      })
+      mounted.store.dispatch.mockImplementation(action =>
+        action === 'createSelectedTasks'
+          ? Promise.reject(error)
+          : Promise.resolve()
+      )
+      return mounted
+    }
+
+    beforeEach(() => {
+      consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      consoleError.mockRestore()
+    })
+
+    test('shows the failure in the task creation bar', async () => {
+      const { wrapper } = await mountFailing()
+
+      await createButton(wrapper).trigger('click')
+      await flushPromises()
+
+      expect(failure(wrapper).text()).toBe('tasks.create_tasks_sequence_failed')
+      expect(consoleError).toHaveBeenCalledWith(error)
+    })
+
+    test('announces the failure to screen readers', async () => {
+      const { wrapper } = await mountFailing()
+
+      await createButton(wrapper).trigger('click')
+      await flushPromises()
+
+      expect(failure(wrapper).attributes('role')).toBe('alert')
+    })
+
+    test('hides the failure once a new attempt starts', async () => {
+      const { store, wrapper } = await mountFailing()
+      await createButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(failure(wrapper).exists()).toBe(true)
+
+      store.dispatch.mockImplementation(() => new Promise(() => {}))
+      await createButton(wrapper).trigger('click')
+
+      expect(failure(wrapper).exists()).toBe(false)
+    })
+
+    // A click on another cell swaps the selection at the same count.
+    test.each([
+      [
+        'another cell',
+        store => {
+          store.state.selectedValidations = new Map([['cell-2', {}]])
+        }
+      ],
+      [
+        'one more cell',
+        store => {
+          store.state.selectedValidations.set('cell-2', {})
+          store.state.nbSelectedValidations = 2
+        }
+      ]
+    ])('hides the failure once %s is selected', async (name, select) => {
+      const { store, wrapper } = await mountFailing()
+      await createButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(failure(wrapper).exists()).toBe(true)
+
+      select(store)
+      await flushPromises()
+
+      expect(createButton(wrapper).exists()).toBe(true)
+      expect(failure(wrapper).exists()).toBe(false)
+    })
+
+    // After a partial failure, the store unselects the cells it created
+    // before the failure reaches the panel.
+    test('keeps the failure of a partial creation', async () => {
+      const { store, wrapper } = await mountFailing({ validations: 2 })
+      store.dispatch.mockImplementation(async action => {
+        if (action === 'createSelectedTasks') {
+          store.state.selectedValidations.delete('cell-1')
+          store.state.nbSelectedValidations = 1
+          throw error
+        }
+      })
+
+      await createButton(wrapper).trigger('click')
+      await flushPromises()
+
+      expect(failure(wrapper).text()).toBe('tasks.create_tasks_sequence_failed')
+    })
   })
 })
 

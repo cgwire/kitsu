@@ -9,6 +9,8 @@ import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 
 const i18n = createI18n({
   legacy: false,
@@ -125,6 +127,22 @@ describe('modals/CreateTasksModal', () => {
     expect(wrapper.emitted('confirm-all-missing')).toBeUndefined()
     expect(button.attributes('aria-disabled')).toBe('true')
     expect(button.attributes('tabindex')).toBe('-1')
+  })
+
+  it('names the choice between the list and the production', () => {
+    const wrapper = mountModal()
+
+    expect(wrapper.findComponent(Combobox).props('ariaLabel')).toBe(
+      'main.entities'
+    )
+  })
+
+  it('names the task type choice', () => {
+    const wrapper = mountModal()
+
+    expect(wrapper.findComponent(ComboboxTaskType).props('ariaLabel')).toBe(
+      'news.task_type'
+    )
   })
 
   it.each(confirmButtons)(

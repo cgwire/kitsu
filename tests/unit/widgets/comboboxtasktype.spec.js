@@ -71,6 +71,20 @@ describe('ComboboxTaskType', () => {
     labeled.unmount()
   })
 
+  it('names the combobox without a label', () => {
+    const named = shallowMountWithI18n(ComboboxTaskType, {
+      props: { ariaLabel: 'Task type', taskTypeList, modelValue: 'tt-2' },
+      global: { plugins: [store], stubs: { teleport: false } }
+    })
+    expect(named.find('[role="combobox"]').attributes('aria-label')).toBe(
+      'Task type'
+    )
+    expect(
+      wrapper.find('[role="combobox"]').attributes('aria-label')
+    ).toBeUndefined()
+    named.unmount()
+  })
+
   it('opens and selects a task type via keyboard', async () => {
     const trigger = wrapper.find('.flexrow.selector')
     await trigger.trigger('keydown', { key: 'ArrowDown' })
