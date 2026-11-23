@@ -705,6 +705,7 @@ describe('App', () => {
     describe('new comments', () => {
       const task = { id: 'task-1' }
       const getters = {
+        isOwnCommentEvent: () => () => false,
         isSavingCommentPreview: () => false,
         taskComments: () => ({}),
         taskMap: () => new Map([['task-1', task]]),
@@ -742,6 +743,23 @@ describe('App', () => {
           commentId: 'comment-9',
           taskId: 'task-1'
         })
+      })
+
+      // The answer of Zou brings the comment the tab posted: its event has
+      // nothing to reload, nor a status to move.
+      it('leaves alone the comment the tab itself posted', async () => {
+        const loadComment = vi.fn(() => Promise.resolve())
+        const updateTask = vi.fn()
+        const { socket } = await mountApp({
+          actions: { loadComment },
+          getters: { ...getters, isOwnCommentEvent: () => () => true },
+          mutations: { UPDATE_TASK: updateTask }
+        })
+
+        emitSocketEvent(socket, 'comment:new', newComment)
+
+        expect(loadComment).not.toHaveBeenCalled()
+        expect(updateTask).not.toHaveBeenCalled()
       })
 
       it('leaves a bug in the reload to Sentry', async () => {
@@ -782,6 +800,7 @@ describe('App', () => {
         currentUserRoleForProduction: () => () => role,
         // The page has no production: the route role is the global one.
         isCurrentUserClient: () => globalRole === 'client',
+        isOwnCommentEvent: () => () => false,
         isPublishingComment: () => () => false,
         isSavingCommentPreview: () => false,
         personMap: () =>

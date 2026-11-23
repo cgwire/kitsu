@@ -340,7 +340,12 @@ describe('Tasks store', () => {
             checklist: []
           }
         ])
-        expect(commit).toHaveBeenCalledTimes(2)
+        // Besides the comments shown while Zou saved them.
+        const savedComments = commit.mock.calls.filter(
+          ([type, { comment }]) =>
+            type === 'NEW_TASK_COMMENT_END' && !comment.isPending
+        )
+        expect(savedComments).toHaveLength(2)
       })
 
       test('sends no task without a chosen status nor a comment', async () => {

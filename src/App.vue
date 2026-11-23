@@ -612,6 +612,8 @@ const socketEvents = {
   'task:unassign': eventData => onAssignation(eventData, false),
 
   'comment:new': eventData => {
+    // The answer of Zou brings the comment this tab posted.
+    if (store.getters.isOwnCommentEvent(eventData)) return
     const commentId = eventData.comment_id
     const task = getHeldTask(eventData.task_id)
     if (!isSavingCommentPreview.value && task) {

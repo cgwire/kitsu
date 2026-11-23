@@ -60,6 +60,7 @@ import {
   ADD_PREVIEW_END,
   ADD_PREVIEW_ERROR,
   REMOVE_FAILED_COMMENT,
+  REMOVE_PENDING_COMMENT,
   CHANGE_PREVIEW_END,
   UPDATE_PREVIEW_ANNOTATION,
   UPDATE_PREVIEW_TRIM,
@@ -98,6 +99,96 @@ import {
 const locks = {}
 // The comments a publication creates, until their last file is up.
 const publishingCommentIds = new Set()
+
+let lastPendingCommentId = 0
+
+const TASK_RELOAD_SIZE = 50
+
+/*
+ * Applies a change of tasks at once and follows each task until Zou answers:
+ * undo() puts back the values the change replaced, on the given tasks or on
+ * all of them. A value changed again since stays (see trackEdit).
+ */
+const editTasksAtOnce = ({ commit, state }, taskIds, applyEdit) => {
+  const trackedEdits = new Map(
+    taskIds.map(taskId => [
+      taskId,
+      trackEdit(
+        () => state.taskMap.get(taskId),
+        () => applyEdit(taskId)
+      )
+    ])
+  )
+  return {
+    keep: (ids = taskIds) => ids.forEach(id => trackedEdits.get(id).keep()),
+    undo: (ids = taskIds) =>
+      ids.forEach(taskId => {
+        const formerValues = trackedEdits.get(taskId).undo()
+        if (formerValues) {
+          commit(EDIT_TASK_DATES, { taskId, data: formerValues })
+        }
+      })
+  }
+}
+
+// Zou works through a batch task by task: one that fails midway, or whose
+// answer is lost, leaves tasks changed. Only Zou knows which.
+const reloadAfterFailure = ({ dispatch }, taskIds) => {
+  dispatch('reloadTasks', taskIds).catch(errors.logRequestFailure)
+}
+
+/*
+ * Shows comments at once, each with the status it gives its task, while Zou
+ * saves them. The function returned takes them back once Zou answered: its
+ * answer applies next as it always did, and a refusal leaves the tasks as
+ * they were.
+ */
+const showCommentsAtOnce = (context, comments) => {
+  const { commit, rootGetters } = context
+  const pendingComments = new Map(
+    comments.map(({ taskId, taskStatusId, text, checklist, forClient }) => [
+      taskId,
+      {
+        id: `pending-${++lastPendingCommentId}`,
+        isPending: true,
+        object_id: taskId,
+        person_id: rootGetters.user?.id,
+        // A guest is not in the person map the authors are read from.
+        person: rootGetters.user,
+        task_status_id: taskStatusId,
+        text: text || '',
+        checklist: checklist || [],
+        for_client: forClient || false,
+        // Zou dates are UTC, without a zone.
+        created_at: new Date().toISOString().slice(0, 19),
+        acknowledgements: [],
+        attachment_files: [],
+        department_mentions: [],
+        links: [],
+        mentions: [],
+        pinned: false,
+        previews: [],
+        replies: []
+      }
+    ])
+  )
+  const taskIds = [...pendingComments.keys()]
+  const edits = editTasksAtOnce(context, taskIds, taskId =>
+    commit(NEW_TASK_COMMENT_END, {
+      comment: pendingComments.get(taskId),
+      taskId
+    })
+  )
+  return () => {
+    taskIds.forEach(taskId =>
+      commit(REMOVE_PENDING_COMMENT, {
+        taskId,
+        commentId: pendingComments.get(taskId).id
+      })
+    )
+    edits.undo()
+  }
+}
 
 const cache = {}
 
@@ -202,6 +293,17 @@ const getters = {
   // Read at call time: a publication joins its comment to the store once its
   // last file is up.
   isPublishingComment: () => commentId => publishingCommentIds.has(commentId),
+  // The comment a tab posts comes back as an event, which has nothing to
+  // load: the answer of Zou brings the comment. Until that answer its id is
+  // unknown: the event is the echo when its author is the user and a comment
+  // of this tab is pending on the task. Another tab of the user has none.
+  isOwnCommentEvent:
+    (state, getters, rootState, rootGetters) =>
+    ({ comment_id, task_id, person_id }) =>
+      (state.taskComments[task_id] || []).some(
+        ({ id, isPending }) =>
+          id === comment_id || (isPending && person_id === rootGetters.user?.id)
+      ),
 
   selectedTasks: state => state.selectedTasks,
   selectedValidations: state => state.selectedValidations,
@@ -222,6 +324,23 @@ const actions = {
       commit(LOAD_TASK_END, task)
       return task
     })
+  },
+
+  // The tasks the store holds, read again 50 a request: more would not fit
+  // in the address. A row of the task list has the fields of the task
+  // without its project nor its entity, whose names the held task keeps.
+  reloadTasks({ commit, state }, taskIds) {
+    const heldIds = taskIds.filter(taskId => state.taskMap.has(taskId))
+    const requests = Array.from(
+      { length: Math.ceil(heldIds.length / TASK_RELOAD_SIZE) },
+      (_, index) =>
+        heldIds.slice(index * TASK_RELOAD_SIZE, (index + 1) * TASK_RELOAD_SIZE)
+    ).map(ids =>
+      tasksApi
+        .getTasks({ id: JSON.stringify(ids), relations: true })
+        .then(tasks => tasks.forEach(task => commit(LOAD_TASK_END, task)))
+    )
+    return Promise.all(requests)
   },
 
   loadTasks({}, filters) {
@@ -550,10 +669,8 @@ const actions = {
   },
 
   // Without a status, each task keeps its own and only the comment goes out.
-  changeSelectedTaskStatus(
-    { commit, state, rootGetters },
-    { taskStatusId, comment }
-  ) {
+  changeSelectedTaskStatus(context, { taskStatusId, comment }) {
+    const { commit, state, rootGetters } = context
     const tasksToChange = []
     const production = rootGetters.currentProduction
     Array.from(state.selectedTasks.keys()).forEach(taskId => {
@@ -571,14 +688,33 @@ const actions = {
         })
       }
     })
-    return tasksApi
-      .commentTasks(production.id, tasksToChange)
-      .then(comments => {
+    const takePendingCommentsBack = showCommentsAtOnce(
+      context,
+      tasksToChange.map(taskComment => ({
+        taskId: taskComment.object_id,
+        taskStatusId: taskComment.task_status_id,
+        text: taskComment.comment
+      }))
+    )
+    return tasksApi.commentTasks(production.id, tasksToChange).then(
+      comments => {
+        // Zou leaves out the tasks the user may not comment: they are back
+        // as they were.
+        takePendingCommentsBack()
         comments.forEach(comment => {
           commit(NEW_TASK_COMMENT_END, { comment, taskId: comment.object_id })
         })
         return comments
-      })
+      },
+      err => {
+        takePendingCommentsBack()
+        reloadAfterFailure(
+          context,
+          tasksToChange.map(taskComment => taskComment.object_id)
+        )
+        throw err
+      }
+    )
   },
 
   // Artists do not see the client comments: the last one of each selected
@@ -680,9 +816,10 @@ const actions = {
   },
 
   commentTask(
-    { commit },
+    context,
     { taskId, taskStatusId, comment, attachment, checklist, forClient }
   ) {
+    const { commit } = context
     const data = {
       taskId,
       taskStatusId,
@@ -691,10 +828,21 @@ const actions = {
       checklist,
       forClient
     }
-    return tasksApi.commentTask(data).then(comment => {
-      commit(NEW_TASK_COMMENT_END, { comment, taskId })
-      return comment
-    })
+    const takePendingCommentBack = showCommentsAtOnce(context, [
+      { taskId, taskStatusId, text: comment, checklist, forClient }
+    ])
+    return tasksApi.commentTask(data).then(
+      comment => {
+        takePendingCommentBack()
+        commit(NEW_TASK_COMMENT_END, { comment, taskId })
+        return comment
+      },
+      err => {
+        takePendingCommentBack()
+        reloadAfterFailure(context, [taskId])
+        throw err
+      }
+    )
   },
 
   commentTaskWithPreview(
@@ -1049,30 +1197,53 @@ const actions = {
     })
   },
 
-  assignSelectedTasks({ commit, state }, { personId, taskIds }) {
+  assignSelectedTasks(context, { personId, taskIds }) {
+    const { commit, state } = context
     const selectedTaskIds = taskIds || Array.from(state.selectedTasks.keys())
-    return tasksApi.assignTasks(personId, selectedTaskIds).then(response => {
-      const successfulTaskIds = response.map(task => task.id)
-      const failedTaskIds = selectedTaskIds.filter(
-        taskId => !successfulTaskIds.includes(taskId)
-      )
-      commit(ASSIGN_TASKS, { taskIds: successfulTaskIds, personId })
-      if (failedTaskIds.length) {
-        const error = new Error(
-          `Failed to assign ${failedTaskIds.length} task(s). Task IDs: ${failedTaskIds.join(', ')}`
+    const edits = editTasksAtOnce(context, selectedTaskIds, taskId =>
+      commit(ASSIGN_TASKS, { taskIds: [taskId], personId })
+    )
+    return tasksApi.assignTasks(personId, selectedTaskIds).then(
+      response => {
+        const successfulTaskIds = response.map(task => task.id)
+        const failedTaskIds = selectedTaskIds.filter(
+          taskId => !successfulTaskIds.includes(taskId)
         )
-        error.failedTaskIds = failedTaskIds
-        error.successfulTaskIds = successfulTaskIds
-        throw error
+        edits.keep(successfulTaskIds.filter(id => selectedTaskIds.includes(id)))
+        edits.undo(failedTaskIds)
+        if (failedTaskIds.length) {
+          const error = new Error(
+            `Failed to assign ${failedTaskIds.length} task(s). Task IDs: ${failedTaskIds.join(', ')}`
+          )
+          error.failedTaskIds = failedTaskIds
+          error.successfulTaskIds = successfulTaskIds
+          throw error
+        }
+      },
+      err => {
+        if (!err.failedTaskIds) {
+          edits.undo()
+          reloadAfterFailure(context, selectedTaskIds)
+        }
+        throw err
       }
-    })
+    )
   },
 
-  unassignSelectedTasks({ commit, state }, { taskIds } = {}) {
+  unassignSelectedTasks(context, { taskIds } = {}) {
+    const { commit, state } = context
     const selectedTaskIds = taskIds || Array.from(state.selectedTasks.keys())
-    return tasksApi.unassignTasks(selectedTaskIds).then(() => {
-      commit(UNASSIGN_TASKS, selectedTaskIds)
-    })
+    const edits = editTasksAtOnce(context, selectedTaskIds, taskId =>
+      commit(UNASSIGN_TASKS, [taskId])
+    )
+    return tasksApi.unassignTasks(selectedTaskIds).then(
+      () => edits.keep(),
+      err => {
+        edits.undo()
+        reloadAfterFailure(context, selectedTaskIds)
+        throw err
+      }
+    )
   },
 
   unassignPersonFromTask({ dispatch }, { task, person }) {
@@ -1242,6 +1413,13 @@ const mutations = {
   },
 
   [LOAD_TASK_END](state, task) {
+    // A row of the task list (reloadTasks) has neither project nor entity
+    // to name the task after: the held one keeps its names.
+    if (!task.entity_type) {
+      const heldTask = state.taskMap.get(task.id)
+      if (heldTask) Object.assign(heldTask, task)
+      return
+    }
     Object.assign(task, {
       project_name: task.project.name,
       entity_type_name: task.entity_type.name
@@ -1514,6 +1692,14 @@ const mutations = {
     helpers.removeRevisionsOfFiles(state, taskId, [{ id: previewId }])
   },
 
+  // Out of the very array: the task panel and the task page render the
+  // list they read once.
+  [REMOVE_PENDING_COMMENT](state, { taskId, commentId }) {
+    const comments = state.taskComments[taskId] || []
+    const index = comments.findIndex(({ id }) => id === commentId)
+    if (index > -1) comments.splice(index, 1)
+  },
+
   [DELETE_PREVIEW_END](state, { taskId, previewId }) {
     state.taskPreviews[taskId].forEach(p => {
       const index = p.previews.findIndex(
@@ -1711,8 +1897,9 @@ const mutations = {
     taskIds.forEach(taskId => {
       const task = state.taskMap.get(taskId)
       if (task && !task.assignees.find(assigneeId => assigneeId === personId)) {
-        task.assignees.push(personId)
-        task.assignees = [...task.assignees]
+        // A new array: the one replaced goes back as it was when Zou
+        // refuses the assignment.
+        task.assignees = [...task.assignees, personId]
       }
     })
   },
