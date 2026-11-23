@@ -235,13 +235,17 @@ const onExportClicked = () => {
   csv.buildCsvFile(name, [headers, ...rows])
 }
 
+// A save can still fail after Cancel: its error is cleared on opening, not
+// on closing.
 const onNewClicked = () => {
   taskTypeToEdit.value = { color: '#999999' }
+  errors.edit = false
   modals.edit = true
 }
 
 const onEditClicked = taskType => {
   taskTypeToEdit.value = taskType
+  errors.edit = false
   modals.edit = true
 }
 

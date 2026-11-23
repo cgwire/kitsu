@@ -209,7 +209,10 @@ const hideAvatarModal = () => {
   modals.avatar = false
 }
 
+// The upload and the removal of the logo share this error, which only the
+// modal shows: each opening clears it.
 const showAvatarModal = () => {
+  errors.saveAvatar = false
   modals.avatar = true
 }
 

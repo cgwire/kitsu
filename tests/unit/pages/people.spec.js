@@ -30,6 +30,7 @@ import '@/lib/auth'
 import PeopleList from '@/components/lists/PeopleList.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EditPersonModal from '@/components/modals/EditPersonModal.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import People from '@/components/pages/People.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -49,6 +50,7 @@ const mountPage = async ({
   routeHolder.route = reactive({ params: {}, query })
   const resolved = () => vi.fn(() => Promise.resolve())
   const actions = {
+    deletePeople: resolved(),
     editPerson: resolved(),
     getResetPasswordLink: resolved(),
     invitePerson: resolved(),
@@ -206,6 +208,39 @@ describe('People page', () => {
       const modal = wrapper.findComponent(EditPersonModal)
       expect(modal.props('isEmailDomainError')).toBe(true)
       expect(modal.props('isError')).toBe(false)
+    })
+  })
+
+  describe('deletion', () => {
+    afterEach(() => vi.restoreAllMocks())
+
+    // Regression: a deletion failing after Cancel showed its error on the
+    // next opening, for another person.
+    it('opens without the error of a deletion failed after Cancel', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { wrapper, actions } = await mountPage()
+      let fail
+      actions.deletePeople.mockImplementationOnce(
+        () =>
+          new Promise((resolve, reject) => {
+            fail = reject
+          })
+      )
+      const list = wrapper.findComponent(PeopleList)
+      const modal = () => wrapper.findComponent(HardDeleteModal)
+      await list.vm.$emit('delete-clicked', { id: 'person-2' })
+      await modal().vm.$emit('confirm')
+      await modal().vm.$emit('cancel')
+      const error = new Error('Bad Request')
+      fail(error)
+      await flushPromises()
+      expect(consoleError).toHaveBeenCalledWith(error)
+
+      await list.vm.$emit('delete-clicked', { id: 'person-3' })
+
+      expect(modal().props('isError')).toBe(false)
     })
   })
 

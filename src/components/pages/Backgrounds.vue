@@ -127,18 +127,23 @@ const confirmDeleteBackground = () => {
     })
 }
 
+// A save or a deletion can still fail after Cancel: its error is cleared on
+// opening, not on closing.
 const onNewClicked = () => {
   backgroundToEdit.value = {}
+  errors.edit = false
   modals.edit = true
 }
 
 const onEditClicked = background => {
   backgroundToEdit.value = background
+  errors.edit = false
   modals.edit = true
 }
 
 const onDeleteClicked = background => {
   backgroundToDelete.value = background
+  errors.del = false
   modals.del = true
 }
 

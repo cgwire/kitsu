@@ -264,7 +264,7 @@
               />
               <button
                 class="button is-link flexrow-item"
-                @click="modals.isAddTaskStatusDisplayed = true"
+                @click="onAddLibraryTaskStatusClicked"
               >
                 {{ $t('task_status.add_task_status_to_library') }}
               </button>
@@ -303,7 +303,7 @@
               />
               <button
                 class="button is-link flexrow-item"
-                @click="modals.isAddAssetTypeDisplayed = true"
+                @click="onAddLibraryAssetTypeClicked"
               >
                 {{ $t('asset_types.add_asset_type_to_library') }}
               </button>
@@ -1097,14 +1097,28 @@ const uploadShotsImportFile = data => {
   toggleModal('isShotsImportRenderDisplayed')
 }
 
+// A save can still fail after Cancel: its error is cleared on opening, not
+// on closing.
 const onAddLibraryAssetTaskTypeClicked = () => {
   taskTypeForEntity.value = 'Asset'
+  errors.creatingTaskType = false
   modals.isAddTaskTypeDisplayed = true
 }
 
 const onAddLibraryShotTaskTypeClicked = () => {
   taskTypeForEntity.value = 'Shot'
+  errors.creatingTaskType = false
   modals.isAddTaskTypeDisplayed = true
+}
+
+const onAddLibraryTaskStatusClicked = () => {
+  errors.creatingTaskStatus = false
+  modals.isAddTaskStatusDisplayed = true
+}
+
+const onAddLibraryAssetTypeClicked = () => {
+  errors.creatingAssetType = false
+  modals.isAddAssetTypeDisplayed = true
 }
 
 onMounted(() => {

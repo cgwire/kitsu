@@ -8,12 +8,15 @@ vi.mock('vue-router', () => ({ useRouter: () => ({ push }) }))
 
 import errors from '@/lib/errors'
 
+import EditAssetTypeModal from '@/components/modals/EditAssetTypeModal.vue'
+import EditTaskStatusModal from '@/components/modals/EditTaskStatusModal.vue'
+import EditTaskTypeModal from '@/components/modals/EditTaskTypeModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import NewProduction from '@/components/pages/production/NewProduction.vue'
 
 import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
 
-const mountPage = async ({ config = {}, actions = {} } = {}) => {
+const mountPage = async ({ config = {}, actions = {}, stubs = {} } = {}) => {
   const store = {
     getters: {
       assetsCsvFormData: {},
@@ -41,7 +44,8 @@ const mountPage = async ({ config = {}, actions = {} } = {}) => {
           methods: { focus: () => {} }
         },
         // The import buttons sit in the steps of the timeline.
-        TimelineItem: { template: '<div><slot /></div>' }
+        TimelineItem: { template: '<div><slot /></div>' },
+        ...stubs
       }
     }
   })
@@ -481,4 +485,85 @@ describe('New production page, CSV import', () => {
       )
     })
   })
+})
+
+describe('New production page, library modals', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // Regression: the page kept the error of a failed save, so the next opening
+  // of the modal showed it on an empty form. A save failing after Cancel must
+  // not show either. The asset and shot steps each have a task type button.
+  test.each([
+    [
+      'asset task type',
+      'task_types.add_task_type_to_library',
+      0,
+      { forEntity: 'Asset' },
+      EditTaskTypeModal,
+      'newTaskType'
+    ],
+    [
+      'shot task type',
+      'task_types.add_task_type_to_library',
+      1,
+      { forEntity: 'Shot' },
+      EditTaskTypeModal,
+      'newTaskType'
+    ],
+    [
+      'task status',
+      'task_status.add_task_status_to_library',
+      0,
+      {},
+      EditTaskStatusModal,
+      'newTaskStatus'
+    ],
+    [
+      'asset type',
+      'asset_types.add_asset_type_to_library',
+      0,
+      {},
+      EditAssetTypeModal,
+      'newAssetType'
+    ]
+  ])(
+    'opens the %s modal without the error of a save failed after Cancel',
+    async (kind, label, index, openedProps, Modal, action) => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      let failSave
+      const wrapper = await mountPage({
+        actions: {
+          [action]: () =>
+            new Promise((resolve, reject) => {
+              failSave = reject
+            })
+        },
+        // The task type buttons sit in the header of the step lists.
+        stubs: { draggable: { template: '<div><slot name="header" /></div>' } }
+      })
+      const open = () =>
+        wrapper
+          .findAll('button')
+          .filter(button => button.text() === label)
+          [index].trigger('click')
+      const modal = () => wrapper.findComponent(Modal)
+      await open()
+      modal().vm.$emit('confirm', { name: 'Layout' })
+      await modal().vm.$emit('cancel')
+      failSave(new Error('Bad Request'))
+      await flushPromises()
+      expect(modal().props()).toMatchObject({ active: false, isError: true })
+
+      await open()
+
+      expect(modal().props()).toMatchObject({
+        active: true,
+        isError: false,
+        ...openedProps
+      })
+      expect(console.error).toHaveBeenCalled()
+    }
+  )
 })

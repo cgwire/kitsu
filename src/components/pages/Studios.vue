@@ -108,18 +108,23 @@ const onExportClicked = () => {
   csv.buildCsvFile(name, [headers, ...rows])
 }
 
+// A save or a deletion can still fail after Cancel: its error is cleared on
+// opening, not on closing.
 const onNewClicked = () => {
   studioToEdit.value = { name: '', color: '#999999' }
+  errors.edit = false
   modals.edit = true
 }
 
 const onEditClicked = studio => {
   studioToEdit.value = studio
+  errors.edit = false
   modals.edit = true
 }
 
 const onDeleteClicked = studio => {
   studioToDelete.value = studio
+  errors.del = false
   modals.del = true
 }
 
