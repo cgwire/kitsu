@@ -42,7 +42,7 @@
         </router-link>
       </div>
 
-      <div class="edit-data block">
+      <div class="edit-data block" v-if="!loadError">
         <route-section-tabs
           class="section-tabs"
           :active-tab="currentSection"
@@ -126,6 +126,11 @@
           v-if="scheduleItems[0].children.length > 0"
           v-show="currentSection === 'schedule'"
         >
+          <error-text
+            class="has-text-centered"
+            :text="scheduleSaveErrorText"
+            v-if="scheduleSaveErrorText"
+          />
           <div class="wrapper">
             <schedule
               ref="scheduleWidget"
@@ -168,6 +173,12 @@
           v-if="currentSection === 'output-files'"
         />
       </div>
+      <entity-load-error
+        class="edit-data block"
+        :error="loadError"
+        @reload="init()"
+        v-else
+      />
     </div>
 
     <div
@@ -227,6 +238,7 @@ import DescriptionCell from '@/components/cells/DescriptionCell.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditEditModal from '@/components/modals/EditEditModal.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
+import EntityLoadError from '@/components/pages/entities/EntityLoadError.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
@@ -237,6 +249,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import EmptySection from '@/components/widgets/EmptySection.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
@@ -268,7 +281,6 @@ const editMetadataDescriptors = computed(
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
-const isTVShow = computed(() => store.getters.isTVShow)
 
 // The list of the page, once loaded: a load replaces the cached array out of
 // sight of Vue, and its scope and loading flag have it read again.
@@ -277,7 +289,7 @@ const entityList = computed(() =>
 )
 
 const title = computed(() => {
-  if (!currentEdit.value) return t('main.loading')
+  if (!currentEdit.value) return loadTitle.value
   const { episode_name, name } = currentEdit.value
   return episode_name ? `${episode_name} / ${name}` : name
 })
@@ -300,11 +312,14 @@ const isTaskDrawerOpen = computed(() => Boolean(currentTask.value))
 
 // Functions
 // --------------------------------------------------------------------------
+// By id: the list of the page, that of the episode of the URL in a TV show,
+// may not hold it, and needs that episode set.
 const getCurrentEdit = async () => {
   const editId = route.params.edit_id
+  if (!editId) return null
   let edit = editStore.cache.editMap.get(editId) || null
   if (!edit) {
-    await store.dispatch('loadEdits')
+    await store.dispatch('loadEdit', editId)
     edit = editStore.cache.editMap.get(editId) || null
   }
   return edit
@@ -312,16 +327,6 @@ const getCurrentEdit = async () => {
 
 const scrollScheduleToStart = () => {
   scheduleWidget.value?.scrollToDate(scheduleItems.value[0].startDate)
-}
-
-const init = async () => {
-  try {
-    currentEdit.value = await getCurrentEdit()
-    currentSection.value = route.query.section || 'infos'
-    setTimeout(scrollScheduleToStart, 100)
-  } catch (err) {
-    console.error(err)
-  }
 }
 
 // Close leaves the error of the last save: opening drops it.
@@ -357,6 +362,9 @@ const closeTask = () => {
 }
 
 const {
+  init,
+  loadError,
+  loadTitle,
   currentSection,
   currentTask,
   zoomLevel,
@@ -368,32 +376,22 @@ const {
   tasksStartDate,
   tasksEndDate,
   onTaskSelected,
-  saveTaskScheduleItem
+  saveTaskScheduleItem,
+  scheduleSaveErrorText
 } = useEntity({
   type: 'edit',
   currentEntity: currentEdit,
   entityList,
-  init,
-  // The list loaded holds its own object for the edit, the one the store
-  // updates from then on.
-  loadList: () =>
-    store.dispatch('loadEdits').then(() => {
-      currentEdit.value =
-        editStore.cache.editMap.get(route.params.edit_id) || currentEdit.value
-    })
+  readEntity: getCurrentEdit,
+  scheduleWidget,
+  onEntityRead: (edit, isListRead) => {
+    if (!isListRead) setTimeout(scrollScheduleToStart, 100)
+  },
+  loadList: () => store.dispatch('loadEdits')
 })
 
 // Watchers
 // --------------------------------------------------------------------------
-// needed when reloading the page with F5
-watch(currentProduction, () => {
-  if (!isTVShow.value) init()
-})
-
-watch(currentEpisode, () => {
-  if (isTVShow.value && editStore.cache.editMap.size === 0) init()
-})
-
 watch(currentSection, () => {
   if (currentSection.value === 'schedule' && scheduleItems.value.length > 0) {
     scrollScheduleToStart()

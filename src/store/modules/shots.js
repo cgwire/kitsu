@@ -11,7 +11,14 @@ import tasksStore from '@/store/modules/tasks'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypesStore from '@/store/modules/tasktypes'
 
-import { getExportDescriptors } from '@/lib/descriptors'
+import {
+  createColumnChangeLog,
+  getExportDescriptors,
+  logColumnChange,
+  removeMetadataField,
+  renameMetadataField,
+  replayColumnChanges
+} from '@/lib/descriptors'
 import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
@@ -74,6 +81,7 @@ import {
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
   ADD_SELECTED_TASKS,
+  DELETE_METADATA_DESCRIPTOR_END,
   DELETE_TASK_END,
   CLEAR_SELECTED_TASKS,
   SET_PREVIEW,
@@ -95,6 +103,9 @@ const cache = {
   shots: [],
   // Shots deleted while a list load runs: its response may still hold them.
   removedShotIds: new Set(),
+  // Columns deleted or renamed: a list load replays on its response the
+  // ones logged while it ran.
+  columnChanges: createColumnChangeLog(),
   shotsLoadingPromise: null,
   shotsLoadingKey: null,
   shotMap: new Map(),
@@ -440,6 +451,7 @@ const actions = {
 
     commit(LOAD_SHOTS_START, { loadingKey })
     cache.shotsLoadingKey = loadingKey
+    const columnChangesSeen = cache.columnChanges.count
     const loadingPromise = dispatch('loadSequencesWithTasks')
       .then(() => {
         return shotsApi.getShots(production, isAllEpisodes ? null : episode)
@@ -465,6 +477,7 @@ const actions = {
           commit(LOAD_SHOTS_END, {
             production,
             shots,
+            columnChangesSeen,
             userFilters,
             userFilterGroups,
             taskTypeMap,
@@ -548,7 +561,6 @@ const actions = {
           if (!isInLoadedScope) commit(MARK_SHOTS_PARTIAL)
         }
       })
-      .catch(err => console.error(err))
   },
 
   newShot({ commit, dispatch, rootGetters }, shot) {
@@ -971,6 +983,7 @@ const mutations = {
     {
       production,
       shots,
+      columnChangesSeen,
       userFilters,
       userFilterGroups,
       taskMap,
@@ -983,6 +996,13 @@ const mutations = {
     // Deleted during the load, after the response was built.
     shots = shots.filter(({ id }) => !cache.removedShotIds.has(id))
     cache.removedShotIds.clear()
+    // A column deleted or renamed during the load: the response may predate it.
+    replayColumnChanges(
+      shots,
+      cache.columnChanges,
+      columnChangesSeen,
+      production.id
+    )
     const validationColumns = {}
     let isFps = false
     let isFrames = false
@@ -993,6 +1013,9 @@ const mutations = {
     let isEstimation = false
     let isMaxRetakes = false
     let isResolution = false
+    // A shot read by id during the load joined the map without marking the
+    // scope: the list replaces the whole map.
+    cache.shotMap.clear()
     shots.forEach(shot => {
       const taskIds = []
       const validations = new Map()
@@ -1084,8 +1107,14 @@ const mutations = {
     state.shotsLoadingKey = null
   },
 
+  // A load in flight replaces the list, and drops its answer once its scope
+  // changed: it stays unmarked.
   [MARK_SHOTS_PARTIAL](state) {
-    if (state.shotsLoadingKey && !state.shotsLoadingKey.includes('#')) {
+    if (
+      state.shotsLoadingKey &&
+      !state.shotsLoadingKey.includes('#') &&
+      !state.isShotsLoading
+    ) {
       state.shotsLoadingKey = `${state.shotsLoadingKey}#partial`
     }
   },
@@ -1574,12 +1603,19 @@ const mutations = {
       previousDescriptorFieldName &&
       previousDescriptorFieldName !== descriptor.field_name
     ) {
-      cache.shots.forEach(shot => {
-        const data = { ...shot.data }
-        data[descriptor.field_name] = data[previousDescriptorFieldName]
-        delete data[previousDescriptorFieldName]
-        shot.data = data
-      })
+      renameMetadataField(cache.shots, descriptor, previousDescriptorFieldName)
+      logColumnChange(
+        cache.columnChanges,
+        descriptor,
+        previousDescriptorFieldName
+      )
+    }
+  },
+
+  [DELETE_METADATA_DESCRIPTOR_END](state, { descriptor }) {
+    if (descriptor?.entity_type === 'Shot') {
+      removeMetadataField(cache.shots, descriptor)
+      logColumnChange(cache.columnChanges, descriptor)
     }
   },
 

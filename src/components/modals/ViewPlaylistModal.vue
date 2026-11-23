@@ -142,6 +142,10 @@ let previewFileEntityMap = new Map()
 // the modal closed, or opened again, belongs to an earlier selection.
 let lastTempLoad = 0
 
+// The playlist a save left empty when its entries failed: a new try from
+// the same form sends them to it instead of creating another one.
+let emptyPlaylist = null
+
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isTVShow = computed(() => store.getters.isTVShow)
@@ -346,6 +350,13 @@ const onViewCreatedPlaylist = () => {
 }
 
 const savePlaylist = async form => {
+  // Cancel closes this form and Save opens another one: an answer that
+  // arrives after that leaves the modal alone.
+  const shownForm = playlistToEdit.value
+  const isFormShown = () =>
+    modals.value.edit && playlistToEdit.value === shownForm
+  const retried = emptyPlaylist?.form === shownForm ? emptyPlaylist : null
+  emptyPlaylist = null
   const newPlaylist = {
     name: form.name,
     production_id: currentProduction.value.id,
@@ -359,8 +370,15 @@ const savePlaylist = async form => {
   }
   errors.value.edit = false
   loading.value.edit = true
+  // Over an empty list, the Playlist page loads its own once open, as an
+  // All shots, All episodes, or All assets list under All. Emptied now,
+  // while no Playlist page shows the list: a page opened during the save
+  // keeps the list it loads.
+  store.commit('LOAD_PLAYLISTS_END', [])
   try {
-    const playlist = await store.dispatch('newPlaylist', newPlaylist)
+    const playlist = retried
+      ? { ...retried.playlist, ...newPlaylist }
+      : await store.dispatch('newPlaylist', newPlaylist)
     Object.assign(currentPlaylist.value, {
       id: playlist.id,
       name: playlist.name,
@@ -374,14 +392,24 @@ const savePlaylist = async form => {
       entity_id: shot.id,
       preview_file_id: pickPreviewFileId(shot, form.task_type_id)
     }))
-    await store.dispatch('editPlaylist', { data: playlistToSave })
-    createdPlaylist.value = playlist
-    editSuccess.value = true
+    // The action answers null when the save fails: the new playlist is then
+    // there, but without its entries.
+    const saved = await store.dispatch('editPlaylist', { data: playlistToSave })
+    if (saved === null) {
+      emptyPlaylist = { form: shownForm, playlist }
+    }
+    if (isFormShown()) {
+      if (saved === null) {
+        errors.value.edit = true
+      } else {
+        createdPlaylist.value = playlist
+        editSuccess.value = true
+      }
+    }
     loading.value.edit = false
-    store.dispatch('loadPlaylists', {})
   } catch (err) {
     console.error(err)
-    errors.value.edit = true
+    if (isFormShown()) errors.value.edit = true
     loading.value.edit = false
   }
 }

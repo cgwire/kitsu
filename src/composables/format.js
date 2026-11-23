@@ -15,12 +15,6 @@ import {
   formatSimpleDate
 } from '@/lib/time'
 
-// Pure helpers — re-exported / defined here so callers that don't need
-// the reactive parts can import them directly without instantiating the
-// composable.
-
-export { libFormatDate as formatDate, formatFullDate, formatSimpleDate }
-
 export const formatPrioritySymbol = priority => {
   const clamped = Math.max(0, Math.min(priority, 3))
   return '!'.repeat(clamped)
@@ -63,7 +57,6 @@ export const useFormat = () => {
 
   const formatBoolean = value => (value ? t('main.yes') : t('main.no'))
 
-  // unlike the pure export above, this one applies the user preferences
   const formatDate = date =>
     libFormatDate(date, dateFormat.value, use12HourClock.value)
 

@@ -2,7 +2,10 @@
   <div class="fixed-page columns xyz-in" xyz="fade">
     <div class="page column main-column">
       <div class="page-header pa1 mb0" xyz="fade">
-        <div class="flexrow header-title" v-if="task">
+        <div class="flexrow header-title" v-if="loadError">
+          <h1 class="title flexrow-item">{{ loadTitle }}</h1>
+        </div>
+        <div class="flexrow header-title" v-else-if="task">
           <router-link
             class="flexrow-item has-text-centered back-link"
             :to="taskEntitiesPath"
@@ -113,7 +116,7 @@
         </div>
       </div>
 
-      <div class="task-columns" ref="task-columns">
+      <div class="task-columns" ref="task-columns" v-if="!loadError">
         <div class="task-column preview-column">
           <div class="preview-column-content block">
             <div class="flexrow preview-header">
@@ -123,7 +126,7 @@
                   :options="previewOptions"
                   is-preview
                   :model-value="currentPreviewId"
-                  @update:model-value="selectedPreviewId = $event"
+                  @update:model-value="onRevisionPicked"
                 />
               </div>
               <div v-else>
@@ -393,11 +396,17 @@
             </div>
           </div>
 
-          <div class="has-text-centered" v-if="taskLoading.isLoading">
+          <div class="has-text-centered" v-if="isTaskLoading">
             <spinner />
           </div>
         </div>
       </div>
+      <entity-load-error
+        class="block load-error"
+        :error="loadError"
+        @reload="loadPage()"
+        v-else
+      />
 
       <add-preview-modal
         ref="add-preview-modal"
@@ -505,7 +514,11 @@ import { isListOfPageLoaded } from '@/composables/entity'
 import { useFullScreenTarget } from '@/composables/fullScreen'
 import { isCommentReplyable } from '@/lib/comments'
 import drafts from '@/lib/drafts'
-import { logRequestFailure } from '@/lib/errors'
+import {
+  isMissingEntity,
+  isRequestFailure,
+  logRequestFailure
+} from '@/lib/errors'
 import func from '@/lib/func'
 import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
 import { formatRevision } from '@/lib/preview'
@@ -534,6 +547,7 @@ import Comment from '@/components/widgets/Comment.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
+import EntityLoadError from '@/components/pages/entities/EntityLoadError.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
@@ -577,10 +591,31 @@ const isUseCurrentFrame = ref(false)
 const hookupPlaylistTaskIds = ref([])
 const addPreviewFormData = ref(null)
 const addExtraPreviewFormData = ref(null)
-const currentExtraPreviewId = ref(null)
-const extraFileRevisionId = ref(null)
+// The file the trash of the player removes and the revision its "+" adds a
+// file to, each with the task of the revision shown at the click.
+const removedFile = ref(null)
+const extraFileRevision = ref(null)
 
-const taskLoading = ref({ isLoading: true, isError: false })
+const isTaskLoading = ref(true)
+// Why the task of the URL is not shown: 'missing' or 'failed'.
+const loadError = ref(null)
+// Loads of the page: only the last one shows its result.
+let loadCount = 0
+// The task the last load was for: a route to another task loads it.
+let pageTaskId = null
+// The task of the last load that ended well: reading it again is a refresh.
+let shownTaskId = null
+// The address it loaded under: its URL may change later, with no load.
+let shownTaskRoute = null
+// The list the arrows walk loads once, with the first task shown, and
+// again after a failure.
+let isEntityListLoaded = false
+// The list a read of the task loaded along with it, once that read showed
+// the task: a cold link.
+let listReadWithTask = null
+// The saves of strokes the page sends again, their player gone.
+const annotationRetries = new Set()
+let isPageClosed = false
 
 const modals = ref({
   addPreview: false,
@@ -690,6 +725,13 @@ const entityList = computed(() => {
 
 // Computed (task)
 // --------------------------------------------------------------------------
+// The title of the page while it shows no task.
+const loadTitle = computed(() => {
+  if (loadError.value === 'missing') return t('not_found.title')
+  if (loadError.value === 'failed') return t('main.loading_error')
+  return t('main.loading')
+})
+
 const taskMetadata = computed(() => {
   if (!task.value) return []
   return taskMetadataDescriptors.value.filter(
@@ -784,15 +826,26 @@ const isMovie = computed(() => extension.value === 'mp4')
 
 const isPicture = computed(() => ['png', 'gif'].includes(extension.value))
 
+// The page keeps the previews of the previous task until the comments of
+// the next one load: the right to annotate them is the one of their task.
+const previewTask = computed(() => {
+  const previewTaskId = currentPreview.value?.task_id
+  if (!previewTaskId || previewTaskId === task.value?.id) return task.value
+  return taskMap.value.get(previewTaskId)
+})
+
 const isPreviewPlayerReadOnly = computed(() => {
-  if (task.value) {
+  if (task.value && previewTask.value) {
     if (isCurrentUserManager.value || isCurrentUserClient.value) {
       return false
     } else if (isCurrentUserSupervisor.value) {
       if (user.value.departments.length === 0) {
         return false
       }
-      return !user.value.departments.includes(taskType.value?.department_id)
+      const previewTaskType = taskTypeMap.value.get(
+        previewTask.value.task_type_id
+      )
+      return !user.value.departments.includes(previewTaskType?.department_id)
     }
   }
   return true
@@ -1179,13 +1232,41 @@ const reset = ({ keepPreviewFiles = false } = {}) => {
   }, 200)
 }
 
+// Resolves to true once the task of the URL shows.
 const loadTaskData = () => {
+  const call = ++loadCount
+  pageTaskId = route.params.task_id
+  loadError.value = null
+  // A task shown, read again after a failed save for instance, stays on
+  // screen when that read fails.
+  const isRefresh = shownTaskId === route.params.task_id
+  const onLoadFailure = err => {
+    if (call === loadCount) {
+      isTaskLoading.value = false
+      // Back from a task whose comments still loaded, the header shows that
+      // one: the page stays only while it shows the task read.
+      if (!isRefresh || task.value?.id !== pageTaskId) {
+        shownTaskId = null
+        task.value = null
+        taskComments.value = []
+        taskPreviews.value = []
+        // The windows act on the task shown before.
+        Object.keys(modals.value).forEach(name => {
+          modals.value[name] = false
+        })
+        loadError.value = isMissingEntity(err) ? 'missing' : 'failed'
+      }
+    }
+    logRequestFailure(err)
+  }
   const currentTask = getCurrentTask()
   if (!currentTask) {
-    taskLoading.value = { isLoading: true, isError: false }
+    isTaskLoading.value = true
     return store
       .dispatch('loadTask', { taskId: route.params.task_id })
       .then(loadedTask => {
+        // A later load shows its own result.
+        if (call !== loadCount) return
         let loadingFunction = () => store.dispatch('loadAssets')
 
         if (loadedTask.entity_type_name === 'Shot') {
@@ -1196,14 +1277,16 @@ const loadTaskData = () => {
                 // Left during the fetches: the page shown now owns the
                 // episode and the shots loaded.
                 if (route.params.task_id !== loadedTask.id) return
-                if (isTVShow.value) {
+                // Zou names no episode when the sequence has none.
+                if (isTVShow.value && loadedTask.episode) {
                   store.dispatch('setCurrentEpisode', loadedTask.episode.id)
                 }
                 return store.dispatch('loadShots')
               })
-              .catch(err => console.error(err))
+              .catch(logRequestFailure)
         }
         return loadingFunction().then(() => {
+          if (call !== loadCount) return
           task.value = loadedTask
           return store
             .dispatch('loadTaskComments', {
@@ -1211,38 +1294,79 @@ const loadTaskData = () => {
               entityId: loadedTask.entity_id
             })
             .then(() => {
+              if (call !== loadCount) return
               reset()
-              taskLoading.value = { isLoading: false, isError: false }
-            })
-            .catch(err => {
-              console.error(err)
-              taskLoading.value = { isLoading: false, isError: true }
+              isTaskLoading.value = false
+              shownTaskId = route.params.task_id
+              shownTaskRoute = { name: route.name, params: { ...route.params } }
+              listReadWithTask =
+                loadedTask.entity_type_name === 'Shot' ? 'Shot' : 'Asset'
+              return true
             })
         })
       })
-      .catch(err => {
-        console.error(err)
-        taskLoading.value = { isLoading: false, isError: true }
-      })
+      .catch(onLoadFailure)
   }
 
-  const taskId = route.params.task_id
   task.value = currentTask
   return store
     .dispatch('loadTaskComments', {
-      taskId,
+      taskId: currentTask.id,
       entityId: currentTask.entity_id
     })
     .then(() => {
+      if (call !== loadCount) return
       reset()
+      isTaskLoading.value = false
+      shownTaskId = route.params.task_id
+      shownTaskRoute = { name: route.name, params: { ...route.params } }
+      return true
     })
-    .catch(err => {
-      console.error(err)
-      taskLoading.value.isError = true
-    })
-    .finally(() => {
-      taskLoading.value.isLoading = false
-    })
+    .catch(onLoadFailure)
+}
+
+// Not only on mount: after a failed first load, the task that a Reload or a
+// new URL shows still needs the list.
+const loadPage = async () => {
+  const load = loadTaskData()
+  const call = loadCount
+  if (!(await load)) return
+  // The read of a task out of the store loads its list too, and that load
+  // can fail as well.
+  const isListFailed = Boolean(
+    store.getters[`is${currentType.value}sLoadingError`]
+  )
+  if (isEntityListLoaded && !isListFailed) return
+  isEntityListLoaded = true
+  await nextTick()
+  // A cold link reads the task with the list of its page: no second load.
+  // Any other list loads again, for the tasks created since that no event
+  // brings.
+  const type = currentType.value
+  if (listReadWithTask !== type || !isListOfPageLoaded(store.getters, type)) {
+    const isFailed = await store
+      .dispatch(`load${type}s`)
+      // The shots, the assets, and the edits answer a failure with an empty
+      // list and their error flag; the sequences and the episodes pass it on.
+      .then(() => Boolean(store.getters[`is${type}sLoadingError`]))
+      .catch(err => {
+        logRequestFailure(err)
+        return true
+      })
+    // A move or a Reload loads it again.
+    if (isFailed) isEntityListLoaded = false
+  }
+  // The list puts its own copy of each task in the store: the page reads its
+  // task again, unless it shows an error or waits for a newer load.
+  if (shownTaskId !== pageTaskId) return
+  task.value = getCurrentTask()
+  // A newer load, a move for instance, keeps its scroll.
+  if (call !== loadCount) return
+  await nextTick()
+  if (taskColumns.value) {
+    taskColumns.value.scrollTop = 100
+    window.scrollTo(0, 0)
+  }
 }
 
 // Functions (comments)
@@ -1299,11 +1423,15 @@ const postComment = (
 }
 
 const resetComments = () => {
-  taskComments.value = getTaskComments.value(task.value.id)
+  // The page may show no task since, after a failed move.
+  if (task.value) taskComments.value = getTaskComments.value(task.value.id)
 }
 
 // Ported from taskMixin.
 const confirmEditTaskComment = comment => {
+  const taskId = task.value.id
+  // The window of another comment can open while this one saves.
+  const editedComment = commentToEdit.value
   loading.value.editComment = true
   errors.value.editComment = false
   const attachmentFilesToDelete = comment.attachmentFilesToDelete || []
@@ -1314,21 +1442,16 @@ const confirmEditTaskComment = comment => {
     .runPromiseMapAsSeries(attachmentFilesToDelete, attachment =>
       store.dispatch('deleteAttachment', {
         attachment,
-        comment: commentToEdit.value
+        comment: editedComment
       })
     )
     .then(() =>
       store.dispatch('addAttachmentToComment', {
-        comment: commentToEdit.value,
+        comment: editedComment,
         files: newAttachmentFiles
       })
     )
-    .then(() =>
-      store.dispatch('editTaskComment', {
-        taskId: task.value.id,
-        comment
-      })
-    )
+    .then(() => store.dispatch('editTaskComment', { taskId, comment }))
     .then(() => {
       nextTick(() => {
         resetComments()
@@ -1367,7 +1490,8 @@ const confirmDeleteTaskComment = () => {
     })
     .then(() => {
       loading.value.deleteComment = false
-      reset()
+      // The files picked for a new comment stay.
+      reset({ keepPreviewFiles: true })
       modals.value.deleteComment = false
     })
     .catch(err => {
@@ -1414,13 +1538,16 @@ const onPinComment = comment => runCommentAction('pinComment', comment)
 const onToggleForClient = comment =>
   runCommentAction('toggleCommentForClient', comment)
 
+// A save can fail after its window closed: each opening starts clean.
 const onEditComment = comment => {
   commentToEdit.value = comment
+  errors.value.editComment = false
   modals.value.editComment = true
 }
 
 const onDeleteComment = comment => {
   commentToEdit.value = comment
+  errors.value.deleteComment = false
   modals.value.deleteComment = true
 }
 
@@ -1438,14 +1565,24 @@ const selectFile = forms => {
   previewForms.value = previewForms.value.concat(forms)
 }
 
+// The task of the page may not be the one of the revision shown yet.
+const getShownRevision = () => ({
+  previewId: currentPreviewId.value,
+  taskId: currentPreview.value?.task_id ?? task.value?.id
+})
+
+// The page shows its own task once its URL and `task` both name it: while it
+// reads a task the store lacks, `task` keeps the one shown before.
+const isTaskOfPage = taskId =>
+  taskId === route.params.task_id && taskId === task.value?.id
+
 const createExtraPreview = forms => {
   errors.value.addExtraPreview = false
   loading.value.addExtraPreview = true
-  const previewId = extraFileRevisionId.value ?? currentPreviewId.value
-  const comment = getCurrentTaskComments().find(item =>
-    item.previews.find(preview => preview.id === previewId)
-  )
-  const taskId = task.value.id
+  const { previewId, taskId } = extraFileRevision.value ?? getShownRevision()
+  const comment = getTaskComments
+    .value(taskId)
+    .find(item => item.previews.find(preview => preview.id === previewId))
   store
     .dispatch('addCommentExtraPreview', {
       taskId,
@@ -1457,12 +1594,15 @@ const createExtraPreview = forms => {
       loading.value.addExtraPreview = false
       modals.value.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
-      // A file may start over a revision the trash emptied meanwhile.
-      taskPreviews.value = getCurrentTaskPreviews()
+      // A file may start over a revision the trash emptied meanwhile. One of
+      // the previous task leaves the page as it is.
+      if (isTaskOfPage(taskId)) {
+        taskPreviews.value = getCurrentTaskPreviews()
+      }
       setTimeout(() => {
         // The page may have moved on to another task, with or without a
         // player.
-        if (task.value?.id === taskId) previewPlayerRef.value?.displayLast()
+        if (isTaskOfPage(taskId)) previewPlayerRef.value?.displayLast()
       }, 0)
     })
     .catch(err => {
@@ -1500,22 +1640,23 @@ const setPreview = () => {
 const confirmDeleteTaskPreview = () => {
   loading.value.deleteExtraPreview = true
   errors.value.deleteExtraPreview = false
-  const previewId = currentPreviewId.value
-  const comment = getCurrentTaskComments().find(
-    item => item.previews.findIndex(p => p.id === previewId) >= 0
-  )
+  const { previewId, revisionId, taskId } = removedFile.value
+  const comment = getTaskComments
+    .value(taskId)
+    .find(item => item.previews.findIndex(p => p.id === revisionId) >= 0)
 
   // A colleague may have deleted the only revision, and so the player.
   previewPlayerRef.value?.displayFirst()
   store
     .dispatch('deleteTaskPreview', {
-      taskId: task.value.id,
+      taskId,
       commentId: comment?.id,
-      previewId: currentExtraPreviewId.value
+      previewId
     })
     .then(() => {
       loading.value.deleteExtraPreview = false
-      resetPreview()
+      // A file of the previous task leaves the page, and its URL, as they are.
+      if (isTaskOfPage(taskId)) resetPreview()
       hideRemoveExtraPreviewModal()
     })
     .catch(err => {
@@ -1559,13 +1700,17 @@ const onPreviewAdded = eventData => {
 }
 
 // The revisions may change behind the modal: the file must join this one.
+// A save can fail after its window closed: each opening starts clean.
 const onAddExtraPreviewClicked = () => {
-  extraFileRevisionId.value = currentPreviewId.value
+  extraFileRevision.value = getShownRevision()
+  errors.value.addExtraPreview = false
   modals.value.addExtraPreview = true
 }
 
 const showRemoveExtraPreviewModal = preview => {
-  currentExtraPreviewId.value = preview.id
+  const { previewId: revisionId, taskId } = getShownRevision()
+  removedFile.value = { previewId: preview.id, revisionId, taskId }
+  errors.value.deleteExtraPreview = false
   modals.value.deleteExtraPreview = true
 }
 
@@ -1601,12 +1746,63 @@ const onPreviewFormRemoved = previewForm => {
   previewForms.value = previewForms.value.filter(f => f !== previewForm)
 }
 
+// The address of a revision, from the address of its task.
+const revisionRoute = ({ name, params }, previewId) => ({
+  name: name.endsWith('-preview') ? name : `${name}-preview`,
+  params: { ...params, preview_id: previewId }
+})
+
+// A revision of the task the page shows opens at the address the page writes.
+// Until the next task loads in full, the lists may also hold the revisions of
+// the task before, or those of the task of the URL under the header of the
+// task before: the task of the URL opens at the URL, the task shown before at
+// the address it loaded under. A revision of any other task only changes the
+// player; one naming no task, which Zou never sends, reaches the URL while the
+// page shows its own task in full.
 const changeCurrentPreview = preview => {
-  router.push(previewPath(preview.id))
+  const taskId = preview.task_id
+  if (isTaskOfPage(taskId)) {
+    router.push(previewPath(preview.id))
+  } else if (taskId === route.params.task_id) {
+    router.push(revisionRoute(route, preview.id))
+  } else if (taskId === shownTaskId) {
+    router.push(revisionRoute(shownTaskRoute, preview.id))
+  } else {
+    selectedPreviewId.value = preview.id
+  }
+}
+
+// A click on the revision shown closes the list.
+const onRevisionPicked = previewId => {
+  const preview = taskPreviews.value.find(item => item.id === previewId)
+  if (preview && previewId !== currentPreviewId.value) {
+    changeCurrentPreview(preview)
+  }
 }
 
 const onFrameUpdated = frame => {
   currentFrame.value = frame
+}
+
+// The server down or out of reach: a later try can save.
+const isWorthRetrying = err =>
+  isRequestFailure(err) && !(err.status >= 400 && err.status < 500)
+
+// Strokes whose player left during their save, with the error page of a
+// failed move for instance: the page sends them again until they save or the
+// page closes.
+const retryAnnotationSave = changes => {
+  if (isPageClosed) return
+  const timer = setTimeout(async () => {
+    annotationRetries.delete(timer)
+    try {
+      await store.dispatch('updatePreviewAnnotation', changes)
+    } catch (err) {
+      console.error('Failed to save annotations', err)
+      if (isWorthRetrying(err)) retryAnnotationSave(changes)
+    }
+  }, 5000)
+  annotationRetries.add(timer)
 }
 
 const onAnnotationChanged = async ({
@@ -1615,19 +1811,23 @@ const onAnnotationChanged = async ({
   deletions,
   updates
 }) => {
-  const taskId = task.value.id
+  // The player sends the strokes of the previous preview as it changes, once
+  // the page shows the next task.
+  const taskId = preview.task_id || task.value.id
+  const changes = { taskId, preview, additions, deletions, updates }
+  // The player that sends them: gone already when it sends them as it leaves.
+  const player = previewPlayerRef.value
+  const isPlayerShown = () => player && player === previewPlayerRef.value
   try {
-    await store.dispatch('updatePreviewAnnotation', {
-      taskId,
-      preview,
-      additions,
-      deletions,
-      updates
-    })
-    previewPlayerRef.value?.confirmAnnotationsSaved()
+    await store.dispatch('updatePreviewAnnotation', changes)
+    if (isPlayerShown()) player.confirmAnnotationsSaved()
   } catch (err) {
     console.error('Failed to save annotations', err)
-    previewPlayerRef.value?.restoreFailedAnnotations()
+    if (isPlayerShown()) {
+      player.restoreFailedAnnotations()
+    } else if (isWorthRetrying(err)) {
+      retryAnnotationSave(changes)
+    }
   }
 }
 
@@ -1876,10 +2076,9 @@ const socketEvents = {
 // Watchers
 // --------------------------------------------------------------------------
 watch(route, () => {
-  if (task.value && route.params.task_id !== task.value.id) {
+  if (route.params.task_id !== pageTaskId) {
     failedActionCommentId.value = null
-    extraFileRevisionId.value = null
-    loadTaskData()
+    loadPage()
   }
   if (route.params.preview_id !== selectedPreviewId.value) {
     selectedPreviewId.value = route.params.preview_id
@@ -1887,7 +2086,7 @@ watch(route, () => {
 })
 
 watch(currentProduction, () => {
-  loadTaskData()
+  loadPage()
 })
 
 watch(
@@ -1900,7 +2099,18 @@ watch(
 )
 
 watch(selectedPreviewId, () => {
-  if (task.value && selectedPreviewId.value) {
+  // Until the task of the URL shows, loaded in full, the header or the list of
+  // revisions may still belong to another task: a path built then would lead
+  // to that task, or name one of its revisions. On a Back to the task shown,
+  // the list may still hold the revisions of the task left.
+  const taskId = taskPreviews.value.find(
+    item => item.id === selectedPreviewId.value
+  )?.task_id
+  if (
+    isTaskOfPage(shownTaskId) &&
+    selectedPreviewId.value &&
+    (!taskId || taskId === shownTaskId)
+  ) {
     router.push(previewPath(selectedPreviewId.value))
   }
 })
@@ -1912,28 +2122,23 @@ onMounted(async () => {
     socket.on(event, handler)
   )
   store.dispatch('clearSelectedTasks')
-  await loadTaskData()
-  await nextTick()
-  await store.dispatch(`load${currentType.value}s`)
-  reset()
-  await nextTick()
-  if (taskColumns.value) {
-    taskColumns.value.scrollTop = 100
-    window.scrollTo(0, 0)
-  }
+  await loadPage()
 })
 
 onBeforeUnmount(() => {
   Object.entries(socketEvents).forEach(([event, handler]) =>
     socket.off(event, handler)
   )
+  // Strokes not saved yet are lost, as on any page closed.
+  isPageClosed = true
+  annotationRetries.forEach(timer => clearTimeout(timer))
 })
 
 // Head
 // --------------------------------------------------------------------------
 useHead({
   title: computed(() => {
-    if (!task.value) return `${t('main.loading')} - Kitsu`
+    if (loadError.value || !task.value) return `${loadTitle.value} - Kitsu`
     const taskTypeName =
       taskTypeMap.value.get(task.value.task_type_id)?.name || ''
     return `${title.value} / ${taskTypeName} - Kitsu`
@@ -2122,6 +2327,10 @@ video {
 
 .info-block {
   margin-right: 0;
+}
+
+.load-error {
+  margin: 1em;
 }
 
 .task-type.block {

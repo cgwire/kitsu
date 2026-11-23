@@ -105,7 +105,9 @@ if (PSStroke) {
  * @param {Object} options
  * @param {import('vue').Ref} options.canvasWrapper - template ref for the canvas wrapper element
  * @param {import('vue').Ref} options.annotations - reactive ref for annotations array
- * @param {import('vue').ComputedRef} options.isCurrentUserArtist - computed ref for artist check
+ * @param {import('vue').Ref<boolean>} options.isReadOnly - true when the viewer
+ *   may not annotate the shown preview: the strokes are then neither
+ *   selectable nor editable
  * @param {import('vue').ComputedRef} options.userId - computed ref for user id
  * @param {Object} options.store - Vuex store instance
  * @param {Function} options.emit - component emit function
@@ -134,7 +136,7 @@ export const useAnnotation = ({
   onionCanvasComponent,
   canvasWrapper,
   annotations,
-  isCurrentUserArtist,
+  isReadOnly,
   userId,
   store,
   emit,
@@ -570,10 +572,10 @@ export const useAnnotation = ({
           ml: false,
           mr: false,
           bl: false,
-          br: !isCurrentUserArtist.value,
+          br: !isReadOnly.value,
           tl: false,
           tr: false,
-          mtr: !isCurrentUserArtist.value
+          mtr: !isReadOnly.value
         })
       }
     })
@@ -722,8 +724,8 @@ export const useAnnotation = ({
       scaleY: obj.scaleY * scale,
       angle: obj.angle,
       scale: obj.scale,
-      editable: !isCurrentUserArtist.value,
-      selectable: !isCurrentUserArtist.value
+      editable: !isReadOnly.value,
+      selectable: !isReadOnly.value
     }
 
     if (type === 'path') {
@@ -740,10 +742,10 @@ export const useAnnotation = ({
         ml: false,
         mr: false,
         bl: false,
-        br: !isCurrentUserArtist.value,
+        br: !isReadOnly.value,
         tl: false,
         tr: false,
-        mtr: !isCurrentUserArtist.value
+        mtr: !isReadOnly.value
       })
       silentAnnotation = true
       canvas.add(path)
@@ -800,8 +802,8 @@ export const useAnnotation = ({
         psstroke.set('height', obj.height)
         psstroke.set('angle', obj.angle)
         psstroke.set('scale', obj.scale)
-        psstroke.set('editable', !isCurrentUserArtist.value)
-        psstroke.set('selectable', !isCurrentUserArtist.value)
+        psstroke.set('editable', !isReadOnly.value)
+        psstroke.set('selectable', !isReadOnly.value)
         addSerialization(psstroke)
         psstroke.setControlsVisibility({
           mt: false,
@@ -809,10 +811,10 @@ export const useAnnotation = ({
           ml: false,
           mr: false,
           bl: false,
-          br: !isCurrentUserArtist.value,
+          br: !isReadOnly.value,
           tl: false,
           tr: false,
-          mtr: !isCurrentUserArtist.value
+          mtr: !isReadOnly.value
         })
         silentAnnotation = true
         canvas.add(psstroke)
@@ -828,7 +830,7 @@ export const useAnnotation = ({
         shape.set('id', obj.id)
         shape.set('canvasWidth', canvasWidth)
         shape.set('canvasHeight', canvasHeight)
-        shape.set('selectable', !isCurrentUserArtist.value)
+        shape.set('selectable', !isReadOnly.value)
         shape.set('evented', true)
         shape.setControlsVisibility({
           mt: false,
@@ -836,10 +838,10 @@ export const useAnnotation = ({
           ml: false,
           mr: false,
           bl: false,
-          br: !isCurrentUserArtist.value,
+          br: !isReadOnly.value,
           tl: false,
           tr: false,
-          mtr: !isCurrentUserArtist.value
+          mtr: !isReadOnly.value
         })
         addSerialization(shape)
         silentAnnotation = true
@@ -1246,6 +1248,26 @@ export const useAnnotation = ({
     fabricCanvas.value.setDimensions({ width, height })
   }
 
+  // The right can go while strokes are on screen, when the departments or the
+  // production role of the viewer change for instance: a stroke left
+  // selectable would let the viewer delete or move what nothing saves.
+  watch(isReadOnly, () => {
+    const canvas = fabricCanvas.value
+    if (!isReadOnly.value || !canvas) return
+    // Discarding a text still in editing fires object:modified: mute it, or
+    // the next save the viewer makes would carry its update.
+    silentAnnotation = true
+    try {
+      canvas.discardActiveObject()
+    } finally {
+      silentAnnotation = false
+    }
+    canvas
+      .getObjects()
+      .forEach(object => object.set({ editable: false, selectable: false }))
+    canvas.requestRenderAll()
+  })
+
   // Suppress object selection while shape mode is active so a mousedown
   // on an existing annotation starts a new shape instead of picking
   // that object. Restores normal interaction when the mode turns off
@@ -1311,7 +1333,7 @@ export const useAnnotation = ({
         // Once the shape is final we flip them back on (matching the
         // path flow) so the user can click to scale / rotate it.
         shape.set({
-          selectable: !isCurrentUserArtist.value,
+          selectable: !isReadOnly.value,
           evented: true
         })
         shape.setControlsVisibility({
@@ -1320,10 +1342,10 @@ export const useAnnotation = ({
           ml: false,
           mr: false,
           bl: false,
-          br: !isCurrentUserArtist.value,
+          br: !isReadOnly.value,
           tl: false,
           tr: false,
-          mtr: !isCurrentUserArtist.value
+          mtr: !isReadOnly.value
         })
         addToAdditions(shape)
         stackAddAction({ target: shape })
@@ -1345,10 +1367,12 @@ export const useAnnotation = ({
     // so a hardcoded width here stuck every freehand stroke at that size.
     _resetPencil()
 
+    // Every player shares this prototype, and a multi-selection only
+    // gathers strokes the viewer may edit: its scale handle stays.
     Group.prototype._controlsVisibility = {
       tl: false,
       tr: false,
-      br: !isCurrentUserArtist.value,
+      br: true,
       bl: false,
       ml: false,
       mr: false,

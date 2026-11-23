@@ -62,7 +62,7 @@ defineExpose({
 
   &:hover {
     background: var(--background-hover, rgba(255, 255, 255, 0.03));
-    border-color: var(--background-selectable, $purple-strong);
+    border-color: var(--selectable-accent, $purple-strong);
   }
 
   // Strip Bulma's button background off the file-upload label so the dropzone's

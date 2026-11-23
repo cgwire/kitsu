@@ -42,7 +42,7 @@
         </router-link>
       </div>
 
-      <div class="shot-data block">
+      <div class="shot-data block" v-if="!loadError">
         <route-section-tabs
           class="section-tabs"
           :active-tab="currentSection"
@@ -307,6 +307,11 @@
           v-if="scheduleItems[0].children.length > 0"
           v-show="currentSection === 'schedule'"
         >
+          <error-text
+            class="has-text-centered"
+            :text="scheduleSaveErrorText"
+            v-if="scheduleSaveErrorText"
+          />
           <div class="wrapper">
             <schedule
               ref="scheduleWidget"
@@ -344,6 +349,12 @@
           v-if="currentSection === 'output-files'"
         />
       </div>
+      <entity-load-error
+        class="shot-data block"
+        :error="loadError"
+        @reload="init()"
+        v-else
+      />
     </div>
 
     <div
@@ -401,7 +412,6 @@ import {
 import {
   computed,
   defineAsyncComponent,
-  nextTick,
   onMounted,
   reactive,
   ref,
@@ -422,6 +432,7 @@ import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditShotModal from '@/components/modals/EditShotModal.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
+import EntityLoadError from '@/components/pages/entities/EntityLoadError.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
@@ -433,6 +444,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import EmptySection from '@/components/widgets/EmptySection.vue'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
@@ -484,7 +496,7 @@ const entityList = computed(() =>
 )
 
 const title = computed(() => {
-  if (!currentShot.value) return t('main.loading')
+  if (!currentShot.value) return loadTitle.value
   const { episode_name, sequence_name, name } = currentShot.value
   const path = `${sequence_name} / ${name}`
   return episode_name ? `${episode_name} / ${path}` : path
@@ -554,32 +566,6 @@ const scrollScheduleToStart = () => {
   scheduleWidget.value?.scrollToDate(scheduleItems.value[0].startDate)
 }
 
-const resetData = async () => {
-  casting.isLoading = true
-  await nextTick()
-  currentShot.value = await getCurrentShot()
-  await loadCastingData()
-}
-
-const init = async () => {
-  try {
-    const shotId = route.params.shot_id
-    const shot = await getCurrentShot()
-    // Another shot opened during the load: its own init shows it.
-    if (route.params.shot_id !== shotId) return
-    currentShot.value = shot
-    currentSection.value = route.query.section || 'infos'
-    if (currentShot.value) {
-      loadCastingData()
-    } else {
-      resetData()
-    }
-    setTimeout(scrollScheduleToStart, 100)
-  } catch (err) {
-    console.error(err)
-  }
-}
-
 const assetPath = asset => {
   const episodeId = asset.episode_id || (isTVShow.value ? 'main' : null)
   return episodifyRoute(
@@ -646,6 +632,9 @@ const viewPlaylist = assets => {
 }
 
 const {
+  init,
+  loadError,
+  loadTitle,
   currentSection,
   currentTask,
   zoomLevel,
@@ -657,15 +646,19 @@ const {
   tasksStartDate,
   tasksEndDate,
   onTaskSelected,
-  saveTaskScheduleItem
+  saveTaskScheduleItem,
+  scheduleSaveErrorText
 } = useEntity({
   type: 'shot',
   currentEntity: currentShot,
   entityList,
-  init,
-  // The list loaded holds its own object for the shot, the one the store
-  // updates from then on.
-  loadList: () => store.dispatch('loadShots').then(resetData)
+  readEntity: getCurrentShot,
+  scheduleWidget,
+  onEntityRead: (shot, isListRead) => {
+    loadCastingData()
+    if (!isListRead) setTimeout(scrollScheduleToStart, 100)
+  },
+  loadList: () => store.dispatch('loadShots')
 })
 
 // Watchers

@@ -200,7 +200,7 @@ watch(value, v => {
   }
 
   :deep(.vue-slider-dot-handle-focus) {
-    box-shadow: 0 0 0 3px var(--background-selectable);
+    box-shadow: 0 0 0 3px var(--selectable-accent);
   }
 
   :deep(.vue-slider-dot-tooltip-inner) {

@@ -1372,10 +1372,10 @@ onBeforeUnmount(() => {
   --accent: #7c5cff;
   --accent-soft: rgba(124, 92, 255, 0.16);
   --background-hover: #4f525a;
-  --background-selectable: #7375bc;
   --border: #dbdbdb;
   --border-soft: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.18);
+  --selectable-accent: #7375bc;
   --surface: #14141a;
   --surface-inset: #0e0e13;
   --surface-raised: #1d1d26;

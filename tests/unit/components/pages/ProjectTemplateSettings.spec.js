@@ -94,6 +94,166 @@ describe('ProjectTemplateSettings page, metadata column modal', () => {
   })
 })
 
+// Zou keeps two columns of the same name in a template, then skips the
+// second when it applies the template. It gives each column the field name
+// of its name there: a rename in the template keeps the old one. It creates
+// no column of no entity type.
+describe('ProjectTemplateSettings page, column names', () => {
+  const template = {
+    id: 'template-1',
+    name: 'Feature',
+    metadata_descriptors: [
+      {
+        name: 'Difficulty',
+        data_type: 'string',
+        entity_type: 'Asset',
+        field_name: 'complexity'
+      },
+      {
+        name: 'Budget (€)',
+        data_type: 'string',
+        entity_type: 'Shot',
+        field_name: 'budget_eur'
+      },
+      {
+        name: 'Notes',
+        data_type: 'string',
+        entity_type: 'Task',
+        task_type_id: 'task-type-1',
+        field_name: 'notes'
+      },
+      { name: 'Legacy', data_type: 'string' }
+    ]
+  }
+
+  const taskType = { id: 'task-type-1', name: 'Animation' }
+  const mountPage = ({ query = {}, actions = {}, loaded = template } = {}) =>
+    mountEntityPage(ProjectTemplateSettings, {
+      stubs,
+      query: { tab: 'metadataDescriptors', ...query },
+      getters: { movieBitrateDefaults },
+      actions: {
+        loadProjectTemplate: () => loaded,
+        loadTemplateTaskTypes: () => [taskType],
+        loadTemplateTaskStatuses: () => [],
+        loadTemplateAssetTypes: () => [],
+        loadTemplateStatusAutomations: () => [],
+        loadTemplateBackgrounds: () => [],
+        ...actions
+      }
+    })
+
+  it('checks a name against the columns of the template', async () => {
+    const { wrapper } = await mountPage()
+    const modal = () => wrapper.findComponent(AddMetadataModal)
+
+    expect(modal().props('descriptors')).toEqual([
+      expect.objectContaining({
+        id: 'template-descriptor-0',
+        name: 'Difficulty',
+        entity_type: 'Asset',
+        field_name: 'difficulty'
+      }),
+      // python-slugify spells € as "eur": that field name is left to Zou.
+      expect.objectContaining({
+        id: 'template-descriptor-1',
+        name: 'Budget (€)',
+        entity_type: 'Shot',
+        field_name: null
+      }),
+      expect.objectContaining({
+        id: 'template-descriptor-2',
+        name: 'Notes',
+        entity_type: 'Task',
+        task_type_id: 'task-type-1',
+        field_name: 'notes'
+      }),
+      expect.objectContaining({
+        id: 'template-descriptor-3',
+        name: 'Legacy',
+        field_name: 'legacy'
+      })
+    ])
+    // The list shows it with the assets, but it holds no name for Zou.
+    expect(modal().props('descriptors')[3].entity_type).toBeUndefined()
+
+    await wrapper.findComponent(RowActionsCell).vm.$emit('edit-clicked')
+
+    expect(modal().props('descriptorToEdit').id).toBe('template-descriptor-0')
+  })
+
+  // Zou stores an explicit null as the name of a template column.
+  it('shows a template whose column has no name', async () => {
+    const { wrapper } = await mountPage({
+      loaded: {
+        ...template,
+        metadata_descriptors: [{ name: null, entity_type: 'Asset' }]
+      }
+    })
+
+    expect(
+      wrapper.findComponent(AddMetadataModal).props('descriptors')
+    ).toEqual([expect.objectContaining({ name: null, field_name: null })])
+  })
+
+  it('opens a column with no name for an edit', async () => {
+    const { wrapper } = await mountPage({
+      loaded: {
+        ...template,
+        metadata_descriptors: [{ name: null, entity_type: 'Asset' }]
+      }
+    })
+
+    await wrapper.findComponent(RowActionsCell).vm.$emit('edit-clicked')
+
+    expect(
+      wrapper.findComponent(AddMetadataModal).props('descriptorToEdit').name
+    ).toBe('')
+  })
+
+  // The modal stays open until the save answers: the new column is no other
+  // column for it meanwhile.
+  it('keeps a new column out of the names to check while it saves', async () => {
+    let answer
+    const { wrapper, dispatched } = await mountPage({
+      actions: {
+        setTemplateMetadataDescriptors: () =>
+          new Promise(resolve => {
+            answer = resolve
+          })
+      }
+    })
+    const modal = () => wrapper.findComponent(AddMetadataModal)
+    const names = () => modal().props('descriptors').map(d => d.name)
+
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'project_templates.add_metadata')
+      .trigger('click')
+    await modal().vm.$emit('confirm', { name: 'Complexity' })
+    await flushPromises()
+
+    expect(names()).toEqual(['Difficulty', 'Budget (€)', 'Notes', 'Legacy'])
+    expect(
+      dispatched('setTemplateMetadataDescriptors').map(([, { descriptors }]) =>
+        descriptors.map(descriptor => descriptor.name)
+      )
+    ).toEqual([['Difficulty', 'Budget (€)', 'Notes', 'Legacy', 'Complexity']])
+    answer()
+    await flushPromises()
+  })
+
+  // Zou keeps the names of the task columns unique per task type: the modal
+  // picks the task type of a new one.
+  it('lets the modal pick the task type of a task column', async () => {
+    const { wrapper } = await mountPage({ query: { entity: 'Task' } })
+
+    expect(wrapper.findComponent(AddMetadataModal).props('taskTypes')).toEqual([
+      taskType
+    ])
+  })
+})
+
 // A failed save reloads the template: the list shows the saved columns.
 describe('ProjectTemplateSettings page, failed column saves', () => {
   afterEach(() => vi.restoreAllMocks())

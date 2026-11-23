@@ -10,6 +10,7 @@ vi.mock('@/store/api/tasks', () => ({
   default: {
     addExtraPreview: vi.fn(),
     addPreview: vi.fn(),
+    assignTasks: vi.fn(),
     commentTask: vi.fn(),
     commentTasks: vi.fn((projectId, comments) =>
       Promise.resolve(
@@ -39,7 +40,8 @@ vi.mock('@/store/api/tasks', () => ({
     updatePreviewAnnotation: vi.fn(),
     updatePreviewTrim: vi.fn(),
     updateTask: vi.fn(),
-    unassignPersonFromTasks: vi.fn(() => Promise.resolve()),
+    // Zou answers with the tasks it cleared.
+    unassignPersonFromTasks: vi.fn(taskIds => Promise.resolve(taskIds)),
     createEntityTasks: vi.fn(() =>
       Promise.resolve([{ id: 'task-1' }, { id: 'task-2' }])
     ),
@@ -260,6 +262,65 @@ describe('Tasks store', () => {
         task: tasks[0],
         person
       })
+    })
+
+    // A schedule puts back a reassignment Zou refuses, and says so.
+    test('unassignPersonFromTasks rejects a refusal and commits nothing', async () => {
+      const refusal = Object.assign(new Error('Forbidden'), { status: 403 })
+      tasksApi.unassignPersonFromTasks.mockRejectedValueOnce(refusal)
+      const commit = vi.fn()
+
+      await expect(
+        tasksStore.actions.unassignPersonFromTasks(
+          { commit },
+          { tasks: [{ id: 'task-1' }], person: { id: 'person-1' } }
+        )
+      ).rejects.toBe(refusal)
+      expect(commit).not.toHaveBeenCalled()
+    })
+
+    // Zou answers a refused unassignment, a task out of the departments of a
+    // supervisor or deleted meanwhile, with the tasks it cleared only.
+    test('unassignPersonFromTasks keeps the tasks Zou leaves out, as a refusal', async () => {
+      tasksApi.unassignPersonFromTasks.mockResolvedValueOnce(['task-1'])
+      const commit = vi.fn()
+      const person = { id: 'person-1' }
+      const tasks = [{ id: 'task-1' }, { id: 'task-2' }]
+
+      const error = await tasksStore.actions
+        .unassignPersonFromTasks({ commit }, { tasks, person })
+        .catch(err => err)
+
+      expect(errors.isRequestFailure(error)).toBe(true)
+      expect(error.failedTaskIds).toEqual(['task-2'])
+      expect(commit.mock.calls).toEqual([
+        ['UNASSIGN_TASK', { task: tasks[0], person }]
+      ])
+    })
+
+    // The same for an assignment: Zou answers with the tasks it assigned.
+    test('assignSelectedTasks rejects the tasks Zou leaves out as a refusal', async () => {
+      tasksApi.assignTasks.mockResolvedValueOnce([{ id: 'task-1' }])
+      const state = {
+        selectedTasks: new Map(),
+        taskMap: new Map(
+          ['task-1', 'task-2'].map(id => [id, { id, assignees: [] }])
+        )
+      }
+      const commit = (type, payload) =>
+        tasksStore.mutations[type](state, payload)
+
+      const error = await tasksStore.actions
+        .assignSelectedTasks(
+          { commit, state },
+          { personId: 'person-1', taskIds: ['task-1', 'task-2'] }
+        )
+        .catch(err => err)
+
+      expect(errors.isRequestFailure(error)).toBe(true)
+      expect(error.failedTaskIds).toEqual(['task-2'])
+      expect(state.taskMap.get('task-1').assignees).toEqual(['person-1'])
+      expect(state.taskMap.get('task-2').assignees).toEqual([])
     })
 
     test('unassignPersonFromTasks skips the request on an empty selection', async () => {

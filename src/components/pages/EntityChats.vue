@@ -277,7 +277,7 @@ useHead({ title: computed(() => `${t('chats.title')} - Kitsu`) })
   padding: 1em;
 
   &:hover {
-    border-color: var(--background-selectable);
+    border-color: var(--selectable-accent);
   }
 
   &.selected {

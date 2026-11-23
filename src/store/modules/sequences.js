@@ -5,7 +5,14 @@ import tasksStore from '@/store/modules/tasks'
 import taskTypesStore from '@/store/modules/tasktypes'
 
 import { getEntityCsvLines } from '@/lib/csv'
-import { getExportDescriptors } from '@/lib/descriptors'
+import {
+  createColumnChangeLog,
+  getExportDescriptors,
+  logColumnChange,
+  removeMetadataField,
+  renameMetadataField,
+  replayColumnChanges
+} from '@/lib/descriptors'
 import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { buildSequenceIndex, indexSearch } from '@/lib/indexing'
@@ -35,6 +42,7 @@ import {
   CLEAR_SHOTS,
   COMPUTE_SEQUENCE_STATS,
   CREATE_TASKS_END,
+  DELETE_METADATA_DESCRIPTOR_END,
   DELETE_TASK_END,
   EDIT_SEQUENCE_END,
   IMPORT_SEQUENCES_END,
@@ -216,6 +224,9 @@ const cache = {
   // Settled or not, the last list load: the single-sequence load waits for
   // it before deciding, the response replaces the whole dataset.
   sequencesLoadingPromise: null,
+  // Columns deleted or renamed: a list load replays on its response the
+  // ones logged while it ran.
+  columnChanges: createColumnChangeLog(),
   sequences: [],
   result: [],
   // The sort the rows are in: the one of the last search or sort change, an
@@ -409,6 +420,7 @@ const actions = {
     // the live insertion still knows which episode this dataset holds.
     const scope = isTVShow ? (currentEpisode?.id ?? '') : ''
     const loadingKey = `${production.id}/${scope}#partial`
+    const columnChangesSeen = cache.columnChanges.count
     const loadingPromise = shotsApi
       .getSequences(production, episode)
       .then(sequences => {
@@ -425,6 +437,7 @@ const actions = {
         }
         commit(LOAD_SEQUENCES_END, {
           sequences,
+          columnChangesSeen,
           episodeMap,
           production,
           userFilters,
@@ -480,6 +493,7 @@ const actions = {
     // decide whether their cache is stale. 'all' is a pseudo-episode: it must
     // be recorded as itself even though the request is not filtered by it.
     const loadingKey = `${production.id}/${isTVShow ? (episode?.id ?? '') : ''}`
+    const columnChangesSeen = cache.columnChanges.count
     const loadingPromise = shotsApi
       .getSequencesWithTasks(production, isAllEpisodes ? null : episode)
       .then(sequences => {
@@ -496,6 +510,7 @@ const actions = {
         if (!isTVShow || isCurrentScope) {
           commit(SET_SEQUENCES_WITH_TASKS, {
             sequences,
+            columnChangesSeen,
             episodeMap,
             personMap,
             production,
@@ -616,7 +631,6 @@ const actions = {
         }
         return sequence
       })
-      .catch(console.error)
   },
 
   computeSequenceStats({ commit, rootGetters }) {
@@ -725,12 +739,20 @@ const mutations = {
       personMap,
       production,
       sequences,
+      columnChangesSeen,
       taskMap,
       taskTypeMap,
       taskStatusMap,
       loadingKey
     }
   ) {
+    // A column deleted or renamed during the load: the response may predate it.
+    replayColumnChanges(
+      sequences,
+      cache.columnChanges,
+      columnChangesSeen,
+      production.id
+    )
     const validationColumns = {}
     let isDescription = false
     let isTime = false
@@ -930,7 +952,14 @@ const mutations = {
 
   [LOAD_SEQUENCES_END](
     state,
-    { sequences, episodeMap, production, userFilters, loadingKey }
+    {
+      sequences,
+      columnChangesSeen,
+      episodeMap,
+      production,
+      userFilters,
+      loadingKey
+    }
   ) {
     cache.sequenceMap.clear()
     if (
@@ -943,6 +972,13 @@ const mutations = {
       state.sequenceSearchQueries = []
     }
     if (!sequences) sequences = []
+    // A column deleted or renamed during the load: the response may predate it.
+    replayColumnChanges(
+      sequences,
+      cache.columnChanges,
+      columnChangesSeen,
+      production?.id
+    )
     sequences.forEach(sequence => {
       cache.sequenceMap.set(sequence.id, sequence)
       helpers.setEpisodeInfo(sequence, episodeMap)
@@ -1154,12 +1190,23 @@ const mutations = {
       previousDescriptorFieldName &&
       previousDescriptorFieldName !== descriptor.field_name
     ) {
-      cache.sequences.forEach(sequence => {
-        const data = { ...sequence.data }
-        data[descriptor.field_name] = data[previousDescriptorFieldName]
-        delete data[previousDescriptorFieldName]
-        sequence.data = data
-      })
+      renameMetadataField(
+        cache.sequences,
+        descriptor,
+        previousDescriptorFieldName
+      )
+      logColumnChange(
+        cache.columnChanges,
+        descriptor,
+        previousDescriptorFieldName
+      )
+    }
+  },
+
+  [DELETE_METADATA_DESCRIPTOR_END](state, { descriptor }) {
+    if (descriptor?.entity_type === 'Sequence') {
+      removeMetadataField(cache.sequences, descriptor)
+      logColumnChange(cache.columnChanges, descriptor)
     }
   },
 

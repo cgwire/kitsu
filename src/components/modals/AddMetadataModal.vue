@@ -27,8 +27,8 @@
         <text-field
           ref="nameField"
           :label="$t('assets.fields.name')"
-          :error-text="$t('productions.metadata.built_in_name')"
-          :errored="isBuiltInName"
+          :error-text="nameError"
+          :errored="Boolean(nameError)"
           v-model.trim="form.name"
           @enter="confirm"
         />
@@ -170,8 +170,10 @@ import { useModal } from '@/composables/modal'
 import {
   getDescriptorChecklistValues,
   getDescriptorFieldName,
-  isBuiltInFieldName
+  isBuiltInFieldName,
+  isPlainDescriptorName
 } from '@/lib/descriptors'
+import { logRequestFailure } from '@/lib/errors'
 import { remove } from '@/lib/models'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -198,10 +200,21 @@ const VALUE_LIST_TYPES = ['list', 'taglist']
 
 const props = defineProps({
   active: { type: Boolean, default: false },
+  // The name Zou refused on the last save as its field name is the key of a
+  // built-in field: a name whose field name is left to Zou.
+  builtInName: { type: String, default: '' },
   descriptorToEdit: { type: Object, default: () => ({}) },
+  // The columns whose names the new one must not repeat: those of the
+  // production, only those of its task type for a task column, or those of
+  // a template. Left empty for the Project columns of every production, as
+  // Zou creates such a column only where no column holds its field name.
+  descriptors: { type: Array, default: () => [] },
   entityType: { type: String, default: 'Asset' },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  // The name Zou refused on the last save as another column holds it, a
+  // rename of a Project column or a name whose field name is left to Zou.
+  takenName: { type: String, default: '' },
   // Task descriptors only: when provided, the user picks the task type
   // the column is scoped to. Left empty when the caller sets it itself.
   taskTypes: { type: Array, default: () => [] }
@@ -283,13 +296,48 @@ const selectableDepartments = computed(() => {
 })
 
 // A column created on the key of a built-in field, before Zou refused it,
-// keeps that key and stays editable.
+// keeps that key and stays editable. The field name of a name Zou spells
+// otherwise is left to Zou: it writes € as "eur", and drops an emoji. The
+// page gives back such a name once Zou refuses it.
 const isBuiltInName = computed(() => {
-  const fieldName = getDescriptorFieldName(form.value.name)
+  const name = form.value.name
+  if (name && name === props.builtInName) return true
+  if (!isPlainDescriptorName(name)) return false
+  const fieldName = getDescriptorFieldName(name)
   return (
     fieldName !== props.descriptorToEdit?.field_name &&
     isBuiltInFieldName(props.entityType, fieldName)
   )
+})
+
+// Zou refuses the name of another column of the entity type, and a name whose
+// field name another column holds: one differing only in case, accents, or
+// the spaces and punctuation around or between its words ("Frame In" and
+// "frame-in!", not "FrameIn"). For a name Zou spells otherwise, € as "eur"
+// for instance, its field name is left to Zou. A task column whose task type
+// the modal picks is compared with the columns of that task type only.
+const isTakenName = computed(() => {
+  const name = form.value.name
+  if (!name) return false
+  if (name === props.takenName) return true
+  const fieldName = isPlainDescriptorName(name)
+    ? getDescriptorFieldName(name)
+    : null
+  return props.descriptors.some(
+    descriptor =>
+      descriptor.id !== props.descriptorToEdit?.id &&
+      descriptor.entity_type === props.entityType &&
+      (!props.taskTypes.length ||
+        descriptor.task_type_id === form.value.task_type_id) &&
+      (descriptor.name === name ||
+        (fieldName !== null && descriptor.field_name === fieldName))
+  )
+})
+
+const nameError = computed(() => {
+  if (isBuiltInName.value) return t('productions.metadata.built_in_name')
+  if (isTakenName.value) return t('productions.metadata.taken_name')
+  return ''
 })
 
 const isFormFilled = computed(() => {
@@ -310,6 +358,7 @@ const isFormFilled = computed(() => {
   return (
     form.value.name.length &&
     !isBuiltInName.value &&
+    !isTakenName.value &&
     dataTypeOk &&
     supervisorDeptOk &&
     taskTypeOk
@@ -394,6 +443,17 @@ const removeTask = entry => {
   checklist.value = remove(checklist.value, entry)
 }
 
+// A failed read leaves the columns of the production stale: they are read
+// again before a new column takes the name of one of them.
+const loadStaleDescriptors = () => {
+  const productionId = currentProduction.value?.id
+  if (productionId) {
+    store
+      .dispatch('loadStaleMetadataDescriptors', productionId)
+      .catch(logRequestFailure)
+  }
+}
+
 const confirm = () => {
   // Enter in a field lands here too, past the grayed confirm button.
   if (!isFormFilled.value) return
@@ -415,6 +475,7 @@ watch(
     if (isActive) {
       reset()
       nextTick(() => nameField.value?.focus())
+      loadStaleDescriptors()
     }
   }
 )

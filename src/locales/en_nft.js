@@ -93,11 +93,15 @@ export default {
     homepage: {
       'shots': 'NFTs'
     },
+    metadata: {
+      delete_shot_text:
+        'Are you sure you want to delete this column and related data for all NFTs of this production?'
+    },
     type: {
       shots: 'Only NFTs'
     },
     video: {
-      frame_in_description: "The player counter starts at the NFT's frame in instead of 0."
+      frame_in_description: "The player counter starts at the NFT's frame in instead of 1."
     }
   },
 

@@ -835,6 +835,211 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  // Nothing saves the annotations of a viewer who may not annotate the task:
+  // that viewer gets no tool.
+  describe('annotation tools of a read-only viewer', () => {
+    const annotationBar = () =>
+      wrapper.findComponent({ name: 'PlayerAnnotationBar' })
+    const press = (key, options = {}) =>
+      window.dispatchEvent(new KeyboardEvent('keydown', { key, ...options }))
+
+    const mountWithCanvas = async ({ readOnly }) => {
+      const canvas = { ...createFakeCanvas(), setActiveObject: vi.fn() }
+      wrapper = mountPlayer({
+        props: { readOnly },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      return canvas
+    }
+
+    const copyStroke = () =>
+      clipboard.copyAnnotations({
+        mainObject: { clone: async () => ({ left: 0, top: 0, set: vi.fn() }) },
+        subObjects: []
+      })
+
+    afterEach(() => {
+      clipboard.copyAnnotations([])
+    })
+
+    it.each([
+      ['d', 'isDrawing'],
+      ['e', 'isEraserModeOn']
+    ])('turns no tool on with %s', async (key, prop) => {
+      await mountWithCanvas({ readOnly: true })
+
+      press(key)
+      await nextTick()
+
+      expect(annotationBar().props(prop)).toBe(false)
+    })
+
+    it.each([
+      ['d', 'isDrawing'],
+      ['e', 'isEraserModeOn']
+    ])('turns a tool on with %s for a viewer who may annotate', async (key, prop) => {
+      await mountWithCanvas({ readOnly: false })
+
+      press(key)
+      await nextTick()
+
+      expect(annotationBar().props(prop)).toBe(true)
+    })
+
+    it('pastes no annotation', async () => {
+      const canvas = await mountWithCanvas({ readOnly: true })
+      copyStroke()
+
+      press('v', { ctrlKey: true })
+      await flushPromises()
+
+      expect(canvas.add).not.toHaveBeenCalled()
+    })
+
+    // A stroke drawn while the viewer could annotate stays in the undo stack:
+    // once the player turned read-only, undoing it changed on screen what
+    // nothing saved.
+    const drawStroke = canvas => {
+      const stroke = {
+        id: 'stroke-new',
+        type: 'path',
+        set(key, value) {
+          this[key] = value
+        },
+        setControlsVisibility: () => {},
+        toJSON() {
+          return { id: this.id, type: this.type }
+        }
+      }
+      canvas._objects.push(stroke)
+      canvas.fire('object:added', { target: stroke })
+      return stroke
+    }
+
+    it('undoes a stroke for a viewer who may annotate', async () => {
+      const canvas = await mountWithCanvas({ readOnly: false })
+      const stroke = drawStroke(canvas)
+
+      press('z', { ctrlKey: true })
+      await nextTick()
+
+      expect(canvas.remove).toHaveBeenCalledWith(stroke)
+    })
+
+    it('undoes nothing once the viewer may no longer annotate', async () => {
+      const canvas = await mountWithCanvas({ readOnly: false })
+      drawStroke(canvas)
+      await wrapper.setProps({ readOnly: true })
+
+      press('z', { ctrlKey: true })
+      await nextTick()
+
+      expect(canvas.remove).not.toHaveBeenCalled()
+    })
+
+    it('redoes a stroke for a viewer who may annotate', async () => {
+      const canvas = await mountWithCanvas({ readOnly: false })
+      const stroke = drawStroke(canvas)
+      press('z', { ctrlKey: true })
+      await nextTick()
+      canvas.add.mockClear()
+
+      press('r', { code: 'KeyR', altKey: true })
+      await nextTick()
+
+      expect(canvas.add).toHaveBeenCalledWith(stroke)
+    })
+
+    it('redoes nothing once the viewer may no longer annotate', async () => {
+      const canvas = await mountWithCanvas({ readOnly: false })
+      drawStroke(canvas)
+      press('z', { ctrlKey: true })
+      await nextTick()
+      await wrapper.setProps({ readOnly: true })
+      canvas.add.mockClear()
+
+      press('r', { code: 'KeyR', altKey: true })
+      await nextTick()
+
+      expect(canvas.add).not.toHaveBeenCalled()
+    })
+
+    it('pastes for a viewer who may annotate', async () => {
+      const canvas = await mountWithCanvas({ readOnly: false })
+      copyStroke()
+
+      press('v', { ctrlKey: true })
+      await flushPromises()
+
+      expect(canvas.add).toHaveBeenCalled()
+    })
+
+    // The task panel keeps its player when it moves to another task.
+    it.each([
+      ['pencil', 'pencil-annotate-clicked', 'isDrawing'],
+      ['eraser', 'erase-clicked', 'isEraserModeOn'],
+      ['text', 'type-clicked', 'isTyping'],
+      ['shape', 'shape-mode-clicked', 'isShapeMode']
+    ])(
+      'turns the %s off once the viewer may no longer annotate',
+      async (_, event, prop) => {
+        await mountWithCanvas({ readOnly: false })
+        annotationBar().vm.$emit(event)
+        await nextTick()
+        expect(annotationBar().props(prop)).toBe(true)
+
+        await wrapper.setProps({ readOnly: true })
+
+        expect(annotationBar().props(prop)).toBe(false)
+      }
+    )
+  })
+
+  // A supervisor out of the department of the task is no artist: the strokes
+  // stayed selectable for them, and Delete or a drag changed on screen what
+  // nothing saves.
+  describe('strokes of a read-only viewer', () => {
+    const mountOnStroke = async ({ readOnly }) => {
+      const canvas = createFakeCanvas()
+      canvas.add.mockImplementation(object => canvas._objects.push(object))
+      wrapper = mountPlayer({
+        props: { previews: [annotatedPreview], readOnly },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      return canvas
+    }
+
+    it('cannot be selected', async () => {
+      const canvas = await mountOnStroke({ readOnly: true })
+
+      expect(canvas._objects.map(({ selectable }) => selectable)).toEqual([
+        false
+      ])
+    })
+
+    it('can be selected by a viewer who may annotate', async () => {
+      const canvas = await mountOnStroke({ readOnly: false })
+
+      expect(canvas._objects.map(({ selectable }) => selectable)).toEqual([
+        true
+      ])
+    })
+
+    it('cannot be selected once the viewer may no longer annotate', async () => {
+      const canvas = await mountOnStroke({ readOnly: false })
+      canvas.discardActiveObject.mockClear()
+
+      await wrapper.setProps({ readOnly: true })
+
+      expect(canvas._objects.map(({ selectable }) => selectable)).toEqual([
+        false
+      ])
+      expect(canvas.discardActiveObject).toHaveBeenCalled()
+    })
+  })
+
   // Zou stores no duration for a sound: the bar takes the decoded one.
   describe('sound time', () => {
     const soundPreview = {
@@ -1526,6 +1731,13 @@ describe('PreviewPlayer.vue', () => {
         expect(wrapper.emitted('change-current-preview')).toEqual([
           [previousRevision]
         ])
+      })
+
+      // A click on the version shown closes the list.
+      it('keeps the version shown when it is picked again', async () => {
+        await showSecondFile('mp3')
+        combo().vm.$emit('update:modelValue', 'preview-v2')
+        expect(wrapper.emitted('change-current-preview')).toBeUndefined()
       })
     })
   })

@@ -6,9 +6,12 @@ import { createStore } from 'vuex'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
+// the parameters of a message show in its text
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
-  useI18n: () => ({ t: key => key })
+  useI18n: () => ({
+    t: (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key)
+  })
 }))
 
 // Pre-load the real store to avoid circular-import race from child components.
@@ -22,10 +25,12 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import ProductivityChart from '@/components/widgets/ProductivityChart.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import UserCalendar from '@/components/widgets/UserCalendar.vue'
 
+import { buildRefusal } from '../fixtures/refusal'
 import { buildSearchQueryListStub } from '../fixtures/search-query-list'
 
 const person = { id: 'person-1', name: 'Jane Doe', is_bot: false }
@@ -591,9 +596,12 @@ describe('Person page', () => {
       due_date: '2026-08-05'
     }
 
-    const mountSchedule = ({ tasks = [plannedTask] } = {}) =>
+    const mountSchedule = ({
+      tasks = [plannedTask],
+      updateTask = vi.fn(() => Promise.resolve())
+    } = {}) =>
       mountPage({
-        actions: { updateTask: vi.fn(() => Promise.resolve()) },
+        actions: { updateTask },
         getters: {
           currentProduction: () => null,
           dateFormat: () => 'YYYY-MM-DD',
@@ -644,6 +652,55 @@ describe('Person page', () => {
       )
       wrapper.unmount()
       expect(title).toContain('(2026-08-06 - ')
+    })
+
+    // A bar whose save Zou refuses goes back where the drag found it, and a
+    // line above the schedule says so.
+    it('puts back a bar whose save Zou refuses, and says so', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const wrapper = await mountSchedule({
+        updateTask: vi.fn(() => Promise.reject(buildRefusal(403)))
+      })
+
+      await taskBar(wrapper)
+        .find('.timebar-center')
+        .trigger('mousedown', { clientX: 300 })
+      document.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
+      )
+      document.dispatchEvent(
+        new MouseEvent('mouseup', { bubbles: true, clientX: 360 })
+      )
+      await flushPromises()
+
+      const title = taskBar(wrapper).attributes('title')
+      const error = wrapper.findComponent(ErrorText)
+      const text = error.exists() ? error.props('text') : null
+      const classes = error.exists() ? error.classes() : []
+      wrapper.unmount()
+      expect(title).toContain('(2026-08-03 - ')
+      expect(text).toBe('main.cell_save_error {"name":"SH01 / Modeling"}')
+      expect(classes).toContain('has-text-centered')
+    })
+
+    // A typed estimation Zou refuses goes back, and the man-days of the row
+    // add up its bars again.
+    it('recounts the man-days of the row after a refused estimation', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const wrapper = await mountSchedule({
+        updateTask: vi.fn(() => Promise.reject(buildRefusal(403)))
+      })
+      const [row] = wrapper.findComponent({ name: 'Schedule' }).props('hierarchy')
+      // a total only a recount can bring back to that of the bars
+      row.man_days = 123
+
+      await wrapper.find('.child-line .man-days-unit-wrapper input').setValue('2')
+      await flushPromises()
+
+      const [bar] = row.children
+      const values = [bar.estimation, row.man_days]
+      wrapper.unmount()
+      expect(values).toEqual([0, 0])
     })
 
     // The range of the schedule frames the first and last tasks: read from

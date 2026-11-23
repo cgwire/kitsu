@@ -19,6 +19,7 @@ vi.mock('vue-router', async importOriginal => ({
   useRoute: () => routeHolder.route
 }))
 
+import { markRequestFailure } from '@/lib/errors'
 import i18n from '@/lib/i18n'
 import assetStore from '@/store/modules/assets'
 import editStore from '@/store/modules/edits'
@@ -42,12 +43,16 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
+
+import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
 
 const production = { id: 'production-1' }
 
 const pages = [
   {
     name: 'Asset',
+    entityAction: 'loadAsset',
     listAction: 'loadAssets',
     page: Asset,
     entityParam: 'asset_id',
@@ -58,6 +63,7 @@ const pages = [
   },
   {
     name: 'Edit',
+    entityAction: 'loadEdit',
     listAction: 'loadEdits',
     page: Edit,
     entityParam: 'edit_id',
@@ -87,6 +93,7 @@ const pages = [
   },
   {
     name: 'Shot',
+    entityAction: 'loadShot',
     listAction: 'loadShots',
     page: Shot,
     entityParam: 'shot_id',
@@ -98,7 +105,8 @@ const pages = [
 ]
 
 // Unless a test puts it in the cache of its store module, the entity of the
-// URL is found nowhere: the page loads nothing and shows its empty state.
+// URL is found nowhere: the pages tell it is missing, but Episode, which
+// leaves an episode the topbar does not know to the topbar.
 const mountPage = async (
   page,
   entityParam,
@@ -152,10 +160,13 @@ const mountPage = async (
       loadAssetCastIn: loadAction,
       loadAssetCasting: loadAction,
       loadAssets: loadAction,
+      loadEdit: loadAction,
       loadEdits: loadAction,
       loadEpisodeCasting: loadAction,
+      loadEpisodes: loadAction,
       loadEpisodesWithTasks: loadAction,
       loadLinkedConcepts: loadAction,
+      loadSequence: loadAction,
       loadSequenceCasting: loadAction,
       loadSequencesWithTasks: loadAction,
       loadShot: loadAction,
@@ -168,7 +179,8 @@ const mountPage = async (
     global: {
       plugins: [store],
       mocks: { $route: routeHolder.route, $t },
-      stubs: { RouterLink: RouterLinkStub }
+      // The reason an entity is not shown renders with the page.
+      stubs: { EntityLoadError: false, RouterLink: RouterLinkStub }
     }
   })
   await flushPromises()
@@ -200,6 +212,726 @@ describe.each(pages)('$name page', ({ entityParam, listRoute, page }) => {
       name: listRoute,
       params: { production_id: production.id }
     })
+  })
+})
+
+// A failure as the API client hands it over, reported already.
+const requestFailure = status => {
+  const failure = Object.assign(new Error(`HTTP ${status}`), { status })
+  markRequestFailure(failure)
+  return failure
+}
+
+// A promise the test settles, to order the answers of several reads.
+const deferred = () => {
+  const handlers = {}
+  const promise = new Promise((resolve, reject) => {
+    Object.assign(handlers, { resolve, reject })
+  })
+  return { promise, ...handlers }
+}
+
+// The pages that read their entity by id when the store does not hold it.
+describe.each(pages.filter(({ entityAction }) => entityAction))(
+  '$name page, entity that fails to load',
+  ({ entityAction, entityMap, entityParam, listAction, page }) => {
+    const title = wrapper => wrapper.find('.entity-title').text()
+    const reloadButton = wrapper =>
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('text') === 'main.reload')
+    const homeLink = wrapper =>
+      wrapper
+        .findAllComponents(RouterLinkStub)
+        .find(link => link.props('to').name === 'home')
+    const entity = (id, name, tasks = []) => ({ id, name, tasks })
+    const taskMap = new Map([
+      ['task-1', { id: 'task-1', task_type_id: 'modeling' }],
+      ['task-2', { id: 'task-2', task_type_id: 'modeling' }]
+    ])
+    const taskIds = wrapper =>
+      wrapper
+        .findComponent(EntityTaskList)
+        .props('entries')
+        .map(({ id }) => id)
+    const goTo = (entityId, productionId = production.id) => {
+      routeHolder.route.params = {
+        ...routeHolder.route.params,
+        production_id: productionId,
+        [entityParam]: entityId
+      }
+    }
+    let consoleError = null
+
+    beforeEach(() => {
+      consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      entityMap.clear()
+      vi.restoreAllMocks()
+    })
+
+    // Zou refuses an entity to a vendor without a task on it, and answers a
+    // malformed id with a 400.
+    test.each([400, 403, 404])('tells it is missing on a %i', async status => {
+      const failure = requestFailure(status)
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [entityAction]: () => Promise.reject(failure)
+      })
+
+      expect(title(wrapper)).toBe('not_found.title')
+      expect(wrapper.text()).toContain('not_found.text')
+      expect(homeLink(wrapper).text()).toBe('main.home')
+      expect(wrapper.findComponent(RouteSectionTabs).exists()).toBe(false)
+      expect(reloadButton(wrapper)).toBeUndefined()
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    test('tells it is missing after a load that did not find it', async () => {
+      const load = vi.fn(() => Promise.resolve())
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [entityAction]: load
+      })
+
+      expect(title(wrapper)).toBe('not_found.title')
+      expect(load).toHaveBeenCalledTimes(1)
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    test('offers a reload after a server error', async () => {
+      const failure = requestFailure(500)
+      const load = vi
+        .fn()
+        .mockRejectedValueOnce(failure)
+        .mockImplementationOnce(() => {
+          entityMap.set('entity-1', entity('entity-1', 'E01'))
+          return Promise.resolve()
+        })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [entityAction]: load
+      })
+
+      expect(title(wrapper)).toBe('main.loading_error')
+      expect(wrapper.text()).not.toContain('not_found.text')
+      expect(homeLink(wrapper)).toBeUndefined()
+
+      await reloadButton(wrapper).vm.$emit('click')
+      await flushPromises()
+
+      expect(load).toHaveBeenCalledTimes(2)
+      expect(title(wrapper)).toContain('E01')
+      expect(reloadButton(wrapper)).toBeUndefined()
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    // A bug is no request failure: it reaches Sentry unhandled.
+    test('leaves a bug in the load to Sentry', async () => {
+      const bug = new TypeError('Cannot read properties of undefined')
+      let wrapper = null
+      const rejections = await recordUnhandledRejections(async () => {
+        ;({ wrapper } = await mountPage(page, entityParam, production, {
+          [entityAction]: () => Promise.reject(bug)
+        }))
+      })
+
+      expect(rejections).toEqual([bug])
+      expect(title(wrapper)).toBe('main.loading_error')
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    // The store fills the entity with the current production. A link to a
+    // closed production opens under the first open one, or under none, until
+    // the topbar has loaded it; a refused one sends the user home.
+    test.each([
+      ['another production', { id: 'production-2' }],
+      ['no production', null]
+    ])(
+      'reads the entity once the production of the URL is set, after %s',
+      async (_, currentProduction) => {
+        const readUnder = []
+        const load = vi.fn(context => {
+          readUnder.push(context.rootGetters.currentProduction?.id)
+          entityMap.set('entity-1', entity('entity-1', 'E01'))
+          return Promise.resolve()
+        })
+        const { store, wrapper } = await mountPage(
+          page,
+          entityParam,
+          currentProduction,
+          { [entityAction]: load }
+        )
+
+        expect(load).not.toHaveBeenCalled()
+
+        store.state.currentProduction = production
+        await flushPromises()
+
+        expect(readUnder).toEqual(['production-1'])
+        expect(title(wrapper)).toContain('E01')
+        expect(consoleError).not.toHaveBeenCalled()
+      }
+    )
+
+    test('reads the entity once when its production comes with it', async () => {
+      const load = vi.fn((context, entityId) =>
+        Promise.resolve().then(() =>
+          entityMap.set(entityId, entity(entityId, 'E02'))
+        )
+      )
+      const { store, wrapper } = await mountPage(
+        page,
+        entityParam,
+        { id: 'production-2' },
+        { [entityAction]: load }
+      )
+
+      goTo('entity-2')
+      store.state.currentProduction = production
+      await flushPromises()
+
+      expect(load.mock.calls.map(([, entityId]) => entityId)).toEqual([
+        'entity-2'
+      ])
+      expect(title(wrapper)).toContain('E02')
+    })
+
+    // Back and forth while a read runs: B, A, then B again.
+    const readTwice = async () => {
+      entityMap.set('entity-1', entity('entity-1', 'E01'))
+      const reads = []
+      const load = vi.fn(() => {
+        const read = deferred()
+        reads.push(read)
+        return read.promise
+      })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [entityAction]: load
+      })
+      goTo('entity-2')
+      await flushPromises()
+      goTo('entity-1')
+      await flushPromises()
+      goTo('entity-2')
+      await flushPromises()
+      expect(load).toHaveBeenCalledTimes(2)
+      const answer = async index => {
+        entityMap.set('entity-2', entity('entity-2', 'E02'))
+        reads[index].resolve()
+        await flushPromises()
+      }
+      const fail = async (index, failure) => {
+        reads[index].reject(failure)
+        await flushPromises()
+      }
+      return { answer, fail, wrapper }
+    }
+
+    test('keeps out an earlier read that fails after the last one', async () => {
+      const { answer, fail, wrapper } = await readTwice()
+      const failure = requestFailure(500)
+
+      await answer(1)
+      await fail(0, failure)
+
+      expect(title(wrapper)).toContain('E02')
+      expect(wrapper.findComponent(RouteSectionTabs).exists()).toBe(true)
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    test('keeps out an earlier read that fails before the last one', async () => {
+      const { answer, fail, wrapper } = await readTwice()
+      const failure = requestFailure(500)
+
+      await fail(0, failure)
+      await answer(1)
+
+      expect(title(wrapper)).toContain('E02')
+      expect(wrapper.findComponent(RouteSectionTabs).exists()).toBe(true)
+      expect(reloadButton(wrapper)).toBeUndefined()
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    test('keeps out an earlier read that answers after the user went back', async () => {
+      entityMap.set('entity-1', entity('entity-1', 'E01', ['task-1']))
+      const read = deferred()
+      // A list load would read the entity of the URL again, after the wrong
+      // one had shown: it never ends here.
+      const { wrapper } = await mountPage(
+        page,
+        entityParam,
+        production,
+        {
+          [listAction]: () => new Promise(() => {}),
+          [entityAction]: () => read.promise
+        },
+        { taskMap: () => taskMap }
+      )
+      goTo('entity-2')
+      await flushPromises()
+      goTo('entity-1')
+      await flushPromises()
+
+      entityMap.set('entity-2', entity('entity-2', 'E02', ['task-2']))
+      read.resolve()
+      await flushPromises()
+
+      expect(title(wrapper)).toContain('E01')
+      expect(taskIds(wrapper)).toEqual(['task-1'])
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    test('stops showing the previous entity', async () => {
+      entityMap.set('entity-1', entity('entity-1', 'E01'))
+      const failure = requestFailure(404)
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [entityAction]: () => Promise.reject(failure)
+      })
+
+      goTo('entity-2')
+      await flushPromises()
+
+      expect(title(wrapper)).toBe('not_found.title')
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    test('forgets it once another entity opens', async () => {
+      const failure = requestFailure(404)
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [entityAction]: () => Promise.reject(failure)
+      })
+      entityMap.set('entity-2', entity('entity-2', 'E02'))
+
+      goTo('entity-2')
+      await flushPromises()
+
+      expect(title(wrapper)).toContain('E02')
+      expect(wrapper.text()).not.toContain('not_found.text')
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    test('keeps out the failure of an entity left during its load', async () => {
+      const read = deferred()
+      const failure = requestFailure(404)
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [entityAction]: () => read.promise
+      })
+      entityMap.set('entity-2', entity('entity-2', 'E02'))
+      goTo('entity-2')
+      await flushPromises()
+
+      read.reject(failure)
+      await flushPromises()
+
+      expect(title(wrapper)).toContain('E02')
+      expect(wrapper.text()).not.toContain('not_found.text')
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    // The next entity belongs to a production the topbar still loads.
+    test('drops the error while the next production loads', async () => {
+      const failure = requestFailure(404)
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [entityAction]: () => Promise.reject(failure)
+      })
+
+      goTo('entity-2', 'production-2')
+      await flushPromises()
+
+      expect(title(wrapper)).toBe('main.loading')
+      expect(wrapper.text()).not.toContain('not_found.text')
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    test('stops showing the previous entity while the next production loads', async () => {
+      entityMap.set('entity-1', entity('entity-1', 'E01', ['task-1']))
+      const { wrapper } = await mountPage(
+        page,
+        entityParam,
+        production,
+        {},
+        { taskMap: () => taskMap }
+      )
+
+      goTo('entity-2', 'production-2')
+      await flushPromises()
+
+      expect(title(wrapper)).toBe('main.loading')
+      expect(taskIds(wrapper)).toEqual([])
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    test('keeps out a read left for the next production', async () => {
+      const read = deferred()
+      const failure = requestFailure(404)
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [entityAction]: () => read.promise
+      })
+      goTo('entity-2', 'production-2')
+      await flushPromises()
+
+      read.reject(failure)
+      await flushPromises()
+
+      expect(title(wrapper)).toBe('main.loading')
+      expect(wrapper.text()).not.toContain('not_found.text')
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    // Once the list for the arrows is loaded, the page reads its entity again
+    // from it: gone from that list, the entity is read by id once more.
+    const listWithout = entityId => () => {
+      entityMap.delete(entityId)
+      return Promise.resolve()
+    }
+
+    test('keeps the entity shown when the second read fails', async () => {
+      entityMap.set('entity-1', entity('entity-1', 'E01'))
+      const failure = requestFailure(404)
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [listAction]: listWithout('entity-1'),
+        [entityAction]: () => Promise.reject(failure)
+      })
+
+      expect(title(wrapper)).toContain('E01')
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    test('keeps out a second read left for the previous entity', async () => {
+      entityMap.set('entity-1', entity('entity-1', 'E01'))
+      entityMap.set('entity-3', entity('entity-3', 'E03'))
+      const read = deferred()
+      // The next list loads would read the entity of the URL again, after the
+      // wrong one had shown: they never end here.
+      const loadList = vi
+        .fn()
+        .mockImplementationOnce(listWithout('entity-1'))
+        .mockImplementation(() => new Promise(() => {}))
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [listAction]: loadList,
+        [entityAction]: () => read.promise
+      })
+
+      goTo('entity-3')
+      await flushPromises()
+      entityMap.set('entity-1', entity('entity-1', 'E01'))
+      read.resolve()
+      await flushPromises()
+
+      expect(title(wrapper)).toContain('E03')
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    // The list load of the previous entity ends while the page waits for the
+    // production of the next one: nothing is read under the production left.
+    test('reads nothing for a list load left by the previous entity', async () => {
+      entityMap.set('entity-1', entity('entity-1', 'E01'))
+      const list = deferred()
+      const readUnder = []
+      const load = vi.fn(context => {
+        readUnder.push(context.rootGetters.currentProduction?.id)
+        entityMap.set('entity-2', entity('entity-2', 'E02'))
+        return Promise.resolve()
+      })
+      const { store, wrapper } = await mountPage(page, entityParam, production, {
+        [listAction]: () => list.promise,
+        [entityAction]: load
+      })
+      goTo('entity-2', 'production-2')
+      await flushPromises()
+
+      list.resolve()
+      await flushPromises()
+
+      expect(load).not.toHaveBeenCalled()
+      expect(title(wrapper)).toBe('main.loading')
+
+      store.state.currentProduction = { id: 'production-2' }
+      await flushPromises()
+
+      expect(readUnder).toEqual(['production-2'])
+      expect(title(wrapper)).toContain('E02')
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    test('leaves a bug in the second read to Sentry', async () => {
+      entityMap.set('entity-1', entity('entity-1', 'E01'))
+      const bug = new TypeError('Cannot read properties of undefined')
+      let wrapper = null
+      const rejections = await recordUnhandledRejections(async () => {
+        ;({ wrapper } = await mountPage(page, entityParam, production, {
+          [listAction]: listWithout('entity-1'),
+          [entityAction]: () => Promise.reject(bug)
+        }))
+      })
+
+      expect(rejections).toEqual([bug])
+      expect(title(wrapper)).toContain('E01')
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+  }
+)
+
+// The pages that find their entity in the list they load: the tasks of a
+// sequence or an episode come with its list only.
+describe.each([
+  { name: 'Sequence', readAction: 'loadSequencesWithTasks' },
+  { name: 'Episode', readAction: 'loadEpisodesWithTasks' }
+].map(read => ({ ...pages.find(({ name }) => name === read.name), ...read })))(
+  '$name page, list that fails to load',
+  ({ entityMap, entityParam, page, readAction }) => {
+    // The store holds the list of the page: once shown, the entity needs no
+    // list load for the arrows.
+    const mount = (currentProduction, actions) =>
+      mountPage(page, entityParam, currentProduction, actions, {
+        sequencesLoadingKey: () => `${production.id}/`
+      })
+    const title = wrapper => wrapper.find('.entity-title').text()
+    const reloadButton = wrapper =>
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('text') === 'main.reload')
+    // Loaded with its tasks, the entity carries its validations.
+    const entity = (id, name) => ({ id, name, tasks: [], validations: new Map() })
+    const goTo = (entityId, productionId = production.id) => {
+      routeHolder.route.params = {
+        ...routeHolder.route.params,
+        production_id: productionId,
+        [entityParam]: entityId
+      }
+    }
+    let consoleError = null
+
+    beforeEach(() => {
+      consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      entityMap.clear()
+      vi.restoreAllMocks()
+    })
+
+    test('offers a reload after a server error', async () => {
+      const failure = requestFailure(500)
+      const load = vi
+        .fn()
+        .mockRejectedValueOnce(failure)
+        .mockImplementationOnce(() => {
+          entityMap.set('entity-1', entity('entity-1', 'E01'))
+          return Promise.resolve()
+        })
+      const { wrapper } = await mount(production, {
+        [readAction]: load
+      })
+
+      expect(title(wrapper)).toBe('main.loading_error')
+      expect(wrapper.text()).not.toContain('not_found.text')
+
+      await reloadButton(wrapper).vm.$emit('click')
+      await flushPromises()
+
+      expect(load).toHaveBeenCalledTimes(2)
+      expect(title(wrapper)).toContain('E01')
+      expect(reloadButton(wrapper)).toBeUndefined()
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+
+    test('leaves a bug in the load to Sentry', async () => {
+      const bug = new TypeError('Cannot read properties of null')
+      let wrapper = null
+      const rejections = await recordUnhandledRejections(async () => {
+        ;({ wrapper } = await mount(production, {
+          [readAction]: () => Promise.reject(bug)
+        }))
+      })
+
+      expect(rejections).toEqual([bug])
+      expect(title(wrapper)).toBe('main.loading_error')
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    // A link to a closed production opens under the first open one, or under
+    // none, until the topbar has loaded it: the list would be the one of
+    // another production, or fail on none.
+    test.each([
+      ['another production', { id: 'production-2' }],
+      ['no production', null]
+    ])(
+      'loads the list once the production of the URL is set, after %s',
+      async (_, currentProduction) => {
+        const loadedFor = []
+        const load = vi.fn(context => {
+          loadedFor.push(context.rootGetters.currentProduction?.id)
+          entityMap.set('entity-1', entity('entity-1', 'E01'))
+          return Promise.resolve()
+        })
+        const { store, wrapper } = await mount(currentProduction, {
+          [readAction]: load
+        })
+
+        expect(load).not.toHaveBeenCalled()
+
+        store.state.currentProduction = production
+        await flushPromises()
+
+        expect(loadedFor).toEqual(['production-1'])
+        expect(title(wrapper)).toContain('E01')
+        expect(consoleError).not.toHaveBeenCalled()
+      }
+    )
+
+    test('stops showing the previous entity while the next production loads', async () => {
+      entityMap.set('entity-1', entity('entity-1', 'E01'))
+      const { wrapper } = await mount(production)
+
+      goTo('entity-2', 'production-2')
+      await flushPromises()
+
+      expect(title(wrapper)).toBe('main.loading')
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    test('keeps out a load that fails after the user went back', async () => {
+      entityMap.set('entity-1', entity('entity-1', 'E01'))
+      const load = deferred()
+      const failure = requestFailure(500)
+      const { wrapper } = await mount(production, {
+        [readAction]: () => load.promise
+      })
+      goTo('entity-2')
+      await flushPromises()
+      goTo('entity-1')
+      await flushPromises()
+
+      load.reject(failure)
+      await flushPromises()
+
+      expect(title(wrapper)).toContain('E01')
+      expect(reloadButton(wrapper)).toBeUndefined()
+      expect(consoleError.mock.calls).toEqual([[failure]])
+    })
+  }
+)
+
+describe('Sequence page, missing sequence', () => {
+  const homeLink = wrapper =>
+    wrapper
+      .findAllComponents(RouterLinkStub)
+      .find(link => link.props('to').name === 'home')
+  let consoleError = null
+
+  beforeEach(() => {
+    consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    sequenceStore.cache.sequenceMap.clear()
+    vi.restoreAllMocks()
+  })
+
+  // The list of a production holds all its sequences, the ones a vendor has
+  // a task on for a vendor.
+  test('tells it is missing when its list lacks it', async () => {
+    const load = vi.fn(() => Promise.resolve())
+    const { wrapper } = await mountPage(Sequence, 'sequence_id', production, {
+      loadSequencesWithTasks: load
+    })
+
+    expect(wrapper.find('.entity-title').text()).toBe('not_found.title')
+    expect(wrapper.text()).toContain('not_found.text')
+    expect(homeLink(wrapper).text()).toBe('main.home')
+    expect(load).toHaveBeenCalledTimes(1)
+    expect(consoleError).not.toHaveBeenCalled()
+  })
+
+  // In a TV show, the page reads the sequence by id first, to load the list
+  // of its episode.
+  test.each([403, 404])('tells it is missing on a %i in a TV show', async status => {
+    const failure = requestFailure(status)
+    const loadList = vi.fn(() => Promise.resolve())
+    const { wrapper } = await mountPage(
+      Sequence,
+      'sequence_id',
+      production,
+      {
+        loadSequence: () => Promise.reject(failure),
+        loadSequencesWithTasks: loadList
+      },
+      { isTVShow: () => true }
+    )
+
+    expect(wrapper.find('.entity-title').text()).toBe('not_found.title')
+    expect(homeLink(wrapper).text()).toBe('main.home')
+    expect(loadList).not.toHaveBeenCalled()
+    expect(consoleError.mock.calls).toEqual([[failure]])
+  })
+})
+
+// The list a TV show page loads is the one of the current episode.
+describe('Sequence page, sequence of another episode', () => {
+  afterEach(() => {
+    sequenceStore.cache.sequenceMap.clear()
+  })
+
+  test('takes the episode of its sequence before loading the list', async () => {
+    const setCurrentEpisode = vi.fn()
+    const loadList = vi.fn(() => {
+      sequenceStore.cache.sequenceMap.set('entity-1', {
+        id: 'entity-1',
+        name: 'SQ01',
+        parent_id: 'episode-2',
+        tasks: [],
+        validations: new Map()
+      })
+      return Promise.resolve()
+    })
+    const { wrapper } = await mountPage(
+      Sequence,
+      'sequence_id',
+      production,
+      {
+        loadSequence: () =>
+          Promise.resolve({ id: 'entity-1', parent_id: 'episode-2' }),
+        loadSequencesWithTasks: loadList,
+        setCurrentEpisode
+      },
+      {
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true
+      }
+    )
+
+    expect(setCurrentEpisode.mock.calls.map(([, id]) => id)).toEqual([
+      'episode-2'
+    ])
+    expect(setCurrentEpisode.mock.invocationCallOrder[0]).toBeLessThan(
+      loadList.mock.invocationCallOrder[0]
+    )
+    expect(wrapper.find('.entity-title').text()).toContain('SQ01')
+  })
+})
+
+// The topbar sends a link to an episode it does not know, deleted or of
+// another production, to the episode list.
+describe('Episode page, episode its list lacks', () => {
+  afterEach(() => {
+    episodeStore.cache.episodeMap.clear()
+  })
+
+  test('leaves it to the topbar', async () => {
+    const load = vi.fn(() => Promise.resolve())
+    const { wrapper } = await mountPage(Episode, 'episode_id', production, {
+      loadEpisodesWithTasks: load
+    })
+
+    expect(wrapper.find('.entity-title').text()).toBe('main.loading')
+    expect(wrapper.text()).not.toContain('not_found.text')
+    expect(
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .some(button => button.props('text') === 'main.reload')
+    ).toBe(false)
+    expect(load).toHaveBeenCalledTimes(1)
   })
 })
 
@@ -648,6 +1380,69 @@ describe.each(pages.filter(({ listAction }) => listAction))(
       )
 
       expect(loadList).not.toHaveBeenCalled()
+    })
+  }
+)
+
+// The casting loads onto the entity the page shows: once the list for the
+// arrows is loaded, the object of that list, which the store updates.
+describe.each(
+  [
+    { name: 'Asset', castingAction: 'loadAssetCastIn' },
+    { name: 'Sequence', castingAction: 'loadSequenceCasting' },
+    { name: 'Shot', castingAction: 'loadShotCasting' }
+  ].map(casting => ({
+    ...pages.find(({ name }) => name === casting.name),
+    ...casting
+  }))
+)(
+  '$name page, casting once the list is loaded',
+  ({ castingAction, entityMap, entityParam, listAction, page }) => {
+    afterEach(() => {
+      entityMap.clear()
+    })
+
+    test('loads it onto the entity of the list', async () => {
+      const shown = {
+        id: 'entity-1',
+        name: 'E01',
+        tasks: [],
+        validations: new Map()
+      }
+      const listed = { ...shown, name: 'E01 bis' }
+      entityMap.set('entity-1', shown)
+      const loadCasting = vi.fn(() => Promise.resolve())
+      await mountPage(page, entityParam, production, {
+        [listAction]: () => {
+          entityMap.set('entity-1', listed)
+          return Promise.resolve()
+        },
+        [castingAction]: loadCasting
+      })
+
+      expect(loadCasting.mock.calls.map(([, { name }]) => name)).toEqual([
+        'E01',
+        'E01 bis'
+      ])
+    })
+
+    // A TV show answers the list load of a cold link without loading.
+    test('loads it once when the list keeps the entity shown', async () => {
+      entityMap.set('entity-1', {
+        id: 'entity-1',
+        name: 'E01',
+        tasks: [],
+        validations: new Map()
+      })
+      const loadList = vi.fn(() => Promise.resolve())
+      const loadCasting = vi.fn(() => Promise.resolve())
+      await mountPage(page, entityParam, production, {
+        [listAction]: loadList,
+        [castingAction]: loadCasting
+      })
+
+      expect(loadList).toHaveBeenCalledTimes(1)
+      expect(loadCasting).toHaveBeenCalledTimes(1)
     })
   }
 )

@@ -730,3 +730,21 @@ describe('Episodes page, CSV', () => {
     expect(dispatched('loadEpisodesWithTasks')).toHaveLength(loadsBefore + 1)
   })
 })
+
+describe('Episodes page, column delete', () => {
+  test('names the episodes in its confirmation', async () => {
+    const { wrapper } = await mountPage()
+
+    await wrapper
+      .findComponent({ name: 'EpisodeList' })
+      .vm.$emit('delete-metadata', 'descriptor-1')
+
+    const texts = wrapper
+      .findAllComponents(DeleteModal)
+      .filter(modal => modal.props('active'))
+      .map(modal => modal.props('text'))
+    expect(texts).toEqual(['productions.metadata.delete_episode_text'])
+    // The $t mock echoes the key: en.js must hold it.
+    expect(en.productions.metadata.delete_episode_text).toEqual(expect.any(String))
+  })
+})

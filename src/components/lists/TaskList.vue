@@ -459,6 +459,7 @@ import {
   getMetadataFieldValue,
   isSupervisorInDepartments
 } from '@/lib/descriptors'
+import { logRequestFailure } from '@/lib/errors'
 import { getTaskHref } from '@/lib/path'
 import {
   durationToMinutes,
@@ -776,7 +777,9 @@ const onUnassign = (task, person) => {
   if (!selectedTasks.value.has(task.id)) {
     tasks.push(task)
   }
-  store.dispatch('unassignPersonFromTasks', { tasks, person })
+  store
+    .dispatch('unassignPersonFromTasks', { tasks, person })
+    .catch(logRequestFailure)
 }
 
 const updateStartDate = date => {

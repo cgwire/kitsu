@@ -1010,7 +1010,7 @@ a {
 
   &:hover {
     background-color: var(--background-hover);
-    border-color: var(--background-selectable);
+    border-color: var(--selectable-accent);
 
     &.playlist-ready-notification {
       border-color: var(--unread-border);

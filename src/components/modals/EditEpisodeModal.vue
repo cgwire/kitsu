@@ -61,6 +61,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { dropRemovedDataKeys } from '@/lib/descriptors'
+
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
@@ -92,6 +94,9 @@ const form = ref({
   fps: '',
   data: { resolution: '' }
 })
+// Keys of the episode data the form was filled with: a column deleted or
+// renamed by someone else meanwhile took its key out of that data.
+let openedDataKeys = []
 
 const episodeStatusOptions = [
   { label: 'canceled', value: 'canceled' },
@@ -117,12 +122,27 @@ const modalTitle = computed(() =>
 
 // Functions
 
+// The store changes its own episode: a page can hand over a copy of it.
+const storedEntity = () =>
+  store.getters.episodeMap?.get(props.episodeToEdit?.id) ?? props.episodeToEdit
+
+const formToSend = () => ({
+  ...form.value,
+  data: dropRemovedDataKeys(
+    form.value.data,
+    openedDataKeys,
+    storedEntity()?.data,
+    episodeMetadataDescriptors.value.map(d => d.field_name)
+  )
+})
+
 const runConfirmation = () => {
-  emit('confirm', form.value)
+  emit('confirm', formToSend())
 }
 
 const resetForm = () => {
   if (isEditing.value) {
+    openedDataKeys = Object.keys(props.episodeToEdit.data || {})
     form.value = {
       id: props.episodeToEdit.id,
       name: props.episodeToEdit.name,
@@ -134,6 +154,7 @@ const resetForm = () => {
       }
     }
   } else {
+    openedDataKeys = []
     form.value.id = null
     form.value.name = ''
     form.value.status = 'running'

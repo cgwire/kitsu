@@ -15,7 +15,11 @@ import { useStore } from 'vuex'
 
 import { getEntityName, useCellSave } from '@/composables/cellSave'
 import csv from '@/lib/csv'
-import { getExportDescriptors } from '@/lib/descriptors'
+import {
+  getExportDescriptors,
+  isBuiltInDescriptorNameError,
+  isTakenDescriptorNameError
+} from '@/lib/descriptors'
 import func from '@/lib/func'
 import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
@@ -130,6 +134,7 @@ const LOADING = {
 const ERRORS = {
   addMetadata: false,
   addThumbnails: false,
+  builtInMetadataName: '',
   creatingTasks: false,
   del: false,
   deleteAllTasks: false,
@@ -138,7 +143,8 @@ const ERRORS = {
   editDeleted: false,
   importing: false,
   importingError: null,
-  restore: false
+  restore: false,
+  takenMetadataName: ''
 }
 
 /*
@@ -629,12 +635,16 @@ export const useEntityPage = ({
   // Close leaves the error of the last save: opening drops it.
   const onAddMetadataClicked = () => {
     errors.addMetadata = false
+    errors.builtInMetadataName = ''
+    errors.takenMetadataName = ''
     descriptorToEdit.value = {}
     modals.isAddMetadataDisplayed = true
   }
 
   const onEditMetadataClicked = descriptorId => {
     errors.addMetadata = false
+    errors.builtInMetadataName = ''
+    errors.takenMetadataName = ''
     descriptorToEdit.value = currentProduction.value.descriptors.find(
       descriptor => descriptor.id === descriptorId
     )
@@ -647,7 +657,10 @@ export const useEntityPage = ({
     modals.isDeleteMetadataDisplayed = true
   }
 
+  // Zou refuses the name sent, which the modal may have closed on since.
   const confirmAddMetadata = async form => {
+    const { name } = form
+    const opening = descriptorToEdit.value
     loading.addMetadata = true
     errors.addMetadata = false
     try {
@@ -657,8 +670,18 @@ export const useEntityPage = ({
       })
       modals.isAddMetadataDisplayed = false
     } catch (err) {
-      console.error(err)
-      errors.addMetadata = true
+      if (isTakenDescriptorNameError(err)) {
+        if (descriptorToEdit.value === opening) {
+          errors.takenMetadataName = name
+        }
+      } else if (isBuiltInDescriptorNameError(err)) {
+        if (descriptorToEdit.value === opening) {
+          errors.builtInMetadataName = name
+        }
+      } else {
+        console.error(err)
+        errors.addMetadata = true
+      }
     } finally {
       loading.addMetadata = false
     }

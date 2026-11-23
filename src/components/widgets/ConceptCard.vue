@@ -164,7 +164,7 @@ const entityPath = (entity, section) => {
   // focuses the card too and would flash the ring on every selection.
   &:focus-visible {
     box-shadow:
-      0 0 0 3px var(--background-selectable),
+      0 0 0 3px var(--selectable-accent),
       0 4px 12px rgba(0, 0, 0, 0.05);
   }
 

@@ -1,7 +1,15 @@
 import { mount } from '@vue/test-utils'
-import { computed, defineComponent, ref, unref } from 'vue'
+import { computed, defineComponent, nextTick, ref, unref } from 'vue'
 
-import { ActiveSelection, Canvas, IText, Point, Rect, Text } from 'fabric'
+import {
+  ActiveSelection,
+  Canvas,
+  Group,
+  IText,
+  Point,
+  Rect,
+  Text
+} from 'fabric'
 import { PSBrush, PSStroke, PSPoint } from 'fabricjs-psbrush'
 
 import { useAnnotation } from '@/composables/players/annotation'
@@ -197,7 +205,7 @@ const mountAnnotation = (options = {}) => {
   const {
     canvas = createFakeCanvas(),
     annotations = ref([]),
-    isCurrentUserArtist = computed(() => false),
+    isReadOnly = computed(() => false),
     userId = computed(() => 'user-1'),
     // A ref so a test can move the playhead between two calls; a plain
     // number still works for the tests that never seek.
@@ -239,7 +247,7 @@ const mountAnnotation = (options = {}) => {
         comparisonCanvasComponent,
         canvasWrapper,
         annotations,
-        isCurrentUserArtist,
+        isReadOnly,
         userId,
         store,
         emit: emitSpy,
@@ -1974,6 +1982,59 @@ describe('composables/annotation', () => {
       // The completion callback removes the faded stroke from the canvas.
       obj.animate.mock.calls[0][1].onComplete()
       expect(canvas.remove).toHaveBeenCalledWith(obj)
+      wrapper.unmount()
+    })
+  })
+
+  // fabric reads the handles of a multi-selection from the Group prototype,
+  // which every player shares: the read-only state of one player must not
+  // take the scale handle away from the others.
+  describe('multi-selection handles', () => {
+    it('keeps the scale handle once a read-only canvas is set up', () => {
+      const { wrapper } = mountAnnotation({ isReadOnly: computed(() => true) })
+
+      expect(Group.prototype._controlsVisibility.br).toBe(true)
+      wrapper.unmount()
+    })
+  })
+
+  describe('loss of the right to annotate', () => {
+    // The strokes lose their selection then, and fabric fires object:modified
+    // when the discarded selection is a text still in editing.
+    it('mutes the object:modified fabric fires on the discard', async () => {
+      const canvas = createFakeCanvas()
+      const isReadOnly = ref(false)
+      const { api, postAnnotationUpdate, saveAnnotationsCb, wrapper } =
+        mountAnnotation({ canvas, isReadOnly })
+      canvas.discardActiveObject.mockImplementation(() =>
+        api.onObjectModified({ target: createSerializableObject() })
+      )
+
+      isReadOnly.value = true
+      await nextTick()
+
+      expect(canvas.discardActiveObject).toHaveBeenCalledTimes(1)
+      expect(api.updates.value).toHaveLength(0)
+      expect(postAnnotationUpdate).not.toHaveBeenCalled()
+      expect(saveAnnotationsCb).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    // A mute left on would drop every change made once the right comes back.
+    it('saves the changes made once the right comes back', async () => {
+      const isReadOnly = ref(false)
+      const { api, saveAnnotationsCb, wrapper } = mountAnnotation({
+        isReadOnly
+      })
+
+      isReadOnly.value = true
+      await nextTick()
+      isReadOnly.value = false
+      await nextTick()
+      api.onObjectModified({ target: createSerializableObject() })
+
+      expect(api.updates.value).toHaveLength(1)
+      expect(saveAnnotationsCb).toHaveBeenCalledTimes(1)
       wrapper.unmount()
     })
   })

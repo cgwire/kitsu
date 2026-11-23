@@ -1,3 +1,4 @@
+import moment from 'moment-timezone'
 import { nextTick } from 'vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -5,20 +6,29 @@ import { createStore } from 'vuex'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
+// the parameters of a message show in its text
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
-  useI18n: () => ({ t: key => key })
+  useI18n: () => ({
+    t: (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key)
+  })
 }))
 
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
 import TeamSchedule from '@/components/pages/TeamSchedule.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
+
+import { buildRefusal } from '../fixtures/refusal'
 
 const ScheduleStub = {
   template: '<div />',
   props: ['assignRule'],
+  // true from the press on a bar to its drop
+  data: () => ({ isEditingDates: false }),
   methods: {
+    refreshItemPositions: () => {},
     scrollToToday: () => {}
   }
 }
@@ -1030,6 +1040,208 @@ describe('TeamSchedule page', () => {
 
       // 160 minutes are a third of an 8 hour day
       expect(wrapper.find('.task-item em').text()).toBe('0.33 main.man_days')
+      wrapper.unmount()
+    })
+  })
+
+  // A bar whose change Zou refuses goes back, and a line under the toolbar
+  // says so.
+  describe('refused changes', () => {
+    const refuse = () => vi.fn(() => Promise.reject(buildRefusal(403)))
+    const day = date => moment.utc(date)
+    const span = bar => [bar.startDate, bar.endDate].map(date => date.format('YYYY-MM-DD'))
+    const findError = wrapper => wrapper.findComponent(ErrorText)
+    const emit = (wrapper, ...args) =>
+      wrapper.findComponent(ScheduleStub).vm.$emit(...args)
+    // the schedule shows once it has rows: one person
+    const taskGetters = {
+      displayedPeople: () => [
+        { id: 'person-1', name: 'Ann', departments: [], is_bot: false }
+      ],
+      organisation: () => ({ hours_by_day: 8 }),
+      taskTypeMap: () => new Map([[animationType.id, animationType]])
+    }
+    const taskActions = {
+      getPersonsTasksDates: vi.fn(() => [
+        {
+          person_id: 'person-1',
+          min_date: '2026-10-01',
+          max_date: '2026-10-30',
+          busy_periods: []
+        }
+      ])
+    }
+
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    const buildRow = (id = 'person-1') => ({
+      id,
+      daysOff: [],
+      expanded: true,
+      startDate: day('2026-10-05'),
+      endDate: day('2026-10-09'),
+      children: []
+    })
+
+    // Moved by the widget from Monday 5 to Monday 12 October.
+    const buildMovedBar = row => {
+      const bar = {
+        type: 'Task',
+        id: 'task-1',
+        name: 'SQ01 / SH010 / Animation',
+        estimation: 0,
+        startDate: day('2026-10-12'),
+        endDate: day('2026-10-16'),
+        _dragOrigStartDate: day('2026-10-05'),
+        _dragOrigEndDate: day('2026-10-09'),
+        _dragOrigEstimation: 0,
+        parentElement: row
+      }
+      row.children = [bar]
+      return bar
+    }
+
+    it('puts back a bar whose move Zou refuses, and its row', async () => {
+      const { wrapper } = await mountPage({
+        actions: { ...taskActions, updateTask: refuse() },
+        getters: taskGetters
+      })
+      await flushPromises()
+      const row = buildRow()
+      const bar = buildMovedBar(row)
+      // the row spans the bar where the drag left it
+      row.startDate = day('2026-10-12')
+      row.endDate = day('2026-10-16')
+
+      emit(wrapper, 'item-changed', bar)
+      await flushPromises()
+
+      expect(span(bar)).toEqual(['2026-10-05', '2026-10-09'])
+      expect(span(row)).toEqual(['2026-10-05', '2026-10-09'])
+      expect(findError(wrapper).props('text')).toBe(
+        'main.cell_save_error {"name":"SQ01 / SH010 / Animation"}'
+      )
+      expect(findError(wrapper).classes()).toContain('has-text-centered')
+      wrapper.unmount()
+    })
+
+    // The widget gives the task from the backlog the dates of the drop.
+    const buildBacklogTask = () => ({
+      id: 'task-1',
+      type: 'Task',
+      task_type_id: animationType.id,
+      project_id: 'production-1',
+      full_entity_name: 'SQ01 / SH010',
+      estimation: 8 * 60,
+      start_date: '2026-10-05',
+      due_date: '2026-10-09'
+    })
+
+    const mountBacklog = async (task, actions) => {
+      const { wrapper } = await mountPage({
+        actions: {
+          ...taskActions,
+          fetchPersonTasks: vi.fn(() => []),
+          loadOpenTasks: vi.fn(() => ({
+            data: [task],
+            is_more: false,
+            stats: { total: 1 }
+          })),
+          ...actions
+        },
+        getters: taskGetters,
+        renderStubDefaultSlot: true
+      })
+      wrapper.vm.toggleTaskSidePanel()
+      await flushPromises()
+      return wrapper
+    }
+
+    const backlogIds = wrapper => wrapper.vm.unassignedTasks.map(({ id }) => id)
+
+    it('keeps in the backlog a task whose assignment Zou refuses', async () => {
+      const task = buildBacklogTask()
+      const updateTask = vi.fn()
+      const wrapper = await mountBacklog(task, {
+        assignSelectedTasks: refuse(),
+        updateTask
+      })
+      const row = buildRow()
+
+      emit(wrapper, 'item-drop', task, row)
+      await flushPromises()
+
+      expect(row.children).toEqual([])
+      expect(backlogIds(wrapper)).toEqual(['task-1'])
+      expect(updateTask).not.toHaveBeenCalled()
+      expect(findError(wrapper).props('text')).toBe(
+        'main.cell_save_error {"name":"SQ01 / SH010 / Animation"}'
+      )
+      wrapper.unmount()
+    })
+
+    // Assigned, the task left the backlog: its row comes back from Zou with
+    // the dates it kept.
+    it('reloads the row of a dropped task whose dates Zou refuses', async () => {
+      const task = buildBacklogTask()
+      const fetchPersonTasks = vi.fn(() => [])
+      const wrapper = await mountBacklog(task, {
+        assignSelectedTasks: vi.fn(() => Promise.resolve()),
+        fetchPersonTasks,
+        updateTask: refuse()
+      })
+      const row = buildRow()
+
+      emit(wrapper, 'item-drop', task, row)
+      await flushPromises()
+
+      expect(backlogIds(wrapper)).toEqual([])
+      expect(fetchPersonTasks).toHaveBeenCalled()
+      expect(row.children).toEqual([])
+      expect(findError(wrapper).props('text')).toBe(
+        'main.cell_save_error {"name":"SQ01 / SH010 / Animation"}'
+      )
+      wrapper.unmount()
+    })
+
+    // A drag reassigns as it crosses the rows of the people: the rows come
+    // back from Zou once the drag is over.
+    it('reloads after the drop the row of a reassignment Zou refuses', async () => {
+      const fetchPersonTasks = vi.fn(() => [])
+      const { wrapper } = await mountPage({
+        actions: {
+          ...taskActions,
+          assignSelectedTasks: refuse(),
+          fetchPersonTasks,
+          unassignPersonFromTask: vi.fn(() => Promise.resolve())
+        },
+        getters: taskGetters
+      })
+      await flushPromises()
+      const from = buildRow('person-1')
+      const to = buildRow('person-2')
+      const bar = buildMovedBar(to)
+      wrapper.findComponent(ScheduleStub).vm.isEditingDates = true
+
+      emit(wrapper, 'item-unassign', bar, from)
+      emit(wrapper, 'item-assign', bar, to)
+      await flushPromises()
+      expect(fetchPersonTasks).not.toHaveBeenCalled()
+
+      wrapper.findComponent(ScheduleStub).vm.isEditingDates = false
+      await flushPromises()
+
+      expect(fetchPersonTasks).toHaveBeenCalledTimes(1)
+      expect(fetchPersonTasks.mock.calls[0][1]).toBe('person-2')
+      expect(findError(wrapper).props('text')).toBe(
+        'main.cell_save_error {"name":"SQ01 / SH010 / Animation"}'
+      )
       wrapper.unmount()
     })
   })

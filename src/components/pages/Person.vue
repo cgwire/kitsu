@@ -220,6 +220,11 @@
             class="todos-panel schedule-panel"
             v-else-if="isActiveTab('schedule')"
           >
+            <error-text
+              class="has-text-centered"
+              :text="scheduleSaveErrorText"
+              v-if="scheduleSaveErrorText"
+            />
             <schedule
               ref="schedule-widget"
               :days-off="daysOff"
@@ -305,6 +310,7 @@ import { useStore } from 'vuex'
 
 import { useBoardStatuses } from '@/composables/board'
 import { useProductivity } from '@/composables/productivity'
+import { getBarOrigin, useScheduleSave } from '@/composables/scheduleSave'
 import { useTaskFilters } from '@/composables/taskFilters'
 import colors from '@/lib/colors'
 import preferences from '@/lib/preferences'
@@ -329,6 +335,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductivityChart from '@/components/widgets/ProductivityChart.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
@@ -342,6 +349,7 @@ const route = useRoute()
 const router = useRouter()
 const store = useStore()
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
+const { saveBar, scheduleSaveErrorText } = useScheduleSave(bar => bar.name)
 
 // State
 // --------------------------------------------------------------------------
@@ -751,7 +759,9 @@ const canEditTaskDates = taskType => {
   )
 }
 
-const saveTaskScheduleItem = item => {
+// A bar whose save Zou refuses goes back where the widget found it.
+const saveTaskScheduleItem = async item => {
+  const origin = getBarOrigin(item)
   if (item.estimation) {
     item.endDate = addBusinessDays(
       item.startDate,
@@ -762,17 +772,26 @@ const saveTaskScheduleItem = item => {
   item.man_days = item.estimation || 0
 
   if (item.startDate && item.endDate) {
-    store
-      .dispatch('updateTask', {
-        taskId: item.id,
-        data: {
-          estimation: item.estimation,
-          start_date: item.startDate.format('YYYY-MM-DD'),
-          due_date: item.endDate.format('YYYY-MM-DD')
-        }
-      })
-      .catch(console.error)
+    await saveBar(
+      item,
+      () =>
+        store.dispatch('updateTask', {
+          taskId: item.id,
+          data: {
+            estimation: item.estimation,
+            start_date: item.startDate.format('YYYY-MM-DD'),
+            due_date: item.endDate.format('YYYY-MM-DD')
+          }
+        }),
+      { origin, onPutBack: redrawBar }
+    )
   }
+}
+
+// a bar put back, and the man-days of its row
+const redrawBar = bar => {
+  scheduleWidgetRef.value?.refreshItemPositions(bar.parentElement ?? bar)
+  scheduleWidgetRef.value?.refreshManDays(bar.parentElement)
 }
 
 const loadPerson = async personId => {

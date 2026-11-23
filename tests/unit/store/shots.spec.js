@@ -12,6 +12,7 @@ vi.mock('@/store/api/client', () => ({
     getModel: vi.fn(),
     pdel: vi.fn(),
     pget: vi.fn(),
+    pgetNdjson: vi.fn(),
     ppost: vi.fn(),
     pput: vi.fn()
   }
@@ -34,6 +35,7 @@ import {
   ADD_SELECTED_TASKS,
   CLEAR_SELECTED_TASKS,
   CREATE_TASKS_END,
+  DELETE_METADATA_DESCRIPTOR_END,
   DELETE_TASK_END,
   IMPORT_SHOTS_END,
   LOAD_SHOTS_END,
@@ -578,6 +580,27 @@ describe('Shots store, loadShot live insertion', () => {
       { shotId: 'sh-gone', onlyInScope: true }
     )
 
+    expect(commit).not.toHaveBeenCalled()
+  })
+})
+
+describe('Shots store, loadShot failure', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // The shot page tells a missing shot from a failed load by the error.
+  test('hands a failed read to its caller', async () => {
+    const failure = Object.assign(new Error('HTTP 404'), { status: 404 })
+    vi.spyOn(shotsApi, 'getShot').mockRejectedValue(failure)
+    const commit = vi.fn()
+
+    await expect(
+      shotsStore.actions.loadShot(
+        { commit, state: {}, rootGetters: { currentProduction: { id: 'p1' } } },
+        'sh-missing'
+      )
+    ).rejects.toBe(failure)
     expect(commit).not.toHaveBeenCalled()
   })
 })
@@ -1597,7 +1620,9 @@ describe('Shots store, through a store', () => {
         taskMap: () => taskMap,
         taskStatus: () => [],
         taskStatusMap: () => new Map(),
-        taskTypeMap: () => taskTypeMap
+        taskTypeMap: () => taskTypeMap,
+        userFilterGroups: () => ({}),
+        userFilters: () => ({})
       },
       actions: rootActions
     })
@@ -1792,6 +1817,40 @@ describe('Shots store, through a store', () => {
         taskStatusStore.cache.taskStatusMap.delete('ts-wfa')
         taskStatusStore.cache.taskStatusMap.delete('ts-wip')
       }
+    })
+
+    // The list load replaces the whole list, and commits its answer only
+    // under the scope it started with.
+    test('keeps a list load started during a read by id to its scope and shots', async () => {
+      rootActions.loadSequencesWithTasks = vi.fn(() => Promise.resolve())
+      const store = buildStore({
+        isTVShow: true,
+        currentEpisode: { id: 'ep-a' }
+      })
+      client.getModel.mockResolvedValueOnce(
+        buildShot('s9', 'SH090', { episode_id: 'ep-b' })
+      )
+      let answerList
+      client.pgetNdjson.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            answerList = resolve
+          })
+      )
+
+      const reading = store.dispatch('loadShot', 's9')
+      const loading = store.dispatch('loadShots')
+      await reading
+      // The list request leaves once the load steps before it settle.
+      await new Promise(resolve => setTimeout(resolve))
+      answerList([buildShot('s1', 'SH010', { episode_id: 'ep-a' })])
+      await loading
+
+      expect(store.getters.isShotsLoading).toBe(false)
+      expect(store.getters.shotsLoadingKey).toBe('p1/ep-a')
+      expect(names(store.getters.displayedShots)).toEqual(['SH010'])
+      // The playlists read the map, not the list.
+      expect([...store.getters.shotMap.keys()]).toEqual(['s1'])
     })
   })
 
@@ -2248,16 +2307,131 @@ describe('Shots store, through a store', () => {
       load(store, [buildShot('s1', 'SH010', { data: { look: 'warm' } })])
 
       store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
-        descriptor: { entity_type: 'Edit', field_name: 'style' },
+        descriptor: {
+          entity_type: 'Edit',
+          field_name: 'style',
+          project_id: 'p1'
+        },
         previousDescriptorFieldName: 'look'
       })
       expect(store.getters.shotMap.get('s1').data).toEqual({ look: 'warm' })
 
       store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
-        descriptor: { entity_type: 'Shot', field_name: 'style' },
+        descriptor: {
+          entity_type: 'Shot',
+          field_name: 'style',
+          project_id: 'p1'
+        },
         previousDescriptorFieldName: 'look'
       })
       expect(store.getters.shotMap.get('s1').data).toEqual({ style: 'warm' })
+    })
+
+    // The live update of a rename made in this tab can come before the
+    // answer to the rename.
+    test('moves the data of a renamed shot descriptor once', () => {
+      const store = buildStore()
+      load(store, [buildShot('s1', 'SH010', { data: { look: 'warm' } })])
+      const rename = () =>
+        store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
+          descriptor: {
+            entity_type: 'Shot',
+            field_name: 'style',
+            project_id: 'p1'
+          },
+          previousDescriptorFieldName: 'look'
+        })
+
+      rename()
+      rename()
+      expect(store.getters.shotMap.get('s1').data).toEqual({ style: 'warm' })
+    })
+
+    test('drops the data of a deleted shot descriptor of its production', () => {
+      const store = buildStore()
+      load(store, [
+        buildShot('s1', 'SH010', {
+          project_id: 'p1',
+          data: { look: 'warm', mood: 'calm' }
+        })
+      ])
+      const drop = (entityType, projectId) =>
+        store.commit(DELETE_METADATA_DESCRIPTOR_END, {
+          id: 'd1',
+          descriptor: {
+            id: 'd1',
+            entity_type: entityType,
+            field_name: 'look',
+            project_id: projectId
+          }
+        })
+
+      drop('Edit', 'p1')
+      drop('Shot', 'p2')
+      expect(store.getters.shotMap.get('s1').data).toEqual({
+        look: 'warm',
+        mood: 'calm'
+      })
+
+      drop('Shot', 'p1')
+      expect(store.getters.shotMap.get('s1').data).toEqual({ mood: 'calm' })
+    })
+
+    // Someone else deletes or renames a column while the list loads: Zou may
+    // have built its answer before.
+    test('replays the column changes made during a list load', async () => {
+      rootActions.loadSequencesWithTasks = vi.fn(() => Promise.resolve())
+      const store = buildStore()
+      let answerList
+      client.pgetNdjson.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            answerList = resolve
+          })
+      )
+
+      const loading = store.dispatch('loadShots')
+      // The list request leaves once the load steps before it settle.
+      await new Promise(resolve => setTimeout(resolve))
+      store.commit(UPDATE_METADATA_DESCRIPTOR_END, {
+        descriptor: { entity_type: 'Shot', field_name: 'style', project_id: 'p1' },
+        previousDescriptorFieldName: 'look'
+      })
+      store.commit(DELETE_METADATA_DESCRIPTOR_END, {
+        id: 'd1',
+        descriptor: { id: 'd1', entity_type: 'Shot', field_name: 'notes', project_id: 'p1' }
+      })
+      answerList([
+        buildShot('s1', 'SH010', {
+          data: { look: 'warm', notes: 'n', mood: 'calm' }
+        })
+      ])
+      await loading
+
+      expect(store.getters.shotMap.get('s1').data).toEqual({
+        style: 'warm',
+        mood: 'calm'
+      })
+    })
+
+    // A load started after a change gets what Zou wrote since, such as a
+    // column created again under the old name.
+    test('replays no column change made before a list load', async () => {
+      rootActions.loadSequencesWithTasks = vi.fn(() => Promise.resolve())
+      const store = buildStore()
+      store.commit(DELETE_METADATA_DESCRIPTOR_END, {
+        id: 'd1',
+        descriptor: { id: 'd1', entity_type: 'Shot', field_name: 'notes', project_id: 'p1' }
+      })
+      client.pgetNdjson.mockResolvedValueOnce([
+        buildShot('s1', 'SH010', { data: { notes: 'new column' } })
+      ])
+
+      await store.dispatch('loadShots')
+
+      expect(store.getters.shotMap.get('s1').data).toEqual({
+        notes: 'new column'
+      })
     })
 
     test('loads the history of a shot', async () => {

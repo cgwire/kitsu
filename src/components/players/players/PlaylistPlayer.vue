@@ -486,11 +486,14 @@
     <div
       id="sound-container"
       :style="{
-        height: isWaveformDisplayed && isCurrentPreviewMovie ? '60px' : '0px',
+        height: isWaveformShown ? '60px' : '0px',
         width: '100%'
       }"
-      v-show="isWaveformDisplayed && isCurrentPreviewMovie"
+      v-show="isWaveformShown"
     >
+      <div class="waveform-loading" v-show="isWaveformLoading">
+        <spinner />
+      </div>
       <div id="waveform"></div>
     </div>
 
@@ -1215,6 +1218,7 @@ const isObjectBackground = ref(false)
 const isShowAnnotationsWhilePlaying = ref(false)
 const isTyping = ref(false)
 const isWaveformDisplayed = ref(false)
+const isWaveformLoading = ref(false)
 const isWireframe = ref(false)
 const maxDuration = ref('00:00:00:00')
 const maxDurationRaw = ref(0)
@@ -1322,6 +1326,14 @@ const {
 // Annotations go on movies and pictures only, as in the task panel.
 const isCurrentPreviewAnnotatable = computed(
   () => isCurrentPreviewMovie.value || isCurrentPreviewPicture.value
+)
+// The toggle stays on through the files that are not movies. A build plays
+// them all in one video, which the waveform would resize at each one.
+const isWaveformShown = computed(
+  () =>
+    isWaveformDisplayed.value &&
+    isCurrentPreviewMovie.value &&
+    !isFullMode.value
 )
 
 // Computed — entity & preview state
@@ -1598,7 +1610,7 @@ const frameNumber = computed(() => {
 
 // Production start frame of the playing shot (data.frame_in, e.g. 1001).
 // Forwarded to the playback bar / progress bar as a display-only offset —
-// currentFrame stays 1-based since annotation seeks round-trip on it.
+// currentFrame stays 1-based.
 // Opt-in through the production option; a missing field means disabled.
 const frameStart = computed(() =>
   currentProduction.value?.is_frame_in_numbering
@@ -1849,7 +1861,7 @@ const annotation = useAnnotation({
   onionCanvasComponent: onionAnnotationCanvas,
   canvasWrapper,
   annotations,
-  isCurrentUserArtist,
+  isReadOnly: computed(() => !canAnnotateCurrentPreview.value),
   userId,
   store,
   emit,
@@ -2062,8 +2074,12 @@ const { isAltHeld } = usePreviewShortcuts({
       onEraseClicked()
     }
   },
-  onUndo: () => undoLastAction(),
-  onRedo: () => redoLastAction(),
+  onUndo: () => {
+    if (canAnnotateCurrentPreview.value) undoLastAction()
+  },
+  onRedo: () => {
+    if (canAnnotateCurrentPreview.value) redoLastAction()
+  },
   onPrevPreview: () => onPlayPreviousEntityClicked(),
   onNextPreview: () => onPlayNextEntityClicked(),
   onCopy: () => copyAnnotations(),
@@ -2999,16 +3015,17 @@ const getCurrentTime = () => {
   if (!isCurrentPreviewMovie.value) return 0
   // 4-decimal rounding only: toPrecision(4) keeps 4 significant digits and
   // quantized times past 100s, landing annotations on neighbouring frames.
-  return roundToFrame(currentTimeRaw.value, fps.value) || 0
+  // Chromium can stand a new list a frame before its start: a stroke drawn
+  // then belongs to the first frame.
+  return Math.max(roundToFrame(currentTimeRaw.value, fps.value) || 0, 0)
 }
 
 const getCurrentFrame = () => {
-  // Persist exactly the frame the user sees (currentFrame is the on-screen
-  // 1-based label), as a number. It was stored as the zero-padded display
-  // string from formatFrame. The annotation seek round-trips on this value
-  // (goPreviousDrawing / goNextDrawing read `Number(frame) - 1`), so it is
-  // the navigation source of truth, not the player time.
-  return parseInt(currentFrame.value)
+  // Persist the 1-based frame of the movie (currentFrame; a production can
+  // start the counter at the shot's frame_in instead), as a number. It was
+  // stored as the zero-padded display string from formatFrame. Before the
+  // start, as for the time, the first frame.
+  return Math.max(parseInt(currentFrame.value), 1)
 }
 
 const setCurrentTimeRaw = time => {
@@ -3388,7 +3405,8 @@ const hideCanvas = () => {
 const loadAnnotation = ann => {
   if (!ann) return
   pause()
-  const time = ann.time || 0
+  // A stroke saved before the start belongs to the first frame.
+  const time = Math.max(ann.time || 0, 0)
   if (rawPlayer.value || picturePlayer.value) {
     if (rawPlayer.value) {
       const frame = time / frameDuration.value
@@ -3573,12 +3591,17 @@ const getAnnotation = time => {
   if (!annotations.value) {
     annotations.value = currentEntity.value?.preview_file_annotations || []
   }
-  time = roundToFrame(time, fps.value)
+  // Nothing comes before the first frame: Chromium can stand a new list a
+  // frame before it, and strokes drawn then were saved on that time.
+  time = roundToFrame(Math.max(time, 0), fps.value)
   if (annotations.value?.find) {
     let ann = annotations.value.find(a => a.time === time)
     if (!ann) {
+      // Compare frames: an older drawing can hold an unrounded time, and a
+      // window in seconds reaches the next frame at 60 fps.
       ann = annotations.value.find(
-        a => a.time > time - 0.02 && a.time < time + 0.02
+        a =>
+          Math.abs(roundToFrame(Math.max(a.time, 0), fps.value) - time) < 0.0001
       )
     }
     if (!ann && isCurrentPreviewPicture.value && annotations.value.length > 0) {
@@ -4148,7 +4171,15 @@ const onVideoLoaded = () => {
       width: currentPreview.value.width,
       height: currentPreview.value.height
     }
-    if (!isPlaying.value) loadAnnotation(getAnnotation(0))
+    // The movie does not always stand on its first frame: a click on the
+    // playlist bar seeks it, and the decoder that preloads the next movie
+    // sends this event too, even while a note is being typed. A drawing sits
+    // on its frame, whose time is rounded: look the frame up, not the time.
+    if (!isPlaying.value && !isTypingNote()) {
+      loadAnnotation(
+        getAnnotation(rawPlayer.value.getCurrentFrame() * frameDuration.value)
+      )
+    }
   }
 }
 
@@ -4235,6 +4266,8 @@ const onEntityDropped = info => {
     const toMoveIndex = findEntityIndex(info.after)
     let targetIndex = findEntityIndex(info.before)
     if (toMoveIndex > targetIndex) targetIndex += 1
+    // Dropped next to where it stands: nothing moves.
+    if (toMoveIndex === targetIndex) return
     silentMode = true
     moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
     nextTick(() => {
@@ -4282,6 +4315,13 @@ const moveSelectedEntity = (entityToMove, toMoveIndex, targetIndex) => {
   if (!currentEntity.value) return
   if (playingEntityIndex.value >= 0) {
     if (toMoveIndex >= 0 && targetIndex >= 0) {
+      // A new list takes the viewers back to the start of its first entry,
+      // and the entry back to its first file: read the time of the entry on
+      // screen first. Another of its files has a time of its own.
+      const keepsFrame =
+        toMoveIndex === playingEntityIndex.value &&
+        currentPreviewIndex.value === 0
+      const time = keepsFrame ? rawPlayer.value?.getCurrentTimeRaw() || 0 : 0
       // Single replacement: the transient empty list unmounted every
       // PlaylistedEntity and remounted the whole strip on each reorder
       // (the keyed v-for just moves nodes on a same-content swap).
@@ -4289,8 +4329,51 @@ const moveSelectedEntity = (entityToMove, toMoveIndex, targetIndex) => {
       tmp.splice(toMoveIndex, 1)
       tmp.splice(targetIndex, 0, entityToMove)
       entityList.value = tmp
+      // The playlist bar draws and plays the entries in the new order.
+      resetPlaylistFrameData()
       nextTick(() => {
         playingEntityIndex.value = targetIndex
+        // A picture counts the frames it held: another entry starts from its
+        // first.
+        if (!keepsFrame) framesSeenOfPicture.value = 1
+        // Playback starts from the start handle: a dropped shot takes its
+        // own, not the one of the shot shown before.
+        resetHandles(entityToMove)
+        rawPlayer.value?.loadEntity(targetIndex, time, true)
+        // The counter and the drawing follow the frame: the decoder of the
+        // movie can stand there already, and then sends none.
+        onFrameUpdate(Math.round(time * fps.value))
+        // The comparison shows movies only.
+        if (
+          isComparing.value &&
+          isMoviePreview(entityToMove.preview_file_extension)
+        ) {
+          rawPlayerComparison.value?.loadEntity(targetIndex, time)
+        }
+        // Paused, the video sends no time to move the playhead of the
+        // playlist bar to the new place of the entry.
+        onRawPlayerTimeUpdate(time)
+        if (isPlaying.value) {
+          if (isSoundPreview(entityToMove.preview_file_extension)) {
+            // The player of a sound comes back paused: the list change took
+            // it away, or loaded other sounds in it on the way. A build holds
+            // the movies only, and plays its own sound.
+            if (!isFullMode.value) playSound()
+          } else if (
+            // A picture plays on a timer, which kept the place it started
+            // from.
+            isPicturePreview(entityToMove.preview_file_extension) ||
+            !entityToMove.preview_file_id
+          ) {
+            playPicture()
+          } else if (isModelPreview(entityToMove.preview_file_extension)) {
+            // As on a click: the viewer gets the model on the next render, and
+            // a model loaded before sends no load to start its animation.
+            nextTick(() => {
+              if (isPlaying.value && isCurrentPreviewModel.value) playModel()
+            })
+          }
+        }
         scrollToEntity(playingEntityIndex.value)
       })
     }
@@ -4318,7 +4401,7 @@ const getMediaHeight = availableHeight => {
       height -= playlistProgressRef.value.$el.offsetHeight
     }
   }
-  if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) height -= 60
+  if (isWaveformShown.value) height -= 60
   return height
 }
 
@@ -4332,12 +4415,14 @@ const getPhoneMediaHeight = () => {
   return Math.round(((videoContainer.value?.offsetWidth || 0) * 9) / 16)
 }
 
-const resetHeight = () => {
+// Resolves once the canvas follows the media.
+const resetHeight = () =>
   nextTick(() => {
     let height
     if (isPhone.value) {
       height = getPhoneMediaHeight()
-    } else if (props.tempMode) {
+    } else if (props.tempMode && !fullScreen.value) {
+      // The modal around the player, which full screen leaves out.
       height = getMediaHeight(window.innerHeight - 90)
     } else {
       height = getMediaHeight(
@@ -4356,13 +4441,12 @@ const resetHeight = () => {
     if (isComparing.value && rawPlayerComparison.value) {
       rawPlayerComparison.value.resetHeight(height)
     }
-    nextTick(() => {
-      if (isTypingNote()) resetCanvasSize()
-      else resetCanvas()
+    return nextTick(() => {
+      const canvasReset = isTypingNote() ? resetCanvasSize() : resetCanvas()
       updateProgressBar()
+      return canvasReset
     })
   })
-}
 
 // Comparison side-effect wrappers (broadcast + player re-load belong here,
 // the pure selection state lives in usePlaylistComparison).
@@ -4601,8 +4685,15 @@ const configureWaveForm = () => {
   }
 }
 
+// The waveform reads the low def movie whatever the quality played: the
+// same sound for a fraction of the bytes. Chrome caches the range reads of
+// the video apart from a whole-file read: on the video's address, each
+// return to the shot downloaded the movie again, so the waveform has its own.
+const getWaveformPath = preview =>
+  `/api/movies/low/preview-files/${preview.id}.mp4?waveform`
+
 const loadWaveForm = () => {
-  if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) {
+  if (isWaveformShown.value) {
     if (rawPlayer.value?.currentPlayer?.src) {
       try {
         if (wavesurfer) {
@@ -4611,17 +4702,31 @@ const loadWaveForm = () => {
           wavesurfer = null
         }
         configureWaveForm()
+        isWaveformLoading.value = Boolean(wavesurfer)
         // The load still pending from a switch less than 100 ms ago would
         // fetch the movie a second time, into this new waveform.
         clearTimeout(waveformLoadTimeout)
         waveformLoadTimeout = setTimeout(() => {
-          // Destroyed meanwhile: the player closed, or moved on to a
-          // preview that is no movie.
-          if (!wavesurfer) return
+          // Destroyed meanwhile: hidden, under a build, or off the movie
+          // (another entry, a file of the revision that is no movie, or a
+          // list emptied).
+          if (!wavesurfer) {
+            isWaveformLoading.value = false
+            return
+          }
           // destroy() aborts the in-flight fetch, rejecting load() with an
           // expected AbortError; real failures already reach the 'error'
           // handler, which load() fires before rejecting.
-          wavesurfer.load(rawPlayer.value.currentPlayer.src).catch(() => {})
+          const loading = wavesurfer
+          loading
+            .load(getWaveformPath(currentPreview.value))
+            .catch(() => {})
+            .finally(() => {
+              // The waveform of the next movie keeps the spinner.
+              if (wavesurfer === loading || !wavesurfer) {
+                isWaveformLoading.value = false
+              }
+            })
         }, 100)
       } catch (err) {
         console.error('Error loading waveform:', err)
@@ -4630,7 +4735,7 @@ const loadWaveForm = () => {
   } else {
     if (wavesurfer) {
       wavesurfer.destroy()
-      // Null it so the playback seek sync cannot touch a destroyed instance.
+      // Null it: the seek sync and a pending load skip a missing waveform.
       wavesurfer = null
     }
   }
@@ -5159,6 +5264,10 @@ watch(playingEntityIndex, () => {
   currentComparisonPreviewIndex.value = 0
   if (isCurrentPreviewMovie.value) {
     nextTick(() => {
+      // A reorder passes through the first entry of the new list: by now,
+      // the entry on screen can be of another kind, which the reorder or its
+      // viewer starts.
+      if (!isCurrentPreviewMovie.value) return
       loadWaveForm()
       if (isPlaying.value) play()
     })
@@ -5182,7 +5291,11 @@ watch(playingEntityIndex, () => {
         resetHeight()
         resetPictureCanvas()
       } else {
-        resetCanvas()
+        // The reset wipes the drawing of a paused movie, which only a movie
+        // loaded afterwards drew again.
+        resetCanvas().then(() => {
+          if (!isPlaying.value) onMainCanvasResized()
+        })
       }
       resetPanZoom()
       panzoomTransform.value = { x: 0, y: 0, scale: 1 }
@@ -5281,7 +5394,6 @@ watch(
     const currentId = currentEntity.value?.id
     if (currentId) entityIdBeforeRebuild = currentId
     resetPlaylist()
-    warmMovies()
     if (newEntities?.length) {
       const index = newEntities.findIndex(
         entity => entity.id === entityIdBeforeRebuild
@@ -5289,6 +5401,8 @@ watch(
       if (index > 0) playEntity(index)
       entityIdBeforeRebuild = null
     }
+    // The warm-ups start from the entity kept on screen.
+    warmMovies()
   }
 )
 
@@ -5409,13 +5523,35 @@ watch(isComparisonOverlay, () => {
   })
 })
 
+// The media gives the waveform its 60 px, and gets them back on hide.
+// The canvas draws again on a new size only, which a movie held by the
+// width of the player does not get: its paused frame draws again here.
+watch(isWaveformShown, () => {
+  resetHeight().then(() => {
+    if (!isPlaying.value && !isTypingNote()) onMainCanvasResized()
+  })
+})
+
+// On hide, loadWaveForm destroys the waveform: its download stops, and the
+// sound it decoded goes.
 watch(isWaveformDisplayed, () => {
-  if (isWaveformDisplayed.value) {
-    resetHeight()
-    loadWaveForm()
-  }
+  loadWaveForm()
+  warmWaveformMovies()
   nextTick(() => updateRoomStatus())
 })
+
+// A new movie on the entry on screen: another file of its revision, another
+// revision, or a new list starting on it. A switch of entry loads its own
+// waveform, in the playingEntityIndex watcher. The load waits for the
+// render, where the viewer takes the new movie as its source.
+watch(
+  [playingEntityIndex, () => currentPreview.value?.id],
+  ([index], [previousIndex]) => {
+    if (index === previousIndex) {
+      nextTick(() => loadWaveForm())
+    }
+  }
+)
 
 // The pencil the laser turned on goes off with it where the user may not keep
 // the tools, such as a document the laser started over.
@@ -5429,6 +5565,8 @@ watch(isLaserModeOn, () => {
 
 watch(isFullMode, () => {
   isComparing.value = false
+  // The waveform goes with the build, and comes back for the entry on screen.
+  loadWaveForm()
   if (isFullMode.value) {
     nextTick(() => playEntity(0))
   } else {
@@ -5452,7 +5590,13 @@ watch(isMuted, () => {
   if (!isMuted.value) preferences.setPreference('player:volume', volume.value)
 })
 
-watch(isMediaFullScreen, () => resetHeight())
+// The bars of full screen hide and show again: the canvas draws again on a
+// new size only, which a movie held by the width does not get.
+watch(isMediaFullScreen, () => {
+  resetHeight().then(() => {
+    if (!isPlaying.value && !isTypingNote()) onMainCanvasResized()
+  })
+})
 
 // a rotation lays the phone out again: the strip folds in landscape
 watch(isPhoneLandscape, isLandscape => {
@@ -5483,14 +5627,30 @@ watch(isHd, () => warmMovies())
 // clips, from the one on screen, as soon as the list or the quality is
 // known, so playback never starts cold.
 let stopMovieWarmup = null
-const warmMovies = () => {
-  if (stopMovieWarmup) stopMovieWarmup()
+let stopWaveformWarmup = null
+const getClipsFromScreen = () => {
   const index = playingEntityIndex.value
   const list = entityList.value
-  stopMovieWarmup = warmPlaylistMovies(
-    [...list.slice(index), ...list.slice(0, index)],
-    { isHd: isHd.value }
-  )
+  return [...list.slice(index), ...list.slice(0, index)]
+}
+// The waveform reads the low def movies, which an HD playback leaves cold.
+// From the next clip on: the waveform on screen reads its whole movie at
+// once, which a warm-up would only make the server fetch twice.
+const warmWaveformMovies = () => {
+  if (stopWaveformWarmup) stopWaveformWarmup()
+  stopWaveformWarmup = null
+  if (isHd.value && isWaveformDisplayed.value) {
+    stopWaveformWarmup = warmPlaylistMovies(getClipsFromScreen().slice(1), {
+      isHd: false
+    })
+  }
+}
+const warmMovies = () => {
+  if (stopMovieWarmup) stopMovieWarmup()
+  stopMovieWarmup = warmPlaylistMovies(getClipsFromScreen(), {
+    isHd: isHd.value
+  })
+  warmWaveformMovies()
 }
 
 onMounted(() => {
@@ -5561,6 +5721,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   isMounted = false
   if (stopMovieWarmup) stopMovieWarmup()
+  if (stopWaveformWarmup) stopWaveformWarmup()
   endAnnotationSaving()
   cancelProgressiveRender()
   _stopPlaylistProgressUpdateLoop()
@@ -5710,7 +5871,7 @@ const playerProxy = {
   }
 
   &.active {
-    color: var(--background-selectable);
+    color: var(--selectable-accent);
   }
 }
 
@@ -5722,6 +5883,19 @@ const playerProxy = {
   align-items: flex-start;
   height: 240px;
   min-height: 240px;
+}
+
+#sound-container {
+  position: relative;
+}
+
+.waveform-loading {
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
 }
 
 .loading-background {
@@ -6174,7 +6348,7 @@ const playerProxy = {
 }
 
 .playlist-button.button.active {
-  color: var(--background-selectable);
+  color: var(--selectable-accent);
 
   img.active {
     filter: invert(59%) sepia(38%) saturate(660%) hue-rotate(201deg)

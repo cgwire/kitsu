@@ -319,6 +319,7 @@
       :is-loading="loading.saveDescriptor"
       :is-error="errors.saveDescriptor"
       :descriptor-to-edit="descriptorToEdit"
+      :descriptors="modalDescriptors"
       :entity-type="metadataEntityTab"
       :task-types="metadataEntityTab === 'Task' ? templateTaskTypes : []"
       @cancel="modals.addMetadata = false"
@@ -339,6 +340,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useFieldCommitOnLeave } from '@/composables/fieldCommit'
+import {
+  getDescriptorFieldName,
+  isPlainDescriptorName
+} from '@/lib/descriptors'
 import {
   HOME_PAGE_OPTIONS,
   PRODUCTION_STYLE_OPTIONS,
@@ -482,6 +487,21 @@ const descriptorsForEntity = computed(() =>
   descriptors.value
     .map((descriptor, index) => ({ ...descriptor, __index: index }))
     .filter(d => (d.entity_type || 'Asset') === metadataEntityTab.value)
+)
+
+// Zou keeps two columns of the same name in a template, and skips the second
+// when it applies the template. It creates each one on the field name of its
+// name, not on the one a rename in the template kept, and none of no entity
+// type.
+const modalDescriptors = computed(() =>
+  descriptors.value.map((descriptor, index) => ({
+    ...descriptor,
+    id: getTemplateDescriptorId(index),
+    field_name:
+      descriptor.name && isPlainDescriptorName(descriptor.name)
+        ? getDescriptorFieldName(descriptor.name)
+        : null
+  }))
 )
 
 const allTaskTypes = computed(() => {
@@ -750,8 +770,8 @@ const removeBackground = backgroundId =>
 const setDefaultBackground = backgroundId =>
   updateTemplate('setTemplateDefaultBackground', { backgroundId })
 
-const cleanDescriptors = () =>
-  descriptors.value.map(d => ({
+const cleanDescriptors = list =>
+  list.map(d => ({
     name: d.name,
     entity_type: d.entity_type,
     task_type_id: d.task_type_id || null,
@@ -763,10 +783,14 @@ const cleanDescriptors = () =>
     position: d.position
   }))
 
-const persistDescriptors = () =>
+const persistDescriptors = (list = descriptors.value) =>
   updateTemplate('setTemplateMetadataDescriptors', {
-    descriptors: cleanDescriptors()
+    descriptors: cleanDescriptors(list)
   })
+
+// The modal tells the column it edits by its id, which a template column
+// lacks.
+const getTemplateDescriptorId = index => `template-descriptor-${index}`
 
 const openAddDescriptor = () => {
   errors.saveDescriptor = false
@@ -787,8 +811,9 @@ const openEditDescriptor = index => {
   errors.saveDescriptor = false
   descriptorToEditIndex.value = index
   descriptorToEdit.value = {
-    id: `template-descriptor-${index}`,
-    name: d.name,
+    id: getTemplateDescriptorId(index),
+    // Zou keeps a template column whose name came as null.
+    name: d.name ?? '',
     data_type: d.data_type,
     task_type_id: d.task_type_id ?? null,
     for_client: Boolean(d.for_client),
@@ -815,18 +840,20 @@ const confirmMetadataModal = async form => {
     for_client: form.for_client === 'true',
     departments: form.departments || []
   }
+  // The modal checks the name against the list until the save answers.
+  const list = [...descriptors.value]
   try {
     if (descriptorToEditIndex.value >= 0) {
-      const existing = descriptors.value[descriptorToEditIndex.value]
+      const existing = list[descriptorToEditIndex.value]
       entry.entity_type = existing.entity_type
       entry.task_type_id = form.task_type_id ?? existing.task_type_id
       entry.field_name = existing.field_name
       entry.position = existing.position
-      descriptors.value[descriptorToEditIndex.value] = entry
+      list[descriptorToEditIndex.value] = entry
     } else {
-      descriptors.value.push(entry)
+      list.push(entry)
     }
-    await persistDescriptors()
+    await persistDescriptors(list)
     modals.addMetadata = false
   } catch (error) {
     console.error(error)

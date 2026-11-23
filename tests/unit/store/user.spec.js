@@ -91,6 +91,23 @@ describe('User store', () => {
         expect(roleFor('production-2')).toEqual('user')
         expect(roleFor(null)).toEqual('user')
       })
+
+      // Zou keeps the team role of a supervisor promoted to admin, and
+      // applies none to an admin.
+      test('is admin for an admin, whatever the project role says', () => {
+        const roleFor = getter(
+          stateFor('admin', { 'production-1': 'supervisor' })
+        )
+        expect(roleFor('production-1')).toEqual('admin')
+        expect(roleFor('production-2')).toEqual('admin')
+      })
+
+      // The API of Zou never accepted the admin role on a team link, and Zou
+      // mostly reads one written some other way as the global role.
+      test('is the global role where the team link holds admin', () => {
+        const roleFor = getter(stateFor('user', { 'production-1': 'admin' }))
+        expect(roleFor('production-1')).toEqual('user')
+      })
     })
 
     describe('isCurrentUserProductionManager', () => {
@@ -101,7 +118,7 @@ describe('User store', () => {
         })
 
       test('admin always manages, whatever the project role says', () => {
-        expect(call('admin', { 'production-1': 'user' }, 'user')).toBe(true)
+        expect(call('admin', { 'production-1': 'user' }, 'admin')).toBe(true)
       })
 
       test('effective manager manages', () => {
@@ -173,6 +190,17 @@ describe('User store', () => {
           )
         ).toBe(true)
       })
+
+      test('a team link holding admin makes no manager', () => {
+        const linkAdmin = stateFor('user', { 'production-1': 'admin' })
+        const rootState = routeFor('production-1')
+        expect(
+          store.getters.isCurrentUserManager(linkAdmin, {}, rootState)
+        ).toBe(false)
+        expect(
+          store.getters.isCurrentUserArtist(linkAdmin, {}, rootState)
+        ).toBe(true)
+      })
     })
 
     describe('isCurrentUserProductionSupervisor', () => {
@@ -185,6 +213,19 @@ describe('User store', () => {
         expect(
           getter(stateFor('supervisor'), { currentUserEffectiveRole: 'user' })
         ).toBe(false)
+      })
+
+      test('is false for an admin whose team role is supervisor', () => {
+        const state = stateFor('admin', { 'production-1': 'supervisor' })
+        const currentUserEffectiveRole = store.getters.currentUserEffectiveRole(
+          state,
+          {
+            currentUserRoleForProduction:
+              store.getters.currentUserRoleForProduction(state)
+          },
+          rootStateFor('production-1')
+        )
+        expect(getter(state, { currentUserEffectiveRole })).toBe(false)
       })
     })
   })

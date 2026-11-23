@@ -207,6 +207,13 @@ export default {
     )
   },
 
+  // The columns of the production that the role of the user on it shows.
+  getMetadataDescriptors(productionId) {
+    return client.pget(
+      `/api/data/projects/${productionId}/metadata-descriptors`
+    )
+  },
+
   getMetadataDescriptor(productionId, descriptorId) {
     return client.pget(
       `/api/data/projects/${productionId}/metadata-descriptors/${descriptorId}`

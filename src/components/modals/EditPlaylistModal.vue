@@ -167,6 +167,9 @@ const taskTypeList = computed(() => {
 })
 
 const runConfirmation = () => {
+  // Enter in the name field comes here without the footer, whose Confirm
+  // waits for the save and is gone once the playlist is created.
+  if (props.isLoading || props.isSuccess) return
   if (!form.value.name) {
     nameField.value?.focus()
     return

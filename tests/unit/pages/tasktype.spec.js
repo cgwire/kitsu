@@ -19,6 +19,7 @@ import '@/lib/auth'
 import csv from '@/lib/csv'
 import assetStore from '@/store/modules/assets'
 import episodeStore from '@/store/modules/episodes'
+import scheduleStore from '@/store/modules/schedule'
 import shotStore from '@/store/modules/shots'
 import taskTypeStore from '@/store/modules/tasktypes'
 
@@ -31,6 +32,7 @@ import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
 import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
 
 import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
@@ -53,6 +55,8 @@ const ScheduleStub = {
   template: '<div />',
   data: () => ({ isEditingDates: false }),
   methods: {
+    refreshItemPositions: () => {},
+    refreshManDays: vi.fn(),
     scrollToDate: () => {},
     scrollToToday: () => {}
   }
@@ -78,6 +82,7 @@ const mountPage = async ({
     }
   ],
   section = 'estimation',
+  mutations = {},
   socket = { on: vi.fn(), off: vi.fn() },
   stubs = {}
 } = {}) => {
@@ -88,6 +93,7 @@ const mountPage = async ({
     ...actions
   }
   const store = createStore({
+    mutations,
     getters: {
       isInAssetTypeWorkflow: () => () => true,
       currentEpisode: () => null,
@@ -351,15 +357,153 @@ describe('TaskType page', () => {
       expect(modal().props('active')).toBe(true)
       expect(modal().props('isError')).toBe(false)
     })
+
+    // The modal cannot judge every name: € is "eur" for Zou.
+    it('tells a name Zou says is taken, until the next opening', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const refusal = Object.assign(new Error('Bad Request'), {
+        status: 400,
+        body: { message: 'Metadata descriptor already exists.' }
+      })
+      const page = await mountPage({
+        section: 'tasks',
+        actions: {
+          addMetadataDescriptor: vi.fn(() => Promise.reject(refusal))
+        },
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            descriptors: [descriptor]
+          })
+        }
+      })
+      wrapper = page.wrapper
+      const modal = () => wrapper.findComponent(AddMetadataModal)
+      const openNew = () =>
+        wrapper
+          .findAllComponents(ButtonSimple)
+          .find(button => button.props('icon') === 'plus')
+          .vm.$emit('click')
+
+      await openNew()
+      await modal().vm.$emit('confirm', { name: 'Budget €' })
+      await flushPromises()
+      expect(modal().props('takenName')).toBe('Budget €')
+      expect(modal().props('isError')).toBe(false)
+      expect(consoleError).not.toHaveBeenCalled()
+
+      await modal().vm.$emit('cancel')
+      await openNew()
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('takenName')).toBe('')
+
+      await modal().vm.$emit('confirm', { name: 'Budget €' })
+      await flushPromises()
+      await modal().vm.$emit('cancel')
+      await wrapper
+        .findComponent(TaskList)
+        .vm.$emit('edit-metadata', descriptor.id)
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('takenName')).toBe('')
+    })
+
+    // The name field stays open to typing while the save runs, and the
+    // modal may close and open on another column before Zou answers.
+    it('tells the name sent, and leaves a later opening alone', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const refusal = Object.assign(new Error('Bad Request'), {
+        status: 400,
+        body: { message: 'Metadata descriptor already exists.' }
+      })
+      let refuse
+      const page = await mountPage({
+        section: 'tasks',
+        actions: {
+          addMetadataDescriptor: vi.fn(
+            () =>
+              new Promise((resolve, reject) => {
+                refuse = () => reject(refusal)
+              })
+          )
+        },
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            descriptors: [descriptor]
+          })
+        }
+      })
+      wrapper = page.wrapper
+      const modal = () => wrapper.findComponent(AddMetadataModal)
+
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'plus')
+        .vm.$emit('click')
+      const form = { name: 'Budget €' }
+      await modal().vm.$emit('confirm', form)
+      form.name = 'Budget € 2'
+      refuse()
+      await flushPromises()
+      expect(modal().props('takenName')).toBe('Budget €')
+
+      await modal().vm.$emit('confirm', { name: 'Difficulty' })
+      await modal().vm.$emit('cancel')
+      await wrapper
+        .findComponent(TaskList)
+        .vm.$emit('edit-metadata', descriptor.id)
+      refuse()
+      await flushPromises()
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('takenName')).toBe('')
+    })
+
+    // Zou keeps the names of the task columns unique per task type.
+    it('checks a new name against the columns of its task type', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const own = {
+        ...descriptor,
+        entity_type: 'Task',
+        task_type_id: 'task-type-1'
+      }
+      const other = {
+        id: 'descriptor-2',
+        name: 'Camera',
+        entity_type: 'Task',
+        task_type_id: 'task-type-2'
+      }
+      const page = await mountPage({
+        section: 'tasks',
+        getters: { taskMetadataDescriptors: () => [own, other] }
+      })
+      wrapper = page.wrapper
+
+      expect(
+        wrapper.findComponent(AddMetadataModal).props('descriptors')
+      ).toEqual([own])
+    })
   })
 
   describe('task filters', () => {
     const TaskListStub = {
       name: 'TaskList',
       props: { tasks: { type: Array, default: () => [] } },
+      emits: ['task-selected'],
       // the tasks tab shows its schedule in the slot of the list
       template: '<div><slot /></div>',
-      methods: { resetSelection: () => {} }
+      methods: {
+        resetSelection: () => {},
+        // as the list does: the store first, then the event
+        selectTask(event, index, task) {
+          this.$store.dispatch('addSelectedTask', { task })
+          this.$emit('task-selected', task)
+        }
+      }
     }
     const statusTasks = ['status-1', 'status-2', 'status-3'].map(
       (statusId, index) => ({
@@ -460,6 +604,140 @@ describe('TaskType page', () => {
       expect(listedTaskIds()).toEqual(['task-11', 'task-12'])
     })
 
+    const mountSelectable = query => {
+      const selection = ref(new Map())
+      return mountTasks(
+        query,
+        {
+          nbSelectedTasks: () => selection.value.size,
+          selectedTasks: () => selection.value
+        },
+        {
+          actions: {
+            addSelectedTask: (context, { task }) => {
+              selection.value = new Map([[task.id, task]])
+            },
+            clearSelectedTasks: () => {
+              selection.value = new Map()
+            }
+          }
+        }
+      )
+    }
+
+    // The load writes the filters a link leaves out back into the URL, then
+    // selects the task of the link.
+    it.each([
+      ['a link with no filter', '', undefined],
+      ['a link with a filter', '?priority=2', undefined],
+      ['a link to a task', '?task_id=task-10', 'task-10'],
+      ['a link to a task the page cannot find', '?task_id=task-9', undefined]
+    ])('opens %s without a new history entry', async (_, query, taskId) => {
+      const historyLength = window.history.length
+      await mountSelectable(query)
+
+      expect(wrapper.vm.$route.query.duedate).toBe('all')
+      expect(wrapper.vm.$route.query.task_id).toBe(taskId)
+      expect(window.history.length).toBe(historyLength)
+    })
+
+    const styledCombo = label => () =>
+      wrapper
+        .findAllComponents({ name: 'ComboboxStyled' })
+        .find(combo => combo.props('label') === label)
+
+    it.each([
+      [
+        'asset type',
+        () => wrapper.findComponent(ComboboxMultiple),
+        ['props'],
+        'asset_type_id',
+        'props'
+      ],
+      [
+        'status',
+        () => wrapper.findComponent(ComboboxStatusMultiple),
+        ['status-2'],
+        'task_status_id',
+        'status-2'
+      ],
+      [
+        'difficulty',
+        styledCombo('tasks.fields.difficulty'),
+        '4',
+        'difficulty',
+        '4'
+      ],
+      ['due date', styledCombo('tasks.due_date'), 'dueweek', 'duedate', 'dueweek'],
+      ['late', styledCombo('tasks.late'), 'donelate', 'late', 'donelate'],
+      ['priority', styledCombo('task_types.fields.priority'), '2', 'priority', '2'],
+      [
+        'retake count',
+        styledCombo('tasks.fields.retake_count'),
+        'none',
+        'retake_count',
+        'none'
+      ]
+    ])(
+      'adds a history entry for a pick in the %s filter',
+      async (_, widget, value, key, valueInUrl) => {
+        await mountTasks('')
+        const historyLength = window.history.length
+
+        widget().vm.$emit('update:modelValue', value)
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query[key]).toBe(valueInUrl)
+        expect(window.history.length).toBe(historyLength + 1)
+      }
+    )
+
+    it('adds a history entry for a task picked', async () => {
+      await mountSelectable('')
+      const historyLength = window.history.length
+
+      wrapper.findComponent(TaskListStub).vm.selectTask({}, 0, statusTasks[0])
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query.task_id).toBe('task-10')
+      expect(window.history.length).toBe(historyLength + 1)
+    })
+
+    it('adds a history entry for a search typed', async () => {
+      const getValue = vi.spyOn(SearchFieldStub.methods, 'getValue')
+      try {
+        await mountTasks('')
+        const historyLength = window.history.length
+
+        getValue.mockReturnValue('chair')
+        wrapper.findComponent(SearchFieldStub).vm.$emit('change', 'chair')
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query.search).toBe('chair')
+        expect(window.history.length).toBe(historyLength + 1)
+      } finally {
+        getValue.mockRestore()
+      }
+    })
+
+    it('adds no history entry for the refresh of a remote update', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      await mountTasks('', {}, { socket })
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      const historyLength = window.history.length
+      expect(wrapper.vm.$route.query.search).toBe('')
+
+      onTaskUpdate({ task_id: 'task-10' })
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+
+      // the refresh wrote the URL again, without its empty search
+      expect(wrapper.vm.$route.query).not.toHaveProperty('search')
+      expect(window.history.length).toBe(historyLength)
+    })
+
     it('combines the asset type and status filters', async () => {
       await mountTasks('?asset_type_id=props&task_status_id=status-1,status-2')
       expect(listedTaskIds()).toEqual(['task-11'])
@@ -543,6 +821,79 @@ describe('TaskType page', () => {
       } finally {
         getValue.mockRestore()
       }
+    })
+
+    // The search and the filters empty the selection: the task id leaves the
+    // URL before their navigation lands, which still adds its history entry.
+    describe('with a task selected', () => {
+      const selected = ref(0)
+      let typed
+      let getValue
+
+      beforeEach(async () => {
+        typed = ''
+        getValue = vi
+          .spyOn(SearchFieldStub.methods, 'getValue')
+          .mockImplementation(() => typed)
+        selected.value = 0
+        await mountTasks(
+          '',
+          {
+            nbSelectedTasks: () => selected.value,
+            selectedTasks: () =>
+              new Map(selected.value ? [['task-10', statusTasks[0]]] : [])
+          },
+          {
+            actions: {
+              clearSelectedTasks: () => {
+                selected.value = 0
+              }
+            }
+          }
+        )
+        selected.value = 1
+        await flushPromises()
+        expect(wrapper.vm.$route.query.task_id).toBe('task-10')
+      })
+
+      afterEach(() => getValue.mockRestore())
+
+      it('keeps a search typed in the URL', async () => {
+        const historyLength = window.history.length
+        typed = 'chair'
+        wrapper.findComponent(SearchFieldStub).vm.$emit('change', 'chair')
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query.search).toBe('chair')
+        expect(wrapper.vm.$route.query.task_id).toBeUndefined()
+        expect(window.history.length).toBe(historyLength + 1)
+      })
+
+      it('keeps a filter picked in the URL', async () => {
+        const historyLength = window.history.length
+        wrapper
+          .findAllComponents({ name: 'ComboboxStyled' })
+          .find(combo => combo.props('label') === 'task_types.fields.priority')
+          .vm.$emit('update:modelValue', '2')
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query.priority).toBe('2')
+        expect(wrapper.vm.$route.query.task_id).toBeUndefined()
+        expect(window.history.length).toBe(historyLength + 1)
+      })
+
+      // The page stays mounted when the schedule tab opens, on a URL without
+      // the filters of the list.
+      it('keeps the filters of the list out of the schedule tab', async () => {
+        await wrapper.vm.$router.push(
+          '/productions/production-1/assets/task-types/task-type-1/schedule'
+        )
+        // the task panel closed
+        selected.value = 0
+        await flushPromises()
+
+        expect(wrapper.vm.$route.query).toEqual({})
+      })
     })
 
     // Rebuilds wait for their days off side by side: the one asked last sets
@@ -2068,4 +2419,263 @@ describe('TaskType page, cell saves', () => {
     expect(wrapper.findComponent(ErrorText).exists()).toBe(false)
     wrapper.unmount()
   })
+})
+
+// The schedules of the page: the rows of the people around their bars, and
+// a bar whose change Zou refuses, put back with a line above it.
+describe('TaskType page, schedule bars', () => {
+  // Monday 5 to Friday 9 October
+  const scheduleTask = {
+    id: 'task-2',
+    assignees: ['person-1'],
+    entity_id: 'asset-1',
+    entity_name: 'Chair',
+    estimation: 0,
+    start_date: '2026-10-05T00:00:00',
+    due_date: '2026-10-09T00:00:00',
+    task_status_id: 'status-1',
+    task_type_id: 'task-type-1'
+  }
+  const person = {
+    id: 'person-1',
+    first_name: 'Alice',
+    last_name: 'Smith',
+    full_name: 'Alice Smith'
+  }
+  const refuse = () => vi.fn(() => Promise.reject(buildRefusal(403)))
+  const format = date => date.format('YYYY-MM-DD')
+  const span = bar => [format(bar.startDate), format(bar.endDate)]
+  // unmounted after each test, a failed one included
+  let wrapper = null
+
+  beforeEach(() => {
+    // the data load starts 100 ms after mounting, the schedule dates follow
+    // 200 ms after it
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    assetStore.cache.assetMap.set('asset-1', {
+      id: 'asset-1',
+      tasks: [scheduleTask.id]
+    })
+  })
+
+  afterEach(() => {
+    wrapper?.unmount()
+    wrapper = null
+    assetStore.cache.assetMap.delete('asset-1')
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  const mountSchedule = async (actions = {}) => {
+    const page = await mountPage({
+      section: 'schedule',
+      // the dates of the task type set on its bar
+      mutations: {
+        SET_SCHEDULE_ITEM_DATES: scheduleStore.mutations.SET_SCHEDULE_ITEM_DATES
+      },
+      actions: {
+        loadProductionDaysOff: vi.fn(() => ({})),
+        loadProductionTimeSpents: vi.fn(() => ({})),
+        loadScheduleItems: vi.fn(() => [
+          {
+            id: 'schedule-item-1',
+            task_type_id: 'task-type-1',
+            start_date: '2026-10-01',
+            end_date: '2026-10-30'
+          }
+        ]),
+        saveScheduleItem: vi.fn(),
+        ...actions
+      },
+      getters: {
+        assetValidationColumns: () => [],
+        currentProduction: () => ({
+          id: 'production-1',
+          name: 'Production',
+          start_date: '2026-01-01',
+          end_date: '2026-12-31',
+          team: [person.id]
+        }),
+        personMap: () => new Map([[person.id, person]]),
+        taskMap: () => new Map([[scheduleTask.id, scheduleTask]]),
+        user: () => ({
+          id: 'manager-1',
+          departments: [],
+          full_name: 'Manager'
+        })
+      }
+    })
+    wrapper = page.wrapper
+    await vi.advanceTimersByTimeAsync(400)
+    await flushPromises()
+    return page
+  }
+
+  const findSchedule = () => wrapper.findComponent({ name: 'Schedule' })
+  const findRows = () => findSchedule().props('hierarchy')
+  const findBar = () =>
+    findRows()
+      .flatMap(row => row.children)
+      .find(bar => bar.id === 'task-2')
+  // the widget stamps where a change found the bar
+  const stamp = bar => {
+    bar._dragOrigStartDate = bar.startDate.clone()
+    bar._dragOrigEndDate = bar.endDate.clone()
+    bar._dragOrigEstimation = bar.estimation
+  }
+
+  // The row of a person spans their bars: the bars pointed to a copy of it,
+  // so a move re-spanned a row no one sees.
+  it('re-spans the row shown when one of its bars moves', async () => {
+    await mountSchedule()
+    const bar = findBar()
+    const row = findRows().find(({ id }) => id === person.id)
+    stamp(bar)
+    bar.startDate = bar.startDate.clone().add(7, 'days')
+    bar.endDate = bar.endDate.clone().add(7, 'days')
+
+    findSchedule().vm.$emit('item-changed', bar)
+    await flushPromises()
+
+    expect(span(row)).toEqual(['2026-10-12', '2026-10-16'])
+  })
+
+  it('puts back a bar whose move Zou refuses, and its row', async () => {
+    await mountSchedule({ updateTask: refuse() })
+    const bar = findBar()
+    const row = bar.parentElement
+    stamp(bar)
+    bar.startDate = bar.startDate.clone().add(7, 'days')
+    bar.endDate = bar.endDate.clone().add(7, 'days')
+
+    findSchedule().vm.$emit('item-changed', bar)
+    await flushPromises()
+
+    expect(span(bar)).toEqual(['2026-10-05', '2026-10-09'])
+    expect(span(row)).toEqual(['2026-10-05', '2026-10-09'])
+    const error = wrapper.findComponent(ErrorText)
+    expect(error.props('text')).toBe('main.cell_save_error {"name":"Chair"}')
+    expect(error.classes()).toContain('has-text-centered')
+    expect(console.error).toHaveBeenCalled()
+  })
+
+  it('puts back an estimation typed in the schedule that Zou refuses', async () => {
+    await mountSchedule({ updateTask: refuse() })
+    const bar = findBar()
+    stamp(bar)
+    // the widget applies the estimation before it tells
+    bar.estimation = 16 * 60
+    bar.man_days = 16 * 60
+
+    findSchedule().vm.$emit('estimation-changed', {
+      taskId: 'task-2',
+      estimation: 16 * 60,
+      item: bar,
+      daysOff: []
+    })
+    await flushPromises()
+
+    expect([bar.estimation, bar.man_days]).toEqual([0, 0])
+    expect(span(bar)).toEqual(['2026-10-05', '2026-10-09'])
+    // the man-days of its row add up its bars again
+    expect(ScheduleStub.methods.refreshManDays).toHaveBeenCalledWith(
+      bar.parentElement
+    )
+    expect(wrapper.findComponent(ErrorText).props('text')).toBe(
+      'main.cell_save_error {"name":"Chair"}'
+    )
+  })
+
+  // A change Zou took stays when a later one is refused.
+  it('puts back the task type dates Zou took before a refused change', async () => {
+    await mountSchedule({
+      saveScheduleItem: vi
+        .fn()
+        .mockResolvedValueOnce()
+        .mockRejectedValueOnce(buildRefusal(403))
+    })
+    const fieldDate = index =>
+      wrapper
+        .findAllComponents(DateField)
+        [index].props('modelValue')
+        .toISOString()
+        .slice(0, 10)
+
+    wrapper
+      .findAllComponents(DateField)[1]
+      .vm.$emit('update:model-value', new Date('2026-10-23T00:00:00Z'))
+    await flushPromises()
+    wrapper
+      .findAllComponents(DateField)[0]
+      .vm.$emit('update:model-value', new Date('2026-10-12T00:00:00Z'))
+    await flushPromises()
+
+    expect([fieldDate(0), fieldDate(1)]).toEqual(['2026-10-01', '2026-10-23'])
+  })
+
+  // Two dates picked before the first answer: the fields show what Zou took.
+  it('keeps the task type dates Zou took after an overlapping refusal', async () => {
+    const settles = []
+    await mountSchedule({
+      saveScheduleItem: vi.fn(
+        () =>
+          new Promise((resolve, reject) => {
+            settles.push({ resolve, reject })
+          })
+      )
+    })
+    const fieldDate = index =>
+      wrapper
+        .findAllComponents(DateField)
+        [index].props('modelValue')
+        .toISOString()
+        .slice(0, 10)
+
+    wrapper
+      .findAllComponents(DateField)[0]
+      .vm.$emit('update:model-value', new Date('2026-10-12T00:00:00Z'))
+    await flushPromises()
+    wrapper
+      .findAllComponents(DateField)[1]
+      .vm.$emit('update:model-value', new Date('2026-10-23T00:00:00Z'))
+    await flushPromises()
+    settles[0].reject(buildRefusal(403))
+    await flushPromises()
+    settles[1].resolve()
+    await flushPromises()
+
+    expect([fieldDate(0), fieldDate(1)]).toEqual(['2026-10-12', '2026-10-23'])
+  })
+
+  // The dates of the task type are those of its bar on the production
+  // schedule.
+  it.each([
+    ['start', 0, '2026-10-12', '2026-10-01'],
+    ['end', 1, '2026-10-23', '2026-10-30']
+  ])(
+    'puts back the %s date of the task type Zou refuses',
+    async (_, index, picked, saved) => {
+      const { storeActions } = await mountSchedule({
+        saveScheduleItem: refuse()
+      })
+
+      wrapper
+        .findAllComponents(DateField)
+        [index].vm.$emit('update:model-value', new Date(`${picked}T00:00:00Z`))
+      await flushPromises()
+
+      expect(storeActions.saveScheduleItem).toHaveBeenCalledTimes(1)
+      expect(
+        wrapper
+          .findAllComponents(DateField)
+          [index].props('modelValue')
+          .toISOString()
+          .slice(0, 10)
+      ).toBe(saved)
+      expect(wrapper.findComponent(ErrorText).props('text')).toBe(
+        'main.cell_save_error {"name":"Modeling"}'
+      )
+    }
+  )
 })

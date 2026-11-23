@@ -1,3 +1,4 @@
+import { useHead } from '@unhead/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
@@ -19,12 +20,16 @@ import '@/lib/auth'
 import Task from '@/components/pages/Task.vue'
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import drafts from '@/lib/drafts'
+import { markRequestFailure } from '@/lib/errors'
 import { DEFAULT_FPS } from '@/lib/video'
 import sequencesStore from '@/store/modules/sequences'
 import shotsStore from '@/store/modules/shots'
@@ -83,6 +88,10 @@ const mountPage = async ({
   pendingTaskLoad = false,
   // The revision the URL names when the page opens.
   previewId = null,
+  // The episode the URL names when the page opens, on a TV show.
+  episodeId = null,
+  // Answers of store actions, by name, in place of the defaults below.
+  actions = {},
   stubs = {}
 } = {}) => {
   const dispatched = []
@@ -116,13 +125,14 @@ const mountPage = async ({
       }
     ]
   })
+  const params = episodeId
+    ? { ...TASK_ROUTE_PARAMS, episode_id: episodeId }
+    : TASK_ROUTE_PARAMS
+  const name = episodeId ? 'episode-task' : 'task'
   await router.push(
     previewId
-      ? {
-          name: 'task-preview',
-          params: { ...TASK_ROUTE_PARAMS, preview_id: previewId }
-        }
-      : { name: 'task', params: TASK_ROUTE_PARAMS }
+      ? { name: `${name}-preview`, params: { ...params, preview_id: previewId } }
+      : { name, params }
   )
   await router.isReady()
 
@@ -164,8 +174,9 @@ const mountPage = async ({
     }
   })
   // Record every dispatch while letting the unregistered ones resolve.
-  store.dispatch = vi.fn(type => {
+  store.dispatch = vi.fn((type, payload) => {
     dispatched.push(type)
+    if (actions[type]) return actions[type](payload)
     if (type === 'loadTask') {
       return pendingTaskLoad ? new Promise(() => {}) : Promise.resolve(task)
     }
@@ -206,6 +217,46 @@ const mountPage = async ({
   })
   await flushPromises()
   return { wrapper, socket, dispatched, store, router }
+}
+
+// The revision list of the page, above the player.
+const previewCombo = wrapper =>
+  wrapper
+    .findAllComponents(ComboboxStyled)
+    .find(combo => combo.classes().includes('preview-combo'))
+
+const pickInPageList = async (wrapper, previewId) => {
+  previewCombo(wrapper).vm.$emit('update:modelValue', previewId)
+  await flushPromises()
+}
+
+// The handler seeks the player on a timer, and the shallow player stub has
+// no seek method. Dropping the fake clock discards that pending callback.
+const clickTimeCode = async (wrapper, versionRevision) => {
+  vi.useFakeTimers()
+  try {
+    wrapper
+      .findComponent(Comment)
+      .vm.$emit('time-code-clicked', { versionRevision, frame: 100 })
+  } finally {
+    vi.useRealTimers()
+  }
+  await flushPromises()
+}
+
+// The handler waits a second for the store to load the comment.
+const emitCommentNew = async (socket, taskId) => {
+  const [, onCommentNew] = socket.on.mock.calls.find(
+    ([event]) => event === 'comment:new'
+  )
+  vi.useFakeTimers()
+  try {
+    onCommentNew({ comment_id: 'comment-1', task_id: taskId })
+    vi.advanceTimersByTime(1000)
+  } finally {
+    vi.useRealTimers()
+  }
+  await flushPromises()
 }
 
 describe('Task.vue', () => {
@@ -507,6 +558,1431 @@ describe('Task.vue', () => {
   })
 })
 
+describe('Task.vue task that fails to load', () => {
+  const OTHER_TASK_ID = 'task-2'
+  const otherTask = () => buildTask({ id: OTHER_TASK_ID, entity_name: 'SH02' })
+
+  const headerTitle = wrapper => wrapper.find('.page-header h1.title').text()
+  const tabTitle = () => useHead.mock.lastCall[0].title.value
+  const reloadButton = wrapper =>
+    wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('text') === 'main.reload')
+  const homeLink = wrapper =>
+    wrapper.findAll('a').find(link => link.text() === 'main.home')
+
+  // A failure as the API client hands it over, reported already.
+  const requestFailure = status => {
+    const failure = Object.assign(new Error(`HTTP ${status}`), { status })
+    markRequestFailure(failure)
+    return failure
+  }
+
+  // A promise the test settles, to order the answers of several reads.
+  const deferred = () => {
+    const handlers = {}
+    const promise = new Promise((resolve, reject) => {
+      Object.assign(handlers, { resolve, reject })
+    })
+    return { promise, ...handlers }
+  }
+
+  // The tasks the store holds: the page reads the others.
+  let taskMap = null
+  let consoleError = null
+
+  // The store holds a task once read.
+  const readTask = task => {
+    taskMap.set(task.id, task)
+    return Promise.resolve(task)
+  }
+
+  // A revision as the store holds it: each of its files names its task.
+  const revisionFile = taskId => ({
+    id: 'preview-1',
+    task_id: taskId,
+    revision: 1,
+    extension: 'png'
+  })
+  const revision = file => ({ ...file, previews: [file] })
+
+  // Strokes a player has not saved yet: it sends them as it unmounts.
+  const unsavedStrokes = () => ({
+    preview: revisionFile(TASK_ID),
+    additions: [{ id: 'stroke-1' }],
+    deletions: [],
+    updates: []
+  })
+  const playerWithStrokes = (changes, methods = {}) => ({
+    emits: ['annotation-changed'],
+    methods,
+    beforeUnmount() {
+      this.$emit('annotation-changed', changes)
+    },
+    template: '<div />'
+  })
+  const mountWithStrokes = (changes, actions, methods) =>
+    mountWithActions(
+      { loadTask: () => Promise.reject(requestFailure(404)), ...actions },
+      {
+        previews: [revision(changes.preview)],
+        stubs: { PreviewPlayer: playerWithStrokes(changes, methods) }
+      }
+    )
+  const fakeTimeouts = () =>
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+  const mountWithActions = (actions, { stubs = {}, ...options } = {}) =>
+    mountPage({
+      actions,
+      getterOverrides: { taskMap: () => taskMap },
+      stubs: { EntityLoadError: false, ...stubs },
+      ...options
+    })
+
+  const goTo = async (router, taskId) => {
+    await router.push({
+      name: 'task',
+      params: { ...TASK_ROUTE_PARAMS, task_id: taskId }
+    })
+    await flushPromises()
+  }
+
+  beforeEach(() => {
+    taskMap = new Map()
+    consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  it('keeps the loading title while the task loads', async () => {
+    const { wrapper } = await mountWithActions({
+      loadTask: () => new Promise(() => {})
+    })
+
+    expect(tabTitle()).toBe('main.loading - Kitsu')
+    expect(wrapper.find('.page-header h1.title').exists()).toBe(false)
+    expect(reloadButton(wrapper)).toBeUndefined()
+  })
+
+  // A deleted task, one out of the user's reach, and a malformed id from a
+  // broken link.
+  it.each([400, 403, 404])('tells the task is missing on a %i', async status => {
+    const failure = requestFailure(status)
+    const { wrapper, dispatched } = await mountWithActions({
+      loadTask: () => Promise.reject(failure)
+    })
+
+    expect(headerTitle(wrapper)).toBe('not_found.title')
+    expect(tabTitle()).toBe('not_found.title - Kitsu')
+    expect(wrapper.text()).toContain('not_found.text')
+    expect(homeLink(wrapper)).toBeDefined()
+    expect(reloadButton(wrapper)).toBeUndefined()
+    expect(wrapper.find('.task-columns').exists()).toBe(false)
+    expect(dispatched).not.toContain('loadAssets')
+    expect(consoleError.mock.calls).toEqual([[failure]])
+  })
+
+  it('offers a reload after a server error', async () => {
+    const failure = requestFailure(500)
+    const loadTask = vi
+      .fn()
+      .mockRejectedValueOnce(failure)
+      .mockImplementationOnce(() => readTask(buildTask()))
+    const { wrapper } = await mountWithActions({ loadTask })
+
+    expect(headerTitle(wrapper)).toBe('main.loading_error')
+    expect(tabTitle()).toBe('main.loading_error - Kitsu')
+    expect(wrapper.text()).not.toContain('not_found.text')
+    expect(homeLink(wrapper)).toBeUndefined()
+
+    await reloadButton(wrapper).vm.$emit('click')
+    await flushPromises()
+
+    expect(loadTask).toHaveBeenCalledTimes(2)
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(tabTitle()).toBe('SH01 / Animation - Kitsu')
+    expect(reloadButton(wrapper)).toBeUndefined()
+    expect(consoleError.mock.calls).toEqual([[failure]])
+  })
+
+  // The page shows the previews of a task through its comments.
+  it('reads the comments again after they fail to load', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const failure = requestFailure(500)
+    const loadTaskComments = vi
+      .fn()
+      .mockRejectedValueOnce(failure)
+      .mockResolvedValueOnce()
+    const { wrapper } = await mountWithActions({ loadTaskComments })
+
+    expect(headerTitle(wrapper)).toBe('main.loading_error')
+    expect(wrapper.find('.task-columns').exists()).toBe(false)
+
+    await reloadButton(wrapper).vm.$emit('click')
+    await flushPromises()
+
+    expect(loadTaskComments).toHaveBeenCalledTimes(2)
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(wrapper.find('.task-columns').exists()).toBe(true)
+    expect(consoleError.mock.calls).toEqual([[failure]])
+  })
+
+  // A bug is no request failure: it reaches Sentry unhandled.
+  it('leaves a bug in the load to Sentry', async () => {
+    const bug = new TypeError('Cannot read properties of undefined')
+    const vueWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    let wrapper = null
+    const rejections = await recordUnhandledRejections(async () => {
+      ;({ wrapper } = await mountWithActions({
+        loadTask: () => Promise.reject(bug)
+      }))
+    })
+
+    expect(rejections).toEqual([bug])
+    expect(headerTitle(wrapper)).toBe('main.loading_error')
+    expect(consoleError).not.toHaveBeenCalled()
+    // The app handler of main.js, which takes it in production, is not set.
+    expect(vueWarn).toHaveBeenCalledTimes(1)
+    expect(vueWarn.mock.calls[0][0]).toContain(
+      'Unhandled error during execution of mounted hook'
+    )
+  })
+
+  // The episodes and shots of a shot task load in a step of their own.
+  it('leaves a bug in the episode load of a shot task read to Sentry', async () => {
+    const bug = new TypeError('Cannot read properties of undefined')
+    const vueWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    let wrapper = null
+    const rejections = await recordUnhandledRejections(async () => {
+      ;({ wrapper } = await mountWithActions({
+        loadTask: () => readTask(buildTask()),
+        loadEpisodes: () => Promise.reject(bug)
+      }))
+    })
+
+    expect(rejections).toEqual([bug])
+    expect(headerTitle(wrapper)).toBe('main.loading_error')
+    expect(consoleError).not.toHaveBeenCalled()
+    expect(vueWarn).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the shot task whose episode load fails', async () => {
+    const failure = requestFailure(502)
+    const { wrapper } = await mountWithActions({
+      loadTask: () => readTask(buildTask()),
+      loadEpisodes: vi.fn().mockRejectedValueOnce(failure).mockResolvedValue()
+    })
+
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(consoleError.mock.calls).toEqual([[failure]])
+  })
+
+  // The arrows walk the shots of that episode.
+  it('reads a shot task of a TV show with the shots of its episode', async () => {
+    const setCurrentEpisode = vi.fn(() => Promise.resolve())
+    const { dispatched } = await mountWithActions(
+      {
+        loadTask: () => readTask(buildTask({ episode: { id: 'episode-1' } })),
+        setCurrentEpisode
+      },
+      { getterOverrides: { isTVShow: () => true, taskMap: () => taskMap } }
+    )
+
+    expect(setCurrentEpisode).toHaveBeenCalledWith('episode-1')
+    // Then the shots, before the comments.
+    expect(dispatched).toContain('loadTaskComments')
+    const read = dispatched.slice(
+      dispatched.indexOf('setCurrentEpisode'),
+      dispatched.indexOf('loadTaskComments')
+    )
+    expect(read).toContain('loadShots')
+  })
+
+  // Zou names no episode for a shot whose sequence has none, in a production
+  // made a TV show after its sequences for instance.
+  it('shows a shot task of a TV show whose sequence has no episode', async () => {
+    const setCurrentEpisode = vi.fn(() => Promise.resolve())
+    let wrapper = null
+    let dispatched = null
+    const rejections = await recordUnhandledRejections(async () => {
+      ;({ wrapper, dispatched } = await mountWithActions(
+        { loadTask: () => readTask(buildTask()), setCurrentEpisode },
+        { getterOverrides: { isTVShow: () => true, taskMap: () => taskMap } }
+      ))
+    })
+
+    expect(rejections).toEqual([])
+    expect(wrapper.find('.task-columns').exists()).toBe(true)
+    expect(wrapper.find('.load-error').exists()).toBe(false)
+    expect(wrapper.findComponent(Spinner).exists()).toBe(false)
+    expect(setCurrentEpisode).not.toHaveBeenCalled()
+    // The read loads the shots before the comments.
+    expect(dispatched).toContain('loadTaskComments')
+    const commentsLoad = dispatched.indexOf('loadTaskComments')
+    expect(dispatched.slice(0, commentsLoad)).toContain('loadShots')
+    expect(consoleError).not.toHaveBeenCalled()
+  })
+
+  it('loads the task of a new URL after a failed load', async () => {
+    const failure = requestFailure(404)
+    const loadTask = vi.fn(({ taskId }) =>
+      taskId === OTHER_TASK_ID ? readTask(otherTask()) : Promise.reject(failure)
+    )
+    const { wrapper, router } = await mountWithActions({ loadTask })
+    expect(headerTitle(wrapper)).toBe('not_found.title')
+
+    await goTo(router, OTHER_TASK_ID)
+
+    expect(headerTitle(wrapper)).toContain('SH02')
+    expect(wrapper.text()).not.toContain('not_found.text')
+  })
+
+  it('tells the new task is missing, not the one shown before', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper, router } = await mountWithActions({
+      loadTask: () => Promise.reject(requestFailure(404))
+    })
+    expect(headerTitle(wrapper)).toContain('SH01')
+
+    await goTo(router, OTHER_TASK_ID)
+
+    expect(headerTitle(wrapper)).toBe('not_found.title')
+    expect(tabTitle()).toBe('not_found.title - Kitsu')
+  })
+
+  it('shows the task again once the user goes back to it', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper, router } = await mountWithActions({
+      loadTask: () => Promise.reject(requestFailure(404))
+    })
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toBe('not_found.title')
+
+    await goTo(router, TASK_ID)
+
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(wrapper.text()).not.toContain('not_found.text')
+  })
+
+  // The page shows that task while the other read runs.
+  it('keeps the task the user goes back to when the read of the one left fails', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const otherRead = deferred()
+    const loadTaskComments = vi.fn(() => Promise.resolve())
+    const { wrapper, router } = await mountWithActions({
+      loadTask: () => otherRead.promise,
+      loadTaskComments
+    })
+    await goTo(router, OTHER_TASK_ID)
+    await goTo(router, TASK_ID)
+
+    otherRead.reject(requestFailure(404))
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(wrapper.text()).not.toContain('not_found.text')
+    expect(loadTaskComments).toHaveBeenCalledTimes(2)
+  })
+
+  // The page still shows that task while the other read runs.
+  it('keeps the task the user goes back to before the next one shows when reading it again fails', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper, router } = await mountWithActions({
+      loadTask: () => new Promise(() => {}),
+      loadTaskComments: vi
+        .fn()
+        .mockResolvedValueOnce()
+        .mockRejectedValueOnce(requestFailure(502))
+    })
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toContain('SH01')
+
+    await goTo(router, TASK_ID)
+
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(reloadButton(wrapper)).toBeUndefined()
+  })
+
+  // From the browser history, for instance.
+  it('reads the task once when the URL names one of its revisions during the read', async () => {
+    const loadTask = vi.fn(() => new Promise(() => {}))
+    const { router } = await mountWithActions({ loadTask })
+
+    await router.push({
+      name: 'task-preview',
+      params: { ...TASK_ROUTE_PARAMS, preview_id: 'preview-1' }
+    })
+    await flushPromises()
+
+    expect(loadTask).toHaveBeenCalledTimes(1)
+  })
+
+  it('tells the error when the task shown before fails to load on the way back', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper, router } = await mountWithActions({
+      loadTask: () => Promise.reject(requestFailure(404)),
+      loadTaskComments: vi
+        .fn()
+        .mockResolvedValueOnce()
+        .mockRejectedValueOnce(requestFailure(500))
+    })
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toBe('not_found.title')
+
+    await goTo(router, TASK_ID)
+
+    expect(headerTitle(wrapper)).toBe('main.loading_error')
+    expect(reloadButton(wrapper)).toBeDefined()
+  })
+
+  // The header shows the next task while its comments load. The store lets
+  // the task left go when it is deleted, or on a production change, when the
+  // next task belongs to another production.
+  it.each([
+    ['deleted', true, map => map.delete(TASK_ID), 404, 'not_found.title'],
+    [
+      'dropped with the task map, as on a production change',
+      false,
+      map => map.clear(),
+      502,
+      'main.loading_error'
+    ]
+  ])(
+    'tells the error when a task left fails to load on the way back while the next one loads (%s)',
+    async (_, isNextHeld, letGo, status, title) => {
+      taskMap.set(TASK_ID, buildTask())
+      if (isNextHeld) taskMap.set(OTHER_TASK_ID, otherTask())
+      const { wrapper, router } = await mountWithActions({
+        loadTask: ({ taskId }) =>
+          taskId === OTHER_TASK_ID
+            ? readTask(otherTask())
+            : Promise.reject(requestFailure(status)),
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValueOnce()
+          .mockReturnValueOnce(new Promise(() => {}))
+      })
+      await goTo(router, OTHER_TASK_ID)
+      expect(headerTitle(wrapper)).toContain('SH02')
+      letGo(taskMap)
+
+      await goTo(router, TASK_ID)
+
+      expect(headerTitle(wrapper)).toBe(title)
+    }
+  )
+
+  // The page shows that task again: the comments of the next one never
+  // loaded.
+  it('keeps the task the user goes back to while the next one loads when reading it again fails', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    taskMap.set(OTHER_TASK_ID, otherTask())
+    const { wrapper, router } = await mountWithActions({
+      loadTaskComments: vi
+        .fn()
+        .mockResolvedValueOnce()
+        .mockReturnValueOnce(new Promise(() => {}))
+        .mockRejectedValueOnce(requestFailure(502))
+    })
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toContain('SH02')
+
+    await goTo(router, TASK_ID)
+
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(reloadButton(wrapper)).toBeUndefined()
+  })
+
+  // The player sends the strokes it has not saved yet as it unmounts.
+  it('saves the strokes left on the task shown before a failed one', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const changes = unsavedStrokes()
+    const { wrapper, router, store } = await mountWithStrokes(changes)
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+
+    await goTo(router, OTHER_TASK_ID)
+
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+    expect(store.dispatch).toHaveBeenCalledWith('updatePreviewAnnotation', {
+      taskId: TASK_ID,
+      ...changes
+    })
+  })
+
+  // Its player is gone: the page sends them again while the server is down
+  // or out of reach.
+  it.each([502, undefined])(
+    'saves the strokes left on the task shown before a failed one once the server answers (status %s)',
+    async status => {
+      taskMap.set(TASK_ID, buildTask())
+      const changes = unsavedStrokes()
+      const updatePreviewAnnotation = vi
+        .fn()
+        .mockRejectedValueOnce(requestFailure(status))
+        .mockRejectedValueOnce(requestFailure(status))
+        .mockResolvedValue()
+      const { router } = await mountWithStrokes(changes, {
+        updatePreviewAnnotation
+      })
+      fakeTimeouts()
+      await goTo(router, OTHER_TASK_ID)
+      expect(updatePreviewAnnotation).toHaveBeenCalledTimes(1)
+
+      await vi.advanceTimersByTimeAsync(4999)
+      expect(updatePreviewAnnotation).toHaveBeenCalledTimes(1)
+      await vi.advanceTimersByTimeAsync(1)
+      expect(updatePreviewAnnotation).toHaveBeenCalledTimes(2)
+      await vi.advanceTimersByTimeAsync(5000)
+      expect(updatePreviewAnnotation).toHaveBeenCalledTimes(3)
+      await vi.advanceTimersByTimeAsync(5000)
+
+      expect(updatePreviewAnnotation).toHaveBeenCalledTimes(3)
+      expect(updatePreviewAnnotation).toHaveBeenLastCalledWith({
+        taskId: TASK_ID,
+        ...changes
+      })
+    }
+  )
+
+  // Sentry hears of the bug from the store.
+  it.each([
+    ['the server refuses them', () => requestFailure(403)],
+    ['their save hits a bug', () => new TypeError('Cannot read properties')]
+  ])(
+    'drops the strokes left on the task shown before a failed one when %s',
+    async (_, failure) => {
+      taskMap.set(TASK_ID, buildTask())
+      const changes = unsavedStrokes()
+      const updatePreviewAnnotation = vi.fn(() => Promise.reject(failure()))
+      const { router } = await mountWithStrokes(changes, {
+        updatePreviewAnnotation
+      })
+      fakeTimeouts()
+      await goTo(router, OTHER_TASK_ID)
+
+      await vi.advanceTimersByTimeAsync(5000)
+
+      expect(updatePreviewAnnotation).toHaveBeenCalledTimes(1)
+    }
+  )
+
+  it('drops the strokes left on the task shown before a failed one when the server refuses them again', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const changes = unsavedStrokes()
+    const updatePreviewAnnotation = vi
+      .fn()
+      .mockRejectedValueOnce(requestFailure(502))
+      .mockRejectedValueOnce(requestFailure(403))
+      .mockResolvedValue()
+    const { router } = await mountWithStrokes(changes, {
+      updatePreviewAnnotation
+    })
+    fakeTimeouts()
+    await goTo(router, OTHER_TASK_ID)
+
+    await vi.advanceTimersByTimeAsync(10000)
+
+    expect(updatePreviewAnnotation).toHaveBeenCalledTimes(2)
+  })
+
+  // As on any page closed with strokes not saved.
+  it('stops sending the strokes of a failed move again once the page closes', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const changes = unsavedStrokes()
+    const updatePreviewAnnotation = vi.fn(() =>
+      Promise.reject(requestFailure(502))
+    )
+    const { wrapper, router } = await mountWithStrokes(changes, {
+      updatePreviewAnnotation
+    })
+    fakeTimeouts()
+    await goTo(router, OTHER_TASK_ID)
+
+    wrapper.unmount()
+    await vi.advanceTimersByTimeAsync(5000)
+
+    expect(updatePreviewAnnotation).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not send again the strokes whose save fails once the page closed', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const changes = unsavedStrokes()
+    const save = deferred()
+    const updatePreviewAnnotation = vi.fn(() => save.promise)
+    const { wrapper } = await mountWithStrokes(changes, {
+      updatePreviewAnnotation
+    })
+    fakeTimeouts()
+    wrapper.unmount()
+
+    save.reject(requestFailure(502))
+    await vi.advanceTimersByTimeAsync(5000)
+
+    expect(updatePreviewAnnotation).toHaveBeenCalledTimes(1)
+  })
+
+  it('saves again the strokes whose player leaves with a failed move during their save', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const changes = unsavedStrokes()
+    const save = deferred()
+    const updatePreviewAnnotation = vi
+      .fn()
+      .mockReturnValueOnce(save.promise)
+      .mockResolvedValue()
+    const methods = {
+      confirmAnnotationsSaved: vi.fn(),
+      restoreFailedAnnotations: vi.fn()
+    }
+    const { wrapper, router } = await mountWithActions(
+      {
+        loadTask: () => Promise.reject(requestFailure(404)),
+        updatePreviewAnnotation
+      },
+      {
+        previews: [revision(changes.preview)],
+        stubs: {
+          PreviewPlayer: {
+            emits: ['annotation-changed'],
+            methods,
+            template: '<div />'
+          }
+        }
+      }
+    )
+    fakeTimeouts()
+    wrapper.findComponent(PreviewPlayer).vm.$emit('annotation-changed', changes)
+    await goTo(router, OTHER_TASK_ID)
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+
+    save.reject(requestFailure(502))
+    await vi.advanceTimersByTimeAsync(5000)
+
+    expect(methods.restoreFailedAnnotations).not.toHaveBeenCalled()
+    expect(updatePreviewAnnotation).toHaveBeenCalledTimes(2)
+    expect(updatePreviewAnnotation).toHaveBeenLastCalledWith({
+      taskId: TASK_ID,
+      ...changes
+    })
+  })
+
+  // That player has strokes of its own to save.
+  it.each(['fails', 'succeeds'])(
+    'leaves the player shown since alone when the save of the one gone %s',
+    async outcome => {
+      taskMap.set(TASK_ID, buildTask())
+      const changes = unsavedStrokes()
+      const save = deferred()
+      const updatePreviewAnnotation = vi
+        .fn()
+        .mockReturnValueOnce(save.promise)
+        .mockResolvedValue()
+      const methods = {
+        confirmAnnotationsSaved: vi.fn(),
+        restoreFailedAnnotations: vi.fn()
+      }
+      const { wrapper, router } = await mountWithStrokes(
+        changes,
+        { updatePreviewAnnotation },
+        methods
+      )
+      fakeTimeouts()
+      await goTo(router, OTHER_TASK_ID)
+      await goTo(router, TASK_ID)
+      expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+
+      if (outcome === 'fails') save.reject(requestFailure(502))
+      else save.resolve()
+      await vi.advanceTimersByTimeAsync(5000)
+
+      expect(methods.confirmAnnotationsSaved).not.toHaveBeenCalled()
+      expect(methods.restoreFailedAnnotations).not.toHaveBeenCalled()
+      expect(updatePreviewAnnotation).toHaveBeenCalledTimes(
+        outcome === 'fails' ? 2 : 1
+      )
+    }
+  )
+
+  it.each([
+    ['fails', 'restoreFailedAnnotations'],
+    ['succeeds', 'confirmAnnotationsSaved']
+  ])(
+    'tells the player when the save of its strokes %s',
+    async (outcome, method) => {
+      taskMap.set(TASK_ID, buildTask())
+      const changes = unsavedStrokes()
+      const methods = {
+        confirmAnnotationsSaved: vi.fn(),
+        restoreFailedAnnotations: vi.fn()
+      }
+      const updatePreviewAnnotation = vi.fn(() =>
+        outcome === 'fails'
+          ? Promise.reject(requestFailure(502))
+          : Promise.resolve()
+      )
+      const { wrapper } = await mountWithStrokes(
+        changes,
+        { updatePreviewAnnotation },
+        methods
+      )
+
+      wrapper.findComponent(PreviewPlayer).vm.$emit('annotation-changed', changes)
+      await flushPromises()
+
+      expect(methods[method]).toHaveBeenCalledTimes(1)
+      expect(updatePreviewAnnotation).toHaveBeenCalledTimes(1)
+    }
+  )
+
+  // Its comment form would post on that task.
+  it('shows nothing of the task shown before while a reload runs', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const secondRead = deferred()
+    const loadTask = vi
+      .fn()
+      .mockRejectedValueOnce(requestFailure(500))
+      .mockReturnValueOnce(secondRead.promise)
+    const { wrapper, router } = await mountWithActions(
+      { loadTask },
+      {
+        getterOverrides: {
+          isCurrentUserProductionManager: () => true,
+          taskMap: () => taskMap
+        },
+        previews: [revision(revisionFile(TASK_ID))]
+      }
+    )
+    expect(wrapper.findComponent(AddComment).exists()).toBe(true)
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+    await goTo(router, OTHER_TASK_ID)
+
+    await reloadButton(wrapper).vm.$emit('click')
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('SH01')
+    expect(wrapper.findComponent(AddComment).exists()).toBe(false)
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+    expect(wrapper.findComponent(Spinner).exists()).toBe(true)
+    expect(tabTitle()).toBe('main.loading - Kitsu')
+
+    taskMap.set(OTHER_TASK_ID, otherTask())
+    secondRead.resolve(otherTask())
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toContain('SH02')
+    expect(wrapper.findComponent(AddComment).exists()).toBe(true)
+  })
+
+  // The store holds the next task: it shows while its comments load.
+  it('shows nothing of the task shown before while a reload reads the comments', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    taskMap.set(OTHER_TASK_ID, otherTask())
+    const secondRead = deferred()
+    const loadTaskComments = vi
+      .fn()
+      .mockResolvedValueOnce()
+      .mockRejectedValueOnce(requestFailure(500))
+      .mockReturnValueOnce(secondRead.promise)
+    const { wrapper, router } = await mountWithActions(
+      { loadTaskComments },
+      {
+        comments: [{ id: 'comment-1', text: 'v1' }],
+        previews: [revision(revisionFile(TASK_ID))]
+      }
+    )
+    expect(wrapper.findComponent(Comment).exists()).toBe(true)
+    await goTo(router, OTHER_TASK_ID)
+
+    await reloadButton(wrapper).vm.$emit('click')
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toContain('SH02')
+    expect(wrapper.findComponent(Comment).exists()).toBe(false)
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+  })
+
+  // A failed save reads the task again, during an outage for instance: the
+  // player stays, with the strokes it could not save yet. The store may have
+  // let the task go meanwhile.
+  it.each([
+    ['held by the store', { isHeldFirst: true, isHeldLater: true }],
+    ['let go by the store since', { isHeldFirst: true, isHeldLater: false }],
+    ['read when the page opened', { isHeldFirst: false, isHeldLater: true }]
+  ])(
+    'keeps the task shown when reading it again fails (task %s)',
+    async (_, { isHeldFirst, isHeldLater }) => {
+      if (isHeldFirst) taskMap.set(TASK_ID, buildTask())
+      const comment = { id: 'comment-1', text: 'v1' }
+      const saveFailure = requestFailure(502)
+      const readFailure = requestFailure(502)
+      const loadTask = vi.fn(() => Promise.reject(readFailure))
+      if (!isHeldFirst) {
+        loadTask.mockImplementationOnce(() => readTask(buildTask()))
+      }
+      const { wrapper } = await mountWithActions(
+        {
+          editTaskComment: () => Promise.reject(saveFailure),
+          loadTask,
+          loadTaskComments: vi
+            .fn()
+            .mockResolvedValueOnce()
+            .mockRejectedValueOnce(readFailure)
+        },
+        { comments: [comment], previews: [revision(revisionFile(TASK_ID))] }
+      )
+      if (!isHeldLater) taskMap.delete(TASK_ID)
+
+      await wrapper.findComponent(Comment).vm.$emit('checklist-updated', comment)
+      await flushPromises()
+
+      expect(headerTitle(wrapper)).toContain('SH01')
+      expect(reloadButton(wrapper)).toBeUndefined()
+      expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+      expect(wrapper.findComponent(Spinner).exists()).toBe(false)
+      expect(consoleError.mock.calls).toEqual([[saveFailure], [readFailure]])
+    }
+  )
+
+  it('keeps the task shown when reading it again fails twice', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const comment = { id: 'comment-1', text: 'v1' }
+    const { wrapper } = await mountWithActions(
+      {
+        editTaskComment: () => Promise.reject(requestFailure(502)),
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValueOnce()
+          .mockRejectedValue(requestFailure(502))
+      },
+      { comments: [comment] }
+    )
+    const failSave = async () => {
+      await wrapper.findComponent(Comment).vm.$emit('checklist-updated', comment)
+      await flushPromises()
+    }
+
+    await failSave()
+    await failSave()
+
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(reloadButton(wrapper)).toBeUndefined()
+  })
+
+  // The page shows the next task with the comments of the one left until its
+  // own comments load.
+  it('tells the error when a task whose comments still load fails to be read again', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    taskMap.set(OTHER_TASK_ID, otherTask())
+    const comment = { id: 'comment-1', text: 'v1' }
+    const { wrapper, router } = await mountWithActions(
+      {
+        editTaskComment: () => Promise.reject(requestFailure(502)),
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValueOnce()
+          .mockReturnValueOnce(new Promise(() => {}))
+          .mockRejectedValueOnce(requestFailure(502))
+      },
+      { comments: [comment] }
+    )
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toContain('SH02')
+
+    await wrapper.findComponent(Comment).vm.$emit('checklist-updated', comment)
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toBe('main.loading_error')
+    expect(reloadButton(wrapper)).toBeDefined()
+  })
+
+  // The deletion resets the page from the store, which holds the next task.
+  it('keeps the error title when a deletion answers after a failed move', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    taskMap.set(OTHER_TASK_ID, otherTask())
+    const comment = { id: 'comment-1', text: 'v1' }
+    const deletion = deferred()
+    const { wrapper, router } = await mountWithActions(
+      {
+        deleteTaskComment: () => deletion.promise,
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValueOnce()
+          .mockRejectedValueOnce(requestFailure(500))
+      },
+      { comments: [comment] }
+    )
+    await wrapper.findComponent(Comment).vm.$emit('delete-comment', comment)
+    wrapper
+      .findAllComponents(DeleteModal)
+      .find(modal => modal.props('active'))
+      .vm.$emit('confirm')
+    await goTo(router, OTHER_TASK_ID)
+    expect(tabTitle()).toBe('main.loading_error - Kitsu')
+
+    deletion.resolve()
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toBe('main.loading_error')
+    expect(tabTitle()).toBe('main.loading_error - Kitsu')
+  })
+
+  // Back with the edit window open, for instance.
+  it('saves a comment edit on its task when a failed move lands while its files upload', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const comment = { id: 'comment-1', text: 'v1' }
+    const upload = deferred()
+    const moveFailure = requestFailure(404)
+    const { wrapper, router, store } = await mountWithActions(
+      {
+        addAttachmentToComment: () => upload.promise,
+        loadTask: () => Promise.reject(moveFailure)
+      },
+      { comments: [comment] }
+    )
+    const edit = { ...comment, text: 'v2' }
+    await wrapper.findComponent(Comment).vm.$emit('edit-comment', comment)
+    wrapper.findComponent(EditCommentModal).vm.$emit('confirm', edit)
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toBe('not_found.title')
+
+    const rejections = await recordUnhandledRejections(async () => {
+      upload.resolve()
+      await flushPromises()
+    })
+
+    expect(rejections).toEqual([])
+    expect(store.dispatch).toHaveBeenCalledWith('editTaskComment', {
+      taskId: TASK_ID,
+      comment: edit
+    })
+    expect(consoleError.mock.calls).toEqual([[moveFailure]])
+  })
+
+  // The arrows to the next and previous edits walk it.
+  it('loads the list of the page once a reload shows the task', async () => {
+    const loadTask = vi
+      .fn()
+      .mockRejectedValueOnce(requestFailure(500))
+      .mockImplementationOnce(() =>
+        readTask(buildTask({ entity_type_name: 'Edit' }))
+      )
+    const { wrapper, dispatched } = await mountWithActions({ loadTask })
+
+    await reloadButton(wrapper).vm.$emit('click')
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(dispatched).toContain('loadEdits')
+  })
+
+  it('loads the list of the page once, for the first task shown', async () => {
+    const names = { [OTHER_TASK_ID]: 'EDIT02', 'task-3': 'EDIT03' }
+    const loadTask = vi.fn(({ taskId }) =>
+      taskId === TASK_ID
+        ? Promise.reject(requestFailure(404))
+        : readTask(
+            buildTask({
+              id: taskId,
+              entity_type_name: 'Edit',
+              entity_name: names[taskId]
+            })
+          )
+    )
+    const { wrapper, router, dispatched } = await mountWithActions({ loadTask })
+    const listLoads = () => dispatched.filter(type => type === 'loadEdits')
+
+    await goTo(router, OTHER_TASK_ID)
+    expect(listLoads()).toHaveLength(1)
+
+    await goTo(router, 'task-3')
+    expect(headerTitle(wrapper)).toContain('EDIT03')
+    expect(listLoads()).toHaveLength(1)
+  })
+
+  it('scrolls to the top once the first task shows', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    window.scrollTo.mockClear()
+
+    const { wrapper } = await mountWithActions({})
+
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
+    expect(wrapper.find('.task-columns').element.scrollTop).toBe(100)
+  })
+
+  // The list load puts its own copy of each task in the store, where a
+  // subscription change lands.
+  it('loads the list of the page once when the user moves during its load', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    taskMap.set(OTHER_TASK_ID, otherTask())
+    const listLoad = deferred()
+    const loadShots = vi.fn(async () => {
+      await listLoad.promise
+      taskMap.set(OTHER_TASK_ID, { ...otherTask(), is_subscribed: true })
+    })
+    const { wrapper, router } = await mountWithActions({ loadShots })
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toContain('SH02')
+    window.scrollTo.mockClear()
+
+    listLoad.resolve()
+    await flushPromises()
+
+    expect(loadShots).toHaveBeenCalledTimes(1)
+    expect(wrapper.findComponent(SubscribeButton).props('subscribed')).toBe(
+      true
+    )
+    // Nor scrolls the task shown since.
+    expect(window.scrollTo).not.toHaveBeenCalled()
+  })
+
+  // The list only brings its own copy of the task: what the user started
+  // stays.
+  it('keeps the files picked for a comment when the list of the page loads', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const listLoad = deferred()
+    const windowReset = vi.fn()
+    const { wrapper } = await mountWithActions(
+      { loadShots: () => listLoad.promise },
+      {
+        getterOverrides: {
+          isCurrentUserProductionManager: () => true,
+          taskMap: () => taskMap
+        },
+        stubs: {
+          AddPreviewModal: {
+            template: '<div />',
+            methods: { reset: windowReset }
+          }
+        }
+      }
+    )
+    const form = new FormData()
+    form.append('file', new File(['frame'], 'sh010.png'))
+    wrapper.findComponent(AddComment).vm.$emit('file-drop', [form])
+    windowReset.mockClear()
+
+    listLoad.resolve()
+    await flushPromises()
+
+    expect(wrapper.findComponent(AddComment).props('previewForms')).toEqual([
+      form
+    ])
+    // Nor the files picked in the window that publishes a revision.
+    expect(windowReset).not.toHaveBeenCalled()
+  })
+
+  // Reading the task of an asset or a shot loads the list of its page.
+  it('loads the list of the page once when reading the task loads it', async () => {
+    const loadShots = vi.fn(() => Promise.resolve())
+    await mountWithActions(
+      { loadTask: () => readTask(buildTask()), loadShots },
+      {
+        getterOverrides: {
+          isShotsLoading: () => false,
+          shotsLoadingKey: () => 'production-1/',
+          taskMap: () => taskMap
+        }
+      }
+    )
+
+    expect(loadShots).toHaveBeenCalledTimes(1)
+  })
+
+  // Zou names the asset type of an asset task, not 'Asset'.
+  it('loads the asset list once when reading the task loads it', async () => {
+    const loadAssets = vi.fn(() => Promise.resolve())
+    await mountWithActions(
+      {
+        loadTask: () => readTask(buildTask({ entity_type_name: 'Character' })),
+        loadAssets
+      },
+      {
+        getterOverrides: {
+          isAssetsLoading: () => false,
+          assetsLoadingKey: () => 'production-1/',
+          taskMap: () => taskMap
+        }
+      }
+    )
+
+    expect(loadAssets).toHaveBeenCalledTimes(1)
+  })
+
+  // The read loaded the list long before the Reload, which finds the task in
+  // the store.
+  it('loads the list of the page again on a reload after a failed read', async () => {
+    const loadShots = vi.fn(() => Promise.resolve())
+    const { wrapper } = await mountWithActions(
+      {
+        loadTask: () => readTask(buildTask()),
+        loadShots,
+        loadTaskComments: vi
+          .fn()
+          .mockRejectedValueOnce(requestFailure(502))
+          .mockResolvedValue()
+      },
+      {
+        getterOverrides: {
+          isShotsLoading: () => false,
+          shotsLoadingKey: () => 'production-1/',
+          taskMap: () => taskMap
+        }
+      }
+    )
+    expect(headerTitle(wrapper)).toBe('main.loading_error')
+
+    await reloadButton(wrapper).vm.$emit('click')
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(loadShots).toHaveBeenCalledTimes(2)
+  })
+
+  // A failed list load leaves the store with no list for the page.
+  it('loads the list of the page again when the one read with the task failed', async () => {
+    const loadShots = vi.fn(() => Promise.resolve())
+    await mountWithActions(
+      { loadTask: () => readTask(buildTask()), loadShots },
+      {
+        getterOverrides: {
+          isShotsLoading: () => false,
+          shotsLoadingKey: () => null,
+          taskMap: () => taskMap
+        }
+      }
+    )
+
+    expect(loadShots).toHaveBeenCalledTimes(2)
+  })
+
+  // A failed load leaves no list for the arrows to walk. The shots, the
+  // assets, and the edits answer it with their error flag, which their next
+  // load clears.
+  const shotsFailingOnCall = failingCall => {
+    const isFailed = ref(false)
+    const loadShots = vi.fn(() => {
+      isFailed.value = loadShots.mock.calls.length === failingCall
+      return Promise.resolve()
+    })
+    const getterOverrides = {
+      isShotsLoadingError: () => isFailed.value,
+      taskMap: () => taskMap
+    }
+    return { loadShots, getterOverrides }
+  }
+
+  it('loads the shots again on a move after their load failed', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    taskMap.set(OTHER_TASK_ID, otherTask())
+    taskMap.set('task-3', buildTask({ id: 'task-3', entity_name: 'SH03' }))
+    const { loadShots, getterOverrides } = shotsFailingOnCall(1)
+    const { wrapper, router } = await mountWithActions(
+      { loadShots },
+      { getterOverrides }
+    )
+
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toContain('SH02')
+    expect(loadShots).toHaveBeenCalledTimes(2)
+
+    await goTo(router, 'task-3')
+    expect(headerTitle(wrapper)).toContain('SH03')
+    expect(loadShots).toHaveBeenCalledTimes(2)
+  })
+
+  // The read of a task out of the store loads the shots with it.
+  it('loads the shots again once the read of a task out of the store failed to load them', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { loadShots, getterOverrides } = shotsFailingOnCall(2)
+    const { wrapper, router } = await mountWithActions(
+      { loadShots, loadTask: () => readTask(otherTask()) },
+      { getterOverrides }
+    )
+
+    await goTo(router, OTHER_TASK_ID)
+
+    expect(headerTitle(wrapper)).toContain('SH02')
+    expect(loadShots).toHaveBeenCalledTimes(3)
+  })
+
+  // The sequences and the episodes pass the failure on.
+  it('loads the sequences again on a move after their load failed', async () => {
+    taskMap.set(TASK_ID, buildTask({ entity_type_name: 'Sequence' }))
+    taskMap.set(OTHER_TASK_ID, {
+      ...otherTask(),
+      entity_type_name: 'Sequence'
+    })
+    const failure = requestFailure(502)
+    const loadSequences = vi
+      .fn()
+      .mockRejectedValueOnce(failure)
+      .mockResolvedValue()
+    const { wrapper, router } = await mountWithActions({ loadSequences })
+    expect(consoleError.mock.calls).toEqual([[failure]])
+
+    await goTo(router, OTHER_TASK_ID)
+
+    expect(headerTitle(wrapper)).toContain('SH02')
+    expect(loadSequences).toHaveBeenCalledTimes(2)
+  })
+
+  // Reading an edit task loads the assets, not the edits.
+  it('loads the edits of an edit task its read did not load', async () => {
+    const loadEdits = vi.fn(() => Promise.resolve())
+    await mountWithActions(
+      {
+        loadTask: () => readTask(buildTask({ entity_type_name: 'Edit' })),
+        loadEdits
+      },
+      {
+        getterOverrides: {
+          isEditsLoading: () => false,
+          editsLoadingKey: () => 'production-1/',
+          taskMap: () => taskMap
+        }
+      }
+    )
+
+    expect(loadEdits).toHaveBeenCalledTimes(1)
+  })
+
+  // Opened from the list of its page, for instance: a reload brings the tasks
+  // created since, which no event announces.
+  it.each(['Asset', 'Edit', 'Shot'])(
+    'loads again the %s list of a task the store holds',
+    async type => {
+      taskMap.set(
+        TASK_ID,
+        buildTask({ entity_type_name: type === 'Asset' ? 'Character' : type })
+      )
+      const loadList = vi.fn(() => Promise.resolve())
+      await mountWithActions(
+        { [`load${type}s`]: loadList },
+        {
+          getterOverrides: {
+            [`is${type}sLoading`]: () => false,
+            [`${type.toLowerCase()}sLoadingKey`]: () => 'production-1/',
+            taskMap: () => taskMap
+          }
+        }
+      )
+
+      expect(loadList).toHaveBeenCalledTimes(1)
+    }
+  )
+
+  // The other lists reload with the tasks the arrows walk.
+  it('loads the sequences of a sequence task the store holds already', async () => {
+    taskMap.set(TASK_ID, buildTask({ entity_type_name: 'Sequence' }))
+    const loadSequences = vi.fn(() => Promise.resolve())
+    await mountWithActions(
+      { loadSequences },
+      {
+        getterOverrides: {
+          isSequencesLoading: () => false,
+          sequencesLoadingKey: () => 'production-1/',
+          taskMap: () => taskMap
+        }
+      }
+    )
+
+    expect(loadSequences).toHaveBeenCalledTimes(1)
+  })
+
+  it('leaves the page alone when its list load ends while a newer read runs', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const listLoad = deferred()
+    const { wrapper, router } = await mountWithActions({
+      loadShots: () => listLoad.promise,
+      loadTask: () => new Promise(() => {})
+    })
+    await goTo(router, OTHER_TASK_ID)
+    const page = wrapper.html()
+
+    listLoad.resolve()
+    await flushPromises()
+
+    expect(wrapper.html()).toBe(page)
+  })
+
+  // They act on the task shown before.
+  it.each([
+    ['edit-comment', wrapper => wrapper.findComponent(EditCommentModal)],
+    [
+      'delete-comment',
+      wrapper =>
+        wrapper
+          .findAllComponents(DeleteModal)
+          .find(modal => modal.props('text') === 'tasks.delete_comment')
+    ]
+  ])('closes the window of a %s when a move fails', async (event, modal) => {
+    taskMap.set(TASK_ID, buildTask())
+    const comment = { id: 'comment-1', text: 'v1' }
+    const { wrapper, router } = await mountWithActions(
+      { loadTask: () => Promise.reject(requestFailure(404)) },
+      { comments: [comment] }
+    )
+    await wrapper.findComponent(Comment).vm.$emit(event, comment)
+    expect(modal(wrapper).props('active')).toBe(true)
+
+    await goTo(router, OTHER_TASK_ID)
+
+    expect(headerTitle(wrapper)).toBe('not_found.title')
+    expect(modal(wrapper).props('active')).toBe(false)
+  })
+
+  it('loads the list of the page once a production change shows the task', async () => {
+    const production = ref({
+      id: 'production-1',
+      team: [],
+      task_types: [taskType.id],
+      fps: 25
+    })
+    const loadTask = vi
+      .fn()
+      .mockRejectedValueOnce(requestFailure(500))
+      .mockImplementationOnce(() =>
+        readTask(buildTask({ entity_type_name: 'Edit' }))
+      )
+    const { wrapper, dispatched } = await mountWithActions(
+      { loadTask },
+      {
+        getterOverrides: {
+          currentProduction: () => production.value,
+          taskMap: () => taskMap
+        }
+      }
+    )
+    expect(headerTitle(wrapper)).toBe('main.loading_error')
+
+    production.value = { ...production.value }
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toContain('SH01')
+    expect(dispatched).toContain('loadEdits')
+  })
+
+  it('shows the task of the URL when an earlier read fails after it', async () => {
+    const firstRead = deferred()
+    const failure = requestFailure(404)
+    const loadTask = vi.fn(({ taskId }) =>
+      taskId === TASK_ID ? firstRead.promise : readTask(otherTask())
+    )
+    const { wrapper, router } = await mountWithActions({ loadTask })
+
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toContain('SH02')
+
+    firstRead.reject(failure)
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toContain('SH02')
+    expect(wrapper.text()).not.toContain('not_found.text')
+    expect(consoleError.mock.calls).toEqual([[failure]])
+  })
+
+  it('keeps the error of the URL when an earlier read succeeds after it', async () => {
+    const firstRead = deferred()
+    const loadTask = vi.fn(({ taskId }) =>
+      taskId === TASK_ID
+        ? firstRead.promise
+        : Promise.reject(requestFailure(404))
+    )
+    const { wrapper, router, dispatched } = await mountWithActions({ loadTask })
+
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toBe('not_found.title')
+
+    firstRead.resolve(buildTask())
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toBe('not_found.title')
+    // Nor the list of a task left.
+    expect(dispatched).not.toContain('loadEpisodes')
+  })
+
+  it('shows the task of the URL when an earlier read lands during its list load', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const LEFT_TASK_ID = 'task-3'
+    const listLoad = deferred()
+    // The comments of the task left would answer last.
+    const loadTaskComments = vi.fn(({ taskId }) =>
+      taskId === LEFT_TASK_ID ? new Promise(() => {}) : Promise.resolve()
+    )
+    const { wrapper, router, dispatched } = await mountWithActions({
+      loadTask: ({ taskId }) =>
+        readTask(
+          taskId === LEFT_TASK_ID
+            ? buildTask({ id: LEFT_TASK_ID, entity_name: 'SH03' })
+            : otherTask()
+        ),
+      loadEpisodes: vi
+        .fn()
+        .mockReturnValueOnce(listLoad.promise)
+        .mockResolvedValue(),
+      loadTaskComments
+    })
+    const shotLoads = () => dispatched.filter(type => type === 'loadShots')
+
+    await goTo(router, LEFT_TASK_ID)
+    await goTo(router, OTHER_TASK_ID)
+    expect(headerTitle(wrapper)).toContain('SH02')
+    const shotLoadCount = shotLoads().length
+
+    listLoad.resolve()
+    await flushPromises()
+
+    expect(headerTitle(wrapper)).toContain('SH02')
+    expect(loadTaskComments).not.toHaveBeenCalledWith(
+      expect.objectContaining({ taskId: LEFT_TASK_ID })
+    )
+    // Nor the shots of its episode.
+    expect(shotLoads()).toHaveLength(shotLoadCount)
+  })
+
+  // Read again on another page: left in the store, or out of it.
+  it.each([true, false])(
+    'keeps the spinner of a newer load when an earlier one ends (task held: %s)',
+    async isTaskHeld => {
+      if (isTaskHeld) taskMap.set(TASK_ID, buildTask())
+      const commentsLoad = deferred()
+      const { wrapper, router } = await mountWithActions({
+        loadTask: ({ taskId }) =>
+          taskId === TASK_ID ? readTask(buildTask()) : new Promise(() => {}),
+        loadTaskComments: vi
+          .fn()
+          .mockReturnValueOnce(commentsLoad.promise)
+          .mockResolvedValue()
+      })
+
+      await goTo(router, OTHER_TASK_ID)
+      expect(wrapper.findComponent(Spinner).exists()).toBe(true)
+
+      commentsLoad.resolve()
+      await flushPromises()
+
+      expect(wrapper.findComponent(Spinner).exists()).toBe(true)
+    }
+  )
+
+  it('reads nothing again when only the revision of the URL changes', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const loadTaskComments = vi.fn(() => Promise.resolve())
+    const { router } = await mountWithActions({ loadTaskComments })
+
+    await router.push({
+      name: 'task-preview',
+      params: { ...TASK_ROUTE_PARAMS, preview_id: 'preview-2' }
+    })
+    await flushPromises()
+
+    expect(loadTaskComments).toHaveBeenCalledTimes(1)
+  })
+})
+
 describe('Task.vue preview selection', () => {
   // Distinct nested previews make the selected revision observable through
   // the player props.
@@ -530,7 +2006,31 @@ describe('Task.vue preview selection', () => {
   // page, the list the page walks.
   it('keeps the episode of the URL when it switches revision', async () => {
     const { wrapper, router } = await mountPage({
-      previews,
+      previews: previews.map(preview => ({ ...preview, task_id: TASK_ID })),
+      task: buildTask({ episode_id: 'episode-2' }),
+      getterOverrides: {
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true
+      }
+    })
+    await router.push({
+      name: 'episode-task',
+      params: { ...TASK_ROUTE_PARAMS, episode_id: 'episode-1' }
+    })
+    await flushPromises()
+
+    await pickInPageList(wrapper, 'preview-2')
+
+    expect(router.currentRoute.value.name).toBe('episode-task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      episode_id: 'episode-1',
+      preview_id: 'preview-2'
+    })
+  })
+
+  it('keeps the episode of the URL when the player switches revision', async () => {
+    const { wrapper, router } = await mountPage({
+      previews: previews.map(preview => ({ ...preview, task_id: TASK_ID })),
       task: buildTask({ episode_id: 'episode-2' }),
       getterOverrides: {
         currentEpisode: () => ({ id: 'episode-1' }),
@@ -544,14 +2044,162 @@ describe('Task.vue preview selection', () => {
     await flushPromises()
 
     wrapper
-      .findAllComponents(ComboboxStyled)
-      .find(combo => combo.classes().includes('preview-combo'))
-      .vm.$emit('update:modelValue', 'preview-2')
+      .findComponent(PreviewPlayer)
+      .vm.$emit('change-current-preview', { ...previews[1], task_id: TASK_ID })
     await flushPromises()
 
     expect(router.currentRoute.value.name).toBe('episode-task-preview')
     expect(router.currentRoute.value.params).toMatchObject({
       episode_id: 'episode-1',
+      preview_id: 'preview-2'
+    })
+  })
+
+  // Opened at an address without its episode, the page writes the revision
+  // picked at the episode address of its task at once, not in a second step.
+  it('writes the revision the player picks at the episode address of its task in one step', async () => {
+    const { wrapper, router } = await mountPage({
+      previews: previews.map(preview => ({ ...preview, task_id: TASK_ID })),
+      getterOverrides: {
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true
+      }
+    })
+    const push = vi.spyOn(router, 'push')
+
+    wrapper
+      .findComponent(PreviewPlayer)
+      .vm.$emit('change-current-preview', { ...previews[1], task_id: TASK_ID })
+    await flushPromises()
+
+    expect(push.mock.calls[0][0]).toMatchObject({
+      name: 'episode-task-preview',
+      params: { episode_id: 'episode-1', preview_id: 'preview-2' }
+    })
+  })
+
+  // A link or a Back to a revision of a task the store does not hold: the
+  // page still shows the task before while it reads that one.
+  it('stays on the revision of the URL while its task loads', async () => {
+    const { router } = await mountPage({
+      previews,
+      actions: { loadTask: () => new Promise(() => {}) }
+    })
+
+    await router.push({
+      name: 'task-preview',
+      params: { ...TASK_ROUTE_PARAMS, task_id: 'task-2', preview_id: 'preview-9' }
+    })
+    await flushPromises()
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: 'task-2',
+      preview_id: 'preview-9'
+    })
+  })
+
+  // The list keeps the revisions of the task before until the comments of
+  // the next one load: one that names no task only changes the player.
+  it('changes only the player for a revision of no known task picked while the next task loads', async () => {
+    const { wrapper, router } = await mountPage({
+      previews,
+      actions: {
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValueOnce()
+          .mockReturnValueOnce(new Promise(() => {}))
+      },
+      getterOverrides: {
+        taskMap: () =>
+          new Map([
+            [TASK_ID, buildTask()],
+            ['task-2', buildTask({ id: 'task-2' })]
+          ])
+      }
+    })
+    await router.push({
+      name: 'task',
+      params: { ...TASK_ROUTE_PARAMS, task_id: 'task-2' }
+    })
+    await flushPromises()
+
+    await pickInPageList(wrapper, 'preview-2')
+
+    expect(router.currentRoute.value.name).toBe('task')
+    expect(router.currentRoute.value.params.task_id).toBe('task-2')
+    expect(playerPreviews(wrapper)).toEqual(['from-2'])
+  })
+
+  // Zou names the task of every revision: one that names none still reaches
+  // the URL of the task shown in full.
+  it('writes a revision of no known task in the URL of the task shown', async () => {
+    const { wrapper, router } = await mountPage({ previews })
+
+    await pickInPageList(wrapper, 'preview-2')
+
+    expect(router.currentRoute.value.name).toBe('task-preview')
+    expect(router.currentRoute.value.params.preview_id).toBe('preview-2')
+  })
+
+  // Back from a task whose comments still load, to a task the store let go
+  // with its production for instance.
+  it('stays on the revision of the URL on the way back to a task the store let go', async () => {
+    const tasks = new Map([[TASK_ID, buildTask()]])
+    const { router } = await mountPage({
+      previews,
+      previewId: 'preview-2',
+      actions: {
+        loadTask: ({ taskId }) => {
+          if (taskId !== 'task-2') return new Promise(() => {})
+          const nextTask = buildTask({ id: 'task-2' })
+          tasks.set(nextTask.id, nextTask)
+          return Promise.resolve(nextTask)
+        },
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValueOnce()
+          .mockReturnValueOnce(new Promise(() => {}))
+      },
+      getterOverrides: { taskMap: () => tasks }
+    })
+    await router.push({
+      name: 'task',
+      params: { ...TASK_ROUTE_PARAMS, task_id: 'task-2' }
+    })
+    await flushPromises()
+    tasks.delete(TASK_ID)
+
+    router.back()
+    await flushPromises()
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: TASK_ID,
+      preview_id: 'preview-2'
+    })
+  })
+
+  it('puts the revision picked in the URL once the next task shows', async () => {
+    const { wrapper, router } = await mountPage({
+      getterOverrides: {
+        getTaskPreviews: () => taskId =>
+          previews.map(preview => ({ ...preview, task_id: taskId })),
+        taskMap: () =>
+          new Map([
+            [TASK_ID, buildTask()],
+            ['task-2', buildTask({ id: 'task-2' })]
+          ])
+      }
+    })
+    await router.push({
+      name: 'task',
+      params: { ...TASK_ROUTE_PARAMS, task_id: 'task-2' }
+    })
+    await flushPromises()
+
+    await pickInPageList(wrapper, 'preview-2')
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: 'task-2',
       preview_id: 'preview-2'
     })
   })
@@ -587,11 +2235,14 @@ describe('Task.vue preview selection', () => {
   describe('once a comment is deleted', () => {
     const { mutations } = tasksStore
 
-    const buildComment = revision => ({
+    // Zou names the task of every file of a comment.
+    const buildComment = (revision, taskId = TASK_ID) => ({
       id: `comment-${revision}`,
       person: { id: 'user-1', first_name: 'Ann', last_name: 'Lee' },
       person_id: 'user-1',
-      previews: [{ id: `preview-${revision}`, revision, extension: 'png' }],
+      previews: [
+        { id: `preview-${revision}`, revision, extension: 'png', task_id: taskId }
+      ],
       task_status: {}
     })
 
@@ -604,7 +2255,7 @@ describe('Task.vue preview selection', () => {
       }
       mutations.LOAD_TASK_COMMENTS_END(state, {
         taskId: TASK_ID,
-        comments: revisions.map(buildComment)
+        comments: revisions.map(revision => buildComment(revision))
       })
       const page = await mountPage({
         ...options,
@@ -623,11 +2274,6 @@ describe('Task.vue preview selection', () => {
       })
       return { ...page, state }
     }
-
-    const previewCombo = wrapper =>
-      wrapper
-        .findAllComponents(ComboboxStyled)
-        .find(combo => combo.classes().includes('preview-combo'))
 
     const options = wrapper =>
       previewCombo(wrapper)
@@ -742,8 +2388,7 @@ describe('Task.vue preview selection', () => {
     it('opens the revision picked in its list', async () => {
       const page = await mountOnRevisions([2, 1])
 
-      previewCombo(page.wrapper).vm.$emit('update:model-value', 'preview-1')
-      await flushPromises()
+      await pickInPageList(page.wrapper, 'preview-1')
 
       expect(shownFiles(page.wrapper)).toEqual(['preview-1'])
       expect(page.router.currentRoute.value.params.preview_id).toBe('preview-1')
@@ -773,6 +2418,14 @@ describe('Task.vue preview selection', () => {
         }
       }
 
+      // The trash shows the first file of the revision before it removes one.
+      const trashStubs = {
+        PreviewPlayer: {
+          ...stubs.PreviewPlayer,
+          methods: { ...stubs.PreviewPlayer.methods, displayFirst: () => {} }
+        }
+      }
+
       it('adds a file to the revision it opened on, once a new one is published', async () => {
         const page = await mountOnRevisions([2, 1], { stubs })
         page.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
@@ -787,6 +2440,28 @@ describe('Task.vue preview selection', () => {
             previewId: 'preview-2'
           })
         )
+      })
+
+      it('removes a file from the revision it opened on, once a new one is published', async () => {
+        const page = await mountOnRevisions([2, 1], { stubs: trashStubs })
+        page.wrapper
+          .findComponent(PreviewPlayer)
+          .vm.$emit('remove-extra-preview', { id: 'preview-2' })
+        await flushPromises()
+
+        await publish(page, 3)
+        expect(shownFiles(page.wrapper)).toEqual(['preview-3'])
+        page.wrapper
+          .findAllComponents(DeleteModal)
+          .find(modal => modal.props('active'))
+          .vm.$emit('confirm')
+        await flushPromises()
+
+        expect(page.store.dispatch).toHaveBeenCalledWith('deleteTaskPreview', {
+          taskId: TASK_ID,
+          commentId: 'comment-2',
+          previewId: 'preview-2'
+        })
       })
 
       it('adds a file to no other revision once its own goes', async () => {
@@ -806,7 +2481,7 @@ describe('Task.vue preview selection', () => {
       })
 
       // The way back in the browser leaves the modal open.
-      it('adds a file to the revision shown once the task changes', async () => {
+      it('adds a file to the revision it opened on once the task changes', async () => {
         const otherTask = buildTask({ id: 'task-2' })
         const page = await mountOnRevisions([2, 1], {
           stubs,
@@ -820,7 +2495,7 @@ describe('Task.vue preview selection', () => {
         })
         mutations.LOAD_TASK_COMMENTS_END(page.state, {
           taskId: otherTask.id,
-          comments: [buildComment(5)]
+          comments: [buildComment(5, otherTask.id)]
         })
         page.wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
 
@@ -834,11 +2509,13 @@ describe('Task.vue preview selection', () => {
         expect(page.store.dispatch).toHaveBeenCalledWith(
           'addCommentExtraPreview',
           expect.objectContaining({
-            taskId: otherTask.id,
-            commentId: 'comment-5',
-            previewId: 'preview-5'
+            taskId: TASK_ID,
+            commentId: 'comment-2',
+            previewId: 'preview-2'
           })
         )
+        // A file of the previous task leaves the page as it is.
+        expect(shownFiles(page.wrapper)).toEqual(['preview-5'])
       })
 
       // The trash can take the only file during the upload of another one.
@@ -891,6 +2568,345 @@ describe('Task.vue preview selection', () => {
         expect(modal.props('isLoading')).toBe(false)
         expect(modal.props('isError')).toBe(true)
         consoleError.mockRestore()
+      })
+
+      // The page shows the revisions of the previous task until the comments
+      // of the next one load: the "+" and the trash sent the next task there,
+      // with no comment, and Zou refused them.
+      describe('on a revision of the previous task', () => {
+        const nextTask = buildTask({ id: 'task-2' })
+
+        // The page moves on to the next task, whose comments load until
+        // `endCommentsLoad` runs. `beforeMove` acts on the previous task. A
+        // next task out of the store reads first, then the list of its page,
+        // which never comes here.
+        const mountAndMoveOn = async (
+          pageStubs,
+          beforeMove = () => {},
+          { isNextTaskInStore = true, previewId } = {}
+        ) => {
+          const tasks = new Map([[TASK_ID, buildTask()]])
+          if (isNextTaskInStore) tasks.set(nextTask.id, nextTask)
+          const page = await mountOnRevisions([2, 1], {
+            previewId,
+            stubs: pageStubs,
+            getterOverrides: { taskMap: () => tasks }
+          })
+          beforeMove(page, tasks)
+          let endLoad
+          page.store.dispatch.mockImplementation(type => {
+            if (type === 'loadTaskComments') {
+              return new Promise(resolve => {
+                endLoad = resolve
+              })
+            }
+            if (!isNextTaskInStore && type === 'loadTask') {
+              return Promise.resolve(nextTask)
+            }
+            if (!isNextTaskInStore && type === 'loadEpisodes') {
+              return new Promise(() => {})
+            }
+            return Promise.resolve()
+          })
+          await page.router.push({
+            name: 'task',
+            params: { ...TASK_ROUTE_PARAMS, task_id: nextTask.id }
+          })
+          await flushPromises()
+          const endCommentsLoad = async () => {
+            mutations.LOAD_TASK_COMMENTS_END(page.state, {
+              taskId: nextTask.id,
+              comments: [buildComment(5, nextTask.id)]
+            })
+            endLoad()
+            await flushPromises()
+          }
+          return { ...page, endCommentsLoad }
+        }
+
+        const openExtraFileModal = ({ wrapper }) =>
+          wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+
+        it.each([
+          ['opened before the move', true, false],
+          ['opened before the move, confirmed once the next task loads', true, true],
+          ['opened on it', false, false],
+          ['opened on it, confirmed once the next task loads', false, true]
+        ])(
+          'adds a file to it from a modal %s',
+          async (_, isOpenedBeforeMove, isConfirmedOnceLoaded) => {
+            const page = await mountAndMoveOn(stubs, page => {
+              if (isOpenedBeforeMove) openExtraFileModal(page)
+            })
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+            if (!isOpenedBeforeMove) openExtraFileModal(page)
+            if (isConfirmedOnceLoaded) {
+              await page.endCommentsLoad()
+              expect(shownFiles(page.wrapper)).toEqual(['preview-5'])
+            }
+            await confirmExtraFile(page.wrapper)
+
+            expect(page.store.dispatch).toHaveBeenCalledWith(
+              'addCommentExtraPreview',
+              expect.objectContaining({
+                taskId: TASK_ID,
+                commentId: 'comment-2',
+                previewId: 'preview-2'
+              })
+            )
+            // A file of the previous task leaves the page as it is.
+            expect(shownFiles(page.wrapper)).toEqual(
+              isConfirmedOnceLoaded ? ['preview-5'] : ['preview-2']
+            )
+          }
+        )
+
+        // The page shows the latest revision of the previous task meanwhile.
+        it('adds a file to the older revision it opened on', async () => {
+          const page = await mountAndMoveOn(stubs, openExtraFileModal, {
+            previewId: 'preview-1'
+          })
+          expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+
+          await confirmExtraFile(page.wrapper)
+
+          expect(page.store.dispatch).toHaveBeenCalledWith(
+            'addCommentExtraPreview',
+            expect.objectContaining({
+              taskId: TASK_ID,
+              commentId: 'comment-1',
+              previewId: 'preview-1'
+            })
+          )
+        })
+
+        // The way back to another production, for one: the page keeps the
+        // previous task until the next one reads, while its URL names the
+        // next one already.
+        describe('with the next task out of the store', () => {
+          const moveOutOfStore = pageStubs =>
+            mountAndMoveOn(pageStubs, undefined, { isNextTaskInStore: false })
+
+          it('adds a file to it and leaves the page as it is', async () => {
+            const displayLast = vi.fn()
+            const page = await moveOutOfStore({
+              PreviewPlayer: {
+                ...stubs.PreviewPlayer,
+                methods: { ...stubs.PreviewPlayer.methods, displayLast }
+              }
+            })
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+            openExtraFileModal(page)
+
+            // The player shows the last file once a timer runs.
+            vi.useFakeTimers({ toFake: ['setTimeout'] })
+            try {
+              await confirmExtraFile(page.wrapper)
+              vi.runAllTimers()
+            } finally {
+              vi.useRealTimers()
+            }
+
+            expect(page.store.dispatch).toHaveBeenCalledWith(
+              'addCommentExtraPreview',
+              expect.objectContaining({
+                taskId: TASK_ID,
+                commentId: 'comment-2',
+                previewId: 'preview-2'
+              })
+            )
+            expect(page.wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+            expect(displayLast).not.toHaveBeenCalled()
+          })
+
+          it('removes a file of it and leaves the page and its URL as they are', async () => {
+            const page = await moveOutOfStore(trashStubs)
+            page.wrapper
+              .findComponent(PreviewPlayer)
+              .vm.$emit('remove-extra-preview', { id: 'preview-2' })
+            await flushPromises()
+
+            page.wrapper
+              .findAllComponents(DeleteModal)
+              .find(modal => modal.props('active'))
+              .vm.$emit('confirm')
+            await flushPromises()
+
+            expect(page.store.dispatch).toHaveBeenCalledWith('deleteTaskPreview', {
+              taskId: TASK_ID,
+              commentId: 'comment-2',
+              previewId: 'preview-2'
+            })
+            expect(page.router.currentRoute.value.params).toEqual({
+              ...TASK_ROUTE_PARAMS,
+              task_id: nextTask.id
+            })
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+          })
+
+          // The list of the next task drops the previous one from the store:
+          // the way back to it during the comments of the next one reads it
+          // again, while `task` still holds the next one.
+          const goBackDuringLoad = async pageStubs => {
+            const tasks = new Map([[TASK_ID, buildTask()]])
+            const page = await mountOnRevisions([2, 1], {
+              stubs: pageStubs,
+              getterOverrides: { taskMap: () => tasks }
+            })
+            page.store.dispatch.mockImplementation((type, payload) => {
+              if (type === 'loadTask') {
+                return payload.taskId === nextTask.id
+                  ? Promise.resolve(nextTask)
+                  : new Promise(() => {})
+              }
+              if (type === 'loadShots') {
+                tasks.delete(TASK_ID)
+                tasks.set(nextTask.id, nextTask)
+              }
+              if (type === 'loadTaskComments') return new Promise(() => {})
+              return Promise.resolve()
+            })
+            await page.router.push({
+              name: 'task',
+              params: { ...TASK_ROUTE_PARAMS, task_id: nextTask.id }
+            })
+            await flushPromises()
+            await page.router.push({ name: 'task', params: TASK_ROUTE_PARAMS })
+            await flushPromises()
+            return page
+          }
+
+          it('removes a file of it back on it, and keeps the URL on it', async () => {
+            const page = await goBackDuringLoad(trashStubs)
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+            page.wrapper
+              .findComponent(PreviewPlayer)
+              .vm.$emit('remove-extra-preview', { id: 'preview-2' })
+            await flushPromises()
+
+            page.wrapper
+              .findAllComponents(DeleteModal)
+              .find(modal => modal.props('active'))
+              .vm.$emit('confirm')
+            await flushPromises()
+
+            expect(page.store.dispatch).toHaveBeenCalledWith('deleteTaskPreview', {
+              taskId: TASK_ID,
+              commentId: 'comment-2',
+              previewId: 'preview-2'
+            })
+            expect(page.router.currentRoute.value.params).toEqual(
+              TASK_ROUTE_PARAMS
+            )
+          })
+
+          it('adds a file to it back on it, and leaves the page as it is', async () => {
+            const displayLast = vi.fn()
+            const page = await goBackDuringLoad({
+              PreviewPlayer: {
+                ...stubs.PreviewPlayer,
+                methods: { ...stubs.PreviewPlayer.methods, displayLast }
+              }
+            })
+            openExtraFileModal(page)
+
+            vi.useFakeTimers({ toFake: ['setTimeout'] })
+            try {
+              await confirmExtraFile(page.wrapper)
+              vi.runAllTimers()
+            } finally {
+              vi.useRealTimers()
+            }
+
+            expect(page.store.dispatch).toHaveBeenCalledWith(
+              'addCommentExtraPreview',
+              expect.objectContaining({
+                taskId: TASK_ID,
+                commentId: 'comment-2',
+                previewId: 'preview-2'
+              })
+            )
+            expect(displayLast).not.toHaveBeenCalled()
+          })
+        })
+
+        // A change of production, for one, drops it from the store.
+        it('adds a file to it once the store dropped its task', async () => {
+          const page = await mountAndMoveOn(stubs, (page, tasks) => {
+            openExtraFileModal(page)
+            tasks.delete(TASK_ID)
+          })
+          expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+
+          await confirmExtraFile(page.wrapper)
+
+          expect(page.store.dispatch).toHaveBeenCalledWith(
+            'addCommentExtraPreview',
+            expect.objectContaining({
+              taskId: TASK_ID,
+              commentId: 'comment-2',
+              previewId: 'preview-2'
+            })
+          )
+        })
+
+        // The URL keeps naming the task shown, never a revision of another.
+        it.each([
+          ['while it shows', false],
+          ['once the next task loads', true]
+        ])(
+          'removes a file of it confirmed %s',
+          async (_, isConfirmedOnceLoaded) => {
+            const page = await mountAndMoveOn(trashStubs)
+            expect(shownFiles(page.wrapper)).toEqual(['preview-2'])
+            page.wrapper
+              .findComponent(PreviewPlayer)
+              .vm.$emit('remove-extra-preview', { id: 'preview-2' })
+            await flushPromises()
+            if (isConfirmedOnceLoaded) await page.endCommentsLoad()
+
+            page.wrapper
+              .findAllComponents(DeleteModal)
+              .find(modal => modal.props('active'))
+              .vm.$emit('confirm')
+            await flushPromises()
+
+            expect(page.store.dispatch).toHaveBeenCalledWith(
+              'deleteTaskPreview',
+              { taskId: TASK_ID, commentId: 'comment-2', previewId: 'preview-2' }
+            )
+            expect(page.router.currentRoute.value.params).toEqual({
+              ...TASK_ROUTE_PARAMS,
+              task_id: nextTask.id
+            })
+            expect(shownFiles(page.wrapper)).toEqual(
+              isConfirmedOnceLoaded ? ['preview-5'] : ['preview-2']
+            )
+          }
+        )
+
+        // A file added since stays out of the list of its comment: the trash
+        // finds the comment by the revision it shows.
+        it('removes a file added since from the comment of its revision', async () => {
+          const page = await mountAndMoveOn(trashStubs)
+          page.wrapper
+            .findComponent(PreviewPlayer)
+            .vm.$emit('remove-extra-preview', { id: 'preview-2b' })
+          await flushPromises()
+
+          page.wrapper
+            .findAllComponents(DeleteModal)
+            .find(modal => modal.props('active'))
+            .vm.$emit('confirm')
+          await flushPromises()
+
+          expect(page.store.dispatch).toHaveBeenCalledWith('deleteTaskPreview', {
+            taskId: TASK_ID,
+            commentId: 'comment-2',
+            previewId: 'preview-2b'
+          })
+        })
       })
     })
 
@@ -974,19 +2990,11 @@ describe('Task.vue timecode navigation', () => {
   ]
   const comments = [{ id: 'comment-1', text: 'v1 00:04.00 (100)' }]
 
-  const clickTimeCode = (wrapper, versionRevision) => {
-    // The handler seeks the player on a timer, and the shallow player stub has
-    // no seek method. Dropping the fake clock discards that pending callback.
-    vi.useFakeTimers()
-    wrapper
-      .findComponent(Comment)
-      .vm.$emit('time-code-clicked', { versionRevision, frame: 100 })
-    vi.useRealTimers()
-    return flushPromises()
-  }
-
   it('opens the preview the timecode names', async () => {
-    const { wrapper, router } = await mountPage({ comments, previews })
+    const { wrapper, router } = await mountPage({
+      comments,
+      previews: previews.map(preview => ({ ...preview, task_id: TASK_ID }))
+    })
     await clickTimeCode(wrapper, '1')
     expect(router.currentRoute.value.params.preview_id).toBe('preview-1')
   })
@@ -1000,21 +3008,384 @@ describe('Task.vue timecode navigation', () => {
   })
 })
 
+// The page keeps the comments and revisions of the task shown until the
+// comments of the next task load: its time codes, its revision list, and the
+// list of the player in full screen still pick among them.
+describe('Task.vue revision picked while the next task loads', () => {
+  const NEXT_TASK_ID = 'task-2'
+  // Zou names the task of each revision.
+  const previews = [
+    { id: 'preview-2', revision: 2, extension: 'mp4', task_id: TASK_ID },
+    { id: 'preview-1', revision: 1, extension: 'mp4', task_id: TASK_ID }
+  ]
+  const comments = [{ id: 'comment-1', text: 'v1 00:04.00 (100)' }]
+  // The revisions the store keeps for the next task from an earlier visit: a
+  // production change empties its task map only, and a new comment brings no
+  // revision.
+  const nextTaskPreviews = [
+    {
+      id: 'preview-9',
+      revision: 2,
+      extension: 'mp4',
+      previews: ['from-9'],
+      task_id: NEXT_TASK_ID
+    },
+    {
+      id: 'preview-8',
+      revision: 1,
+      extension: 'mp4',
+      previews: ['from-8'],
+      task_id: NEXT_TASK_ID
+    }
+  ]
+
+  // The comments of the task shown load, then those of the next task hang.
+  const commentsOfNextTaskHang = () =>
+    vi
+      .fn()
+      .mockResolvedValue()
+      .mockResolvedValueOnce()
+      .mockReturnValueOnce(new Promise(() => {}))
+
+  const bothTasks = () =>
+    new Map([
+      [TASK_ID, buildTask()],
+      [NEXT_TASK_ID, buildTask({ id: NEXT_TASK_ID })]
+    ])
+
+  const goTo = async (router, params) => {
+    await router.push({
+      name: 'task',
+      params: { ...TASK_ROUTE_PARAMS, ...params }
+    })
+    await flushPromises()
+  }
+
+  // The list of revisions of the player in full screen.
+  const pickInPlayer = async (wrapper, preview) => {
+    wrapper
+      .findComponent(PreviewPlayer)
+      .vm.$emit('change-current-preview', preview)
+    await flushPromises()
+  }
+
+  it('opens a time code of the task before on that task', async () => {
+    const { wrapper, router } = await mountPage({
+      comments,
+      previews,
+      actions: { loadTaskComments: commentsOfNextTaskHang() },
+      getterOverrides: { taskMap: bothTasks }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+
+    await clickTimeCode(wrapper, '1')
+
+    expect(router.currentRoute.value.name).toBe('task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // A link to a task of another episode, which the store does not hold: the
+  // header keeps the task before while the page reads that one.
+  it('opens a time code of the task before under its own episode', async () => {
+    const { wrapper, router } = await mountPage({
+      comments,
+      previews,
+      episodeId: 'episode-1',
+      actions: { loadTask: () => new Promise(() => {}) },
+      getterOverrides: {
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true
+      }
+    })
+    await router.push({
+      name: 'episode-task',
+      params: {
+        ...TASK_ROUTE_PARAMS,
+        episode_id: 'episode-2',
+        task_id: NEXT_TASK_ID
+      }
+    })
+    await flushPromises()
+
+    await clickTimeCode(wrapper, '1')
+
+    expect(router.currentRoute.value.name).toBe('episode-task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      episode_id: 'episode-1',
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // A link to a task of another production: the store lets go of the task
+  // shown, read like the next one.
+  it('opens a revision of the task before in its own production', async () => {
+    const tasks = new Map()
+    const { wrapper, router } = await mountPage({
+      previews,
+      actions: {
+        loadTask: ({ taskId }) => {
+          const task =
+            taskId === TASK_ID
+              ? buildTask()
+              : buildTask({ id: taskId, project_id: 'production-2' })
+          tasks.set(task.id, task)
+          return Promise.resolve(task)
+        },
+        loadTaskComments: commentsOfNextTaskHang()
+      },
+      getterOverrides: { taskMap: () => tasks }
+    })
+    tasks.clear()
+    await goTo(router, {
+      production_id: 'production-2',
+      task_id: NEXT_TASK_ID
+    })
+
+    await pickInPlayer(wrapper, previews[1])
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      production_id: 'production-1',
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // Back from a task whose comments still load, to a task the store let go:
+  // the header shows the task left while the page reads that one.
+  it('stays on the task of the URL on the way back to a task the store let go', async () => {
+    const tasks = new Map([[TASK_ID, buildTask()]])
+    const { wrapper, router } = await mountPage({
+      previews,
+      previewId: 'preview-2',
+      actions: {
+        loadTask: ({ taskId }) => {
+          if (taskId !== NEXT_TASK_ID) return new Promise(() => {})
+          const nextTask = buildTask({ id: NEXT_TASK_ID })
+          tasks.set(nextTask.id, nextTask)
+          return Promise.resolve(nextTask)
+        },
+        loadTaskComments: commentsOfNextTaskHang()
+      },
+      getterOverrides: { taskMap: () => tasks }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+    tasks.delete(TASK_ID)
+    router.back()
+    await flushPromises()
+
+    await pickInPlayer(wrapper, previews[1])
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // Back to a task the store holds, from the next one shown in full: the
+  // header shows the task of the Back at once, the lists keep those of the
+  // task left until its comments load.
+  it('opens a revision of the task left on that task while a Back loads the task before', async () => {
+    const { wrapper, router } = await mountPage({
+      actions: {
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValue()
+          .mockResolvedValueOnce()
+          .mockResolvedValueOnce()
+          .mockReturnValueOnce(new Promise(() => {}))
+      },
+      getterOverrides: {
+        getTaskPreviews: () => taskId =>
+          taskId === NEXT_TASK_ID ? nextTaskPreviews : previews,
+        taskMap: bothTasks
+      }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+    router.back()
+    await flushPromises()
+
+    await pickInPlayer(wrapper, nextTaskPreviews[1])
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: NEXT_TASK_ID,
+      preview_id: 'preview-8'
+    })
+  })
+
+  // A new comment on the next task lists the revisions the store kept for
+  // it, before its comments load.
+  it('opens a revision of the next task on that task', async () => {
+    const { wrapper, router, socket } = await mountPage({
+      actions: { loadTaskComments: commentsOfNextTaskHang() },
+      getterOverrides: {
+        getTaskComments: () => taskId =>
+          taskId === NEXT_TASK_ID ? comments : [],
+        getTaskPreviews: () => taskId =>
+          taskId === NEXT_TASK_ID ? nextTaskPreviews : previews,
+        taskMap: bothTasks
+      }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+    await emitCommentNew(socket, NEXT_TASK_ID)
+
+    await pickInPlayer(wrapper, nextTaskPreviews[1])
+
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: NEXT_TASK_ID,
+      preview_id: 'preview-8'
+    })
+  })
+
+  it('opens a revision of the task before picked in the list of the page on that task', async () => {
+    const { wrapper, router } = await mountPage({
+      previews,
+      actions: { loadTaskComments: commentsOfNextTaskHang() },
+      getterOverrides: { taskMap: bothTasks }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+
+    await pickInPageList(wrapper, 'preview-1')
+
+    expect(router.currentRoute.value.name).toBe('task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // A task the store does not hold reads while the header keeps the task
+  // before. Reordering the files of a revision meanwhile reads again the
+  // revisions the store kept for the task of the URL.
+  it('opens a revision of the next task listed under the task before on that task', async () => {
+    const { wrapper, router } = await mountPage({
+      previews,
+      actions: { loadTask: () => new Promise(() => {}) },
+      getterOverrides: {
+        getTaskPreviews: () => taskId =>
+          taskId === NEXT_TASK_ID ? nextTaskPreviews : previews
+      }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+    wrapper.findComponent(PreviewPlayer).vm.$emit('previews-order-changed')
+    await flushPromises()
+
+    await pickInPlayer(wrapper, nextTaskPreviews[1])
+
+    expect(router.currentRoute.value.name).toBe('task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      task_id: NEXT_TASK_ID,
+      preview_id: 'preview-8'
+    })
+    expect(wrapper.findComponent(PreviewPlayer).props('previews')).toEqual([
+      'from-8'
+    ])
+  })
+
+  // Back to the task shown while the comments of the next one still load,
+  // once a new comment listed the revisions the store kept for the next one.
+  // That one never showed in full: the page has no address for it.
+  it('keeps out of the URL a revision a new comment listed for the task left, on the way back', async () => {
+    const { wrapper, router, socket } = await mountPage({
+      actions: {
+        loadTaskComments: vi
+          .fn()
+          .mockResolvedValue()
+          .mockResolvedValueOnce()
+          .mockReturnValueOnce(new Promise(() => {}))
+          .mockReturnValueOnce(new Promise(() => {}))
+      },
+      getterOverrides: {
+        getTaskComments: () => taskId =>
+          taskId === NEXT_TASK_ID ? comments : [],
+        getTaskPreviews: () => taskId =>
+          taskId === NEXT_TASK_ID ? nextTaskPreviews : previews,
+        taskMap: bothTasks
+      }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+    await emitCommentNew(socket, NEXT_TASK_ID)
+    router.back()
+    await flushPromises()
+
+    await pickInPlayer(wrapper, nextTaskPreviews[1])
+
+    expect(router.currentRoute.value.name).toBe('task')
+    expect(router.currentRoute.value.params.task_id).toBe(TASK_ID)
+    expect(wrapper.findComponent(PreviewPlayer).props('previews')).toEqual([
+      'from-8'
+    ])
+  })
+
+  // The URL of a task may change its episode after the load, with no new
+  // load. Back to it from a task of another production, its current URL wins
+  // over the one it loaded under.
+  it('opens a revision of the task of the URL under the episode of its URL', async () => {
+    const tasks = new Map([[TASK_ID, buildTask()]])
+    const { wrapper, router } = await mountPage({
+      previews,
+      episodeId: 'episode-1',
+      actions: {
+        loadTask: ({ taskId }) => {
+          if (taskId !== NEXT_TASK_ID) return new Promise(() => {})
+          const nextTask = buildTask({ id: taskId, project_id: 'production-2' })
+          tasks.set(nextTask.id, nextTask)
+          return Promise.resolve(nextTask)
+        },
+        loadTaskComments: commentsOfNextTaskHang()
+      },
+      getterOverrides: {
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true,
+        taskMap: () => tasks
+      }
+    })
+    const episodeTask = params =>
+      router.push({ name: 'episode-task', params: { ...TASK_ROUTE_PARAMS, ...params } })
+    await episodeTask({ episode_id: 'episode-2' })
+    await flushPromises()
+    tasks.delete(TASK_ID)
+    await episodeTask({
+      episode_id: 'episode-3',
+      production_id: 'production-2',
+      task_id: NEXT_TASK_ID
+    })
+    await flushPromises()
+    router.back()
+    await flushPromises()
+
+    await pickInPlayer(wrapper, previews[1])
+
+    expect(router.currentRoute.value.name).toBe('episode-task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      episode_id: 'episode-2',
+      task_id: TASK_ID,
+      preview_id: 'preview-1'
+    })
+  })
+
+  // A click on the revision shown closes the list.
+  it('stays on the next task when the revision shown is picked again in the list of the page', async () => {
+    const { wrapper, router } = await mountPage({
+      previews,
+      actions: { loadTaskComments: commentsOfNextTaskHang() },
+      getterOverrides: { taskMap: bothTasks }
+    })
+    await goTo(router, { task_id: NEXT_TASK_ID })
+
+    await pickInPageList(wrapper, 'preview-2')
+
+    expect(router.currentRoute.value.name).toBe('task')
+    expect(router.currentRoute.value.params.task_id).toBe(NEXT_TASK_ID)
+  })
+})
+
 describe('Task.vue comment events', () => {
   const previews = [{ id: 'preview-1', revision: 1, extension: 'mp4' }]
   const comment = { id: 'comment-1', text: 'v1', previews: [] }
-
-  // The handler waits a second for the store to finish loading the comment.
-  const emitCommentNew = async (socket, taskId) => {
-    const [, onCommentNew] = socket.on.mock.calls.find(
-      ([event]) => event === 'comment:new'
-    )
-    vi.useFakeTimers()
-    onCommentNew({ comment_id: comment.id, task_id: taskId })
-    vi.advanceTimersByTime(1000)
-    vi.useRealTimers()
-    await flushPromises()
-  }
 
   it('mounts the player once a comment brings the first preview', async () => {
     // The store replaces its lists when the comment lands, and the page
@@ -1234,6 +3605,174 @@ describe('Task.vue comment actions', () => {
   })
 })
 
+describe('Task.vue comment edits', () => {
+  // The window of another comment can open while the first one saves.
+  it('saves the attachments of an edit on the comment it opened on', async () => {
+    const first = { id: 'comment-1', text: 'v1' }
+    const second = { id: 'comment-2', text: 'v2' }
+    let releaseDeletion = null
+    const { wrapper, store } = await mountPage({
+      comments: [first, second],
+      actions: {
+        deleteAttachment: vi
+          .fn()
+          .mockImplementationOnce(
+            () =>
+              new Promise(resolve => {
+                releaseDeletion = resolve
+              })
+          )
+          .mockResolvedValue()
+      }
+    })
+    const editOn = comment =>
+      wrapper
+        .findAllComponents(Comment)
+        .find(component => component.props('comment').id === comment.id)
+        .vm.$emit('edit-comment', comment)
+    const attachments = [{ id: 'attachment-1' }, { id: 'attachment-2' }]
+    const file = new File(['frame'], 'ref.png')
+    editOn(first)
+    await flushPromises()
+    wrapper.findComponent(EditCommentModal).vm.$emit('confirm', {
+      ...first,
+      text: 'v1 bis',
+      attachmentFilesToDelete: attachments,
+      newAttachmentFiles: [file]
+    })
+    await flushPromises()
+    wrapper.findComponent(EditCommentModal).vm.$emit('cancel')
+    editOn(second)
+    await flushPromises()
+
+    releaseDeletion()
+    await flushPromises()
+
+    attachments.forEach(attachment => {
+      expect(store.dispatch).toHaveBeenCalledWith('deleteAttachment', {
+        attachment,
+        comment: first
+      })
+    })
+    expect(store.dispatch).toHaveBeenCalledWith('addAttachmentToComment', {
+      comment: first,
+      files: [file]
+    })
+  })
+})
+
+// A save that fails once its window is closed sets the error of that window:
+// the next opening starts without it.
+describe('Task.vue window errors', () => {
+  const file = {
+    id: 'preview-1',
+    task_id: TASK_ID,
+    revision: 1,
+    extension: 'png'
+  }
+  const comment = { id: 'comment-1', text: 'v1', previews: [file] }
+  const deletion = text => wrapper =>
+    wrapper
+      .findAllComponents(DeleteModal)
+      .find(modal => modal.props('text') === text)
+  const extraFile = () => {
+    const form = new FormData()
+    form.append('file', new File(['frame'], 'sh010-alt.png'))
+    return form
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it.each([
+    {
+      name: 'comment edit',
+      action: 'editTaskComment',
+      open: wrapper =>
+        wrapper.findComponent(Comment).vm.$emit('edit-comment', comment),
+      modal: wrapper => wrapper.findComponent(EditCommentModal),
+      confirm: modal => modal.vm.$emit('confirm', { ...comment, text: 'v2' })
+    },
+    {
+      name: 'comment deletion',
+      action: 'deleteTaskComment',
+      open: wrapper =>
+        wrapper.findComponent(Comment).vm.$emit('delete-comment', comment),
+      modal: deletion('tasks.delete_comment'),
+      confirm: modal => modal.vm.$emit('confirm')
+    },
+    {
+      name: 'revision file upload',
+      action: 'addCommentExtraPreview',
+      open: wrapper =>
+        wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview'),
+      modal: wrapper => wrapper.findComponent({ ref: 'add-extra-preview-modal' }),
+      confirm: modal => modal.vm.$emit('confirm', [extraFile()])
+    },
+    {
+      name: 'revision file removal',
+      action: 'deleteTaskPreview',
+      open: wrapper =>
+        wrapper
+          .findComponent(PreviewPlayer)
+          .vm.$emit('remove-extra-preview', { id: 'preview-1' }),
+      modal: deletion('tasks.delete_preview'),
+      confirm: modal => modal.vm.$emit('confirm')
+    }
+  ])(
+    'opens the $name window without the error of a save that failed after it closed',
+    async ({ action, open, modal, confirm }) => {
+      const failure = new Error('Bad Gateway')
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      let fail = null
+      const { wrapper } = await mountPage({
+        comments: [comment],
+        previews: [{ ...file, previews: [file] }],
+        actions: {
+          [action]: () =>
+            new Promise((resolve, reject) => {
+              fail = reject
+            })
+        },
+        stubs: {
+          AddPreviewModal: {
+            props: ['active', 'isError', 'isLoading'],
+            template: '<div />',
+            methods: { reset: () => {} }
+          },
+          PreviewPlayer: {
+            props: ['previews'],
+            template: '<div />',
+            methods: {
+              displayFirst: () => {},
+              displayLast: () => {},
+              focus: () => {}
+            }
+          }
+        }
+      })
+      open(wrapper)
+      await flushPromises()
+      confirm(modal(wrapper))
+      await flushPromises()
+      modal(wrapper).vm.$emit('cancel')
+      await flushPromises()
+
+      fail(failure)
+      await flushPromises()
+      open(wrapper)
+      await flushPromises()
+
+      expect(consoleError).toHaveBeenCalledWith(failure)
+      expect(modal(wrapper).props('active')).toBe(true)
+      expect(modal(wrapper).props('isError')).toBe(false)
+    }
+  )
+})
+
 describe('Task.vue publishing', () => {
   const previewForm = name => {
     const form = new FormData()
@@ -1289,6 +3828,29 @@ describe('Task.vue publishing', () => {
       'sh010.mp4'
     ])
     expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+  })
+
+  it('keeps the files of its comment box when a comment is deleted', async () => {
+    const comment = { id: 'comment-1', text: 'v1' }
+    const { wrapper, store } = await mountCommentingPage({
+      comments: [comment]
+    })
+    const form = previewForm('sh010.mp4')
+    commentBox(wrapper).vm.$emit('file-drop', [form])
+    wrapper.findComponent(Comment).vm.$emit('delete-comment', comment)
+    await flushPromises()
+
+    wrapper
+      .findAllComponents(DeleteModal)
+      .find(modal => modal.props('active'))
+      .vm.$emit('confirm')
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith('deleteTaskComment', {
+      taskId: TASK_ID,
+      commentId: comment.id
+    })
+    expect(commentBox(wrapper).props('previewForms')).toEqual([form])
   })
 
   // The extra preview modal uploads its own files: the comment box keeps
@@ -1903,6 +4465,170 @@ describe('Task.vue preview player permissions', () => {
       }
     })
     expect(isReadOnly(wrapper)).toBe(true)
+  })
+
+  // The page keeps the previews of the previous task until the comments of
+  // the next one load: a drawing went onto them with the rights of the next
+  // task, and Zou refused it.
+  describe('on the previews of the previous task', () => {
+    const ownTaskType = { ...taskType, department_id: 'department-1' }
+    const otherTaskType = {
+      ...taskType,
+      id: 'task-type-2',
+      department_id: 'department-2'
+    }
+    const ownTask = id => buildTask({ id })
+    const otherTask = id => buildTask({ id, task_type_id: otherTaskType.id })
+    const previewsByTask = {
+      [TASK_ID]: [
+        { id: 'preview-1', revision: 1, task_id: TASK_ID, previews: ['1'] }
+      ],
+      'task-2': [
+        { id: 'preview-2', revision: 1, task_id: 'task-2', previews: ['2'] }
+      ]
+    }
+
+    it.each([
+      {
+        title: 'locks them for a supervisor of another department',
+        previousTask: otherTask(TASK_ID),
+        nextTask: ownTask('task-2'),
+        role: 'supervisor',
+        readOnlyWhileLoading: true,
+        readOnlyOnceLoaded: false
+      },
+      {
+        title: 'leaves them open to a supervisor of their department',
+        previousTask: ownTask(TASK_ID),
+        nextTask: otherTask('task-2'),
+        role: 'supervisor',
+        readOnlyWhileLoading: false,
+        readOnlyOnceLoaded: true
+      },
+      {
+        title: 'leaves them open to a manager',
+        previousTask: otherTask(TASK_ID),
+        nextTask: ownTask('task-2'),
+        role: 'manager',
+        readOnlyWhileLoading: false,
+        readOnlyOnceLoaded: false
+      },
+      {
+        title: 'locks them once the store drops their task',
+        previousTask: otherTask(TASK_ID),
+        nextTask: ownTask('task-2'),
+        role: 'manager',
+        isPreviousTaskDropped: true,
+        readOnlyWhileLoading: true,
+        readOnlyOnceLoaded: false
+      }
+    ])(
+      '$title',
+      async ({
+        previousTask,
+        nextTask,
+        role,
+        isPreviousTaskDropped = false,
+        readOnlyWhileLoading,
+        readOnlyOnceLoaded
+      }) => {
+        const tasks = new Map([
+          [previousTask.id, previousTask],
+          [nextTask.id, nextTask]
+        ])
+        const { wrapper, store, router } = await mountPage({
+          task: previousTask,
+          getterOverrides: {
+            getTaskPreviews: () => taskId => previewsByTask[taskId] ?? [],
+            isCurrentUserProductionManager: () => role === 'manager',
+            isCurrentUserProductionSupervisor: () => role === 'supervisor',
+            taskMap: () => tasks,
+            taskTypeMap: () =>
+              new Map([
+                [ownTaskType.id, ownTaskType],
+                [otherTaskType.id, otherTaskType]
+              ]),
+            user: () => ({ id: 'user-1', departments: ['department-1'] })
+          }
+        })
+        const player = () => wrapper.findComponent(PreviewPlayer)
+        let endCommentsLoad
+        store.dispatch.mockImplementation(type =>
+          type === 'loadTaskComments'
+            ? new Promise(resolve => {
+                endCommentsLoad = resolve
+              })
+            : Promise.resolve()
+        )
+        if (isPreviousTaskDropped) tasks.delete(previousTask.id)
+
+        await router.push({
+          name: 'task',
+          params: { ...TASK_ROUTE_PARAMS, task_id: nextTask.id }
+        })
+        await flushPromises()
+
+        expect(player().props('previews')).toEqual(['1'])
+        expect(isReadOnly(wrapper)).toBe(readOnlyWhileLoading)
+
+        endCommentsLoad()
+        await flushPromises()
+
+        expect(player().props('previews')).toEqual(['2'])
+        expect(isReadOnly(wrapper)).toBe(readOnlyOnceLoaded)
+      }
+    )
+
+    // The player sends the strokes of the previous preview as its preview
+    // changes, once the page shows the next task.
+    it('files a drawing under the task of its preview', async () => {
+      const confirmAnnotationsSaved = vi.fn()
+      const tasks = new Map([
+        [TASK_ID, ownTask(TASK_ID)],
+        ['task-2', ownTask('task-2')]
+      ])
+      const { wrapper, store, router } = await mountPage({
+        task: ownTask(TASK_ID),
+        stubs: {
+          PreviewPlayer: {
+            props: ['previews', 'readOnly'],
+            template: '<div />',
+            methods: {
+              confirmAnnotationsSaved,
+              focus: () => {},
+              restoreFailedAnnotations: () => {}
+            }
+          }
+        },
+        getterOverrides: {
+          getTaskPreviews: () => taskId => previewsByTask[taskId] ?? [],
+          isCurrentUserProductionManager: () => true,
+          taskMap: () => tasks
+        }
+      })
+      await router.push({
+        name: 'task',
+        params: { ...TASK_ROUTE_PARAMS, task_id: 'task-2' }
+      })
+      await flushPromises()
+      const changes = {
+        preview: { id: 'preview-1', task_id: TASK_ID },
+        additions: [{ id: 'stroke-1' }],
+        deletions: [],
+        updates: []
+      }
+
+      wrapper
+        .findComponent(PreviewPlayer)
+        .vm.$emit('annotation-changed', changes)
+      await flushPromises()
+
+      expect(store.dispatch).toHaveBeenCalledWith('updatePreviewAnnotation', {
+        taskId: TASK_ID,
+        ...changes
+      })
+      expect(confirmAnnotationsSaved).toHaveBeenCalled()
+    })
   })
 })
 

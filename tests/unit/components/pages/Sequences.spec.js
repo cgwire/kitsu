@@ -11,6 +11,7 @@ import en from '@/locales/en'
 import fr from '@/locales/fr.json'
 
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Sequences from '@/components/pages/Sequences.vue'
@@ -654,5 +655,25 @@ describe('Sequences page, CSV', () => {
     expect(uploadSequenceFile).toHaveBeenCalledWith(true)
     expect(dispatched('loadSequencesWithTasks')).toHaveLength(loadsBefore + 1)
     expect(wrapper.findComponent(ImportRenderModal).props('active')).toBe(false)
+  })
+})
+
+describe('Sequences page, column delete', () => {
+  test('names the sequences in its confirmation', async () => {
+    const { wrapper } = await mountEntityPage(Sequences, {
+      listName: 'SequenceList'
+    })
+
+    await wrapper
+      .findComponent({ name: 'SequenceList' })
+      .vm.$emit('delete-metadata', 'descriptor-1')
+
+    const texts = wrapper
+      .findAllComponents(DeleteModal)
+      .filter(modal => modal.props('active'))
+      .map(modal => modal.props('text'))
+    expect(texts).toEqual(['productions.metadata.delete_sequence_text'])
+    // The $t mock echoes the key: en.js must hold it.
+    expect(en.productions.metadata.delete_sequence_text).toEqual(expect.any(String))
   })
 })

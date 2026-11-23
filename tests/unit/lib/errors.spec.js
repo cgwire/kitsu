@@ -1,7 +1,7 @@
  
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-import errors from '@/lib/errors'
+import errors, { isMissingEntity } from '@/lib/errors'
 
 describe('errors', () => {
   beforeEach(() => {
@@ -57,5 +57,16 @@ describe('errors', () => {
       expect(consoleError.mock.calls).toEqual([[failure]])
       consoleError.mockRestore()
     })
+  })
+
+  it('takes a deleted, refused, or malformed entity for a missing one', () => {
+    expect([400, 403, 404].map(status => isMissingEntity({ status }))).toEqual(
+      [true, true, true]
+    )
+    expect(isMissingEntity({ status: 500 })).toBe(false)
+    expect(isMissingEntity(new Error('Request has been terminated'))).toBe(
+      false
+    )
+    expect(isMissingEntity(new TypeError('x is undefined'))).toBe(false)
   })
 })

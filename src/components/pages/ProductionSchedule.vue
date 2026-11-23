@@ -116,6 +116,11 @@
               v-model="selectedEndDate"
             />
           </div>
+          <info-question-mark
+            class="flexrow-item dates-help"
+            :text="$t('schedule.production_dates_locked')"
+            v-if="!isCurrentUserManager"
+          />
           <div class="filler"></div>
           <button-simple
             class="flexrow-item"
@@ -134,6 +139,12 @@
           />
         </div>
       </div>
+
+      <error-text
+        class="has-text-centered"
+        :text="scheduleSaveErrorText"
+        v-if="scheduleSaveErrorText"
+      />
 
       <schedule
         ref="schedule"
@@ -577,9 +588,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useFormat } from '@/composables/format'
+import {
+  getBarDates,
+  getBarOrigin,
+  useScheduleSave
+} from '@/composables/scheduleSave'
 import colors from '@/lib/colors'
 import { downloadBlob } from '@/lib/download'
-import { logRequestFailure } from '@/lib/errors'
 import { isFreeEscape } from '@/lib/keyboard'
 import { getTaskTypeSchedulePath } from '@/lib/path'
 import preferences from '@/lib/preferences'
@@ -643,6 +658,8 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import ProgressBar from '@/components/widgets/ProgressBar.vue'
@@ -656,6 +673,14 @@ const route = useRoute()
 const router = useRouter()
 const store = useStore()
 const { durationUnit, formatDuration } = useFormat()
+// a task bar shows the name of its entity
+const {
+  groupSaves,
+  saveAssignment,
+  saveBar,
+  saveTracked,
+  scheduleSaveErrorText
+} = useScheduleSave(bar => bar.entity?.name ?? bar.name)
 
 // State
 // --------------------------------------------------------------------------
@@ -1756,36 +1781,82 @@ const saveTaskChanged = task => {
     : store.dispatch('updateTask', getTaskUpdate(task))
 }
 
+// Whether Zou took every save of the change: a move to confirm saves later.
 const onScheduleItemChanged = async item => {
+  // read before the rows of a collapsed bar load: a new drag stamps again
+  const origin = getBarOrigin(item)
   if (!item.parentElement && !item.expanded && !subItemsOf(item).length) {
     const generation = scheduleGeneration
     await loadRootRows(item)
-    if (isStaleSchedule(generation)) return
+    if (isStaleSchedule(generation)) return true
     scheduleRef.value?.applyMoveToLoadedRows(item)
   }
   const affected = item.type === 'Task' ? [] : movedSubItems(item)
   if (affected.length) {
     pendingParentChange.value = { item, affected }
     modals.value.confirmChildMove = true
-    return
+    return true
   }
-  await saveChangedItem(item)
+  return saveChangedItem(item, origin)
 }
 
-const saveChangedItem = async item => {
+// A refused move of a thousand rows puts them all back: the rows of each
+// parent redraw once.
+const barsToRedraw = new Set()
+const redrawBar = bar => {
+  if (barsToRedraw.size === 0) {
+    queueMicrotask(() => {
+      barsToRedraw.forEach(item =>
+        scheduleRef.value?.refreshItemPositions(item)
+      )
+      barsToRedraw.clear()
+    })
+  }
+  barsToRedraw.add(bar.parentElement ?? bar)
+}
+
+// A bar Zou refuses goes back to origin, where the widget found it by
+// default: the bars a move widens go back to the dates they had. Each save
+// tells whether it went through.
+const saveTaskBar = (task, origin) =>
+  saveBar(task, () => saveTaskChanged(task), { origin, onPutBack: redrawBar })
+
+// the raw dates of a row follow its moments
+const putBackScheduleItem = item => {
+  refreshRawDates(item)
+  redrawBar(item)
+}
+
+const saveScheduleItemBar = (item, origin = getBarOrigin(item)) =>
+  saveBar(item, () => updateScheduleItem(item), {
+    origin,
+    onPutBack: putBackScheduleItem
+  })
+
+// A task and the rows it widens: whether Zou took the task, and each row.
+const saveTaskChange = async (item, origin) => {
+  // update dates with weekends and days off
+  const daysOff = item.assignees
+    .flatMap(assigneeId => daysOffByPerson.value[assigneeId])
+    .filter(Boolean)
+  item.startDate = addBusinessDays(item.startDate, 0, daysOff)
+  item.endDate = addBusinessDays(
+    item.startDate,
+    Math.ceil(minutesToDays(organisation.value, item.estimation)) - 1,
+    daysOff
+  )
+  const [parentSaves, isSaved] = await Promise.all([
+    widenScheduleItemParents(item),
+    saveTaskBar(item, origin)
+  ])
+  return { isSaved, parentSaves }
+}
+
+// Whether Zou took every save of the change.
+const saveChangedItem = async (item, origin = getBarOrigin(item)) => {
   if (item.type === 'Task') {
-    // update dates with weekends and days off
-    const daysOff = item.assignees
-      .flatMap(assigneeId => daysOffByPerson.value[assigneeId])
-      .filter(Boolean)
-    item.startDate = addBusinessDays(item.startDate, 0, daysOff)
-    item.endDate = addBusinessDays(
-      item.startDate,
-      Math.ceil(minutesToDays(organisation.value, item.estimation)) - 1,
-      daysOff
-    )
-    await Promise.all([widenScheduleItemParents(item), saveTaskChanged(item)])
-    return
+    const { isSaved, parentSaves } = await saveTaskChange(item, origin)
+    return isSaved && parentSaves.every(Boolean)
   }
 
   const parentSaves = []
@@ -1795,24 +1866,37 @@ const saveChangedItem = async item => {
       // type bar spans the production: they can widen it, not shrink it
       parentSaves.push(widenScheduleItemParents(item))
     } else {
-      item.parentElement.startDate = getMinDate(
-        item.parentElement,
-        endDate.value
-      )
-      item.parentElement.endDate = getMaxDate(
-        item.parentElement,
-        startDate.value
-      )
-      parentSaves.push(updateScheduleItem(item.parentElement))
+      const parent = item.parentElement
+      const parentDates = getBarDates(parent)
+      parent.startDate = getMinDate(parent, endDate.value)
+      parent.endDate = getMaxDate(parent, startDate.value)
+      parentSaves.push(saveScheduleItemBar(parent, parentDates))
     }
   }
 
-  await Promise.all([...parentSaves, updateScheduleItem(item)])
+  const saves = await Promise.all([
+    ...parentSaves,
+    saveScheduleItemBar(item, origin)
+  ])
+  return saves.flat().every(Boolean)
 }
 
+const ancestorsOf = item =>
+  item.parentElement
+    ? [item.parentElement, ...ancestorsOf(item.parentElement)]
+    : []
+
 // save each widened bar once, with both its dates
-const widenScheduleItemParents = item =>
-  Promise.all(widenParents(item).map(updateScheduleItem))
+const widenScheduleItemParents = item => {
+  const datesByParent = new Map(
+    ancestorsOf(item).map(parent => [parent, getBarDates(parent)])
+  )
+  return Promise.all(
+    widenParents(item).map(parent =>
+      saveScheduleItemBar(parent, datesByParent.get(parent))
+    )
+  )
+}
 
 const updateScheduleItem = async item => {
   refreshRawDates(item)
@@ -1824,7 +1908,7 @@ const updateScheduleItem = async item => {
 const saveMovedElement = element =>
   element.type === 'Task'
     ? saveChangedItem(element)
-    : updateScheduleItem(element)
+    : saveScheduleItemBar(element)
 
 // a thousand tasks at once would flood the browser's connection pool
 const SAVE_BATCH_SIZE = 10
@@ -1835,13 +1919,17 @@ const confirmChildMove = async () => {
   const elements = [item, ...affected]
   childMoveProgress.value = 0
   try {
-    for (let start = 0; start < elements.length; start += SAVE_BATCH_SIZE) {
-      const batch = elements.slice(start, start + SAVE_BATCH_SIZE)
-      await Promise.all(batch.map(saveMovedElement))
-      childMoveProgress.value = Math.round(
-        ((start + batch.length) / elements.length) * 100
-      )
-    }
+    // one change, its batches included: a later batch going through keeps
+    // the refusals of an earlier one
+    await groupSaves(async () => {
+      for (let start = 0; start < elements.length; start += SAVE_BATCH_SIZE) {
+        const batch = elements.slice(start, start + SAVE_BATCH_SIZE)
+        await Promise.all(batch.map(saveMovedElement))
+        childMoveProgress.value = Math.round(
+          ((start + batch.length) / elements.length) * 100
+        )
+      }
+    })
   } finally {
     childMoveProgress.value = null
     pendingParentChange.value = null
@@ -2521,8 +2609,13 @@ const saveTask = async () => {
       estimation: getTaskEstimation(assignments.value.task),
       assignees: availablePersons.value.map(person => person.id)
     }
-    // update task and assignments
-    await onScheduleItemChanged(task)
+    // update task and assignments: a row the task widens goes back on a
+    // refusal with its own line, and the assignees still follow the task
+    const { isSaved } = await saveTaskChange(task, getBarOrigin(task))
+    if (!isSaved) {
+      panel.isError = true
+      return
+    }
     if (!isVersioned.value) {
       // One task update carrying the full assignee list replaces the
       // unassign request plus one assign request per person.
@@ -2560,21 +2653,49 @@ const onScheduleExpandAll = async () => {
   loading.value.expandSchedule = false
 }
 
+// The rows of the task types whose reassignment Zou refused: a drag
+// reassigns as it crosses the rows of the people, and Zou tells who holds
+// the task in the end, once the drag is over.
+const rowsToReload = new Set()
+
+const rootOf = item => (item.parentElement ? rootOf(item.parentElement) : item)
+
+const reloadRefusedRows = () => {
+  const roots = [...rowsToReload]
+  rowsToReload.clear()
+  roots.forEach(async root => {
+    const generation = scheduleGeneration
+    await loadRootRows(root)
+    if (!isStaleSchedule(generation)) {
+      scheduleRef.value?.refreshItemPositions(root)
+    }
+  })
+}
+
+const saveReassignment = async (task, save) => {
+  const generation = scheduleGeneration
+  if (await saveAssignment(task, save)) return
+  // the rows of a production or an episode left meanwhile are gone
+  if (isStaleSchedule(generation)) return
+  rowsToReload.add(rootOf(task))
+  if (!scheduleRef.value?.isEditingDates) reloadRefusedRows()
+}
+
 const onScheduleItemAssigned = async (task, personId) => {
   task.assignees.push(personId)
   task.parentElement.children.get(personId).push(task)
 
-  if (isVersioned.value) {
-    return store.dispatch('updateScheduleVersionedTask', {
-      id: task.versionedTaskId,
-      assignees: task.assignees
-    })
-  } else {
-    await store.dispatch('assignSelectedTasks', {
-      personId,
-      taskIds: [task.id]
-    })
-  }
+  await saveReassignment(task, () =>
+    isVersioned.value
+      ? store.dispatch('updateScheduleVersionedTask', {
+          id: task.versionedTaskId,
+          assignees: task.assignees
+        })
+      : store.dispatch('assignSelectedTasks', {
+          personId,
+          taskIds: [task.id]
+        })
+  )
 }
 
 const onScheduleItemUnassigned = async (task, personId) => {
@@ -2587,16 +2708,20 @@ const onScheduleItemUnassigned = async (task, personId) => {
   }
 
   if (isVersioned.value) {
-    return store.dispatch('updateScheduleVersionedTask', {
-      id: task.versionedTaskId,
-      assignees: task.assignees
-    })
+    await saveReassignment(task, () =>
+      store.dispatch('updateScheduleVersionedTask', {
+        id: task.versionedTaskId,
+        assignees: task.assignees
+      })
+    )
   } else if (personId !== 'unassigned') {
     // 'unassigned' is a local placeholder, not a person known to the API
-    await store.dispatch('unassignPersonFromTask', {
-      person: { id: personId },
-      task
-    })
+    await saveReassignment(task, () =>
+      store.dispatch('unassignPersonFromTask', {
+        person: { id: personId },
+        task
+      })
+    )
   }
 }
 
@@ -3033,26 +3158,54 @@ const buildExportFile = async () => {
 // --------------------------------------------------------------------------
 
 // a picked range date moves the schedule and, once the production has
-// one, its own date: only an admin or its managers pick one, as Zou allows
+// one, its own date: only an admin or its managers pick one, as Zou allows.
+// Refused, the field and the view go back to the date of the production.
+// The saves of a date belong to its production: the field stays across a
+// production switch.
+const rangeDateKeys = new Map()
+const getRangeDateKey = (production, field) => {
+  const id = `${production.id}/${field}`
+  if (!rangeDateKeys.has(id)) rangeDateKeys.set(id, {})
+  return rangeDateKeys.get(id)
+}
+
 const watchRangeDate = (selectedDate, rangeDate, field) =>
-  watch(selectedDate, () => {
+  watch(selectedDate, async () => {
     rangeDate.value = parseDate(selectedDate.value)
     const date = rangeDate.value.format('YYYY-MM-DD')
-    if (
-      currentProduction.value[field] &&
-      currentProduction.value[field] !== date
-    ) {
-      store
-        .dispatch('editProduction', {
-          id: currentProduction.value.id,
-          [field]: date
-        })
-        .catch(logRequestFailure)
+    const production = currentProduction.value
+    if (production[field] && production[field] !== date) {
+      await saveTracked(getRangeDateKey(production, field), production, {
+        origin: production[field],
+        sent: date,
+        save: () =>
+          store.dispatch('editProduction', {
+            id: production.id,
+            [field]: date
+          }),
+        // the date of the store, which another session may have moved: the
+        // watcher sees nothing new to save there
+        putBack: () => {
+          if (currentProduction.value?.id === production.id) {
+            selectedDate.value = parseDate(
+              currentProduction.value[field]
+            ).toDate()
+          }
+        }
+      })
     }
   })
 
 watchRangeDate(selectedStartDate, startDate, 'start_date')
 watchRangeDate(selectedEndDate, endDate, 'end_date')
+
+// the rows of a refused reassignment wait for the drop
+watch(
+  () => scheduleRef.value?.isEditingDates,
+  isEditing => {
+    if (!isEditing && rowsToReload.size) reloadRefusedRows()
+  }
+)
 
 watch(currentProduction, value => {
   if (!value) return
@@ -3128,6 +3281,13 @@ useHead({
 
   .zoom-level :deep(.control),
   .zoom-level :deep(.select) {
+    height: 42px;
+  }
+
+  // centered on the date inputs it follows
+  .dates-help {
+    align-items: center;
+    display: flex;
     height: 42px;
   }
 }

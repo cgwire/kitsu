@@ -1001,6 +1001,27 @@ describe('Assets store, loadAsset live insertion', () => {
   })
 })
 
+describe('Assets store, loadAsset failure', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // The asset page tells a missing asset from a failed load by the error.
+  test('hands a failed read to its caller', async () => {
+    const failure = Object.assign(new Error('HTTP 404'), { status: 404 })
+    vi.spyOn(assetsApi, 'getAsset').mockRejectedValue(failure)
+    const commit = vi.fn()
+
+    await expect(
+      assetsStore.actions.loadAsset(
+        { commit, state: {}, rootGetters: baseRootGetters() },
+        'a-missing'
+      )
+    ).rejects.toBe(failure)
+    expect(commit).not.toHaveBeenCalled()
+  })
+})
+
 describe('Assets store, ADD_ASSET', () => {
   // The episode column and the scope checks read asset.episode_id. The
   // single-asset payload of a TV show carries it as a string, empty for the
@@ -2019,7 +2040,8 @@ describe('Assets store, list workflow', () => {
 
   const buildStore = ({
     assetTaskTypeIds = ['tt-model', 'tt-rig'],
-    isTVShow = false
+    isTVShow = false,
+    episode = null
   } = {}) =>
     createStore({
       modules: {
@@ -2041,9 +2063,9 @@ describe('Assets store, list workflow', () => {
       },
       getters: {
         assetTypeMap: () => assetTypeMap,
-        currentEpisode: () => null,
+        currentEpisode: () => episode,
         currentProduction: () => production,
-        episodes: () => [],
+        episodes: () => (episode ? [episode] : []),
         isTVShow: () => isTVShow,
         organisation: () => ({ hours_by_day: 8 }),
         people: () => [],
@@ -2276,6 +2298,33 @@ describe('Assets store, list workflow', () => {
       store.state.assets.assetsLoadingKey = 'p1/all#shared'
       store.commit('MARK_ASSETS_PARTIAL')
       expect(store.getters.assetsLoadingKey).toBe('p1/all#shared')
+    })
+
+    // The list load replaces the whole list, and commits its answer only
+    // under the scope it started with.
+    test('leaves the scope of a list load started during a read by id', async () => {
+      const store = buildStore({ isTVShow: true, episode: { id: 'ep-a' } })
+      client.getModel.mockResolvedValueOnce(
+        buildAsset('a9', 'Lamp', { episode_id: 'ep-b' })
+      )
+      let answerList
+      client.pgetNdjson.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            answerList = resolve
+          })
+      )
+      client.pget.mockResolvedValueOnce([])
+
+      const reading = store.dispatch('loadAsset', 'a9')
+      const loading = store.dispatch('loadAssets')
+      await reading
+      answerList([buildAsset('a1', 'Rock', { episode_id: 'ep-a' })])
+      await loading
+
+      expect(store.getters.isAssetsLoading).toBe(false)
+      expect(store.getters.assetsLoadingKey).toBe('p1/ep-a')
+      expect(names(store.getters.displayedAssets)).toEqual(['Rock'])
     })
 
     test('adds an asset loaded by id with its tasks', async () => {
@@ -2909,7 +2958,11 @@ describe('Assets store, list workflow', () => {
       const store = buildStore()
       load(store, [buildAsset('a1', 'Rock', { data: { mood: 'calm' } })])
       const rename = entityType => ({
-        descriptor: { entity_type: entityType, field_name: 'tone' },
+        descriptor: {
+          entity_type: entityType,
+          field_name: 'tone',
+          project_id: 'p1'
+        },
         previousDescriptorFieldName: 'mood'
       })
 
@@ -2918,6 +2971,104 @@ describe('Assets store, list workflow', () => {
 
       store.commit('UPDATE_METADATA_DESCRIPTOR_END', rename('Asset'))
       expect(store.getters.assetMap.get('a1').data).toEqual({ tone: 'calm' })
+    })
+
+    test('drops the data of a deleted asset descriptor of its production', () => {
+      const store = buildStore()
+      load(store, [
+        // Zou lists the assets of a production without its id.
+        buildAsset('a1', 'Rock', {
+          project_id: undefined,
+          data: { mood: 'calm', size: 'big' }
+        }),
+        // A shared asset of another production shows in this list.
+        buildAsset('a2', 'Tree', {
+          project_id: 'p2',
+          shared: true,
+          data: { mood: 'wild' }
+        })
+      ])
+      const drop = (entityType, projectId) =>
+        store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+          id: 'd1',
+          descriptor: {
+            id: 'd1',
+            entity_type: entityType,
+            field_name: 'mood',
+            project_id: projectId
+          }
+        })
+      const dataOf = id => store.getters.assetMap.get(id).data
+
+      drop('Shot', 'p1')
+      expect(dataOf('a1')).toEqual({ mood: 'calm', size: 'big' })
+
+      drop('Asset', 'p1')
+      expect(dataOf('a1')).toEqual({ size: 'big' })
+      expect(dataOf('a2')).toEqual({ mood: 'wild' })
+
+      drop('Asset', 'p2')
+      expect(dataOf('a2')).toEqual({})
+    })
+
+    // Someone else deletes or renames a column while the list loads: Zou may
+    // have built its answer before.
+    test('replays the column changes made during a list load', async () => {
+      const store = buildStore()
+      let answerList
+      vi.spyOn(assetsApi, 'getAssets').mockReturnValue(
+        new Promise(resolve => {
+          answerList = resolve
+        })
+      )
+
+      const loading = store.dispatch('loadAssets', { withShared: false })
+      store.commit('UPDATE_METADATA_DESCRIPTOR_END', {
+        descriptor: { entity_type: 'Asset', field_name: 'tone', project_id: 'p1' },
+        previousDescriptorFieldName: 'mood'
+      })
+      store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+        id: 'd2',
+        descriptor: { id: 'd2', entity_type: 'Asset', field_name: 'notes', project_id: 'p1' }
+      })
+      answerList([
+        // Zou lists the assets of a production without its id.
+        buildAsset('a1', 'Rock', {
+          project_id: undefined,
+          data: { mood: 'calm', notes: 'n', size: 'big' }
+        }),
+        buildAsset('a2', 'Tree', {
+          project_id: 'p2',
+          shared: true,
+          data: { notes: 'wild' }
+        })
+      ])
+      await loading
+
+      expect(store.getters.assetMap.get('a1').data).toEqual({
+        tone: 'calm',
+        size: 'big'
+      })
+      expect(store.getters.assetMap.get('a2').data).toEqual({ notes: 'wild' })
+    })
+
+    // A load started after a change gets what Zou wrote since, such as a
+    // column created again under the old name.
+    test('replays no column change made before a list load', async () => {
+      const store = buildStore()
+      store.commit('DELETE_METADATA_DESCRIPTOR_END', {
+        id: 'd2',
+        descriptor: { id: 'd2', entity_type: 'Asset', field_name: 'notes', project_id: 'p1' }
+      })
+      vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([
+        buildAsset('a1', 'Rock', { data: { notes: 'new column' } })
+      ])
+
+      await store.dispatch('loadAssets', { withShared: false })
+
+      expect(store.getters.assetMap.get('a1').data).toEqual({
+        notes: 'new column'
+      })
     })
 
     test('sorts the task columns by task type priority', () => {

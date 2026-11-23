@@ -42,7 +42,7 @@
         </router-link>
       </div>
 
-      <div class="sequence-data block">
+      <div class="sequence-data block" v-if="!loadError">
         <route-section-tabs
           class="section-tabs"
           :active-tab="currentSection"
@@ -261,6 +261,11 @@
           v-if="scheduleItems[0].children.length > 0"
           v-show="currentSection === 'schedule'"
         >
+          <error-text
+            class="has-text-centered"
+            :text="scheduleSaveErrorText"
+            v-if="scheduleSaveErrorText"
+          />
           <div class="wrapper">
             <schedule
               ref="scheduleWidget"
@@ -293,6 +298,12 @@
           v-if="currentSequence && currentSection === 'time-logs'"
         />
       </div>
+      <entity-load-error
+        class="sequence-data block"
+        :error="loadError"
+        @reload="init()"
+        v-else
+      />
     </div>
 
     <div
@@ -345,7 +356,6 @@ import {
 import {
   computed,
   defineAsyncComponent,
-  nextTick,
   onMounted,
   reactive,
   ref,
@@ -366,6 +376,7 @@ import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditSequenceModal from '@/components/modals/EditSequenceModal.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
+import EntityLoadError from '@/components/pages/entities/EntityLoadError.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
@@ -376,6 +387,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import EmptySection from '@/components/widgets/EmptySection.vue'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
@@ -428,7 +440,7 @@ const entityList = computed(() =>
 )
 
 const title = computed(() => {
-  if (!currentSequence.value) return t('main.loading')
+  if (!currentSequence.value) return loadTitle.value
   const { name } = currentSequence.value
   return currentEpisode.value ? `${currentEpisode.value.name} / ${name}` : name
 })
@@ -462,7 +474,8 @@ const isTaskDrawerOpen = computed(() => Boolean(currentTask.value))
 // --------------------------------------------------------------------------
 // the sequence list only carries the tasks once loaded with them, and on
 // a TV show that load is scoped to the current episode, which the route
-// without episode leaves unset: align it on the sequence's own episode
+// without episode leaves unset: align it on the sequence's own episode.
+// The list of a production holds all its sequences: one it lacks is missing.
 const getCurrentSequence = async () => {
   const sequenceId = route.params.sequence_id
   let sequence = sequenceStore.cache.sequenceMap.get(sequenceId) || null
@@ -503,32 +516,6 @@ const loadCastingData = async () => {
 
 const scrollScheduleToStart = () => {
   scheduleWidget.value?.scrollToDate(scheduleItems.value[0].startDate)
-}
-
-const resetData = async () => {
-  casting.isLoading = true
-  await nextTick()
-  currentSequence.value = await getCurrentSequence()
-  await loadCastingData()
-}
-
-const init = async () => {
-  try {
-    const sequenceId = route.params.sequence_id
-    const sequence = await getCurrentSequence()
-    // Another sequence opened during the load: its own init shows it.
-    if (route.params.sequence_id !== sequenceId) return
-    currentSequence.value = sequence
-    currentSection.value = route.query.section || 'infos'
-    if (currentSequence.value) {
-      loadCastingData()
-    } else {
-      resetData()
-    }
-    setTimeout(scrollScheduleToStart, 100)
-  } catch (err) {
-    console.error(err)
-  }
 }
 
 const assetPath = asset =>
@@ -582,6 +569,9 @@ const viewPlaylist = assets => {
 }
 
 const {
+  init,
+  loadError,
+  loadTitle,
   currentSection,
   currentTask,
   zoomLevel,
@@ -593,15 +583,19 @@ const {
   tasksStartDate,
   tasksEndDate,
   onTaskSelected,
-  saveTaskScheduleItem
+  saveTaskScheduleItem,
+  scheduleSaveErrorText
 } = useEntity({
   type: 'sequence',
   currentEntity: currentSequence,
   entityList,
-  init,
-  // The list loaded holds its own object for the sequence, the one the store
-  // updates from then on.
-  loadList: () => store.dispatch('loadSequencesWithTasks').then(resetData)
+  readEntity: getCurrentSequence,
+  scheduleWidget,
+  onEntityRead: (sequence, isListRead) => {
+    loadCastingData()
+    if (!isListRead) setTimeout(scrollScheduleToStart, 100)
+  },
+  loadList: () => store.dispatch('loadSequencesWithTasks')
 })
 
 // Watchers

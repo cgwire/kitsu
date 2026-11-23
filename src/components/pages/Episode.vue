@@ -42,7 +42,7 @@
         </router-link>
       </div>
 
-      <div class="episode-data block">
+      <div class="episode-data block" v-if="!loadError">
         <route-section-tabs
           class="section-tabs"
           :active-tab="currentSection"
@@ -277,6 +277,11 @@
           v-if="scheduleItems[0].children.length > 0"
           v-show="currentSection === 'schedule'"
         >
+          <error-text
+            class="has-text-centered"
+            :text="scheduleSaveErrorText"
+            v-if="scheduleSaveErrorText"
+          />
           <div class="wrapper">
             <schedule
               ref="scheduleWidget"
@@ -309,6 +314,12 @@
           v-if="currentSection === 'time-logs'"
         />
       </div>
+      <entity-load-error
+        class="episode-data block"
+        :error="loadError"
+        @reload="init()"
+        v-else
+      />
     </div>
 
     <div
@@ -361,7 +372,6 @@ import {
 import {
   computed,
   defineAsyncComponent,
-  nextTick,
   onMounted,
   reactive,
   ref,
@@ -382,6 +392,7 @@ import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
+import EntityLoadError from '@/components/pages/entities/EntityLoadError.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
@@ -392,6 +403,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import EmptySection from '@/components/widgets/EmptySection.vue'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
@@ -436,7 +448,9 @@ const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
 const entityList = computed(() => episodeStore.cache.episodes)
 
-const title = computed(() => currentEpisode.value?.name || t('main.loading'))
+const title = computed(() =>
+  currentEpisode.value ? currentEpisode.value.name : loadTitle.value
+)
 
 const castAssets = computed(() =>
   (currentEpisode.value?.castingAssetsByType || []).flat()
@@ -494,32 +508,6 @@ const scrollScheduleToStart = () => {
   scheduleWidget.value?.scrollToDate(scheduleItems.value[0].startDate)
 }
 
-const resetData = async () => {
-  casting.isLoading = true
-  await nextTick()
-  currentEpisode.value = await getCurrentEpisode()
-  await loadCastingData()
-}
-
-const init = async () => {
-  try {
-    const episodeId = route.params.episode_id
-    const episode = await getCurrentEpisode()
-    // Another episode opened during the load: its own init shows it.
-    if (route.params.episode_id !== episodeId) return
-    currentEpisode.value = episode
-    currentSection.value = route.query.section || 'infos'
-    if (currentEpisode.value) {
-      loadCastingData()
-    } else {
-      resetData()
-    }
-    setTimeout(scrollScheduleToStart, 100)
-  } catch (err) {
-    console.error(err)
-  }
-}
-
 const assetPath = asset =>
   episodifyRoute(
     {
@@ -572,6 +560,9 @@ const viewPlaylist = assets => {
 }
 
 const {
+  init,
+  loadError,
+  loadTitle,
   currentSection,
   currentTask,
   zoomLevel,
@@ -583,12 +574,21 @@ const {
   tasksStartDate,
   tasksEndDate,
   onTaskSelected,
-  saveTaskScheduleItem
+  saveTaskScheduleItem,
+  scheduleSaveErrorText
 } = useEntity({
   type: 'episode',
   currentEntity: currentEpisode,
   entityList,
-  init
+  readEntity: getCurrentEpisode,
+  scheduleWidget,
+  onEntityRead: (episode, isListRead) => {
+    loadCastingData()
+    if (!isListRead) setTimeout(scrollScheduleToStart, 100)
+  },
+  // The topbar sends a link to an episode it does not know, deleted or of
+  // another production, to the episode list.
+  isMissingReported: false
 })
 
 // Watchers

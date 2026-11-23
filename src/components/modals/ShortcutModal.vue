@@ -184,7 +184,7 @@ const shortcutGroups = computed(() => [
 }
 
 .card-head-icon {
-  color: var(--background-selectable, $purple-strong);
+  color: var(--selectable-accent, $purple-strong);
   flex-shrink: 0;
 }
 

@@ -103,6 +103,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { dropRemovedDataKeys } from '@/lib/descriptors'
+
 import BaseModal from '@/components/modals/BaseModal.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
@@ -135,6 +137,9 @@ const form = ref({
 const assetSuccessText = ref('')
 const episodeField = ref(null)
 const nameField = ref(null)
+// Keys of the asset data the form was filled with: a column deleted or
+// renamed by someone else meanwhile took its key out of that data.
+let openedDataKeys = []
 
 const assetCreated = computed(() => store.getters.assetCreated)
 const assetMetadataDescriptors = computed(
@@ -184,8 +189,18 @@ const validateForm = () => {
   return true
 }
 
+// The store changes its own asset: a page can hand over a copy of it.
+const storedEntity = () =>
+  store.getters.assetMap?.get(props.assetToEdit?.id) ?? props.assetToEdit
+
 const buildPayload = () => ({
   ...form.value,
+  data: dropRemovedDataKeys(
+    form.value.data,
+    openedDataKeys,
+    storedEntity()?.data,
+    assetMetadataDescriptors.value.map(d => d.field_name)
+  ),
   is_shared: form.value.is_shared === 'true'
 })
 
@@ -214,6 +229,7 @@ const getEntityTypeIdDefaultValue = () => {
 
 const resetForm = () => {
   if (isEditing.value) {
+    openedDataKeys = Object.keys(props.assetToEdit.data || {})
     form.value = {
       entity_type_id: getEntityTypeIdDefaultValue(),
       project_id: props.assetToEdit.project_id,
@@ -228,6 +244,7 @@ const resetForm = () => {
       is_shared: String(props.assetToEdit.is_shared === true)
     }
   } else {
+    openedDataKeys = []
     if (!form.value.entity_type_id && productionAssetTypeOptions.value[0]) {
       form.value.entity_type_id = productionAssetTypeOptions.value[0].value
     }

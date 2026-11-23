@@ -174,7 +174,9 @@
 
       <div
         class="playlist-column no-selection has-text-centered"
-        v-else-if="playlists.length === 0"
+        v-else-if="
+          playlists.length === 0 && !currentPlaylist.id && !loading.playlist
+        "
       >
         <div v-if="!loading.playlists && !loading.playlistsInit">
           <template v-if="!errors.playlistLoading">
@@ -715,16 +717,20 @@ const isEntireAdditionOffered = computed(
   () => !isTVShow.value || !['all', 'main'].includes(currentEpisode.value?.id)
 )
 
+// The production, episode, and All shots, All episodes, or All assets list
+// the page shows.
+const listScope = computed(() => ({
+  productionId: currentProduction.value.id,
+  episodeId: isTVShow.value ? currentEpisode.value?.id : undefined,
+  forEntity: allForEntity.value
+}))
+
 // The store keeps the last loaded list across pages: on mount it can
 // belong to another production, episode or all-mode entity type.
 const isPlaylistListStale = computed(() => {
   const [first] = playlists.value
   if (!first) return false
-  return !isPlaylistInScope(first, {
-    productionId: currentProduction.value.id,
-    episodeId: isTVShow.value ? currentEpisode.value?.id : undefined,
-    forEntity: allForEntity.value
-  })
+  return !isPlaylistInScope(first, listScope.value)
 })
 
 const currentEntityType = computed(() => currentPlaylist.value.for_entity)
@@ -838,15 +844,20 @@ const isCurrentProjectEvent = eventData =>
   eventData?.project_id != null &&
   eventData.project_id === currentProduction.value.id
 
-const getPlaylistPath = (playlistId, section) => ({
-  ...buildPlaylistPath(
-    currentProduction.value.id,
-    currentEpisode.value ? currentEpisode.value.id : null,
-    playlistId,
-    section
-  ),
-  query: allEntityQuery.value
-})
+// A getPlaylistPath frozen on the production, episode, and All shots, All
+// episodes, or All assets list shown at the call.
+const freezePlaylistPath = () => {
+  const productionId = currentProduction.value.id
+  const episodeId = currentEpisode.value ? currentEpisode.value.id : null
+  const query = allEntityQuery.value
+  return (playlistId, section) => ({
+    ...buildPlaylistPath(productionId, episodeId, playlistId, section),
+    query
+  })
+}
+
+const getPlaylistPath = (playlistId, section) =>
+  freezePlaylistPath()(playlistId, section)
 
 const playlistElementStyle = playlist => {
   if (isListToggled.value) return
@@ -1123,14 +1134,24 @@ const convertEntityToPlaylistFormat = entityInfo => {
   return playlistEntity
 }
 
+const showNoPlaylist = () => {
+  loading.playlist = false
+  currentPlaylist.value = { name: '' }
+}
+
 // Loads the playlist shown and shows the answer with its share links count,
 // unless another playlist opened or a later load of this one started
-// meanwhile. A load can answer after a later one, with an older state.
-const showLoadedPlaylist = async playlist => {
+// meanwhile. A load can answer after a later one, with an older state. An
+// answer isShown refuses shows no playlist.
+const showLoadedPlaylist = async (playlist, isShown = () => true) => {
   loading.playlist = true
   const load = ++playlistLoadCount
   const loadedPlaylist = await store.dispatch('loadPlaylist', playlist)
   if (load !== playlistLoadCount || route.params.playlist_id !== playlist.id) {
+    return null
+  }
+  if (!isShown(loadedPlaylist)) {
+    showNoPlaylist()
     return null
   }
   currentPlaylist.value = loadedPlaylist
@@ -1141,12 +1162,19 @@ const showLoadedPlaylist = async playlist => {
 }
 
 const setCurrentPlaylist = async () => {
-  const playlist = playlistMap.value.get(route.params.playlist_id)
+  const playlistId = route.params.playlist_id
+  const playlist = playlistMap.value.get(playlistId)
   if (playlist) {
     await showLoadedPlaylist(playlist)
+  } else if (playlistId) {
+    // The list holds the pages loaded so far, in the order picked: the
+    // playlist of a link, or of "View created playlist", can come after
+    // them. It loads alone, and opens if it belongs to the list shown.
+    await showLoadedPlaylist({ id: playlistId }, loadedPlaylist =>
+      isPlaylistInScope(loadedPlaylist, listScope.value)
+    )
   } else {
-    loading.playlist = false
-    currentPlaylist.value = { name: '' }
+    showNoPlaylist()
   }
 }
 
@@ -1426,6 +1454,14 @@ const onForClientChanged = forClient => {
 }
 
 const runAddPlaylist = async form => {
+  // Cancel and any form opened next replace this object, while leaving the
+  // page replaces nothing: an answer that arrives after any of them leaves
+  // the modal and the route alone.
+  const shownForm = playlistToEdit.value
+  const isFormShown = () => !isUnmounted && playlistToEdit.value === shownForm
+  // The form stays open when the topbar or Back moves the page to another
+  // production or list: the answer opens the playlist where it was created.
+  const getCreatedPlaylistPath = freezePlaylistPath()
   loading.editPlaylist = true
   errors.editPlaylist = false
   try {
@@ -1438,13 +1474,17 @@ const runAddPlaylist = async form => {
       task_type_id: form.task_type_id,
       ...(isTVShow.value && currentEpisode.value
         ? { episode_id: currentEpisode.value.id }
-        : {})
+        : {}),
+      listForEntity: allForEntity.value
     })
-    router.push(getPlaylistPath(playlist.id))
-    modals.isEditDisplayed = false
+    // Otherwise the new playlist at most joins the list.
+    if (isFormShown()) {
+      router.push(getCreatedPlaylistPath(playlist.id))
+      modals.isEditDisplayed = false
+    }
   } catch (err) {
     console.error(err)
-    errors.editPlaylist = true
+    if (isFormShown()) errors.editPlaylist = true
   } finally {
     loading.editPlaylist = false
   }
@@ -1463,7 +1503,14 @@ const runEditPlaylist = async form => {
         task_type_id: form.task_type_id
       }
     })
-    modals.isEditDisplayed = false
+    // The form may have closed, and another one opened, during the save.
+    const isFormShown = playlistToEdit.value.id === form.id
+    // The action answers null when the save fails, a taken name for one.
+    if (!playlist) {
+      if (isFormShown) errors.editPlaylist = true
+      return
+    }
+    if (isFormShown) modals.isEditDisplayed = false
     // Another playlist may have opened during the save.
     if (currentPlaylist.value.id === form.id) {
       Object.assign(currentPlaylist.value, playlist)
@@ -1689,7 +1736,9 @@ const SOCKET_EVENTS = {
   'playlist:update': async eventData => {
     if (
       isCurrentProjectEvent(eventData) &&
-      playlistMap.value.get(eventData.playlist_id) &&
+      // The playlist shown can be past the pages of the list loaded.
+      (playlistMap.value.get(eventData.playlist_id) ||
+        eventData.playlist_id === currentPlaylist.value.id) &&
       !isSilent &&
       !isAddingEntity.value
     ) {
@@ -1698,9 +1747,9 @@ const SOCKET_EVENTS = {
       })
       if (eventData.playlist_id !== currentPlaylist.value.id) return
       if (!playlist) {
-        // Gone from the list once unreadable (made internal for a client, or
-        // deleted); a failed refresh keeps it on screen.
-        if (!playlistMap.value.get(eventData.playlist_id)) goFirstPlaylist()
+        // Left once unreadable (made internal for a client, or deleted); a
+        // failed refresh keeps it on screen.
+        if (playlist === false) goFirstPlaylist()
         return
       }
       currentPlaylist.value = playlist
@@ -1716,6 +1765,16 @@ const SOCKET_EVENTS = {
       playlistMap.value.get(eventData.playlist_id)
     ) {
       store.commit('DELETE_PLAYLIST_END', { id: eventData.playlist_id })
+    }
+    // Left, listed or not, as on an unreadable update, once shown or while it
+    // loads: the address can also name a playlist of another list, which the
+    // page keeps closed. A click changes the address at once, and the
+    // playlist shown only once the clicked one loads.
+    if (
+      eventData.playlist_id === route.params.playlist_id &&
+      (eventData.playlist_id === currentPlaylist.value.id || loading.playlist)
+    ) {
+      goFirstPlaylist()
     }
   },
 
@@ -1875,7 +1934,7 @@ useHead({ title: pageTitle })
 
   &:hover {
     transform: scale(1.02);
-    border: 2px solid var(--background-selectable);
+    border: 2px solid var(--selectable-accent);
   }
 }
 

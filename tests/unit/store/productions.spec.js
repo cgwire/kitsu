@@ -3,11 +3,17 @@
 import { computed, effectScope } from 'vue'
 import { createStore } from 'vuex'
 
+// The shots store reaches the libraries that read the app store.
+vi.mock('@/store', () => ({ default: {} }))
+
 import store from '@/store/modules/productions'
 import assetTypeStore from '@/store/modules/assettypes'
 import backgroundStore from '@/store/modules/backgrounds'
+import shotsStore from '@/store/modules/shots'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypeStore from '@/store/modules/tasktypes'
+
+import { removeMetadataField, renameMetadataField } from '@/lib/descriptors'
 
 import client from '@/store/api/client'
 import assetsApi from '@/store/api/assets'
@@ -21,6 +27,7 @@ import {
   CLEAR_ASSETS,
   CLEAR_EDITS,
   CLEAR_SHOTS,
+  DELETE_METADATA_DESCRIPTOR_END,
   LOAD_BACKGROUNDS_END,
   LOAD_OPEN_PRODUCTIONS_END,
   LOAD_PRODUCTION_STATUS_END,
@@ -29,6 +36,7 @@ import {
   LOAD_PRODUCTIONS_END,
   LOAD_PRODUCTIONS_ERROR,
   LOAD_PRODUCTIONS_START,
+  LOAD_SHOTS_END,
   PRODUCTION_ADD_ASSET_TYPE,
   PRODUCTION_ADD_TASK_STATUS,
   PRODUCTION_ADD_TASK_TYPE,
@@ -427,12 +435,40 @@ describe('Productions store', () => {
       expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_PRODUCTIONS_ERROR)
 
       mockCommit = vi.fn()
-      productionApi.getProductions = vi.fn(() => Promise.resolve(123))
+      const productions = [{ id: 'production-1' }]
+      productionApi.getProductions = vi.fn(() => Promise.resolve(productions))
       await store.actions.loadProductions({ commit: mockCommit })
       expect(productionApi.getProductions).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_PRODUCTIONS_START)
-      expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_PRODUCTIONS_END, 123)
+      expect(mockCommit).toHaveBeenNthCalledWith(
+        2,
+        LOAD_PRODUCTIONS_END,
+        productions
+      )
+    })
+
+    // The Productions page lists them again after a change made elsewhere:
+    // the rows shown stay until the answer, and through a failure.
+    test('loadProductions lists them again quietly', async () => {
+      let mockCommit = vi.fn()
+      const productions = [{ id: 'production-1' }]
+      productionApi.getProductions = vi.fn(() => Promise.resolve(productions))
+      await store.actions.loadProductions(
+        { commit: mockCommit },
+        { isQuiet: true }
+      )
+      expect(mockCommit.mock.calls).toEqual([
+        [LOAD_PRODUCTIONS_END, productions]
+      ])
+
+      mockCommit = vi.fn()
+      const error = new Error('Bad Gateway')
+      productionApi.getProductions = vi.fn(() => Promise.reject(error))
+      await expect(
+        store.actions.loadProductions({ commit: mockCommit }, { isQuiet: true })
+      ).rejects.toBe(error)
+      expect(mockCommit).not.toHaveBeenCalled()
     })
 
     test('loadProduction', async () => {
@@ -515,9 +551,13 @@ describe('Productions store', () => {
       expect(result).toBe(owned)
       expect(mockDispatch).not.toHaveBeenCalled()
 
-      // Missing: creates the descriptor once, even for concurrent calls.
+      // Missing: creates the descriptor once, even for concurrent calls. A
+      // shot column of that field name keeps its values elsewhere.
       mockDispatch = vi.fn(() => Promise.resolve())
-      const production = { id: 'production-2', descriptors: [] }
+      const production = {
+        id: 'production-2',
+        descriptors: [{ ...descriptor, id: 'shot-column', entity_type: 'Shot' }]
+      }
       await Promise.all([
         store.actions.ensureProjectMetadataDescriptor(
           { dispatch: mockDispatch },
@@ -1232,6 +1272,63 @@ describe('Productions store', () => {
       expect(productionApi.removeTaskStatusFromProduction).toBeCalledTimes(1)
     })
 
+    // Someone else may rename the same column during the save: the lists then
+    // hold its values under that other name.
+    test('addMetadataDescriptor reads the old name once Zou answers', async () => {
+      const mockCommit = vi.fn()
+      const known = { id: 1, field_name: 'mood' }
+      const state = {
+        currentProduction: { id: '123', descriptors: [known] },
+        productionMap: new Map(),
+        openProductions: [],
+        productions: []
+      }
+      let answer
+      productionApi.updateMetadataDescriptor = vi.fn(
+        () =>
+          new Promise(resolve => {
+            answer = resolve
+          })
+      )
+      const saving = store.actions.addMetadataDescriptor(
+        { commit: mockCommit, state },
+        { id: 1, field_name: 'feel' }
+      )
+      known.field_name = 'tone'
+      const descriptor = { id: 1, field_name: 'feel' }
+      answer(descriptor)
+      await saving
+
+      expect(mockCommit).toHaveBeenCalledWith(UPDATE_METADATA_DESCRIPTOR_END, {
+        production: state.currentProduction,
+        previousDescriptorFieldName: 'tone',
+        descriptor
+      })
+    })
+
+    // A logout during the save empties the store.
+    test('addMetadataDescriptor ends a save answered after a logout', async () => {
+      const mockCommit = vi.fn()
+      const state = {
+        currentProduction: { id: '123', descriptors: [{ id: 1, field_name: 'mood' }] }
+      }
+      let answer
+      productionApi.updateMetadataDescriptor = vi.fn(
+        () =>
+          new Promise(resolve => {
+            answer = resolve
+          })
+      )
+      const saving = store.actions.addMetadataDescriptor(
+        { commit: mockCommit, state },
+        { id: 1, field_name: 'feel' }
+      )
+      state.currentProduction = null
+      answer({ id: 1, field_name: 'feel' })
+
+      await expect(saving).resolves.toBeUndefined()
+    })
+
     test('addMetadataDescriptor', async () => {
       let mockCommit = vi.fn()
       const productionForMap = { id: '123', descriptors: [] }
@@ -1272,34 +1369,111 @@ describe('Productions store', () => {
       expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_METADATA_DESCRIPTOR_END, { production: state.currentProduction, previousDescriptorFieldName: 'descriptor', descriptor: existingDescriptor })
     })
 
+    // The column of the production on screen, read through it as Zou serves
+    // it.
     test('refreshMetadataDescriptor', async () => {
       let mockCommit = vi.fn()
+      const production = {
+        id: '1',
+        descriptors: [{ id: '456', field_name: 'descriptor name' }]
+      }
       const state = {
-        currentProduction: {
-          id: '123'
-        },
-        openProductions: [{}, { descriptors: [{ id: '456', field_name: 'descriptor name' }] }],
-        productionMap: new Map(Object.entries({
-          1: { id: 1 }
-        }))
+        currentProduction: production,
+        openProductions: [production],
+        productionMap: new Map([['1', production]])
       }
 
       const descriptor = { id: '456', field_name: 'descriptor name', project_id: '1' }
       productionApi.getMetadataDescriptor = vi.fn(() => Promise.resolve(descriptor))
-      await store.actions.refreshMetadataDescriptor({ commit: mockCommit, state }, descriptor.id)
+      await store.actions.refreshMetadataDescriptor(
+        { commit: mockCommit, state },
+        { productionId: '1', descriptorId: descriptor.id }
+      )
       expect(productionApi.getMetadataDescriptor).toBeCalledTimes(1)
-      expect(productionApi.getMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', descriptor.id)
+      expect(productionApi.getMetadataDescriptor).toHaveBeenNthCalledWith(1, '1', descriptor.id)
       expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_METADATA_DESCRIPTOR_END, { production: { id: 1 }, descriptor })
+      expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_METADATA_DESCRIPTOR_END, { production, previousDescriptorFieldName: 'descriptor name', descriptor })
 
       descriptor.id = '789'
       mockCommit = vi.fn()
       productionApi.getMetadataDescriptor = vi.fn(() => Promise.resolve(descriptor))
-      await store.actions.refreshMetadataDescriptor({ commit: mockCommit, state }, descriptor.id)
+      await store.actions.refreshMetadataDescriptor(
+        { commit: mockCommit, state },
+        { productionId: '1', descriptorId: descriptor.id }
+      )
       expect(productionApi.getMetadataDescriptor).toBeCalledTimes(1)
-      expect(productionApi.getMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', descriptor.id)
+      expect(productionApi.getMetadataDescriptor).toHaveBeenNthCalledWith(1, '1', descriptor.id)
       expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_METADATA_DESCRIPTOR_END, { production: { id: 1 }, descriptor })
+      expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_METADATA_DESCRIPTOR_END, { production, descriptor })
+    })
+
+    test('refreshMetadataDescriptor leaves a production the tab has not loaded', async () => {
+      const state = {
+        currentProduction: { id: '123' },
+        openProductions: [],
+        productionMap: new Map()
+      }
+      productionApi.getMetadataDescriptor = vi.fn()
+      const commit = vi.fn()
+      await store.actions.refreshMetadataDescriptor(
+        { commit, state },
+        { productionId: '1', descriptorId: '456' }
+      )
+      expect(productionApi.getMetadataDescriptor).not.toHaveBeenCalled()
+      expect(commit).not.toHaveBeenCalled()
+    })
+
+    // A rename made elsewhere reaches the lists with the name they hold.
+    test('refreshMetadataDescriptor gives the old field name of a renamed column', async () => {
+      const production = {
+        id: 'p1',
+        descriptors: [{ id: 'd1', entity_type: 'Shot', field_name: 'look' }]
+      }
+      const state = {
+        currentProduction: production,
+        openProductions: [production],
+        productionMap: new Map([['p1', production]])
+      }
+      const renamed = {
+        id: 'd1',
+        entity_type: 'Shot',
+        field_name: 'style',
+        project_id: 'p1'
+      }
+      productionApi.getMetadataDescriptor = vi.fn(() => Promise.resolve(renamed))
+      const commit = vi.fn()
+      await store.actions.refreshMetadataDescriptor(
+        { commit, state },
+        { productionId: 'p1', descriptorId: 'd1' }
+      )
+      expect(commit).toHaveBeenCalledWith(UPDATE_METADATA_DESCRIPTOR_END, {
+        production,
+        previousDescriptorFieldName: 'look',
+        descriptor: renamed
+      })
+    })
+
+    describe('dropMetadataDescriptor', () => {
+      // A column deleted elsewhere, in this production or another one. The
+      // descriptors of a production come without its id.
+      test('hands the column deleted elsewhere to the lists', () => {
+        const column = { id: 'desc-1', entity_type: 'Shot', field_name: 'notes' }
+        const production = { id: '123', descriptors: [column] }
+        const state = {
+          productions: [],
+          openProductions: [production],
+          productionMap: new Map([['123', production]])
+        }
+        const commit = vi.fn()
+        store.actions.dropMetadataDescriptor(
+          { commit, state },
+          { productionId: '123', descriptorId: 'desc-1' }
+        )
+        expect(commit).toHaveBeenCalledWith(DELETE_METADATA_DESCRIPTOR_END, {
+          id: 'desc-1',
+          descriptor: { ...column, project_id: '123' }
+        })
+      })
     })
 
     describe('deleteMetadataDescriptor', () => {
@@ -1363,7 +1537,7 @@ describe('Productions store', () => {
 
       // A confirmation left open across a production switch sends the column
       // of the previous production, and Zou answers 404 for it too. A closed
-      // production opened from a link is in the map only.
+      // production opened from a link is not among the open productions.
       test('keeps a column of another production', async () => {
         const other = { id: '456', descriptors: [] }
         state.currentProduction = other
@@ -1380,6 +1554,47 @@ describe('Productions store', () => {
         expect(columnIds()).toEqual(['desc-1', 'desc-2'])
       })
 
+      // The lists drop the values of the column with it. The descriptors of a
+      // production come without its id.
+      test.each([
+        ['deletes it', () => Promise.resolve()],
+        ['no longer has it', () => Promise.reject(notFound)]
+      ])('hands the column to the lists when Zou %s', async (_, answer) => {
+        const column = production.descriptors[0]
+        const commits = []
+        productionApi.deleteMetadataDescriptor = vi.fn(answer)
+        await store.actions.deleteMetadataDescriptor(
+          { commit: (type, payload) => commits.push([type, payload]), state },
+          'desc-1'
+        )
+        expect(commits).toEqual([
+          [
+            DELETE_METADATA_DESCRIPTOR_END,
+            { id: 'desc-1', descriptor: { ...column, project_id: '123' } }
+          ]
+        ])
+      })
+
+      // A reload of the production can leave the column out meanwhile.
+      test('hands the column to the lists once the store lost it', async () => {
+        const column = production.descriptors[0]
+        const commits = []
+        productionApi.deleteMetadataDescriptor = vi.fn(() => {
+          production.descriptors = production.descriptors.slice(1)
+          return Promise.resolve()
+        })
+        await store.actions.deleteMetadataDescriptor(
+          { commit: (type, payload) => commits.push([type, payload]), state },
+          'desc-1'
+        )
+        expect(commits).toEqual([
+          [
+            DELETE_METADATA_DESCRIPTOR_END,
+            { id: 'desc-1', descriptor: { ...column, project_id: '123' } }
+          ]
+        ])
+      })
+
       test('keeps a column Zou refuses to delete', async () => {
         const refusal = Object.assign(new Error('Forbidden'), { status: 403 })
         productionApi.deleteMetadataDescriptor = vi.fn(() =>
@@ -1387,6 +1602,165 @@ describe('Productions store', () => {
         )
         await expect(run('desc-1')).rejects.toBe(refusal)
         expect(columnIds()).toEqual(['desc-1', 'desc-2'])
+      })
+    })
+
+    // Zou deletes or renames a column of all productions on the open ones
+    // only.
+    describe('Project columns of all productions', () => {
+      const budget = productionId => ({
+        id: `budget-${productionId}`,
+        project_id: productionId,
+        entity_type: 'Project',
+        field_name: 'budget'
+      })
+      let open
+      let closed
+      let state
+
+      // Runs an action through the real mutations of the module.
+      const run = (action, payload) =>
+        store.actions[action](
+          {
+            commit: (type, value) => store.mutations[type](state, value),
+            state
+          },
+          payload
+        )
+
+      // The save of a production sends its cached data along.
+      const sentDataOfNextEdit = async () => {
+        const updateProduction = vi
+          .spyOn(productionApi, 'updateProduction')
+          .mockResolvedValue({ id: 'open' })
+        await store.actions.editProduction(
+          { commit: vi.fn(), state },
+          { id: 'open', data: { studio: 'B' } }
+        )
+        return updateProduction.mock.calls[0][0].data
+      }
+
+      beforeEach(() => {
+        open = {
+          id: 'open',
+          descriptors: [budget('open')],
+          data: { budget: '100 k', studio: 'A' }
+        }
+        closed = {
+          id: 'closed',
+          descriptors: [budget('closed')],
+          data: { budget: '200 k' }
+        }
+        state = {
+          productions: [open, closed],
+          openProductions: [open],
+          productionMap: new Map([
+            ['open', open],
+            ['closed', closed]
+          ])
+        }
+      })
+
+      afterEach(() => vi.restoreAllMocks())
+
+      // The Productions page loads its list after the context: the open
+      // production is then both the map entry and a list entry, each with
+      // its own descriptors, and they share one data object.
+      const listOpenProductionApart = () => {
+        const listEntry = { ...open, descriptors: [budget('open')] }
+        state.productions = [listEntry, closed]
+        return listEntry
+      }
+
+      describe('deleteProjectMetadataByFieldName', () => {
+        beforeEach(() => {
+          vi.spyOn(
+            productionApi,
+            'deleteMetadataDescriptorOnAllProjects'
+          ).mockResolvedValue(['budget-open'])
+        })
+
+        test('clears the values of the column with it', async () => {
+          await run('deleteProjectMetadataByFieldName', 'budget')
+          expect(
+            productionApi.deleteMetadataDescriptorOnAllProjects
+          ).toHaveBeenCalledWith('budget', 'Project')
+          expect(open.descriptors).toEqual([])
+          expect(open.data).toEqual({ studio: 'A' })
+        })
+
+        test('keeps the column and the values Zou keeps', async () => {
+          await run('deleteProjectMetadataByFieldName', 'budget')
+          expect(closed.descriptors).toEqual([budget('closed')])
+          expect(closed.data).toEqual({ budget: '200 k' })
+        })
+
+        test('sends no deleted value back with the next edit', async () => {
+          await run('deleteProjectMetadataByFieldName', 'budget')
+          expect(await sentDataOfNextEdit()).toEqual({ studio: 'B' })
+        })
+
+        test('clears the column from the list entry too', async () => {
+          const listEntry = listOpenProductionApart()
+          await run('deleteProjectMetadataByFieldName', 'budget')
+          expect(open.descriptors).toEqual([])
+          expect(listEntry.descriptors).toEqual([])
+          expect(listEntry.data).toEqual({ studio: 'A' })
+        })
+      })
+
+      describe('updateProjectMetadataOnAll', () => {
+        const cost = productionId => ({
+          ...budget(productionId),
+          name: 'Cost',
+          field_name: 'cost'
+        })
+        const rename = () =>
+          run('updateProjectMetadataOnAll', {
+            fieldName: 'budget',
+            form: { name: 'Cost' }
+          })
+
+        beforeEach(() => {
+          vi.spyOn(
+            productionApi,
+            'updateMetadataDescriptorOnAllProjects'
+          ).mockResolvedValue([cost('open')])
+        })
+
+        test('moves the values of a renamed column', async () => {
+          await rename()
+          expect(
+            productionApi.updateMetadataDescriptorOnAllProjects
+          ).toHaveBeenCalledWith('budget', {
+            name: 'Cost',
+            entity_type: 'Project'
+          })
+          expect(open.descriptors).toEqual([cost('open')])
+          expect(open.data).toEqual({ cost: '100 k', studio: 'A' })
+        })
+
+        test('keeps the column and the values Zou keeps', async () => {
+          await rename()
+          expect(closed.descriptors).toEqual([budget('closed')])
+          expect(closed.data).toEqual({ budget: '200 k' })
+        })
+
+        test('sends the value under its new name with the next edit', async () => {
+          await rename()
+          expect(await sentDataOfNextEdit()).toEqual({
+            cost: '100 k',
+            studio: 'B'
+          })
+        })
+
+        test('moves the value once for the list entry too', async () => {
+          const listEntry = listOpenProductionApart()
+          await rename()
+          expect(open.descriptors).toEqual([cost('open')])
+          expect(listEntry.descriptors).toEqual([cost('open')])
+          expect(listEntry.data).toEqual({ cost: '100 k', studio: 'A' })
+        })
       })
     })
   })
@@ -1427,8 +1801,8 @@ describe('Productions store', () => {
     })
 
     // The all-productions listing carries no relations and the Project
-    // descriptors only: an entry loaded in full keeps them and its object,
-    // and takes the listed fields.
+    // descriptors only: an entry loaded in full keeps its object and its
+    // other descriptors, and takes the listed fields.
     test('LOAD_PRODUCTIONS_END keeps a production loaded in full', () => {
       const projectDescriptor = {
         id: 'descriptor-project',
@@ -1752,11 +2126,178 @@ describe('Productions store', () => {
       expect(production.descriptors[0]).toEqual(descriptor)
     })
 
+    // The live update of a rename commits the new descriptor alone.
+    test('UPDATE_METADATA_DESCRIPTOR_END on a renamed production column', () => {
+      const budget = {
+        id: 'descriptor',
+        entity_type: 'Project',
+        field_name: 'budget'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: '100 k', studio: 'A' }
+      }
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      expect(production.data).toEqual({ cost: '100 k', studio: 'A' })
+    })
+
+    // Zou moves every value but null.
+    test.each([
+      ['an empty text', ''],
+      ['0', 0],
+      ['false', false]
+    ])('UPDATE_METADATA_DESCRIPTOR_END on a renamed production column holding %s', (_, value) => {
+      const budget = {
+        id: 'descriptor',
+        entity_type: 'Project',
+        field_name: 'budget'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: value }
+      }
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      expect(production.data).toEqual({ cost: value })
+    })
+
+    // A column named "Constructor" has the field name of a property every
+    // object inherits.
+    test('UPDATE_METADATA_DESCRIPTOR_END on a renamed production column the data does not hold', () => {
+      const builder = {
+        id: 'descriptor',
+        entity_type: 'Project',
+        field_name: 'constructor'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [builder],
+        data: { studio: 'A' }
+      }
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...builder, field_name: 'builder' }
+      })
+      expect(production.data).toEqual({ studio: 'A' })
+    })
+
+    // The live update of a rename made in this tab comes after the action.
+    // A column added in this tab is one object in every copy of the
+    // production, and a reload of the context gives the copies their own data.
+    test('UPDATE_METADATA_DESCRIPTOR_END on copies that share the column', () => {
+      const budget = {
+        id: 'descriptor',
+        entity_type: 'Project',
+        field_name: 'budget'
+      }
+      const inMap = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: '100 k' }
+      }
+      const inList = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: '100 k' }
+      }
+      state.productions = [inList]
+      state.productionMap.set('production-id', inMap)
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production: inMap,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      expect(inMap.data).toEqual({ cost: '100 k' })
+      expect(inList.data).toEqual({ cost: '100 k' })
+    })
+
+    test('UPDATE_METADATA_DESCRIPTOR_END twice for the same rename', () => {
+      const budget = {
+        id: 'descriptor',
+        entity_type: 'Project',
+        field_name: 'budget'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: '100 k' }
+      }
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      expect(production.data).toEqual({ cost: '100 k' })
+    })
+
+    // A shot column keeps its values on the shots, even when the production
+    // data holds a key of the same name for a Project column.
+    test('UPDATE_METADATA_DESCRIPTOR_END on a renamed shot column', () => {
+      const budget = {
+        id: 'descriptor',
+        entity_type: 'Shot',
+        field_name: 'budget'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [budget],
+        data: { budget: '100 k' }
+      }
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, {
+        production,
+        descriptor: { ...budget, field_name: 'cost' }
+      })
+      expect(production.data).toEqual({ budget: '100 k' })
+    })
+
     test('DELETE_METADATA_DESCRIPTOR_END', () => {
       const descriptor = { id: 'descriptor', field_name: 'new descriptor' }
       state.openProductions = [{ id: 'production-id', descriptors: [descriptor] }]
       store.mutations.DELETE_METADATA_DESCRIPTOR_END(state, descriptor)
       expect(state.openProductions[0].descriptors).toHaveLength(0)
+    })
+
+    // The live update of a deletion commits the id of the column alone.
+    test('DELETE_METADATA_DESCRIPTOR_END on a production column', () => {
+      const production = {
+        id: 'production-id',
+        descriptors: [
+          { id: 'descriptor', entity_type: 'Project', field_name: 'budget' }
+        ],
+        data: { budget: '100 k', studio: 'A' }
+      }
+      state.openProductions = [production]
+      store.mutations.DELETE_METADATA_DESCRIPTOR_END(state, { id: 'descriptor' })
+      expect(production.descriptors).toHaveLength(0)
+      expect(production.data).toEqual({ studio: 'A' })
+    })
+
+    // A shot column keeps its values on the shots, even when the production
+    // data holds a key of the same name for a Project column.
+    test('DELETE_METADATA_DESCRIPTOR_END on a shot column', () => {
+      const descriptor = {
+        id: 'descriptor',
+        entity_type: 'Shot',
+        field_name: 'budget'
+      }
+      const production = {
+        id: 'production-id',
+        descriptors: [descriptor],
+        data: { budget: '100 k' }
+      }
+      state.openProductions = [production]
+      store.mutations.DELETE_METADATA_DESCRIPTOR_END(state, descriptor)
+      expect(production.descriptors).toHaveLength(0)
+      expect(production.data).toEqual({ budget: '100 k' })
     })
 
     test('ASSIGN_TASKS', () => {
@@ -1802,6 +2343,18 @@ describe('Productions store', () => {
   })
 
   describe('API', () => {
+    // The columns of a production that the role of the user on it shows.
+    test('getMetadataDescriptors reads the columns of a production', async () => {
+      const pget = vi.spyOn(client, 'pget').mockResolvedValue([])
+
+      await productionApi.getMetadataDescriptors('production-1')
+
+      expect(pget).toHaveBeenCalledWith(
+        '/api/data/projects/production-1/metadata-descriptors'
+      )
+      pget.mockRestore()
+    })
+
     // Unlike a read, the listing answers a production out of the user's
     // teams with none rather than a refusal.
     describe('getListedProduction', () => {
@@ -2545,5 +3098,1545 @@ describe('Productions store, production access error', () => {
 
     await vuexStore.dispatch('setProductionAccessError', null)
     expect(vuexStore.getters.productionAccessError).toBeNull()
+  })
+})
+
+// Zou sends the column events of every production. A production off screen
+// reads its columns again once it is on screen, rather than a column per
+// event: a change made on the Productions page sends one per production.
+describe('Productions store, columns changed elsewhere', () => {
+  const column = (id, name, fieldName = name.toLowerCase()) => ({
+    id,
+    name,
+    field_name: fieldName,
+    entity_type: 'Shot',
+    data_type: 'string',
+    choices: [],
+    for_client: false,
+    departments: []
+  })
+  const projectColumn = (id, name, fieldName) => ({
+    ...column(id, name, fieldName),
+    entity_type: 'Project'
+  })
+  // As the list stores: the values move with a rename and go with a
+  // deletion, and a production switch empties the lists.
+  let shots
+  const listMutations = {
+    [ADD_METADATA_DESCRIPTOR_END]: vi.fn(),
+    [UPDATE_METADATA_DESCRIPTOR_END]: vi.fn(
+      (state, { descriptor, previousDescriptorFieldName }) => {
+        if (
+          descriptor.entity_type === 'Shot' &&
+          previousDescriptorFieldName &&
+          previousDescriptorFieldName !== descriptor.field_name
+        ) {
+          renameMetadataField(shots, descriptor, previousDescriptorFieldName)
+        }
+      }
+    ),
+    [DELETE_METADATA_DESCRIPTOR_END]: vi.fn((state, { descriptor }) => {
+      if (descriptor?.entity_type === 'Shot') {
+        removeMetadataField(shots, descriptor)
+      }
+    }),
+    [CLEAR_ASSETS]: vi.fn(),
+    [CLEAR_SHOTS]: vi.fn(() => {
+      shots = []
+    }),
+    [CLEAR_EDITS]: vi.fn()
+  }
+  const deferred = () => {
+    let settle
+    let fail
+    const promise = new Promise((resolve, reject) => {
+      settle = resolve
+      fail = reject
+    })
+    return { promise, resolve: settle, reject: fail }
+  }
+  let vuexStore
+
+  const productionOf = id => vuexStore.state.productions.productionMap.get(id)
+  const descriptorsOf = id => productionOf(id).descriptors
+  const idsOf = id => descriptorsOf(id).map(descriptor => descriptor.id)
+  const showProduction = id => vuexStore.commit(SET_CURRENT_PRODUCTION, id)
+
+  beforeEach(() => {
+    Object.values(listMutations).forEach(mutation => mutation.mockClear())
+    shots = []
+    vuexStore = createStore({
+      modules: {
+        productions: {
+          state: {
+            currentProduction: null,
+            productions: [],
+            openProductions: [],
+            productionMap: new Map(),
+            productionStatusMap: new Map()
+          },
+          getters: store.getters,
+          mutations: store.mutations,
+          actions: store.actions
+        },
+        lists: { mutations: listMutations }
+      }
+    })
+    vuexStore.commit(LOAD_OPEN_PRODUCTIONS_END, [
+      {
+        id: 'alpha',
+        name: 'Alpha',
+        descriptors: [
+          column('notes', 'Notes'),
+          column('camera', 'Camera'),
+          column('mood', 'Mood')
+        ]
+      },
+      { id: 'beta', name: 'Beta', descriptors: [column('light', 'Light')] }
+    ])
+    showProduction('alpha')
+  })
+
+  afterEach(async () => {
+    // The productions left stale stay so in the module: read them now.
+    vi.restoreAllMocks()
+    vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([])
+    await Promise.all(
+      ['alpha', 'beta'].map(id =>
+        vuexStore.dispatch('loadStaleMetadataDescriptors', id)
+      )
+    )
+    vi.restoreAllMocks()
+  })
+
+  test('shows the column created meanwhile once the production is on screen', async () => {
+    const camera = { ...column('beta-camera', 'Camera'), project_id: 'beta' }
+    const getMetadataDescriptor = vi
+      .spyOn(productionApi, 'getMetadataDescriptor')
+      .mockResolvedValue(camera)
+    const getMetadataDescriptors = vi
+      .spyOn(productionApi, 'getMetadataDescriptors')
+      .mockResolvedValue([
+        { ...column('light', 'Light'), project_id: 'beta' },
+        camera
+      ])
+
+    await vuexStore.dispatch('refreshMetadataDescriptor', {
+      productionId: 'beta',
+      descriptorId: 'beta-camera'
+    })
+    await vuexStore.dispatch('loadStaleMetadataDescriptors', 'alpha')
+    expect(getMetadataDescriptor).not.toHaveBeenCalled()
+    expect(getMetadataDescriptors).not.toHaveBeenCalled()
+
+    showProduction('beta')
+    await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+    await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+
+    expect(getMetadataDescriptors).toHaveBeenCalledTimes(1)
+    expect(getMetadataDescriptors).toHaveBeenCalledWith('beta')
+    expect(idsOf('beta')).toEqual(['light', 'beta-camera'])
+    expect(vuexStore.getters.currentProduction.descriptors).toContainEqual(
+      camera
+    )
+  })
+
+  // Two renames in a row: the read of the first gives way to the second,
+  // whose read fails. The column modal or a way back reads them all.
+  test('reads the columns again once the read of a changed column fails', async () => {
+    const failure = Object.assign(new Error('HTTP 502'), { status: 502 })
+    const firstRead = deferred()
+    vi.spyOn(productionApi, 'getMetadataDescriptor')
+      .mockReturnValueOnce(firstRead.promise)
+      .mockRejectedValueOnce(failure)
+    const getMetadataDescriptors = vi
+      .spyOn(productionApi, 'getMetadataDescriptors')
+      .mockResolvedValue([
+        column('notes', 'Total'),
+        column('camera', 'Camera'),
+        column('mood', 'Mood')
+      ])
+    const refresh = () =>
+      vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'alpha',
+        descriptorId: 'notes'
+      })
+
+    const firstRefresh = refresh()
+    await expect(refresh()).rejects.toBe(failure)
+    firstRead.resolve(column('notes', 'Cost'))
+    await firstRefresh
+    expect(descriptorsOf('alpha')[0].field_name).toBe('notes')
+
+    await vuexStore.dispatch('loadStaleMetadataDescriptors', 'alpha')
+
+    expect(getMetadataDescriptors).toHaveBeenCalledWith('alpha')
+    expect(descriptorsOf('alpha')[0].field_name).toBe('total')
+  })
+
+  // The lists of a production load again once it is on screen: their
+  // values already follow the columns of Zou.
+  test('leaves the values of the lists to their next load', async () => {
+    vuexStore.commit(LOAD_OPEN_PRODUCTIONS_END, [
+      {
+        id: 'beta',
+        name: 'Beta',
+        descriptors: [column('light', 'Light'), column('mood', 'Mood')]
+      }
+    ])
+    // the two columns swapped their names while Beta was off screen
+    const shot = { project_id: 'beta', data: { light: 'calm', mood: 'warm' } }
+    shots.push(shot)
+    vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+      column('light', 'Mood'),
+      column('mood', 'Light')
+    ])
+    await vuexStore.dispatch('refreshMetadataDescriptor', {
+      productionId: 'beta',
+      descriptorId: 'light'
+    })
+
+    showProduction('beta')
+    await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+
+    expect(descriptorsOf('beta').map(d => d.field_name)).toEqual([
+      'mood',
+      'light'
+    ])
+    expect(shot.data).toEqual({ light: 'calm', mood: 'warm' })
+  })
+
+  test('keeps the values of a column named as a deleted one', async () => {
+    // Light deleted and created again while Beta was off screen
+    const shot = { project_id: 'beta', data: { light: 'warm' } }
+    shots.push(shot)
+    vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+      column('light-2', 'Light')
+    ])
+    await vuexStore.dispatch('refreshMetadataDescriptor', {
+      productionId: 'beta',
+      descriptorId: 'light-2'
+    })
+
+    showProduction('beta')
+    await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+
+    expect(idsOf('beta')).toEqual(['light-2'])
+    expect(shot.data).toEqual({ light: 'warm' })
+  })
+
+  // A column of another entity type may hold the same field name.
+  test('renames no column whose field name stays', async () => {
+    const assetLight = {
+      ...column('asset-light', 'Light'),
+      entity_type: 'Asset'
+    }
+    vuexStore.commit(LOAD_OPEN_PRODUCTIONS_END, [
+      {
+        id: 'beta',
+        name: 'Beta',
+        descriptors: [column('light', 'Light'), assetLight]
+      }
+    ])
+    vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+      { ...column('light', 'Light'), position: 2 },
+      { ...assetLight, position: 1 }
+    ])
+    await vuexStore.dispatch('refreshMetadataDescriptor', {
+      productionId: 'beta',
+      descriptorId: 'light'
+    })
+
+    showProduction('beta')
+    await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+
+    expect(
+      listMutations[UPDATE_METADATA_DESCRIPTOR_END].mock.calls.map(
+        ([, { descriptor }]) => [descriptor.id, descriptor.field_name]
+      )
+    ).toEqual([
+      ['light', 'light'],
+      ['asset-light', 'light']
+    ])
+  })
+
+  // Zou moves the values of a Project column in the data of the production,
+  // which the store holds as it read it.
+  test('moves the values of swapped Project columns in the production', async () => {
+    const budget = { ...column('budget', 'Budget'), entity_type: 'Project' }
+    const cost = { ...column('cost', 'Cost'), entity_type: 'Project' }
+    vuexStore.commit(LOAD_OPEN_PRODUCTIONS_END, [
+      {
+        id: 'beta',
+        name: 'Beta',
+        descriptors: [budget, cost],
+        data: { budget: 10, cost: 20 }
+      }
+    ])
+    vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+      { ...budget, name: 'Cost', field_name: 'cost' },
+      { ...cost, name: 'Budget', field_name: 'budget' }
+    ])
+    await vuexStore.dispatch('refreshMetadataDescriptor', {
+      productionId: 'beta',
+      descriptorId: 'budget'
+    })
+
+    showProduction('beta')
+    await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+
+    expect(productionOf('beta').data).toEqual({ cost: 10, budget: 20 })
+  })
+
+  test('keeps a production stale until a read of its columns succeeds', async () => {
+    const error = new Error('Bad Gateway')
+    const getMetadataDescriptors = vi
+      .spyOn(productionApi, 'getMetadataDescriptors')
+      .mockRejectedValueOnce(error)
+      .mockResolvedValueOnce([
+        column('light', 'Light'),
+        column('beta-lens', 'Lens')
+      ])
+    await vuexStore.dispatch('refreshMetadataDescriptor', {
+      productionId: 'beta',
+      descriptorId: 'beta-lens'
+    })
+    showProduction('beta')
+
+    await expect(
+      vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+    ).rejects.toBe(error)
+    await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+
+    expect(getMetadataDescriptors).toHaveBeenCalledTimes(2)
+    expect(idsOf('beta')).toEqual(['light', 'beta-lens'])
+  })
+
+  // Zou refuses a second copy of a Project column in a production. The
+  // Productions page passes the object of its listing.
+  test('reads the columns of a production off screen before adding a Project column to it', async () => {
+    const location = projectColumn('beta-location', 'Location')
+    vuexStore.commit(LOAD_PRODUCTIONS_END, [
+      { id: 'beta', name: 'Beta', descriptors: [] }
+    ])
+    const listed = vuexStore.state.productions.productions[0]
+    vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+      column('light', 'Light'),
+      location
+    ])
+    const addMetadataDescriptor = vi
+      .spyOn(productionApi, 'addMetadataDescriptor')
+      .mockResolvedValue({ ...location, id: 'beta-location-2' })
+    await vuexStore.dispatch('refreshMetadataDescriptor', {
+      productionId: 'beta',
+      descriptorId: 'beta-location'
+    })
+
+    const owned = await vuexStore.dispatch('ensureProjectMetadataDescriptor', {
+      production: listed,
+      descriptor: { ...location, id: 'alpha-location' }
+    })
+
+    expect(listed).not.toBe(productionOf('beta'))
+    expect(addMetadataDescriptor).not.toHaveBeenCalled()
+    expect(owned).toMatchObject({ id: 'beta-location' })
+  })
+
+  // Zou stores the data of a production as Kitsu sends it, and moves the
+  // values of a renamed Project column there.
+  describe('values of the Project columns', () => {
+    // The store updates a column in place: each step gets its own copy.
+    const budget = () => projectColumn('beta-budget', 'Budget')
+    const remarks = () => projectColumn('beta-remarks', 'Remarks')
+    const renamedBudget = () =>
+      projectColumn('beta-budget', 'Budget 2025', 'budget_2025')
+    let updateProduction
+
+    beforeEach(() => {
+      vuexStore.commit(LOAD_OPEN_PRODUCTIONS_END, [
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [column('light', 'Light'), budget(), remarks()],
+          data: { budget: 100, remarks: 'old' }
+        }
+      ])
+      // Zou answers with the production saved, which the store then changes.
+      updateProduction = vi
+        .spyOn(productionApi, 'updateProduction')
+        .mockImplementation(production =>
+          Promise.resolve({ ...production, data: { ...production.data } })
+        )
+    })
+
+    test('reads the columns of a stale production before saving its values', async () => {
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockResolvedValue([
+          column('light', 'Light'),
+          renamedBudget(),
+          remarks()
+        ])
+      // Budget renamed Budget 2025 elsewhere: Zou moved its values
+      await vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'beta',
+        descriptorId: 'beta-budget'
+      })
+
+      await Promise.all([
+        vuexStore.dispatch('editProduction', {
+          id: 'beta',
+          data: { remarks: 'new' }
+        }),
+        vuexStore.dispatch('editProduction', {
+          id: 'beta',
+          data: { remarks: 'newer' }
+        })
+      ])
+
+      expect(getMetadataDescriptors).toHaveBeenCalledTimes(1)
+      expect(updateProduction.mock.calls.map(([{ data }]) => data)).toEqual([
+        { budget_2025: 100, remarks: 'new' },
+        { budget_2025: 100, remarks: 'newer' }
+      ])
+    })
+
+    // A read made again after an event of the production holds the saves
+    // typed meanwhile: they go out in their order, and Zou keeps the last.
+    test('keeps the order of the saves through a read made again', async () => {
+      const firstRead = deferred()
+      const secondRead = deferred()
+      vi.spyOn(productionApi, 'getMetadataDescriptors')
+        .mockReturnValueOnce(firstRead.promise)
+        .mockReturnValueOnce(secondRead.promise)
+      const changeBudget = () =>
+        vuexStore.dispatch('refreshMetadataDescriptor', {
+          productionId: 'beta',
+          descriptorId: 'beta-budget'
+        })
+      const save = value =>
+        vuexStore.dispatch('editProduction', {
+          id: 'beta',
+          data: { remarks: value }
+        })
+      await changeBudget()
+
+      const saves = [save('a'), save('ab')]
+      await changeBudget()
+      firstRead.resolve([column('light', 'Light'), budget(), remarks()])
+      await new Promise(resolve => setTimeout(resolve))
+      saves.push(save('abc'))
+      secondRead.resolve([column('light', 'Light'), budget(), remarks()])
+      await Promise.all(saves)
+
+      expect(
+        updateProduction.mock.calls.map(([{ data }]) => data.remarks)
+      ).toEqual(['a', 'ab', 'abc'])
+    })
+
+    // A column renamed elsewhere keeps its id: a value typed in its cell goes
+    // under its new field name, and the production gets no second copy.
+    test('gives the column renamed elsewhere with its new field name', async () => {
+      vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+        column('light', 'Light'),
+        renamedBudget(),
+        remarks()
+      ])
+      const addMetadataDescriptor = vi
+        .spyOn(productionApi, 'addMetadataDescriptor')
+        .mockResolvedValue(projectColumn('beta-budget-2', 'Budget'))
+      await vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'beta',
+        descriptorId: 'beta-budget'
+      })
+
+      const owned = await vuexStore.dispatch(
+        'ensureProjectMetadataDescriptor',
+        { production: productionOf('beta'), descriptor: budget() }
+      )
+
+      expect(owned).toMatchObject({
+        id: 'beta-budget',
+        field_name: 'budget_2025'
+      })
+      expect(addMetadataDescriptor).not.toHaveBeenCalled()
+    })
+
+    // The listing of every production gives its Project columns with the
+    // values Zou moved there.
+    test('takes the Project columns of the listing with its values', async () => {
+      const cost = projectColumn('beta-cost', 'Cost')
+      vuexStore.commit(LOAD_OPEN_PRODUCTIONS_END, [
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [column('light', 'Light'), budget(), { ...cost }],
+          data: { budget: 10, cost: 20 }
+        }
+      ])
+      // Budget and Cost swapped their names elsewhere
+      const swapped = () => [
+        { ...budget(), name: 'Cost', field_name: 'cost' },
+        { ...cost, name: 'Budget', field_name: 'budget' }
+      ]
+      await vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'beta',
+        descriptorId: 'beta-budget'
+      })
+      vi.spyOn(productionApi, 'getProductions').mockResolvedValue([
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: swapped(),
+          data: { cost: 10, budget: 20 }
+        }
+      ])
+      vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+        column('light', 'Light'),
+        ...swapped()
+      ])
+
+      await vuexStore.dispatch('loadProductions')
+      showProduction('beta')
+      await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+
+      expect(descriptorsOf('beta').map(d => d.field_name)).toEqual([
+        'light',
+        'cost',
+        'budget'
+      ])
+      expect(productionOf('beta').data).toEqual({ cost: 10, budget: 20 })
+    })
+
+    // The listing may predate a column event received during its request.
+    test('reads the columns again before a save once the listing predates an event', async () => {
+      const listing = deferred()
+      vi.spyOn(productionApi, 'getProductions').mockReturnValue(
+        listing.promise
+      )
+      vi.spyOn(productionApi, 'getMetadataDescriptor').mockResolvedValue(
+        renamedBudget()
+      )
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockResolvedValue([
+          column('light', 'Light'),
+          renamedBudget(),
+          remarks()
+        ])
+      showProduction('beta')
+
+      const load = vuexStore.dispatch('loadProductions')
+      // Budget renamed Budget 2025 meanwhile
+      await vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'beta',
+        descriptorId: 'beta-budget'
+      })
+      listing.resolve([
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [budget(), remarks()],
+          data: { budget: 100, remarks: 'old' }
+        }
+      ])
+      await load
+      await vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'new' }
+      })
+
+      expect(getMetadataDescriptors).toHaveBeenCalledTimes(1)
+      expect(updateProduction).toHaveBeenCalledWith({
+        id: 'beta',
+        data: { budget_2025: 100, remarks: 'new' }
+      })
+    })
+
+    // Zou may read the productions before a change the store took for one of
+    // them during the listing: the listing would put older values back, and
+    // the next save sends the whole data, which Zou stores as is.
+    test.each([
+      [
+        'a save',
+        () =>
+          vuexStore.dispatch('editProduction', {
+            id: 'beta',
+            data: { remarks: 'new' }
+          })
+      ],
+      [
+        'a read of the production',
+        () => {
+          vi.spyOn(productionApi, 'getProduction').mockResolvedValue({
+            id: 'beta',
+            name: 'Beta',
+            data: { budget: 100, remarks: 'new' }
+          })
+          return vuexStore.dispatch('loadProduction', 'beta')
+        }
+      ]
+    ])(
+      'keeps the values of %s answered during a listing',
+      async (_, change) => {
+        const listing = deferred()
+        vi.spyOn(productionApi, 'getProductions').mockReturnValue(
+          listing.promise
+        )
+        const getMetadataDescriptors = vi
+          .spyOn(productionApi, 'getMetadataDescriptors')
+          .mockResolvedValue([column('light', 'Light'), budget(), remarks()])
+
+        const load = vuexStore.dispatch('loadProductions', { isQuiet: true })
+        await change()
+        listing.resolve([
+          {
+            id: 'beta',
+            name: 'Beta',
+            descriptors: [budget(), remarks()],
+            data: { budget: 100, remarks: 'old' }
+          }
+        ])
+        await load
+        const listed = vuexStore.getters.productions.find(
+          ({ id }) => id === 'beta'
+        )
+        expect(listed.data).toEqual({ budget: 100, remarks: 'new' })
+
+        await vuexStore.dispatch('editProduction', {
+          id: 'beta',
+          data: { budget: 120 }
+        })
+        expect(getMetadataDescriptors).toHaveBeenCalledTimes(1)
+        expect(updateProduction).toHaveBeenLastCalledWith({
+          id: 'beta',
+          data: { budget: 120, remarks: 'new' }
+        })
+      }
+    )
+
+    test('keeps the values of a save sent before a listing and answered during it', async () => {
+      const save = deferred()
+      updateProduction.mockReturnValueOnce(save.promise)
+      const listing = deferred()
+      vi.spyOn(productionApi, 'getProductions').mockReturnValue(
+        listing.promise
+      )
+
+      const saving = vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'new' }
+      })
+      const load = vuexStore.dispatch('loadProductions', { isQuiet: true })
+      save.resolve({
+        id: 'beta',
+        name: 'Beta',
+        data: { budget: 100, remarks: 'new' }
+      })
+      await saving
+      // Zou read the productions before that save went in
+      listing.resolve([
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [budget(), remarks()],
+          data: { budget: 100, remarks: 'old' }
+        }
+      ])
+      await load
+
+      expect(productionOf('beta').data).toEqual({ budget: 100, remarks: 'new' })
+    })
+
+    test('takes the values of a listing sent once the saves answered', async () => {
+      await vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'new' }
+      })
+      vi.spyOn(productionApi, 'getProductions').mockResolvedValue([
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [budget(), remarks()],
+          data: { budget: 100, remarks: 'theirs' }
+        }
+      ])
+
+      await vuexStore.dispatch('loadProductions', { isQuiet: true })
+
+      expect(productionOf('beta').data).toEqual({
+        budget: 100,
+        remarks: 'theirs'
+      })
+    })
+
+    test('takes the values of a listing sent once a failed save ended', async () => {
+      const failure = new Error('Bad Gateway')
+      updateProduction.mockRejectedValueOnce(failure)
+      await expect(
+        vuexStore.dispatch('editProduction', {
+          id: 'beta',
+          data: { remarks: 'new' }
+        })
+      ).rejects.toBe(failure)
+      vi.spyOn(productionApi, 'getProductions').mockResolvedValue([
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [budget(), remarks()],
+          data: { budget: 100, remarks: 'theirs' }
+        }
+      ])
+
+      await vuexStore.dispatch('loadProductions', { isQuiet: true })
+
+      expect(productionOf('beta').data).toEqual({
+        budget: 100,
+        remarks: 'theirs'
+      })
+    })
+
+    // A save still running when a listing answers may have gone in before a
+    // rename made elsewhere: its answer then gives the values under the old
+    // field names, which the columns of the listing no longer hold.
+    test('leaves a production with a save in flight to the answer of that save', async () => {
+      const save = deferred()
+      updateProduction.mockReturnValueOnce(save.promise)
+      vi.spyOn(productionApi, 'getProductions').mockResolvedValue([
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [renamedBudget(), remarks()],
+          data: { budget_2025: 100, remarks: 'new' }
+        }
+      ])
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockResolvedValue([
+          column('light', 'Light'),
+          renamedBudget(),
+          remarks()
+        ])
+
+      const saving = vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'new' }
+      })
+      // Budget renamed Budget 2025 elsewhere, after that save went in
+      await vuexStore.dispatch('loadProductions', { isQuiet: true })
+      save.resolve({
+        id: 'beta',
+        name: 'Beta',
+        data: { budget: 100, remarks: 'new' }
+      })
+      await saving
+      await vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'newer' }
+      })
+
+      expect(getMetadataDescriptors).toHaveBeenCalledTimes(1)
+      expect(updateProduction).toHaveBeenLastCalledWith({
+        id: 'beta',
+        data: { budget_2025: 100, remarks: 'newer' }
+      })
+    })
+
+    // Saves that all fail bring no answer, while a listing answered meanwhile
+    // may hold values changed elsewhere: the next save sends the whole data,
+    // which Zou stores as is.
+    test('takes the last listing answered during a save that then failed', async () => {
+      const save = deferred()
+      updateProduction.mockReturnValueOnce(save.promise)
+      const getProductions = vi.spyOn(productionApi, 'getProductions')
+      const listing = budgetValue => [
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [budget(), remarks()],
+          data: { budget: budgetValue, remarks: 'old' }
+        }
+      ]
+      vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+        column('light', 'Light'),
+        budget(),
+        remarks()
+      ])
+
+      const saving = vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'new' }
+      })
+      // Budget changed elsewhere, twice, while the socket was down
+      getProductions.mockResolvedValueOnce(listing(150))
+      await vuexStore.dispatch('loadProductions', { isQuiet: true })
+      getProductions.mockResolvedValueOnce(listing(175))
+      await vuexStore.dispatch('loadProductions', { isQuiet: true })
+      expect(productionOf('beta').data).toEqual({ budget: 100, remarks: 'old' })
+      const failure = new Error('Bad Gateway')
+      save.reject(failure)
+      await expect(saving).rejects.toBe(failure)
+
+      expect(productionOf('beta').data).toEqual({ budget: 175, remarks: 'old' })
+      expect(
+        vuexStore.getters.productions.find(({ id }) => id === 'beta').data
+      ).toEqual({ budget: 175, remarks: 'old' })
+      expect(idsOf('beta')).toEqual(['light', 'beta-budget', 'beta-remarks'])
+      await vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'retry' }
+      })
+      expect(updateProduction).toHaveBeenLastCalledWith({
+        id: 'beta',
+        data: { budget: 175, remarks: 'retry' }
+      })
+    })
+
+    // A save that answers wins over the listing answered while it ran, which
+    // may predate that save.
+    test.each([
+      [
+        'answers',
+        second =>
+          second.resolve({
+            id: 'beta',
+            name: 'Beta',
+            data: { budget: 100, remarks: 'newer' }
+          }),
+        { budget: 100, remarks: 'newer' }
+      ],
+      [
+        'fails',
+        second => second.reject(new Error('Bad Gateway')),
+        { budget: 150, remarks: 'old' }
+      ]
+    ])(
+      'waits for the last save of a production to take a listing: that save %s',
+      async (_, settle, expected) => {
+        const first = deferred()
+        const second = deferred()
+        updateProduction
+          .mockReturnValueOnce(first.promise)
+          .mockReturnValueOnce(second.promise)
+        vi.spyOn(productionApi, 'getProductions').mockResolvedValue([
+          {
+            id: 'beta',
+            name: 'Beta',
+            descriptors: [budget(), remarks()],
+            data: { budget: 150, remarks: 'old' }
+          }
+        ])
+
+        const firstSave = vuexStore.dispatch('editProduction', {
+          id: 'beta',
+          data: { remarks: 'new' }
+        })
+        const secondSave = vuexStore.dispatch('editProduction', {
+          id: 'beta',
+          data: { remarks: 'newer' }
+        })
+        await vuexStore.dispatch('loadProductions', { isQuiet: true })
+        const failure = new Error('Bad Gateway')
+        first.reject(failure)
+        await expect(firstSave).rejects.toBe(failure)
+        expect(productionOf('beta').data).toEqual({
+          budget: 100,
+          remarks: 'old'
+        })
+        settle(second)
+        await secondSave.catch(() => {})
+
+        expect(productionOf('beta').data).toEqual(expected)
+      }
+    )
+
+    test('keeps a read of the production answered after a listing once its saves fail', async () => {
+      const save = deferred()
+      updateProduction.mockReturnValueOnce(save.promise)
+      vi.spyOn(productionApi, 'getProductions').mockResolvedValue([
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [budget(), remarks()],
+          data: { budget: 150, remarks: 'old' }
+        }
+      ])
+      vi.spyOn(productionApi, 'getProduction').mockResolvedValue({
+        id: 'beta',
+        name: 'Beta',
+        descriptors: [column('light', 'Light'), budget(), remarks()],
+        data: { budget: 175, remarks: 'old' }
+      })
+
+      const saving = vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'new' }
+      })
+      await vuexStore.dispatch('loadProductions', { isQuiet: true })
+      // Budget changed again elsewhere, as a project update announced
+      await vuexStore.dispatch('loadProduction', 'beta')
+      const failure = new Error('Bad Gateway')
+      save.reject(failure)
+      await expect(saving).rejects.toBe(failure)
+
+      expect(productionOf('beta').data).toEqual({ budget: 175, remarks: 'old' })
+    })
+
+    test('reads the columns again before the next save once a failed save took a listing', async () => {
+      const save = deferred()
+      updateProduction.mockReturnValueOnce(save.promise)
+      vi.spyOn(productionApi, 'getProductions').mockResolvedValue([
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [budget(), remarks()],
+          data: { budget: 150, remarks: 'old' }
+        }
+      ])
+      vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+        column('light', 'Light'),
+        renamedBudget(),
+        remarks()
+      ])
+
+      const saving = vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'new' }
+      })
+      await vuexStore.dispatch('loadProductions', { isQuiet: true })
+      // Budget renamed Budget 2025 elsewhere once Zou read the productions
+      await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+      const failure = new Error('Bad Gateway')
+      save.reject(failure)
+      await expect(saving).rejects.toBe(failure)
+      await vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'retry' }
+      })
+
+      expect(updateProduction).toHaveBeenLastCalledWith({
+        id: 'beta',
+        data: { budget_2025: 150, remarks: 'retry' }
+      })
+    })
+
+    test('leaves out a production removed during a failed save', async () => {
+      const save = deferred()
+      updateProduction.mockReturnValueOnce(save.promise)
+      vi.spyOn(productionApi, 'getProductions').mockResolvedValue([
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [budget(), remarks()],
+          data: { budget: 150, remarks: 'old' }
+        }
+      ])
+      vi.spyOn(productionApi, 'deleteProduction').mockResolvedValue()
+
+      const saving = vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'new' }
+      })
+      await vuexStore.dispatch('loadProductions', { isQuiet: true })
+      await vuexStore.dispatch('deleteProduction', { id: 'beta' })
+      const failure = new Error('Not Found')
+      save.reject(failure)
+
+      await expect(saving).rejects.toBe(failure)
+      expect(productionOf('beta')).toBeUndefined()
+    })
+
+    test('leaves a production as it is after a failed save no listing answered during', async () => {
+      vi.spyOn(productionApi, 'getProductions').mockResolvedValue([
+        {
+          id: 'beta',
+          name: 'Beta',
+          descriptors: [budget(), remarks()],
+          data: { budget: 100, remarks: 'old' }
+        }
+      ])
+      vi.spyOn(productionApi, 'getMetadataDescriptor').mockResolvedValue(
+        renamedBudget()
+      )
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockResolvedValue([
+          column('light', 'Light'),
+          renamedBudget(),
+          remarks()
+        ])
+      await vuexStore.dispatch('loadProductions', { isQuiet: true })
+      // Budget renamed Budget 2025 elsewhere: Zou moved its values
+      await vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'beta',
+        descriptorId: 'beta-budget'
+      })
+      const failure = new Error('Bad Gateway')
+      updateProduction.mockRejectedValueOnce(failure)
+
+      await expect(
+        vuexStore.dispatch('editProduction', {
+          id: 'beta',
+          data: { remarks: 'new' }
+        })
+      ).rejects.toBe(failure)
+      expect(productionOf('beta').data).toEqual({
+        budget_2025: 100,
+        remarks: 'old'
+      })
+      await vuexStore.dispatch('editProduction', {
+        id: 'beta',
+        data: { remarks: 'retry' }
+      })
+      expect(getMetadataDescriptors).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('after a socket drop', () => {
+    const renamed = [
+      column('notes', 'Notes'),
+      column('camera', 'Lens'),
+      column('mood', 'Mood')
+    ]
+
+    // A list loaded before the drop holds the values where they were, one
+    // loaded during the drop where Zou moved them: a rename moves them only
+    // when no other column held its field names, the values of the other
+    // renamed columns are cleared rather than moved twice, and those of a
+    // deleted column go.
+    test.each([
+      [
+        'a rename',
+        renamed,
+        { notes: 'note', camera: 'wide', mood: 'calm' },
+        { notes: 'note', lens: 'wide', mood: 'calm' },
+        { notes: 'note', lens: 'wide', mood: 'calm' }
+      ],
+      [
+        'a swap',
+        [
+          column('notes', 'Mood'),
+          column('camera', 'Camera'),
+          column('mood', 'Notes')
+        ],
+        { notes: 'note', camera: 'wide', mood: 'calm' },
+        { mood: 'note', camera: 'wide', notes: 'calm' },
+        { camera: 'wide' }
+      ],
+      [
+        'a chain of renames',
+        [
+          column('notes', 'Camera'),
+          column('camera', 'Lens'),
+          column('mood', 'Mood')
+        ],
+        { notes: 'note', camera: 'wide', mood: 'calm' },
+        { camera: 'note', lens: 'wide', mood: 'calm' },
+        { mood: 'calm' }
+      ],
+      [
+        'a rename whose field name a new column took',
+        [...renamed, column('camera-2', 'Camera')],
+        { notes: 'note', camera: 'wide', mood: 'calm' },
+        { notes: 'note', lens: 'wide', camera: 'close', mood: 'calm' },
+        { notes: 'note', mood: 'calm' }
+      ],
+      [
+        'a deletion',
+        [column('notes', 'Notes'), column('mood', 'Mood')],
+        { notes: 'note', camera: 'wide', mood: 'calm' },
+        { notes: 'note', mood: 'calm' },
+        { notes: 'note', mood: 'calm' }
+      ],
+      [
+        'a deletion whose field name a new column took',
+        [
+          column('notes', 'Notes'),
+          column('mood', 'Mood'),
+          column('camera-2', 'Camera')
+        ],
+        { notes: 'note', camera: 'wide', mood: 'calm' },
+        { notes: 'note', camera: 'close', mood: 'calm' },
+        { notes: 'note', mood: 'calm' }
+      ],
+      [
+        'a rename to the field name of a deleted column',
+        [column('notes', 'Camera'), column('mood', 'Mood')],
+        { notes: 'note', camera: 'wide', mood: 'calm' },
+        { camera: 'note', mood: 'calm' },
+        { mood: 'calm' }
+      ]
+    ])(
+      'passes on to the lists %s made during the drop',
+      async (_, listed, before, during, expected) => {
+        const loadedBefore = { project_id: 'alpha', data: { ...before } }
+        const loadedDuring = { project_id: 'alpha', data: { ...during } }
+        shots.push(loadedBefore, loadedDuring)
+        const getMetadataDescriptors = vi
+          .spyOn(productionApi, 'getMetadataDescriptors')
+          .mockResolvedValue(listed)
+
+        await vuexStore.dispatch('resyncMetadataDescriptors')
+
+        expect(getMetadataDescriptors.mock.calls).toEqual([['alpha']])
+        expect(idsOf('alpha')).toEqual(listed.map(({ id }) => id))
+        expect(loadedBefore.data).toEqual(expected)
+        expect(loadedDuring.data).toEqual(expected)
+      }
+    )
+
+    // A read gives the dates the context lacks.
+    test('updates only the columns changed during the drop', async () => {
+      vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+        column('notes', 'Notes'),
+        column('camera', 'Lens'),
+        { ...column('mood', 'Mood'), updated_at: '2026-11-17T08:00:00' }
+      ])
+
+      await vuexStore.dispatch('resyncMetadataDescriptors')
+
+      expect(
+        listMutations[UPDATE_METADATA_DESCRIPTOR_END].mock.calls.map(
+          ([, { descriptor }]) => descriptor.id
+        )
+      ).toEqual(['camera'])
+    })
+
+    test('reads the other productions once on screen', async () => {
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockResolvedValue([column('light', 'Light')])
+
+      await vuexStore.dispatch('resyncMetadataDescriptors')
+      showProduction('beta')
+      await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+
+      expect(getMetadataDescriptors.mock.calls).toEqual([['alpha'], ['beta']])
+    })
+
+    test('reads no columns until a production is on screen', async () => {
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockResolvedValue([column('light', 'Light')])
+      showProduction(null)
+
+      await vuexStore.dispatch('resyncMetadataDescriptors')
+      expect(getMetadataDescriptors).not.toHaveBeenCalled()
+
+      await vuexStore.dispatch('loadStaleMetadataDescriptors', 'alpha')
+      await vuexStore.dispatch('loadStaleMetadataDescriptors', 'beta')
+      expect(getMetadataDescriptors.mock.calls).toEqual([['alpha'], ['beta']])
+    })
+
+    // The column modal or a save may ask for the columns during the
+    // catch-up: they wait for it.
+    test('moves the values once whichever call reads the columns', async () => {
+      const read = deferred()
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockReturnValueOnce(read.promise)
+        .mockResolvedValue(renamed)
+      const shot = { project_id: 'alpha', data: { camera: 'wide' } }
+      shots.push(shot)
+
+      const resync = vuexStore.dispatch('resyncMetadataDescriptors')
+      const otherRead = vuexStore.dispatch(
+        'loadStaleMetadataDescriptors',
+        'alpha'
+      )
+      read.resolve(renamed)
+      await Promise.all([resync, otherRead])
+
+      expect(getMetadataDescriptors).toHaveBeenCalledTimes(1)
+      expect(shot.data).toEqual({ lens: 'wide' })
+    })
+
+    // A read sent during the drop may predate a change made since.
+    test('reads the columns again after a read sent during the drop', async () => {
+      const read = deferred()
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockReturnValueOnce(read.promise)
+        .mockResolvedValue(renamed)
+      const shot = { project_id: 'alpha', data: { camera: 'wide' } }
+      shots.push(shot)
+
+      const earlierRead = vuexStore.dispatch('syncMetadataDescriptors', {
+        productionId: 'alpha'
+      })
+      const resync = vuexStore.dispatch('resyncMetadataDescriptors')
+      read.resolve([
+        column('notes', 'Notes'),
+        column('camera', 'Camera'),
+        column('mood', 'Mood')
+      ])
+      await Promise.all([earlierRead, resync])
+
+      expect(getMetadataDescriptors).toHaveBeenCalledTimes(2)
+      expect(descriptorsOf('alpha')[1].field_name).toBe('lens')
+      expect(shot.data).toEqual({ lens: 'wide' })
+    })
+
+    // The socket may come back before the API.
+    test('moves the values with the next read after a failed catch-up', async () => {
+      const error = new Error('Bad Gateway')
+      vi.spyOn(productionApi, 'getMetadataDescriptors')
+        .mockRejectedValueOnce(error)
+        .mockResolvedValue(renamed)
+      const shot = { project_id: 'alpha', data: { camera: 'wide' } }
+      shots.push(shot)
+
+      await expect(
+        vuexStore.dispatch('resyncMetadataDescriptors')
+      ).rejects.toBe(error)
+      await vuexStore.dispatch('loadStaleMetadataDescriptors', 'alpha')
+
+      expect(shot.data).toEqual({ lens: 'wide' })
+    })
+
+    test('moves the values after a column event during the catch-up', async () => {
+      const read = deferred()
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockReturnValueOnce(read.promise)
+        .mockResolvedValue(renamed)
+      vi.spyOn(productionApi, 'getMetadataDescriptor').mockResolvedValue(
+        column('mood', 'Mood')
+      )
+      const shot = { project_id: 'alpha', data: { camera: 'wide' } }
+      shots.push(shot)
+
+      const resync = vuexStore.dispatch('resyncMetadataDescriptors')
+      await vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'alpha',
+        descriptorId: 'mood'
+      })
+      read.resolve([
+        column('notes', 'Notes'),
+        column('camera', 'Camera'),
+        column('mood', 'Mood')
+      ])
+      await resync
+
+      expect(getMetadataDescriptors).toHaveBeenCalledTimes(2)
+      expect(shot.data).toEqual({ lens: 'wide' })
+    })
+
+    // The lists may load again afterwards, with the values where Zou keeps
+    // them.
+    test('moves the values with the first read only', async () => {
+      vi.spyOn(productionApi, 'getMetadataDescriptors')
+        .mockResolvedValueOnce(renamed)
+        .mockResolvedValue([
+          column('notes', 'Mood'),
+          column('camera', 'Lens'),
+          column('mood', 'Notes')
+        ])
+      shots.push({ project_id: 'alpha', data: { camera: 'wide' } })
+      await vuexStore.dispatch('resyncMetadataDescriptors')
+
+      // Notes and Mood swap their names while Alpha is off screen
+      showProduction('beta')
+      await vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'alpha',
+        descriptorId: 'notes'
+      })
+      showProduction('alpha')
+      shots = []
+      const shot = {
+        project_id: 'alpha',
+        data: { mood: 'note', lens: 'wide', notes: 'calm' }
+      }
+      shots.push(shot)
+      await vuexStore.dispatch('loadStaleMetadataDescriptors', 'alpha')
+
+      expect(shot.data).toEqual({ mood: 'note', lens: 'wide', notes: 'calm' })
+    })
+
+    // A switch empties the lists, which load again with the values where
+    // Zou keeps them.
+    test('leaves in place the values of the lists loaded after a switch', async () => {
+      const error = new Error('Bad Gateway')
+      vi.spyOn(productionApi, 'getMetadataDescriptors')
+        .mockRejectedValueOnce(error)
+        .mockResolvedValue([
+          column('notes', 'Mood'),
+          column('camera', 'Camera'),
+          column('mood', 'Notes')
+        ])
+      await expect(
+        vuexStore.dispatch('resyncMetadataDescriptors')
+      ).rejects.toBe(error)
+
+      await vuexStore.dispatch('setProduction', 'beta')
+      await vuexStore.dispatch('setProduction', 'alpha')
+      const shot = {
+        project_id: 'alpha',
+        data: { mood: 'note', camera: 'wide', notes: 'calm' }
+      }
+      shots.push(shot)
+      await vuexStore.dispatch('loadStaleMetadataDescriptors', 'alpha')
+
+      expect(shot.data).toEqual({ mood: 'note', camera: 'wide', notes: 'calm' })
+    })
+  })
+
+  describe('answers overtaken', () => {
+    // The answer may predate the column event received meanwhile.
+    test.each([
+      [
+        'a column read',
+        () =>
+          vuexStore.dispatch('refreshMetadataDescriptor', {
+            productionId: 'alpha',
+            descriptorId: 'lens'
+          })
+      ],
+      [
+        'a column deletion',
+        () =>
+          vuexStore.dispatch('dropMetadataDescriptor', {
+            productionId: 'alpha',
+            descriptorId: 'camera'
+          })
+      ]
+    ])(
+      'reads the columns again after %s during the read',
+      async (_, columnEvent) => {
+        const first = deferred()
+        const lens = column('lens', 'Lens')
+        vi.spyOn(productionApi, 'getMetadataDescriptor').mockResolvedValue(
+          lens
+        )
+        const getMetadataDescriptors = vi
+          .spyOn(productionApi, 'getMetadataDescriptors')
+          .mockReturnValueOnce(first.promise)
+          .mockResolvedValueOnce([
+            column('notes', 'Notes'),
+            column('mood', 'Mood'),
+            lens
+          ])
+
+        const sync = vuexStore.dispatch('syncMetadataDescriptors', {
+          productionId: 'alpha'
+        })
+        await columnEvent()
+        first.resolve([
+          column('notes', 'Notes'),
+          column('camera', 'Camera'),
+          column('mood', 'Mood')
+        ])
+        await sync
+
+        expect(getMetadataDescriptors).toHaveBeenCalledTimes(2)
+        expect(idsOf('alpha')).toEqual(['notes', 'mood', 'lens'])
+      }
+    )
+
+    test('makes a read again only after an event of its production', async () => {
+      const read = deferred()
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockReturnValueOnce(read.promise)
+        .mockResolvedValue([])
+
+      const sync = vuexStore.dispatch('syncMetadataDescriptors', {
+        productionId: 'alpha'
+      })
+      // a column changed in Beta, off screen
+      await vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'beta',
+        descriptorId: 'light'
+      })
+      read.resolve([
+        column('notes', 'Notes'),
+        column('camera', 'Camera'),
+        column('mood', 'Mood')
+      ])
+      await sync
+
+      expect(getMetadataDescriptors).toHaveBeenCalledTimes(1)
+      expect(idsOf('alpha')).toEqual(['notes', 'camera', 'mood'])
+    })
+
+    // A switch and a save, for instance, may ask for the same columns.
+    test('sends one read of the columns of a production at a time', async () => {
+      const read = deferred()
+      const known = [
+        column('notes', 'Notes'),
+        column('camera', 'Camera'),
+        column('mood', 'Mood')
+      ]
+      const getMetadataDescriptors = vi
+        .spyOn(productionApi, 'getMetadataDescriptors')
+        .mockReturnValueOnce(read.promise)
+        .mockResolvedValue(known)
+
+      const reads = [
+        vuexStore.dispatch('syncMetadataDescriptors', { productionId: 'alpha' }),
+        vuexStore.dispatch('syncMetadataDescriptors', { productionId: 'alpha' })
+      ]
+      read.resolve([...known, column('lens', 'Lens')])
+      await Promise.all(reads)
+
+      expect(getMetadataDescriptors).toHaveBeenCalledTimes(1)
+      expect(idsOf('alpha')).toEqual(['notes', 'camera', 'mood', 'lens'])
+    })
+
+    test('drops the read of a column after a later event on it', async () => {
+      const first = deferred()
+      vi.spyOn(productionApi, 'getMetadataDescriptor')
+        .mockReturnValueOnce(first.promise)
+        .mockResolvedValueOnce(column('camera', 'Zoom'))
+
+      const firstRead = vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'alpha',
+        descriptorId: 'camera'
+      })
+      await vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'alpha',
+        descriptorId: 'camera'
+      })
+      first.resolve(column('camera', 'Lens'))
+      await firstRead
+
+      expect(descriptorsOf('alpha')[1].name).toBe('Zoom')
+    })
+
+    test('keeps a column deleted during its read deleted', async () => {
+      const read = deferred()
+      vi.spyOn(productionApi, 'getMetadataDescriptor').mockReturnValueOnce(
+        read.promise
+      )
+
+      const refresh = vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'alpha',
+        descriptorId: 'camera'
+      })
+      await vuexStore.dispatch('dropMetadataDescriptor', {
+        productionId: 'alpha',
+        descriptorId: 'camera'
+      })
+      read.resolve(column('camera', 'Lens'))
+      await refresh
+
+      expect(idsOf('alpha')).toEqual(['notes', 'mood'])
+    })
+
+    test('drops the read of a column once a later read of the columns applied', async () => {
+      const read = deferred()
+      vi.spyOn(productionApi, 'getMetadataDescriptor').mockReturnValueOnce(
+        read.promise
+      )
+      vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+        column('notes', 'Notes'),
+        column('camera', 'Zoom'),
+        column('mood', 'Mood')
+      ])
+
+      const refresh = vuexStore.dispatch('refreshMetadataDescriptor', {
+        productionId: 'alpha',
+        descriptorId: 'camera'
+      })
+      await vuexStore.dispatch('syncMetadataDescriptors', {
+        productionId: 'alpha'
+      })
+      read.resolve(column('camera', 'Lens'))
+      await refresh
+
+      expect(descriptorsOf('alpha')[1].name).toBe('Zoom')
+    })
+  })
+})
+
+// A list store replays on a load in flight the column changes made since the
+// load started: Zou may have built its answer before them.
+describe('Productions store, catch-up during a list load', () => {
+  const column = (id, name) => ({
+    id,
+    name,
+    field_name: name.toLowerCase(),
+    entity_type: 'Shot',
+    data_type: 'string',
+    choices: [],
+    for_client: false,
+    departments: []
+  })
+  let vuexStore
+
+  beforeEach(() => {
+    vuexStore = createStore({
+      modules: {
+        productions: {
+          state: {
+            currentProduction: null,
+            productions: [],
+            openProductions: [],
+            productionMap: new Map(),
+            productionStatusMap: new Map()
+          },
+          getters: store.getters,
+          mutations: store.mutations,
+          actions: store.actions
+        },
+        shots: {
+          state: shotsStore.state,
+          getters: shotsStore.getters,
+          mutations: shotsStore.mutations
+        }
+      }
+    })
+    vuexStore.commit(LOAD_OPEN_PRODUCTIONS_END, [
+      {
+        id: 'alpha',
+        name: 'Alpha',
+        descriptors: [
+          column('notes', 'Notes'),
+          column('camera', 'Camera'),
+          column('mood', 'Mood')
+        ]
+      }
+    ])
+    vuexStore.commit(SET_CURRENT_PRODUCTION, 'alpha')
+  })
+
+  afterEach(() => vi.restoreAllMocks())
+
+  // The answer, built during the drop, holds the values where Zou moved
+  // them: those of the swapped columns are cleared rather than moved twice.
+  test('clears in the shots loaded during the drop the values of a swap', async () => {
+    vi.spyOn(productionApi, 'getMetadataDescriptors').mockResolvedValue([
+      column('notes', 'Mood'),
+      column('camera', 'Camera'),
+      column('mood', 'Notes')
+    ])
+    // as loadShots, once it sends its request
+    const columnChangesSeen = shotsStore.cache.columnChanges.count
+
+    await vuexStore.dispatch('resyncMetadataDescriptors')
+    vuexStore.commit(LOAD_SHOTS_END, {
+      production: { id: 'alpha', name: 'Alpha' },
+      shots: [
+        {
+          id: 'shot-1',
+          name: 'SH010',
+          project_id: 'alpha',
+          data: { mood: 'note', camera: 'wide', notes: 'calm' },
+          tasks: []
+        }
+      ],
+      columnChangesSeen,
+      userFilters: {},
+      userFilterGroups: {},
+      taskMap: new Map(),
+      taskTypeMap: new Map(),
+      personMap: new Map(),
+      episodeMap: new Map(),
+      sequenceMap: new Map()
+    })
+
+    expect(vuexStore.getters.shotMap.get('shot-1').data).toEqual({
+      camera: 'wide'
+    })
   })
 })

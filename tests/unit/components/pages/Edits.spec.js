@@ -644,3 +644,21 @@ describe('Edits page, saved searches', () => {
     expect(searchField(wrapper).props('canSave')).toBe(false)
   })
 })
+
+describe('Edits page, column delete', () => {
+  test('names the edits in its confirmation', async () => {
+    const { wrapper } = await mountPage()
+
+    await wrapper
+      .findComponent({ name: 'EditList' })
+      .vm.$emit('delete-metadata', 'descriptor-1')
+
+    const texts = wrapper
+      .findAllComponents(DeleteModal)
+      .filter(modal => modal.props('active'))
+      .map(modal => modal.props('text'))
+    expect(texts).toEqual(['productions.metadata.delete_edit_text'])
+    // The $t mock echoes the key: en.js must hold it.
+    expect(en.productions.metadata.delete_edit_text).toEqual(expect.any(String))
+  })
+})

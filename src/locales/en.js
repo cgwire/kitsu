@@ -866,7 +866,7 @@ export default {
     about: 'About',
     active: 'Active',
     activity: 'Activity',
-    add: 'add',
+    add: 'Add',
     after: 'After',
     admin: 'Admin',
     all: 'All',
@@ -892,6 +892,7 @@ export default {
     clear_selection: 'Clear current selection',
     clear_sorting: 'Clear current sorting',
     click_to_add: 'Click to add',
+    click_to_remove: 'Click to remove',
     close: 'Close',
     color: 'Color',
     copy: 'Copy',
@@ -1670,19 +1671,29 @@ export default {
 
     metadata: {
       applies_to_all_projects:
-        'This column is added to every production in the list. Each production can have its own value in the list view.',
+        'This column is added to every open production. Each production can have its own value in the list view.',
       add_new_values: 'There are currently no available values.',
       available_values: 'Available values',
       boolean: 'Checkbox',
       built_in_name: 'A built-in field already uses this name.',
+      taken_name: 'Another column already uses this name.',
       checklist: 'Checklist',
       choices: 'List of values',
       date: 'Date',
       delete_list_column_text:
-        'This will remove the column “{name}” from all productions, including stored values. Continue?',
+        'This will remove the column “{name}” from all open productions, including stored values. Continue?',
       delete_task_text:
         'Are you sure you want to delete this column and related data for all tasks of this task type?',
-      delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
+      delete_asset_text:
+        'Are you sure you want to delete this column and related data for all assets of this production?',
+      delete_edit_text:
+        'Are you sure you want to delete this column and related data for all edits of this production?',
+      delete_episode_text:
+        'Are you sure you want to delete this column and related data for all episodes of this production?',
+      delete_sequence_text:
+        'Are you sure you want to delete this column and related data for all sequences of this production?',
+      delete_shot_text:
+        'Are you sure you want to delete this column and related data for all shots of this production?',
       delete_error: 'An error occurred while deleting this metadata column.',
       edit_title: 'Edit metadata column',
       error: 'An error occurred while adding the metadata column. Make sure there is no column with a similar name and that all fields are filled. If the problem persists, please contact the support team.',
@@ -1717,7 +1728,7 @@ export default {
       bitrates: 'Bitrates',
       encoding_explanation: 'Uploaded videos are converted to this frame rate, ratio and resolution; existing previews are not re-encoded.',
       encoding_title: 'Encoding',
-      frame_in_description: "The player counter starts at the shot's frame in instead of 0.",
+      frame_in_description: "The player counter starts at the shot's frame in instead of 1.",
       hd_bitrate_description: 'Full-resolution version, played in HD mode and used for downloads.',
       ld_bitrate_description: 'Lighter version, 1280 pixels wide, played in LD mode.',
       ld_bitrate_max: 'Maximum: {value} Mbit/s (HD bitrate)',
@@ -2142,6 +2153,8 @@ export default {
     previous_day: 'Previous day',
     previous_month: 'Previous month',
     previous_week: 'Previous week',
+    production_dates_locked:
+      'Only Studio Managers and Production Managers can change the production dates.',
     reset_list: 'Reset list',
     save_task_error: 'Could not save the task. Please try again.',
     select_entity_group: 'Select a group of entities',

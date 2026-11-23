@@ -35,7 +35,7 @@ import { useStore } from 'vuex'
 import auth from '@/lib/auth'
 import crisp from '@/lib/crisp'
 import { isNewShotInLoadedScope } from '@/lib/episodes'
-import errors from '@/lib/errors'
+import errors, { isMissingEntity } from '@/lib/errors'
 import i18n from '@/lib/i18n'
 import lang, { localeCode, pageLocaleCode } from '@/lib/lang'
 import { getProductionRole } from '@/lib/people'
@@ -71,6 +71,18 @@ const editMap = editStore.cache.editMap
 const episodeMap = episodeStore.cache.episodeMap
 const sequenceMap = sequenceStore.cache.sequenceMap
 const shotMap = shotsStore.cache.shotMap
+
+// Set by a socket drop or a failed connection. The first connection needs
+// no catch-up of the columns: it follows the load of the context.
+let isSocketDropped = false
+// The socket may come back before the API: a catch-up of the columns that
+// fails is made again, a little later each time, while the production stays
+// on screen.
+const COLUMN_CATCH_UP_RETRY_DELAYS = [2000, 4000, 8000, 16000, 32000]
+let columnCatchUpRetry = null
+// Each connection after a drop starts a series of tries, which stops the
+// previous one, a read of it still running included.
+let columnCatchUpSeries = 0
 
 // Computed
 // --------------------------------------------------------------------------
@@ -136,6 +148,38 @@ const onAssignation = (eventData, assign = true) => {
   } else {
     store.commit('UNASSIGN_TASKS', taskIds)
   }
+}
+
+// Zou sends the column events of every production: the store reads the
+// column of the production on screen, the columns of another production once
+// it is on screen.
+const onMetadataDescriptorChange = eventData => {
+  store
+    .dispatch('refreshMetadataDescriptor', {
+      productionId: eventData.project_id,
+      descriptorId: eventData.metadata_descriptor_id
+    })
+    .catch(errors.logRequestFailure)
+}
+
+// Logs the failure of the last try only, or at once that of a production
+// deleted or out of reach, which answers the same each time. Anything but a
+// failed request is a bug, left to Sentry.
+const retryColumnCatchUp = (productionId, attempt, series) => err => {
+  if (!errors.isRequestFailure(err)) throw err
+  if (series !== columnCatchUpSeries) return
+  const delay = COLUMN_CATCH_UP_RETRY_DELAYS[attempt]
+  if (delay === undefined || isMissingEntity(err)) {
+    errors.logRequestFailure(err)
+    return
+  }
+  columnCatchUpRetry = setTimeout(() => {
+    if (currentProduction.value?.id === productionId) {
+      store
+        .dispatch('loadStaleMetadataDescriptors', productionId)
+        .catch(retryColumnCatchUp(productionId, attempt + 1, series))
+    }
+  }, delay)
 }
 
 // As Zou's check_comment_access: an admin, a supervisor or a manager of the
@@ -351,20 +395,24 @@ const socketEvents = {
       !sequenceMap.get(eventData.sequence_id) &&
       currentProduction.value?.id === eventData.project_id
     ) {
-      store.dispatch('loadSequence', {
-        sequenceId: eventData.sequence_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadSequence', {
+          sequenceId: eventData.sequence_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
   'sequence:update': eventData => {
     const sequence = sequenceMap.get(eventData.sequence_id)
     if (sequence && !sequence.lock) {
-      store.dispatch('loadSequence', {
-        sequenceId: eventData.sequence_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadSequence', {
+          sequenceId: eventData.sequence_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -379,20 +427,24 @@ const socketEvents = {
       !editMap.get(eventData.edit_id) &&
       currentProduction.value?.id === eventData.project_id
     ) {
-      store.dispatch('loadEdit', {
-        editId: eventData.edit_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadEdit', {
+          editId: eventData.edit_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
   'edit:update': eventData => {
     const edit = editMap.get(eventData.edit_id)
     if (edit && !edit.lock) {
-      store.dispatch('loadEdit', {
-        editId: eventData.edit_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadEdit', {
+          editId: eventData.edit_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -409,14 +461,18 @@ const socketEvents = {
       !episodeMap.get(eventData.episode_id) &&
       currentProduction.value?.id === eventData.project_id
     ) {
-      store.dispatch('loadEpisode', eventData.episode_id)
+      store
+        .dispatch('loadEpisode', eventData.episode_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'episode:update': eventData => {
     const episode = episodeMap.get(eventData.episode_id)
     if (episode && !episode.lock) {
-      store.dispatch('loadEpisode', eventData.episode_id)
+      store
+        .dispatch('loadEpisode', eventData.episode_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -433,10 +489,12 @@ const socketEvents = {
       isNewShotInLoadedScope(shotsLoadingKey.value, eventData.episode_id)
     ) {
       setTimeout(() => {
-        store.dispatch('loadShot', {
-          shotId: eventData.shot_id,
-          onlyInScope: true
-        })
+        store
+          .dispatch('loadShot', {
+            shotId: eventData.shot_id,
+            onlyInScope: true
+          })
+          .catch(errors.logRequestFailure)
       }, 1000)
     }
   },
@@ -451,10 +509,12 @@ const socketEvents = {
       !shot.lock &&
       currentProduction.value?.id === eventData.project_id
     ) {
-      store.dispatch('loadShot', {
-        shotId: eventData.shot_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadShot', {
+          shotId: eventData.shot_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -472,10 +532,12 @@ const socketEvents = {
       currentProduction.value?.id === eventData.project_id
     ) {
       setTimeout(() => {
-        store.dispatch('loadAsset', {
-          assetId: eventData.asset_id,
-          onlyInScope: true
-        })
+        store
+          .dispatch('loadAsset', {
+            assetId: eventData.asset_id,
+            onlyInScope: true
+          })
+          .catch(errors.logRequestFailure)
       }, 1000)
     }
   },
@@ -483,10 +545,12 @@ const socketEvents = {
   'asset:update': eventData => {
     const asset = assetMap.get(eventData.asset_id)
     if (asset && !asset.lock) {
-      store.dispatch('loadAsset', {
-        assetId: eventData.asset_id,
-        onlyInScope: true
-      })
+      store
+        .dispatch('loadAsset', {
+          assetId: eventData.asset_id,
+          onlyInScope: true
+        })
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -527,6 +591,30 @@ const socketEvents = {
     store
       .dispatch('refreshProcessingPreviewFiles')
       .catch(errors.logRequestFailure)
+    if (isSocketDropped) {
+      isSocketDropped = false
+      clearTimeout(columnCatchUpRetry)
+      columnCatchUpSeries += 1
+      store
+        .dispatch('resyncMetadataDescriptors')
+        .catch(
+          retryColumnCatchUp(
+            currentProduction.value?.id,
+            0,
+            columnCatchUpSeries
+          )
+        )
+    }
+  },
+
+  disconnect: () => {
+    isSocketDropped = true
+  },
+
+  // The context loads before the socket connects, which may take several
+  // attempts.
+  connect_error: () => {
+    isSocketDropped = true
   },
 
   'task:delete': eventData => {
@@ -735,25 +823,14 @@ const socketEvents = {
     }
   },
 
-  'metadata-descriptor:new': eventData => {
-    if (currentProduction.value?.id === eventData.project_id) {
-      store
-        .dispatch('refreshMetadataDescriptor', eventData.metadata_descriptor_id)
-        .catch(errors.logRequestFailure)
-    }
-  },
+  'metadata-descriptor:new': onMetadataDescriptorChange,
 
-  'metadata-descriptor:update': eventData => {
-    if (currentProduction.value?.id === eventData.project_id) {
-      store
-        .dispatch('refreshMetadataDescriptor', eventData.metadata_descriptor_id)
-        .catch(errors.logRequestFailure)
-    }
-  },
+  'metadata-descriptor:update': onMetadataDescriptorChange,
 
   'metadata-descriptor:delete': eventData => {
-    store.commit('DELETE_METADATA_DESCRIPTOR_END', {
-      id: eventData.metadata_descriptor_id
+    store.dispatch('dropMetadataDescriptor', {
+      productionId: eventData.project_id,
+      descriptorId: eventData.metadata_descriptor_id
     })
   },
 
@@ -793,6 +870,18 @@ watch(
     document.documentElement.lang = pageLocaleCode.value
   },
   { immediate: true }
+)
+
+// A production whose columns changed while off screen reads them again.
+watch(
+  () => currentProduction.value?.id,
+  productionId => {
+    if (productionId) {
+      store
+        .dispatch('loadStaleMetadataDescriptors', productionId)
+        .catch(errors.logRequestFailure)
+    }
+  }
 )
 
 // The production stays when a guard or the Profile page applies English.

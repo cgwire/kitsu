@@ -281,6 +281,15 @@
           :text="taskListSaveErrorText"
           v-if="taskListSaveErrorText"
         />
+        <error-text
+          class="has-text-centered"
+          :text="scheduleSaveErrorText"
+          v-if="
+            scheduleSaveErrorText &&
+            (isActiveTab('schedule') ||
+              (isActiveTab('tasks') && isScheduleVisible))
+          "
+        />
         <task-list
           ref="task-list"
           :disabled-dates="disabledDates"
@@ -406,7 +415,9 @@
           :active="modals.isAddMetadataDisplayed"
           :is-loading="loading.addMetadata"
           :is-error="errors.addMetadata"
+          :taken-name="errors.takenMetadataName"
           :descriptor-to-edit="descriptorToEdit"
+          :descriptors="taskMetadataDescriptors"
           entity-type="Task"
           @confirm="confirmAddMetadata"
           @cancel="modals.isAddMetadataDisplayed = false"
@@ -453,8 +464,12 @@ import { useStore } from 'vuex'
 
 import { useCellSave } from '@/composables/cellSave'
 import { getEntityMap } from '@/composables/entity'
+import { getBarOrigin, useScheduleSave } from '@/composables/scheduleSave'
 import csv, { getEstimationsCsvLabelKeys } from '@/lib/csv'
-import { isSupervisorInDepartments } from '@/lib/descriptors'
+import {
+  isSupervisorInDepartments,
+  isTakenDescriptorNameError
+} from '@/lib/descriptors'
 import func from '@/lib/func'
 import {
   applyFilters,
@@ -565,6 +580,10 @@ const store = useStore()
 const { cellSaveErrorText, saveCell } = useCellSave(task => task.entity_name, {
   rowsAreTasks: true
 })
+// The bars of the schedules, and the dates of the task type.
+const { saveBar, saveTracked, scheduleSaveErrorText } = useScheduleSave(
+  bar => bar.name
+)
 
 const instance = getCurrentInstance()
 const socket = instance.appContext.config.globalProperties.$socket
@@ -585,6 +604,9 @@ let isScrollResetAsked = false
 // The store getters follow the route: a load still running when the page
 // is left stops at its next step instead of acting on the next page.
 let isUnmounted = false
+// The query of a navigation still on its way: route.query only changes
+// once it lands, and a write of one key meanwhile builds on this one.
+let pendingQuery = null
 const timesheetByPerson = ref({})
 const displaySettings = ref({
   contactSheetMode: false,
@@ -682,7 +704,8 @@ const errors = reactive({
   deleteMetadata: false,
   entities: false,
   importing: false,
-  importingError: null
+  importingError: null,
+  takenMetadataName: ''
 })
 
 const loading = reactive({
@@ -1006,15 +1029,14 @@ const initData = force => {
           resetTaskTypeDates()
         }, 200)
 
-        dueDateFilter.value = route.query.duedate || 'all'
-        estimationFilter.value = route.query.late || 'all'
-        priorityFilter.value = route.query.priority || '-1'
-        difficultyFilter.value = route.query.difficulty || '-1'
-        retakeCountFilter.value = route.query.retake_count || 'all'
-        assetTypeIdsFilter.value =
-          route.query.asset_type_id?.split(',').filter(Boolean) || []
-        taskStatusIdsFilter.value =
-          route.query.task_status_id?.split(',').filter(Boolean) || []
+        const view = readQueryView(route.query)
+        dueDateFilter.value = view.dueDate
+        estimationFilter.value = view.late
+        priorityFilter.value = view.priority
+        difficultyFilter.value = view.difficulty
+        retakeCountFilter.value = view.retakeCount
+        assetTypeIdsFilter.value = view.assetTypeIds
+        taskStatusIdsFilter.value = view.taskStatusIds
 
         const taskId = route.query.task_id
         const task = taskMap.value.get(taskId)
@@ -1121,6 +1143,40 @@ const getRoute = section => {
   return sectionRoute
 }
 
+// URL
+
+// What a query opens the page on: a value left out reads as its default,
+// and a task id the page cannot find as no task.
+const readQueryView = query => ({
+  search: query.search || '',
+  dueDate: query.duedate || 'all',
+  late: query.late || 'all',
+  priority: query.priority || '-1',
+  difficulty: query.difficulty || '-1',
+  retakeCount: query.retake_count || 'all',
+  assetTypeIds: query.asset_type_id?.split(',').filter(Boolean) || [],
+  taskStatusIds: query.task_status_id?.split(',').filter(Boolean) || [],
+  taskId: taskMap.value.has(query.task_id) ? query.task_id : ''
+})
+
+// A write whose URL opens the page as the landed one does replaces the
+// history entry instead of adding one. On a link to a task, the load's push
+// of the filters, which drops the task id, is canceled by the replace of the
+// selection that follows. The pending URL stays out of the comparison: a
+// filter or a task picked can come with a second write, which would turn
+// its push into a replace.
+const pushQuery = query => {
+  pendingQuery = query
+  const isSameView =
+    JSON.stringify(readQueryView(query)) ===
+    JSON.stringify(readQueryView(route.query))
+  router[isSameView ? 'replace' : 'push']({ query }).finally(() => {
+    if (pendingQuery === query) {
+      pendingQuery = null
+    }
+  })
+}
+
 // Search
 
 const focusSearchField = options => {
@@ -1137,11 +1193,9 @@ const setSearchFromUrl = () => {
 
 const setSearchInUrl = query => {
   const searchQuery = query || searchFieldRef.value?.getValue()
-  router.push({
-    query: {
-      ...route.query,
-      search: searchQuery || undefined
-    }
+  pushQuery({
+    ...(pendingQuery || route.query),
+    search: searchQuery || undefined
   })
 }
 
@@ -1227,17 +1281,15 @@ const saveSearchQuery = searchQuery => {
 
 const updateUrlParams = () => {
   const retakeCount = retakeCountFilter.value
-  router.push({
-    query: {
-      search: searchFieldRef.value.getValue(),
-      duedate: dueDateFilter.value,
-      late: estimationFilter.value,
-      priority: priorityFilter.value,
-      difficulty: difficultyFilter.value,
-      retake_count: retakeCount === 'all' ? undefined : retakeCount,
-      task_status_id: taskStatusIdsFilter.value.join(',') || null,
-      asset_type_id: assetTypeIdsFilter.value.join(',') || null
-    }
+  pushQuery({
+    search: searchFieldRef.value.getValue(),
+    duedate: dueDateFilter.value,
+    late: estimationFilter.value,
+    priority: priorityFilter.value,
+    difficulty: difficultyFilter.value,
+    retake_count: retakeCount === 'all' ? undefined : retakeCount,
+    task_status_id: taskStatusIdsFilter.value.join(',') || null,
+    asset_type_id: assetTypeIdsFilter.value.join(',') || null
   })
 }
 
@@ -1267,18 +1319,14 @@ const toggleSchedule = () => {
 const updateTaskInQuery = () => {
   if (nbSelectedTasks.value === 1) {
     const selectedTaskIds = Array.from(selectedTasks.value.keys())
-    router.push({
-      query: {
-        ...route.query,
-        task_id: selectedTaskIds[0]
-      }
+    pushQuery({
+      ...(pendingQuery || route.query),
+      task_id: selectedTaskIds[0]
     })
   } else {
-    router.push({
-      query: {
-        ...route.query,
-        task_id: undefined
-      }
+    pushQuery({
+      ...(pendingQuery || route.query),
+      task_id: undefined
     })
   }
 }
@@ -1422,9 +1470,13 @@ const saveEstimation = (task, { estimation, item, daysOff }) => {
   return store.dispatch('updateTask', { taskId: task.id, data })
 }
 
-const updateEstimation = ({ taskId, ...change }) => {
+// typed in a schedule, which applied it to the bar
+const updateEstimation = async ({ taskId, ...change }) => {
   const task = taskMap.value.get(taskId)
-  if (task) saveEstimation(task, change).catch(console.error)
+  if (!task) return
+  await saveBar(change.item, () => saveEstimation(task, change), {
+    onPutBack: putBackRow
+  })
 }
 
 const onEstimationCellChanged = ({ taskId, ...change }) => {
@@ -1833,13 +1885,13 @@ const buildPersonElement = (
     return data
   })
 
-  return {
-    ...personElement,
+  // the row its bars point to, which a move re-spans
+  return Object.assign(personElement, {
     children,
     startDate: minStartDate,
     endDate: maxEndDate,
     man_days: manDays
-  }
+  })
 }
 
 const getTaskElementColor = (task, endDate) => {
@@ -1856,7 +1908,18 @@ const getTaskElementColor = (task, endDate) => {
   return null
 }
 
-const saveTaskScheduleItem = item => {
+// A bar whose save Zou refuses goes back where the widget found it: its
+// row spans its bars again, and adds up their man-days.
+const putBackRow = item => {
+  const row = item.parentElement
+  row.startDate = getMinDate(row)
+  row.endDate = getMaxDate(row)
+  scheduleWidgetRef.value?.refreshManDays(row)
+  scheduleWidgetRef.value?.refreshItemPositions(row)
+}
+
+const saveTaskScheduleItem = async item => {
+  const origin = getBarOrigin(item)
   if (item.estimation) {
     item.endDate = addBusinessDays(
       item.startDate,
@@ -1869,14 +1932,19 @@ const saveTaskScheduleItem = item => {
   if (item.startDate && item.endDate) {
     item.parentElement.startDate = getMinDate(item.parentElement)
     item.parentElement.endDate = getMaxDate(item.parentElement)
-    store.dispatch('updateTask', {
-      taskId: item.id,
-      data: {
-        estimation: item.estimation,
-        start_date: item.startDate.format('YYYY-MM-DD'),
-        due_date: item.endDate.format('YYYY-MM-DD')
-      }
-    })
+    await saveBar(
+      item,
+      () =>
+        store.dispatch('updateTask', {
+          taskId: item.id,
+          data: {
+            estimation: item.estimation,
+            start_date: item.startDate.format('YYYY-MM-DD'),
+            due_date: item.endDate.format('YYYY-MM-DD')
+          }
+        }),
+      { origin, onPutBack: putBackRow }
+    )
   }
 }
 
@@ -1909,12 +1977,14 @@ const expandPersonElement = personElement => {
 // Close leaves the error of the last save: opening drops it.
 const onAddMetadataClicked = () => {
   errors.addMetadata = false
+  errors.takenMetadataName = ''
   descriptorToEdit.value = {}
   modals.isAddMetadataDisplayed = true
 }
 
 const onEditMetadataClicked = descriptorId => {
   errors.addMetadata = false
+  errors.takenMetadataName = ''
   descriptorToEdit.value = currentProduction.value.descriptors.find(
     descriptor => descriptor.id === descriptorId
   )
@@ -1935,7 +2005,10 @@ const onSortByMetadata = descriptorId => {
   }
 }
 
+// Zou refuses the name sent, which the modal may have closed on since.
 const confirmAddMetadata = form => {
+  const { name } = form
+  const opening = descriptorToEdit.value
   loading.addMetadata = true
   errors.addMetadata = false
   store
@@ -1949,9 +2022,15 @@ const confirmAddMetadata = form => {
       modals.isAddMetadataDisplayed = false
     })
     .catch(err => {
-      console.error(err)
       loading.addMetadata = false
-      errors.addMetadata = true
+      if (isTakenDescriptorNameError(err)) {
+        if (descriptorToEdit.value === opening) {
+          errors.takenMetadataName = name
+        }
+      } else {
+        console.error(err)
+        errors.addMetadata = true
+      }
     })
 }
 
@@ -2235,21 +2314,49 @@ watch(currentScheduleItem, () => {
   }
 })
 
+// The dates of the task type are those of its bar on the production
+// schedule: its moments hold the dates set last, its raw dates those of the
+// load. Refused, the bar and the fields go back to the dates set before.
 watch(
   [() => schedule.taskTypeStartDate, () => schedule.taskTypeEndDate],
-  () => {
-    if (!currentScheduleItem.value) return
+  async () => {
+    const scheduleItem = currentScheduleItem.value
+    if (!scheduleItem) return
     const startDate = moment(schedule.taskTypeStartDate).utc()
     const endDate = moment(schedule.taskTypeEndDate).utc()
+    const previous = {
+      startDate: (
+        scheduleItem.startDate ?? parseDate(scheduleItem.start_date)
+      ).clone(),
+      endDate: (
+        scheduleItem.endDate ?? parseDate(scheduleItem.end_date)
+      ).clone()
+    }
+    const format = date => date.format('YYYY-MM-DD')
     if (
-      startDate.format('YYYY-MM-DD') !== currentScheduleItem.value.start_date ||
-      endDate.format('YYYY-MM-DD') !== currentScheduleItem.value.end_date
+      format(startDate) !== format(previous.startDate) ||
+      format(endDate) !== format(previous.endDate)
     ) {
       store.commit('SET_SCHEDULE_ITEM_DATES', {
-        scheduleItem: currentScheduleItem.value,
+        scheduleItem,
         dates: { startDate, endDate }
       })
-      store.dispatch('saveScheduleItem', currentScheduleItem.value)
+      await saveTracked(
+        scheduleItem,
+        { id: scheduleItem.id, name: currentTaskType.value?.name },
+        {
+          origin: previous,
+          sent: { startDate, endDate },
+          save: () => store.dispatch('saveScheduleItem', scheduleItem),
+          putBack: dates => {
+            store.commit('SET_SCHEDULE_ITEM_DATES', { scheduleItem, dates })
+            if (currentScheduleItem.value === scheduleItem) {
+              schedule.taskTypeStartDate = dates.startDate.toDate()
+              schedule.taskTypeEndDate = dates.endDate.toDate()
+            }
+          }
+        }
+      )
     }
   }
 )

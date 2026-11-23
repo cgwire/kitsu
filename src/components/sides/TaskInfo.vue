@@ -152,7 +152,7 @@
                     :entity-type="entityType"
                     :extra-wide="isExtraWide"
                     :fps="currentFps"
-                    :is-assigned="isAssigned"
+                    :is-assigned="isAssignedToPreviewsTask"
                     :last-preview-files="taskPreviews"
                     :light="!isWide"
                     :link="currentPreviewComment?.links?.[0]"
@@ -400,6 +400,7 @@ import {
   provide,
   reactive,
   ref,
+  shallowRef,
   useTemplateRef,
   watch
 } from 'vue'
@@ -530,9 +531,14 @@ const isWide = ref(false)
 const isExtraWide = ref(false)
 const taskComments = ref([])
 const taskPreviews = ref([])
+// The previews stay on screen until the comments of the next task load: the
+// right to annotate them is the one of the task they were shown for.
+const previewsTask = shallowRef(null)
 
-let currentExtraPreviewId = null
-let extraFileRevisionId = null
+// The file the trash of the player removes and the revision its "+" adds a
+// file to, each with the task of the previews shown at the click.
+let removedFile = null
+let extraFileRevision = null
 // Extend-drag bookkeeping, read only inside event handlers
 let lastWidth = 0
 let lastWidthX = 0
@@ -732,14 +738,29 @@ const isDepartmentSupervisor = computed(() =>
   )
 )
 
-const isPreviewPlayerReadOnly = computed(
-  () =>
-    !props.task ||
-    !(
-      isCurrentUserManager.value ||
-      isCurrentUserClient.value ||
-      isDepartmentSupervisor.value
+const isPreviewPlayerReadOnly = computed(() => {
+  const task = previewsTask.value
+  if (!props.task || !task) return true
+  if (store.getters.isCurrentUserAdmin || isCurrentUserClient.value) {
+    return false
+  }
+  const role = store.getters.currentUserRoleForProduction(
+    task.project_id || currentProduction.value?.id
+  )
+  return !(
+    role === 'manager' ||
+    isSupervisorInDepartments(
+      user.value,
+      role === 'supervisor',
+      taskTypeMap.value.get(task.task_type_id)?.department_id
     )
+  )
+})
+
+// The "+" of the player adds a file to a revision shown, which may still be
+// one of the previous task.
+const isAssignedToPreviewsTask = computed(
+  () => previewsTask.value?.assignees?.includes(user.value?.id) ?? false
 )
 
 const currentTaskType = computed(() =>
@@ -1004,6 +1025,17 @@ const resetComments = () => {
   taskComments.value = getCurrentTaskComments()
 }
 
+const showTaskPreviews = () => {
+  taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+  previewsTask.value = props.task
+}
+
+// The task of the panel may not be the one of the revision shown yet.
+const getShownRevision = () => ({
+  previewId: currentPreviewId.value,
+  task: previewsTask.value
+})
+
 const reset = ({ keepPreviewFiles = false } = {}) => {
   resetModals()
   if (!keepPreviewFiles) {
@@ -1011,7 +1043,7 @@ const reset = ({ keepPreviewFiles = false } = {}) => {
   }
   if (props.task) {
     resetComments()
-    taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+    showTaskPreviews()
     nextTick(() => {
       previewPlayerRef.value?.focus()
     })
@@ -1041,11 +1073,11 @@ const clearPreviewFiles = () => {
 const createExtraPreview = forms => {
   errors.addExtraPreview = false
   loading.addExtraPreview = true
-  const previewId = extraFileRevisionId ?? currentPreviewId.value
-  const comment = taskComments.value.find(comment =>
-    comment.previews.some(preview => preview.id === previewId)
-  )
-  const taskId = props.task.id
+  const { previewId, task } = extraFileRevision ?? getShownRevision()
+  const taskId = task.id
+  const comment = store.getters
+    .getTaskComments(taskId)
+    .find(comment => comment.previews.some(preview => preview.id === previewId))
   store
     .dispatch('addCommentExtraPreview', {
       taskId,
@@ -1056,7 +1088,8 @@ const createExtraPreview = forms => {
     .then(() => {
       loading.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
-      reset({ keepPreviewFiles: true })
+      // A file of the previous task leaves the panel as it is.
+      if (props.task?.id === taskId) reset({ keepPreviewFiles: true })
       setTimeout(() => {
         // The panel may have moved on to another task, with or without a
         // player.
@@ -1107,7 +1140,7 @@ const onPreviewAdded = eventData => {
 }
 
 const onPreviewsOrderChange = () => {
-  taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+  showTaskPreviews()
 }
 
 const onAnnotationChanged = async ({
@@ -1116,7 +1149,9 @@ const onAnnotationChanged = async ({
   deletions,
   updates
 }) => {
-  const taskId = props.task?.id || preview.task_id
+  // The player sends the strokes of the previous preview as it changes, once
+  // the panel shows the next task.
+  const taskId = preview.task_id || props.task?.id
   if (!taskId) return
   try {
     await store.dispatch('updatePreviewAnnotation', {
@@ -1138,12 +1173,12 @@ const onAddPreviewClicked = () => {
 
 // The revisions may change behind the modal: the file must join this one.
 const onAddExtraPreview = () => {
-  extraFileRevisionId = currentPreviewId.value
+  extraFileRevision = getShownRevision()
   modals.addExtraPreview = true
 }
 
 const onRemoveExtraPreview = preview => {
-  currentExtraPreviewId = preview.id
+  removedFile = { previewId: preview.id, task: previewsTask.value }
   modals.deleteExtraPreview = true
 }
 
@@ -1356,16 +1391,16 @@ const confirmDeleteTaskComment = () => {
 const confirmDeleteTaskPreview = () => {
   loading.deleteExtraPreview = true
   errors.deleteExtraPreview = false
-  const previewId = currentExtraPreviewId
-  const comment = getCurrentTaskComments().find(comment =>
-    comment.previews.some(p => p.id === previewId)
-  )
+  const { previewId, task } = removedFile
+  const comment = store.getters
+    .getTaskComments(task.id)
+    .find(comment => comment.previews.some(p => p.id === previewId))
 
   // A colleague may have deleted the only revision, and so the player.
   previewPlayerRef.value?.displayFirst()
   store
     .dispatch('deleteTaskPreview', {
-      taskId: props.task.id,
+      taskId: task.id,
       commentId: comment?.id,
       previewId
     })
@@ -1631,7 +1666,7 @@ const onRemoteCommentNew = eventData => {
       !loading.task
     ) {
       taskComments.value = comments
-      taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+      showTaskPreviews()
     }
     animOn.value = false
   }, 1000)
@@ -1684,7 +1719,7 @@ const onRemoteCommentDelete = eventData => {
     if (comment) {
       store.commit('REMOVE_TASK_COMMENT', { task: props.task, comment })
       resetComments()
-      taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+      showTaskPreviews()
     } else if (eventData.task_id !== props.task.id) {
       store
         .dispatch('refreshTaskEntityPreviewFiles', {
@@ -1730,7 +1765,7 @@ const onRemoteAnnotationUpdate = eventData => {
           eventData.updated_at
         )
         if (isStillValid) {
-          taskPreviews.value = store.getters.getTaskPreviews(props.task.id)
+          showTaskPreviews()
           // Wait for the refreshed previews prop to propagate to the
           // player before reloading — otherwise reloadAnnotations
           // reads the stale currentPreview and the remote drawing
@@ -1766,7 +1801,6 @@ watch(
   () => {
     clearPreviewFiles()
     pickedPreviewId.value = null
-    extraFileRevisionId = null
     failedActionCommentId.value = null
     if (!props.silent) {
       loadTaskData()

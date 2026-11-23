@@ -105,7 +105,8 @@ const getFailureKind = err => {
 
 // The API client reported the failure as a warning named after its route,
 // and the raw error, grouped by the superagent stack, would only repeat it.
-// A deliberate capture brings its own context: it stays.
+// A refusal Zou answered with a 200, which a store action marks, is no bug
+// either. A deliberate capture brings its own context: it stays.
 const isReportedRequestFailure = (event, hint) =>
   errors.isRequestFailure(hint.originalException) &&
   (event.exception?.values || []).some(
