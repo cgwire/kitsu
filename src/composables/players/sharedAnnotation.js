@@ -50,7 +50,11 @@ export const useSharedAnnotationCanvas = () => {
   let userId = null
 
   const setup = (canvasEl, { width = 1, height = 1 } = {}) => {
-    fabricCanvas = createAnnotationCanvas(canvasEl)
+    // As in the studio: the finger gestures of the player hand a finger
+    // over to the tool as pointer events.
+    fabricCanvas = createAnnotationCanvas(canvasEl, {
+      enablePointerEvents: true
+    })
     fabricCanvas.setDimensions({ width, height })
     applyPencilColor(fabricCanvas, pencilColor.value)
     applyPencilWidth(fabricCanvas, pencilWidth.value)

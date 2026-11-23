@@ -1,6 +1,6 @@
 <template>
   <div class="annotation-overlay" ref="wrapper" :style="wrapperStyle">
-    <div class="annotation-surface" :style="surfaceStyle">
+    <div class="annotation-surface" ref="surface" :style="surfaceStyle">
       <canvas :id="canvasId" />
     </div>
     <div class="annotation-toolbar" v-if="isEditable">
@@ -129,6 +129,7 @@ const annotation = useSharedAnnotationCanvas()
 
 const containerSize = ref({ width: 0, height: 0 })
 const isSaving = ref(false)
+const surface = ref(null)
 const wrapper = ref(null)
 
 let renderToken = 0
@@ -413,6 +414,8 @@ onBeforeUnmount(() => {
 defineExpose({
   hasChanges: () => annotation.hasChanges(),
   getDiff: () => annotation.getDiff(),
+  // Where the fingers of the player navigate or draw, without the toolbar.
+  overlay: surface,
   reset: () => annotation.reset(),
   setDrawingMode: enabled => annotation.setDrawingMode(enabled),
   // The player binds Ctrl+Z to the same undo the toolbar button calls.

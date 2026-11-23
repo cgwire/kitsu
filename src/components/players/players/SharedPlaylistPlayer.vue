@@ -28,10 +28,10 @@
       <div class="player-area">
         <div
           class="video-container"
+          :class="{ 'touch-navigation': isTouchNavigationEnabled }"
           ref="videoContainer"
           @contextmenu.prevent
           @pointerdown.capture="onMediaPointerDown"
-          @pointerup.capture="onMediaPointerUp"
         >
           <multi-video-viewer
             ref="rawPlayer"
@@ -126,7 +126,7 @@
             :current-frame="currentFrameNumber"
             :frame-duration="frameDuration"
             :guest-id="guestId"
-            :is-editable="canComment && !!guestId && isAnnotating"
+            :is-editable="isOverlayEditable"
             :is-picture="isPicture"
             :is-playing="isPlaying"
             :movie-dimensions="overlayDimensions"
@@ -276,6 +276,7 @@ import {
   isAltLetter,
   undoRedoCommand
 } from '@/composables/players/previewShortcuts'
+import { useTouchNavigation } from '@/composables/players/touchNavigation'
 import { usePlayerTransport } from '@/composables/players/transport'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
 import {
@@ -515,6 +516,16 @@ const overlayDimensions = computed(() => {
   }
   return movieDimensions.value
 })
+
+const isOverlayEditable = computed(
+  () => props.canComment && !!props.guestId && isAnnotating.value
+)
+
+// Two fingers pan and zoom the media, over the drawing too. One finger
+// draws in draw mode, or pans.
+const isTouchNavigationEnabled = computed(
+  () => isMovie.value || isPicture.value
+)
 
 const nbFrames = computed(() => {
   if (isSound.value) return Math.round(soundDuration.value * fps.value)
@@ -771,6 +782,25 @@ const onResetZoom = () => {
   resetPanzoomTransform()
 }
 
+const getMainViewer = () => {
+  if (isMovie.value) return rawPlayer.value
+  if (isPicture.value) return picturePlayer.value
+  return null
+}
+
+// The whole viewer is a surface: panzoom hears only the parent of what it
+// moves, and the bands around a picture lie outside it.
+useTouchNavigation({
+  container: videoContainer,
+  surfaces: () => [annotationOverlay.value?.overlay, getMainViewer()?.$el],
+  overlay: () => annotationOverlay.value?.overlay,
+  isAnnotating: isOverlayEditable,
+  isEnabled: isTouchNavigationEnabled,
+  panBy: (dx, dy) => getMainViewer()?.panBy(dx, dy),
+  zoomAt: (clientX, clientY, ratio) =>
+    getMainViewer()?.zoomAt(clientX, clientY, ratio)
+})
+
 // A sound has no frames of its own: the keys step it by a frame of the
 // playlist, up to the start of its last frame like a movie.
 const seekSoundFrame = frame => {
@@ -849,13 +879,15 @@ const togglePhoneFullScreen = () => {
   }
 }
 
-// Captured: the pan/zoom of the media keeps these events for itself, and no
-// click follows a touch.
+// Captured: the finger gestures stop these events on their way to the
+// media. They stop the release of a finger on the window, where the other
+// listeners still hear it.
 const onMediaPointerDown = event => {
   mediaPointerStart = { x: event.clientX, y: event.clientY }
 }
 
 const onMediaPointerUp = event => {
+  if (!videoContainer.value?.contains(event.target)) return
   if (!isPhoneLandscape.value || !isPhoneFullScreen.value) return
   if (isAnnotating.value || !mediaPointerStart) return
   const isTap =
@@ -1209,6 +1241,7 @@ watch(
 
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown, false)
+  window.addEventListener('pointerup', onMediaPointerUp, true)
   document.addEventListener('fullscreenchange', onFullScreenChange)
   document.addEventListener('webkitfullscreenchange', onFullScreenChange)
   updatePictureHeight()
@@ -1220,6 +1253,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
+  window.removeEventListener('pointerup', onMediaPointerUp, true)
   document.removeEventListener('fullscreenchange', onFullScreenChange)
   document.removeEventListener('webkitfullscreenchange', onFullScreenChange)
   pictureResizeObserver?.disconnect()
@@ -1472,6 +1506,19 @@ onBeforeUnmount(() => {
   justify-content: center;
   position: relative;
   width: 100%;
+
+  // The fingers navigate the media there: the page must not scroll or zoom
+  // under them, and iOS must not select, open its menu, or start a drag
+  // under a held finger.
+  &.touch-navigation {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+
+    :deep(img) {
+      -webkit-user-drag: none;
+    }
+  }
 }
 
 .video-progress {
