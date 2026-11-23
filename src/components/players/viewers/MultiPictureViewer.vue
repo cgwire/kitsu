@@ -14,7 +14,7 @@
       :preview="preview"
       @loaded="onViewerLoaded(preview)"
       @panzoom-changed="$event => $emit('panzoom-changed', $event)"
-      @panzoom-ready="() => $emit('panzoom-ready')"
+      @panzoom-ready="onViewerPanZoomReady(preview)"
       @size-changed="() => $emit('size-changed')"
       v-for="preview in mountedPreviews"
       v-show="previewKey(preview) === previewKey(currentPreview)"
@@ -114,6 +114,12 @@ const setPictureRef = (preview, el) => {
 const onViewerLoaded = preview => {
   if (previewKey(preview) === previewKey(props.currentPreview)) {
     emit('loaded')
+  }
+}
+
+const onViewerPanZoomReady = preview => {
+  if (previewKey(preview) === previewKey(props.currentPreview)) {
+    emit('panzoom-ready')
   }
 }
 

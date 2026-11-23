@@ -597,7 +597,7 @@ export const usePreviewRoom = options => {
   const onPanzoomChanged = eventData => {
     const r = unref(room)
     if (!isValidRoomId(r) || !joinedRoom.value) return
-    if (r.localId === eventData.local_id) return
+    if (r.localId === eventData.data?.local_id) return
     const { x, y, zoom } = eventData.data
     setPanZoom(x, y, zoom)
   }
@@ -605,7 +605,7 @@ export const usePreviewRoom = options => {
   const onComparisonPanzoomChanged = eventData => {
     const r = unref(room)
     if (!isValidRoomId(r) || !joinedRoom.value) return
-    if (r.localId === eventData.local_id) return
+    if (r.localId === eventData.data?.local_id) return
     const { x, y, zoom } = eventData.data
     setComparisonPanZoom(x, y, zoom)
   }

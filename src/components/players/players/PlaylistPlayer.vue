@@ -288,6 +288,7 @@
           @max-duration-update="onMaxDurationUpdate"
           @metadata-loaded="onMetadataLoaded"
           @panzoom-changed="onPanZoomChanged"
+          @panzoom-ready="isCurrentPreviewMovie && onMainPanZoomReady()"
           @play-failed="onMoviePlayFailed"
           @play-next="onPlayNext"
           @repeat="onVideoRepeated"
@@ -390,6 +391,7 @@
             :previews="picturePreviews"
             @loaded="onPictureLoaded"
             @panzoom-changed="onPanZoomChanged"
+            @panzoom-ready="isCurrentPreviewPicture && onMainPanZoomReady()"
             high-quality
           />
         </div>
@@ -4771,11 +4773,16 @@ const resetPanZoom = () => {
 }
 
 const setPanZoom = (x, y, scale) => {
-  if (isCurrentPreviewMovie.value) {
-    rawPlayer.value?.setPanZoom(x, y, scale)
-  } else if (isCurrentPreviewPicture.value) {
-    picturePlayer.value?.setPanZoom(x, y, scale)
-  }
+  getMainViewer()?.setPanZoom(x, y, scale)
+  // The viewers apply remote transforms silently, so update the overlays here.
+  panzoomTransform.value = { x, y, scale }
+}
+
+const onMainPanZoomReady = () => {
+  const { x, y, scale } = panzoomTransform.value
+  // A fresh panzoom instance starts at identity, even if a room update arrived.
+  if (x === 0 && y === 0 && scale === 1) return
+  getMainViewer()?.setPanZoom(x, y, scale)
 }
 
 const setComparisonPanZoom = (x, y, scale) => {
