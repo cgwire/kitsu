@@ -403,7 +403,6 @@
                       ? taskHref(asset.validations.get(columnId))
                       : undefined
                   "
-                  :selected="isSelected(i, k, j)"
                   :row-x="getIndex(i, k)"
                   :column-y="j"
                   :minimized="hiddenColumns[columnId]"
@@ -557,13 +556,6 @@
                       ? taskHref(asset.validations.get(columnId))
                       : undefined
                   "
-                  :selected="
-                    isSelected(
-                      i,
-                      k,
-                      j + stickedDisplayedValidationColumns.length
-                    )
-                  "
                   :row-x="getIndex(i, k)"
                   :column-y="j"
                   :minimized="hiddenColumns[columnId]"
@@ -703,7 +695,6 @@ const assetMetadataDescriptors = computed(
   () => store.getters.assetMetadataDescriptors
 )
 const assetSearchText = computed(() => store.getters.assetSearchText)
-const assetSelectionGrid = computed(() => store.getters.assetSelectionGrid)
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const displayedAssetsCount = computed(() => store.getters.displayedAssetsCount)
@@ -901,11 +892,6 @@ const assetEpisodes = (asset, full) => {
 // is looked up in the same rows.
 const getIndex = (i, k) =>
   getEntityLineNumber(filteredDisplayedAssets.value, i, k)
-
-const isSelected = (indexInGroup, groupIndex, columnIndex) =>
-  assetSelectionGrid.value.has(
-    `${getIndex(indexInGroup, groupIndex)}-${columnIndex}`
-  )
 
 // Shift-click selects every line between the last selected one and this
 // one.

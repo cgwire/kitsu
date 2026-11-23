@@ -1476,14 +1476,16 @@ const mutations = {
 
   [ADD_SELECTED_TASK](state, validationInfo) {
     state.assetSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
-    state.selectedAssets = new Map()
+    // Unselect the lines. An empty selection keeps its Map: the lists read
+    // it in every row, and a new one renders them all at each cell click.
+    if (state.selectedAssets.size > 0) state.selectedAssets = new Map()
   },
 
   [ADD_SELECTED_TASKS](state, selection) {
     selection.forEach(validationInfo => {
       state.assetSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
     })
-    state.selectedAssets = new Map()
+    if (state.selectedAssets.size > 0) state.selectedAssets = new Map()
   },
 
   [CLEAR_SELECTED_TASKS](state) {
@@ -1631,7 +1633,7 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_ASSETS](state) {
-    state.selectedAssets = new Map()
+    if (state.selectedAssets.size > 0) state.selectedAssets = new Map()
   }
 }
 

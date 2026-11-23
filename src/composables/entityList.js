@@ -597,6 +597,15 @@ export const useEntityList = ({
 
   const getValidationCell = (x, y) => getRef(`validation-${x}-${y}`)?.[0]
 
+  // Each cell reads its own key of the grid: read from the template of the
+  // list, the grid rendered every row at each click.
+  provide('isCellSelected', (x, y, sticked) => {
+    const columnOffset = sticked
+      ? 0
+      : stickedDisplayedValidationColumns.value.length
+    return selectionGrid.value.has(`${x}-${y + columnOffset}`)
+  })
+
   // The last click stays on its entity, whichever row a new one moved it to.
   const getLastSelection = () => {
     if (!lastSelection) return null

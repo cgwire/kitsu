@@ -710,7 +710,7 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_SEQUENCES](state) {
-    state.selectedSequences = new Map()
+    if (state.selectedSequences.size > 0) state.selectedSequences = new Map()
   },
 
   [SET_CURRENT_PRODUCTION](state, production) {
@@ -1019,14 +1019,16 @@ const mutations = {
 
   [ADD_SELECTED_TASK](state, validationInfo) {
     state.sequenceSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
-    state.selectedSequences = new Map() // unselect all previously selected lines
+    // Unselect the lines. An empty selection keeps its Map: the lists read
+    // it in every row, and a new one renders them all at each cell click.
+    if (state.selectedSequences.size > 0) state.selectedSequences = new Map()
   },
 
   [ADD_SELECTED_TASKS](state, selection) {
     selection.forEach(validationInfo => {
       state.sequenceSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
     })
-    state.selectedSequences = new Map()
+    if (state.selectedSequences.size > 0) state.selectedSequences = new Map()
   },
 
   [CLEAR_SELECTED_TASKS](state) {

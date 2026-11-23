@@ -879,7 +879,9 @@ const mutations = {
 
   [ADD_SELECTED_TASK](state, validationInfo) {
     state.editSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
-    state.selectedEdits = new Map() // unselect all previously selected lines
+    // Unselect the lines. An empty selection keeps its Map: the lists read
+    // it in every row, and a new one renders them all at each cell click.
+    if (state.selectedEdits.size > 0) state.selectedEdits = new Map()
   },
 
   [CLEAR_SELECTED_TASKS](state) {
@@ -949,7 +951,7 @@ const mutations = {
     selection.forEach(validationInfo => {
       state.editSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
     })
-    state.selectedEdits = new Map()
+    if (state.selectedEdits.size > 0) state.selectedEdits = new Map()
   },
 
   [ADD_EDIT](state, { taskTypeMap, taskMap, personMap, production, edit }) {
@@ -1111,7 +1113,7 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_EDITS](state) {
-    state.selectedEdits = new Map()
+    if (state.selectedEdits.size > 0) state.selectedEdits = new Map()
   }
 }
 

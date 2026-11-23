@@ -337,7 +337,6 @@
                   "
                   :minimized="hiddenColumns[columnId]"
                   :row-x="i"
-                  :selected="isSelected(i, j)"
                   :sticked="true"
                   :task-href="taskHref(edit.validations.get(columnId))"
                   :task-test="taskMap.get(edit.validations.get(columnId))"
@@ -425,9 +424,6 @@
                     )
                   "
                   :minimized="hiddenColumns[columnId]"
-                  :selected="
-                    isSelected(i, j + stickedDisplayedValidationColumns.length)
-                  "
                   :row-x="i"
                   :column-y="j"
                   :is-assignees="displaySettings.showAssignations"
@@ -575,7 +571,6 @@ const editMetadataDescriptors = computed(
   () => store.getters.editMetadataDescriptors
 )
 const editSearchText = computed(() => store.getters.editSearchText)
-const editSelectionGrid = computed(() => store.getters.editSelectionGrid)
 const episodeMap = computed(() => store.getters.episodeMap)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 // Production-scoped: effective role on the current production (global
@@ -658,9 +653,6 @@ const {
 
 // Functions
 // --------------------------------------------------------------------------
-
-const isSelected = (lineIndex, columnIndex) =>
-  editSelectionGrid.value.has(`${lineIndex}-${columnIndex}`)
 
 // Shift-click selects every line between the last selected one and this
 // one.
