@@ -14,9 +14,9 @@
         :size="20"
         role="button"
         tabindex="0"
-        @click="cancelCurrentTwoFactorAuthAction"
-        @keydown.enter.prevent="cancelCurrentTwoFactorAuthAction"
-        @keydown.space.prevent="cancelCurrentTwoFactorAuthAction"
+        @click="closeRecoveryCodes"
+        @keydown.enter.prevent="closeRecoveryCodes"
+        @keydown.space.prevent="closeRecoveryCodes"
       />
       <save-icon
         class="action-icon"
@@ -48,7 +48,7 @@
     </div>
 
     <two-factor-authentication
-      v-else-if="twoFA.newRecoveryCodesNeedTwoFA"
+      v-if="twoFA.newRecoveryCodesNeedTwoFA"
       :preferred-two-fa="user.preferred_two_factor_authentication"
       :two-fas-enabled="twoFAsEnabled"
       :is-loading="twoFA.loadingAction === 'newRecoveryCodes'"
@@ -618,7 +618,6 @@ const removeTwoFactorErrors = () => {
   twoFA.error.newRecoveryCodes = false
   twoFA.error.unregisterFIDO = false
   twoFA.error.registerFIDO = false
-  twoFA.OTPRecoveryCodes = null
 }
 
 // The setup of a method stops here until a factor already enabled is given.
@@ -638,6 +637,22 @@ const showSetupError = (err, action) => {
     !twoFA.error.isWrongOTP && !twoFA.error.isWrongEnabledFactor
 }
 
+// Zou shows the recovery codes once, so their panel stays until its close
+// icon, with only the codes Zou still accepts: it deletes the one that
+// confirmed an action, and all of them with the last method.
+const keepValidRecoveryCodes = twoFactorPayload => {
+  if (!twoFA.OTPRecoveryCodes) return
+  if (!twoFAEnabled.value) {
+    twoFA.OTPRecoveryCodes = null
+  } else if (twoFactorPayload?.recovery_code) {
+    const codes = twoFA.OTPRecoveryCodes.filter(
+      code => code !== twoFactorPayload.recovery_code
+    )
+    // The panel closes once every code it showed is used up.
+    twoFA.OTPRecoveryCodes = codes.length ? codes : null
+  }
+}
+
 const enableTOTPRequested = twoFactorPayload => {
   if (askEnabledFactor(twoFactorPayload)) return
   removeTwoFactorErrors()
@@ -645,6 +660,7 @@ const enableTOTPRequested = twoFactorPayload => {
   store
     .dispatch('enableTOTP', { totp: twoFA.validationOTP, twoFactorPayload })
     .then(OTPRecoveryCodes => {
+      keepValidRecoveryCodes(twoFactorPayload)
       if (OTPRecoveryCodes) twoFA.OTPRecoveryCodes = OTPRecoveryCodes
       twoFA.TOTPPreEnabled = false
       twoFA.enableNeedTwoFA = false
@@ -687,6 +703,7 @@ const disableTOTPRequested = payload => {
     store
       .dispatch('disableTOTP', payload)
       .then(() => {
+        keepValidRecoveryCodes(payload)
         twoFA.TOTPNeedTwoFA = false
         twoFA.validationOTP = ''
         twoFA.error.isWrongOTP = false
@@ -708,6 +725,7 @@ const enableEmailOTPRequested = twoFactorPayload => {
   store
     .dispatch('enableEmailOTP', { otp: twoFA.validationOTP, twoFactorPayload })
     .then(OTPRecoveryCodes => {
+      keepValidRecoveryCodes(twoFactorPayload)
       if (OTPRecoveryCodes) twoFA.OTPRecoveryCodes = OTPRecoveryCodes
       twoFA.emailOTPPreEnabled = false
       twoFA.enableNeedTwoFA = false
@@ -725,7 +743,6 @@ const preEnableEmailOTPRequested = () => {
   removeTwoFactorErrors()
   twoFA.loadingAction = 'preEnableEmailOTP'
   twoFA.emailOTPPreEnabled = false
-  twoFA.OTPRecoveryCodes = null
   store
     .dispatch('preEnableEmailOTP')
     .then(() => {
@@ -741,7 +758,6 @@ const preEnableEmailOTPRequested = () => {
 
 const disableEmailOTPRequested = payload => {
   removeTwoFactorErrors()
-  twoFA.OTPRecoveryCodes = null
   if (!twoFA.emailOTPNeedTwoFA) {
     twoFA.emailOTPNeedTwoFA = true
   } else {
@@ -749,6 +765,7 @@ const disableEmailOTPRequested = payload => {
     store
       .dispatch('disableEmailOTP', payload)
       .then(() => {
+        keepValidRecoveryCodes(payload)
         twoFA.emailOTPNeedTwoFA = false
         twoFA.validationOTP = ''
         twoFA.error.isWrongOTP = false
@@ -785,6 +802,7 @@ const registerFIDORequested = twoFactorPayload => {
       })
     )
     .then(OTPRecoveryCodes => {
+      keepValidRecoveryCodes(twoFactorPayload)
       if (OTPRecoveryCodes) twoFA.OTPRecoveryCodes = OTPRecoveryCodes
     })
     .catch(err => {
@@ -816,6 +834,7 @@ const unregisterFIDOConfirmed = payload => {
       twoFactorPayload: payload
     })
     .then(() => {
+      keepValidRecoveryCodes(payload)
       twoFA.FIDOUnregisterDeviceName = ''
       twoFA.validationOTP = ''
       twoFA.error.isWrongOTP = false
@@ -885,6 +904,10 @@ const saveRecoveryCodesToFile = () => {
   downloadBlob(blob, 'kitsu-recovery-codes.txt')
 }
 
+const closeRecoveryCodes = () => {
+  twoFA.OTPRecoveryCodes = null
+}
+
 const changedTwoFA = () => {
   twoFA.error.isWrongOTP = false
   twoFA.error.isWrongEnabledFactor = false
@@ -911,7 +934,6 @@ const cancelCurrentTwoFactorAuthAction = () => {
   twoFA.error.newRecoveryCodes = false
   twoFA.error.unregisterFIDO = false
   twoFA.error.registerFIDO = false
-  twoFA.OTPRecoveryCodes = null
 }
 
 const onKeyDown = event => {

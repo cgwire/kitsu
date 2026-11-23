@@ -1,4 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
+import { reactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
@@ -13,14 +14,17 @@ const i18n = createI18n({
   fallbackWarn: false
 })
 
+// The store actions commit the new 2FA state: a fake one sets it on
+// getters.user.
 const mountSetup = (user, actions = {}) => {
+  const currentUser = reactive({
+    email: 'ada@example.com',
+    preferred_two_factor_authentication: null,
+    ...user
+  })
   const store = createStore({
     getters: {
-      user: () => ({
-        email: 'ada@example.com',
-        preferred_two_factor_authentication: null,
-        ...user
-      })
+      user: () => currentUser
     },
     actions: {
       preEnableTOTP: () => ({
@@ -42,6 +46,8 @@ const label = key => `profile.two_factor_authentication.${key}`
 
 const findButton = (wrapper, text) =>
   wrapper.findAll('button').find(button => button.text() === text)
+
+const findCodeCheck = wrapper => wrapper.findComponent(TwoFactorAuthentication)
 
 // The method buttons and the recovery codes one, not those of an open flow.
 const actionStates = wrapper =>
@@ -162,7 +168,7 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
     await wrapper.find('.otp-input').setValue('Key')
     await wrapper.find('.two-fa-flow-actions .save-button').trigger('click')
 
-    expect(wrapper.findComponent(TwoFactorAuthentication).exists()).toBe(true)
+    expect(findCodeCheck(wrapper).exists()).toBe(true)
     expect(wrapper.find('.otp-input').attributes('readonly')).toBeDefined()
   })
 
@@ -245,8 +251,6 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
   // Zou asks for a factor already enabled before it adds a method.
   describe('with a method already enabled', () => {
     const twoFactorPayload = { recovery_code: 'abcd' }
-    const findCodeCheck = wrapper =>
-      wrapper.findComponent(TwoFactorAuthentication)
 
     const fillSetup = async (wrapper, open, value) => {
       await findButton(wrapper, label(open)).trigger('click')
@@ -405,8 +409,6 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
         .find(item => item.text() === device)
         .find('.action-icon')
 
-    const findCodeCheck = wrapper => wrapper.findComponent(TwoFactorAuthentication)
-
     it('removes a key with the 2FA code typed for it', async () => {
       const unregisterFIDO = vi.fn()
       const wrapper = mountSetup(user, { unregisterFIDO })
@@ -464,6 +466,238 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
       expect(findCodeCheck(wrapper).exists()).toBe(false)
       expect(findTrash(wrapper, 'Yubikey').attributes('tabindex')).toBe('0')
       expect(unregisterFIDO).not.toHaveBeenCalled()
+    })
+  })
+
+  // Zou shows the recovery codes once: the next action used to hide them.
+  describe('new recovery codes', () => {
+    const codes = ['AAAA', 'BBBB', 'CCCC']
+
+    // The FIDO setup reads navigator.credentials, which jsdom lacks.
+    afterEach(() => {
+      vi.unstubAllGlobals()
+    })
+    const findPanel = wrapper => wrapper.find('.recovery-codes-panel')
+    const shownCodes = wrapper =>
+      findPanel(wrapper).find('textarea').element.value.split('\t')
+
+    // The first method: Zou answers with the codes.
+    const enableFirstTOTP = async (actions = {}) => {
+      const wrapper = mountSetup(
+        {},
+        {
+          enableTOTP: ({ getters }) => {
+            getters.user.totp_enabled = true
+            return [...codes]
+          },
+          ...actions
+        }
+      )
+      await findButton(wrapper, label('totp.button_enable')).trigger('click')
+      await flushPromises()
+      const field = wrapper.find('.otp-input')
+      await field.setValue('123456')
+      await field.trigger('keyup', { key: 'Enter' })
+      await flushPromises()
+      return wrapper
+    }
+
+    it('keeps them while another action runs', async () => {
+      const wrapper = await enableFirstTOTP()
+
+      await findButton(wrapper, label('totp.button_disable')).trigger('click')
+
+      expect(findCodeCheck(wrapper).exists()).toBe(true)
+      expect(findPanel(wrapper).exists()).toBe(true)
+      expect(shownCodes(wrapper)).toEqual(codes)
+    })
+
+    it('keeps them when a setup is canceled, until their close icon', async () => {
+      const wrapper = await enableFirstTOTP({ preEnableEmailOTP: () => {} })
+      const openEmailSetup = async () => {
+        await findButton(wrapper, label('email_otp.button_enable')).trigger(
+          'click'
+        )
+        await flushPromises()
+      }
+
+      await openEmailSetup()
+      await findButton(wrapper, 'main.cancel').trigger('click')
+      await openEmailSetup()
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      await flushPromises()
+
+      expect(wrapper.find('.two-fa-flow').exists()).toBe(false)
+      expect(findPanel(wrapper).exists()).toBe(true)
+
+      await findPanel(wrapper).find('.action-icon').trigger('click')
+
+      expect(findPanel(wrapper).exists()).toBe(false)
+    })
+
+    it('asks for new codes next to the shown ones', async () => {
+      const wrapper = await enableFirstTOTP({ newRecoveryCodes: () => ['DDDD'] })
+
+      await findButton(wrapper, label('recovery_codes.button_new')).trigger(
+        'click'
+      )
+
+      expect(findPanel(wrapper).exists()).toBe(true)
+      findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+      await flushPromises()
+
+      expect(shownCodes(wrapper)).toEqual(['DDDD'])
+    })
+
+    it('forgets the code used to confirm an action', async () => {
+      const wrapper = mountSetup(
+        { totp_enabled: true, email_otp_enabled: true },
+        {
+          newRecoveryCodes: () => [...codes],
+          disableTOTP: ({ getters }) => {
+            getters.user.totp_enabled = false
+          }
+        }
+      )
+      await findButton(wrapper, label('recovery_codes.button_new')).trigger(
+        'click'
+      )
+      findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+      await flushPromises()
+      await findButton(wrapper, label('totp.button_disable')).trigger('click')
+
+      findCodeCheck(wrapper).vm.$emit('validate', { recovery_code: 'BBBB' })
+      await flushPromises()
+
+      expect(shownCodes(wrapper)).toEqual(['AAAA', 'CCCC'])
+    })
+
+    // A setup next to the shown codes can be confirmed with one of them.
+    it.each([
+      {
+        name: 'TOTP',
+        user: { email_otp_enabled: true },
+        open: 'totp.button_enable',
+        field: '123456',
+        actions: {
+          enableTOTP: ({ getters }) => {
+            getters.user.totp_enabled = true
+          }
+        }
+      },
+      {
+        name: 'OTP via email',
+        user: { totp_enabled: true },
+        open: 'email_otp.button_enable',
+        field: '123456',
+        actions: {
+          preEnableEmailOTP: () => {},
+          enableEmailOTP: ({ getters }) => {
+            getters.user.email_otp_enabled = true
+          }
+        }
+      },
+      {
+        name: 'a FIDO key',
+        user: { totp_enabled: true },
+        open: 'fido.button_register',
+        field: 'Key',
+        actions: {
+          preRegisterFIDO: () => ({}),
+          registerFIDO: ({ getters }) => {
+            getters.user.fido_enabled = true
+          }
+        }
+      }
+    ])('forgets the code that confirms the setup of $name', async scenario => {
+      const { user, open, field, actions } = scenario
+      vi.stubGlobal('navigator', {
+        credentials: { create: () => Promise.resolve('credential') }
+      })
+      const wrapper = mountSetup(user, {
+        newRecoveryCodes: () => [...codes],
+        ...actions
+      })
+      await findButton(wrapper, label('recovery_codes.button_new')).trigger(
+        'click'
+      )
+      findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+      await flushPromises()
+      await findButton(wrapper, label(open)).trigger('click')
+      await flushPromises()
+      await wrapper.find('.otp-input').setValue(field)
+      await wrapper.find('.two-fa-flow-actions .save-button').trigger('click')
+
+      findCodeCheck(wrapper).vm.$emit('validate', { recovery_code: 'BBBB' })
+      await flushPromises()
+
+      expect(shownCodes(wrapper)).toEqual(['AAAA', 'CCCC'])
+    })
+
+    it('closes their panel once every code shown is used up', async () => {
+      const wrapper = mountSetup(
+        { totp_enabled: true, email_otp_enabled: true },
+        {
+          newRecoveryCodes: () => ['AAAA'],
+          disableTOTP: ({ getters }) => {
+            getters.user.totp_enabled = false
+          }
+        }
+      )
+      await findButton(wrapper, label('recovery_codes.button_new')).trigger(
+        'click'
+      )
+      findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+      await flushPromises()
+      await findButton(wrapper, label('totp.button_disable')).trigger('click')
+
+      findCodeCheck(wrapper).vm.$emit('validate', { recovery_code: 'AAAA' })
+      await flushPromises()
+
+      expect(findPanel(wrapper).exists()).toBe(false)
+    })
+
+    it.each([
+      {
+        name: 'TOTP',
+        user: { totp_enabled: true },
+        action: 'disableTOTP',
+        open: wrapper => findButton(wrapper, label('totp.button_disable')),
+        removed: { totp_enabled: false }
+      },
+      {
+        name: 'OTP via email',
+        user: { email_otp_enabled: true },
+        action: 'disableEmailOTP',
+        open: wrapper => findButton(wrapper, label('email_otp.button_disable')),
+        removed: { email_otp_enabled: false }
+      },
+      {
+        name: 'the last FIDO key',
+        user: { fido_enabled: true, fido_devices: ['Key'] },
+        action: 'unregisterFIDO',
+        open: wrapper => wrapper.find('ul.pa1 .action-icon'),
+        removed: { fido_enabled: false, fido_devices: [] }
+      }
+    ])('drops them with $name, as Zou does', async scenario => {
+      const { user, action, open, removed } = scenario
+      const wrapper = mountSetup(user, {
+        newRecoveryCodes: () => [...codes],
+        [action]: ({ getters }) => {
+          Object.assign(getters.user, removed)
+        }
+      })
+      await findButton(wrapper, label('recovery_codes.button_new')).trigger(
+        'click'
+      )
+      findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+      await flushPromises()
+      await open(wrapper).trigger('click')
+
+      findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+      await flushPromises()
+
+      expect(findPanel(wrapper).exists()).toBe(false)
     })
   })
 })
