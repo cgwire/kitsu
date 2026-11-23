@@ -146,6 +146,7 @@
               v-if="!twoFA.enableNeedTwoFA"
               class="button save-button"
               :class="{ 'is-loading': twoFA.loadingAction === 'enableTOTP' }"
+              :disabled="!twoFA.validationOTP"
               @click="nextEnable()"
             >
               {{ textValidateNewTwoFA }}
@@ -261,6 +262,7 @@
               :class="{
                 'is-loading': twoFA.loadingAction === 'enableEmailOTP'
               }"
+              :disabled="!twoFA.validationOTP"
               @click="nextEnable()"
             >
               {{ textValidateNewTwoFA }}
@@ -344,6 +346,7 @@
                 class="input is-medium otp-input"
                 type="text"
                 v-model.trim="twoFA.FIDONewDeviceName"
+                :readonly="twoFA.enableNeedTwoFA"
                 @keyup.enter="registerFIDORequested()"
                 :placeholder="
                   $t('profile.two_factor_authentication.fido.device_name')
@@ -381,6 +384,7 @@
               v-if="!twoFA.enableNeedTwoFA"
               class="button save-button"
               :class="{ 'is-loading': twoFA.loadingAction === 'registerFIDO' }"
+              :disabled="!twoFA.FIDONewDeviceName"
               @click="registerFIDORequested()"
             >
               {{ $t('profile.two_factor_authentication.fido.button_register') }}
@@ -941,7 +945,7 @@ onUnmounted(() => {
   border-color: $green;
   color: $white;
 
-  &:hover {
+  &:hover:not([disabled]) {
     background: $light-green;
     border-color: $light-green;
   }

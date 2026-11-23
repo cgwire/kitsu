@@ -128,6 +128,44 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
     expect(enableTOTP).not.toHaveBeenCalled()
   })
 
+  // A click with the field empty did nothing and said nothing.
+  it.each([
+    { name: 'TOTP setup', open: 'totp.button_enable', value: '123456' },
+    {
+      name: 'OTP via email setup',
+      open: 'email_otp.button_enable',
+      value: '123456'
+    },
+    { name: 'FIDO registration', open: 'fido.button_register', value: 'Key' }
+  ])('disables the $name button while its field is empty', async scenario => {
+    const { open, value } = scenario
+    const wrapper = mountSetup({}, { preEnableEmailOTP: () => {} })
+    await findButton(wrapper, label(open)).trigger('click')
+    await flushPromises()
+    const saveButton = () => wrapper.find('.two-fa-flow-actions .save-button')
+
+    expect(saveButton().element.disabled).toBe(true)
+
+    await wrapper.find('.otp-input').setValue(value)
+
+    expect(saveButton().element.disabled).toBe(false)
+  })
+
+  // Emptied while its 2FA code was asked, the name sent nothing.
+  it('keeps the FIDO key name while its 2FA code is asked', async () => {
+    const wrapper = mountSetup({
+      totp_enabled: true,
+      preferred_two_factor_authentication: 'totp'
+    })
+    await findButton(wrapper, label('fido.button_register')).trigger('click')
+    await flushPromises()
+    await wrapper.find('.otp-input').setValue('Key')
+    await wrapper.find('.two-fa-flow-actions .save-button').trigger('click')
+
+    expect(wrapper.findComponent(TwoFactorAuthentication).exists()).toBe(true)
+    expect(wrapper.find('.otp-input').attributes('readonly')).toBeDefined()
+  })
+
   // Safari then offers the code that Mail received, or the one its Passwords
   // app generates.
   it.each([
