@@ -23,6 +23,19 @@ const news = {
   task_type_id: taskType.id
 }
 
+// jsdom has no IntersectionObserver: the test tells the row when it shows.
+let showRow = null
+vi.stubGlobal(
+  'IntersectionObserver',
+  class {
+    constructor(callback) {
+      showRow = isIntersecting => callback([{ isIntersecting }])
+    }
+    observe() {}
+    disconnect() {}
+  }
+)
+
 const mountRow = (
   taskTypeMap,
   { previewMode = 'comments', row = news, statusMap = new Map() } = {}
@@ -67,7 +80,7 @@ describe('NewsRow', () => {
 
   // Zou builds a picture in a job: a news read while it was processing must
   // not undo the ready status the registry got since.
-  test('passes the player the statuses the registry knows', () => {
+  test('passes the player the statuses the registry knows', async () => {
     const previewFile = { id: 'preview-1', extension: 'png', status: '' }
     const wrapper = mountRow(new Map(), {
       previewMode: 'previews',
@@ -78,9 +91,29 @@ describe('NewsRow', () => {
       },
       statusMap: new Map([['preview-1', 'ready']])
     })
+    showRow(true)
+    await wrapper.vm.$nextTick()
 
     expect(wrapper.findComponent(PreviewPlayer).props('previews')).toEqual([
       { ...previewFile, status: 'ready' }
     ])
+  })
+
+  // A feed of videos loading at once starves the other requests: only the
+  // rows on screen hold a player.
+  test('mounts the player only while the row is on screen', async () => {
+    const wrapper = mountRow(new Map(), {
+      previewMode: 'previews',
+      row: { ...news, preview_file_id: 'preview-1', preview_files: [] }
+    })
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+
+    showRow(true)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+
+    showRow(false)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
   })
 })

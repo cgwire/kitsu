@@ -796,6 +796,12 @@ onBeforeUnmount(() => {
   renderer = null
   window.removeEventListener('resize', onWindowResize)
   panzoomInstance?.dispose()
+  // A detached video keeps downloading until it is collected, and holds one
+  // of the few connections the browser opens to Zou.
+  if (video.value) {
+    video.value.removeAttribute('src')
+    video.value.load()
+  }
 })
 
 defineExpose({
