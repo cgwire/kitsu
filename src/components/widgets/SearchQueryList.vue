@@ -788,22 +788,25 @@ defineExpose({ addSearch })
   }
 }
 
-// the search the page runs; a shared one recolors its border rather than
-// doubling it with the ring
+// the search the page runs. The tags sit between two pixels (em sizes): a
+// box-shadow ring smears over two rows there, where a border keeps the same
+// width on every side.
 .search-queries .tag.active:not(.folder) {
-  box-shadow: 0 0 0 1px $purple-strong;
+  border: 2px solid $purple-strong;
+  box-shadow: none;
+  // the padding gives up the width of the border, so that the tags after it
+  // stay in place
+  padding-left: calc(0.75em - 2px);
+  padding-right: calc(0.75em - 2px);
 
   .dark & {
-    box-shadow: 0 0 0 1px $blue;
+    border-color: $blue;
   }
 
+  // a shared tag already has a 1px border
   &.is-shared {
-    border-color: $purple-strong;
-    box-shadow: none;
-
-    .dark & {
-      border-color: $blue;
-    }
+    padding-left: calc(0.75em - 1px);
+    padding-right: calc(0.75em - 1px);
   }
 }
 </style>
