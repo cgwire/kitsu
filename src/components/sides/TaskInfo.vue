@@ -238,6 +238,7 @@
                         isDepartmentSupervisor ||
                         isCurrentUserManager
                       "
+                      :is-duplicable="isCommentingAllowed"
                       :is-editable="
                         (user && user.id === comment.person?.id) ||
                         isCurrentUserManager

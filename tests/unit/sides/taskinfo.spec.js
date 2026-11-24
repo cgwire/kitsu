@@ -666,6 +666,22 @@ describe('TaskInfo.vue', () => {
       })
       expect(canComment(wrapper)).toBe(true)
     })
+
+    // Its copy fills the comment form: a click without one threw.
+    it('offers the copy of a client comment only with the comment form', async () => {
+      const comments = [
+        { id: 'from-client', person: { id: 'client-1', role: 'client' } }
+      ]
+      const duplicable = async options => {
+        const { wrapper } = await mountPanel({ comments, ...options })
+        return wrapper.findComponent(Comment).props('isDuplicable')
+      }
+
+      expect(await duplicable()).toBe(false)
+      expect(
+        await duplicable({ task: buildTask({ assignees: [USER_ID] }) })
+      ).toBe(true)
+    })
   })
 
   // The client sees the name and avatar of whoever answers a comment it is

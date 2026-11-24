@@ -95,6 +95,7 @@ const mountComment = ({
   comment = makeComment(),
   isAcknowledgeable,
   isActionError = false,
+  isDuplicable,
   isEditable = true,
   isReplyable,
   storeOptions,
@@ -109,6 +110,7 @@ const mountComment = ({
       comment,
       isAcknowledgeable,
       isActionError,
+      isDuplicable,
       isEditable,
       isReplyable,
       task,
@@ -315,6 +317,7 @@ describe('Comment', () => {
         person_id: 'person-2',
         person: { id: 'person-2', role: 'client' }
       }),
+      isDuplicable: true,
       renderStubDefaultSlot: true
     })
 
@@ -324,6 +327,21 @@ describe('Comment', () => {
     expect(icon.element.querySelector('title')?.textContent ?? null).toBe(
       'Copy into a new comment'
     )
+  })
+
+  // The copy fills the comment form, which a user who may not comment lacks.
+  test('shows the copy icon only when the comment can be duplicated', () => {
+    const comment = makeComment({
+      person_id: 'person-2',
+      person: { id: 'person-2', role: 'client' }
+    })
+
+    const withoutCopy = mountComment({ comment })
+    expect(withoutCopy.find('.client-comment').exists()).toBe(true)
+    expect(withoutCopy.findComponent(CopyIcon).exists()).toBe(false)
+
+    const withCopy = mountComment({ comment, isDuplicable: true })
+    expect(withCopy.findComponent(CopyIcon).exists()).toBe(true)
   })
 
   // Zou hands the client the internal comments that carry a preview, emptied
