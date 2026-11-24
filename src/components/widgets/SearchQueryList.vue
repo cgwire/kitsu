@@ -782,12 +782,22 @@ defineExpose({ addSearch })
   }
 }
 
-// the search the page runs
+// the search the page runs; a shared one recolors its border rather than
+// doubling it with the ring
 .search-queries .tag.active:not(.folder) {
   box-shadow: 0 0 0 1px $purple-strong;
 
   .dark & {
     box-shadow: 0 0 0 1px $blue;
+  }
+
+  &.is-shared {
+    border-color: $purple-strong;
+    box-shadow: none;
+
+    .dark & {
+      border-color: $blue;
+    }
   }
 }
 </style>
