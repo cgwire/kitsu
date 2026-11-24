@@ -533,8 +533,8 @@ describe('TaskType page', () => {
       assetStore.cache.assetMap.delete('asset-2')
     })
 
-    // The URL filters are read on the first load only, once the tasks
-    // arrive: 100 ms after mounting, then 200 ms more.
+    // The URL filters are read once the tasks arrive, 100 ms after mounting,
+    // and a last timer of the load fires 200 ms later.
     const mountTasks = async (
       query,
       getters = {},
@@ -1163,6 +1163,7 @@ describe('TaskType page', () => {
     }))
     // unmounted after each test, a failed one included
     let wrapper = null
+    let storeActions = null
 
     beforeEach(() => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
@@ -1176,7 +1177,19 @@ describe('TaskType page', () => {
       )
     })
 
-    const openLink = async query => {
+    // The props of the link, loaded by the page or by a visit before.
+    const loadProps = () => {
+      linkTasks.forEach(linkTask => {
+        assetStore.cache.assetMap.set(linkTask.entity_id, {
+          id: linkTask.entity_id,
+          asset_type_id: 'props',
+          tasks: [linkTask.id]
+        })
+      })
+    }
+
+    const openLink = async (query, { isLoaded = false } = {}) => {
+      if (isLoaded) loadProps()
       const selection = trackTaskSelection()
       const page = await mountPage({
         section: 'tasks',
@@ -1198,15 +1211,7 @@ describe('TaskType page', () => {
         stubs: { TaskList: false },
         actions: {
           ...selection.actions,
-          initTaskType: vi.fn(() => {
-            linkTasks.forEach(linkTask => {
-              assetStore.cache.assetMap.set(linkTask.entity_id, {
-                id: linkTask.entity_id,
-                asset_type_id: 'props',
-                tasks: [linkTask.id]
-              })
-            })
-          }),
+          initTaskType: vi.fn(loadProps),
           loadScheduleItems: vi.fn(() => [])
         },
         getters: {
@@ -1219,6 +1224,7 @@ describe('TaskType page', () => {
         }
       })
       wrapper = page.wrapper
+      storeActions = page.storeActions
       await vi.advanceTimersByTimeAsync(400)
       await flushPromises()
       return selection
@@ -1259,6 +1265,26 @@ describe('TaskType page', () => {
       })
 
       expect(selection.selectedIds()).toEqual(['task-20', 'task-23'])
+    })
+
+    // Back on the page, its props were still loaded: it skipped the filter
+    // and the task of the URL, and listed every task.
+    it('applies the filter and the task of the URL on a return to the page', async () => {
+      const historyLength = window.history.length
+      const selection = await openLink(
+        '?task_status_id=status-1&task_id=task-24',
+        { isLoaded: true }
+      )
+
+      expect(storeActions.initTaskType).not.toHaveBeenCalled()
+      expect(
+        wrapper
+          .findComponent(TaskList)
+          .props('tasks')
+          .map(({ id }) => id)
+      ).toEqual(['task-20', 'task-23', 'task-24'])
+      expect(selection.selectedIds()).toEqual(['task-24'])
+      expect(window.history.length).toBe(historyLength)
     })
   })
 
