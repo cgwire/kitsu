@@ -105,6 +105,7 @@
             <div
               class="tag"
               :class="{
+                active: isActiveSearch(searchQuery),
                 'is-shared': searchQuery.is_shared,
                 'is-editing': isEditing
               }"
@@ -146,6 +147,7 @@
     <span
       class="tag"
       :class="{
+        active: isActiveSearch(searchQuery),
         'is-shared': searchQuery.is_shared,
         'is-editing': isEditing
       }"
@@ -425,6 +427,18 @@ const removeErrorText = computed(() =>
 const pageQuery = computed(() =>
   props.withRouteQuery ? new URLSearchParams(route.query).toString() : ''
 )
+
+const toSortedQueryString = query => {
+  const searchParams = new URLSearchParams(query)
+  searchParams.sort()
+  return searchParams.toString()
+}
+
+const sortedPageQuery = computed(() => toSortedQueryString(route.query))
+
+const isActiveSearch = searchQuery =>
+  props.withRouteQuery &&
+  toSortedQueryString(searchQuery.search_query) === sortedPageQuery.value
 
 const setQueryPaths = () => {
   props.queries.forEach(query => {
@@ -765,6 +779,15 @@ defineExpose({ addSearch })
 
   .dark & {
     box-shadow: inset 0 0 4px 2px #444;
+  }
+}
+
+// the search the page runs
+.search-queries .tag.active:not(.folder) {
+  box-shadow: 0 0 0 1px $purple-strong;
+
+  .dark & {
+    box-shadow: 0 0 0 1px $blue;
   }
 }
 </style>

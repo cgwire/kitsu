@@ -536,6 +536,25 @@ describe('SearchQueryList, searches of the page query', () => {
       task_type_id: 'type-1'
     })
   })
+  test('marks the search the page runs, whatever the order', async () => {
+    const both = {
+      ...pageSearch,
+      id: 'search-2',
+      search_query: 'task_type_id=type-1&project_id=production-1'
+    }
+    const wrapper = await mountPageList({
+      queries: [pageSearch, both],
+      url: '/?project_id=production-1&task_type_id=type-1'
+    })
+    const tags = () => wrapper.findAll('.tag:not(.folder):not(.group)')
+
+    expect(tags().map(tag => tag.classes('active'))).toEqual([false, true])
+
+    await wrapper.vm.$router.push('/?task_type_id=type-1')
+    await flushPromises()
+
+    expect(tags().map(tag => tag.classes('active'))).toEqual([true, false])
+  })
 })
 
 // The list cuts a long name.
