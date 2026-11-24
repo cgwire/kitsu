@@ -1,14 +1,5 @@
 <template>
   <div>
-    <div class="has-text-right filler filter-button">
-      <button-simple
-        icon="filter"
-        :active="isFiltersDisplayed"
-        :title="$t('main.more_filters')"
-        @click="toggleFilters"
-      />
-    </div>
-
     <div class="filters flexrow">
       <combobox
         class="flexrow-item selector filter-episode"
@@ -39,6 +30,25 @@
           v-model="person"
         />
       </div>
+      <div class="filler"></div>
+      <button-simple
+        class="flexrow-item reset-filters"
+        icon="remove"
+        :title="$t('main.clear_filters')"
+        @click="resetFilters"
+        v-if="hasFilters"
+      />
+      <button-simple
+        class="flexrow-item filters-toggle"
+        :icon="isFiltersDisplayed ? 'minus' : 'plus'"
+        :aria-expanded="`${isFiltersDisplayed}`"
+        :is-on="isFiltersDisplayed"
+        :text="secondRowFilterCount ? `${secondRowFilterCount}` : ''"
+        :title="
+          $t(isFiltersDisplayed ? 'main.less_filters' : 'main.more_filters')
+        "
+        @click="toggleFilters"
+      />
     </div>
 
     <div class="filters flexrow mt1" v-if="isFiltersDisplayed">
@@ -116,6 +126,21 @@ const productionTaskStatuses = computed(
 const productionTaskTypes = computed(() => store.getters.productionTaskTypes)
 const runningEpisodes = computed(() => store.getters.runningEpisodes)
 
+const secondRowFilterCount = computed(
+  () =>
+    [after.value, before.value, previewMode.value !== 'comments'].filter(
+      Boolean
+    ).length
+)
+
+// an episode filter is either unset or on its "all" entry
+const hasFilters = computed(
+  () =>
+    secondRowFilterCount.value > 0 ||
+    Boolean(taskStatusId.value || taskTypeId.value || person.value) ||
+    !['', 'all'].includes(episodeId.value)
+)
+
 const previewOptions = computed(() => [
   { label: t('news.only_comments'), value: 'comments' },
   { label: t('news.only_previews'), value: 'previews' }
@@ -152,6 +177,16 @@ const team = computed(() =>
 const toggleFilters = () => {
   isFiltersDisplayed.value = !isFiltersDisplayed.value
 }
+
+const resetFilters = () => {
+  after.value = null
+  before.value = null
+  episodeId.value = ''
+  person.value = null
+  previewMode.value = 'comments'
+  taskStatusId.value = ''
+  taskTypeId.value = ''
+}
 </script>
 
 <style lang="scss" scoped>
@@ -165,17 +200,22 @@ const toggleFilters = () => {
   margin-bottom: 4px;
 }
 
-.filter-button {
-  color: $grey;
-  cursor: pointer;
-  float: right;
-  text-transform: lowercase;
+.reset-filters,
+.filters-toggle {
+  align-self: flex-end;
+  color: var(--text);
+  height: 42px;
+  padding: 0 14px;
+}
+
+.filters > :last-child {
+  margin-right: 0;
 }
 
 // Mobile: keep only task-status + task-type filters, drop the advanced
 // filter toggle and the episode/person fields to fit the narrow width.
 @media screen and (max-width: 768px) {
-  .filter-button,
+  .filters-toggle,
   .filter-episode,
   .filter-person {
     display: none;

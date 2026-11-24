@@ -1,62 +1,73 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
-      <div class="news page" ref="body" @scroll.passive="onBodyScroll">
-        <div class="timeline-wrapper">
-          <news-filters
-            :is-studio="isStudio"
-            v-model:episode-id="episodeId"
-            v-model:task-status-id="taskStatusId"
-            v-model:task-type-id="taskTypeId"
-            v-model:person="person"
-            v-model:before="before"
-            v-model:after="after"
-            v-model:preview-mode="previewMode"
+      <div class="news-column">
+        <news-filters
+          class="filters-panel"
+          :is-studio="isStudio"
+          v-model:episode-id="episodeId"
+          v-model:task-status-id="taskStatusId"
+          v-model:task-type-id="taskTypeId"
+          v-model:person="person"
+          v-model:before="before"
+          v-model:after="after"
+          v-model:preview-mode="previewMode"
+        />
+
+        <div class="feed-panel">
+          <search-query-list
+            class="query-list"
+            :groups="searchFilterGroups"
+            :is-group-enabled="true"
+            :queries="searchQueries"
+            :type="searchListType"
+            with-route-query
           />
-
-          <div :class="{ timeline: true, 'timeline-blank': isTimelineBlank }">
-            <div class="empty-state" v-if="errors.news">
-              <alert-triangle-icon class="empty-icon" :size="48" />
-              <p class="empty-title">{{ $t('main.loading_error') }}</p>
-              <button class="empty-action" type="button" @click="init">
-                {{ $t('main.reload') }}
-              </button>
-            </div>
-
-            <news-skeleton v-else-if="loading.news" />
-
-            <div class="empty-state" v-else-if="newsList.length === 0">
-              <newspaper-icon class="empty-icon" :size="48" />
-              <p class="empty-title">{{ $t('news.no_news') }}</p>
-              <p class="empty-hint">{{ $t('news.no_news_hint') }}</p>
-            </div>
-
-            <template v-else>
-              <div :key="key" v-for="{ dayList, key } in newsDays">
-                <div
-                  class="has-text-centered subtitle timeline-entry day-sticky"
-                >
-                  <span class="big-dot"></span>
-                  {{
-                    dayList.length > 0 ? formatDay(dayList[0].created_at) : ''
-                  }}
-                </div>
-                <news-row
-                  :key="`news-${news.id}`"
-                  :ref="el => setNewsRef(news.id, el?.root)"
-                  :canvas-id="`annotation-canvas-${news.id}`"
-                  :is-new="recentNewsIds.has(news.id)"
-                  :is-selected="news.id === currentNewsId"
-                  :is-studio="isStudio"
-                  :news="news"
-                  :preview-mode="previewMode"
-                  @select="onNewsSelected"
-                  v-for="news in dayList"
-                />
+          <div class="news page" ref="body" @scroll.passive="onBodyScroll">
+            <div :class="{ timeline: true, 'timeline-blank': isTimelineBlank }">
+              <div class="empty-state" v-if="errors.news">
+                <alert-triangle-icon class="empty-icon" :size="48" />
+                <p class="empty-title">{{ $t('main.loading_error') }}</p>
+                <button class="empty-action" type="button" @click="init">
+                  {{ $t('main.reload') }}
+                </button>
               </div>
-            </template>
 
-            <spinner class="load-more" v-if="loading.more" />
+              <news-skeleton v-else-if="loading.news" />
+
+              <div class="empty-state" v-else-if="newsList.length === 0">
+                <newspaper-icon class="empty-icon" :size="48" />
+                <p class="empty-title">{{ $t('news.no_news') }}</p>
+                <p class="empty-hint">{{ $t('news.no_news_hint') }}</p>
+              </div>
+
+              <template v-else>
+                <div :key="key" v-for="{ dayList, key } in newsDays">
+                  <div
+                    class="has-text-centered subtitle timeline-entry day-sticky"
+                  >
+                    <span class="big-dot"></span>
+                    {{
+                      dayList.length > 0 ? formatDay(dayList[0].created_at) : ''
+                    }}
+                  </div>
+                  <news-row
+                    :key="`news-${news.id}`"
+                    :ref="el => setNewsRef(news.id, el?.root)"
+                    :canvas-id="`annotation-canvas-${news.id}`"
+                    :is-new="recentNewsIds.has(news.id)"
+                    :is-selected="news.id === currentNewsId"
+                    :is-studio="isStudio"
+                    :news="news"
+                    :preview-mode="previewMode"
+                    @select="onNewsSelected"
+                    v-for="news in dayList"
+                  />
+                </div>
+              </template>
+
+              <spinner class="load-more" v-if="loading.more" />
+            </div>
           </div>
         </div>
       </div>
@@ -124,6 +135,7 @@ import NewsFilters from '@/components/pages/news/NewsFilters.vue'
 import NewsRow from '@/components/pages/news/NewsRow.vue'
 import NewsSkeleton from '@/components/pages/news/NewsSkeleton.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const { t } = useI18n()
@@ -187,6 +199,17 @@ const newsDays = computed(() =>
 
 const isStudio = computed(() => !route.path.includes('productions'))
 
+// The studio feed and the feed of each production keep their own searches.
+const searchListType = computed(() =>
+  isStudio.value ? 'newsFeed' : 'productionNewsFeed'
+)
+const searchQueries = computed(
+  () => store.getters[`${searchListType.value}SearchQueries`]
+)
+const searchFilterGroups = computed(
+  () => store.getters[`${searchListType.value}SearchFilterGroups`]
+)
+
 const currentEntityType = computed(
   () => currentTask.value?.task_type?.for_entity
 )
@@ -228,6 +251,37 @@ const filterQuery = computed(() => ({
 }))
 
 // Functions
+
+const toSortedQueryString = query => {
+  const searchParams = new URLSearchParams(query)
+  searchParams.sort()
+  return searchParams.toString()
+}
+
+// Without its unset filters, as the router keeps it.
+const isPageQuery = query =>
+  toSortedQueryString(query) ===
+  toSortedQueryString(
+    Object.fromEntries(
+      Object.entries(filterQuery.value).filter(([, value]) => value)
+    )
+  )
+
+// A filter missing from the query is unset: a saved search replaces the
+// whole query.
+const applyRouteQuery = query => {
+  silent = true
+  previewMode.value = query.preview_mode || 'comments'
+  taskTypeId.value = query.task_type_id || ''
+  taskStatusId.value = query.task_status_id || ''
+  episodeId.value = query.episode_id || ''
+  person.value = query.person_id
+    ? (personMap.value.get(query.person_id) ?? null)
+    : null
+  before.value = parseQueryDate(query.before)
+  after.value = parseQueryDate(query.after)
+  silent = false
+}
 
 // Query dates carry the day only. Rebuild them at local midnight: the round
 // trip goes back out through formatSimpleDate, which formats in local time.
@@ -537,26 +591,28 @@ watch(taskStatusId, value => {
   init()
 })
 
+// A saved search, or the back button, sets a query the page did not write.
+// The feed of another production keeps the filters instead: its path differs.
+watch(
+  () => ({ path: route.path, query: route.query }),
+  (to, from) => {
+    // the watchers of the filters it changes load the feed
+    if (to.path === from.path && !isPageQuery(to.query)) {
+      applyRouteQuery(to.query)
+    }
+  }
+)
+
 // Lifecycle
 
 onMounted(() => {
-  const query = route.query
-  silent = true
-  previewMode.value =
-    query.preview_mode ||
-    localStorage.getItem('news:preview-mode') ||
-    'comments'
-  taskTypeId.value =
-    query.task_type_id || localStorage.getItem('news:task-type-id') || ''
-  taskStatusId.value =
-    query.task_status_id || localStorage.getItem('news:task-status-id') || ''
-  episodeId.value = query.episode_id || ''
-  person.value = query.person_id
-    ? (personMap.value.get(query.person_id) ?? null)
-    : null
-  before.value = parseQueryDate(query.before)
-  after.value = parseQueryDate(query.after)
-  silent = false
+  // the filters the browser kept only stand in for a query without them
+  applyRouteQuery({
+    preview_mode: localStorage.getItem('news:preview-mode'),
+    task_type_id: localStorage.getItem('news:task-type-id'),
+    task_status_id: localStorage.getItem('news:task-status-id'),
+    ...route.query
+  })
 
   window.addEventListener('keydown', onKeyDown, false)
   socket.on('preview-file:add-file', onPreviewFileAddFile)
@@ -593,10 +649,6 @@ useHead({
 
 <style lang="scss" scoped>
 .dark {
-  .page {
-    background: $dark-grey-light;
-  }
-
   .icon,
   .comment-text {
     color: $light-grey-light;
@@ -604,10 +656,6 @@ useHead({
 
   a {
     color: $light-grey-light;
-  }
-
-  .timeline-wrapper {
-    background: $dark-grey;
   }
 
   .timeline {
@@ -631,28 +679,71 @@ useHead({
 
 .main-column {
   flex: 1 1 auto;
-  padding-top: 60px;
-  background: $white-grey-light;
   height: 100%;
   overflow: hidden;
+  // the 60px topbar, then the same 1em as the sides
+  padding: calc(60px + 1em) 1em 1em;
 }
 
-.news {
-  background: $white-grey-light;
-  width: 100%;
-  padding: 0;
-  overflow-y: auto;
+// the feed keeps its reading width, as two panels: the filters, then the
+// saved searches over the news, which scroll alone
+.news-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   height: 100%;
+  margin: auto;
+  // 870px of timeline, as before, plus the panel padding, the room for the
+  // dots and the scrollbar: the dots of the preview rows count on that width
+  max-width: 940px;
 }
 
-.timeline-wrapper {
-  margin: auto;
-  max-width: 920px;
-  padding-top: 25px;
-  padding-left: 25px;
-  padding-right: 25px;
-  background: $white;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+.filters-panel,
+.feed-panel {
+  background: var(--background-panel);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.feed-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75em;
+  min-height: 0;
+}
+
+// the global .query-list margins indent it from the panel padding
+.query-list {
+  margin: 0;
+}
+
+// the default tag color is the panel background: take the tone made for
+// tags laid on a panel (groups keep their inline tint)
+.feed-panel :deep(.search-queries .tag:not(.empty)) {
+  background-color: var(--background-panel-tag);
+}
+
+.feed-panel :deep(.search-queries .group-list) {
+  background-color: var(--background-panel-tag);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+// the global .page rule paints a white sheet as tall as the window
+.news.page {
+  background: transparent;
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  // always its lane: the timeline keeps its width on a short feed
+  overflow-y: scroll;
+  // room for the dots of the rail
+  padding: 0 11px;
+}
+
+// the first day needs no room over it: the panel gap already sets it apart
+.timeline > div:first-child > .day-sticky {
+  margin-top: 0;
 }
 
 .timeline {
@@ -689,16 +780,12 @@ useHead({
 // `position: sticky` still establishes a positioning context for the
 // absolutely-placed `.big-dot`, so the dot keeps sitting on the rail.
 .timeline-entry.day-sticky {
-  background: $white;
+  background: var(--background-panel);
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   position: sticky;
   top: 0;
   z-index: 2;
-
-  .dark & {
-    background: $dark-grey;
-  }
 }
 
 .empty-state {
@@ -751,6 +838,37 @@ useHead({
   max-width: 450px;
 }
 
+@media (min-width: 1025px) {
+  .main-column {
+    padding: 80px 20px 20px;
+  }
+
+  // the task panel is its own surface: the column only frames it. 20px under
+  // the 60px margin of the column puts its top level with the filters panel
+  .side-column {
+    background: transparent;
+    padding: 20px 20px 20px 0;
+  }
+
+  .side-column :deep(.side.task-info) {
+    background: var(--background-panel);
+    border-radius: 12px;
+  }
+
+  // the resize handle becomes the gutter before the panel, its line showing
+  // only on hover (the column selector outweighs the dark theme color)
+  .column.side-column :deep(.extend-bar) {
+    background: transparent;
+    margin-left: 0;
+    width: 14px;
+
+    &:hover {
+      background: linear-gradient(var(--border), var(--border)) center / 3px
+        100% no-repeat;
+    }
+  }
+}
+
 .drawer-close {
   display: none;
 }
@@ -776,9 +894,17 @@ useHead({
     display: none;
   }
 
-  .timeline-wrapper {
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+  .feed-panel {
+    padding: 0.5em;
+  }
+
+  .news.page {
+    padding: 0;
+  }
+
+  // read-only: the saved searches stay, without their editing
+  .query-list :deep(.tag.folder) {
+    display: none;
   }
 }
 

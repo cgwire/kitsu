@@ -47,6 +47,17 @@ const newsList = [
   }
 ]
 
+const studioSearch = {
+  id: 'search-1',
+  name: 'Previews',
+  search_query: 'preview_mode=previews'
+}
+const productionSearch = {
+  id: 'search-2',
+  name: 'Layout',
+  search_query: 'task_type_id=type-2'
+}
+
 let mounted = null
 
 const mountPage = async (
@@ -92,8 +103,12 @@ const mountPage = async (
     getters: {
       currentProduction: () => production,
       dateFormat: () => 'YYYY-MM-DD',
+      newsFeedSearchFilterGroups: () => [],
+      newsFeedSearchQueries: () => [studioSearch],
       openProductions: () => [production],
       personMap: () => new Map(),
+      productionNewsFeedSearchFilterGroups: () => [],
+      productionNewsFeedSearchQueries: () => [productionSearch],
       taskTypeMap: () => new Map(),
       use12HourClock: () => false,
       user: () => ({ timezone: 'Europe/Paris' }),
@@ -1214,6 +1229,76 @@ describe('pages/ProductionNewsFeed', () => {
       await pressEscape()
 
       expect(isDrawerOpen(wrapper)).toBe(true)
+    })
+  })
+
+  describe('saved searches', () => {
+    const feedPath = `/productions/${production.id}/news-feed`
+    const searchListOf = wrapper =>
+      wrapper.findComponent({ name: 'SearchQueryList' })
+    const filtersOf = wrapper => wrapper.findComponent(NewsFilters)
+
+    it('lists the searches of the production, which hold its whole URL query', async () => {
+      const { wrapper } = await mountPage(feedPath)
+
+      expect(searchListOf(wrapper).props()).toMatchObject({
+        groups: [],
+        isGroupEnabled: true,
+        queries: [productionSearch],
+        type: 'productionNewsFeed',
+        withRouteQuery: true
+      })
+    })
+
+    it('lists the searches of the studio on the studio feed', async () => {
+      const { wrapper } = await mountPage('/news-feed')
+
+      expect(searchListOf(wrapper).props()).toMatchObject({
+        queries: [studioSearch],
+        type: 'newsFeed'
+      })
+    })
+
+    // A saved search, or the back button, changes the URL query of the page
+    // shown. A filter missing from it is unset, whatever the browser kept.
+    it('shows and loads the filters of a new URL query', async () => {
+      const { router, wrapper } = await mountPage(
+        `${feedPath}?task_status_id=status-1`
+      )
+
+      await router.push(`${feedPath}?task_type_id=type-2&preview_mode=previews`)
+      await flushPromises()
+
+      expect(filtersOf(wrapper).props()).toMatchObject({
+        previewMode: 'previews',
+        taskStatusId: '',
+        taskTypeId: 'type-2'
+      })
+      expect(pget.mock.calls.at(-1)[0]).toContain('task_type_id=type-2')
+      expect(pget.mock.calls.at(-1)[0]).not.toContain('task_status_id')
+      expect(router.currentRoute.value.query).toEqual({
+        preview_mode: 'previews',
+        task_type_id: 'type-2'
+      })
+    })
+
+    it('loads nothing again for the query it wrote', async () => {
+      const { wrapper } = await mountPage(feedPath)
+      filtersOf(wrapper).vm.$emit('update:taskTypeId', 'type-1')
+      await flushPromises()
+
+      expect(pget).toHaveBeenCalledTimes(2)
+    })
+
+    it('keeps its filters on the feed of another production', async () => {
+      const { router, wrapper } = await mountPage(
+        `${feedPath}?task_type_id=type-2`
+      )
+
+      await router.push('/productions/production-2/news-feed')
+      await flushPromises()
+
+      expect(filtersOf(wrapper).props('taskTypeId')).toBe('type-2')
     })
   })
 })
