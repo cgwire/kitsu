@@ -42,7 +42,6 @@ import {
   GoneFileReader,
   TextFileReader
 } from '../fixtures/file-reader'
-import { buildSearchQueryListStub } from '../fixtures/search-query-list'
 
 const currentUser = { id: 'person-1', role: 'admin' }
 
@@ -52,7 +51,7 @@ const mountPage = async ({
   getters = {},
   stubs = {}
 } = {}) => {
-  routeHolder.route = reactive({ params: {}, query })
+  routeHolder.route = reactive({ name: 'people', params: {}, query })
   const resolved = () => vi.fn(() => Promise.resolve())
   const actions = {
     deletePeople: resolved(),
@@ -94,11 +93,19 @@ const mountPage = async ({
       mocks: { $t: translate },
       // The page drives its search field through a ref.
       stubs: {
+        PanelLayout: false,
         SearchField: {
           name: 'SearchField',
-          props: { canSave: { type: Boolean, default: false } },
           template: '<div />',
-          methods: { getValue: () => '', setValue: () => {} }
+          data: () => ({ value: '' }),
+          methods: {
+            getValue() {
+              return this.value
+            },
+            setValue(value) {
+              this.value = value
+            }
+          }
         },
         ...stubs
       }
@@ -118,31 +125,103 @@ const mountPage = async ({
 }
 
 describe('People page', () => {
+  describe('panel layout', () => {
+    it('lays its filters and its list out in the two panels', async () => {
+      const { wrapper } = await mountPage()
+      const filters = wrapper.find('.filters-panel')
+      const list = wrapper.find('.list-panel')
+
+      expect(filters.findComponent({ name: 'SearchField' }).exists()).toBe(true)
+      expect(filters.findComponent(ComboboxStyled).exists()).toBe(true)
+      expect(list.findComponent({ name: 'SearchQueryList' }).exists()).toBe(
+        true
+      )
+      expect(list.findComponent(PeopleList).exists()).toBe(true)
+    })
+  })
+
   describe('saved searches', () => {
-    const searchField = wrapper =>
-      wrapper.findComponent({ name: 'SearchField' })
+    const savedSearches = wrapper =>
+      wrapper.findComponent({ name: 'SearchQueryList' })
 
-    it('opens the search filter modal on Save', async () => {
-      const SearchQueryList = buildSearchQueryListStub()
-      const { wrapper } = await mountPage({ stubs: { SearchQueryList } })
+    it('saves the filters of the URL, whatever the tab', async () => {
+      const { wrapper } = await mountPage()
 
-      searchField(wrapper).vm.$emit('save', 'ada')
-
-      expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('ada')
-      wrapper.unmount()
+      expect(savedSearches(wrapper).props()).toMatchObject({
+        keptQueryKeys: ['tab'],
+        type: 'people',
+        withRouteQuery: true
+      })
     })
 
-    // The list that opens the modal shows once the people are loaded.
-    it('offers the Save button once the people are loaded', async () => {
-      const loading = await mountPage({
-        getters: { isPeopleLoading: () => true }
+    // Before the filters went to the URL, a search held the text of the
+    // search field, where department=Modeling names a department.
+    it('reads a search saved as text as the text of the field', async () => {
+      const departmentId = '3a2e0f8c-7b1d-4c5e-9f60-1a2b3c4d5e6f'
+      const queries = [
+        { id: '1', name: 'Ada', search_query: 'ada lovelace' },
+        { id: '2', name: 'Modeling', search_query: 'department=Modeling' },
+        { id: '3', name: 'Admins', search_query: 'role=admin&studio=s-1' },
+        { id: '4', name: 'Anim', search_query: `department=${departmentId}` }
+      ]
+      const { wrapper } = await mountPage({
+        getters: { peopleSearchQueries: () => queries }
       })
-      const loaded = await mountPage()
 
-      expect(searchField(loading.wrapper).props('canSave')).toBe(false)
-      expect(searchField(loaded.wrapper).props('canSave')).toBe(true)
-      loading.wrapper.unmount()
-      loaded.wrapper.unmount()
+      expect(
+        savedSearches(wrapper)
+          .props('queries')
+          .map(query => query.search_query)
+      ).toEqual([
+        'search=ada+lovelace',
+        'search=department%3DModeling',
+        'role=admin&studio=s-1',
+        `department=${departmentId}`
+      ])
+    })
+
+    // A saved search, or the back button, sets a query the page did not
+    // write.
+    it('follows the filters of the URL', async () => {
+      const { wrapper } = await mountPage()
+
+      routeHolder.route.query = { role: 'admin' }
+      await flushPromises()
+
+      expect(wrapper.findComponent(ComboboxStyled).props('modelValue')).toBe(
+        'admin'
+      )
+    })
+  })
+
+  describe('filters reset', () => {
+    const resetButton = wrapper =>
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'remove')
+
+    it('shows only when a filter is set', async () => {
+      const { wrapper } = await mountPage({ query: { tab: 'guests' } })
+      expect(resetButton(wrapper)).toBeUndefined()
+
+      routeHolder.route.query = { tab: 'guests', search: 'ada' }
+      await flushPromises()
+
+      expect(resetButton(wrapper).exists()).toBe(true)
+    })
+
+    it('clears the filters and keeps the tab', async () => {
+      const { wrapper } = await mountPage({
+        query: { tab: 'guests', role: 'client', studio: 's-1' }
+      })
+
+      await resetButton(wrapper).vm.$emit('click')
+      await flushPromises()
+
+      expect(routeHolder.route.query).toEqual({ tab: 'guests' })
+      expect(wrapper.findComponent(ComboboxStyled).props('modelValue')).toBe(
+        'all'
+      )
     })
   })
 

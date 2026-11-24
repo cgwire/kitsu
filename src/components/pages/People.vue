@@ -1,85 +1,92 @@
 <template>
-  <div class="people page fixed-page">
-    <div class="flexrow page-header">
-      <button-simple
-        class="flexrow-item"
-        :title="$t('main.csv.import_file')"
-        :is-responsive="true"
-        icon="import"
-        @click="showImportModal"
-        v-if="isCurrentUserAdmin"
-      />
-      <button-href-link
-        class="flexrow-item"
-        :title="$t('main.csv.export_file')"
-        icon="export"
-        path="/api/export/csv/persons.csv"
-      />
-      <button-simple
-        class="flexrow-item"
-        :text="$t('people.new_person')"
-        :is-responsive="true"
-        icon="plus"
-        @click="onNewClicked"
-        v-if="isCurrentUserAdmin"
-      />
-    </div>
-
-    <div class="flexrow search-options">
-      <search-field
-        ref="people-search-field"
-        class="search flexrow-item"
-        :can-save="!isPeopleLoading"
-        @change="onSearchChange"
-        @save="saveSearchQuery"
-        placeholder="ex: John Doe"
-      />
-      <combobox-studio
-        class="flexrow-item"
-        all-studios-label
-        :label="$t('main.studio')"
-        v-model="selectedStudio"
-      />
-      <combobox-department
-        class="flexrow-item"
-        all-departments-label
-        :label="$t('main.department')"
-        v-model="selectedDepartment"
-      />
-      <combobox-styled
-        class="flexrow-item"
-        :label="$t('people.fields.role')"
-        locale-key-prefix="people.role."
-        :options="roleOptions"
-        v-model="role"
-      />
-    </div>
-
-    <div class="query-list">
+  <panel-layout class="people">
+    <template #filters>
+      <div class="flexrow filters">
+        <search-field
+          ref="people-search-field"
+          class="search flexrow-item"
+          @change="onSearchChange"
+          placeholder="ex: John Doe"
+        />
+        <combobox-studio
+          class="flexrow-item is-hidden-mobile"
+          all-studios-label
+          :label="$t('main.studio')"
+          v-model="selectedStudio"
+        />
+        <combobox-department
+          class="flexrow-item is-hidden-mobile"
+          all-departments-label
+          :label="$t('main.department')"
+          v-model="selectedDepartment"
+        />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('people.fields.role')"
+          locale-key-prefix="people.role."
+          :options="roleOptions"
+          v-model="role"
+        />
+        <div class="flexrow filter-actions">
+          <button-simple
+            class="flexrow-item"
+            :title="$t('main.csv.import_file')"
+            :is-responsive="true"
+            icon="import"
+            @click="showImportModal"
+            v-if="isCurrentUserAdmin"
+          />
+          <button-href-link
+            class="flexrow-item"
+            :title="$t('main.csv.export_file')"
+            icon="export"
+            path="/api/export/csv/persons.csv"
+          />
+          <button-simple
+            class="flexrow-item"
+            :text="$t('people.new_person')"
+            :is-responsive="true"
+            icon="plus"
+            @click="onNewClicked"
+            v-if="isCurrentUserAdmin"
+          />
+          <button-simple
+            class="flexrow-item reset-filters"
+            icon="remove"
+            :title="$t('main.clear_filters')"
+            @click="resetFilters"
+            v-if="hasFilters"
+          />
+        </div>
+      </div>
+    </template>
+    <template #list>
       <search-query-list
-        ref="people-search-query-list"
-        :queries="peopleSearchQueries"
+        class="query-list"
+        :kept-query-keys="KEPT_QUERY_KEYS"
+        :queries="savedSearches"
         type="people"
+        with-route-query
         v-if="!isPeopleLoading"
       />
-    </div>
 
-    <route-tabs class="mb0" :active-tab="activeTab" :tabs="tabs" />
+      <route-tabs :active-tab="activeTab" :tabs="tabs" />
 
-    <people-list
-      :entries="listEntries"
-      :is-guests="isGuestTab"
-      :is-archived-guests="activeTab === 'archived-guests'"
-      :is-loading="isListLoading"
-      :is-error="isListError"
-      :seats-remaining="activeTab === 'active' ? seatsRemaining : null"
-      @archive-clicked="onArchiveClicked"
-      @avatar-clicked="onAvatarClicked"
-      @delete-clicked="onDeleteClicked"
-      @edit-clicked="onEditClicked"
-      @restore-clicked="onRestoreClicked"
-      @change-password-clicked="onChangePasswordClicked"
-    />
+      <people-list
+        :entries="listEntries"
+        :is-guests="isGuestTab"
+        :is-archived-guests="activeTab === 'archived-guests'"
+        :is-loading="isListLoading"
+        :is-error="isListError"
+        :seats-remaining="activeTab === 'active' ? seatsRemaining : null"
+        @archive-clicked="onArchiveClicked"
+        @avatar-clicked="onAvatarClicked"
+        @delete-clicked="onDeleteClicked"
+        @edit-clicked="onEditClicked"
+        @restore-clicked="onRestoreClicked"
+        @change-password-clicked="onChangePasswordClicked"
+      />
+    </template>
 
     <import-render-modal
       active
@@ -182,7 +189,7 @@
       @confirm="confirmArchiveGuest"
       v-if="modals.archiveGuest"
     />
-  </div>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -194,7 +201,7 @@ import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 
-/* eslint-disable no-unused-vars */
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import PeopleList from '@/components/lists/PeopleList.vue'
 import ChangePasswordModal from '@/components/modals/ChangePasswordModal.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
@@ -211,7 +218,6 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
-/* eslint-enable no-unused-vars */
 
 const { t } = useI18n()
 const route = useRoute()
@@ -241,12 +247,15 @@ const roleOptions = [
   'user',
   'vendor'
 ].map(name => ({ label: name, value: name }))
+// the tab is where the list is read, not one of its filters
+const KEPT_QUERY_KEYS = ['tab']
+const FILTER_KEYS = ['department', 'role', 'search', 'studio']
+const UUID = /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/
 
 // State
 // --------------------------------------------------------------------------
 
 const searchFieldRef = useTemplateRef('people-search-field')
-const searchQueryListRef = useTemplateRef('people-search-query-list')
 
 const activeTab = ref('active')
 const parsedCSV = ref([])
@@ -319,6 +328,32 @@ const peopleSearchQueries = computed(() => store.getters.peopleSearchQueries)
 const studioMap = computed(() => store.getters.studioMap)
 const user = computed(() => store.getters.user)
 const userLimit = computed(() => store.getters.userLimit)
+
+// Before the filters went to the URL, a saved search held the text of the
+// search field, where department=Modeling names a department.
+const savedSearches = computed(() =>
+  peopleSearchQueries.value.map(query => {
+    const isRouteQuery = [...new URLSearchParams(query.search_query)].every(
+      ([key, value]) =>
+        FILTER_KEYS.includes(key) && (key !== 'department' || UUID.test(value))
+    )
+    return isRouteQuery
+      ? query
+      : {
+          ...query,
+          search_query: `${new URLSearchParams({ search: query.search_query })}`
+        }
+  })
+)
+
+const hasFilters = computed(() =>
+  Boolean(
+    route.query.search ||
+    selectedDepartment.value ||
+    selectedStudio.value ||
+    role.value !== 'all'
+  )
+)
 
 const selfRoleDowngradeText = computed(() => {
   if (!pendingEditForm.value) return ''
@@ -462,8 +497,14 @@ const onSearchChange = () => {
   setSearchInUrl()
 }
 
-const saveSearchQuery = searchQuery => {
-  searchQueryListRef.value?.addSearch(searchQuery)
+const applyRouteFilters = () => {
+  role.value = route.query.role || 'all'
+  selectedDepartment.value = route.query.department || ''
+  selectedStudio.value = route.query.studio || ''
+}
+
+const resetFilters = () => {
+  router.push({ query: { tab: route.query.tab } })
 }
 
 // Unset filters stay out of the URL: the router drops undefined values.
@@ -797,6 +838,14 @@ watch(
   }
 )
 
+// A saved search, or the back button, sets filters the page did not write.
+watch(
+  () => route.query,
+  () => {
+    if (route.name === 'people') applyRouteFilters()
+  }
+)
+
 watch(
   () => route.query.search,
   search => {
@@ -810,9 +859,7 @@ watch(
 
 onMounted(async () => {
   activeTab.value = route.query.tab || 'active'
-  role.value = route.query.role || 'all'
-  selectedDepartment.value = route.query.department || ''
-  selectedStudio.value = route.query.studio || ''
+  applyRouteFilters()
   if (!searchFieldRef.value?.getValue() && route.query.search) {
     searchFieldRef.value?.setValue(route.query.search)
   }
@@ -828,47 +875,76 @@ useHead({ title: computed(() => `${t('people.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.page-header {
+// Controls of unequal height (pill input, select under its label, buttons)
+// only line up on their bottom edge.
+.filters {
+  align-items: flex-end;
+  flex-wrap: wrap;
+  row-gap: 1em;
+
+  > .flexrow-item {
+    margin-bottom: 0;
+  }
+
+  .button {
+    height: 42px;
+  }
+}
+
+// The search field gives its width up before the row wraps: a long role and
+// the reset button did not fit beside it on a laptop.
+.search {
+  flex: 1 1 200px;
+  max-width: 420px;
+}
+
+.filter-actions {
+  margin-left: auto;
+
+  > :last-child {
+    margin-right: 0;
+  }
+}
+
+// One label height and one control height for the whole row, as on the
+// Timesheets.
+.filters :deep(.label) {
+  margin-bottom: 5px;
+  padding-top: 0;
+}
+
+.filters :deep(.studio-combo),
+.filters :deep(.department-combo),
+.filters :deep(.combo) {
+  display: flex;
+  flex-direction: column;
+  height: 42px;
+  justify-content: center;
+}
+
+.reset-filters {
+  color: var(--text);
+  padding: 0 14px;
+}
+
+// Bulma sets the tabs apart from what follows: the panel already does
+.people .tabs {
   margin-bottom: 0;
 }
 
-.data-list {
-  margin-top: 1em;
-}
-
-.search {
-  margin-top: 2em;
-}
-.query-list {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-.search-options {
-  align-items: flex-end;
-}
-
 @media screen and (max-width: 768px) {
-  .people {
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-  }
-
   // Mobile is read-only: no import, export or creation.
-  .page-header {
+  .filter-actions {
     display: none;
   }
 
-  // Margins, not gap: Safari 14.0 has no gap on flex containers.
-  .search-options {
-    flex-wrap: wrap;
+  // the tabs scroll sideways, without the bar
+  .people .tabs {
+    scrollbar-width: none;
 
-    .flexrow-item {
-      margin-bottom: 0.5em;
+    &::-webkit-scrollbar {
+      display: none;
     }
-  }
-
-  .search {
-    margin-top: 1em;
   }
 }
 </style>
