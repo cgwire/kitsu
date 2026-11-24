@@ -2,7 +2,7 @@
   <div class="columns fixed-page" :class="{ 'with-info': showInfo }">
     <div class="column main-column">
       <div class="timesheets page">
-        <div class="page-header" :class="{ collapsed: !showFilters }">
+        <div class="filters-panel" :class="{ collapsed: !showFilters }">
           <div class="filters flexrow">
             <combobox
               class="flexrow-item nowrap"
@@ -58,13 +58,21 @@
               v-if="isCurrentUserAdmin"
             />
             <button-simple
+              class="flexrow-item reset-filters"
+              icon="remove"
+              :title="$t('main.clear_filters')"
+              @click="resetFilters"
+              v-if="hasFilters"
+            />
+            <button-simple
               class="flexrow-item filters-toggle"
+              :icon="showFilters ? 'minus' : 'plus'"
+              :aria-expanded="`${showFilters}`"
+              :is-on="showFilters"
+              :text="secondRowFilterCount ? `${secondRowFilterCount}` : ''"
               :title="
                 $t(showFilters ? 'main.less_filters' : 'main.more_filters')
               "
-              icon="funnel"
-              :aria-expanded="`${showFilters}`"
-              :is-on="showFilters"
               @click="showFilters = !showFilters"
             />
           </div>
@@ -96,32 +104,42 @@
           </div>
         </div>
 
-        <timesheet-chart
-          class="data-list"
-          :people="filteredPeople"
-          :timesheet="timesheet"
-          :detail-level="detailLevel"
-          :month="currentMonth"
-          :year="currentYear"
-          :unit="unit"
-          :daily-rates="dailyRates"
-          :is-loading="isLoading"
-          :is-error="isLoadingError"
-          v-if="showChart"
-        />
-        <people-timesheet-list
-          class="data-list"
-          :people="filteredPeople"
-          :timesheet="timesheet"
-          :detail-level="detailLevel"
-          :month="currentMonth"
-          :year="currentYear"
-          :unit="unit"
-          :daily-rates="dailyRates"
-          :is-loading="isLoading"
-          :is-error="isLoadingError"
-          v-else
-        />
+        <div class="list-panel">
+          <search-query-list
+            class="query-list"
+            :groups="timesheetsSearchFilterGroups"
+            :is-group-enabled="true"
+            :queries="timesheetsSearchQueries"
+            type="timesheets"
+            with-route-query
+          />
+          <timesheet-chart
+            class="data-list"
+            :people="filteredPeople"
+            :timesheet="timesheet"
+            :detail-level="detailLevel"
+            :month="currentMonth"
+            :year="currentYear"
+            :unit="unit"
+            :daily-rates="dailyRates"
+            :is-loading="isLoading"
+            :is-error="isLoadingError"
+            v-if="showChart"
+          />
+          <people-timesheet-list
+            class="data-list"
+            :people="filteredPeople"
+            :timesheet="timesheet"
+            :detail-level="detailLevel"
+            :month="currentMonth"
+            :year="currentYear"
+            :unit="unit"
+            :daily-rates="dailyRates"
+            :is-loading="isLoading"
+            :is-error="isLoadingError"
+            v-else
+          />
+        </div>
       </div>
     </div>
     <div class="column side-column" v-if="showInfo">
@@ -167,6 +185,7 @@ import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TimesheetChart from '@/components/widgets/TimesheetChart.vue'
 
 // Composables
@@ -199,6 +218,12 @@ const personMap = computed(() => store.getters.personMap)
 const productions = computed(() => store.getters.productions)
 const timesheet = computed(() => store.getters.timesheet)
 const firstYear = computed(() => store.getters.firstTimesheetYear)
+const timesheetsSearchFilterGroups = computed(
+  () => store.getters.timesheetsSearchFilterGroups
+)
+const timesheetsSearchQueries = computed(
+  () => store.getters.timesheetsSearchQueries
+)
 
 // The route holds the whole selection: every filter reads it back and writes
 // to it, so there is no local copy to keep in sync.
@@ -278,6 +303,21 @@ const showChart = computed({
 })
 
 const showInfo = computed(() => Boolean(route.params.person_id))
+
+const secondRowFilterCount = computed(
+  () =>
+    [
+      productionId.value,
+      studioId.value,
+      departmentId.value,
+      selectedPerson.value
+    ].filter(Boolean).length
+)
+
+// the unit and the chart are how the page shows the time, not filters
+const hasFilters = computed(
+  () => secondRowFilterCount.value > 0 || peopleFilter.value !== 'logged'
+)
 
 const currentPerson = computed(
   () => personMap.value.get(route.params.person_id) ?? {}
@@ -382,6 +422,19 @@ const pushLevelRoute = (level, params) =>
 const pushQuery = (key, value) => {
   if ((route.query[key] ?? '') === value) return
   router.push({ query: { ...route.query, [key]: value || undefined } })
+}
+
+const resetFilters = () => {
+  router.push({
+    query: {
+      ...route.query,
+      departmentId: undefined,
+      people: undefined,
+      personId: undefined,
+      productionId: undefined,
+      studioId: undefined
+    }
+  })
 }
 
 const reloadTimesheet = async () => {
@@ -519,84 +572,132 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.data-list {
-  margin-top: 2em;
-}
-
 .timesheets {
+  // the global .page rule paints a white sheet
+  background: transparent;
   display: flex;
   flex-direction: column;
+  gap: 14px;
   height: 100%;
-  padding-bottom: 1em;
+  // the 60px topbar, then the same 1em as the sides
+  padding: calc(60px + 1em) 1em 1em;
 }
 
-// the person panel is its own surface: the column only frames it
+.filters-panel,
+.list-panel {
+  background: var(--background-panel);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.filters-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.list-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75em;
+  min-height: 0;
+}
+
+.list-panel .data-list {
+  margin-top: 0;
+}
+
+.list-panel :deep(.datatable-wrapper) {
+  border-radius: 10px;
+}
+
+// the global .query-list margins indent it from the panel padding
+.query-list {
+  margin: 0;
+}
+
+// the default tag color is the panel background: take the tone made for
+// tags laid on a panel (groups keep their inline tint)
+.list-panel :deep(.search-queries .tag:not(.empty)) {
+  background-color: var(--background-panel-tag);
+}
+
+.list-panel :deep(.search-queries .group-list) {
+  background-color: var(--background-panel-tag);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
 .column.side-column {
   background: transparent;
   padding: 1em 1em 1em 0;
 }
 
-.page-header {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5em;
-}
-
 .filters {
   align-items: flex-start;
   flex-wrap: wrap;
-  row-gap: 1.5em;
+  row-gap: 1em;
 
-  // the comboboxes carry the Bulma field margin the person field and the
-  // buttons lack, which pushed those 14px down in the centered rows
   > .flexrow-item {
     margin-bottom: 0;
   }
 
-  // the icon buttons render 32px tall: stretch them to the controls and
-  // sit them on the row's bottom edge, under the labels
+  > :last-child {
+    margin-right: 0;
+  }
+
   > .button {
     align-self: flex-end;
     height: 42px;
   }
 }
 
-// measured on the live row: ComboboxStudio and ComboboxDepartment deviate
-// on BOTH metrics of the centered header rows, so both need pinning. Their
-// label takes a 5px padding-top under the field class, and their control
-// renders 38px tall against 42px for the production combo and the Bulma
-// selects.
-// small screens only: the filters fold behind it
+.reset-filters,
 .filters-toggle {
+  color: var(--text);
+  padding: 0 14px;
+}
+
+.collapsed .filters.collapsible {
   display: none;
 }
 
-.page-header :deep(.label) {
+.filters-panel :deep(.label) {
   margin-bottom: 5px;
   padding-top: 0;
 }
 
-.page-header :deep(.studio-combo),
-.page-header :deep(.department-combo) {
+.filters-panel :deep(.studio-combo),
+.filters-panel :deep(.department-combo) {
   display: flex;
   flex-direction: column;
   height: 42px;
   justify-content: center;
 }
 
+@media screen and (min-width: 769px) {
+  .timesheets {
+    padding: 80px 20px 20px;
+  }
+
+  // the person panel comes 14px after the list, level with the filters
+  // panel: 20px under the 60px margin of its column
+  .with-info .timesheets {
+    padding-right: 14px;
+  }
+
+  .column.side-column {
+    padding: 20px 20px 20px 0;
+  }
+
+  // phones get borderless cards instead
+  .list-panel :deep(.datatable-wrapper) {
+    border: 1px solid var(--border);
+  }
+}
+
 @media screen and (max-width: 768px) {
-  .data-list {
-    margin-top: 1em;
-  }
-
-  .page-header {
-    gap: 1em;
-  }
-
   .filters {
-    row-gap: 1em;
-
-    // read-only below the tablet breakpoint, like the admin lists
     > .button {
       display: none;
     }
@@ -610,21 +711,28 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
     display: none;
   }
 
-  // on its own line under the toggle, once unfolded
   .people-filter {
     flex: 0 0 calc(100% - 1rem);
     order: 1;
   }
 
-  // the panel takes the whole width in place of the grid: its close
-  // button (or Escape) brings the grid back
+  // the cards carry their own padding
+  .list-panel {
+    padding: 0.5em;
+  }
+
+  // read-only: the saved searches stay, without their editing
+  .query-list :deep(.tag.folder) {
+    display: none;
+  }
+
   .with-info .main-column {
     display: none;
   }
 
   .column.side-column {
     max-width: none;
-    padding: 0.5em;
+    padding: 1em;
     width: 100%;
   }
 }

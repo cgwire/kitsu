@@ -18,6 +18,12 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 const alice = { id: 'person-1', full_name: 'Alice', active: true }
 const bob = { id: 'person-2', full_name: 'Bob', active: true }
 
+const savedSearch = {
+  id: 'search-1',
+  name: 'Studio one, in days',
+  search_query: 'studioId=studio-1&unit=day'
+}
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -52,6 +58,8 @@ const mountPage = async (path, { actions = {}, getters = {} } = {}) => {
       personMap: () => new Map([[alice.id, alice]]),
       productions: () => [],
       timesheet: () => ({ 1: { [alice.id]: 120 } }),
+      timesheetsSearchFilterGroups: () => [],
+      timesheetsSearchQueries: () => [savedSearch],
       ...getters
     }
   })
@@ -123,6 +131,72 @@ describe('Timesheets', () => {
 
       // 2025 has 52 ISO weeks, 2026 has 53.
       expect(headers.split(';')).toHaveLength(53)
+    })
+  })
+
+  describe('filters', () => {
+    const buttonOf = name =>
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.classes(name))
+
+    test('keeps its second filter row folded and counts its filters', async () => {
+      await mountPage(
+        `/timesheets/day/2026/10?productionId=production-1&personId=${alice.id}`
+      )
+
+      expect(wrapper.find('.filters-panel').classes()).toContain('collapsed')
+      expect(buttonOf('filters-toggle').props('text')).toBe('2')
+    })
+
+    test('unfolds its second filter row from its toggle', async () => {
+      await mountPage('/timesheets/day/2026/10')
+
+      await buttonOf('filters-toggle').vm.$emit('click')
+
+      expect(wrapper.find('.filters-panel').classes()).not.toContain(
+        'collapsed'
+      )
+    })
+
+    // the unit and the chart are how the page shows the time, not filters
+    test('counts no filter and offers no reset on a bare view', async () => {
+      await mountPage('/timesheets/day/2026/10?unit=day&view=chart')
+
+      expect(buttonOf('filters-toggle').props('text')).toBeFalsy()
+      expect(buttonOf('reset-filters')).toBeUndefined()
+    })
+
+    test('clears its filters and keeps its period and its view', async () => {
+      await mountPage(
+        '/timesheets/day/2026/10?productionId=production-1&studioId=studio-1' +
+          `&departmentId=department-1&personId=${alice.id}&people=all` +
+          '&unit=day&view=chart'
+      )
+
+      buttonOf('reset-filters').vm.$emit('click')
+      await flushPromises()
+
+      expect(router.currentRoute.value.path).toBe('/timesheets/day/2026/10')
+      expect(router.currentRoute.value.query).toEqual({
+        unit: 'day',
+        view: 'chart'
+      })
+      expect(buttonOf('reset-filters')).toBeUndefined()
+    })
+
+    test('lists its saved searches, which hold its whole URL query', async () => {
+      await mountPage('/timesheets/day/2026/10')
+
+      expect(
+        wrapper.findComponent({ name: 'SearchQueryList' }).props()
+      ).toMatchObject({
+        groups: [],
+        isGroupEnabled: true,
+        queries: [savedSearch],
+        type: 'timesheets',
+        withRouteQuery: true
+      })
     })
   })
 
