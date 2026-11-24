@@ -618,8 +618,29 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
     }
   }
 
+  // The toggle wraps alone to a second line for 8px: it gets as narrow as
+  // the funnel it replaces, and the fields come 4px closer.
+  .filters :deep(.filters-toggle) {
+    padding: 0 10px;
+  }
+
+  .filters > .flexrow-item:not(:last-child) {
+    margin-right: 10px;
+  }
+
   .collapsed .collapsible {
     display: none;
+  }
+
+  // The list lets its cards overflow, for a page that scrolls: here they
+  // scroll inside the panel, as on All Tasks, without the bar.
+  .timesheets :deep(.datatable-wrapper) {
+    overflow-y: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .people-filter {
