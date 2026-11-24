@@ -58,6 +58,7 @@ const task = {
 // to survive that too.
 const makeStore = ({
   actions = {},
+  getters = {},
   isAdmin = false,
   isClient = false,
   persons = [],
@@ -70,6 +71,7 @@ const makeStore = ({
       canValidatePreviewFiles: () => () => false,
       dateFormat: () => 'dd/MM/yyyy',
       departmentMap: () => new Map(),
+      getProductionDepartmentIds: () => () => [],
       isCurrentUserAdmin: () => isAdmin,
       isCurrentUserArtist: () => false,
       isCurrentUserClient: () => isClient,
@@ -80,13 +82,13 @@ const makeStore = ({
           ['person-1', { id: 'person-1' }],
           ...persons.map(person => [person.id, person])
         ]),
-      productionDepartmentIds: () => [],
       taskTypeMap: () =>
         new Map([['task-type-1', { id: 'task-type-1', for_entity: 'Asset' }]]),
       teamRolesForProduction: () => productionId =>
         teamRoles[productionId] || {},
       use12HourClock: () => false,
-      user: () => user
+      user: () => user,
+      ...getters
     }
   })
 
@@ -494,6 +496,28 @@ describe('Comment', () => {
       mounted.splice(0).forEach(wrapper => wrapper.unmount())
       vi.restoreAllMocks()
       vi.useRealTimers()
+    })
+
+    // My Tasks shows tasks of any production, whatever the current one.
+    test('offers the departments of the production of the task', async () => {
+      const wrapper = mountReplyable({
+        getters: {
+          departmentMap: () =>
+            new Map([
+              ['department-layout', { id: 'department-layout', name: 'Layout' }],
+              ['department-model', { id: 'department-model', name: 'Modeling' }]
+            ]),
+          getProductionDepartmentIds: () => productionId =>
+            productionId === 'production-1'
+              ? ['department-model']
+              : ['department-layout']
+        }
+      })
+
+      await typeReply(wrapper, 'Thanks @')
+
+      expect(wrapper.find('.atwho-view').text()).toContain('Modeling')
+      expect(wrapper.find('.atwho-view').text()).not.toContain('Layout')
     })
 
     test('closes its list once the focus leaves the field', async () => {

@@ -14,9 +14,9 @@ import { shallowMountWithI18n } from '../fixtures/i18n'
 const store = createStore({
   getters: {
     departmentMap: () => new Map(),
+    getProductionDepartmentIds: () => () => [],
     getTaskStatusForCurrentUser: () => () => [],
     isCurrentUserClient: () => false,
-    productionDepartmentIds: () => [],
     taskStatusForCurrentUser: () => []
   }
 })
@@ -154,10 +154,10 @@ describe('modals/EditCommentModal', () => {
       getters: {
         currentProduction: () => production,
         departmentMap: () => new Map(),
+        getProductionDepartmentIds: () => () => [],
         getTaskStatusForCurrentUser: () => () => [],
         isCurrentUserClient: () => false,
         isDarkTheme: () => false,
-        productionDepartmentIds: () => [],
         productionMap: () => new Map([[production.id, production]]),
         taskStatusForCurrentUser: () => statuses,
         taskStatusMap: () =>
@@ -228,6 +228,42 @@ describe('modals/EditCommentModal', () => {
       expect(wrapper.find('textarea').element.value).toBe(
         'Ready v1 00:00:00:00 (1) '
       )
+    })
+
+    // The window of a task of another production than the current one, as
+    // on My Tasks.
+    it('offers the departments of the given production', async () => {
+      const departmentStore = createStore({
+        getters: {
+          departmentMap: () =>
+            new Map([
+              ['department-layout', { id: 'department-layout', name: 'Layout' }],
+              ['department-model', { id: 'department-model', name: 'Modeling' }]
+            ]),
+          getProductionDepartmentIds: () => productionId =>
+            productionId === 'production-2'
+              ? ['department-model']
+              : ['department-layout'],
+          getTaskStatusForCurrentUser: () => () => [],
+          isCurrentUserClient: () => false,
+          taskStatusForCurrentUser: () => []
+        }
+      })
+      wrapper.unmount()
+      wrapper = shallowMount(EditCommentModal, {
+        attachTo: document.body,
+        global: {
+          plugins: [departmentStore],
+          stubs: { AtTextarea: false, TextField: TextFieldStub }
+        },
+        props: { active: false, commentToEdit: null, productionId: 'production-2' }
+      })
+      await openOn(wrapper, buildComment('comment-1', []))
+      await wrapper.find('textarea').setValue('Ready @')
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(wrapper.find('.atwho-view').text()).toContain('Modeling')
+      expect(wrapper.find('.atwho-view').text()).not.toContain('Layout')
     })
 
     // The other comment fields show the same avatar, which is no link.

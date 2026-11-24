@@ -325,6 +325,7 @@
           :frame="displayedFrame"
           :is-loading="loading.editComment"
           :is-error="errors.editComment"
+          :production-id="currentProductionId"
           :revision="currentRevision"
           :team="currentTeam"
           :task-types="currentTaskTypes"
@@ -655,7 +656,9 @@ const currentTeam = computed(() => {
 // Task types of the same project, filtered by the current task entity type
 // (Shot or Asset), each with a url pointing to the matching task.
 const currentTaskTypes = computed(() => {
-  if (!props.task || !currentProduction.value) return []
+  // On My Tasks, the task is not always of the current production.
+  const production = productionMap.value.get(props.task?.project_id)
+  if (!production) return []
 
   const taskType = taskTypeMap.value.get(props.task.task_type_id)
   if (!taskType) return []
@@ -669,7 +672,7 @@ const currentTaskTypes = computed(() => {
     ])
   )
 
-  return currentProduction.value.task_types
+  return (production.task_types ?? [])
     .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
     .filter(taskType => taskType?.for_entity === taskTypeEntity)
     .filter(taskType => entityTasks[taskType.id])

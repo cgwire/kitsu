@@ -1,21 +1,15 @@
 import { computed, onBeforeUnmount, reactive, watch } from 'vue'
 import { useStore } from 'vuex'
 
-// The departments are the ones of the current production, unless a getter of
-// department ids is given.
 export const useAtMentionsMembers = (
   teamGetter,
   taskTypesGetter,
-  departmentIdsGetter = null
+  departmentIdsGetter
 ) => {
   const store = useStore()
   const departmentMap = computed(() => store.getters.departmentMap)
   const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
-  const departmentIds = computed(() =>
-    departmentIdsGetter
-      ? departmentIdsGetter()
-      : store.getters.productionDepartmentIds
-  )
+  const departmentIds = computed(departmentIdsGetter)
 
   const membersForAts = reactive({ '@': [], '#': [] })
 

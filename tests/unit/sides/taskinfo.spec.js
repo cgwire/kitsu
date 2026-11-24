@@ -645,6 +645,55 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  // My Tasks shows tasks of any production, whatever the current one.
+  describe('task of another production than the current one', () => {
+    const modeling = {
+      id: 'task-type-2',
+      name: 'Modeling',
+      for_entity: 'Shot',
+      department_id: 'department-2'
+    }
+    const mountOnOtherProduction = () =>
+      mountPanel({
+        task: buildTask({
+          assignees: [USER_ID],
+          project_id: 'production-2',
+          task_type_id: modeling.id
+        }),
+        getterOverrides: {
+          productionMap: () =>
+            new Map([
+              ['production-1', { id: 'production-1', task_types: [taskType.id] }],
+              ['production-2', { id: 'production-2', task_types: [modeling.id] }]
+            ]),
+          taskTypeMap: () =>
+            new Map([
+              [taskType.id, taskType],
+              [modeling.id, modeling]
+            ])
+        }
+      })
+
+    it('offers the task types of its production to the comment form', async () => {
+      const { wrapper } = await mountOnOtherProduction()
+
+      expect(
+        wrapper
+          .findComponent(AddComment)
+          .props('taskTypes')
+          .map(taskTypeValue => taskTypeValue.name)
+      ).toEqual(['Modeling'])
+    })
+
+    it('gives its production to the comment edit window', async () => {
+      const { wrapper } = await mountOnOtherProduction()
+
+      expect(wrapper.findComponent(EditCommentModal).props('productionId')).toBe(
+        'production-2'
+      )
+    })
+  })
+
   describe('commenting permissions', () => {
     const canComment = wrapper => wrapper.findComponent(AddComment).exists()
 

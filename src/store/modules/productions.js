@@ -736,16 +736,18 @@ const getters = {
     return production && production.production_style === '2dpaper'
   },
 
-  productionDepartmentIds: (state, getters) => {
-    const departmentIds = {}
-    return getters.productionTaskTypes.reduce((acc, type) => {
-      if (type?.department_id && !departmentIds[type.department_id]) {
-        departmentIds[type.department_id] = true
-        acc.push(type.department_id)
-      }
-      return acc
-    }, [])
-  },
+  // The departments of the task types of a production, each once, in their
+  // order. Without a production, the ones of the current production.
+  getProductionDepartmentIds: (state, getters) => productionId => [
+    ...new Set(
+      (productionId
+        ? getters.getProductionTaskTypes(productionId)
+        : getters.productionTaskTypes
+      )
+        .map(taskType => taskType?.department_id)
+        .filter(Boolean)
+    )
+  ],
 
   productionAssetTypeOptions: (state, getters) => {
     return getters.productionAssetTypes

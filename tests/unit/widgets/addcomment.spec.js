@@ -88,8 +88,8 @@ describe('AddComment', () => {
         isCurrentUserManager: () => false,
         currentUserRoleForProduction: () => () => null,
         departmentMap: () => new Map(),
+        getProductionDepartmentIds: () => () => [],
         isTaskRevisionTaken: () => () => false,
-        productionDepartmentIds: () => [],
         productionMap: () =>
           new Map([
             [
@@ -671,6 +671,32 @@ describe('AddComment', () => {
 
     afterEach(() => {
       vi.useRealTimers()
+    })
+
+    // My Tasks shows tasks of any production, whatever the current one.
+    it('offers the departments of the production of its task', async () => {
+      wrapper.unmount()
+      await mountComment(
+        {
+          departmentMap: () =>
+            new Map([
+              ['department-layout', { id: 'department-layout', name: 'Layout' }],
+              ['department-model', { id: 'department-model', name: 'Modeling' }]
+            ]),
+          getProductionDepartmentIds: () => productionId =>
+            productionId === 'production-1'
+              ? ['department-model']
+              : ['department-layout']
+        },
+        { AtTextarea: false },
+        {},
+        { attachTo: document.body }
+      )
+
+      await typeComment('Ready @')
+
+      expect(wrapper.find('.atwho-view').text()).toContain('Modeling')
+      expect(wrapper.find('.atwho-view').text()).not.toContain('Layout')
     })
 
     it('closes its list on a press elsewhere, not on the list', async () => {

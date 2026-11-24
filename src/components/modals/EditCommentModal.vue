@@ -222,6 +222,7 @@ const props = defineProps({
   frame: { type: Number, default: 0 },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  productionId: { type: String, default: null },
   revision: { type: Number, default: 1 },
   taskTypes: { type: Array, default: () => [] },
   team: { type: Array, default: () => [] }
@@ -231,9 +232,11 @@ const emit = defineEmits(['cancel', 'confirm'])
 
 useModal(toRef(props, 'active'), emit)
 
+// On My Tasks, the task is not always of the current production.
 const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.team,
-  () => props.taskTypes
+  () => props.taskTypes,
+  () => store.getters.getProductionDepartmentIds(props.productionId)
 )
 const commentSuggestionsRef = ref(null)
 const { members: mentionMembers } = useAtSuggestions(

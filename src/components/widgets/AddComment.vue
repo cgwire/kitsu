@@ -556,9 +556,11 @@ const inputLinkRef = ref(null)
 const addAttachmentModalRef = ref(null)
 const commentSuggestionsRef = ref(null)
 
+// On My Tasks, the task is not always of the current production.
 const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.team,
-  () => props.taskTypes
+  () => props.taskTypes,
+  () => store.getters.getProductionDepartmentIds(props.task?.project_id)
 )
 // vue-at gets one array of members: the form renders again at each frame
 // of the player.

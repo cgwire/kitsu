@@ -420,8 +420,6 @@ describe('ActionPanel, suggestions of the comment', () => {
         nbSelectedTasks: state => state.selection.length,
         nbSelectedValidations: () => 0,
         personMap: () => new Map([alice, bob].map(member => [member.id, member])),
-        // The current production of the store, not the one of the tasks.
-        productionDepartmentIds: () => ['department-other'],
         productionMap: () => productionMap,
         selectedAssets: () => new Map(),
         selectedConcepts: () => new Map(),
