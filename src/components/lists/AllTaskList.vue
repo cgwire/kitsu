@@ -53,13 +53,14 @@
             @keydown.enter.prevent="selectTask(task)"
             v-for="task in tasks"
           >
-            <td class="project">
+            <td class="project" :data-label="$t('tasks.fields.production')">
               <production-name-cell
                 class="project"
                 :entry="{ id: task.project_id, name: task.project_name }"
                 :only-avatar="true"
                 :is-link="false"
               />
+              <span class="project-name">{{ task.project_name }}</span>
             </td>
             <td class="thumbnail">
               <entity-thumbnail
@@ -371,6 +372,11 @@ td.due-date {
   margin-top: 0.6em;
 }
 
+// the cards name the production: its avatar says nothing without a tooltip
+.project-name {
+  display: none;
+}
+
 // keeps the first header off the rounded corner of the frame
 .datatable-head th.project {
   padding-left: 1em;
@@ -415,11 +421,18 @@ td.due-date {
 
 // read-only cards below the tablet breakpoint, like the admin lists
 @media screen and (max-width: 768px) {
+  // the list scrolls in its frame: a desktop browser at phone width would
+  // take 20px off the right of the cards for its scrollbar
   .datatable-wrapper {
     background: transparent;
     border: 0;
     min-height: 0;
     overflow-x: visible;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .datatable.datatable--cards {
@@ -447,7 +460,45 @@ td.due-date {
     .datatable-body td.entity {
       font-size: 1.05em;
       font-weight: 600;
+      padding-bottom: 0.5em;
       padding-top: 0;
+    }
+
+    // one height for every line, whatever the widget it holds
+    .datatable-body td[data-label] {
+      min-height: 2.25em;
+      padding: 0.15em 0;
+    }
+
+    td.project {
+      .project-name {
+        display: inline;
+      }
+
+      :deep(.production-name) {
+        display: none;
+      }
+    }
+
+    // TaskTypeCell pads and spaces its chip for a full desktop cell
+    td.task-type :deep(.tag) {
+      font-size: 0.9em;
+      margin: 0;
+      padding: 0 0.7em;
+    }
+
+    // ValidationCell pads its tag inline, and spaces it for stacked tags
+    td.status :deep(.status-wrapper) {
+      padding: 0 !important;
+    }
+
+    td.status :deep(.tag) {
+      margin-bottom: 0;
+    }
+
+    // PeopleAvatarWithMenu keeps a right margin on its last avatar
+    td.assignees :deep(.flexrow-item:last-child) {
+      margin-right: 0;
     }
 
     // size and font come inline from the avatar props, tuned for the rows

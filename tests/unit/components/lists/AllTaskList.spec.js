@@ -128,7 +128,12 @@ describe('lists/AllTaskList', () => {
         },
         props: {
           tasks: [
-            { id: 'task-1', assignees: ['person-1'], due_date: '2026-12-01' },
+            {
+              id: 'task-1',
+              assignees: ['person-1'],
+              due_date: '2026-12-01',
+              project_name: 'Caminandes'
+            },
             { id: 'task-2', assignees: [] }
           ]
         }
@@ -139,6 +144,15 @@ describe('lists/AllTaskList', () => {
 
       expect(row.find('td.asset-type').classes()).toContain('card-head')
       expect(row.find('td.entity').classes()).toContain('card-head')
+    })
+
+    // The avatar of the desktop rows names no production without its
+    // tooltip, which a phone cannot show.
+    test('names the production on a line', () => {
+      const cell = mountCards().find('tbody tr td.project')
+
+      expect(cell.attributes('data-label')).toBe('tasks.fields.production')
+      expect(cell.find('.project-name').text()).toBe('Caminandes')
     })
 
     test('lines up the type, status, assignees and due date', () => {
@@ -162,7 +176,6 @@ describe('lists/AllTaskList', () => {
     test('keeps the other cells off the card', () => {
       const row = mountCards().find('tbody tr')
       const hidden = [
-        'td.project',
         'td.thumbnail',
         'td.estimation',
         'td.duration',
