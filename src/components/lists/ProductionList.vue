@@ -85,7 +85,7 @@
           </tr>
         </thead>
         <tbody class="datatable-body">
-          <template :key="section.label" v-for="section in openSections">
+          <template :key="section.key" v-for="section in openSections">
             <tr class="datatable-type-header">
               <th
                 scope="rowgroup"
@@ -270,11 +270,13 @@
 </template>
 
 <script setup>
+import { format, isValid, parse } from 'date-fns'
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { useFormat } from '@/composables/format'
 import { getOwnValue } from '@/lib/models'
 import { PRODUCTION_STYLE_OPTIONS } from '@/lib/productions'
 
@@ -310,6 +312,7 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 const store = useStore()
+const { formatBoolean, formatDisplayDate } = useFormat()
 
 // State
 
@@ -327,6 +330,17 @@ const isCurrentUserSupervisor = computed(
 const lastProductionScreen = computed(() => store.getters.lastProductionScreen)
 const mergedProjectMetadataDescriptors = computed(
   () => store.getters.mergedProjectMetadataDescriptors
+)
+// The personMap getter hands back the same Map when a person changes, the
+// people and guests getters a new list.
+const personMap = computed(
+  () =>
+    new Map(
+      [...store.getters.people, ...store.getters.guests].map(person => [
+        person.id,
+        person
+      ])
+    )
 )
 const searchQuery = computed(() => props.search.trim().toLowerCase())
 
@@ -346,21 +360,17 @@ const closedProductions = computed(() =>
   )
 )
 
-const groupLabel = production => {
-  if (props.groupBy === 'production_type') {
-    return t(`productions.type.${production.production_type || 'short'}`)
-  }
-  if (props.groupBy === 'production_style') {
-    const style = getProductionStyleLabel(production.production_style)
-    return t(`productions.style.${style || '2d3d'}`)
-  }
-  return getOwnValue(production.data, props.groupBy) || t('main.none')
-}
+const groupByDescriptor = computed(() =>
+  mergedProjectMetadataDescriptors.value.find(
+    descriptor => descriptor.field_name === props.groupBy
+  )
+)
 
 const openSections = computed(() => {
   if (!props.groupBy) {
     return [
       {
+        key: 'open',
         label: t('productions.status.open'),
         productions: openProductions.value
       }
@@ -368,13 +378,13 @@ const openSections = computed(() => {
   }
   const groups = new Map()
   openProductions.value.forEach(production => {
-    const label = groupLabel(production)
-    if (!groups.has(label)) groups.set(label, [])
-    groups.get(label).push(production)
+    const group = getGroup(production)
+    if (!groups.has(group.key)) {
+      groups.set(group.key, { ...group, productions: [] })
+    }
+    groups.get(group.key).productions.push(production)
   })
-  return [...groups]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([label, productions]) => ({ label, productions }))
+  return [...groups.values()].sort(compareGroups)
 })
 
 // A match hidden inside the collapsed section would look like no match at all.
@@ -472,6 +482,94 @@ const getProductionStyleLabel = value =>
 
 const getProjectDescriptorForField = (production, fieldName) =>
   projectDescriptorMap.value.get(production.id)?.get(fieldName) || null
+
+// The copies of a column may not share one type: a key per kind keeps a
+// number apart from the same text.
+const valueGroup = (kind, value, label, order = label) => ({
+  key: `${kind}:${value}`,
+  label,
+  order
+})
+
+const noValueGroup = () => ({ key: '', label: t('main.none'), order: null })
+
+// A number input empties any other text.
+const NUMBER_PATTERN = /^-?(\d+|\d*\.\d+)([eE][-+]?\d+)?$/
+
+// A section per value, titled as its cells show it: a value they cannot show
+// goes with the productions without one.
+const getGroup = production => {
+  if (props.groupBy === 'production_type') {
+    const label = t(`productions.type.${production.production_type || 'short'}`)
+    return valueGroup('text', label, label)
+  }
+  if (props.groupBy === 'production_style') {
+    const style = getProductionStyleLabel(production.production_style)
+    const label = t(`productions.style.${style || '2d3d'}`)
+    return valueGroup('text', label, label)
+  }
+  const descriptor =
+    getProjectDescriptorForField(production, props.groupBy) ||
+    groupByDescriptor.value
+  const dataType = descriptor?.data_type
+  const choices = descriptor?.choices || []
+  const value = getOwnValue(production.data, props.groupBy)
+  const raw = value == null ? '' : String(value)
+  // A production without a value shows an unticked box.
+  if (dataType === 'boolean') {
+    const isTicked = value === 'true'
+    return valueGroup(
+      'boolean',
+      isTicked,
+      formatBoolean(isTicked),
+      Number(isTicked)
+    )
+  }
+  if (dataType === 'taglist') {
+    const tags = raw
+      .split(',')
+      .filter(tag => tag && choices.includes(tag))
+      .sort()
+      .join(', ')
+    return tags ? valueGroup('text', tags, tags) : noValueGroup()
+  }
+  if (dataType === 'person') {
+    const person = personMap.value.get(value)
+    return person ? valueGroup('person', value, person.name) : noValueGroup()
+  }
+  if (dataType === 'list') {
+    return value && choices.includes(value)
+      ? valueGroup('text', value, value)
+      : noValueGroup()
+  }
+  if (dataType === 'date') {
+    const date = parse(raw, 'yyyy-MM-dd', new Date())
+    if (!isValid(date)) return noValueGroup()
+    const day = format(date, 'yyyy-MM-dd')
+    return valueGroup('date', day, formatDisplayDate(day), day)
+  }
+  if (dataType === 'number') {
+    return NUMBER_PATTERN.test(raw)
+      ? valueGroup('number', raw, raw, Number(raw))
+      : noValueGroup()
+  }
+  const text = raw.trim()
+  return text ? valueGroup('text', text, text) : noValueGroup()
+}
+
+const collator = new Intl.Collator(undefined, { numeric: true })
+
+const getRank = ({ order }) => {
+  if (order === null) return 2
+  return typeof order === 'number' ? 0 : 1
+}
+
+const compareGroups = (a, b) => {
+  const rankGap = getRank(a) - getRank(b)
+  if (rankGap !== 0) return rankGap
+  if (typeof a.order === 'number') return a.order - b.order
+  return collator.compare(a.order, b.order)
+}
 
 const onProjectMetadataInCell = ({ entry, descriptor, value }) => {
   emit('metadata-changed', { entry, descriptor, value })
