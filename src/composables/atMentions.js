@@ -122,9 +122,12 @@ export const useAtSuggestions = (atRef, membersGetter) => {
 
   // vue-at picks its highlighted entry on key code 13, whatever the modifiers.
   // The document gets the key before the field: the list closes on Ctrl+Enter
-  // or Cmd+Enter, and the text stays as typed. vue-at also reads the field
-  // again 50 ms after a keystroke, later on a busy page: the list stays closed
-  // until the next input in the field.
+  // or Cmd+Enter, and the text stays as typed. On Escape, vue-at closes its
+  // list but lets the key go on to a modal around the field, which would close
+  // with the text: the key stops once the list closes. It may come from a
+  // container of the field, which a press on the list focuses. vue-at also
+  // reads the field again 50 ms after a keystroke, later on a busy page: the
+  // list stays closed until the next input in the field.
   let isClosedUntilInput = false
 
   const onDocumentKeydown = event => {
@@ -133,6 +136,15 @@ export const useAtSuggestions = (atRef, membersGetter) => {
       (event.ctrlKey || event.metaKey) &&
       isInField(event)
     ) {
+      isClosedUntilInput = true
+      closeSuggestions()
+    }
+    if (
+      event.key === 'Escape' &&
+      atRef.value?.atwho &&
+      (isInField(event) || isAroundField(event))
+    ) {
+      event.stopPropagation()
       isClosedUntilInput = true
       closeSuggestions()
     }

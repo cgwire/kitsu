@@ -213,6 +213,60 @@ describe('modals/EditCommentModal', () => {
       expect(isListOpen()).toBe(false)
     })
 
+    // vue-at closes its list on Escape and lets the key go on to the window.
+    it('closes its list on Escape, and the window on the next one', async () => {
+      const field = wrapper.find('textarea')
+
+      await field.trigger('keydown', { key: 'Escape', keyCode: 27 })
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+      expect(wrapper.emitted('cancel')).toBeUndefined()
+
+      await field.trigger('keydown', { key: 'Escape', keyCode: 27 })
+      expect(wrapper.emitted('cancel')).toHaveLength(1)
+    })
+
+    // vue-at reads the field again 50 ms after a keystroke.
+    it('keeps its list closed after an Escape until the next input', async () => {
+      const field = wrapper.find('textarea')
+
+      await field.trigger('keydown', { keyCode: 65 })
+      await field.trigger('keydown', { key: 'Escape', keyCode: 27 })
+      await vi.advanceTimersByTimeAsync(100)
+      expect(isListOpen()).toBe(false)
+
+      await field.setValue('Ready @a')
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(true)
+    })
+
+    // A held key repeats its keydown.
+    it('keeps the window open while Escape is held', async () => {
+      const field = wrapper.find('textarea')
+
+      await field.trigger('keydown', { key: 'Escape', keyCode: 27 })
+      await field.trigger('keydown', { key: 'Escape', keyCode: 27, repeat: true })
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+      expect(wrapper.emitted('cancel')).toBeUndefined()
+    })
+
+    // A press on the list, released outside it, leaves the focus on the window
+    // and the list open.
+    it('closes its list alone on Escape with the focus on the window', async () => {
+      wrapper
+        .find('.atwho-li')
+        .element.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      wrapper.element.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(true)
+
+      await wrapper.trigger('keydown', { key: 'Escape', keyCode: 27 })
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+      expect(wrapper.emitted('cancel')).toBeUndefined()
+    })
+
     // A press on the list moves the focus to the window, the closest focusable
     // container of the field.
     it('keeps its list open while an entry is picked with the mouse', async () => {
