@@ -450,6 +450,7 @@ import { useBreakdownLoader } from '@/composables/breakdownLoader'
 import { useCellSave } from '@/composables/cellSave'
 import clipboard from '@/lib/clipboard'
 import csv from '@/lib/csv'
+import { getOwnValue } from '@/lib/models'
 import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
 import { range } from '@/lib/time'
@@ -1419,7 +1420,7 @@ const getCsvEntries = () =>
       ...(isFrameIn.value ? [entity.data.frame_in] : []),
       ...(isFrameOut.value ? [entity.data.frame_out] : []),
       ...metadataDescriptors.value.map(
-        descriptor => entity.data[descriptor.field_name] || ''
+        descriptor => getOwnValue(entity.data, descriptor.field_name) || ''
       ),
       ...castingAssetTypes.value.map(assetTypeName =>
         getCsvCastingCell(

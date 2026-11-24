@@ -4691,6 +4691,32 @@ describe('Task.vue metadata values', () => {
       .find(candidate => candidate.find('.field-label').text() === 'Field')
     expect(row.findAll('td')[1].text()).toEqual('')
   })
+
+  // A column named "Constructor" has the field name of a property every
+  // object inherits.
+  it.each(['string', 'person', 'url'])(
+    'renders the %s Constructor column of a task without a value as empty',
+    async dataType => {
+      const { wrapper } = await mountPage({
+        task: buildTask({ data: {} }),
+        getterOverrides: {
+          taskMetadataDescriptors: () => [
+            descriptorOf(dataType, {
+              name: 'Constructor',
+              field_name: 'constructor'
+            })
+          ]
+        }
+      })
+      const row = wrapper
+        .findAll('tr.datatable-row')
+        .find(
+          candidate => candidate.find('.field-label').text() === 'Constructor'
+        )
+      expect(row.findAll('td')[1].text()).toEqual('')
+      expect(row.find('a').exists()).toBe(false)
+    }
+  )
 })
 
 // Zou may still build the files of a preview another user adds.

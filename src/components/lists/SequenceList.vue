@@ -263,9 +263,7 @@
                 <td
                   class="metadata-descriptor datatable-row-header"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="
-                    sequence.data ? sequence.data[descriptor.field_name] : ''
-                  "
+                  :title="getOwnValue(sequence.data, descriptor.field_name)"
                   :style="{
                     'z-index': 1000 - i, // Need for combo to be above the next cell
                     left: offsets['editor-' + j]
@@ -371,9 +369,7 @@
                 <td
                   class="metadata-descriptor"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="
-                    sequence.data ? sequence.data[descriptor.field_name] : ''
-                  "
+                  :title="getOwnValue(sequence.data, descriptor.field_name)"
                   :key="sequence.id + '-' + descriptor.id"
                   v-for="(
                     descriptor, j
@@ -509,6 +505,7 @@ import { useStore } from 'vuex'
 import { useEntityList } from '@/composables/entityList'
 import { useFormat } from '@/composables/format'
 import { getMetadataFieldValue } from '@/lib/descriptors'
+import { getOwnValue } from '@/lib/models'
 import { getEntityPath, getTaskHref } from '@/lib/path'
 
 /* eslint-disable no-unused-vars */

@@ -53,7 +53,8 @@ import { useStore } from 'vuex'
 import { useFormat } from '@/composables/format'
 import {
   getDescriptorChecklistValues,
-  getMetadataChecklistValues
+  getMetadataChecklistValues,
+  hasDataValue
 } from '@/lib/descriptors'
 import { safeUrl } from '@/lib/render'
 
@@ -68,11 +69,7 @@ const store = useStore()
 const { formatDisplayDate } = useFormat()
 
 const getMetadataFieldValue = (descriptor, entity) => {
-  if (
-    entity?.data &&
-    descriptor.field_name in entity.data &&
-    entity.data[descriptor.field_name] != null
-  ) {
+  if (hasDataValue(entity?.data, descriptor.field_name)) {
     return entity.data[descriptor.field_name]
   }
   return ''

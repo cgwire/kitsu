@@ -1519,6 +1519,51 @@ describe('Shots store, getShotsCsvLines', () => {
 
     expect(lines[0].slice(3)).toEqual(['a', 'z'])
   })
+
+  // A column named "Constructor" has the field name of a property every
+  // object inherits.
+  test.each([
+    ['boolean', false],
+    ['person', ''],
+    ['string', undefined]
+  ])(
+    'exports an empty %s Constructor cell for a shot without a value',
+    (dataType, cell) => {
+      shotsStore.cache.shots = [
+        {
+          id: 's1',
+          sequence_name: 'SEQ01',
+          name: 'SH01',
+          description: '',
+          data: {},
+          validations: new Map()
+        }
+      ]
+      shotsStore.cache.result = []
+      const rootGetters = {
+        currentProduction: {
+          id: 'p1',
+          descriptors: [
+            {
+              name: 'Constructor',
+              field_name: 'constructor',
+              data_type: dataType,
+              entity_type: 'Shot'
+            }
+          ]
+        },
+        isTVShow: false,
+        organisation: { hours_by_day: 8 },
+        personMap: new Map(),
+        taskMap: new Map()
+      }
+      const state = { shotValidationColumns: [] }
+
+      const lines = shotsStore.actions.getShotsCsvLines({ state, rootGetters })
+
+      expect(lines[0].slice(3)).toEqual([cell])
+    }
+  )
 })
 
 describe('Shots store, list totals', () => {

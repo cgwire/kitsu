@@ -712,6 +712,49 @@ describe('Assets store', () => {
 
       expect(lines[0].slice(4)).toEqual(['a', 'z'])
     })
+
+    // A column named "Constructor" has the field name of a property every
+    // object inherits.
+    test.each([
+      ['boolean', false],
+      ['person', ''],
+      ['string', undefined]
+    ])(
+      'exports an empty %s Constructor cell for an asset without a value',
+      (dataType, cell) => {
+        assetsStore.cache.assets = [
+          {
+            id: 'a1',
+            name: 'A1',
+            asset_type_name: 'Char',
+            description: '',
+            data: {},
+            validations: new Map()
+          }
+        ]
+        assetsStore.cache.result = []
+        const rootGetters = baseRootGetters()
+        rootGetters.currentProduction = {
+          id: 'p1',
+          descriptors: [
+            {
+              name: 'Constructor',
+              field_name: 'constructor',
+              data_type: dataType,
+              entity_type: 'Asset'
+            }
+          ]
+        }
+        const state = { assetValidationColumns: [] }
+
+        const lines = assetsStore.actions.getAssetsCsvLines({
+          state,
+          rootGetters
+        })
+
+        expect(lines[0].slice(4)).toEqual([cell])
+      }
+    )
   })
 
   describe('cache.result maintenance', () => {

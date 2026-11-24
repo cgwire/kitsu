@@ -116,6 +116,30 @@ describe('lib/sorting', () => {
     expect(results.map(entry => entry.id)).toEqual([2, 1])
   })
 
+  // A column named "Constructor" has the field name of a property every
+  // object inherits: an entity without a value still sorts last.
+  it('sortByMetadata puts the entities without a Constructor value last', () => {
+    const entries = [
+      { id: 1, data: {} },
+      { id: 2, data: { constructor: 'zeta' } },
+      { id: 3, data: { constructor: 'omega' } }
+    ]
+    const comparator = sortByMetadata({
+      column: 'constructor',
+      data_type: 'string'
+    })
+    // Both orders, so the entity without a value comes as each argument.
+    expect([...entries].sort(comparator).map(entry => entry.id)).toEqual([
+      3, 2, 1
+    ])
+    expect(
+      [...entries]
+        .reverse()
+        .sort(comparator)
+        .map(entry => entry.id)
+    ).toEqual([3, 2, 1])
+  })
+
   // A checklist cell can hold a value written for another type of column:
   // "null" or text from a CSV import, "true" left by a boolean column.
   it('sortByMetadata ranks a checklist cell of another type as unticked', () => {

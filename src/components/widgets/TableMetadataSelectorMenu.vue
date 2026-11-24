@@ -93,6 +93,7 @@ import { useStore } from 'vuex'
 import draggable from 'vuedraggable'
 
 import { useDraggableRebuild } from '@/composables/draggableRebuild'
+import { getOwnValue } from '@/lib/models'
 
 const SIDE_PAD = 8
 const MENU_MAX_HEIGHT = 400
@@ -158,13 +159,17 @@ const isCurrentUserManager = computed(() =>
 
 const filteredFixedColumns = computed(() =>
   Object.keys(props.modelValue)
-    .filter(name => FIELD_TO_NAME.value[name] && !props.exclude[name])
+    .filter(
+      name =>
+        getOwnValue(FIELD_TO_NAME.value, name) &&
+        !getOwnValue(props.exclude, name)
+    )
     .map(name => ({ field_name: name, name: FIELD_TO_NAME.value[name] }))
 )
 
 const filteredMetadataDescriptors = computed(() =>
   props.descriptors
-    .filter(descriptor => !props.exclude[descriptor.field_name])
+    .filter(descriptor => !getOwnValue(props.exclude, descriptor.field_name))
     .sort((a, b) => {
       const positionDiff = (a.position ?? 1000) - (b.position ?? 1000)
       if (positionDiff !== 0) return positionDiff
@@ -278,7 +283,7 @@ const initialHeaders = {
   ...(stored ? JSON.parse(stored) : {})
 }
 props.descriptors.forEach(descriptor => {
-  if (initialHeaders[descriptor.field_name] === undefined) {
+  if (getOwnValue(initialHeaders, descriptor.field_name) === undefined) {
     initialHeaders[descriptor.field_name] = true
   }
 })

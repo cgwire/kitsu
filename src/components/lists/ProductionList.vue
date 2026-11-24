@@ -275,6 +275,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { getOwnValue } from '@/lib/models'
 import { PRODUCTION_STYLE_OPTIONS } from '@/lib/productions'
 
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
@@ -353,7 +354,7 @@ const groupLabel = production => {
     const style = getProductionStyleLabel(production.production_style)
     return t(`productions.style.${style || '2d3d'}`)
   }
-  return production.data?.[props.groupBy] || t('main.none')
+  return getOwnValue(production.data, props.groupBy) || t('main.none')
 }
 
 const openSections = computed(() => {

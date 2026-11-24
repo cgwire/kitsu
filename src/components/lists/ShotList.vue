@@ -370,7 +370,7 @@
                 <td
                   class="metadata-descriptor datatable-row-header"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="shot.data ? shot.data[descriptor.field_name] : ''"
+                  :title="getOwnValue(shot.data, descriptor.field_name)"
                   :style="{
                     'z-index':
                       descriptor.data_type === 'taglist'
@@ -696,7 +696,7 @@
                 <td
                   class="metadata-descriptor"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="shot.data ? shot.data[descriptor.field_name] : ''"
+                  :title="getOwnValue(shot.data, descriptor.field_name)"
                   :key="shot.id + '-' + descriptor.id"
                   v-for="(
                     descriptor, j
@@ -815,6 +815,7 @@ import { useEntityList } from '@/composables/entityList'
 import { useFormat } from '@/composables/format'
 import vNumberValue from '@/directives/number-value'
 import { getMetadataFieldValue } from '@/lib/descriptors'
+import { getOwnValue } from '@/lib/models'
 import { readNumberInput } from '@/lib/number'
 import { getTaskHref } from '@/lib/path'
 import { range } from '@/lib/time'

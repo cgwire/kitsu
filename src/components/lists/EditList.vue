@@ -298,7 +298,7 @@
                 <td
                   class="metadata-descriptor datatable-row-header"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="edit.data ? edit.data[descriptor.field_name] : ''"
+                  :title="getOwnValue(edit.data, descriptor.field_name)"
                   :style="{
                     'z-index': 1000 - i, // Need for combo to be above the next cell
                     left: offsets['editor-' + j]
@@ -367,7 +367,7 @@
                 <td
                   class="metadata-descriptor"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="edit.data ? edit.data[descriptor.field_name] : ''"
+                  :title="getOwnValue(edit.data, descriptor.field_name)"
                   :key="edit.id + '-' + descriptor.id"
                   v-for="(
                     descriptor, j
@@ -497,6 +497,7 @@ import { useStore } from 'vuex'
 import { useEntityList } from '@/composables/entityList'
 import { useFormat } from '@/composables/format'
 import { getMetadataFieldValue } from '@/lib/descriptors'
+import { getOwnValue } from '@/lib/models'
 import { getTaskHref } from '@/lib/path'
 import { range } from '@/lib/time'
 

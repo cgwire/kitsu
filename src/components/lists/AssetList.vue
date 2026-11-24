@@ -364,7 +364,7 @@
                 <td
                   class="metadata-descriptor datatable-row-header"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="asset.data ? asset.data[descriptor.field_name] : ''"
+                  :title="getOwnValue(asset.data, descriptor.field_name)"
                   :style="{
                     'z-index':
                       descriptor.data_type === 'taglist'
@@ -523,7 +523,7 @@
                 <td
                   class="metadata-descriptor"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="asset.data ? asset.data[descriptor.field_name] : ''"
+                  :title="getOwnValue(asset.data, descriptor.field_name)"
                   :key="'desc' + asset.id + '-' + descriptor.id"
                   v-for="(
                     descriptor, j
@@ -617,6 +617,7 @@ import emptyAssetIllustration from '@/assets/illustrations/empty_asset.png'
 import { useEntityList } from '@/composables/entityList'
 import { useFormat } from '@/composables/format'
 import { getMetadataFieldValue } from '@/lib/descriptors'
+import { getOwnValue } from '@/lib/models'
 import { getTaskHref } from '@/lib/path'
 import { sortTaskTypes } from '@/lib/sorting'
 import { range } from '@/lib/time'

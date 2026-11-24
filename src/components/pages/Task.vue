@@ -287,7 +287,7 @@
                           linkForDescriptor(descriptor)
                         "
                       >
-                        {{ task.data[descriptor.field_name] }}
+                        {{ getOwnValue(task.data, descriptor.field_name) }}
                       </a>
                       <span
                         class="flexrow"
@@ -527,6 +527,7 @@ import {
   logRequestFailure
 } from '@/lib/errors'
 import func from '@/lib/func'
+import { getOwnValue } from '@/lib/models'
 import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
 import { formatRevision } from '@/lib/preview'
 import {
@@ -1122,7 +1123,7 @@ const formatDuration = (minutes, toLocale = true) =>
   formatDurationLib(organisation.value, minutes, toLocale)
 
 const getTaskMetadataValue = descriptor => {
-  const value = task.value?.data?.[descriptor.field_name]
+  const value = getOwnValue(task.value?.data, descriptor.field_name)
   if (value == null || value === '') return ''
   if (descriptor.data_type === 'date') {
     return formatDisplayDate(value)
@@ -1137,11 +1138,12 @@ const getTaskMetadataValue = descriptor => {
 }
 
 const personForDescriptor = descriptor =>
-  personMap.value.get(task.value?.data?.[descriptor.field_name]) || null
+  personMap.value.get(getOwnValue(task.value?.data, descriptor.field_name)) ||
+  null
 
 // The url field accepts any absolute URL, javascript: included.
 const linkForDescriptor = descriptor =>
-  safeUrl(task.value?.data?.[descriptor.field_name])
+  safeUrl(getOwnValue(task.value?.data, descriptor.field_name))
 
 // Functions (routing)
 // --------------------------------------------------------------------------

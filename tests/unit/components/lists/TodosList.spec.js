@@ -176,6 +176,37 @@ describe('lists/TodosList', () => {
     })
   })
 
+  // A column named "Constructor" has the field name of a property every
+  // object inherits.
+  test('shows a Constructor column and leaves the Object global alone', async () => {
+    const descriptor = {
+      id: 'descriptor-1',
+      name: 'Constructor',
+      field_name: 'constructor',
+      entity_type: 'Shot',
+      data_type: 'string',
+      departments: ['department-1'],
+      choices: []
+    }
+    const wrapper = await mountLoadedList(undefined, {
+      getters: {
+        openProductions: () => [
+          { id: 'production-1', descriptors: [descriptor] }
+        ],
+        user: () => ({ id: 'user-1', departments: ['department-1'] })
+      }
+    })
+    try {
+      expect(
+        wrapper.findAllComponents({ name: 'MetadataHeader' })
+      ).toHaveLength(1)
+      expect(Object.hasOwn(Object, 'Shot')).toBe(false)
+    } finally {
+      delete Object.Shot
+      wrapper.unmount()
+    }
+  })
+
   test('can show the empty message without the illustration', () => {
     const wrapper = mountList({
       emptyText: 'Nothing waiting',

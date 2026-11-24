@@ -2,6 +2,7 @@
  * Pure helpers to read and format metadata descriptors.
  */
 
+import { getOwnValue } from '@/lib/models'
 import { sortByName } from '@/lib/sorting'
 
 export const getDescriptorChoicesOptions = (descriptor, emptyChoice = true) => {
@@ -12,12 +13,11 @@ export const getDescriptorChoicesOptions = (descriptor, emptyChoice = true) => {
   return values
 }
 
+export const hasDataValue = (data, fieldName) =>
+  getOwnValue(data, fieldName) != null
+
 export const getMetadataFieldValue = (descriptor, entity) => {
-  if (
-    entity.data &&
-    descriptor.field_name in entity.data &&
-    entity.data[descriptor.field_name] != null
-  ) {
+  if (hasDataValue(entity.data, descriptor.field_name)) {
     return entity.data[descriptor.field_name]
   }
   // Task descriptors live only in the task's own `data`. Never fall back to
@@ -26,9 +26,7 @@ export const getMetadataFieldValue = (descriptor, entity) => {
   // into the task column.
   if (
     descriptor.entity_type !== 'Task' &&
-    entity.entity_data &&
-    descriptor.field_name in entity.entity_data &&
-    entity.entity_data[descriptor.field_name] != null
+    hasDataValue(entity.entity_data, descriptor.field_name)
   ) {
     return entity.entity_data[descriptor.field_name]
   }
@@ -41,11 +39,6 @@ export const getMetadataFieldValue = (descriptor, entity) => {
 // loaded for.
 const getEntityProductionId = (entity, productionId) =>
   entity.project_id ?? entity.production_id ?? productionId
-
-// A column named "Constructor" has the field name of a property every object
-// inherits: a value counts only when the data holds it.
-export const hasDataValue = (data, fieldName) =>
-  Object.keys(data ?? {}).includes(fieldName) && data[fieldName] != null
 
 // Zou moves the value of a renamed column to its new field name, in the
 // production of the column, when there is one. The data changes in place: a

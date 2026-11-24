@@ -250,5 +250,20 @@ describe('ShotLine, number cells', () => {
 
       expect(savedValues(wrapper)).toEqual(['Run'])
     })
+
+    // A column named "Constructor" has the field name of a property every
+    // object inherits.
+    test('titles a Constructor cell with the value of the shot only', () => {
+      const titleOf = data =>
+        mountNumberLine({
+          entity: markRaw({ id: 'shot-b', nb_frames: null, data }),
+          metadataDescriptors: [descriptor('constructor', 'string')]
+        })
+          .find('.metadata-descriptor')
+          .attributes('title')
+
+      expect(titleOf({})).toBeUndefined()
+      expect(titleOf({ constructor: 'Unit 2' })).toBe('Unit 2')
+    })
   })
 })

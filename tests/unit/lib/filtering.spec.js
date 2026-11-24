@@ -1363,6 +1363,21 @@ describe('lib/filtering', () => {
       expect(results).toHaveLength(4)
     })
 
+    // A column named "Constructor" has the field name of a property every
+    // object inherits.
+    it('an empty Constructor filter keeps the entries without a value', () => {
+      const descriptor = { field_name: 'constructor', entity_type: 'Shot' }
+      const filters = [{ descriptor, values: [''], type: 'descriptor' }]
+      const constructorEntries = [
+        { id: 'shot-1', data: {} },
+        { id: 'shot-2', data: { constructor: 'Unit 1' } },
+        // A task row: the metadata of its shot comes in entity_data.
+        { id: 'task-1', data: {}, entity_data: {} }
+      ]
+      const results = applyFilters(constructorEntries, filters, taskMap)
+      expect(results.map(entry => entry.id)).toEqual(['shot-1', 'task-1'])
+    })
+
     it('color=blue', () => {
       const filters = [
         {
