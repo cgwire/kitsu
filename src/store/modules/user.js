@@ -51,6 +51,10 @@ import {
   REMOVE_ALL_TASKS_SEARCH_END,
   SAVE_ALL_TASKS_SEARCH_FILTER_GROUP_END,
   REMOVE_ALL_TASKS_SEARCH_FILTER_GROUP_END,
+  SAVE_MAIN_SCHEDULE_SEARCH_END,
+  REMOVE_MAIN_SCHEDULE_SEARCH_END,
+  SAVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END,
+  REMOVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END,
   ADD_SELECTED_TASK,
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
@@ -331,6 +335,9 @@ const getters = {
   allTasksSearchQueries: state => state.userFilters.alltasks?.all || [],
   allTasksSearchFilterGroups: state =>
     state.userFilterGroups.alltasks?.all || [],
+  mainScheduleSearchQueries: state => state.userFilters.mainschedule?.all || [],
+  mainScheduleSearchFilterGroups: state =>
+    state.userFilterGroups.mainschedule?.all || [],
   userFilters: state => state.userFilters,
   userFilterGroups: state => state.userFilterGroups,
   isTodosLoading: state => state.isTodosLoading,
@@ -615,6 +622,42 @@ const actions = {
   async removeAllTasksSearchFilterGroup({ commit }, filterGroup) {
     await peopleApi.removeFilterGroup(filterGroup)
     commit(REMOVE_ALL_TASKS_SEARCH_FILTER_GROUP_END, { filterGroup })
+  },
+
+  async saveMainScheduleSearch({ commit }, searchFilter) {
+    const searchQuery = await peopleApi.createFilter(
+      'mainschedule',
+      searchFilter,
+      null,
+      null
+    )
+    commit(SAVE_MAIN_SCHEDULE_SEARCH_END, { searchQuery })
+    return searchQuery
+  },
+
+  async removeMainScheduleSearch({ commit }, searchQuery) {
+    await peopleApi.removeFilter(searchQuery)
+    commit(REMOVE_MAIN_SCHEDULE_SEARCH_END, { searchQuery })
+  },
+
+  async saveMainScheduleSearchFilterGroup({ commit }, filterGroup) {
+    const savedGroup = await peopleApi.createFilterGroup(
+      'mainschedule',
+      filterGroup.name,
+      filterGroup.color,
+      null,
+      filterGroup.is_shared,
+      filterGroup.department_id
+    )
+    commit(SAVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END, {
+      filterGroup: savedGroup
+    })
+    return savedGroup
+  },
+
+  async removeMainScheduleSearchFilterGroup({ commit }, filterGroup) {
+    await peopleApi.removeFilterGroup(filterGroup)
+    commit(REMOVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END, { filterGroup })
   },
 
   setTodoListScrollPosition({ commit, rootGetters }, scrollPosition) {
@@ -947,6 +990,22 @@ const mutations = {
 
   [REMOVE_ALL_TASKS_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
     removeFromFilters(state.userFilterGroups, 'alltasks', filterGroup)
+  },
+
+  [SAVE_MAIN_SCHEDULE_SEARCH_END](state, { searchQuery }) {
+    addToFilters(state.userFilters, 'mainschedule', 'all', searchQuery)
+  },
+
+  [REMOVE_MAIN_SCHEDULE_SEARCH_END](state, { searchQuery }) {
+    removeFromFilters(state.userFilters, 'mainschedule', searchQuery)
+  },
+
+  [SAVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    addToFilters(state.userFilterGroups, 'mainschedule', 'all', filterGroup)
+  },
+
+  [REMOVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    removeFromFilters(state.userFilterGroups, 'mainschedule', filterGroup)
   },
 
   [ADD_SELECTED_TASK](state, validationInfo) {

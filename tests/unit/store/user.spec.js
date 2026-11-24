@@ -754,9 +754,13 @@ describe('User store', () => {
     })
   })
 
-  // The All Tasks page lists its searches straight from the user filters,
-  // through the getter.
-  describe('All Tasks searches', () => {
+  // These pages list their searches straight from the user filters, through
+  // the getters.
+  describe.each([
+    { page: 'All Tasks', type: 'AllTasks', listType: 'alltasks' },
+    { page: 'Main Schedule', type: 'MainSchedule', listType: 'mainschedule' }
+  ])('$page searches', ({ type, listType }) => {
+    const prefix = type.charAt(0).toLowerCase() + type.slice(1)
     const late = {
       id: 'filter-1',
       name: 'Late',
@@ -780,10 +784,10 @@ describe('User store', () => {
 
     test('lists the searches loaded with the context', () => {
       const realStore = mountStore()
-      const queries = computed(() => realStore.getters.allTasksSearchQueries)
+      const queries = computed(() => realStore.getters[`${prefix}SearchQueries`])
       expect(queries.value).toEqual([])
 
-      realStore.commit('LOAD_USER_FILTERS_END', { alltasks: { all: [late] } })
+      realStore.commit('LOAD_USER_FILTERS_END', { [listType]: { all: [late] } })
 
       expect(queries.value).toEqual([late])
     })
@@ -791,13 +795,13 @@ describe('User store', () => {
     test('saves a search out of any production', async () => {
       peopleApi.createFilter.mockResolvedValue(late)
       const realStore = mountStore()
-      const queries = computed(() => realStore.getters.allTasksSearchQueries)
+      const queries = computed(() => realStore.getters[`${prefix}SearchQueries`])
       const searchFilter = { name: 'Late', search_query: late.search_query }
 
-      await realStore.dispatch('saveAllTasksSearch', searchFilter)
+      await realStore.dispatch(`save${type}Search`, searchFilter)
 
       expect(peopleApi.createFilter).toHaveBeenCalledWith(
-        'alltasks',
+        listType,
         searchFilter,
         null,
         null
@@ -808,10 +812,10 @@ describe('User store', () => {
     test('drops a removed search', async () => {
       peopleApi.removeFilter.mockResolvedValue()
       const kept = { ...late, id: 'filter-2', name: 'Mine' }
-      const realStore = mountStore({ alltasks: { all: [late, kept] } })
-      const queries = computed(() => realStore.getters.allTasksSearchQueries)
+      const realStore = mountStore({ [listType]: { all: [late, kept] } })
+      const queries = computed(() => realStore.getters[`${prefix}SearchQueries`])
 
-      await realStore.dispatch('removeAllTasksSearch', late)
+      await realStore.dispatch(`remove${type}Search`, late)
 
       expect(peopleApi.removeFilter).toHaveBeenCalledWith(late)
       expect(queries.value).toEqual([kept])
@@ -831,18 +835,18 @@ describe('User store', () => {
         }
       })
       const groups = computed(
-        () => realStore.getters.allTasksSearchFilterGroups
+        () => realStore.getters[`${prefix}SearchFilterGroups`]
       )
       expect(groups.value).toEqual([])
 
-      await realStore.dispatch('saveAllTasksSearchFilterGroup', {
+      await realStore.dispatch(`save${type}SearchFilterGroup`, {
         name: 'Mine',
         color: '#000',
         is_shared: false
       })
 
       expect(peopleApi.createFilterGroup).toHaveBeenCalledWith(
-        'alltasks',
+        listType,
         'Mine',
         '#000',
         null,
@@ -860,7 +864,7 @@ describe('User store', () => {
           user: {
             state: {
               userFilters: {},
-              userFilterGroups: { alltasks: { all: [group] } }
+              userFilterGroups: { [listType]: { all: [group] } }
             },
             getters: store.getters,
             mutations: store.mutations,
@@ -869,10 +873,10 @@ describe('User store', () => {
         }
       })
       const groups = computed(
-        () => realStore.getters.allTasksSearchFilterGroups
+        () => realStore.getters[`${prefix}SearchFilterGroups`]
       )
 
-      await realStore.dispatch('removeAllTasksSearchFilterGroup', group)
+      await realStore.dispatch(`remove${type}SearchFilterGroup`, group)
 
       expect(peopleApi.removeFilterGroup).toHaveBeenCalledWith(group)
       expect(groups.value).toEqual([])
