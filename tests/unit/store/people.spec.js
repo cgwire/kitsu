@@ -11,6 +11,7 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@/store/api/people', () => ({
   default: {
     deleteOrganisationLogo: vi.fn(),
+    deletePerson: vi.fn(),
     getDaysOff: vi.fn(),
     getDayTable: vi.fn(),
     getMonthTable: vi.fn(),
@@ -306,6 +307,82 @@ describe('People store', () => {
 
         expect(displayedPeople.value).toEqual(['alice', 'robot'])
       })
+    })
+
+    // The person cells of the lists look their person up.
+    test('getPerson follows a rename, the guests, and a deletion', () => {
+      scope.run(() => {
+        const name = id => computed(() => vuexStore.getters.getPerson(id)?.name)
+        const bob = name('bob')
+        const guest = name('guest')
+        expect(bob.value).toBe('bob Doe')
+        expect(guest.value).toBeUndefined()
+
+        vuexStore.commit(
+          'EDIT_PEOPLE_END',
+          person('bob', { first_name: 'Robert' })
+        )
+        expect(bob.value).toBe('Robert Doe')
+
+        vuexStore.commit('LOAD_GUESTS_END', {
+          guests: [person('guest', { is_guest: true })]
+        })
+        expect(guest.value).toBe('guest Doe')
+        vuexStore.commit(
+          'EDIT_PEOPLE_END',
+          person('guest', { first_name: 'Gwen', is_guest: true })
+        )
+        expect(guest.value).toBe('Gwen Doe')
+
+        vuexStore.commit('DELETE_PEOPLE_END', person('bob'))
+        expect(bob.value).toBeUndefined()
+      })
+    })
+
+    // The People and Bots pages delete through this action: the person leaves
+    // the lists without waiting for the server to send the deletion back.
+    test('deletePeople takes the person out of the lists at once', async () => {
+      peopleApi.deletePerson.mockResolvedValue({})
+      const { bob, displayedPeople, people } = scope.run(() => ({
+        bob: computed(() => vuexStore.getters.getPerson('bob')?.name),
+        displayedPeople: computed(() =>
+          vuexStore.getters.displayedPeople.map(({ id }) => id)
+        ),
+        people: computed(() => vuexStore.getters.people.map(({ id }) => id))
+      }))
+      expect(bob.value).toBe('bob Doe')
+
+      await store.actions.deletePeople(
+        { commit: vuexStore.commit },
+        person('bob')
+      )
+
+      expect(peopleApi.deletePerson).toHaveBeenCalledWith(person('bob'))
+      expect(people.value).toEqual(['alice', 'robot'])
+      expect(displayedPeople.value).toEqual(['alice', 'robot'])
+      expect(bob.value).toBeUndefined()
+    })
+
+    // The People page lists the guests in their own tabs, where an archived
+    // guest can be deleted.
+    test('deletePeople takes a deleted guest out of the guests', async () => {
+      peopleApi.deletePerson.mockResolvedValue({})
+      const guest = id => person(id, { is_guest: true })
+      vuexStore.commit('LOAD_GUESTS_END', {
+        guests: [guest('gina'), guest('gus')]
+      })
+      const guests = scope.run(() =>
+        computed(() => vuexStore.getters.guests.map(({ id }) => id))
+      )
+      expect(guests.value).toEqual(['gina', 'gus'])
+
+      await store.actions.deletePeople(
+        { commit: vuexStore.commit },
+        guest('gina')
+      )
+
+      expect(guests.value).toEqual(['gus'])
+      expect(vuexStore.getters.getPerson('gina')).toBeUndefined()
     })
   })
 

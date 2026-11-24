@@ -218,7 +218,6 @@ const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
 )
 const currentProduction = computed(() => store.getters.currentProduction)
-const personMap = computed(() => store.getters.personMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const selectedAssets = computed(() => store.getters.selectedAssets)
 const selectedEdits = computed(() => store.getters.selectedEdits)
@@ -226,18 +225,20 @@ const selectedShots = computed(() => store.getters.selectedShots)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const user = computed(() => store.getters.user)
 
-// Project team, for the "person" descriptor picker.
+// Project team, for the "person" descriptor picker. A computed over the
+// person map would keep the people of its first read: getPerson follows a
+// rename or a deletion.
 const team = computed(() =>
   sortPeople(
     (currentProduction.value?.team || [])
-      .map(personId => personMap.value.get(personId))
+      .map(personId => store.getters.getPerson(personId))
       .filter(Boolean)
   )
 )
 
 const personValue = computed(
   () =>
-    personMap.value.get(
+    store.getters.getPerson(
       getMetadataFieldValue(props.descriptor, props.entity)
     ) || null
 )

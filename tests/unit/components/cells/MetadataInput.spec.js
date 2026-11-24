@@ -1,8 +1,16 @@
-import { mount } from '@vue/test-utils'
+import { mount, RouterLinkStub } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
+// The people module pulls in the root store (lib/auth → @/store): stub it so
+// no Vuex store is built.
+vi.mock('@/store', () => ({ default: {} }))
+
+import peopleStore from '@/store/modules/people'
+
 import MetadataInput from '@/components/cells/MetadataInput.vue'
+import MetadataPerson from '@/components/cells/MetadataPerson.vue'
 
 import { useNumberField } from '../../fixtures/number-input'
 
@@ -24,7 +32,6 @@ describe('cells/MetadataInput', () => {
           isCurrentUserAdmin: () => true,
           isCurrentUserManager: () => true,
           isCurrentUserSupervisor: () => false,
-          personMap: () => new Map(),
           selectedAssets: () => new Map(),
           selectedEdits: () => new Map(),
           selectedShots: () => new Map(),
@@ -90,7 +97,6 @@ describe('cells/MetadataInput', () => {
           isCurrentUserAdmin: () => isAdmin,
           isCurrentUserManager: () => isAdmin,
           isCurrentUserSupervisor: () => false,
-          personMap: () => new Map(),
           selectedAssets: () => new Map(),
           selectedEdits: () => new Map(),
           selectedShots: () => new Map(),
@@ -193,6 +199,111 @@ describe('cells/MetadataInput', () => {
       expect(wrapper.find('input').exists()).toBe(false)
       expect(wrapper.find('a').attributes('href')).toBe(url)
       expect(wrapper.find('a').text()).toBe(url)
+    })
+  })
+
+  describe('person', () => {
+    const person = (id, firstName) => ({
+      id,
+      first_name: firstName,
+      last_name: 'Doe',
+      email: `${id}@example.com`,
+      active: true
+    })
+
+    let theme
+
+    beforeEach(() => {
+      theme = document.createElement('div')
+      theme.innerHTML = '<div id="theme-popups"></div>'
+      document.body.appendChild(theme)
+    })
+
+    afterEach(() => {
+      theme.remove()
+    })
+
+    // The real people module, whose person map keeps its identity when a
+    // person changes.
+    const mountCell = () => {
+      peopleStore.cache.people = []
+      peopleStore.cache.personMap.clear()
+      peopleStore.cache.guests = []
+      const store = createStore({
+        modules: {
+          people: {
+            state: { ...peopleStore.state },
+            getters: peopleStore.getters,
+            mutations: peopleStore.mutations
+          }
+        },
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            team: ['person-1', 'person-2']
+          }),
+          isCurrentUserAdmin: () => true,
+          isCurrentUserManager: () => true,
+          isCurrentUserSupervisor: () => false,
+          isDarkTheme: () => false,
+          selectedAssets: () => new Map(),
+          selectedEdits: () => new Map(),
+          selectedShots: () => new Map(),
+          selectedTasks: () => new Map(),
+          taskTypeMap: () => new Map(),
+          user: () => ({ departments: [] })
+        }
+      })
+      store.commit('LOAD_PEOPLE_END', {
+        people: [person('person-1', 'Ada'), person('person-2', 'Bob')],
+        userFilters: {}
+      })
+      const wrapper = mount(MetadataInput, {
+        props: {
+          descriptor: {
+            id: 'descriptor-3',
+            field_name: 'supervisor',
+            data_type: 'person',
+            departments: []
+          },
+          entity: { id: 'shot-1', data: { supervisor: 'person-1' } }
+        },
+        global: {
+          plugins: [store, createI18n({ legacy: false, locale: 'en' })],
+          stubs: { RouterLink: RouterLinkStub }
+        }
+      })
+      return { store, wrapper }
+    }
+
+    const findName = wrapper => wrapper.find('.metadata-person-cell .ellipsis')
+    // The people the picker offers.
+    const getTeamNames = wrapper =>
+      wrapper
+        .findComponent(MetadataPerson)
+        .props('people')
+        .map(({ name }) => name)
+
+    test('shows a person renamed elsewhere, in the cell and its picker', async () => {
+      const { store, wrapper } = mountCell()
+      expect(findName(wrapper).text()).toBe('Ada Doe')
+      expect(getTeamNames(wrapper)).toEqual(['Ada Doe', 'Bob Doe'])
+
+      store.commit('EDIT_PEOPLE_END', person('person-1', 'Zoe'))
+      await nextTick()
+
+      expect(findName(wrapper).text()).toBe('Zoe Doe')
+      expect(getTeamNames(wrapper)).toEqual(['Bob Doe', 'Zoe Doe'])
+    })
+
+    test('empties the cell of a person deleted elsewhere', async () => {
+      const { store, wrapper } = mountCell()
+
+      store.commit('DELETE_PEOPLE_END', person('person-1', 'Ada'))
+      await nextTick()
+
+      expect(findName(wrapper).exists()).toBe(false)
+      expect(getTeamNames(wrapper)).toEqual(['Bob Doe'])
     })
   })
 })
