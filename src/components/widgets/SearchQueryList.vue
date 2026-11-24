@@ -669,9 +669,9 @@ defineExpose({ addSearch })
     border-bottom-right-radius: 1em;
     display: flex;
     flex-direction: column;
-    left: -1px;
+    left: 0;
     max-height: 200px;
-    min-width: calc(100% + 2px + 1em);
+    min-width: calc(100% + 1em);
     overflow-x: hidden;
     overflow-y: auto;
     padding: 0.5rem 0;
@@ -686,6 +686,12 @@ defineExpose({ addSearch })
       margin-top: 0.5em;
     }
   }
+}
+
+// the list of a shared group starts under its 1px border
+.search-queries .group.is-shared .group-list {
+  left: -1px;
+  min-width: calc(100% + 2px + 1em);
 }
 
 .search-queries .tag {
