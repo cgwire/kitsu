@@ -235,39 +235,57 @@ const productionRole = (state, productionId) => {
 const routeRole = (state, rootState) =>
   productionRole(state, rootState?.route?.params?.production_id)
 
-// The pages outside any production whose saved searches hold their whole URL
-// query: the `type` of their SearchQueryList, which names their getters and
-// their actions, then the list type Zou files their searches under.
-const PAGE_SEARCH_LIST_TYPES = Object.entries({
-  allTasks: 'alltasks',
-  mainSchedule: 'mainschedule',
-  teamSchedule: 'teamschedule'
-})
+// The pages whose saved searches hold their whole URL query: the `type` of
+// their SearchQueryList, which names their getters and their actions, then
+// the list type Zou files their searches under. Most are outside any
+// production; the others file them under the current one.
+const PAGE_SEARCHES = [
+  { type: 'allTasks', listType: 'alltasks' },
+  { type: 'mainSchedule', listType: 'mainschedule' },
+  { type: 'teamSchedule', listType: 'teamschedule' },
+  { type: 'newsFeed', listType: 'newsfeed' },
+  { type: 'productionNewsFeed', listType: 'newsfeed', isInProduction: true }
+]
 
 const pageSearchGetters = Object.fromEntries(
-  PAGE_SEARCH_LIST_TYPES.flatMap(([type, listType]) => [
-    [`${type}SearchQueries`, state => state.userFilters[listType]?.all || []],
-    [
-      `${type}SearchFilterGroups`,
-      state => state.userFilterGroups[listType]?.all || []
+  PAGE_SEARCHES.flatMap(({ type, listType, isInProduction }) => {
+    // Zou files the searches out of any production under "all"
+    const listOf = (filters, rootGetters) =>
+      filters[listType]?.[
+        isInProduction ? rootGetters.currentProduction?.id : 'all'
+      ] || []
+    return [
+      [
+        `${type}SearchQueries`,
+        (state, getters, rootState, rootGetters) =>
+          listOf(state.userFilters, rootGetters)
+      ],
+      [
+        `${type}SearchFilterGroups`,
+        (state, getters, rootState, rootGetters) =>
+          listOf(state.userFilterGroups, rootGetters)
+      ]
     ]
-  ])
+  })
 )
 
 const pageSearchActions = Object.fromEntries(
-  PAGE_SEARCH_LIST_TYPES.flatMap(([type, listType]) => {
+  PAGE_SEARCHES.flatMap(({ type, listType, isInProduction }) => {
     const name = stringHelpers.capitalize(type)
+    const productionIdOf = rootGetters =>
+      isInProduction ? rootGetters.currentProduction.id : null
     return [
       [
         `save${name}Search`,
-        async ({ commit }, searchFilter) => {
+        async ({ commit, rootGetters }, searchFilter) => {
+          const productionId = productionIdOf(rootGetters)
           const searchQuery = await peopleApi.createFilter(
             listType,
             searchFilter,
-            null,
+            productionId,
             null
           )
-          commit(SAVE_PAGE_SEARCH_END, { listType, searchQuery })
+          commit(SAVE_PAGE_SEARCH_END, { listType, productionId, searchQuery })
           return searchQuery
         }
       ],
@@ -280,16 +298,24 @@ const pageSearchActions = Object.fromEntries(
       ],
       [
         `save${name}SearchFilterGroup`,
-        async ({ commit }, { name, color, is_shared, department_id }) => {
+        async (
+          { commit, rootGetters },
+          { name, color, is_shared, department_id }
+        ) => {
+          const productionId = productionIdOf(rootGetters)
           const filterGroup = await peopleApi.createFilterGroup(
             listType,
             name,
             color,
-            null,
+            productionId,
             is_shared,
             department_id
           )
-          commit(SAVE_PAGE_SEARCH_FILTER_GROUP_END, { listType, filterGroup })
+          commit(SAVE_PAGE_SEARCH_FILTER_GROUP_END, {
+            listType,
+            productionId,
+            filterGroup
+          })
           return filterGroup
         }
       ],
@@ -969,16 +995,29 @@ const mutations = {
     removeFromFilters(state.userFilters, 'todos', searchQuery)
   },
 
-  [SAVE_PAGE_SEARCH_END](state, { listType, searchQuery }) {
-    addToFilters(state.userFilters, listType, 'all', searchQuery)
+  [SAVE_PAGE_SEARCH_END](state, { listType, productionId, searchQuery }) {
+    addToFilters(
+      state.userFilters,
+      listType,
+      productionId || 'all',
+      searchQuery
+    )
   },
 
   [REMOVE_PAGE_SEARCH_END](state, { listType, searchQuery }) {
     removeFromFilters(state.userFilters, listType, searchQuery)
   },
 
-  [SAVE_PAGE_SEARCH_FILTER_GROUP_END](state, { listType, filterGroup }) {
-    addToFilters(state.userFilterGroups, listType, 'all', filterGroup)
+  [SAVE_PAGE_SEARCH_FILTER_GROUP_END](
+    state,
+    { listType, productionId, filterGroup }
+  ) {
+    addToFilters(
+      state.userFilterGroups,
+      listType,
+      productionId || 'all',
+      filterGroup
+    )
   },
 
   [REMOVE_PAGE_SEARCH_FILTER_GROUP_END](state, { listType, filterGroup }) {
