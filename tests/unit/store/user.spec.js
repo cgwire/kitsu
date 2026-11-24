@@ -758,7 +758,8 @@ describe('User store', () => {
   // the getters.
   describe.each([
     { page: 'All Tasks', type: 'AllTasks', listType: 'alltasks' },
-    { page: 'Main Schedule', type: 'MainSchedule', listType: 'mainschedule' }
+    { page: 'Main Schedule', type: 'MainSchedule', listType: 'mainschedule' },
+    { page: 'Team Schedule', type: 'TeamSchedule', listType: 'teamschedule' }
   ])('$page searches', ({ type, listType }) => {
     const prefix = type.charAt(0).toLowerCase() + type.slice(1)
     const late = {

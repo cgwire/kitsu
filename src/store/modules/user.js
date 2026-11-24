@@ -7,6 +7,7 @@ import { sortTasks, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex } from '@/lib/indexing'
 import { getKeyWords } from '@/lib/filtering'
 import { populateTask } from '@/lib/models'
+import stringHelpers from '@/lib/string'
 
 import {
   coercePublicKeyFromJSON,
@@ -47,14 +48,10 @@ import {
   UPDATE_USER_FILTER_GROUP,
   SAVE_TODO_SEARCH_END,
   REMOVE_TODO_SEARCH_END,
-  SAVE_ALL_TASKS_SEARCH_END,
-  REMOVE_ALL_TASKS_SEARCH_END,
-  SAVE_ALL_TASKS_SEARCH_FILTER_GROUP_END,
-  REMOVE_ALL_TASKS_SEARCH_FILTER_GROUP_END,
-  SAVE_MAIN_SCHEDULE_SEARCH_END,
-  REMOVE_MAIN_SCHEDULE_SEARCH_END,
-  SAVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END,
-  REMOVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END,
+  SAVE_PAGE_SEARCH_END,
+  REMOVE_PAGE_SEARCH_END,
+  SAVE_PAGE_SEARCH_FILTER_GROUP_END,
+  REMOVE_PAGE_SEARCH_FILTER_GROUP_END,
   ADD_SELECTED_TASK,
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
@@ -238,6 +235,75 @@ const productionRole = (state, productionId) => {
 const routeRole = (state, rootState) =>
   productionRole(state, rootState?.route?.params?.production_id)
 
+// The pages outside any production whose saved searches hold their whole URL
+// query: the `type` of their SearchQueryList, which names their getters and
+// their actions, then the list type Zou files their searches under.
+const PAGE_SEARCH_LIST_TYPES = Object.entries({
+  allTasks: 'alltasks',
+  mainSchedule: 'mainschedule',
+  teamSchedule: 'teamschedule'
+})
+
+const pageSearchGetters = Object.fromEntries(
+  PAGE_SEARCH_LIST_TYPES.flatMap(([type, listType]) => [
+    [`${type}SearchQueries`, state => state.userFilters[listType]?.all || []],
+    [
+      `${type}SearchFilterGroups`,
+      state => state.userFilterGroups[listType]?.all || []
+    ]
+  ])
+)
+
+const pageSearchActions = Object.fromEntries(
+  PAGE_SEARCH_LIST_TYPES.flatMap(([type, listType]) => {
+    const name = stringHelpers.capitalize(type)
+    return [
+      [
+        `save${name}Search`,
+        async ({ commit }, searchFilter) => {
+          const searchQuery = await peopleApi.createFilter(
+            listType,
+            searchFilter,
+            null,
+            null
+          )
+          commit(SAVE_PAGE_SEARCH_END, { listType, searchQuery })
+          return searchQuery
+        }
+      ],
+      [
+        `remove${name}Search`,
+        async ({ commit }, searchQuery) => {
+          await peopleApi.removeFilter(searchQuery)
+          commit(REMOVE_PAGE_SEARCH_END, { listType, searchQuery })
+        }
+      ],
+      [
+        `save${name}SearchFilterGroup`,
+        async ({ commit }, { name, color, is_shared, department_id }) => {
+          const filterGroup = await peopleApi.createFilterGroup(
+            listType,
+            name,
+            color,
+            null,
+            is_shared,
+            department_id
+          )
+          commit(SAVE_PAGE_SEARCH_FILTER_GROUP_END, { listType, filterGroup })
+          return filterGroup
+        }
+      ],
+      [
+        `remove${name}SearchFilterGroup`,
+        async ({ commit }, filterGroup) => {
+          await peopleApi.removeFilterGroup(filterGroup)
+          commit(REMOVE_PAGE_SEARCH_FILTER_GROUP_END, { listType, filterGroup })
+        }
+      ]
+    ]
+  })
+)
+
 const getters = {
   user: state => state.user,
   isAuthenticated: state => state.isAuthenticated,
@@ -332,12 +398,7 @@ const getters = {
   todosSearchText: state => state.todosSearchText,
   todoSelectionGrid: state => state.todoSelectionGrid,
   todoSearchQueries: state => state.todoSearchQueries,
-  allTasksSearchQueries: state => state.userFilters.alltasks?.all || [],
-  allTasksSearchFilterGroups: state =>
-    state.userFilterGroups.alltasks?.all || [],
-  mainScheduleSearchQueries: state => state.userFilters.mainschedule?.all || [],
-  mainScheduleSearchFilterGroups: state =>
-    state.userFilterGroups.mainschedule?.all || [],
+  ...pageSearchGetters,
   userFilters: state => state.userFilters,
   userFilterGroups: state => state.userFilterGroups,
   isTodosLoading: state => state.isTodosLoading,
@@ -590,75 +651,7 @@ const actions = {
     })
   },
 
-  async saveAllTasksSearch({ commit }, searchFilter) {
-    const searchQuery = await peopleApi.createFilter(
-      'alltasks',
-      searchFilter,
-      null,
-      null
-    )
-    commit(SAVE_ALL_TASKS_SEARCH_END, { searchQuery })
-    return searchQuery
-  },
-
-  async removeAllTasksSearch({ commit }, searchQuery) {
-    await peopleApi.removeFilter(searchQuery)
-    commit(REMOVE_ALL_TASKS_SEARCH_END, { searchQuery })
-  },
-
-  async saveAllTasksSearchFilterGroup({ commit }, filterGroup) {
-    const savedGroup = await peopleApi.createFilterGroup(
-      'alltasks',
-      filterGroup.name,
-      filterGroup.color,
-      null,
-      filterGroup.is_shared,
-      filterGroup.department_id
-    )
-    commit(SAVE_ALL_TASKS_SEARCH_FILTER_GROUP_END, { filterGroup: savedGroup })
-    return savedGroup
-  },
-
-  async removeAllTasksSearchFilterGroup({ commit }, filterGroup) {
-    await peopleApi.removeFilterGroup(filterGroup)
-    commit(REMOVE_ALL_TASKS_SEARCH_FILTER_GROUP_END, { filterGroup })
-  },
-
-  async saveMainScheduleSearch({ commit }, searchFilter) {
-    const searchQuery = await peopleApi.createFilter(
-      'mainschedule',
-      searchFilter,
-      null,
-      null
-    )
-    commit(SAVE_MAIN_SCHEDULE_SEARCH_END, { searchQuery })
-    return searchQuery
-  },
-
-  async removeMainScheduleSearch({ commit }, searchQuery) {
-    await peopleApi.removeFilter(searchQuery)
-    commit(REMOVE_MAIN_SCHEDULE_SEARCH_END, { searchQuery })
-  },
-
-  async saveMainScheduleSearchFilterGroup({ commit }, filterGroup) {
-    const savedGroup = await peopleApi.createFilterGroup(
-      'mainschedule',
-      filterGroup.name,
-      filterGroup.color,
-      null,
-      filterGroup.is_shared,
-      filterGroup.department_id
-    )
-    commit(SAVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END, {
-      filterGroup: savedGroup
-    })
-    return savedGroup
-  },
-
-  async removeMainScheduleSearchFilterGroup({ commit }, filterGroup) {
-    await peopleApi.removeFilterGroup(filterGroup)
-    commit(REMOVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END, { filterGroup })
-  },
+  ...pageSearchActions,
 
   setTodoListScrollPosition({ commit, rootGetters }, scrollPosition) {
     commit(SET_TODO_LIST_SCROLL_POSITION, scrollPosition)
@@ -976,36 +969,20 @@ const mutations = {
     removeFromFilters(state.userFilters, 'todos', searchQuery)
   },
 
-  [SAVE_ALL_TASKS_SEARCH_END](state, { searchQuery }) {
-    addToFilters(state.userFilters, 'alltasks', 'all', searchQuery)
+  [SAVE_PAGE_SEARCH_END](state, { listType, searchQuery }) {
+    addToFilters(state.userFilters, listType, 'all', searchQuery)
   },
 
-  [REMOVE_ALL_TASKS_SEARCH_END](state, { searchQuery }) {
-    removeFromFilters(state.userFilters, 'alltasks', searchQuery)
+  [REMOVE_PAGE_SEARCH_END](state, { listType, searchQuery }) {
+    removeFromFilters(state.userFilters, listType, searchQuery)
   },
 
-  [SAVE_ALL_TASKS_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
-    addToFilters(state.userFilterGroups, 'alltasks', 'all', filterGroup)
+  [SAVE_PAGE_SEARCH_FILTER_GROUP_END](state, { listType, filterGroup }) {
+    addToFilters(state.userFilterGroups, listType, 'all', filterGroup)
   },
 
-  [REMOVE_ALL_TASKS_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
-    removeFromFilters(state.userFilterGroups, 'alltasks', filterGroup)
-  },
-
-  [SAVE_MAIN_SCHEDULE_SEARCH_END](state, { searchQuery }) {
-    addToFilters(state.userFilters, 'mainschedule', 'all', searchQuery)
-  },
-
-  [REMOVE_MAIN_SCHEDULE_SEARCH_END](state, { searchQuery }) {
-    removeFromFilters(state.userFilters, 'mainschedule', searchQuery)
-  },
-
-  [SAVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
-    addToFilters(state.userFilterGroups, 'mainschedule', 'all', filterGroup)
-  },
-
-  [REMOVE_MAIN_SCHEDULE_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
-    removeFromFilters(state.userFilterGroups, 'mainschedule', filterGroup)
+  [REMOVE_PAGE_SEARCH_FILTER_GROUP_END](state, { listType, filterGroup }) {
+    removeFromFilters(state.userFilterGroups, listType, filterGroup)
   },
 
   [ADD_SELECTED_TASK](state, validationInfo) {
