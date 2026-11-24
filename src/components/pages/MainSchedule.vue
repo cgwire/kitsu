@@ -55,23 +55,12 @@
               @click="scrollScheduleByPeriod(1)"
             />
           </div>
-          <button-simple
-            class="flexrow-item reset-filters"
-            icon="remove"
-            :title="$t('main.clear_filters')"
-            @click="resetFilters"
-            v-if="activeFilterCount"
-          />
-          <button-simple
-            class="flexrow-item filters-toggle"
-            :icon="showMoreFilters ? 'minus' : 'plus'"
-            :aria-expanded="`${showMoreFilters}`"
-            :is-on="showMoreFilters"
-            :text="activeFilterCount ? `${activeFilterCount}` : ''"
-            :title="
-              $t(showMoreFilters ? 'main.less_filters' : 'main.more_filters')
-            "
-            @click="showMoreFilters = !showMoreFilters"
+          <filters-toggle
+            class="flexrow-item"
+            :count="activeFilterCount"
+            :resettable="Boolean(activeFilterCount)"
+            v-model="showMoreFilters"
+            @reset="resetFilters"
           />
         </div>
         <div class="toolbar-row" v-show="showMoreFilters">
@@ -158,6 +147,7 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 // Constants
@@ -546,12 +536,6 @@ useHead({
   .zoom-level :deep(.select) {
     height: 42px;
   }
-}
-
-.reset-filters,
-.filters-toggle {
-  color: var(--text);
-  padding: 0 14px;
 }
 
 .period-stepper {

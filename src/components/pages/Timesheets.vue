@@ -60,21 +60,12 @@
           icon="export-lines"
           v-if="isCurrentUserAdmin"
         />
-        <button-simple
-          class="flexrow-item reset-filters"
-          icon="remove"
-          :title="$t('main.clear_filters')"
-          @click="resetFilters"
-          v-if="hasFilters"
-        />
-        <button-simple
-          class="flexrow-item filters-toggle"
-          :icon="showFilters ? 'minus' : 'plus'"
-          :aria-expanded="`${showFilters}`"
-          :is-on="showFilters"
-          :text="secondRowFilterCount ? `${secondRowFilterCount}` : ''"
-          :title="$t(showFilters ? 'main.less_filters' : 'main.more_filters')"
-          @click="showFilters = !showFilters"
+        <filters-toggle
+          class="flexrow-item"
+          :count="secondRowFilterCount"
+          :resettable="hasFilters"
+          v-model="showFilters"
+          @reset="resetFilters"
         />
       </div>
       <div class="filters flexrow collapsible">
@@ -183,6 +174,7 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TimesheetChart from '@/components/widgets/TimesheetChart.vue'
@@ -594,12 +586,6 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
   }
 }
 
-.reset-filters,
-.filters-toggle {
-  color: var(--text);
-  padding: 0 14px;
-}
-
 .collapsed .filters.collapsible {
   display: none;
 }
@@ -626,12 +612,9 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
 
 @media screen and (max-width: 768px) {
   .filters {
-    > .button {
+    > .button,
+    :deep(.reset-filters) {
       display: none;
-    }
-
-    > .filters-toggle {
-      display: flex;
     }
   }
 

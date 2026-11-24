@@ -473,34 +473,31 @@ describe('MainSchedule filters', () => {
   const isFilterRowShown = wrapper =>
     wrapper.findAll('.toolbar-row')[1].element.style.display !== 'none'
 
-  const buttonOf = (wrapper, name) =>
-    wrapper
-      .findAllComponents({ name: 'ButtonSimple' })
-      .find(button => button.classes(name))
+  const toggleOf = wrapper => wrapper.findComponent({ name: 'FiltersToggle' })
 
   it('keeps the filters folded when none is set', async () => {
     const wrapper = await mountFilteredPage()
     expect(isFilterRowShown(wrapper)).toBe(false)
-    expect(buttonOf(wrapper, 'filters-toggle').props('text')).toBeFalsy()
-    expect(buttonOf(wrapper, 'reset-filters')).toBeUndefined()
+    expect(toggleOf(wrapper).props('count')).toBe(0)
+    expect(toggleOf(wrapper).props('resettable')).toBe(false)
   })
 
   it.each([
-    ['/main-schedule?hiddenProductions=production-2', '1'],
-    ['/main-schedule?hiddenTypes=tt-anim', '1'],
-    ['/main-schedule?hiddenProductions=production-2&hiddenTypes=tt-anim', '2']
+    ['/main-schedule?hiddenProductions=production-2', 1],
+    ['/main-schedule?hiddenTypes=tt-anim', 1],
+    ['/main-schedule?hiddenProductions=production-2&hiddenTypes=tt-anim', 2]
   ])(
     'keeps the filters of a link folded and counts them on its toggle (%s)',
     async (path, count) => {
       const wrapper = await mountFilteredPage(path)
       expect(isFilterRowShown(wrapper)).toBe(false)
-      expect(buttonOf(wrapper, 'filters-toggle').props('text')).toBe(count)
+      expect(toggleOf(wrapper).props('count')).toBe(count)
     }
   )
 
   it('unfolds the filters from its toggle', async () => {
     const wrapper = await mountFilteredPage()
-    buttonOf(wrapper, 'filters-toggle').vm.$emit('click')
+    toggleOf(wrapper).vm.$emit('update:modelValue', true)
     await flushPromises()
     expect(isFilterRowShown(wrapper)).toBe(true)
   })
@@ -510,7 +507,7 @@ describe('MainSchedule filters', () => {
       '/main-schedule?zoom=2&hiddenProductions=production-2&hiddenTypes=tt-anim'
     )
 
-    buttonOf(wrapper, 'reset-filters').vm.$emit('click')
+    toggleOf(wrapper).vm.$emit('reset')
     await flushPromises()
 
     expect(wrapper.vm.$route.query).toEqual({ zoom: '2' })
@@ -522,7 +519,7 @@ describe('MainSchedule filters', () => {
       'tt-anim': true,
       'tt-light': true
     })
-    expect(buttonOf(wrapper, 'reset-filters')).toBeUndefined()
+    expect(toggleOf(wrapper).props('resettable')).toBe(false)
   })
 
   it('lists its saved searches, which hold its whole URL query', async () => {

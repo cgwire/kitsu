@@ -31,23 +31,12 @@
         />
       </div>
       <div class="filler"></div>
-      <button-simple
-        class="flexrow-item reset-filters"
-        icon="remove"
-        :title="$t('main.clear_filters')"
-        @click="resetFilters"
-        v-if="hasFilters"
-      />
-      <button-simple
-        class="flexrow-item filters-toggle"
-        :icon="isFiltersDisplayed ? 'minus' : 'plus'"
-        :aria-expanded="`${isFiltersDisplayed}`"
-        :is-on="isFiltersDisplayed"
-        :text="secondRowFilterCount ? `${secondRowFilterCount}` : ''"
-        :title="
-          $t(isFiltersDisplayed ? 'main.less_filters' : 'main.more_filters')
-        "
-        @click="toggleFilters"
+      <filters-toggle
+        class="flexrow-item"
+        :count="secondRowFilterCount"
+        :resettable="hasFilters"
+        v-model="isFiltersDisplayed"
+        @reset="resetFilters"
       />
     </div>
 
@@ -84,11 +73,11 @@ import { useStore } from 'vuex'
 import { useTime } from '@/composables/time'
 import { sortByName, sortPeople } from '@/lib/sorting'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 
 const { t } = useI18n()
@@ -174,10 +163,6 @@ const team = computed(() =>
 
 // Functions
 
-const toggleFilters = () => {
-  isFiltersDisplayed.value = !isFiltersDisplayed.value
-}
-
 const resetFilters = () => {
   after.value = null
   before.value = null
@@ -200,14 +185,6 @@ const resetFilters = () => {
   margin-bottom: 4px;
 }
 
-.reset-filters,
-.filters-toggle {
-  align-self: flex-end;
-  color: var(--text);
-  height: 42px;
-  padding: 0 14px;
-}
-
 .filters > :last-child {
   margin-right: 0;
 }
@@ -215,7 +192,7 @@ const resetFilters = () => {
 // Mobile: keep only task-status + task-type filters, drop the advanced
 // filter toggle and the episode/person fields to fit the narrow width.
 @media screen and (max-width: 768px) {
-  .filters-toggle,
+  :deep(.filters-toggle),
   .filter-episode,
   .filter-person {
     display: none;

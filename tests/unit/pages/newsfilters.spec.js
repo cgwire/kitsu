@@ -33,10 +33,7 @@ const mountFilters = (props = {}) =>
     }
   })
 
-const buttonOf = (wrapper, name) =>
-  wrapper
-    .findAllComponents({ name: 'ButtonSimple' })
-    .find(button => button.classes(name))
+const toggleOf = wrapper => wrapper.findComponent({ name: 'FiltersToggle' })
 
 describe('NewsFilters', () => {
   it('keeps its second row folded and counts the filters set in it', () => {
@@ -47,14 +44,14 @@ describe('NewsFilters', () => {
     })
 
     expect(wrapper.findAll('.filters')).toHaveLength(1)
-    expect(buttonOf(wrapper, 'filters-toggle').props('text')).toBe('2')
+    expect(toggleOf(wrapper).props('count')).toBe(2)
   })
 
   it('unfolds its second row from its toggle', async () => {
     const wrapper = mountFilters()
-    expect(buttonOf(wrapper, 'filters-toggle').props('text')).toBeFalsy()
+    expect(toggleOf(wrapper).props('count')).toBe(0)
 
-    await buttonOf(wrapper, 'filters-toggle').vm.$emit('click')
+    await toggleOf(wrapper).vm.$emit('update:modelValue', true)
 
     expect(wrapper.findAll('.filters')).toHaveLength(2)
   })
@@ -62,7 +59,7 @@ describe('NewsFilters', () => {
   it('offers no reset without a filter', () => {
     const wrapper = mountFilters({ episodeId: 'all' })
 
-    expect(buttonOf(wrapper, 'reset-filters')).toBeUndefined()
+    expect(toggleOf(wrapper).props('resettable')).toBe(false)
   })
 
   it('clears the filters set', () => {
@@ -73,7 +70,7 @@ describe('NewsFilters', () => {
       taskStatusId: 'status-1'
     })
 
-    buttonOf(wrapper, 'reset-filters').vm.$emit('click')
+    toggleOf(wrapper).vm.$emit('reset')
 
     expect(wrapper.emitted()).toMatchObject({
       'update:after': [[null]],

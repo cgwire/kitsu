@@ -33,21 +33,12 @@
           :title="$t('burndown.title')"
           @click="showBurndown = !showBurndown"
         />
-        <button-simple
-          class="flexrow-item reset-filters"
-          icon="remove"
-          :title="$t('main.clear_filters')"
-          @click="resetFilters"
-          v-if="hasFilters"
-        />
-        <button-simple
-          class="flexrow-item filters-toggle"
-          :icon="showFilters ? 'minus' : 'plus'"
-          :aria-expanded="`${showFilters}`"
-          :is-on="showFilters"
-          :text="secondRowFilterCount ? `${secondRowFilterCount}` : ''"
-          :title="$t(showFilters ? 'main.less_filters' : 'main.more_filters')"
-          @click="showFilters = !showFilters"
+        <filters-toggle
+          class="flexrow-item"
+          :count="secondRowFilterCount"
+          :resettable="hasFilters"
+          v-model="showFilters"
+          @reset="resetFilters"
         />
       </div>
       <div class="filters flexrow collapsible">
@@ -163,6 +154,7 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import StatusStats from '@/components/widgets/StatusStats.vue'
@@ -458,18 +450,12 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
   row-gap: 1em;
 }
 
-.reset-filters,
-.burndown-button,
-.filters-toggle {
+.burndown-button {
   align-self: flex-end;
   height: 42px;
   padding: 0 14px;
   // Bulma's near-black button text outweighs the grey of the filter labels
   color: var(--text);
-}
-
-.filters-toggle {
-  flex: none;
 }
 
 .collapsed .filters.collapsible {

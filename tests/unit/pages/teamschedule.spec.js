@@ -530,19 +530,16 @@ describe('TeamSchedule page', () => {
     const isFilterRowShown = wrapper =>
       wrapper.findAll('.toolbar-row')[1].element.style.display !== 'none'
 
-const buttonOf = (wrapper, name) =>
-      wrapper
-        .findAllComponents({ name: 'ButtonSimple' })
-        .find(button => button.classes(name))
-    const filterCountOf = wrapper =>
-      buttonOf(wrapper, 'filters-toggle').props('text')
+const toggleOf = wrapper =>
+      wrapper.findComponent({ name: 'FiltersToggle' })
+    const filterCountOf = wrapper => toggleOf(wrapper).props('count')
 
     it('stays folded without a filter', async () => {
       const { wrapper } = await mountPage()
 
       expect(isFilterRowShown(wrapper)).toBe(false)
-      expect(filterCountOf(wrapper)).toBeFalsy()
-      expect(buttonOf(wrapper, 'reset-filters')).toBeUndefined()
+      expect(filterCountOf(wrapper)).toBe(0)
+      expect(toggleOf(wrapper).props('resettable')).toBe(false)
       wrapper.unmount()
     })
 
@@ -556,7 +553,7 @@ const buttonOf = (wrapper, name) =>
         const { wrapper } = await mountPage({ getters, query })
 
         expect(isFilterRowShown(wrapper)).toBe(false)
-        expect(filterCountOf(wrapper)).toBe('1')
+        expect(filterCountOf(wrapper)).toBe(1)
         wrapper.unmount()
       }
     )
@@ -564,7 +561,7 @@ const buttonOf = (wrapper, name) =>
     it('unfolds from its toggle', async () => {
       const { wrapper } = await mountPage()
 
-      buttonOf(wrapper, 'filters-toggle').vm.$emit('click')
+      toggleOf(wrapper).vm.$emit('update:modelValue', true)
       await nextTick()
 
       expect(isFilterRowShown(wrapper)).toBe(true)
@@ -574,7 +571,7 @@ const buttonOf = (wrapper, name) =>
     it('counts no filter on the own departments of a supervisor', async () => {
       const { wrapper } = await mountPage({ getters: supervisorGetters })
 
-      expect(filterCountOf(wrapper)).toBeFalsy()
+      expect(filterCountOf(wrapper)).toBe(0)
       wrapper.unmount()
     })
 
@@ -587,7 +584,7 @@ const buttonOf = (wrapper, name) =>
         query: { department: 'dep-1' }
       })
 
-      expect(filterCountOf(wrapper)).toBe('1')
+      expect(filterCountOf(wrapper)).toBe(1)
       wrapper.unmount()
     })
 
@@ -601,14 +598,14 @@ const buttonOf = (wrapper, name) =>
           zoom: '3'
         }
       })
-      expect(filterCountOf(wrapper)).toBe('3')
+      expect(filterCountOf(wrapper)).toBe(3)
 
-      buttonOf(wrapper, 'reset-filters').vm.$emit('click')
+      toggleOf(wrapper).vm.$emit('reset')
       await flushPromises()
 
       expect(wrapper.vm.$route.query).toEqual({ department: 'ALL', zoom: '3' })
-      expect(filterCountOf(wrapper)).toBeFalsy()
-      expect(buttonOf(wrapper, 'reset-filters')).toBeUndefined()
+      expect(filterCountOf(wrapper)).toBe(0)
+      expect(toggleOf(wrapper).props('resettable')).toBe(false)
       wrapper.unmount()
     })
 
@@ -709,7 +706,7 @@ const buttonOf = (wrapper, name) =>
     ])('counts no filter on a link with %s', async (_, query, getters) => {
       const { wrapper } = await mountPage({ getters, query })
 
-      expect(filterCountOf(wrapper)).toBeFalsy()
+      expect(filterCountOf(wrapper)).toBe(0)
       wrapper.unmount()
     })
 

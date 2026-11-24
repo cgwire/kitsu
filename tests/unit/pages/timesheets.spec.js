@@ -135,10 +135,7 @@ describe('Timesheets', () => {
   })
 
   describe('filters', () => {
-    const buttonOf = name =>
-      wrapper
-        .findAllComponents(ButtonSimple)
-        .find(button => button.classes(name))
+    const toggleOf = () => wrapper.findComponent({ name: 'FiltersToggle' })
 
     test('keeps its second filter row folded and counts its filters', async () => {
       await mountPage(
@@ -146,13 +143,13 @@ describe('Timesheets', () => {
       )
 
       expect(wrapper.find('.timesheets').classes()).toContain('collapsed')
-      expect(buttonOf('filters-toggle').props('text')).toBe('2')
+      expect(toggleOf().props('count')).toBe(2)
     })
 
     test('unfolds its second filter row from its toggle', async () => {
       await mountPage('/timesheets/day/2026/10')
 
-      await buttonOf('filters-toggle').vm.$emit('click')
+      await toggleOf().vm.$emit('update:modelValue', true)
 
       expect(wrapper.find('.timesheets').classes()).not.toContain(
         'collapsed'
@@ -163,8 +160,8 @@ describe('Timesheets', () => {
     test('counts no filter and offers no reset on a bare view', async () => {
       await mountPage('/timesheets/day/2026/10?unit=day&view=chart')
 
-      expect(buttonOf('filters-toggle').props('text')).toBeFalsy()
-      expect(buttonOf('reset-filters')).toBeUndefined()
+      expect(toggleOf().props('count')).toBe(0)
+      expect(toggleOf().props('resettable')).toBe(false)
     })
 
     test('clears its filters and keeps its period and its view', async () => {
@@ -174,7 +171,7 @@ describe('Timesheets', () => {
           '&unit=day&view=chart'
       )
 
-      buttonOf('reset-filters').vm.$emit('click')
+      toggleOf().vm.$emit('reset')
       await flushPromises()
 
       expect(router.currentRoute.value.path).toBe('/timesheets/day/2026/10')
@@ -182,7 +179,7 @@ describe('Timesheets', () => {
         unit: 'day',
         view: 'chart'
       })
-      expect(buttonOf('reset-filters')).toBeUndefined()
+      expect(toggleOf().props('resettable')).toBe(false)
     })
 
     test('lists its saved searches, which hold its whole URL query', async () => {
