@@ -1,148 +1,146 @@
 <template>
-  <div class="columns fixed-page" :class="{ 'with-info': showInfo }">
-    <div class="column main-column">
-      <div class="timesheets page">
-        <div class="filters-panel" :class="{ collapsed: !showFilters }">
-          <div class="filters flexrow">
-            <combobox
-              class="flexrow-item nowrap"
-              :label="$t('timesheets.detail_level')"
-              :options="detailOptions"
-              v-model="detailLevel"
-            />
-            <combobox
-              class="flexrow-item"
-              :label="$t('timesheets.year')"
-              :options="yearOptions"
-              v-model="currentYear"
-              v-if="detailLevel !== 'year'"
-            />
-            <combobox
-              class="flexrow-item collapsible"
-              :label="$t('timesheets.month')"
-              :options="monthOptions"
-              v-model="currentMonth"
-              v-if="detailLevel === 'day'"
-            />
-            <combobox
-              class="flexrow-item"
-              :label="$t('timesheets.unit')"
-              :options="unitOptions"
-              v-model="unit"
-            />
-            <combobox
-              class="flexrow-item collapsible people-filter"
-              :label="$t('main.people')"
-              :options="peopleOptions"
-              v-model="peopleFilter"
-            />
-            <div class="filler"></div>
-            <button-simple
-              class="flexrow-item chart-button"
-              icon="chart-column"
-              :active="showChart"
-              :title="$t('timesheets.chart')"
-              @click="showChart = !showChart"
-            />
-            <button-simple
-              class="flexrow-item"
-              :title="$t('timesheets.export_timesheet')"
-              icon="export"
-              @click="exportTimesheet"
-            />
-            <button-href-link
-              class="flexrow-item"
-              :title="$t('timesheets.export_timespents')"
-              path="/api/export/csv/time-spents.csv"
-              icon="export-lines"
-              v-if="isCurrentUserAdmin"
-            />
-            <button-simple
-              class="flexrow-item reset-filters"
-              icon="remove"
-              :title="$t('main.clear_filters')"
-              @click="resetFilters"
-              v-if="hasFilters"
-            />
-            <button-simple
-              class="flexrow-item filters-toggle"
-              :icon="showFilters ? 'minus' : 'plus'"
-              :aria-expanded="`${showFilters}`"
-              :is-on="showFilters"
-              :text="secondRowFilterCount ? `${secondRowFilterCount}` : ''"
-              :title="
-                $t(showFilters ? 'main.less_filters' : 'main.more_filters')
-              "
-              @click="showFilters = !showFilters"
-            />
-          </div>
-          <div class="filters flexrow collapsible">
-            <combobox-production
-              class="flexrow-item"
-              :label="$t('main.production')"
-              :production-list="productionList"
-              v-model="productionId"
-            />
-            <combobox-studio
-              class="flexrow-item field"
-              all-studios-label
-              :label="$t('main.studio')"
-              v-model="studioId"
-            />
-            <combobox-department
-              class="flexrow-item field"
-              all-departments-label
-              :label="$t('main.department')"
-              v-model="departmentId"
-            />
-            <people-field
-              class="flexrow-item"
-              :label="$t('main.person')"
-              :people="selectablePeople"
-              v-model="selectedPerson"
-            />
-          </div>
-        </div>
-
-        <div class="list-panel">
-          <search-query-list
-            class="query-list"
-            :groups="timesheetsSearchFilterGroups"
-            :is-group-enabled="true"
-            :queries="timesheetsSearchQueries"
-            type="timesheets"
-            with-route-query
-          />
-          <timesheet-chart
-            class="data-list"
-            :people="filteredPeople"
-            :timesheet="timesheet"
-            :detail-level="detailLevel"
-            :month="currentMonth"
-            :year="currentYear"
-            :unit="unit"
-            :daily-rates="dailyRates"
-            :is-loading="isLoading"
-            :is-error="isLoadingError"
-            v-if="showChart"
-          />
-          <people-timesheet-list
-            class="data-list"
-            :people="filteredPeople"
-            :timesheet="timesheet"
-            :detail-level="detailLevel"
-            :month="currentMonth"
-            :year="currentYear"
-            :unit="unit"
-            :daily-rates="dailyRates"
-            :is-loading="isLoading"
-            :is-error="isLoadingError"
-            v-else
-          />
-        </div>
+  <panel-layout
+    class="timesheets"
+    :class="{ collapsed: !showFilters }"
+    :side="showInfo"
+    :side-focused="showInfo"
+  >
+    <template #filters>
+      <div class="filters flexrow">
+        <combobox
+          class="flexrow-item nowrap"
+          :label="$t('timesheets.detail_level')"
+          :options="detailOptions"
+          v-model="detailLevel"
+        />
+        <combobox
+          class="flexrow-item"
+          :label="$t('timesheets.year')"
+          :options="yearOptions"
+          v-model="currentYear"
+          v-if="detailLevel !== 'year'"
+        />
+        <combobox
+          class="flexrow-item collapsible"
+          :label="$t('timesheets.month')"
+          :options="monthOptions"
+          v-model="currentMonth"
+          v-if="detailLevel === 'day'"
+        />
+        <combobox
+          class="flexrow-item"
+          :label="$t('timesheets.unit')"
+          :options="unitOptions"
+          v-model="unit"
+        />
+        <combobox
+          class="flexrow-item collapsible people-filter"
+          :label="$t('main.people')"
+          :options="peopleOptions"
+          v-model="peopleFilter"
+        />
+        <div class="filler"></div>
+        <button-simple
+          class="flexrow-item chart-button"
+          icon="chart-column"
+          :active="showChart"
+          :title="$t('timesheets.chart')"
+          @click="showChart = !showChart"
+        />
+        <button-simple
+          class="flexrow-item"
+          :title="$t('timesheets.export_timesheet')"
+          icon="export"
+          @click="exportTimesheet"
+        />
+        <button-href-link
+          class="flexrow-item"
+          :title="$t('timesheets.export_timespents')"
+          path="/api/export/csv/time-spents.csv"
+          icon="export-lines"
+          v-if="isCurrentUserAdmin"
+        />
+        <button-simple
+          class="flexrow-item reset-filters"
+          icon="remove"
+          :title="$t('main.clear_filters')"
+          @click="resetFilters"
+          v-if="hasFilters"
+        />
+        <button-simple
+          class="flexrow-item filters-toggle"
+          :icon="showFilters ? 'minus' : 'plus'"
+          :aria-expanded="`${showFilters}`"
+          :is-on="showFilters"
+          :text="secondRowFilterCount ? `${secondRowFilterCount}` : ''"
+          :title="$t(showFilters ? 'main.less_filters' : 'main.more_filters')"
+          @click="showFilters = !showFilters"
+        />
       </div>
-    </div>
-    <div class="column side-column" v-if="showInfo">
+      <div class="filters flexrow collapsible">
+        <combobox-production
+          class="flexrow-item"
+          :label="$t('main.production')"
+          :production-list="productionList"
+          v-model="productionId"
+        />
+        <combobox-studio
+          class="flexrow-item field"
+          all-studios-label
+          :label="$t('main.studio')"
+          v-model="studioId"
+        />
+        <combobox-department
+          class="flexrow-item field"
+          all-departments-label
+          :label="$t('main.department')"
+          v-model="departmentId"
+        />
+        <people-field
+          class="flexrow-item"
+          :label="$t('main.person')"
+          :people="selectablePeople"
+          v-model="selectedPerson"
+        />
+      </div>
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="timesheetsSearchFilterGroups"
+        :is-group-enabled="true"
+        :queries="timesheetsSearchQueries"
+        type="timesheets"
+        with-route-query
+      />
+      <timesheet-chart
+        class="data-list"
+        :people="filteredPeople"
+        :timesheet="timesheet"
+        :detail-level="detailLevel"
+        :month="currentMonth"
+        :year="currentYear"
+        :unit="unit"
+        :daily-rates="dailyRates"
+        :is-loading="isLoading"
+        :is-error="isLoadingError"
+        v-if="showChart"
+      />
+      <people-timesheet-list
+        class="data-list"
+        :people="filteredPeople"
+        :timesheet="timesheet"
+        :detail-level="detailLevel"
+        :month="currentMonth"
+        :year="currentYear"
+        :unit="unit"
+        :daily-rates="dailyRates"
+        :is-loading="isLoading"
+        :is-error="isLoadingError"
+        v-else
+      />
+    </template>
+    <template #side>
       <people-timesheet-info
         :person="currentPerson"
         :year="currentYear"
@@ -157,8 +155,8 @@
         :day-offs="dayOffs"
         :with-days-off="infoWithDaysOff"
       />
-    </div>
-  </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -176,6 +174,7 @@ import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import { monthToString, range } from '@/lib/time'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import PeopleTimesheetList from '@/components/lists/PeopleTimesheetList.vue'
 import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
@@ -572,65 +571,8 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.timesheets {
-  // the global .page rule paints a white sheet
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  height: 100%;
-  // the 60px topbar, then the same 1em as the sides
-  padding: calc(60px + 1em) 1em 1em;
-}
-
-.filters-panel,
-.list-panel {
-  background: var(--background-panel);
-  border-radius: 12px;
-  padding: 14px;
-}
-
-.filters-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-
-.list-panel {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 0.75em;
-  min-height: 0;
-}
-
-.list-panel .data-list {
-  margin-top: 0;
-}
-
-.list-panel :deep(.datatable-wrapper) {
+.timesheets :deep(.datatable-wrapper) {
   border-radius: 10px;
-}
-
-// the global .query-list margins indent it from the panel padding
-.query-list {
-  margin: 0;
-}
-
-// the default tag color is the panel background: take the tone made for
-// tags laid on a panel (groups keep their inline tint)
-.list-panel :deep(.search-queries .tag:not(.empty)) {
-  background-color: var(--background-panel-tag);
-}
-
-.list-panel :deep(.search-queries .group-list) {
-  background-color: var(--background-panel-tag);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-.column.side-column {
-  background: transparent;
-  padding: 1em 1em 1em 0;
 }
 
 .filters {
@@ -662,36 +604,22 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
   display: none;
 }
 
-.filters-panel :deep(.label) {
+.filters :deep(.label) {
   margin-bottom: 5px;
   padding-top: 0;
 }
 
-.filters-panel :deep(.studio-combo),
-.filters-panel :deep(.department-combo) {
+.filters :deep(.studio-combo),
+.filters :deep(.department-combo) {
   display: flex;
   flex-direction: column;
   height: 42px;
   justify-content: center;
 }
 
+// phones get borderless cards instead
 @media screen and (min-width: 769px) {
-  .timesheets {
-    padding: 80px 20px 20px;
-  }
-
-  // the person panel comes 14px after the list, level with the filters
-  // panel: 20px under the 60px margin of its column
-  .with-info .timesheets {
-    padding-right: 14px;
-  }
-
-  .column.side-column {
-    padding: 20px 20px 20px 0;
-  }
-
-  // phones get borderless cards instead
-  .list-panel :deep(.datatable-wrapper) {
+  .timesheets :deep(.datatable-wrapper) {
     border: 1px solid var(--border);
   }
 }
@@ -714,26 +642,6 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
   .people-filter {
     flex: 0 0 calc(100% - 1rem);
     order: 1;
-  }
-
-  // the cards carry their own padding
-  .list-panel {
-    padding: 0.5em;
-  }
-
-  // read-only: the saved searches stay, without their editing
-  .query-list :deep(.tag.folder) {
-    display: none;
-  }
-
-  .with-info .main-column {
-    display: none;
-  }
-
-  .column.side-column {
-    max-width: none;
-    padding: 1em;
-    width: 100%;
   }
 }
 </style>

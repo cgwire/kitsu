@@ -109,9 +109,7 @@ const mountPage = async ({
       // The status stats sit in the side slot of the layout, in the default
       // slot of the task panel.
       stubs: {
-        PageLayout: {
-          template: '<div><slot name="main" /><slot name="side" /></div>'
-        },
+        PanelLayout: false,
         TaskInfo: { template: '<div><slot /></div>' }
       }
     }

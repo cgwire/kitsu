@@ -1,6 +1,6 @@
 <template>
-  <div class="columns fixed-page">
-    <div class="column main-column">
+  <panel-layout class="main-schedule">
+    <template #filters>
       <div class="schedule-toolbar">
         <div class="toolbar-row">
           <div class="flexrow-item">
@@ -97,31 +97,30 @@
           </div>
         </div>
       </div>
-
-      <div class="schedule-panel">
-        <search-query-list
-          class="query-list"
-          :groups="mainScheduleSearchFilterGroups"
-          :is-group-enabled="true"
-          :queries="mainScheduleSearchQueries"
-          type="mainSchedule"
-          with-route-query
-        />
-        <schedule
-          ref="schedule"
-          :end-date="endDate"
-          :hierarchy="filteredScheduleItems"
-          :is-loading="false"
-          :milestones="shownMilestones"
-          :start-date="startDate"
-          :zoom-level="zoomLevel"
-          hide-man-days
-          readonly
-          @root-element-expanded="expandProductionElement"
-        />
-      </div>
-    </div>
-  </div>
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="mainScheduleSearchFilterGroups"
+        :is-group-enabled="true"
+        :queries="mainScheduleSearchQueries"
+        type="mainSchedule"
+        with-route-query
+      />
+      <schedule
+        ref="schedule"
+        :end-date="endDate"
+        :hierarchy="filteredScheduleItems"
+        :is-loading="false"
+        :milestones="shownMilestones"
+        :start-date="startDate"
+        :zoom-level="zoomLevel"
+        hide-man-days
+        readonly
+        @root-element-expanded="expandProductionElement"
+      />
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -152,6 +151,7 @@ import {
   parseSimpleDate
 } from '@/lib/time'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import Schedule from '@/components/schedule/Schedule.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -519,11 +519,6 @@ useHead({
 }
 
 .schedule-toolbar {
-  background: var(--background-panel);
-  border-radius: 12px;
-  margin-bottom: 14px;
-  padding: 14px;
-
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
@@ -622,40 +617,10 @@ useHead({
   }
 }
 
-.fixed-page {
-  padding: 1em;
-  // the 60px topbar, then the same 1em as the sides
-  padding-top: calc(60px + 1em);
-}
-
-@media screen and (min-width: 769px) {
-  .fixed-page {
-    padding: 80px 20px 20px;
-  }
-}
-
-.main-column {
-  display: flex;
-  border: 0;
-  overflow: hidden;
-  flex-direction: column;
-}
-
-.schedule-panel {
-  background: var(--background-panel);
-  border-radius: 12px;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 0.75em;
-  min-height: 0;
-  padding: 14px;
-}
-
 // The schedule paints its corner and its month names with the page
 // background and leaves the rest of its headers transparent: on the panel
 // tone they came out as patches.
-.schedule-panel .schedule-wrapper {
+.main-schedule .schedule-wrapper {
   background: var(--background);
   border-radius: 10px;
   flex: 1;
@@ -664,30 +629,7 @@ useHead({
 }
 
 // its names sit 5px from its left edge, made for a page margin beside them
-.schedule-panel :deep(.schedule) {
+.main-schedule .schedule-wrapper :deep(.schedule) {
   padding-left: 10px;
-}
-
-// the global .query-list margins indent it from the panel padding
-.query-list {
-  margin: 0;
-}
-
-// the default tag color is the panel background: take the tone made for
-// tags laid on a panel (groups keep their inline tint)
-.schedule-panel :deep(.search-queries .tag:not(.empty)) {
-  background-color: var(--background-panel-tag);
-}
-
-.schedule-panel :deep(.search-queries .group-list) {
-  background-color: var(--background-panel-tag);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-@media screen and (max-width: 768px) {
-  // read-only: the saved searches stay, without their editing
-  .query-list :deep(.tag.folder) {
-    display: none;
-  }
 }
 </style>

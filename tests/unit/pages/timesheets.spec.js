@@ -69,7 +69,7 @@ const mountPage = async (path, { actions = {}, getters = {} } = {}) => {
   await router.push(path)
   await router.isReady()
   wrapper = shallowMount(Timesheets, {
-    global: { plugins: [store, router] }
+    global: { plugins: [store, router], stubs: { PanelLayout: false } }
   })
   await flushPromises()
 }
@@ -145,7 +145,7 @@ describe('Timesheets', () => {
         `/timesheets/day/2026/10?productionId=production-1&personId=${alice.id}`
       )
 
-      expect(wrapper.find('.filters-panel').classes()).toContain('collapsed')
+      expect(wrapper.find('.timesheets').classes()).toContain('collapsed')
       expect(buttonOf('filters-toggle').props('text')).toBe('2')
     })
 
@@ -154,7 +154,7 @@ describe('Timesheets', () => {
 
       await buttonOf('filters-toggle').vm.$emit('click')
 
-      expect(wrapper.find('.filters-panel').classes()).not.toContain(
+      expect(wrapper.find('.timesheets').classes()).not.toContain(
         'collapsed'
       )
     })

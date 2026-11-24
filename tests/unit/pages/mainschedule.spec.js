@@ -66,7 +66,7 @@ const mountPage = async productions => {
   const wrapper = shallowMount(MainSchedule, {
     global: {
       plugins: [router, store],
-      stubs: { Schedule: ScheduleStub }
+      stubs: { PanelLayout: false, Schedule: ScheduleStub }
     }
   })
   await flushPromises()
@@ -174,7 +174,7 @@ const mountFilteredPage = async (
   const wrapper = shallowMount(MainSchedule, {
     global: {
       plugins: [router, store],
-      stubs: { Schedule: ScheduleStub }
+      stubs: { PanelLayout: false, Schedule: ScheduleStub }
     }
   })
   await flushPromises()

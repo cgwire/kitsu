@@ -1,6 +1,10 @@
 <template>
-  <div class="columns fixed-page">
-    <div class="column main-column">
+  <panel-layout
+    class="team-schedule"
+    :side="isTaskSidePanelOpen"
+    :side-focused="isTaskSidePanelOpen"
+  >
+    <template #filters>
       <div class="schedule-toolbar">
         <div class="toolbar-row">
           <div class="flexrow-item">
@@ -93,54 +97,51 @@
           </div>
         </div>
       </div>
-
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="teamScheduleSearchFilterGroups"
+        :is-group-enabled="true"
+        :queries="teamScheduleSearchQueries"
+        type="teamSchedule"
+        with-route-query
+      />
       <error-text
         class="has-text-centered"
         :text="scheduleSaveErrorText"
         v-if="scheduleSaveErrorText"
       />
-
-      <div class="schedule-panel">
-        <search-query-list
-          class="query-list"
-          :groups="teamScheduleSearchFilterGroups"
-          :is-group-enabled="true"
-          :queries="teamScheduleSearchQueries"
-          type="teamSchedule"
-          with-route-query
-        />
-        <div class="empty-schedule schedule-error" v-if="errors.schedule">
-          <table-info is-error />
-          <button-simple :text="$t('main.reload')" @click="init" />
-        </div>
-        <schedule
-          ref="schedule"
-          :assign-rule="assignRule"
-          :dragged-items="draggedTasks"
-          :end-date="endDate"
-          :hide-man-days="true"
-          :hierarchy="scheduleItems"
-          :is-estimation-linked="true"
-          :multiline="true"
-          :reassignable="true"
-          :start-date="startDate"
-          :with-milestones="false"
-          :zoom-level="zoomLevel"
-          @item-assign="onScheduleItemAssigned"
-          @item-changed="onScheduleItemChanged"
-          @item-drop="onScheduleItemDropped"
-          @item-unassign="onScheduleItemUnassigned"
-          @root-element-expanded="expandPersonElement"
-          v-else-if="loading.schedule || scheduleItems.length > 0"
-        />
-        <div class="empty-schedule" v-else>
-          <user-search-icon :size="40" />
-          <p>{{ $t('team_schedule.empty') }}</p>
-        </div>
+      <div class="empty-schedule schedule-error" v-if="errors.schedule">
+        <table-info is-error />
+        <button-simple :text="$t('main.reload')" @click="init" />
       </div>
-    </div>
-
-    <div class="column side-column" v-if="isTaskSidePanelOpen">
+      <schedule
+        ref="schedule"
+        :assign-rule="assignRule"
+        :dragged-items="draggedTasks"
+        :end-date="endDate"
+        :hide-man-days="true"
+        :hierarchy="scheduleItems"
+        :is-estimation-linked="true"
+        :multiline="true"
+        :reassignable="true"
+        :start-date="startDate"
+        :with-milestones="false"
+        :zoom-level="zoomLevel"
+        @item-assign="onScheduleItemAssigned"
+        @item-changed="onScheduleItemChanged"
+        @item-drop="onScheduleItemDropped"
+        @item-unassign="onScheduleItemUnassigned"
+        @root-element-expanded="expandPersonElement"
+        v-else-if="loading.schedule || scheduleItems.length > 0"
+      />
+      <div class="empty-schedule" v-else>
+        <user-search-icon :size="40" />
+        <p>{{ $t('team_schedule.empty') }}</p>
+      </div>
+    </template>
+    <template #side>
       <task-info>
         <a
           class="close-button"
@@ -281,8 +282,8 @@
           <em>{{ $t('main.no_results') }}</em>
         </div>
       </task-info>
-    </div>
-  </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -321,6 +322,7 @@ import {
   parseSimpleDate
 } from '@/lib/time'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import Schedule from '@/components/schedule/Schedule.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -1225,11 +1227,6 @@ useHead({
 }
 
 .schedule-toolbar {
-  background: var(--background-panel);
-  border-radius: 12px;
-  margin-bottom: 14px;
-  padding: 14px;
-
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
@@ -1298,40 +1295,10 @@ useHead({
   }
 }
 
-.fixed-page {
-  padding: 1em;
-  // the 60px topbar, then the same 1em as the sides
-  padding-top: calc(60px + 1em);
-}
-
-@media screen and (min-width: 769px) {
-  .fixed-page {
-    padding: 80px 20px 20px;
-  }
-}
-
-.main-column {
-  display: flex;
-  border: 0;
-  overflow: hidden;
-  flex-direction: column;
-}
-
-.schedule-panel {
-  background: var(--background-panel);
-  border-radius: 12px;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 0.75em;
-  min-height: 0;
-  padding: 14px;
-}
-
 // The schedule paints its corner and its month names with the page
 // background and leaves the rest of its headers transparent: on the panel
 // tone they came out as patches.
-.schedule-panel .schedule-wrapper {
+.team-schedule .schedule-wrapper {
   background: var(--background);
   border-radius: 10px;
   flex: 1;
@@ -1340,31 +1307,8 @@ useHead({
 }
 
 // its names sit 5px from its left edge, made for a page margin beside them
-.schedule-panel :deep(.schedule) {
+.team-schedule .schedule-wrapper :deep(.schedule) {
   padding-left: 10px;
-}
-
-// the global .query-list margins indent it from the panel padding
-.query-list {
-  margin: 0;
-}
-
-// the default tag color is the panel background: take the tone made for
-// tags laid on a panel (groups keep their inline tint)
-.schedule-panel :deep(.search-queries .tag:not(.empty)) {
-  background-color: var(--background-panel-tag);
-}
-
-.schedule-panel :deep(.search-queries .group-list) {
-  background-color: var(--background-panel-tag);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-@media screen and (max-width: 768px) {
-  // read-only: the saved searches stay, without their editing
-  .query-list :deep(.tag.folder) {
-    display: none;
-  }
 }
 
 .people-filter {
@@ -1390,111 +1334,100 @@ useHead({
   }
 }
 
-.side-column {
+// the close button hangs in the corner of the task panel
+.team-schedule :deep(.side.task-info) {
   position: relative;
-  margin-top: 0;
-  // with the 6px resize bar of the task panel, 14px between the panels
-  padding: 0 0 0 8px;
+}
 
-  :deep(.side) {
-    background: var(--background-panel);
-    border-radius: 12px;
-  }
+// Hide the task selection counter
+.team-schedule :deep(.task-info.empty) {
+  padding-top: 0;
 
-  // Hide the task selection counter
-  :deep(.task-info.empty) {
-    padding-top: 0;
-    > *:not(.empty-section) {
-      display: none;
-    }
-  }
-
-  .close-button {
-    color: var(--text);
-    opacity: 0.6;
-    position: absolute;
-    right: 1em;
-    top: 1em;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
-
-  .task-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75em;
-
-    .task-item {
-      position: relative;
-      cursor: grab;
-
-      .ui-droppable {
-        padding: 0.5em;
-        // borderless in light: the crisp shadows carry the edge, dark
-        // mode restores a faint solid border (same recipe as the board
-        // cards)
-        border: 1px solid transparent;
-        border-radius: 10px;
-        background-color: var(--background-alt-2);
-        box-shadow:
-          0 1px 2px rgba(0, 0, 0, 0.12),
-          0 2px 8px rgba(0, 0, 0, 0.06);
-        transition:
-          transform 150ms ease-out,
-          box-shadow 150ms ease-out;
-
-        .production-name {
-          margin-bottom: 0;
-          margin-top: 0.3em;
-          font-size: 0.8em;
-          text-transform: uppercase;
-        }
-
-        .dark & {
-          border-color: #55585d;
-        }
-      }
-
-      &:hover .ui-droppable {
-        box-shadow:
-          0 2px 6px rgba(0, 0, 0, 0.14),
-          0 6px 16px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
-      }
-
-      &.selected .ui-droppable {
-        box-shadow:
-          0 0 0 3px var(--background-selected),
-          0 2px 8px rgba(0, 0, 0, 0.06);
-      }
-
-      &.dragging {
-        cursor: grabbing;
-        opacity: 0.4;
-      }
-
-      .task-thumbnail {
-        border-radius: 6px;
-        margin-right: 1em;
-        overflow: hidden;
-      }
-
-      .task-department {
-        position: absolute;
-        top: 8px;
-        right: 0.5em;
-      }
-    }
+  > *:not(.empty-section) {
+    display: none;
   }
 }
 
-// the page background App.vue gives every side column
-.dark .side-column {
-  background: transparent;
+.close-button {
+  color: var(--text);
+  opacity: 0.6;
+  position: absolute;
+  right: 1em;
+  top: 1em;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+
+  .task-item {
+    position: relative;
+    cursor: grab;
+
+    .ui-droppable {
+      padding: 0.5em;
+      // borderless in light: the crisp shadows carry the edge, dark
+      // mode restores a faint solid border (same recipe as the board
+      // cards)
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background-color: var(--background-alt-2);
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+      transition:
+        transform 150ms ease-out,
+        box-shadow 150ms ease-out;
+
+      .production-name {
+        margin-bottom: 0;
+        margin-top: 0.3em;
+        font-size: 0.8em;
+        text-transform: uppercase;
+      }
+
+      .dark & {
+        border-color: #55585d;
+      }
+    }
+
+    &:hover .ui-droppable {
+      box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.14),
+        0 6px 16px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    &.selected .ui-droppable {
+      box-shadow:
+        0 0 0 3px var(--background-selected),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    &.dragging {
+      cursor: grabbing;
+      opacity: 0.4;
+    }
+
+    .task-thumbnail {
+      border-radius: 6px;
+      margin-right: 1em;
+      overflow: hidden;
+    }
+
+    .task-department {
+      position: absolute;
+      top: 8px;
+      right: 0.5em;
+    }
+  }
 }
 </style>

@@ -116,7 +116,7 @@ const mountPage = async ({
         }
       ],
       renderStubDefaultSlot,
-      stubs: { Schedule: ScheduleStub }
+      stubs: { PanelLayout: false, Schedule: ScheduleStub }
     }
   })
   await nextTick()

@@ -127,7 +127,8 @@ const mountPage = async (
             app.config.globalProperties.$socket = socket
           }
         }
-      ]
+      ],
+      stubs: { PanelLayout: false }
     }
   })
   await flushPromises()
@@ -293,7 +294,7 @@ describe('pages/ProductionNewsFeed', () => {
       emitSocketEvent(socket, 'news:delete', { news_id: 'news-2' })
       await flushPromises()
 
-      expect(wrapper.find('.side-column').classes()).toContain('is-open')
+      expect(wrapper.find('.drawer-backdrop').classes()).toContain('is-open')
       expect(wrapper.findComponent(TaskInfo).props('task')?.id).toBe('task-2')
     })
 
@@ -394,7 +395,7 @@ describe('pages/ProductionNewsFeed', () => {
 
         await reconnect(socket)
 
-        expect(wrapper.find('.side-column').classes()).toContain('is-open')
+        expect(wrapper.find('.drawer-backdrop').classes()).toContain('is-open')
       })
 
       it('leaves the news to the load in flight', async () => {
@@ -1199,7 +1200,7 @@ describe('pages/ProductionNewsFeed', () => {
     }
 
     const isDrawerOpen = wrapper =>
-      wrapper.find('.side-column').classes().includes('is-open')
+      wrapper.find('.drawer-backdrop').classes().includes('is-open')
 
     const pressEscape = async () => {
       window.dispatchEvent(
