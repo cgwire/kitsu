@@ -15,6 +15,7 @@ import '@/lib/auth'
 import AllTaskList from '@/components/lists/AllTaskList.vue'
 import AllTasks from '@/components/pages/AllTasks.vue'
 import BurndownChart from '@/components/widgets/BurndownChart.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
@@ -269,6 +270,56 @@ describe('AllTasks page', () => {
     expect(loadOpenTasks.mock.calls[0][1].person_id).toBe(
       `${ada.id},${gone.id}`
     )
+    wrapper.unmount()
+  })
+
+  it('keeps its second filter row folded with one of its filters set', async () => {
+    const wrapper = await mountPage({ url: `/?person_id=${ada.id}` })
+
+    expect(wrapper.find('.all-tasks').classes()).toContain('collapsed')
+    wrapper.unmount()
+  })
+
+  it('counts the filters set in its second row on its toggle', async () => {
+    const wrapper = await mountPage({
+      url: `/?project_id=production-1&person_id=${ada.id}&due_date=2026-12-01`
+    })
+    const toggle = () =>
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.classes('filters-toggle'))
+
+    expect(toggle().props('text')).toBe('2')
+
+    await wrapper.vm.$router.push('/?project_id=production-1')
+    await flushPromises()
+
+    expect(toggle().props('text')).toBeFalsy()
+    wrapper.unmount()
+  })
+
+  it('resets its filters and keeps its view', async () => {
+    const loadOpenTasks = vi.fn(() => openTasks)
+    const wrapper = await mountPage({
+      loadOpenTasks,
+      url: `/?project_id=production-1&person_id=${ada.id}&view=burndown`
+    })
+    const resetButton = () =>
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.classes('reset-filters'))
+
+    resetButton().vm.$emit('click')
+    await flushPromises()
+
+    expect(wrapper.vm.$router.currentRoute.value.query).toEqual({
+      view: 'burndown'
+    })
+    expect(loadOpenTasks.mock.calls.at(-1)[1]).toMatchObject({
+      project_id: null,
+      person_id: null
+    })
+    expect(resetButton()).toBeUndefined()
     wrapper.unmount()
   })
 })

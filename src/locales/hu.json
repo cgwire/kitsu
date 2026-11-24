@@ -440,6 +440,7 @@
       "cancel": "Mégsem",
       "cell_save_error": "A(z) \"{name}\" mentése nem sikerült: az előző érték visszaállt. Kérlek töltsd újra az oldalt és próbáld újra.",
       "cells_save_error": "Néhány módosítás mentése nem sikerült: az előző értékek visszaálltak. Kérlek töltsd újra az oldalt és próbáld újra.",
+      "clear_filters": "Jelenlegi szűrők törlése",
       "clear_selection": "Kijelölés megszüntetése",
       "click_to_add": "Kattints a hozzáadáshoz",
       "click_to_remove": "Kattints az eltávolításhoz",

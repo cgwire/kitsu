@@ -851,6 +851,7 @@
       "cancel": "Anuluj",
       "cell_save_error": "Nie udało się zapisać „{name}”: przywrócono poprzednią wartość. Odśwież stronę i spróbuj ponownie.",
       "cells_save_error": "Nie udało się zapisać niektórych zmian: przywrócono poprzednie wartości. Odśwież stronę i spróbuj ponownie.",
+      "clear_filters": "Wyczyść bieżące filtry",
       "clear_selection": "Wyczyść bieżące zaznaczenie",
       "clear_sorting": "Wyczyść bieżące sortowanie",
       "click_to_add": "Kliknij, aby dodać",

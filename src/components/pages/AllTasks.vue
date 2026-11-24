@@ -30,10 +30,18 @@
             @click="showBurndown = !showBurndown"
           />
           <button-simple
+            class="flexrow-item reset-filters"
+            icon="remove"
+            :title="$t('main.clear_filters')"
+            @click="resetFilters"
+            v-if="hasFilters"
+          />
+          <button-simple
             class="flexrow-item filters-toggle"
-            icon="funnel"
+            :icon="showFilters ? 'minus' : 'plus'"
             :aria-expanded="`${showFilters}`"
             :is-on="showFilters"
+            :text="secondRowFilterCount ? `${secondRowFilterCount}` : ''"
             :title="$t(showFilters ? 'main.less_filters' : 'main.more_filters')"
             @click="showFilters = !showFilters"
           />
@@ -282,6 +290,20 @@ const params = computed(() => ({
   due_date: filters.dueDate
 }))
 
+// The toggle shows how many filters its folded row holds.
+const secondRowFilterCount = computed(
+  () =>
+    [
+      filters.studioId,
+      filters.departmentId,
+      filters.person?.length,
+      filters.startDate,
+      filters.dueDate
+    ].filter(Boolean).length
+)
+
+const hasFilters = computed(() => Object.values(params.value).some(Boolean))
+
 const pageQuery = computed(() => {
   const query = Object.fromEntries(
     Object.entries(params.value).filter(([, value]) => value)
@@ -308,6 +330,11 @@ const statusStatsList = computed(() =>
 
 // Functions
 // --------------------------------------------------------------------------
+// The route watcher clears the filters the query no longer holds.
+const resetFilters = () => {
+  router.push({ query: showBurndown.value ? { view: 'burndown' } : {} })
+}
+
 const syncRouteQuery = () => {
   router.push({ query: pageQuery.value })
 }
@@ -437,15 +464,31 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
   row-gap: 1em;
 }
 
+.reset-filters,
 .burndown-button,
 .filters-toggle {
   align-self: flex-end;
   height: 42px;
+  // Bulma's near-black button text outweighs the grey of the filter labels
+  color: var(--text);
 }
 
-// small screens only: the second filter row folds behind the toggle and
-// the back button brings the list back in place of the task panel
-.filters-toggle,
+.filters-toggle {
+  flex: none;
+}
+
+.collapsed .filters.collapsible {
+  display: none;
+}
+
+// the global .query-list margins indent it from the filters, and the page
+// already spaces its blocks with a gap
+.query-list {
+  margin: 0;
+}
+
+// small screens only: the back button brings the list back in place of the
+// task panel
 .back-to-list {
   display: none;
 }
@@ -479,11 +522,6 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
 }
 
 @media screen and (max-width: 768px) {
-  .filters-toggle {
-    display: flex;
-    flex: none;
-  }
-
   // the production combobox is 300px wide by default, which pushed the
   // toggle to a second line on phones
   .combobox-production {

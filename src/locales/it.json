@@ -440,6 +440,7 @@
       "cancel": "Annulla",
       "cell_save_error": "Impossibile salvare \"{name}\": è stato ripristinato il valore precedente. Ricarica la pagina e riprova.",
       "cells_save_error": "Impossibile salvare alcune modifiche: sono stati ripristinati i valori precedenti. Ricarica la pagina e riprova.",
+      "clear_filters": "Rimuovi i filtri correnti",
       "clear_selection": "Rimuovi la selezione corrente",
       "click_to_add": "Clicca per aggiungere",
       "click_to_remove": "Clicca per rimuovere",

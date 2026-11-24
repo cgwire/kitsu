@@ -440,6 +440,7 @@
       "cancel": "Cancelar",
       "cell_save_error": "No se ha podido guardar \"{name}\": se ha restaurado el valor anterior. Por favor, recargue la página e inténtelo de nuevo.",
       "cells_save_error": "No se han podido guardar algunos cambios: se han restaurado los valores anteriores. Por favor, recargue la página e inténtelo de nuevo.",
+      "clear_filters": "Borrar los filtros actuales",
       "clear_selection": "Borrar la selección actual",
       "click_to_add": "Haga clic para añadir",
       "click_to_remove": "Haga clic para quitar",

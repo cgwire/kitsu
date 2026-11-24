@@ -440,6 +440,7 @@
       "cancel": "Annuller",
       "cell_save_error": "\"{name}\" kunne ikke gemmes: den tidligere værdi er gendannet. Genindlæs venligst siden og prøv igen.",
       "cells_save_error": "Nogle ændringer kunne ikke gemmes: de tidligere værdier er gendannet. Genindlæs venligst siden og prøv igen.",
+      "clear_filters": "Ryd nuværende filtre",
       "clear_selection": "Ryd nuværende markering",
       "click_to_add": "Klik for at tilføje",
       "click_to_remove": "Klik for at fjerne",

@@ -440,6 +440,7 @@
       "cancel": "取消",
       "cell_save_error": "无法保存“{name}”：已恢复为之前的值。请重新加载页面并重试。",
       "cells_save_error": "部分更改无法保存：已恢复为之前的值。请重新加载页面并重试。",
+      "clear_filters": "清除当前筛选",
       "clear_selection": "清除当前所选",
       "click_to_add": "点击添加",
       "click_to_remove": "点击移除",
