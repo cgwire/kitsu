@@ -1390,7 +1390,8 @@
           "error_enable": "Ocorreu um erro ao ativar a OTP por e-mail.",
           "error_disable": "Ocorreu um erro ao desativar a OTP por e-mail.",
           "description": "Receba um código de uso único por e-mail toda vez que você fizer login.",
-          "name": "E-mail"
+          "name": "E-mail",
+          "new_code_sent": "Um novo código foi enviado por e-mail. Apenas o código do e-mail mais recente é válido."
         },
         "recovery_codes": {
           "title": "Códigos de recuperação",

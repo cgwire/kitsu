@@ -1390,7 +1390,8 @@
           "error_enable": "Er is een fout opgetreden bij het inschakelen van OTP via e-mail.",
           "error_disable": "Er is een fout opgetreden bij het uitschakelen van OTP via e-mail.",
           "description": "Ontvang elke keer dat je inlogt een eenmalige code per e-mail.",
-          "name": "E-mail"
+          "name": "E-mail",
+          "new_code_sent": "Er is een nieuwe code per e-mail verstuurd. Alleen de code uit de meest recente e-mail is geldig."
         },
         "recovery_codes": {
           "title": "Herstelcodes",

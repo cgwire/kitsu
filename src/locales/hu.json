@@ -1377,7 +1377,8 @@
           "description": "Minden bejelentkezéskor kapj egy egyszer használatos kódot e-mailben.",
           "error_disable": "Hiba történt az e-mailes OTP kikapcsolásakor.",
           "error_enable": "Hiba történt az e-mailes OTP bekapcsolásakor.",
-          "name": "E-mail"
+          "name": "E-mail",
+          "new_code_sent": "Új kódot küldtünk e-mailben. Csak a legfrissebb e-mailben lévő kód érvényes."
         },
         "enabled": "Kétfaktoros hitelesítés bekapcsolva",
         "fido": {

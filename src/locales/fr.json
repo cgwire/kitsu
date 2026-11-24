@@ -1393,7 +1393,8 @@
           "button_validate_disable": "Valider et désactiver l'authentification OTP par e-mail",
           "button_validate": "Valider et activer l'authentification OTP par e-mail",
           "error_enable": "Une erreur est survenue en activant l'OTP par e-mail.",
-          "error_disable": "Une erreur est survenue en désactivant l'OTP par e-mail."
+          "error_disable": "Une erreur est survenue en désactivant l'OTP par e-mail.",
+          "new_code_sent": "Un nouveau code a été envoyé par e-mail. Seul le code de l'e-mail le plus récent est valable."
         },
         "recovery_codes": {
           "title": "Codes de récupération",

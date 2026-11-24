@@ -1795,7 +1795,8 @@
           "button_validate_disable": "Zweryfikuj i wyłącz OTP przez e-mail",
           "button_validate": "Zweryfikuj i włącz OTP przez e-mail",
           "error_enable": "Wystąpił błąd podczas włączania OTP przez e-mail.",
-          "error_disable": "Wystąpił błąd podczas wyłączania OTP przez e-mail."
+          "error_disable": "Wystąpił błąd podczas wyłączania OTP przez e-mail.",
+          "new_code_sent": "Nowy kod został wysłany e-mailem. Ważny jest tylko kod z najnowszej wiadomości e-mail."
         },
         "fido": {
           "name": "Klucz bezpieczeństwa",

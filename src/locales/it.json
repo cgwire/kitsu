@@ -1393,7 +1393,8 @@
           "button_validate_disable": "Convalida e disattiva OTP via email",
           "button_validate": "Convalida e attiva OTP via email",
           "error_enable": "Si è verificato un errore durante l'attivazione dell'OTP via email.",
-          "error_disable": "Si è verificato un errore durante la disattivazione dell'OTP via email."
+          "error_disable": "Si è verificato un errore durante la disattivazione dell'OTP via email.",
+          "new_code_sent": "Un nuovo codice è stato inviato via email. È valido solo il codice dell'email più recente."
         },
         "recovery_codes": {
           "title": "Codici di recupero",

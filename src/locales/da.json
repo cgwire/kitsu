@@ -1390,7 +1390,8 @@
           "error_enable": "Der opstod en fejl under aktivering af OTP via e-mail.",
           "error_disable": "Der opstod en fejl under deaktivering af OTP via e-mail.",
           "description": "Modtag en engangskode via e-mail, hver gang du logger ind.",
-          "name": "E-mail"
+          "name": "E-mail",
+          "new_code_sent": "En ny kode er blevet sendt via e-mail. Kun koden fra den seneste e-mail virker."
         },
         "recovery_codes": {
           "title": "Gendannelseskoder",

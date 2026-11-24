@@ -1,7 +1,18 @@
 import { flushPromises, mount } from '@vue/test-utils'
+import { vi } from 'vitest'
 import { reactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
+
+// The user store imports it, and it imports the whole app store.
+vi.mock('@/lib/auth', () => ({ default: {} }))
+vi.mock('@/store/api/people', () => ({
+  default: { preEnableEmailOTP: vi.fn(), sendEmailOTP: vi.fn() }
+}))
+
+import peopleApi from '@/store/api/people'
+import userStore from '@/store/modules/user'
+import { USER_EMAIL_OTP_SENT } from '@/store/mutation-types'
 
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 import TwoFactorAuthenticationSetup from '@/components/widgets/TwoFactorAuthenticationSetup.vue'
@@ -22,29 +33,42 @@ const i18n = createI18n({
 })
 
 // The store actions commit the new 2FA state: a fake one sets it on
-// getters.user.
-const mountSetup = (user, actions = {}) => {
+// getters.user. The codes sent by email are counted by the user store, as in
+// the app.
+const mountSetup = (user, actions = {}, stubs = {}) => {
   const currentUser = reactive({
     email: 'ada@example.com',
     preferred_two_factor_authentication: null,
     ...user
   })
   const store = createStore({
+    state: () => ({ user: currentUser, emailOTPCodesSent: {} }),
     getters: {
-      user: () => currentUser
+      user: state => state.user,
+      emailOTPCodesSent: userStore.getters.emailOTPCodesSent
+    },
+    mutations: {
+      [USER_EMAIL_OTP_SENT]: userStore.mutations[USER_EMAIL_OTP_SENT]
     },
     actions: {
+      preEnableEmailOTP: userStore.actions.preEnableEmailOTP,
       preEnableTOTP: () => ({
         totp_provisionning_uri: 'otpauth://totp/Kitsu:ada?secret=ABC',
         otp_secret: 'ABC'
       }),
+      sendEmailOTP: userStore.actions.sendEmailOTP,
       ...actions
     }
   })
   return mount(TwoFactorAuthenticationSetup, {
     global: {
       plugins: [store, i18n],
-      stubs: { QrcodeVue: true, TextField: true, TwoFactorAuthentication: true }
+      stubs: {
+        QrcodeVue: true,
+        TextField: true,
+        TwoFactorAuthentication: true,
+        ...stubs
+      }
     }
   })
 }
@@ -65,6 +89,13 @@ const actionStates = wrapper =>
 // The grayed look only stopped the mouse: Tab and Enter started a second
 // action in the middle of the first one.
 describe('widgets/TwoFactorAuthenticationSetup', () => {
+  beforeEach(() => {
+    peopleApi.preEnableEmailOTP.mockReset()
+    peopleApi.preEnableEmailOTP.mockResolvedValue({ success: true })
+    peopleApi.sendEmailOTP.mockReset()
+    peopleApi.sendEmailOTP.mockResolvedValue({ success: true })
+  })
+
   it.each([
     {
       name: 'a TOTP setup',
@@ -193,6 +224,83 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
     expect(wrapper.find('.otp-input').attributes('autocomplete')).toBe(
       'one-time-code'
     )
+  })
+
+  // Each Enable makes Zou send a new code and refuse the earlier ones: the
+  // code of the first email, typed after a Cancel and a second Enable, was
+  // refused with no word on why.
+  describe('codes sent by email', () => {
+    const notice = label('email_otp.new_code_sent')
+    const startSetup = async wrapper => {
+      await findButton(wrapper, label('email_otp.button_enable')).trigger(
+        'click'
+      )
+      await flushPromises()
+    }
+    const codeFieldDescription = wrapper => {
+      const id = wrapper.find('.otp-input').attributes('aria-describedby')
+      return id && wrapper.find(`[id="${id}"]`).text()
+    }
+
+    it('says that only the latest email code works once a new one is sent', async () => {
+      const wrapper = mountSetup({})
+
+      await startSetup(wrapper)
+
+      expect(wrapper.text()).not.toContain(notice)
+      expect(codeFieldDescription(wrapper)).toBeUndefined()
+
+      await findButton(wrapper, 'main.cancel').trigger('click')
+      await startSetup(wrapper)
+
+      expect(codeFieldDescription(wrapper)).toBe(notice)
+    })
+
+    // The 2FA code step that confirms a removal mails its code to the same
+    // address: enabling OTP via email again mails a second one.
+    it('counts the codes sent by the 2FA code step of the page', async () => {
+      const wrapper = mountSetup(
+        {
+          email_otp_enabled: true,
+          preferred_two_factor_authentication: 'email_otp'
+        },
+        {
+          disableEmailOTP: ({ getters }) => {
+            Object.assign(getters.user, {
+              email_otp_enabled: false,
+              preferred_two_factor_authentication: null
+            })
+          }
+        },
+        { TwoFactorAuthentication: false }
+      )
+      await findButton(wrapper, label('email_otp.button_disable')).trigger(
+        'click'
+      )
+      await flushPromises()
+      const codeStep = findCodeCheck(wrapper)
+      await codeStep.find('input').setValue('123456')
+      await codeStep.find('button').trigger('click')
+      await flushPromises()
+
+      await startSetup(wrapper)
+
+      expect(peopleApi.sendEmailOTP).toHaveBeenCalledWith('ada@example.com')
+      expect(codeFieldDescription(wrapper)).toBe(notice)
+    })
+
+    it('counts no code when the setup fails to start', async () => {
+      peopleApi.preEnableEmailOTP.mockRejectedValueOnce(new Error('down'))
+      const wrapper = mountSetup({})
+
+      await startSetup(wrapper)
+
+      expect(wrapper.text()).toContain(label('email_otp.error_enable'))
+
+      await startSetup(wrapper)
+
+      expect(codeFieldDescription(wrapper)).toBeUndefined()
+    })
   })
 
   describe('while a request runs', () => {

@@ -15,9 +15,11 @@ vi.mock('@/store/api/people', () => ({
     loadDone: vi.fn(),
     loadTasksToCheck: vi.fn(),
     loadTimeSpents: vi.fn(),
+    preEnableEmailOTP: vi.fn(),
     registerFIDO: vi.fn(),
     removeFilter: vi.fn(),
     removeFilterGroup: vi.fn(),
+    sendEmailOTP: vi.fn(),
     unregisterFIDO: vi.fn(),
     updatePerson: vi.fn(),
     updatePersonLocale: vi.fn()
@@ -490,6 +492,25 @@ describe('User store', () => {
       expect(state.projectRoles['production-1']).toBeUndefined()
     })
 
+    // Each code sent by email makes Zou refuse the codes of the earlier ones.
+    test('USER_EMAIL_OTP_SENT counts the codes of each address', () => {
+      const state = {}
+      store.mutations.RESET_ALL(state)
+
+      store.mutations.USER_EMAIL_OTP_SENT(state, 'ada@example.com')
+      store.mutations.USER_EMAIL_OTP_SENT(state, 'ada@example.com')
+      store.mutations.USER_EMAIL_OTP_SENT(state, 'bob@example.com')
+
+      expect(state.emailOTPCodesSent).toEqual({
+        'ada@example.com': 2,
+        'bob@example.com': 1
+      })
+
+      store.mutations.RESET_ALL(state)
+
+      expect(state.emailOTPCodesSent).toEqual({})
+    })
+
     // Zou picks the next preferred method in the same order
     // (TWO_FACTOR_FALLBACKS), so the page matches it until a reload.
     describe('preferred 2FA method once one is turned off', () => {
@@ -956,6 +977,76 @@ describe('User store', () => {
           'Yubikey'
         )
       })
+    })
+
+    // The 2FA code step and the setup of OTP via email both send codes: the
+    // count of an address has to follow every one of them.
+    describe('codes sent by email', () => {
+      const context = () => ({
+        commit: vi.fn(),
+        state: { user: { email: 'ada@example.com' } }
+      })
+
+      test('sendEmailOTP counts the code sent to the address', async () => {
+        peopleApi.sendEmailOTP.mockResolvedValue({ success: true })
+        const { commit, state } = context()
+
+        await store.actions.sendEmailOTP({ commit, state }, 'bob@example.com')
+
+        expect(peopleApi.sendEmailOTP).toHaveBeenCalledWith('bob@example.com')
+        expect(commit).toHaveBeenCalledWith(
+          'USER_EMAIL_OTP_SENT',
+          'bob@example.com'
+        )
+      })
+
+      test('preEnableEmailOTP counts it for the address of the user', async () => {
+        peopleApi.preEnableEmailOTP.mockResolvedValue({ success: true })
+        const { commit, state } = context()
+
+        await store.actions.preEnableEmailOTP({ commit, state })
+
+        expect(commit).toHaveBeenCalledWith(
+          'USER_EMAIL_OTP_SENT',
+          'ada@example.com'
+        )
+      })
+
+      test.each(['sendEmailOTP', 'preEnableEmailOTP'])(
+        '%s counts no code when the request fails',
+        async action => {
+          peopleApi[action].mockRejectedValue(new Error('down'))
+          const { commit, state } = context()
+
+          await expect(
+            store.actions[action]({ commit, state }, 'ada@example.com')
+          ).rejects.toThrow('down')
+
+          expect(commit).not.toHaveBeenCalled()
+        }
+      )
+
+      // Zou stores the new code before it mails it: past the time limit, the
+      // code of the earlier email may already be refused.
+      test.each(['sendEmailOTP', 'preEnableEmailOTP'])(
+        '%s counts the code of a request out of time',
+        async action => {
+          const timeout = Object.assign(new Error('timeout'), {
+            isTimeout: true
+          })
+          peopleApi[action].mockRejectedValue(timeout)
+          const { commit, state } = context()
+
+          await expect(
+            store.actions[action]({ commit, state }, 'ada@example.com')
+          ).rejects.toBe(timeout)
+
+          expect(commit).toHaveBeenCalledWith(
+            'USER_EMAIL_OTP_SENT',
+            'ada@example.com'
+          )
+        }
+      )
     })
 
     // Zou asks for a factor already enabled before it adds a method.

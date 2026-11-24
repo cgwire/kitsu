@@ -1390,7 +1390,8 @@
           "error_enable": "Beim Aktivieren des OTP per E-Mail ist ein Fehler aufgetreten.",
           "error_disable": "Beim Deaktivieren des OTP per E-Mail ist ein Fehler aufgetreten.",
           "description": "Erhalten Sie bei jeder Anmeldung einen Einmalcode per E-Mail.",
-          "name": "E-Mail"
+          "name": "E-Mail",
+          "new_code_sent": "Ein neuer Code wurde per E-Mail gesendet. Nur der Code aus der neuesten E-Mail ist gültig."
         },
         "recovery_codes": {
           "title": "Wiederherstellungscodes",

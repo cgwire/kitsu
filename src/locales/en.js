@@ -1870,7 +1870,8 @@ export default {
         button_validate_disable: 'Validate and disable OTP via email',
         button_validate: 'Validate and enable OTP via email',
         error_enable: 'An error occurred while enabling OTP via email.',
-        error_disable: 'An error occurred while disabling OTP via email.'
+        error_disable: 'An error occurred while disabling OTP via email.',
+        new_code_sent: 'A new code was sent by email. Only the code from the most recent email works.'
       },
       fido: {
         name: 'Security key',

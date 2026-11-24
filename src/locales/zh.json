@@ -1390,7 +1390,8 @@
           "error_enable": "启用电子邮件验证错误。",
           "error_disable": "禁用电子邮件验证错误。",
           "description": "每次登录时通过电子邮件接收一次性验证码。",
-          "name": "电子邮件"
+          "name": "电子邮件",
+          "new_code_sent": "新验证码已通过电子邮件发送。只有最新一封电子邮件中的验证码有效。"
         },
         "recovery_codes": {
           "title": "恢复代码",

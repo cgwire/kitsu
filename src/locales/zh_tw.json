@@ -1390,7 +1390,8 @@
           "error_enable": "透過電子郵件啟用 OTP 時發生錯誤。",
           "error_disable": "透過電子郵件停用 OTP 時發生錯誤。",
           "description": "每次登入時透過電子郵件接收一次性驗證碼。",
-          "name": "電子郵件"
+          "name": "電子郵件",
+          "new_code_sent": "新驗證碼已透過電子郵件寄送。只有最新一封電子郵件中的驗證碼有效。"
         },
         "recovery_codes": {
           "title": "復原碼",

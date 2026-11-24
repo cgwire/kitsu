@@ -224,12 +224,24 @@
         </p>
 
         <div v-if="twoFA.emailOTPPreEnabled" class="two-fa-flow">
+          <p
+            v-if="isNewEmailCodeSent"
+            :id="newCodeSentId"
+            class="new-code-sent"
+          >
+            {{
+              $t('profile.two_factor_authentication.email_otp.new_code_sent')
+            }}
+          </p>
           <div class="field">
             <p class="control has-icon">
               <input
                 class="input is-medium otp-input"
                 type="text"
                 autocomplete="one-time-code"
+                :aria-describedby="
+                  isNewEmailCodeSent ? newCodeSentId : undefined
+                "
                 v-model.trim="twoFA.validationOTP"
                 @keyup.enter="nextEnable"
                 :placeholder="placeholderInputEnableOTP"
@@ -477,7 +489,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import QrcodeVue from 'qrcode.vue'
@@ -536,6 +548,7 @@ const twoFA = reactive({
     newRecoveryCodes: false
   }
 })
+const newCodeSentId = useId()
 
 // Computed
 
@@ -613,6 +626,10 @@ const textWrongOTPError = computed(() => {
   if (twoFA.emailOTPPreEnabled) return t('login.wrong_email_otp')
   return ''
 })
+
+const isNewEmailCodeSent = computed(
+  () => (store.getters.emailOTPCodesSent[user.value.email] ?? 0) > 1
+)
 
 // Methods
 
@@ -1055,6 +1072,12 @@ onUnmounted(() => {
   .field {
     margin-bottom: 1em;
   }
+}
+
+.new-code-sent {
+  color: var(--text);
+  font-size: 0.9em;
+  margin-bottom: 0.75em;
 }
 
 .two-fa-flow-actions {

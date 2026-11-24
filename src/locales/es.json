@@ -1390,7 +1390,8 @@
           "error_enable": "Se ha producido un error al activar OTP por correo electrónico.",
           "error_disable": "Se ha producido un error al desactivar OTP por correo electrónico.",
           "description": "Reciba un código de un solo uso por correo electrónico cada vez que inicie sesión.",
-          "name": "Correo electrónico"
+          "name": "Correo electrónico",
+          "new_code_sent": "Se ha enviado un nuevo código por correo electrónico. Solo es válido el código del correo electrónico más reciente."
         },
         "recovery_codes": {
           "title": "Códigos de recuperación",
