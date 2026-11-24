@@ -306,4 +306,70 @@ describe('cells/MetadataInput', () => {
       expect(getTeamNames(wrapper)).toEqual(['Bob Doe'])
     })
   })
+
+  describe('list', () => {
+    const listDescriptor = {
+      id: 'descriptor-4',
+      field_name: 'priority',
+      data_type: 'list',
+      choices: ['Low', 'High'],
+      departments: []
+    }
+
+    const mountCell = value =>
+      mount(MetadataInput, {
+        props: {
+          descriptor: listDescriptor,
+          entity: { id: 'shot-1', data: { priority: value } }
+        },
+        global: {
+          plugins: [
+            createStore({
+              getters: {
+                currentProduction: () => ({ id: 'production-1', team: [] }),
+                isCurrentUserAdmin: () => true,
+                isCurrentUserManager: () => true,
+                isCurrentUserSupervisor: () => false,
+                selectedAssets: () => new Map(),
+                selectedEdits: () => new Map(),
+                selectedShots: () => new Map(),
+                selectedTasks: () => new Map(),
+                taskTypeMap: () => new Map(),
+                user: () => ({ departments: [] })
+              }
+            }),
+            createI18n({ legacy: false, locale: 'en' })
+          ]
+        }
+      })
+
+    // As on the production list, when the production's own copy of the column
+    // replaces the shared one: Vue draws the options again, the last one
+    // first.
+    const drawAgain = wrapper =>
+      wrapper.setProps({ descriptor: { ...listDescriptor, id: 'descriptor-5' } })
+
+    test.each(['Removed', ' High'])(
+      'selects the empty choice for %j, no longer offered',
+      async value => {
+        const wrapper = mountCell(value)
+        const select = wrapper.find('select').element
+        expect(select.selectedIndex).toBe(0)
+
+        await drawAgain(wrapper)
+
+        expect(select.selectedIndex).toBe(0)
+      }
+    )
+
+    test('keeps the stored choice when the options are drawn again', async () => {
+      const wrapper = mountCell('Low')
+      const select = wrapper.find('select').element
+      expect(select.value).toBe('Low')
+
+      await drawAgain(wrapper)
+
+      expect(select.value).toBe('Low')
+    })
+  })
 })

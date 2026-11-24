@@ -140,13 +140,13 @@
     <span class="select" v-else-if="descriptor.data_type === 'list'">
       <select
         class="select-input"
+        :value="listValue"
         @change="event => onMetadataFieldChanged(entity, descriptor, event)"
       >
         <option
           :disabled="!isEditable"
           :key="`desc-value-${entity.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
           :value="option.value"
-          :selected="getMetadataFieldValue(descriptor, entity) === option.value"
           v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
         >
           {{ option.label }}
@@ -305,6 +305,15 @@ const metadataInputClass = computed(() => ({
   'is-taglist': !isReadonly.value && props.descriptor.data_type === 'taglist',
   'is-url': !isReadonly.value && props.descriptor.data_type === 'url'
 }))
+
+// Given to the select, which Vue sets once the options are in: a redraw
+// inserts them last first, and with none selected the browser keeps the one
+// inserted first, the last choice. A value no longer among the choices takes
+// the empty one.
+const listValue = computed(() => {
+  const value = getMetadataFieldValue(props.descriptor, props.entity)
+  return props.descriptor.choices?.includes(value) ? value : ''
+})
 
 const displayValue = computed(() => {
   const value = getMetadataFieldValue(props.descriptor, props.entity)
