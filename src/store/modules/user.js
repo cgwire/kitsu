@@ -244,7 +244,8 @@ const PAGE_SEARCHES = [
   { type: 'mainSchedule', listType: 'mainschedule' },
   { type: 'teamSchedule', listType: 'teamschedule' },
   { type: 'newsFeed', listType: 'newsfeed' },
-  { type: 'productionNewsFeed', listType: 'newsfeed', isInProduction: true }
+  { type: 'productionNewsFeed', listType: 'newsfeed', isInProduction: true },
+  { type: 'timesheets', listType: 'timesheets' }
 ]
 
 const pageSearchGetters = Object.fromEntries(
