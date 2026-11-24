@@ -527,8 +527,6 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
 @media screen and (min-width: 769px) {
   .list-panel :deep(.datatable-wrapper) {
     border: 1px solid var(--border);
-    // the last row draws the bottom line
-    border-bottom: 0;
   }
 }
 
