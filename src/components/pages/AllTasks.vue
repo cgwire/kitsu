@@ -457,12 +457,12 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
 .all-tasks {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   // a definite height (not only a max) so the burndown chart can flex to
   // fill the page; the task list scrolls inside either way
   height: 100%;
-  // 20px under the 60px topbar, as the Concepts filters
-  padding: 80px 1em 1em 1em;
+  // 1em all around on phones, under the 60px topbar
+  padding: calc(60px + 1em) 1em 1em;
   color: var(--text);
 }
 
@@ -508,7 +508,7 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.5em;
+  gap: 0.75em;
   min-height: 0;
   padding: 14px;
 }
@@ -553,10 +553,11 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
 // as on the Timesheets page, the task panel is its own surface: the column
 // only frames it
 // 20px under the 60px margin of the column puts the panel top level with
-// the filters panel, at the 80px padding of the main column
+// the filters panel, at the 80px padding of the main column; the right and
+// the bottom take the same 20px as the page
 :deep(.column.side-column) {
   background: transparent;
-  padding: 20px 1em 1em 0;
+  padding: 20px 20px 20px 0;
 }
 
 :deep(.side.task-info) {
@@ -569,10 +570,11 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
   padding-top: 6px;
 }
 
-// the resize gutter already separates the list from the panel
+// 20px all around the page; on the right the resize gutter already
+// separates the list from the panel
 @media screen and (min-width: 769px) {
   .all-tasks {
-    padding-right: 0;
+    padding: 80px 0 20px 20px;
   }
 }
 
@@ -669,12 +671,17 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
     display: none;
   }
 
+  // the cards carry their own padding
+  .list-panel {
+    padding: 0.5em;
+  }
+
   // TaskInfo writes the width of its resizable panel inline on the column
   :deep(.column.side-column) {
     display: none;
     max-width: none;
     min-width: 0 !important;
-    padding: 0.5em;
+    padding: 1em;
     width: 100%;
   }
 
