@@ -56,13 +56,20 @@
             />
           </div>
           <button-simple
-            class="flexrow-item toggle-filters"
-            :active="showMoreFilters"
-            icon="funnel"
+            class="flexrow-item reset-filters"
+            icon="remove"
+            :title="$t('main.clear_filters')"
+            @click="resetFilters"
+            v-if="activeFilterCount"
+          />
+          <button-simple
+            class="flexrow-item filters-toggle"
+            :icon="showMoreFilters ? 'minus' : 'plus'"
+            :aria-expanded="`${showMoreFilters}`"
+            :is-on="showMoreFilters"
+            :text="activeFilterCount ? `${activeFilterCount}` : ''"
             :title="
-              showMoreFilters
-                ? $t('main.less_filters')
-                : $t('main.more_filters')
+              $t(showMoreFilters ? 'main.less_filters' : 'main.more_filters')
             "
             @click="showMoreFilters = !showMoreFilters"
           />
@@ -91,18 +98,28 @@
         </div>
       </div>
 
-      <schedule
-        ref="schedule"
-        :end-date="endDate"
-        :hierarchy="filteredScheduleItems"
-        :is-loading="false"
-        :milestones="shownMilestones"
-        :start-date="startDate"
-        :zoom-level="zoomLevel"
-        hide-man-days
-        readonly
-        @root-element-expanded="expandProductionElement"
-      />
+      <div class="schedule-panel">
+        <search-query-list
+          class="query-list"
+          :groups="mainScheduleSearchFilterGroups"
+          :is-group-enabled="true"
+          :queries="mainScheduleSearchQueries"
+          type="mainSchedule"
+          with-route-query
+        />
+        <schedule
+          ref="schedule"
+          :end-date="endDate"
+          :hierarchy="filteredScheduleItems"
+          :is-loading="false"
+          :milestones="shownMilestones"
+          :start-date="startDate"
+          :zoom-level="zoomLevel"
+          hide-man-days
+          readonly
+          @root-element-expanded="expandProductionElement"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -141,6 +158,7 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 // Constants
 // --------------------------------------------------------------------------
@@ -183,8 +201,18 @@ const zoomLevel = ref(0)
 
 const scheduleRef = useTemplateRef('schedule')
 
+// The route watcher sees the query of the next page too, before this one
+// unmounts.
+const pagePath = route.path
+
 // Computed
 // --------------------------------------------------------------------------
+const mainScheduleSearchFilterGroups = computed(
+  () => store.getters.mainScheduleSearchFilterGroups
+)
+const mainScheduleSearchQueries = computed(
+  () => store.getters.mainScheduleSearchQueries
+)
 const openProductions = computed(() => store.getters.openProductions)
 const archivedTaskTypes = computed(() => store.getters.archivedTaskTypes)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -252,6 +280,13 @@ const taskTypeFilterTitle = computed(() => {
     t('main.all')
   )
 })
+
+const activeFilterCount = computed(
+  () =>
+    [hiddenProductionIds.value, hiddenTaskTypeIds.value].filter(
+      ids => ids.length
+    ).length
+)
 
 const filteredScheduleItems = computed(() =>
   scheduleItems.value.filter(
@@ -351,14 +386,44 @@ const onProductionVisibilityChanged = ({ key, value }) => {
 
 // The rows of a production are loaded when it unfolds: the filter applies
 // to the ones already loaded and to the next ones.
-const onTaskTypeVisibilityChanged = ({ key, value }) => {
-  hiddenTaskTypeIds.value = setVisibility(hiddenTaskTypeIds.value, key, value)
+const filterLoadedTaskTypeRows = () => {
   scheduleItems.value.forEach(item => {
     if (item.allChildren) {
       item.children = getVisibleTaskTypeItems(item.allChildren)
     }
   })
+}
+
+const onTaskTypeVisibilityChanged = ({ key, value }) => {
+  hiddenTaskTypeIds.value = setVisibility(hiddenTaskTypeIds.value, key, value)
+  filterLoadedTaskTypeRows()
   updateFilterQuery()
+}
+
+// The route watcher shows again what the query no longer hides.
+const resetFilters = () => {
+  router.push({
+    query: {
+      ...route.query,
+      hiddenProductions: undefined,
+      hiddenTypes: undefined
+    }
+  })
+}
+
+const applyRouteQuery = () => {
+  const zoom = parseInt(route.query.zoom)
+  zoomLevel.value = Math.min(Math.max(isNaN(zoom) ? 1 : zoom, 0), 3)
+  const knownIds = options => new Set(options.map(option => option.value))
+  hiddenProductionIds.value = parseHiddenIds(
+    route.query.hiddenProductions,
+    knownIds(productionFilterOptions.value)
+  )
+  hiddenTaskTypeIds.value = parseHiddenIds(
+    route.query.hiddenTypes,
+    knownIds(taskTypeFilterOptions.value)
+  )
+  filterLoadedTaskTypeRows()
 }
 
 const expandProductionElement = async productionElement => {
@@ -411,27 +476,25 @@ watch(zoomLevel, zoom => {
   if (zoom === 0 && periodUnit.value === 'days') periodUnit.value = 'weeks'
   const query = { ...route.query, zoom: String(zoom) }
   if (JSON.stringify(query) !== JSON.stringify(route.query)) {
-    router.push({ query })
+    // A query without zoom is completed in place: going back to it would
+    // otherwise push a new entry over the next ones.
+    const navigate = route.query.zoom ? router.push : router.replace
+    navigate({ query })
   }
 })
+
+// A saved search, or the back button, sets a query the page did not write.
+watch(
+  () => route.query,
+  () => {
+    if (route.path === pagePath) applyRouteQuery()
+  }
+)
 
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
-  const zoom = parseInt(route.query.zoom)
-  zoomLevel.value = Math.min(Math.max(isNaN(zoom) ? 1 : zoom, 0), 3)
-  const knownIds = options => new Set(options.map(option => option.value))
-  hiddenProductionIds.value = parseHiddenIds(
-    route.query.hiddenProductions,
-    knownIds(productionFilterOptions.value)
-  )
-  hiddenTaskTypeIds.value = parseHiddenIds(
-    route.query.hiddenTypes,
-    knownIds(taskTypeFilterOptions.value)
-  )
-  // a link or a reload brings the filters back: keep them in sight
-  showMoreFilters.value =
-    hiddenProductionIds.value.length > 0 || hiddenTaskTypeIds.value.length > 0
+  applyRouteQuery()
   if (openProductions.value.length) {
     scheduleItems.value = convertScheduleItems(openProductions.value)
     startDate.value = getFirstStartDate(scheduleItems.value)
@@ -458,8 +521,8 @@ useHead({
 .schedule-toolbar {
   background: var(--background-panel);
   border-radius: 12px;
-  margin-bottom: 1em;
-  padding: 0.75em 1em 1em;
+  margin-bottom: 14px;
+  padding: 14px;
 
   .field {
     padding-bottom: 0;
@@ -488,6 +551,12 @@ useHead({
   .zoom-level :deep(.select) {
     height: 42px;
   }
+}
+
+.reset-filters,
+.filters-toggle {
+  color: var(--text);
+  padding: 0 14px;
 }
 
 .period-stepper {
@@ -559,10 +628,66 @@ useHead({
   padding-top: calc(60px + 1em);
 }
 
+@media screen and (min-width: 769px) {
+  .fixed-page {
+    padding: 80px 20px 20px;
+  }
+}
+
 .main-column {
   display: flex;
   border: 0;
   overflow: hidden;
   flex-direction: column;
+}
+
+.schedule-panel {
+  background: var(--background-panel);
+  border-radius: 12px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75em;
+  min-height: 0;
+  padding: 14px;
+}
+
+// The schedule paints its corner and its month names with the page
+// background and leaves the rest of its headers transparent: on the panel
+// tone they came out as patches.
+.schedule-panel .schedule-wrapper {
+  background: var(--background);
+  border-radius: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// its names sit 5px from its left edge, made for a page margin beside them
+.schedule-panel :deep(.schedule) {
+  padding-left: 10px;
+}
+
+// the global .query-list margins indent it from the panel padding
+.query-list {
+  margin: 0;
+}
+
+// the default tag color is the panel background: take the tone made for
+// tags laid on a panel (groups keep their inline tint)
+.schedule-panel :deep(.search-queries .tag:not(.empty)) {
+  background-color: var(--background-panel-tag);
+}
+
+.schedule-panel :deep(.search-queries .group-list) {
+  background-color: var(--background-panel-tag);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+@media screen and (max-width: 768px) {
+  // read-only: the saved searches stay, without their editing
+  .query-list :deep(.tag.folder) {
+    display: none;
+  }
 }
 </style>

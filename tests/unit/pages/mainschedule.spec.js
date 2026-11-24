@@ -54,6 +54,8 @@ const mountPage = async productions => {
   await router.push('/main-schedule')
   const store = createStore({
     getters: {
+      mainScheduleSearchFilterGroups: () => [],
+      mainScheduleSearchQueries: () => [],
       openProductions: () => productions,
       taskTypes: () => [],
       archivedTaskTypes: () => [],
@@ -126,6 +128,12 @@ const filteredScheduleItems = [
   { id: 'item-2', task_type_id: 'tt-light', start_date: '2026-02-01' }
 ]
 
+const savedSearch = {
+  id: 'search-1',
+  name: 'Animation only',
+  search_query: 'zoom=2&hiddenTypes=tt-light'
+}
+
 const mountFilteredPage = async (
   path = '/main-schedule',
   {
@@ -147,6 +155,8 @@ const mountFilteredPage = async (
   await router.push(path)
   const store = createStore({
     getters: {
+      mainScheduleSearchFilterGroups: () => [],
+      mainScheduleSearchQueries: () => [savedSearch],
       openProductions: () => productions,
       taskTypes: () => taskTypes.filter(taskType => !taskType.archived),
       archivedTaskTypes: () => taskTypes.filter(taskType => taskType.archived),
@@ -463,17 +473,106 @@ describe('MainSchedule filters', () => {
   const isFilterRowShown = wrapper =>
     wrapper.findAll('.toolbar-row')[1].element.style.display !== 'none'
 
+  const buttonOf = (wrapper, name) =>
+    wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(button => button.classes(name))
+
   it('keeps the filters folded when none is set', async () => {
     const wrapper = await mountFilteredPage()
     expect(isFilterRowShown(wrapper)).toBe(false)
+    expect(buttonOf(wrapper, 'filters-toggle').props('text')).toBeFalsy()
+    expect(buttonOf(wrapper, 'reset-filters')).toBeUndefined()
   })
 
   it.each([
-    '/main-schedule?hiddenProductions=production-2',
-    '/main-schedule?hiddenTypes=tt-anim'
-  ])('shows the filters a reload brings back (%s)', async path => {
-    const wrapper = await mountFilteredPage(path)
+    ['/main-schedule?hiddenProductions=production-2', '1'],
+    ['/main-schedule?hiddenTypes=tt-anim', '1'],
+    ['/main-schedule?hiddenProductions=production-2&hiddenTypes=tt-anim', '2']
+  ])(
+    'keeps the filters of a link folded and counts them on its toggle (%s)',
+    async (path, count) => {
+      const wrapper = await mountFilteredPage(path)
+      expect(isFilterRowShown(wrapper)).toBe(false)
+      expect(buttonOf(wrapper, 'filters-toggle').props('text')).toBe(count)
+    }
+  )
+
+  it('unfolds the filters from its toggle', async () => {
+    const wrapper = await mountFilteredPage()
+    buttonOf(wrapper, 'filters-toggle').vm.$emit('click')
+    await flushPromises()
     expect(isFilterRowShown(wrapper)).toBe(true)
+  })
+
+  it('clears its filters and keeps its zoom', async () => {
+    const wrapper = await mountFilteredPage(
+      '/main-schedule?zoom=2&hiddenProductions=production-2&hiddenTypes=tt-anim'
+    )
+
+    buttonOf(wrapper, 'reset-filters').vm.$emit('click')
+    await flushPromises()
+
+    expect(wrapper.vm.$route.query).toEqual({ zoom: '2' })
+    expect(hierarchyOf(wrapper).map(item => item.id)).toEqual([
+      'production-1',
+      'production-2'
+    ])
+    expect(taskTypeComboOf(wrapper).props('modelValue')).toEqual({
+      'tt-anim': true,
+      'tt-light': true
+    })
+    expect(buttonOf(wrapper, 'reset-filters')).toBeUndefined()
+  })
+
+  it('lists its saved searches, which hold its whole URL query', async () => {
+    const wrapper = await mountFilteredPage()
+
+    expect(
+      wrapper.findComponent({ name: 'SearchQueryList' }).props()
+    ).toMatchObject({
+      groups: [],
+      isGroupEnabled: true,
+      queries: [savedSearch],
+      type: 'mainSchedule',
+      withRouteQuery: true
+    })
+  })
+
+  // A saved search, or the back button, changes the URL query of the page
+  // shown.
+  it('shows the zoom and the filters of a new URL query', async () => {
+    const wrapper = await mountFilteredPage()
+    const schedule = wrapper.findComponent(ScheduleStub)
+    schedule.vm.$emit('root-element-expanded', hierarchyOf(wrapper)[0])
+    await flushPromises()
+
+    await wrapper.vm.$router.push(
+      '/main-schedule?zoom=3&hiddenProductions=production-2&hiddenTypes=tt-anim'
+    )
+    await flushPromises()
+
+    expect(hierarchyOf(wrapper).map(item => item.id)).toEqual(['production-1'])
+    expect(hierarchyOf(wrapper)[0].children.map(c => c.id)).toEqual(['item-2'])
+    expect(
+      wrapper.findComponent({ name: 'ComboboxNumber' }).props('modelValue')
+    ).toBe(3)
+    expect(wrapper.vm.$route.query).toEqual({
+      zoom: '3',
+      hiddenProductions: 'production-2',
+      hiddenTypes: 'tt-anim'
+    })
+  })
+
+  it('leaves the query of the next page alone', async () => {
+    const wrapper = await mountFilteredPage('/main-schedule?zoom=2')
+
+    await wrapper.vm.$router.push('/productions/production-1/schedule')
+    await flushPromises()
+
+    expect(wrapper.vm.$route.fullPath).toBe(
+      '/productions/production-1/schedule'
+    )
   })
 
   it('keeps the filters folded when the link hides only gone productions', async () => {
