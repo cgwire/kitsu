@@ -46,6 +46,15 @@ describe('PanelLayout', () => {
     )
   })
 
+  // Concepts keeps the task panel of the other pages: a full-height column.
+  it('frames its side as a panel unless asked for the plain column', () => {
+    expect(mountLayout({ side: true }).classes()).toContain('paneled-side')
+
+    const wrapper = mountLayout({ plainSide: true, side: true })
+
+    expect(wrapper.classes()).not.toContain('paneled-side')
+  })
+
   it('marks a side shown in place of the list on phones', () => {
     const wrapper = mountLayout({ side: true, sideFocused: true })
 

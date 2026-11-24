@@ -1,7 +1,11 @@
 <template>
   <div
     class="columns fixed-page panel-layout"
-    :class="{ 'side-focused': sideFocused, 'with-side': side }"
+    :class="{
+      'paneled-side': !plainSide,
+      'side-focused': sideFocused,
+      'with-side': side
+    }"
   >
     <div class="column main-column">
       <div
@@ -31,6 +35,8 @@
 defineProps({
   // the width the two panels stop growing at, in pixels
   maxWidth: { type: Number, default: 0 },
+  // the side keeps the look it has on the other pages: a full-height column
+  plainSide: { type: Boolean, default: false },
   side: { type: Boolean, default: false },
   // on phones the side panel shows in place of the list, never beside it
   sideFocused: { type: Boolean, default: false }
@@ -98,11 +104,11 @@ defineProps({
 }
 
 // the side panel is its own surface: the column only frames it
-.panel-layout .side-column {
+.panel-layout.paneled-side .side-column {
   background: transparent;
 }
 
-.side-column :deep(.side.task-info) {
+.paneled-side .side-column :deep(.side.task-info) {
   background: var(--background-panel);
   border-radius: 12px;
 }
@@ -110,7 +116,7 @@ defineProps({
 // The resize handle of the task panel lies over the gutter before it, its
 // line showing only on hover (the layout selector outweighs the dark theme
 // color).
-.panel-layout .side-column :deep(.extend-bar) {
+.panel-layout.paneled-side .side-column :deep(.extend-bar) {
   background: transparent;
   margin-left: -14px;
   width: 14px;
@@ -127,13 +133,13 @@ defineProps({
   }
 
   // the gutter before the side panel belongs to its column
-  .with-side .main-column {
+  .paneled-side.with-side .main-column {
     padding-right: 0;
   }
 
   // 20px under the 60px margin of the column puts the side panel level with
   // the filters panel
-  .side-column {
+  .paneled-side .side-column {
     padding: 20px 20px 20px 14px;
   }
 }
@@ -154,8 +160,11 @@ defineProps({
     display: none;
     max-width: none;
     min-width: 0 !important;
-    padding: 1em;
     width: 100%;
+  }
+
+  .paneled-side .side-column {
+    padding: 1em;
   }
 
   .side-focused .main-column {
