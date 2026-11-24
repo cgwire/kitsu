@@ -669,9 +669,11 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
     display: none;
   }
 
+  // TaskInfo writes the width of its resizable panel inline on the column
   :deep(.column.side-column) {
     display: none;
     max-width: none;
+    min-width: 0 !important;
     padding: 0.5em;
     width: 100%;
   }
