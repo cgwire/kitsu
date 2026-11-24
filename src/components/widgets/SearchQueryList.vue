@@ -309,6 +309,12 @@ const props = defineProps({
   withRouteQuery: {
     type: Boolean,
     default: false
+  },
+  // The keys of the route query a search neither holds nor changes: what
+  // the page shows beside its filters, as a folder or a selection.
+  keptQueryKeys: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -433,11 +439,22 @@ const removeErrorText = computed(() =>
     : t('main.remove_search_filter_group_error')
 )
 
+const pickQueryKeys = isKept =>
+  Object.fromEntries(
+    Object.entries(route.query).filter(
+      ([key]) => props.keptQueryKeys.includes(key) === isKept
+    )
+  )
+
 const pageQuery = computed(() =>
-  props.withRouteQuery ? new URLSearchParams(route.query).toString() : ''
+  props.withRouteQuery
+    ? new URLSearchParams(pickQueryKeys(false)).toString()
+    : ''
 )
 
-const sortedPageQuery = computed(() => toSortedQueryString(route.query))
+const sortedPageQuery = computed(() =>
+  toSortedQueryString(pickQueryKeys(false))
+)
 
 const isActiveSearch = searchQuery =>
   props.withRouteQuery &&
@@ -453,7 +470,10 @@ const queryRoute = searchQuery => {
   return {
     ...route,
     query: props.withRouteQuery
-      ? Object.fromEntries(new URLSearchParams(searchQuery.search_query))
+      ? {
+          ...pickQueryKeys(true),
+          ...Object.fromEntries(new URLSearchParams(searchQuery.search_query))
+        }
       : { ...route.query, search: searchQuery.search_query }
   }
 }

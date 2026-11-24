@@ -49,6 +49,7 @@ const mountList = async ({
   groups = [group],
   isAdmin = false,
   isClient = false,
+  keptQueryKeys,
   productionId,
   queries = [search],
   role = 'manager',
@@ -80,6 +81,7 @@ const mountList = async ({
     groups,
     isGroupEnabled: true,
     entityType,
+    keptQueryKeys,
     productionId,
     withRouteQuery
   }
@@ -556,6 +558,59 @@ describe('SearchQueryList, searches of the page query', () => {
     await flushPromises()
 
     expect(tags().map(tag => tag.classes('active'))).toEqual([true, false])
+  })
+
+  // Concepts keeps its folder and its selection in its query, next to its
+  // filters: a search neither holds nor changes them.
+  describe('with query keys it leaves alone', () => {
+    const keptQueryKeys = ['folder', 'concept-id']
+    const tag = wrapper => wrapper.find('.tag:not(.folder):not(.group)')
+
+    test('saves the query without them', async () => {
+      const wrapper = await mountPageList({
+        keptQueryKeys,
+        url: '/?folder=folder-1&project_id=production-1&concept-id=concept-1'
+      })
+
+      await addButton(wrapper).trigger('click')
+
+      expect(modal(wrapper).props('searchQueryToEdit').search_query).toBe(
+        'project_id=production-1'
+      )
+    })
+
+    test('saves nothing while the page holds only them', async () => {
+      const wrapper = await mountPageList({
+        keptQueryKeys,
+        url: '/?folder=folder-1'
+      })
+
+      expect(addButton(wrapper).attributes('aria-disabled')).toBe('true')
+    })
+
+    test('runs its query and keeps them', async () => {
+      const wrapper = await mountPageList({
+        keptQueryKeys,
+        url: '/?folder=folder-1&view=burndown'
+      })
+
+      await tag(wrapper).trigger('click')
+      await flushPromises()
+
+      expect(wrapper.vm.$router.currentRoute.value.query).toEqual({
+        folder: 'folder-1',
+        task_type_id: 'type-1'
+      })
+    })
+
+    test('marks the search the page runs, whatever they hold', async () => {
+      const wrapper = await mountPageList({
+        keptQueryKeys,
+        url: '/?folder=folder-1&task_type_id=type-1'
+      })
+
+      expect(tag(wrapper).classes('active')).toBe(true)
+    })
   })
 })
 
