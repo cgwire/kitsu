@@ -40,13 +40,20 @@
             @click="toggleTaskSidePanel"
           />
           <button-simple
-            class="flexrow-item toggle-filters"
-            :active="showMoreFilters"
-            icon="funnel"
+            class="flexrow-item reset-filters"
+            icon="remove"
+            :title="$t('main.clear_filters')"
+            @click="resetFilters"
+            v-if="activeFilterCount"
+          />
+          <button-simple
+            class="flexrow-item filters-toggle"
+            :icon="showMoreFilters ? 'minus' : 'plus'"
+            :aria-expanded="`${showMoreFilters}`"
+            :is-on="showMoreFilters"
+            :text="activeFilterCount ? `${activeFilterCount}` : ''"
             :title="
-              showMoreFilters
-                ? $t('main.less_filters')
-                : $t('main.more_filters')
+              $t(showMoreFilters ? 'main.less_filters' : 'main.more_filters')
             "
             @click="showMoreFilters = !showMoreFilters"
           />
@@ -93,33 +100,43 @@
         v-if="scheduleSaveErrorText"
       />
 
-      <div class="empty-schedule schedule-error" v-if="errors.schedule">
-        <table-info is-error />
-        <button-simple :text="$t('main.reload')" @click="init" />
-      </div>
-      <schedule
-        ref="schedule"
-        :assign-rule="assignRule"
-        :dragged-items="draggedTasks"
-        :end-date="endDate"
-        :hide-man-days="true"
-        :hierarchy="scheduleItems"
-        :is-estimation-linked="true"
-        :multiline="true"
-        :reassignable="true"
-        :start-date="startDate"
-        :with-milestones="false"
-        :zoom-level="zoomLevel"
-        @item-assign="onScheduleItemAssigned"
-        @item-changed="onScheduleItemChanged"
-        @item-drop="onScheduleItemDropped"
-        @item-unassign="onScheduleItemUnassigned"
-        @root-element-expanded="expandPersonElement"
-        v-else-if="loading.schedule || scheduleItems.length > 0"
-      />
-      <div class="empty-schedule" v-else>
-        <user-search-icon :size="40" />
-        <p>{{ $t('team_schedule.empty') }}</p>
+      <div class="schedule-panel">
+        <search-query-list
+          class="query-list"
+          :groups="teamScheduleSearchFilterGroups"
+          :is-group-enabled="true"
+          :queries="teamScheduleSearchQueries"
+          type="teamSchedule"
+          with-route-query
+        />
+        <div class="empty-schedule schedule-error" v-if="errors.schedule">
+          <table-info is-error />
+          <button-simple :text="$t('main.reload')" @click="init" />
+        </div>
+        <schedule
+          ref="schedule"
+          :assign-rule="assignRule"
+          :dragged-items="draggedTasks"
+          :end-date="endDate"
+          :hide-man-days="true"
+          :hierarchy="scheduleItems"
+          :is-estimation-linked="true"
+          :multiline="true"
+          :reassignable="true"
+          :start-date="startDate"
+          :with-milestones="false"
+          :zoom-level="zoomLevel"
+          @item-assign="onScheduleItemAssigned"
+          @item-changed="onScheduleItemChanged"
+          @item-drop="onScheduleItemDropped"
+          @item-unassign="onScheduleItemUnassigned"
+          @root-element-expanded="expandPersonElement"
+          v-else-if="loading.schedule || scheduleItems.length > 0"
+        />
+        <div class="empty-schedule" v-else>
+          <user-search-icon :size="40" />
+          <p>{{ $t('team_schedule.empty') }}</p>
+        </div>
       </div>
     </div>
 
@@ -279,6 +296,7 @@ import { firstBy } from 'thenby'
 import {
   computed,
   getCurrentInstance,
+  nextTick,
   onBeforeUnmount,
   onMounted,
   reactive,
@@ -316,6 +334,7 @@ import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
@@ -383,6 +402,14 @@ const emptyDragImage = new Image()
 emptyDragImage.src =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
+// The route watcher sees the query of the next page too, before this one
+// unmounts.
+const pagePath = route.path
+
+// A query the page reads is not written back: a default it adds would
+// unmark the saved search just run.
+let isReadingRoute = false
+
 const peopleFieldRef = useTemplateRef('people-field')
 const scheduleRef = useTemplateRef('schedule')
 
@@ -400,6 +427,12 @@ const getProductionTaskTypes = computed(
 const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const openProductions = computed(() => store.getters.openProductions)
+const teamScheduleSearchFilterGroups = computed(
+  () => store.getters.teamScheduleSearchFilterGroups
+)
+const teamScheduleSearchQueries = computed(
+  () => store.getters.teamScheduleSearchQueries
+)
 const organisation = computed(() => store.getters.organisation)
 const productionMap = computed(() => store.getters.productionMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -417,6 +450,22 @@ const daysOffByPerson = computed(() =>
 // departments only browses those.
 const isSupervisorWithDepartments = computed(() =>
   Boolean(scopedDepartments(selectedProduction.value)?.length)
+)
+
+// "My departments" is the widest scope of a supervisor attached to
+// departments: any other choice counts as a filter.
+const defaultDepartment = computed(() =>
+  isSupervisorWithDepartments.value ? 'MY_DEPARTMENTS' : 'ALL'
+)
+
+const activeFilterCount = computed(
+  () =>
+    [
+      selectedStudio.value,
+      selectedProduction.value,
+      selectedDepartment.value !== defaultDepartment.value,
+      selectedPerson.value
+    ].filter(Boolean).length
 )
 
 // The unassigned panel is scoped the same way by its own production
@@ -1027,14 +1076,37 @@ const syncDepartmentFilter = () => {
   }
 }
 
-// "My departments" is the widest scope of a supervisor attached to
-// departments: any other choice counts as a filter.
-const hasFilters = () =>
-  Boolean(selectedStudio.value || selectedProduction.value) ||
-  selectedDepartment.value !==
-    (isSupervisorWithDepartments.value ? 'MY_DEPARTMENTS' : 'ALL')
+const resetFilters = () => {
+  if (selectedPerson.value) peopleFieldRef.value.clear()
+  // the values of the "All" entries: undefined would leave the URL as it is
+  selectedStudio.value = null
+  selectedProduction.value = ''
+  selectedDepartment.value = defaultDepartment.value
+}
+
+const applyRouteQuery = () => {
+  selectedStudio.value = route.query.studio || undefined
+  // the combobox lists the open productions only: a closed or deleted
+  // production of a link is dropped. It stays in the URL (undefined, not
+  // ''), so a link with nothing else to rewrite opens without a navigation.
+  const production = route.query.production
+  selectedProduction.value = openProductions.value.some(
+    ({ id }) => id === production
+  )
+    ? production
+    : undefined
+  // Supervisors land on their own departments (issue #1579), a bookmarked
+  // department outside them included.
+  selectedDepartment.value = route.query.department || defaultDepartment.value
+  syncDepartmentFilter()
+  const zoom = Number(route.query.zoom)
+  zoomLevel.value = zoomOptions.value.some(option => option.value === zoom)
+    ? zoom
+    : DEFAULT_ZOOM
+}
 
 const updateRoute = ({ department, production, studio, zoom }) => {
+  if (isReadingRoute) return
   const currentQuery = pendingQuery || route.query
   const query = { ...currentQuery }
 
@@ -1106,6 +1178,20 @@ watch(zoomLevel, value => {
   updateRoute({ zoom: value })
 })
 
+// A saved search, or the back button, sets a query the page did not write.
+watch(
+  () => route.query,
+  async () => {
+    if (route.path === pagePath) {
+      isReadingRoute = true
+      applyRouteQuery()
+      // the filter watchers run before the next tick
+      await nextTick()
+      isReadingRoute = false
+    }
+  }
+)
+
 watch(isTaskSidePanelOpen, open => {
   if (open) {
     loadUnassignedTasks()
@@ -1115,31 +1201,7 @@ watch(isTaskSidePanelOpen, open => {
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
-  selectedStudio.value = route.query.studio || undefined
-  // the combobox lists the open productions only: a closed or deleted
-  // production of a link is dropped. It stays in the URL (undefined, not
-  // ''), so a link with nothing else to rewrite opens without a navigation.
-  const production = route.query.production
-  selectedProduction.value = openProductions.value.some(
-    ({ id }) => id === production
-  )
-    ? production
-    : undefined
-  // Supervisors land on their own departments (issue #1579), a bookmarked
-  // department outside them included.
-  const department = route.query.department
-  if (department) {
-    selectedDepartment.value = department
-  } else if (isSupervisorWithDepartments.value) {
-    selectedDepartment.value = 'MY_DEPARTMENTS'
-  }
-  syncDepartmentFilter()
-  // a link or a reload brings the filters back: keep them in sight
-  showMoreFilters.value = hasFilters()
-  const zoom = Number(route.query.zoom)
-  zoomLevel.value = zoomOptions.value.some(option => option.value === zoom)
-    ? zoom
-    : DEFAULT_ZOOM
+  applyRouteQuery()
 
   socket.on('preview-file:set-main', onPreviewFileSetMain)
 
@@ -1165,8 +1227,8 @@ useHead({
 .schedule-toolbar {
   background: var(--background-panel);
   border-radius: 12px;
-  margin-bottom: 1em;
-  padding: 0.75em 1em 1em;
+  margin-bottom: 14px;
+  padding: 14px;
 
   .field {
     padding-bottom: 0;
@@ -1205,6 +1267,12 @@ useHead({
   }
 }
 
+.reset-filters,
+.filters-toggle {
+  color: var(--text);
+  padding: 0 14px;
+}
+
 // #app .dp--input sets the height globally; the id outranks the scope
 #app .schedule-toolbar :deep(.dp--input) {
   height: 42px;
@@ -1236,11 +1304,67 @@ useHead({
   padding-top: calc(60px + 1em);
 }
 
+@media screen and (min-width: 769px) {
+  .fixed-page {
+    padding: 80px 20px 20px;
+  }
+}
+
 .main-column {
   display: flex;
   border: 0;
   overflow: hidden;
   flex-direction: column;
+}
+
+.schedule-panel {
+  background: var(--background-panel);
+  border-radius: 12px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75em;
+  min-height: 0;
+  padding: 14px;
+}
+
+// The schedule paints its corner and its month names with the page
+// background and leaves the rest of its headers transparent: on the panel
+// tone they came out as patches.
+.schedule-panel .schedule-wrapper {
+  background: var(--background);
+  border-radius: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// its names sit 5px from its left edge, made for a page margin beside them
+.schedule-panel :deep(.schedule) {
+  padding-left: 10px;
+}
+
+// the global .query-list margins indent it from the panel padding
+.query-list {
+  margin: 0;
+}
+
+// the default tag color is the panel background: take the tone made for
+// tags laid on a panel (groups keep their inline tint)
+.schedule-panel :deep(.search-queries .tag:not(.empty)) {
+  background-color: var(--background-panel-tag);
+}
+
+.schedule-panel :deep(.search-queries .group-list) {
+  background-color: var(--background-panel-tag);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+@media screen and (max-width: 768px) {
+  // read-only: the saved searches stay, without their editing
+  .query-list :deep(.tag.folder) {
+    display: none;
+  }
 }
 
 .people-filter {
@@ -1269,7 +1393,7 @@ useHead({
 .side-column {
   position: relative;
   margin-top: 0;
-  padding: 0 0 0 1em;
+  padding: 0 0 0 14px;
 
   :deep(.side) {
     background: var(--background-panel);

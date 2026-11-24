@@ -49,6 +49,12 @@ const lightingType = {
 }
 const taskTypes = [animationType, lightingType]
 
+const savedSearch = {
+  id: 'search-1',
+  name: 'Studio one',
+  search_query: 'studio=studio-1'
+}
+
 const emptyPage = { data: [], is_more: false, stats: { total: 0 } }
 
 const mountPage = async ({
@@ -75,6 +81,8 @@ const mountPage = async ({
       organisation: () => ({}),
       productionMap: () => new Map(),
       taskTypeMap: () => new Map(),
+      teamScheduleSearchFilterGroups: () => [],
+      teamScheduleSearchQueries: () => [savedSearch],
       user: () => ({ id: 'user-1', departments: [] }),
       ...getters
     },
@@ -88,7 +96,10 @@ const mountPage = async ({
   })
   const router = createRouter({
     history: createWebHashHistory(),
-    routes: [{ path: '/', component: { template: '<div />' } }]
+    routes: [
+      { path: '/', component: { template: '<div />' } },
+      { path: '/other', component: { template: '<div />' } }
+    ]
   })
   if (query) {
     await router.push({ path: '/', query })
@@ -519,10 +530,19 @@ describe('TeamSchedule page', () => {
     const isFilterRowShown = wrapper =>
       wrapper.findAll('.toolbar-row')[1].element.style.display !== 'none'
 
+const buttonOf = (wrapper, name) =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.classes(name))
+    const filterCountOf = wrapper =>
+      buttonOf(wrapper, 'filters-toggle').props('text')
+
     it('stays folded without a filter', async () => {
       const { wrapper } = await mountPage()
 
       expect(isFilterRowShown(wrapper)).toBe(false)
+      expect(filterCountOf(wrapper)).toBeFalsy()
+      expect(buttonOf(wrapper, 'reset-filters')).toBeUndefined()
       wrapper.unmount()
     })
 
@@ -530,21 +550,35 @@ describe('TeamSchedule page', () => {
       ['studio', { studio: 'studio-1' }, {}],
       ['department', { department: 'dep-2' }, {}],
       ['production', { production: 'prod-1' }, openProductionGetters('prod-1')]
-    ])('shows the %s filter a link brings back', async (_, query, getters) => {
-      const { wrapper } = await mountPage({ getters, query })
+    ])(
+      'keeps the %s filter of a link folded and counts it on its toggle',
+      async (_, query, getters) => {
+        const { wrapper } = await mountPage({ getters, query })
+
+        expect(isFilterRowShown(wrapper)).toBe(false)
+        expect(filterCountOf(wrapper)).toBe('1')
+        wrapper.unmount()
+      }
+    )
+
+    it('unfolds from its toggle', async () => {
+      const { wrapper } = await mountPage()
+
+      buttonOf(wrapper, 'filters-toggle').vm.$emit('click')
+      await nextTick()
 
       expect(isFilterRowShown(wrapper)).toBe(true)
       wrapper.unmount()
     })
 
-    it('stays folded on the own departments of a supervisor', async () => {
+    it('counts no filter on the own departments of a supervisor', async () => {
       const { wrapper } = await mountPage({ getters: supervisorGetters })
 
-      expect(isFilterRowShown(wrapper)).toBe(false)
+      expect(filterCountOf(wrapper)).toBeFalsy()
       wrapper.unmount()
     })
 
-    it('shows a single department of a supervisor', async () => {
+    it('counts a single department of a supervisor', async () => {
       const { wrapper } = await mountPage({
         getters: {
           ...supervisorGetters,
@@ -553,7 +587,93 @@ describe('TeamSchedule page', () => {
         query: { department: 'dep-1' }
       })
 
-      expect(isFilterRowShown(wrapper)).toBe(true)
+      expect(filterCountOf(wrapper)).toBe('1')
+      wrapper.unmount()
+    })
+
+    it('clears its filters and keeps its zoom', async () => {
+      const { wrapper } = await mountPage({
+        getters: openProductionGetters('prod-1'),
+        query: {
+          studio: 'studio-1',
+          department: 'dep-2',
+          production: 'prod-1',
+          zoom: '3'
+        }
+      })
+      expect(filterCountOf(wrapper)).toBe('3')
+
+      buttonOf(wrapper, 'reset-filters').vm.$emit('click')
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query).toEqual({ department: 'ALL', zoom: '3' })
+      expect(filterCountOf(wrapper)).toBeFalsy()
+      expect(buttonOf(wrapper, 'reset-filters')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    it('lists its saved searches, which hold its whole URL query', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(
+        wrapper.findComponent({ name: 'SearchQueryList' }).props()
+      ).toMatchObject({
+        groups: [],
+        isGroupEnabled: true,
+        queries: [savedSearch],
+        type: 'teamSchedule',
+        withRouteQuery: true
+      })
+      wrapper.unmount()
+    })
+
+    // A saved search, or the back button, changes the URL query of the page
+    // shown. Writing a default back would unmark the search just run.
+    it('shows the filters of a new URL query and leaves it as it is', async () => {
+      const { wrapper } = await mountPage({
+        query: { department: 'dep-2', zoom: '3' }
+      })
+
+      await wrapper.vm.$router.push({ path: '/', query: { studio: 'studio-1' } })
+      await flushPromises()
+
+      expect(
+        wrapper.findComponent({ name: 'ComboboxStudio' }).props('modelValue')
+      ).toBe('studio-1')
+      expect(
+        wrapper.findComponent({ name: 'ComboboxDepartment' }).props('modelValue')
+      ).toBe('ALL')
+      expect(
+        wrapper.findComponent({ name: 'ComboboxNumber' }).props('modelValue')
+      ).not.toBe(3)
+      expect(wrapper.vm.$route.query).toEqual({ studio: 'studio-1' })
+      wrapper.unmount()
+    })
+
+    it('writes to the URL again after a query it read', async () => {
+      const { wrapper } = await mountPage()
+      await wrapper.vm.$router.push({ path: '/', query: { studio: 'studio-1' } })
+      await flushPromises()
+
+      wrapper
+        .findComponent({ name: 'ComboboxDepartment' })
+        .vm.$emit('update:modelValue', 'dep-2')
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query).toEqual({
+        studio: 'studio-1',
+        department: 'dep-2'
+      })
+      wrapper.unmount()
+    })
+
+    it('leaves the query of the next page alone', async () => {
+      const { wrapper } = await mountPage({ query: { department: 'dep-2' } })
+
+      await wrapper.vm.$router.push('/other')
+      await flushPromises()
+
+      expect(wrapper.vm.$route.fullPath).toBe('/other')
       wrapper.unmount()
     })
 
@@ -586,10 +706,10 @@ describe('TeamSchedule page', () => {
         { production: 'prod-closed' },
         closedProductionGetters
       ]
-    ])('stays folded on a link with %s', async (_, query, getters) => {
+    ])('counts no filter on a link with %s', async (_, query, getters) => {
       const { wrapper } = await mountPage({ getters, query })
 
-      expect(isFilterRowShown(wrapper)).toBe(false)
+      expect(filterCountOf(wrapper)).toBeFalsy()
       wrapper.unmount()
     })
 
