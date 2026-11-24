@@ -3018,14 +3018,18 @@ th.validation-cell {
   background-color: #ccc;
 }
 .dark {
+  // The element itself too: a list opened in <body> carries .dark.
+  &::-webkit-scrollbar-thumb,
   ::-webkit-scrollbar-thumb {
     background-color: #46494f;
   }
 
+  &::-webkit-scrollbar-thumb:hover,
   ::-webkit-scrollbar-thumb:hover {
     background-color: #4d5560;
   }
 
+  &::-webkit-scrollbar-thumb:active,
   ::-webkit-scrollbar-thumb:active {
     background-color: #5e6169;
   }

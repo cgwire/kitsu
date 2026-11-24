@@ -40,6 +40,22 @@ const pick = (wrapper, value) =>
 // UTC cannot tell them apart, so timezones.spec.js checks the conversions
 // this field uses in other time zones.
 describe('DateField', () => {
+  // A field can sit in an area that stays dark in the light theme, such as
+  // the share modal of the Playlists page.
+  describe('theme', () => {
+    it('shows a light calendar in the light theme', () => {
+      const wrapper = mountField({})
+
+      expect(findPicker(wrapper).props('dark')).toBe(false)
+    })
+
+    it('shows a dark calendar with isDark, in the light theme', () => {
+      const wrapper = mountField({ isDark: true })
+
+      expect(findPicker(wrapper).props('dark')).toBe(true)
+    })
+  })
+
   // The browser shows the element in full screen alone, like a player
   // holding the share modal: the calendar opens in place there, fixed on the
   // screen, instead of in <body>.

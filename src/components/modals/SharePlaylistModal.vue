@@ -167,6 +167,7 @@
           <div class="create-form">
             <date-field
               can-delete
+              is-dark
               :label="$t('playlists.share_modal.expiration')"
               :min-date="tomorrow"
               v-model="expirationDate"
