@@ -811,7 +811,6 @@ useHead({
   .news-feed.panel-layout :deep(.side-column) {
     background: $white;
     bottom: 0;
-    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
     margin-top: 0 !important;
     max-width: min(100vw, 420px) !important;
     min-width: 0 !important;
@@ -826,8 +825,15 @@ useHead({
     z-index: 250;
   }
 
+  // shut, the drawer would cast its shadow over the edge of the page
   .news-feed.panel-layout.drawer-open :deep(.side-column) {
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
     transform: translateX(0);
+  }
+
+  // a drawer is not resized, and its handle would hang over the backdrop
+  .news-feed.panel-layout :deep(.extend-bar) {
+    display: none;
   }
 
   .dark .news-feed.panel-layout :deep(.side-column) {
