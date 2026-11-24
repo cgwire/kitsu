@@ -280,8 +280,9 @@
               >
                 <template v-if="showReply">
                   <at-ta
+                    ref="replySuggestionsRef"
                     :ats="['#', '@']"
-                    :members="[...membersForAts['@'], ...membersForAts['#']]"
+                    :members="mentionMembers"
                     :filter-match="atOptionsFilter"
                     name-key="full_name"
                     :limit="2"
@@ -598,7 +599,10 @@ import {
 } from '@/lib/time'
 import stringHelpers from '@/lib/string'
 
-import { useAtMentionsMembers } from '@/composables/atMentions'
+import {
+  useAtMentionsMembers,
+  useAtSuggestions
+} from '@/composables/atMentions'
 import { pauseEvent } from '@/composables/dom'
 import { useTime } from '@/composables/time'
 
@@ -699,12 +703,19 @@ const props = defineProps({
 })
 
 const replyRef = ref(null)
+const replySuggestionsRef = ref(null)
 const addAttachmentModalRef = ref(null)
 const menuWrapper = ref(null)
 
 const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.team,
   () => props.taskTypes
+)
+// vue-at gets one array of members: the comment renders again at each frame
+// of the player.
+const { members: mentionMembers } = useAtSuggestions(
+  replySuggestionsRef,
+  () => [...membersForAts['@'], ...membersForAts['#']]
 )
 
 const checklistItems = ref([])

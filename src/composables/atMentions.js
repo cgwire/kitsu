@@ -1,4 +1,4 @@
-import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, watch } from 'vue'
 import { useStore } from 'vuex'
 
 // The departments are the ones of the current production, unless a getter of
@@ -98,9 +98,9 @@ export const useAtSuggestions = (atRef, membersGetter) => {
   const isInField = event => Boolean(atRef.value?.$el.contains(event.target))
 
   // A press on the list moves the focus to the closest focusable container of
-  // the field, such as a player: that focus keeps the list, not one a key
-  // gives to the container. The window gets a key before the document, where
-  // the players listen.
+  // the field, such as a modal or a player: that focus keeps the list, not
+  // one a key gives to the container. The window gets a key before the
+  // document, where the players listen.
   let isPressOnList = false
 
   const isAroundField = event =>
@@ -126,6 +126,38 @@ export const useAtSuggestions = (atRef, membersGetter) => {
     isPressOnList = false
   }
 
+  // vue-at picks its highlighted entry on key code 13, whatever the modifiers.
+  // The document gets the key before the field: the list closes on Ctrl+Enter
+  // or Cmd+Enter, and the text stays as typed. vue-at also reads the field
+  // again 50 ms after a keystroke, later on a busy page: the list stays closed
+  // until the next input in the field.
+  let isClosedUntilInput = false
+
+  const onDocumentKeydown = event => {
+    if (
+      event.keyCode === 13 &&
+      (event.ctrlKey || event.metaKey) &&
+      isInField(event)
+    ) {
+      isClosedUntilInput = true
+      closeSuggestions()
+    }
+  }
+
+  const onDocumentInput = event => {
+    if (isInField(event)) {
+      isClosedUntilInput = false
+    }
+  }
+
+  const listen = method => {
+    document[method]('pointerdown', onDocumentPress, true)
+    document[method]('focusin', onDocumentFocus, true)
+    document[method]('keydown', onDocumentKeydown, true)
+    document[method]('input', onDocumentInput, true)
+    window[method]('keydown', onWindowKeydown, true)
+  }
+
   watch(
     membersGetter,
     values => {
@@ -134,16 +166,26 @@ export const useAtSuggestions = (atRef, membersGetter) => {
     { immediate: true }
   )
 
-  onMounted(() => {
-    document.addEventListener('pointerdown', onDocumentPress, true)
-    document.addEventListener('focusin', onDocumentFocus, true)
-    window.addEventListener('keydown', onWindowKeydown, true)
-  })
+  watch(
+    () => atRef.value?.atwho,
+    atwho => {
+      if (atwho && isClosedUntilInput) {
+        closeSuggestions()
+      }
+    }
+  )
+
+  // A list of comments holds one field per comment: only a rendered field
+  // listens.
+  watch(
+    () => Boolean(atRef.value),
+    isShown => {
+      listen(isShown ? 'addEventListener' : 'removeEventListener')
+    }
+  )
 
   onBeforeUnmount(() => {
-    document.removeEventListener('pointerdown', onDocumentPress, true)
-    document.removeEventListener('focusin', onDocumentFocus, true)
-    window.removeEventListener('keydown', onWindowKeydown, true)
+    listen('removeEventListener')
   })
 
   return { members, closeSuggestions }

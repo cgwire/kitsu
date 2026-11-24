@@ -791,5 +791,53 @@ describe('AddComment', () => {
       await vi.advanceTimersByTimeAsync(20)
       expect(isListOpen()).toBe(false)
     })
+
+    // vue-at picks its highlighted entry on Enter, whatever the modifiers.
+    it.each([
+      ['Ctrl', 'ctrlKey'],
+      ['Cmd', 'metaKey']
+    ])(
+      'posts the text as typed on %s+Enter, its list open',
+      async (key, modifier) => {
+        await typeComment('Ready @')
+        expect(isListOpen()).toBe(true)
+
+        const field = wrapper.find('textarea')
+        await field.trigger('keydown.enter', { [modifier]: true })
+        await field.trigger('keyup.enter', { [modifier]: true })
+
+        expect(isListOpen()).toBe(false)
+        expect(wrapper.emitted('add-comment')[0][0]).toBe('Ready @')
+      }
+    )
+
+    // vue-at reads the field again 50 ms after a keystroke: a send within that
+    // delay got its list back over the text sent.
+    it('keeps its list closed after a send right after a keystroke', async () => {
+      await typeComment('Ready @')
+      const field = wrapper.find('textarea')
+      await field.trigger('keydown', { keyCode: 50 })
+      await field.trigger('keydown.enter', { ctrlKey: true })
+      await field.trigger('keyup.enter', { ctrlKey: true })
+
+      await vi.advanceTimersByTimeAsync(200)
+      expect(isListOpen()).toBe(false)
+    })
+
+    // On a busy page, that read of vue-at comes later still.
+    it('keeps its list closed after a send until the next input', async () => {
+      await typeComment('Ready @')
+      const field = wrapper.find('textarea')
+      await field.trigger('keydown.enter', { ctrlKey: true })
+      await field.trigger('keyup.enter', { ctrlKey: true })
+      await vi.advanceTimersByTimeAsync(200)
+
+      await field.trigger('keydown', { keyCode: 50 })
+      await vi.advanceTimersByTimeAsync(60)
+      expect(isListOpen()).toBe(false)
+
+      await typeComment('Ready @')
+      expect(isListOpen()).toBe(true)
+    })
   })
 })

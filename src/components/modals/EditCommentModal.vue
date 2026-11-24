@@ -26,8 +26,9 @@
               {{ $t('comments.text') }}
             </label>
             <at-ta
+              ref="commentSuggestionsRef"
               :ats="['#', '@']"
-              :members="[...membersForAts['@'], ...membersForAts['#']]"
+              :members="mentionMembers"
               name-key="full_name"
               limit="2"
               :filter-match="atOptionsFilter"
@@ -188,7 +189,10 @@ import { computed, ref, toRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
-import { useAtMentionsMembers } from '@/composables/atMentions'
+import {
+  useAtMentionsMembers,
+  useAtSuggestions
+} from '@/composables/atMentions'
 import { useModal } from '@/composables/modal'
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
@@ -226,6 +230,11 @@ useModal(toRef(props, 'active'), emit)
 const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.team,
   () => props.taskTypes
+)
+const commentSuggestionsRef = ref(null)
+const { members: mentionMembers } = useAtSuggestions(
+  commentSuggestionsRef,
+  () => [...membersForAts['@'], ...membersForAts['#']]
 )
 
 const extensions = files.ALL_EXTENSIONS_STRING

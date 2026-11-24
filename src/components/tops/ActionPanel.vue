@@ -320,13 +320,7 @@
                 v-model="taskStatusId"
               />
             </div>
-            <!-- vue-at picks its highlighted entry on Enter, whatever the
-            modifiers: closing the list first sends the text as typed. -->
-            <div
-              class="flexrow-item is-wide"
-              @keydown.ctrl.enter.capture="closeCommentSuggestions"
-              @keydown.meta.enter.capture="closeCommentSuggestions"
-            >
+            <div class="flexrow-item is-wide">
               <at-ta
                 ref="comment-suggestions"
                 :ats="['#', '@']"

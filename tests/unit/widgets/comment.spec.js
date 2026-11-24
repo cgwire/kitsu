@@ -465,4 +465,83 @@ describe('Comment', () => {
       )
     })
   })
+
+  describe('reply suggestions', () => {
+    const mounted = []
+    const mountReplyable = storeOptions => {
+      const wrapper = mountComment({
+        isReplyable: true,
+        storeOptions,
+        stubs: { AtTextarea: false },
+        attachTo: document.body
+      })
+      mounted.push(wrapper)
+      return wrapper
+    }
+    // vue-at opens its list 10 ms after the keystroke.
+    const typeReply = async (wrapper, text) => {
+      await wrapper.find('span.reply-button').trigger('click')
+      await wrapper.find('textarea.reply').setValue(text)
+      await vi.advanceTimersByTimeAsync(20)
+    }
+    const isListOpen = wrapper => wrapper.find('.atwho-panel').exists()
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    })
+
+    afterEach(() => {
+      mounted.splice(0).forEach(wrapper => wrapper.unmount())
+      vi.restoreAllMocks()
+      vi.useRealTimers()
+    })
+
+    test('closes its list once the focus leaves the field', async () => {
+      const wrapper = mountReplyable()
+      await typeReply(wrapper, 'Ready @')
+      expect(isListOpen(wrapper)).toBe(true)
+
+      const nextField = document.createElement('button')
+      document.body.appendChild(nextField)
+      nextField.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      nextField.remove()
+      expect(isListOpen(wrapper)).toBe(false)
+    })
+
+    // vue-at reopens its list at each new array of members, and the comment
+    // renders again at each frame of the player.
+    test('keeps its list closed while the frame changes', async () => {
+      const wrapper = mountReplyable()
+      await typeReply(wrapper, 'Ready @')
+      document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      await vi.advanceTimersByTimeAsync(20)
+
+      await wrapper.setProps({ frame: 12 })
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen(wrapper)).toBe(false)
+    })
+
+    // A list of comments holds one reply field per comment.
+    test('listens on the document only while its reply field shows', async () => {
+      const added = vi.spyOn(document, 'addEventListener')
+      const removed = vi.spyOn(document, 'removeEventListener')
+      const focusCalls = spy =>
+        spy.mock.calls.filter(([type]) => type === 'focusin').length
+      const wrapper = mountReplyable({
+        actions: { replyToComment: vi.fn() }
+      })
+      await vi.advanceTimersByTimeAsync(20)
+      expect(focusCalls(added)).toBe(0)
+
+      await typeReply(wrapper, 'Ready')
+      expect(focusCalls(added)).toBe(1)
+
+      // A sent reply hides the field.
+      await wrapper.find('textarea.reply').trigger('keyup.ctrl.enter')
+      await vi.advanceTimersByTimeAsync(20)
+      expect(wrapper.find('textarea.reply').exists()).toBe(false)
+      expect(focusCalls(removed)).toBe(1)
+    })
+  })
 })

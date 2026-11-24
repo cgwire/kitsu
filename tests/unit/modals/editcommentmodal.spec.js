@@ -55,8 +55,9 @@ const TextFieldStub = {
 describe('modals/EditCommentModal', () => {
   let wrapper
 
-  const mountModal = (stubs = {}) =>
+  const mountModal = (stubs = {}, options = {}) =>
     shallowMount(EditCommentModal, {
+      ...options,
       global: {
         plugins: [store],
         stubs: { TextField: TextFieldStub, ...stubs }
@@ -177,5 +178,55 @@ describe('modals/EditCommentModal', () => {
     expect(
       wrapper.findAll('[role="option"] .tag').map(tag => tag.attributes('title'))
     ).toEqual(['Work In Progress', 'Retake'])
+  })
+
+  describe('suggestion list', () => {
+    const isListOpen = () => wrapper.find('.atwho-panel').exists()
+
+    // vue-at opens its list 10 ms after the keystroke.
+    beforeEach(async () => {
+      wrapper.unmount()
+      wrapper = mountModal({ AtTextarea: false }, { attachTo: document.body })
+      await openOn(wrapper, buildComment('comment-1', []))
+      await wrapper.find('textarea').setValue('Ready @')
+      await vi.advanceTimersByTimeAsync(20)
+    })
+
+    it('closes its list on a press elsewhere in the window', async () => {
+      expect(isListOpen()).toBe(true)
+
+      wrapper
+        .find('.box')
+        .element.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+    })
+
+    it('closes its list once the focus leaves the field', async () => {
+      expect(isListOpen()).toBe(true)
+
+      const nextField = document.createElement('button')
+      wrapper.find('.box').element.appendChild(nextField)
+      nextField.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+    })
+
+    // A press on the list moves the focus to the window, the closest focusable
+    // container of the field.
+    it('keeps its list open while an entry is picked with the mouse', async () => {
+      const entry = wrapper.find('.atwho-li')
+      entry.element.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      wrapper.element.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(document.activeElement).toBe(wrapper.element)
+      expect(isListOpen()).toBe(true)
+
+      // The frame entry gives the time of the frame.
+      await entry.trigger('click')
+      expect(wrapper.find('textarea').element.value).toBe(
+        'Ready v1 00:00:00:00 (1) '
+      )
+    })
   })
 })
