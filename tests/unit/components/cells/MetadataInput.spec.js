@@ -1,5 +1,5 @@
 import { mount, RouterLinkStub } from '@vue/test-utils'
-import { nextTick } from 'vue'
+import { nextTick, reactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
@@ -211,21 +211,30 @@ describe('cells/MetadataInput', () => {
       active: true
     })
 
-    let theme
+    let theme, wrappers
 
     beforeEach(() => {
       theme = document.createElement('div')
       theme.innerHTML = '<div id="theme-popups"></div>'
       document.body.appendChild(theme)
+      wrappers = []
     })
 
     afterEach(() => {
+      wrappers.forEach(wrapper => wrapper.unmount())
       theme.remove()
     })
 
+    const personDescriptor = {
+      id: 'descriptor-3',
+      field_name: 'supervisor',
+      data_type: 'person',
+      departments: []
+    }
+
     // The real people module, whose person map keeps its identity when a
     // person changes.
-    const mountCell = () => {
+    const mountCell = (props = {}) => {
       peopleStore.cache.people = []
       peopleStore.cache.personMap.clear()
       peopleStore.cache.guests = []
@@ -260,19 +269,16 @@ describe('cells/MetadataInput', () => {
       })
       const wrapper = mount(MetadataInput, {
         props: {
-          descriptor: {
-            id: 'descriptor-3',
-            field_name: 'supervisor',
-            data_type: 'person',
-            departments: []
-          },
-          entity: { id: 'shot-1', data: { supervisor: 'person-1' } }
+          descriptor: personDescriptor,
+          entity: { id: 'shot-1', data: { supervisor: 'person-1' } },
+          ...props
         },
         global: {
           plugins: [store, createI18n({ legacy: false, locale: 'en' })],
           stubs: { RouterLink: RouterLinkStub }
         }
       })
+      wrappers.push(wrapper)
       return { store, wrapper }
     }
 
@@ -283,10 +289,13 @@ describe('cells/MetadataInput', () => {
         .findComponent(MetadataPerson)
         .props('people')
         .map(({ name }) => name)
+    const openPicker = wrapper =>
+      wrapper.find('.metadata-person-cell .display').trigger('click')
 
     test('shows a person renamed elsewhere, in the cell and its picker', async () => {
       const { store, wrapper } = mountCell()
       expect(findName(wrapper).text()).toBe('Ada Doe')
+      await openPicker(wrapper)
       expect(getTeamNames(wrapper)).toEqual(['Ada Doe', 'Bob Doe'])
 
       store.commit('EDIT_PEOPLE_END', person('person-1', 'Zoe'))
@@ -298,12 +307,81 @@ describe('cells/MetadataInput', () => {
 
     test('empties the cell of a person deleted elsewhere', async () => {
       const { store, wrapper } = mountCell()
+      await openPicker(wrapper)
 
       store.commit('DELETE_PEOPLE_END', person('person-1', 'Ada'))
       await nextTick()
 
       expect(findName(wrapper).exists()).toBe(false)
       expect(getTeamNames(wrapper)).toEqual(['Bob Doe'])
+    })
+
+    // Every person cell of a list would otherwise sort the team again at each
+    // person change.
+    test('builds the team of its picker only while it is open', async () => {
+      const { store, wrapper } = mountCell()
+      const getPeople = () =>
+        wrapper.findComponent(MetadataPerson).props('people')
+      const closedPeople = getPeople()
+      expect(closedPeople).toEqual([])
+
+      store.commit('EDIT_PEOPLE_END', person('person-2', 'Zoe'))
+      await nextTick()
+      expect(getPeople()).toBe(closedPeople)
+
+      await openPicker(wrapper)
+      expect(getTeamNames(wrapper)).toEqual(['Ada Doe', 'Zoe Doe'])
+
+      document.querySelector('.metadata-person-mask').click()
+      await nextTick()
+      expect(getTeamNames(wrapper)).toEqual([])
+    })
+
+    test('focuses the people field of its picker once open', async () => {
+      const { wrapper } = mountCell()
+      await openPicker(wrapper)
+
+      expect(document.activeElement).toBe(
+        document.querySelector('.metadata-person-popup .multiselect')
+      )
+    })
+
+    // The column may change type while its picker is open.
+    test('closes its picker when the column stops being a person column', async () => {
+      const { wrapper } = mountCell()
+      await openPicker(wrapper)
+
+      await wrapper.setProps({
+        descriptor: { ...personDescriptor, data_type: 'string' }
+      })
+      await wrapper.setProps({ descriptor: personDescriptor })
+
+      expect(document.querySelector('.metadata-person-popup')).toBeNull()
+      expect(getTeamNames(wrapper)).toEqual([])
+    })
+
+    // The production list passes the production itself as the row, while
+    // the current production may be another one.
+    test('offers the team of the production row on the production list', async () => {
+      const production = reactive({
+        id: 'production-2',
+        team: ['person-2'],
+        data: { supervisor: 'person-2' }
+      })
+      const { wrapper } = mountCell({
+        descriptor: { ...personDescriptor, entity_type: 'Project' },
+        entity: production
+      })
+
+      expect(findName(wrapper).text()).toBe('Bob Doe')
+      await openPicker(wrapper)
+      expect(getTeamNames(wrapper)).toEqual(['Bob Doe'])
+
+      // The picker reads the team of the row, not a copy of its first draw.
+      production.team.push('person-1')
+      await nextTick()
+
+      expect(getTeamNames(wrapper)).toEqual(['Ada Doe', 'Bob Doe'])
     })
   })
 

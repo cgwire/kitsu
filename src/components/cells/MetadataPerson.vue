@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { nextTick, ref } from 'vue'
+import { nextTick, onBeforeUnmount, ref } from 'vue'
 
 import { getPopupPlacement } from '@/lib/popup'
 
@@ -62,12 +62,14 @@ const props = defineProps({
 
 const emit = defineEmits(['select'])
 
+// Bound by the cell, which builds the people list while the picker is open.
+const isOpen = defineModel('isOpen', { type: Boolean, default: false })
+
 const WIDTH = 280
 // The people field and its list, at the PeopleField default max height.
 const FIELD_HEIGHT = 42
 const LIST_HEIGHT = 300
 
-const isOpen = ref(false)
 const displayRef = ref(null)
 const fieldRef = ref(null)
 const popupStyle = ref({})
@@ -101,6 +103,12 @@ const onClose = () => {
   // stays where it is.
   displayRef.value?.focus({ preventScroll: true })
 }
+
+// The cell keeps the open state, which would outlive a picker gone with its
+// column.
+onBeforeUnmount(() => {
+  isOpen.value = false
+})
 </script>
 
 <style lang="scss" scoped>

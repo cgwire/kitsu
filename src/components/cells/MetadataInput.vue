@@ -26,6 +26,7 @@
       :person="personValue"
       :people="team"
       :editable="isEditable"
+      v-model:is-open="isPersonPickerOpen"
       @select="value => onMetadataFieldChanged(entity, descriptor, value)"
       v-else-if="descriptor.data_type === 'person'"
     />
@@ -175,7 +176,7 @@
 
 <script setup>
 import { ExternalLinkIcon } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import { useFormat } from '@/composables/format'
@@ -210,6 +211,10 @@ const emit = defineEmits(['metadata-changed'])
 const store = useStore()
 const { dateFormat, formatDisplayDate } = useFormat()
 
+// State
+
+const isPersonPickerOpen = ref(false)
+
 // Computed
 
 const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
@@ -225,16 +230,23 @@ const selectedShots = computed(() => store.getters.selectedShots)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const user = computed(() => store.getters.user)
 
-// Project team, for the "person" descriptor picker. A computed over the
-// person map would keep the people of its first read: getPerson follows a
-// rename or a deletion.
-const team = computed(() =>
-  sortPeople(
-    (currentProduction.value?.team || [])
+// Project team, for the "person" descriptor picker, built only while it is
+// open: every person cell of a list would sort it again at each person change.
+// A Project column, on the production list, has the productions themselves as
+// rows: it offers the row's own team. A computed over the person map would
+// keep the people of its first read: getPerson follows a rename or a deletion.
+const team = computed(() => {
+  if (!isPersonPickerOpen.value) return []
+  const production =
+    props.descriptor.entity_type === 'Project'
+      ? props.entity
+      : currentProduction.value
+  return sortPeople(
+    (production?.team || [])
       .map(personId => store.getters.getPerson(personId))
       .filter(Boolean)
   )
-)
+})
 
 const personValue = computed(
   () =>
