@@ -51,7 +51,6 @@
       <button-simple
         class="mt1 new-button"
         :text="$t('bots.new_bot')"
-        :is-responsive="true"
         @click="onNewClicked"
         v-if="isCurrentUserAdmin"
       />

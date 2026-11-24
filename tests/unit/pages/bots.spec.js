@@ -27,14 +27,14 @@ const SearchFieldStub = {
   }
 }
 
-const mountPage = async query => {
+const mountPage = async (query, { people = bots, stubs = {} } = {}) => {
   const store = createStore({
     getters: {
-      displayedPeople: () => bots,
+      displayedPeople: () => people,
       isCurrentUserAdmin: () => true,
       isPeopleLoading: () => false,
       isPeopleLoadingError: () => false,
-      people: () => bots
+      people: () => people
     },
     actions: {
       // answered after the page navigations land, as the API does
@@ -50,7 +50,7 @@ const mountPage = async query => {
   const wrapper = shallowMount(Bots, {
     global: {
       plugins: [store, router],
-      stubs: { SearchField: SearchFieldStub }
+      stubs: { SearchField: SearchFieldStub, ...stubs }
     }
   })
   await flushPromises()
@@ -93,6 +93,30 @@ describe('Bots page', () => {
         role: 'manager'
       })
       expect(activeTab()).toBe('unactive')
+    })
+  })
+
+  describe('empty list', () => {
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    // A responsive button hides its text below 1000 px wide, and this one has
+    // no icon to show instead.
+    it('keeps the text of its new bot button on narrow screens', async () => {
+      wrapper = await mountPage(
+        {},
+        { people: [], stubs: { ButtonSimple: false } }
+      )
+      const button = wrapper.find('.has-text-centered .new-button')
+
+      expect(button.text()).toBe('bots.new_bot')
+      expect(button.find('span').classes()).not.toContain(
+        'visuallyhidden-touch'
+      )
     })
   })
 })
