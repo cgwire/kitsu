@@ -46,7 +46,8 @@ const mountPage = ({
     listName: 'ProductionList',
     config: { globalProperties: { $socket: socket }, errorHandler },
     getters: { productions: [production] },
-    actions
+    actions,
+    stubs: { PanelLayout: false }
   })
 
 // Regression: a save or a deletion failing after Cancel showed its error on
@@ -101,6 +102,17 @@ describe('Productions page, production modals', () => {
       expect(modal().props('isError')).toBe(false)
     }
   )
+})
+
+describe('Productions page, layout', () => {
+  test('lays its controls and its list out in the two panels', async () => {
+    const { wrapper } = await mountPage()
+
+    expect(wrapper.find('.filters-panel .page-header').exists()).toBe(true)
+    expect(
+      wrapper.find('.list-panel').findComponent({ name: 'ProductionList' }).exists()
+    ).toBe(true)
+  })
 })
 
 // Zou refuses a column named like another one: a close keeps the error, the
