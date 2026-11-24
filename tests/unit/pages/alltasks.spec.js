@@ -62,6 +62,7 @@ const mountPage = async ({
   const store = createStore({
     getters: {
       activePeopleWithoutBot: () => [ada],
+      allTasksSearchFilterGroups: () => [],
       allTasksSearchQueries: () => [savedSearch],
       getProductionTaskStatuses: () => () => [],
       getProductionTaskTypes: () => () => [],

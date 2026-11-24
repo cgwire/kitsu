@@ -75,6 +75,8 @@
         </div>
         <search-query-list
           class="query-list"
+          :groups="allTasksSearchFilterGroups"
+          :is-group-enabled="true"
           :queries="allTasksSearchQueries"
           type="allTasks"
           with-route-query
@@ -205,6 +207,9 @@ const pagePath = route.path
 // --------------------------------------------------------------------------
 const activePeopleWithoutBot = computed(
   () => store.getters.activePeopleWithoutBot
+)
+const allTasksSearchFilterGroups = computed(
+  () => store.getters.allTasksSearchFilterGroups
 )
 const allTasksSearchQueries = computed(
   () => store.getters.allTasksSearchQueries

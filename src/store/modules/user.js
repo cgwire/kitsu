@@ -48,6 +48,8 @@ import {
   REMOVE_TODO_SEARCH_END,
   SAVE_ALL_TASKS_SEARCH_END,
   REMOVE_ALL_TASKS_SEARCH_END,
+  SAVE_ALL_TASKS_SEARCH_FILTER_GROUP_END,
+  REMOVE_ALL_TASKS_SEARCH_FILTER_GROUP_END,
   ADD_SELECTED_TASK,
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
@@ -317,6 +319,8 @@ const getters = {
   todoSelectionGrid: state => state.todoSelectionGrid,
   todoSearchQueries: state => state.todoSearchQueries,
   allTasksSearchQueries: state => state.userFilters.alltasks?.all || [],
+  allTasksSearchFilterGroups: state =>
+    state.userFilterGroups.alltasks?.all || [],
   userFilters: state => state.userFilters,
   userFilterGroups: state => state.userFilterGroups,
   isTodosLoading: state => state.isTodosLoading,
@@ -571,6 +575,24 @@ const actions = {
   async removeAllTasksSearch({ commit }, searchQuery) {
     await peopleApi.removeFilter(searchQuery)
     commit(REMOVE_ALL_TASKS_SEARCH_END, { searchQuery })
+  },
+
+  async saveAllTasksSearchFilterGroup({ commit }, filterGroup) {
+    const savedGroup = await peopleApi.createFilterGroup(
+      'alltasks',
+      filterGroup.name,
+      filterGroup.color,
+      null,
+      filterGroup.is_shared,
+      filterGroup.department_id
+    )
+    commit(SAVE_ALL_TASKS_SEARCH_FILTER_GROUP_END, { filterGroup: savedGroup })
+    return savedGroup
+  },
+
+  async removeAllTasksSearchFilterGroup({ commit }, filterGroup) {
+    await peopleApi.removeFilterGroup(filterGroup)
+    commit(REMOVE_ALL_TASKS_SEARCH_FILTER_GROUP_END, { filterGroup })
   },
 
   setTodoListScrollPosition({ commit, rootGetters }, scrollPosition) {
@@ -886,6 +908,14 @@ const mutations = {
 
   [REMOVE_ALL_TASKS_SEARCH_END](state, { searchQuery }) {
     removeFromFilters(state.userFilters, 'alltasks', searchQuery)
+  },
+
+  [SAVE_ALL_TASKS_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    addToFilters(state.userFilterGroups, 'alltasks', 'all', filterGroup)
+  },
+
+  [REMOVE_ALL_TASKS_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    removeFromFilters(state.userFilterGroups, 'alltasks', filterGroup)
   },
 
   [ADD_SELECTED_TASK](state, validationInfo) {
