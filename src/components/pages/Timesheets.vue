@@ -563,10 +563,6 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.timesheets :deep(.datatable-wrapper) {
-  border-radius: 10px;
-}
-
 .filters {
   align-items: flex-start;
   flex-wrap: wrap;
@@ -603,13 +599,6 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
   justify-content: center;
 }
 
-// phones get borderless cards instead
-@media screen and (min-width: 769px) {
-  .timesheets :deep(.datatable-wrapper) {
-    border: 1px solid var(--border);
-  }
-}
-
 @media screen and (max-width: 768px) {
   .filters {
     > .button,
@@ -630,17 +619,6 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
 
   .collapsed .collapsible {
     display: none;
-  }
-
-  // The list lets its cards overflow, for a page that scrolls: here they
-  // scroll inside the panel, as on All Tasks, without the bar.
-  .timesheets :deep(.datatable-wrapper) {
-    overflow-y: auto;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 
   .people-filter {

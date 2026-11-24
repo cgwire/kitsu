@@ -52,6 +52,8 @@ defineProps({
 }
 
 .panels {
+  // the text of the theme, where the body keeps the darker one of Bulma
+  color: var(--text);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -98,9 +100,13 @@ defineProps({
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-// a list sits right under the saved searches
+// a list sits right under the saved searches, in a frame of its own
 .list-panel :deep(.data-list) {
   margin-top: 0;
+}
+
+.list-panel :deep(.datatable-wrapper) {
+  border-radius: 10px;
 }
 
 // the side panel is its own surface: the column only frames it
@@ -142,6 +148,25 @@ defineProps({
   .paneled-side .side-column {
     padding: 20px 20px 20px 14px;
   }
+
+  // The frame of a list is a sheet of the page color: the rows of a list in
+  // sections round their own corners, over a background they expect behind
+  // them. Phones get borderless cards instead.
+  .list-panel :deep(.datatable-wrapper) {
+    background: var(--background);
+    border: 1px solid var(--border);
+  }
+
+  // The frame is the outline of the whole list: the sections of a list
+  // keep square rows in it, where they rounded their own first and last row
+  // for a page without a frame.
+  .list-panel :deep(.datatable.multi-section .datatable-row) {
+    th:first-child,
+    td:first-child,
+    td:last-child {
+      border-radius: 0;
+    }
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -153,6 +178,17 @@ defineProps({
   // read-only: the saved searches stay, without their editing
   .list-panel :deep(.query-list .tag.folder) {
     display: none;
+  }
+
+  // A list lets its cards overflow, for a page that scrolls: here they
+  // scroll inside the panel, without the bar.
+  .list-panel :deep(.datatable-wrapper) {
+    overflow-y: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   // TaskInfo writes the width of its resizable panel inline on the column

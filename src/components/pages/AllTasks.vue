@@ -440,10 +440,6 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.all-tasks :deep(.panels) {
-  color: var(--text);
-}
-
 .filters {
   align-items: flex-start;
   flex-wrap: wrap;
@@ -465,20 +461,12 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
 // the frame runs down to the task count, which closes the panel without
 // the padding it adds under itself
 .all-tasks :deep(.datatable-wrapper) {
-  border-radius: 10px;
   flex: 1;
   margin-bottom: 4px;
 }
 
 .all-tasks :deep(.nb-tasks) {
   padding-bottom: 0;
-}
-
-// phones get borderless cards instead
-@media screen and (min-width: 769px) {
-  .all-tasks :deep(.datatable-wrapper) {
-    border: 1px solid var(--border);
-  }
 }
 
 // its first line sits as high as the first filter label
