@@ -9,13 +9,19 @@ vi.mock('vue-i18n', async importOriginal => ({
   useI18n: () => ({ t: key => key })
 }))
 
+import PeopleList from '@/components/lists/PeopleList.vue'
 import Bots from '@/components/pages/Bots.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
 const bots = [
   { id: 'bot-1', full_name: 'Active Bot', active: true, is_bot: true },
   { id: 'bot-2', full_name: 'Old Bot', active: false, is_bot: true }
+]
+
+const savedSearches = [
+  { id: 'search-1', name: 'Managers', search_query: 'role=manager' }
 ]
 
 const SearchFieldStub = {
@@ -30,6 +36,7 @@ const SearchFieldStub = {
 const mountPage = async (query, { people = bots, stubs = {} } = {}) => {
   const store = createStore({
     getters: {
+      botsSearchQueries: () => savedSearches,
       displayedPeople: () => people,
       isCurrentUserAdmin: () => true,
       isPeopleLoading: () => false,
@@ -44,13 +51,15 @@ const mountPage = async (query, { people = bots, stubs = {} } = {}) => {
   })
   const router = createRouter({
     history: createWebHashHistory(),
-    routes: [{ path: '/bots', component: { template: '<div />' } }]
+    routes: [
+      { path: '/bots', name: 'bots', component: { template: '<div />' } }
+    ]
   })
   await router.push({ path: '/bots', query })
   const wrapper = shallowMount(Bots, {
     global: {
       plugins: [store, router],
-      stubs: { SearchField: SearchFieldStub, ...stubs }
+      stubs: { PanelLayout: false, SearchField: SearchFieldStub, ...stubs }
     }
   })
   await flushPromises()
@@ -58,6 +67,11 @@ const mountPage = async (query, { people = bots, stubs = {} } = {}) => {
 }
 
 describe('Bots page', () => {
+  const roleCombo = wrapper =>
+    wrapper
+      .findAllComponents(ComboboxStyled)
+      .find(combo => combo.props('label') === 'people.fields.role')
+
   describe('URL', () => {
     // unmounted after each test, a failed one included
     let wrapper = null
@@ -93,6 +107,76 @@ describe('Bots page', () => {
         role: 'manager'
       })
       expect(activeTab()).toBe('unactive')
+    })
+
+    // A saved search, or the back button, sets a query the page did not
+    // write.
+    it('follows the filters of the URL', async () => {
+      wrapper = await mountPage()
+
+      await wrapper.vm.$router.push({ query: { role: 'manager' } })
+      await flushPromises()
+
+      expect(roleCombo(wrapper).props('modelValue')).toBe('manager')
+    })
+  })
+
+  describe('panel layout', () => {
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    const resetButton = () =>
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'remove')
+
+    it('lays its filters and its list out in the two panels', async () => {
+      wrapper = await mountPage()
+      const filters = wrapper.find('.filters-panel')
+      const list = wrapper.find('.list-panel')
+
+      expect(filters.findComponent(ComboboxStyled).exists()).toBe(true)
+      expect(list.findComponent(RouteTabs).exists()).toBe(true)
+      expect(list.findComponent(PeopleList).exists()).toBe(true)
+    })
+
+    it('saves the filters of the URL, whatever the tab', async () => {
+      wrapper = await mountPage()
+
+      expect(
+        wrapper.findComponent({ name: 'SearchQueryList' }).props()
+      ).toMatchObject({
+        keptQueryKeys: ['tab'],
+        queries: savedSearches,
+        type: 'bots',
+        withRouteQuery: true
+      })
+    })
+
+    it('offers the reset only when a filter is set', async () => {
+      wrapper = await mountPage({ tab: 'unactive' })
+      expect(resetButton()).toBeUndefined()
+
+      await wrapper.vm.$router.push({
+        query: { tab: 'unactive', role: 'manager' }
+      })
+      await flushPromises()
+
+      expect(resetButton().exists()).toBe(true)
+    })
+
+    it('clears the filters and keeps the tab', async () => {
+      wrapper = await mountPage({ tab: 'unactive', role: 'manager' })
+
+      await resetButton().vm.$emit('click')
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query).toEqual({ tab: 'unactive' })
+      expect(roleCombo(wrapper).props('modelValue')).toBe('all')
     })
   })
 

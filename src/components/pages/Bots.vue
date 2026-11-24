@@ -1,15 +1,15 @@
 <template>
-  <div class="bots page fixed-page">
-    <div class="flexrow search-options mt1">
-      <search-field
-        ref="searchFieldRef"
-        class="search flexrow-item"
-        @change="onSearchChange"
-        placeholder="ex: gazu bot"
-      />
+  <panel-layout class="bots">
+    <template #filters>
       <div class="flexrow filters">
+        <search-field
+          ref="searchFieldRef"
+          class="search flexrow-item"
+          @change="onSearchChange"
+          placeholder="ex: gazu bot"
+        />
         <combobox-department
-          class="flexrow-item"
+          class="flexrow-item is-hidden-mobile"
           all-departments-label
           :label="$t('main.department')"
           v-model="selectedDepartment"
@@ -21,40 +21,57 @@
           :options="roleOptions"
           v-model="role"
         />
+        <div class="flexrow filter-actions">
+          <button-simple
+            class="flexrow-item"
+            :text="$t('bots.new_bot')"
+            :is-responsive="true"
+            icon="plus"
+            @click="onNewClicked"
+            v-if="isCurrentUserAdmin"
+          />
+          <button-simple
+            class="flexrow-item reset-filters"
+            icon="remove"
+            :title="$t('main.clear_filters')"
+            @click="resetFilters"
+            v-if="hasFilters"
+          />
+        </div>
       </div>
-      <span class="filler"></span>
-      <button-simple
-        class="flexrow-item mr0 new-button"
-        :text="$t('bots.new_bot')"
-        :is-responsive="true"
-        icon="plus"
-        @click="onNewClicked"
-        v-if="isCurrentUserAdmin"
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :kept-query-keys="KEPT_QUERY_KEYS"
+        :queries="botsSearchQueries"
+        type="bots"
+        with-route-query
       />
-    </div>
 
-    <route-tabs class="mb0 mt1" :active-tab="activeTab" :tabs="tabs" />
+      <route-tabs :active-tab="activeTab" :tabs="tabs" />
 
-    <people-list
-      :entries="activeTab === 'active' ? activePeople : unactivePeople"
-      :is-bots="true"
-      :is-loading="isPeopleLoading"
-      :is-error="isPeopleLoadingError"
-      @avatar-clicked="onAvatarClicked"
-      @delete-clicked="onDeleteClicked"
-      @edit-clicked="onEditClicked"
-      @refresh-clicked="onRefreshClicked"
-      v-if="isPeopleLoading || hasBots"
-    />
-    <div class="has-text-centered strong" v-else>
-      <p>{{ $t('bots.no_bot') }}</p>
-      <button-simple
-        class="mt1 new-button"
-        :text="$t('bots.new_bot')"
-        @click="onNewClicked"
-        v-if="isCurrentUserAdmin"
+      <people-list
+        :entries="activeTab === 'active' ? activePeople : unactivePeople"
+        :is-bots="true"
+        :is-loading="isPeopleLoading"
+        :is-error="isPeopleLoadingError"
+        @avatar-clicked="onAvatarClicked"
+        @delete-clicked="onDeleteClicked"
+        @edit-clicked="onEditClicked"
+        @refresh-clicked="onRefreshClicked"
+        v-if="isPeopleLoading || hasBots"
       />
-    </div>
+      <div class="has-text-centered strong" v-else>
+        <p>{{ $t('bots.no_bot') }}</p>
+        <button-simple
+          class="mt1 new-button"
+          :text="$t('bots.new_bot')"
+          @click="onNewClicked"
+          v-if="isCurrentUserAdmin"
+        />
+      </div>
+    </template>
 
     <edit-avatar-modal
       active
@@ -101,7 +118,7 @@
       @confirm="confirmDeletePeople"
       v-if="modals.del"
     />
-  </div>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -111,21 +128,26 @@ import { useHead } from '@unhead/vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
+import PeopleList from '@/components/lists/PeopleList.vue'
 import EditAvatarModal from '@/components/modals/EditAvatarModal.vue'
 import EditPersonModal from '@/components/modals/EditPersonModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import NewTokenModal from '@/components/modals/NewTokenModal.vue'
-import PeopleList from '@/components/lists/PeopleList.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useStore()
+
+// the tab is where the list is read, not one of its filters
+const KEPT_QUERY_KEYS = ['tab']
 
 // State
 
@@ -168,11 +190,18 @@ const searchFieldRef = ref(null)
 
 // Computed
 
+const botsSearchQueries = computed(() => store.getters.botsSearchQueries)
 const people = computed(() => store.getters.people)
 const displayedPeople = computed(() => store.getters.displayedPeople)
 const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isPeopleLoading = computed(() => store.getters.isPeopleLoading)
 const isPeopleLoadingError = computed(() => store.getters.isPeopleLoadingError)
+
+const hasFilters = computed(() =>
+  Boolean(
+    route.query.search || selectedDepartment.value || role.value !== 'all'
+  )
+)
 
 const hasBots = computed(() => people.value.some(person => person.is_bot))
 
@@ -215,12 +244,19 @@ const deleteText = computed(() => {
 
 // Functions
 
-const setSearchFromUrl = () => {
-  const searchQuery = searchFieldRef.value?.getValue()
-  const searchFromUrl = route.query.search
-  if (!searchQuery && searchFromUrl) {
-    searchFieldRef.value?.setValue(searchFromUrl)
+const applyRouteQuery = () => {
+  activeTab.value = route.query.tab || 'active'
+  role.value = route.query.role || 'all'
+  selectedDepartment.value = route.query.department || ''
+  const search = route.query.search || ''
+  if ((searchFieldRef.value?.getValue() || '') !== search) {
+    searchFieldRef.value?.setValue(search)
+    onSearchChange()
   }
+}
+
+const resetFilters = () => {
+  router.push({ query: { tab: route.query.tab } })
 }
 
 const setSearchInUrl = query => {
@@ -388,20 +424,18 @@ watch(
 watch(selectedDepartment, updateRoute)
 watch(role, updateRoute)
 
+// A saved search, or the back button, sets a query the page did not write.
 watch(
-  () => route.query.tab,
-  tab => {
-    activeTab.value = tab || 'active'
+  () => route.query,
+  () => {
+    if (route.name === 'bots') applyRouteQuery()
   }
 )
 
 // Lifecycle
 
 onMounted(async () => {
-  activeTab.value = route.query.tab || 'active'
-  role.value = route.query.role || 'all'
-  selectedDepartment.value = route.query.department || ''
-  setSearchFromUrl()
+  applyRouteQuery()
   await store.dispatch('loadPeople')
   onSearchChange()
 })
@@ -412,34 +446,63 @@ useHead({ title: computed(() => `${t('bots.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.page-header {
-  align-items: center;
-  margin-bottom: 1em;
+// Controls of unequal height (pill input, select under its label, buttons)
+// only line up on their bottom edge.
+.filters {
+  align-items: flex-end;
+  flex-wrap: wrap;
+  row-gap: 1em;
+
+  > .flexrow-item {
+    margin-bottom: 0;
+  }
+
+  .button {
+    height: 42px;
+  }
 }
 
 .search {
-  margin-top: 2em;
+  flex: 1 1 200px;
+  max-width: 420px;
 }
-.search-options {
-  align-items: flex-end;
+
+.filter-actions {
+  margin-left: auto;
+
+  > :last-child {
+    margin-right: 0;
+  }
 }
-.filter-button {
-  margin-top: 0.3em;
+
+// One label height and one control height for the whole row, as on the
+// People page.
+.filters :deep(.label) {
+  margin-bottom: 5px;
+  padding-top: 0;
+}
+
+.filters :deep(.department-combo),
+.filters :deep(.combo) {
+  display: flex;
+  flex-direction: column;
+  height: 42px;
+  justify-content: center;
+}
+
+.reset-filters {
+  color: var(--text);
+  padding: 0 14px;
+}
+
+// Bulma sets the tabs apart from what follows: the panel already does
+.bots .tabs {
+  margin-bottom: 0;
 }
 
 @media screen and (max-width: 768px) {
-  .search-options {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5em;
-  }
-
-  .search {
-    margin-top: 0;
-    order: 0;
-  }
-
-  .search-options :deep(.label),
+  // Mobile is read-only: no creation.
+  .filter-actions,
   .new-button {
     display: none;
   }
