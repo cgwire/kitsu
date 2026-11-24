@@ -71,25 +71,32 @@
                 :empty-height="33"
               />
             </td>
-            <td class="asset-type">
+            <td class="asset-type card-head">
               {{ getParentName(task) }}
             </td>
-            <td class="entity name">
+            <td class="entity name card-head">
               {{ task.entity_name }}
             </td>
             <task-type-cell
               class="task-type name"
+              :data-label="$t('tasks.fields.task_type')"
               :task-type="taskTypeMap.get(task.task_type_id)"
             />
             <validation-cell
               class="status unselectable"
+              :data-label="$t('tasks.fields.task_status')"
               :task-test="task"
               :is-border="false"
               :is-assignees="false"
               :selectable="false"
               :is-static="true"
             />
-            <td class="assignees">
+            <td
+              class="assignees"
+              :data-label="
+                task.assignees.length ? $t('tasks.fields.assignees') : null
+              "
+            >
               <div class="flexrow">
                 <people-avatar-with-menu
                   class="flexrow-item"
@@ -420,81 +427,29 @@ td.due-date {
       overflow: visible;
     }
 
-    .datatable-row {
-      align-items: center;
-      column-gap: 0.75em;
-      display: grid;
-      grid-template-areas:
-        'project type status'
-        'thumbnail parent assignees'
-        'thumbnail entity assignees'
-        'due due due';
-      grid-template-columns: auto 1fr auto;
-      padding: 0.75em 0.5em 0.75em 0.75em;
-      row-gap: 0.25em;
-    }
-
-    .datatable-body td.project,
-    .datatable-body td.thumbnail,
-    .datatable-body td.entity,
-    .datatable-body td.asset-type,
-    .datatable-body td.task-type,
-    .datatable-body td.status,
-    .datatable-body td.assignees {
-      display: block;
-      padding: 0;
-    }
-
-    td.project {
-      grid-area: project;
-    }
-
-    td.thumbnail {
-      grid-area: thumbnail;
-    }
-
-    td.entity {
-      grid-area: entity;
-      font-size: 1.05em;
-    }
-
-    td.asset-type {
-      grid-area: parent;
+    // the parent reads as a kicker right above the entity name
+    .datatable-body td.asset-type {
       color: var(--text-alt);
-      font-size: 0.9em;
-      // cancels the row gap: the parent sits right on top of the name
-      margin-bottom: -0.25em;
+      font-size: 0.85em;
+      padding-bottom: 0;
     }
 
-    td.task-type {
-      grid-area: type;
+    // the column divider of the desktop rows
+    .datatable-body td.name {
+      border-right: 0;
     }
 
-    td.status {
-      grid-area: status;
+    .datatable-body td.entity {
+      font-size: 1.05em;
+      font-weight: 600;
+      padding-top: 0;
     }
 
-    td.assignees {
-      grid-area: assignees;
-      justify-self: end;
-
-      .flexrow {
-        justify-content: flex-end;
-      }
-
-      // size and font come inline from the avatar props, tuned for the rows
-      :deep(.avatar) {
-        font-size: 12px !important;
-        height: 24px !important;
-        width: 24px !important;
-      }
-    }
-
-    .datatable-body td.due-date {
-      font-size: 0.9em;
-      grid-area: due;
-      justify-content: flex-start;
-      padding: 0;
+    // size and font come inline from the avatar props, tuned for the rows
+    td.assignees :deep(.avatar) {
+      font-size: 12px !important;
+      height: 24px !important;
+      width: 24px !important;
     }
   }
 }

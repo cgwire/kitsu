@@ -106,4 +106,75 @@ describe('lists/AllTaskList', () => {
 
     expect(selection.selectedIds()).toEqual(['task-2'])
   })
+
+  // Phones get cards from the global datatable--cards rule: a card-head cell
+  // titles the card, a data-label cell is a line of it, the rest is hidden.
+  describe('cards', () => {
+    const mountCards = () =>
+      shallowMount(AllTaskList, {
+        global: {
+          plugins: [
+            createStore({
+              getters: {
+                nbSelectedTasks: () => 0,
+                organisation: () => ({ hours_by_day: 8 }),
+                personMap: () => new Map(),
+                selectedTasks: () => new Map(),
+                taskTypeMap: () => new Map(),
+                user: () => ({ id: 'user-1' })
+              }
+            })
+          ]
+        },
+        props: {
+          tasks: [
+            { id: 'task-1', assignees: ['person-1'], due_date: '2026-12-01' },
+            { id: 'task-2', assignees: [] }
+          ]
+        }
+      })
+
+    test('titles a card with the parent and the entity', () => {
+      const row = mountCards().find('tbody tr')
+
+      expect(row.find('td.asset-type').classes()).toContain('card-head')
+      expect(row.find('td.entity').classes()).toContain('card-head')
+    })
+
+    test('lines up the type, status, assignees and due date', () => {
+      const wrapper = mountCards()
+      const [row] = wrapper.findAll('tbody tr')
+      const labelOf = selector => row.find(selector).attributes('data-label')
+
+      expect(labelOf('.task-type')).toBe('tasks.fields.task_type')
+      expect(labelOf('.status')).toBe('tasks.fields.task_status')
+      expect(labelOf('td.assignees')).toBe('tasks.fields.assignees')
+      expect(labelOf('td.due-date')).toBe('tasks.fields.due_date')
+    })
+
+    test('leaves out the empty assignees and due date', () => {
+      const row = mountCards().findAll('tbody tr')[1]
+
+      expect(row.find('td.assignees').attributes('data-label')).toBeUndefined()
+      expect(row.find('td.due-date').attributes('data-label')).toBeUndefined()
+    })
+
+    test('keeps the other cells off the card', () => {
+      const row = mountCards().find('tbody tr')
+      const hidden = [
+        'td.project',
+        'td.thumbnail',
+        'td.estimation',
+        'td.duration',
+        'td.start-date',
+        'td.done-date'
+      ]
+
+      hidden.forEach(selector => {
+        const cell = row.find(selector)
+        expect(cell.attributes('data-label')).toBeUndefined()
+        expect(cell.classes()).not.toContain('card-head')
+      })
+    })
+  })
 })
