@@ -1393,7 +1393,8 @@ useHead({
 .side-column {
   position: relative;
   margin-top: 0;
-  padding: 0 0 0 14px;
+  // with the 6px resize bar of the task panel, 14px between the panels
+  padding: 0 0 0 8px;
 
   :deep(.side) {
     background: var(--background-panel);
