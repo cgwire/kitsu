@@ -840,4 +840,23 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
       'Delete Key'
     ])
   })
+
+  // Its title was a label tied to nothing: screen readers announced a bare
+  // read-only text field.
+  it('names the recovery codes field after its title', async () => {
+    const wrapper = mountSetup(
+      { totp_enabled: true },
+      { newRecoveryCodes: () => ['AAAA'] }
+    )
+    await findButton(wrapper, label('recovery_codes.button_new')).trigger(
+      'click'
+    )
+    findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+    await flushPromises()
+
+    const field = wrapper.find('textarea.recovery-codes')
+    expect(
+      Array.from(field.element.labels, item => item.textContent.trim())
+    ).toEqual([label('recovery_codes.title')])
+  })
 })

@@ -6,7 +6,7 @@
     />
 
     <div v-if="twoFA.OTPRecoveryCodes" class="recovery-codes-panel">
-      <label class="label label-recovery-codes">
+      <label class="label label-recovery-codes" :for="recoveryCodesId">
         {{ $t('profile.two_factor_authentication.recovery_codes.title') }}
       </label>
       <x-circle-icon
@@ -43,6 +43,7 @@
         <title>{{ $t('main.copy') }}</title>
       </copy-icon>
       <textarea
+        :id="recoveryCodesId"
         class="input recovery-codes"
         v-text="twoFA.OTPRecoveryCodes.join('\t')"
         readonly
@@ -549,6 +550,7 @@ const twoFA = reactive({
   }
 })
 const newCodeSentId = useId()
+const recoveryCodesId = useId()
 
 // Computed
 
