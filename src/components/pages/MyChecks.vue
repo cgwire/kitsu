@@ -1,101 +1,112 @@
 <template>
-  <div class="columns fixed-page">
-    <div class="column main-column">
-      <div class="todos page">
-        <div class="filters flexrow mt1" :class="{ collapsed: !showFilters }">
-          <combobox-production
-            class="combobox-production flexrow-item"
-            :label="$t('main.production')"
-            :production-list="productionList"
-            v-model="filters.productionId"
-          />
+  <panel-layout
+    class="my-checks"
+    :class="{ collapsed: !showFilters }"
+    :side="nbSelectedTasks === 1"
+  >
+    <template #filters>
+      <div class="filters flexrow">
+        <combobox-production
+          class="combobox-production flexrow-item"
+          :label="$t('main.production')"
+          :production-list="productionList"
+          v-model="filters.productionId"
+        />
 
-          <combobox
-            class="flexrow-item collapsible"
-            :label="$t('shots.fields.episode')"
-            :options="episodeOptions"
-            v-model="filters.episodeId"
-            v-if="isTVShow && episodes.length > 0"
-          />
+        <combobox
+          class="flexrow-item collapsible"
+          :label="$t('shots.fields.episode')"
+          :options="episodeOptions"
+          v-model="filters.episodeId"
+          v-if="isTVShow && episodes.length > 0"
+        />
 
-          <combobox-task-type
-            class="flexrow-item selector collapsible"
-            :label="$t('news.task_type')"
-            :task-type-list="taskTypeList"
-            v-model="filters.taskTypeId"
-          />
+        <combobox-task-type
+          class="flexrow-item selector collapsible"
+          :label="$t('news.task_type')"
+          :task-type-list="taskTypeList"
+          v-model="filters.taskTypeId"
+        />
 
-          <combobox-status
-            class="flexrow-item selector collapsible"
-            :label="$t('news.task_status')"
-            :task-status-list="taskStatusList"
-            v-model="filters.taskStatusId"
-          />
+        <combobox-status
+          class="flexrow-item selector collapsible"
+          :label="$t('news.task_status')"
+          :task-status-list="taskStatusList"
+          v-model="filters.taskStatusId"
+        />
 
-          <people-field
-            class="flexrow-item selector collapsible"
-            :label="$t('main.person')"
-            :people="personList"
-            small
-            v-model="filters.person"
-          />
+        <people-field
+          class="flexrow-item selector collapsible"
+          :label="$t('main.person')"
+          :people="personList"
+          small
+          v-model="filters.person"
+        />
 
-          <span class="filler"></span>
+        <span class="filler"></span>
 
-          <combobox
-            class="flexrow-item collapsible"
-            :label="$t('main.show')"
-            :options="filterOptions"
-            locale-key-prefix="tasks."
-            v-model="filters.currentFilter"
-          />
-
-          <combobox
-            class="flexrow-item collapsible"
-            :label="$t('main.sorted_by')"
-            :options="sortOptions"
-            locale-key-prefix="tasks.fields."
-            v-model="filters.currentSort"
-          />
-
-          <button-simple
-            class="flexrow-item filters-toggle"
-            icon="funnel"
-            :aria-expanded="`${showFilters}`"
-            :is-on="showFilters"
-            :title="$t(showFilters ? 'main.less_filters' : 'main.more_filters')"
-            @click="showFilters = !showFilters"
-          />
-        </div>
-
-        <div class="title-row flexrow">
-          <h1 class="title mt1 flexrow-item filler">
-            {{ stats.total }}
-            {{ $t('my_checks.title', { count: stats.total }) }}
-          </h1>
-          <button-simple
-            class="flexrow-item playlist-button"
-            @click="isPlaylist = true"
-            :text="buildPlaylistText"
-            :title="isMore ? $t('my_checks.build_playlist_loaded_only') : ''"
-          />
-        </div>
-
-        <to-check-list
-          :tasks="tasks"
-          :stats="stats"
-          :is-loading="isLoading"
-          :is-error="isLoadingError"
-          :is-more="isMore"
-          :is-more-loading="isMoreLoading"
-          @more-clicked="loadMore"
+        <filters-toggle
+          class="flexrow-item"
+          :count="secondRowFilterCount"
+          :resettable="hasFilters"
+          v-model="showFilters"
+          @reset="resetFilters"
         />
       </div>
-    </div>
+      <div class="filters flexrow collapsible">
+        <combobox
+          class="flexrow-item"
+          :label="$t('main.show')"
+          :options="filterOptions"
+          locale-key-prefix="tasks."
+          v-model="filters.currentFilter"
+        />
 
-    <div class="column side-column" v-if="nbSelectedTasks === 1">
+        <combobox
+          class="flexrow-item"
+          :label="$t('main.sorted_by')"
+          :options="sortOptions"
+          locale-key-prefix="tasks.fields."
+          v-model="filters.currentSort"
+        />
+      </div>
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="myChecksSearchFilterGroups"
+        :is-group-enabled="true"
+        :queries="myChecksSearchQueries"
+        type="myChecks"
+        with-route-query
+      />
+
+      <div class="title-row flexrow">
+        <h1 class="title flexrow-item filler">
+          {{ stats.total }}
+          {{ $t('my_checks.title', { count: stats.total }) }}
+        </h1>
+        <button-simple
+          class="flexrow-item playlist-button"
+          @click="isPlaylist = true"
+          :text="buildPlaylistText"
+          :title="isMore ? $t('my_checks.build_playlist_loaded_only') : ''"
+        />
+      </div>
+
+      <to-check-list
+        :tasks="tasks"
+        :stats="stats"
+        :is-loading="isLoading"
+        :is-error="isLoadingError"
+        :is-more="isMore"
+        :is-more-loading="isMoreLoading"
+        @more-clicked="loadMore"
+      />
+    </template>
+    <template #side>
       <task-info :task="selectedTasks.values().next().value" />
-    </div>
+    </template>
 
     <view-playlist-modal
       active
@@ -103,7 +114,7 @@
       @cancel="isPlaylist = false"
       v-if="isPlaylist"
     />
-  </div>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -122,8 +133,10 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { toSortedQueryString } from '@/lib/query'
 import { sortPeople } from '@/lib/sorting'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import ToCheckList from '@/components/lists/ToCheckList.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -131,7 +144,9 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 const ViewPlaylistModal = defineAsyncComponent(
   () => import('@/components/modals/ViewPlaylistModal.vue')
@@ -157,18 +172,23 @@ const showFilters = ref(false)
 const stats = ref({ total: 0 })
 const tasks = ref([])
 
-const filters = reactive({
-  currentFilter: 'all_tasks',
-  currentSort: 'priority',
-  episodeId: route.query.episode_id || '',
+const DEFAULT_FILTER = 'all_tasks'
+const DEFAULT_SORT = 'priority'
+
+const filtersFromQuery = query => ({
+  currentFilter: query.filter || DEFAULT_FILTER,
+  currentSort: query.sort || DEFAULT_SORT,
+  episodeId: query.episode_id || '',
   person:
     store.getters.activePeopleWithoutBot.find(
-      person => person.id === route.query.person_id
+      person => person.id === query.person_id
     ) || null,
-  productionId: route.query.project_id || '',
-  taskStatusId: route.query.task_status_id || '',
-  taskTypeId: route.query.task_type_id || ''
+  productionId: query.project_id || '',
+  taskStatusId: query.task_status_id || '',
+  taskTypeId: query.task_type_id || ''
 })
+
+const filters = reactive(filtersFromQuery(route.query))
 
 const filterOptions = ['all_tasks', 'due_this_week'].map(name => ({
   label: name,
@@ -181,6 +201,9 @@ const sortOptions = ['entity_name', 'priority', 'due_date', 'estimation'].map(
 // requests raced by quick filter changes are dropped when stale
 let reloadToken = 0
 
+// the query the page wrote last: the one it must not read back
+let writtenQuery = null
+
 // Computed
 // --------------------------------------------------------------------------
 const activePeopleWithoutBot = computed(
@@ -191,6 +214,12 @@ const getProductionTaskStatuses = computed(
 )
 const getProductionTaskTypes = computed(
   () => store.getters.getProductionTaskTypes
+)
+const myChecksSearchFilterGroups = computed(
+  () => store.getters.myChecksSearchFilterGroups
+)
+const myChecksSearchQueries = computed(
+  () => store.getters.myChecksSearchQueries
 )
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const openProductions = computed(() => store.getters.openProductions)
@@ -266,6 +295,26 @@ const episodeOptions = computed(() => [
     }))
 ])
 
+const secondRowFilterCount = computed(
+  () =>
+    [
+      filters.currentFilter !== DEFAULT_FILTER,
+      filters.currentSort !== DEFAULT_SORT
+    ].filter(Boolean).length
+)
+
+const hasFilters = computed(
+  () =>
+    secondRowFilterCount.value > 0 ||
+    Boolean(
+      filters.productionId ||
+      filters.episodeId ||
+      filters.taskTypeId ||
+      filters.taskStatusId ||
+      filters.person
+    )
+)
+
 const buildPlaylistText = computed(() =>
   isMore.value
     ? `${t('tasks.build_playlist')} (${tasks.value.length}/${stats.value.total})`
@@ -299,7 +348,16 @@ const syncRouteQuery = () => {
   if (filters.taskTypeId) query.task_type_id = filters.taskTypeId
   if (filters.taskStatusId) query.task_status_id = filters.taskStatusId
   if (filters.person?.id) query.person_id = filters.person.id
+  if (filters.currentFilter !== DEFAULT_FILTER) {
+    query.filter = filters.currentFilter
+  }
+  if (filters.currentSort !== DEFAULT_SORT) query.sort = filters.currentSort
+  writtenQuery = toSortedQueryString(query)
   router.push({ query })
+}
+
+const resetFilters = () => {
+  Object.assign(filters, filtersFromQuery({}))
 }
 
 const reload = async () => {
@@ -374,8 +432,25 @@ const loadEpisodesForProduction = async productionId => {
 watch(
   () => filters.productionId,
   productionId => {
-    filters.episodeId = ''
+    // a production read from the URL comes with its episode
+    filters.episodeId =
+      route.query.project_id === productionId
+        ? route.query.episode_id || ''
+        : ''
     loadEpisodesForProduction(productionId)
+  }
+)
+
+// A saved search, or the back button, sets a query the page did not write.
+watch(
+  () => route.query,
+  query => {
+    if (
+      route.name === 'checks' &&
+      toSortedQueryString(query) !== writtenQuery
+    ) {
+      Object.assign(filters, filtersFromQuery(query))
+    }
   }
 )
 
@@ -399,26 +474,6 @@ useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.data-list {
-  margin-top: 0;
-}
-
-.todos {
-  display: flex;
-  flex-direction: column;
-}
-
-.columns {
-  display: flex;
-  flex-direction: row;
-  padding: 0;
-}
-
-.column {
-  overflow-y: auto;
-  padding: 0;
-}
-
 .field {
   margin-bottom: 0;
 }
@@ -426,9 +481,20 @@ useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
 // measured on the live row: the Bulma selects are 42px tall while the
 // vue-multiselect control stops at 40.6px, and the task-type / status
 // combos pad their labels 5px more (status adds a 1px margin on top).
-// The centered flexrow turns every difference into a vertical stagger,
-// so pin all three metrics to the same values.
+// Pin all three metrics to the same values.
 .filters {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  row-gap: 1em;
+
+  > .flexrow-item {
+    margin-bottom: 0;
+  }
+
+  > :last-child {
+    margin-right: 0;
+  }
+
   :deep(.label) {
     margin-bottom: 5px;
     padding-top: 0;
@@ -446,28 +512,27 @@ useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
   }
 }
 
-// small screens only: the filters fold behind the toggle
-.filters-toggle {
-  align-self: flex-end;
+.collapsed .filters.collapsible {
   display: none;
-  height: 42px;
+}
+
+.title-row {
+  align-items: center;
+
+  .title {
+    margin: 0;
+  }
 }
 
 @media screen and (max-width: 768px),
   screen and (max-height: 500px) and (orientation: landscape) {
   .filters {
-    align-items: flex-end;
-    flex-wrap: wrap;
     row-gap: 0.5em;
 
-    .filler {
+    .filler,
+    :deep(.reset-filters) {
       display: none;
     }
-  }
-
-  .filters-toggle {
-    display: flex;
-    flex: none;
   }
 
   .combobox-production {
@@ -497,52 +562,43 @@ useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
 
     .title {
       flex: 0 0 100%;
+      margin-bottom: 0.5em;
     }
-
-    .playlist-button {
-      margin-bottom: 1em;
-    }
-  }
-
-  // TaskInfo edits the task: phones stay read-only
-  .side-column {
-    display: none;
   }
 }
 
 // a landscape phone is too short to share its height with the list: the
 // whole page scrolls instead of the list alone
 @media screen and (max-height: 500px) and (orientation: landscape) {
-  .todos {
-    display: block;
-    height: auto;
+  .my-checks :deep(.main-column) {
+    overflow-y: auto;
   }
 
-  .filters {
-    margin-top: 0.5em !important;
+  .my-checks :deep(.panels) {
+    height: auto;
   }
 
   // the title and the playlist button share one line
   .title-row {
-    align-items: center;
     flex-wrap: nowrap;
 
     .title {
       flex: 1 1 auto;
       font-size: 1.4em;
-      margin: 0.5em 0;
-    }
-
-    .playlist-button {
       margin-bottom: 0;
     }
   }
 
-  .todos :deep(.data-list),
-  .todos :deep(.datatable-wrapper) {
+  .my-checks :deep(.data-list),
+  .my-checks :deep(.datatable-wrapper) {
     height: auto;
     max-height: none;
     overflow: visible;
+  }
+
+  // TaskInfo edits the task: phones stay read-only
+  .my-checks :deep(.side-column) {
+    display: none;
   }
 }
 </style>
