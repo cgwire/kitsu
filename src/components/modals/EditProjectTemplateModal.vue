@@ -39,7 +39,7 @@
           v-model="form.production_style"
         />
       </div>
-      <text-field
+      <textarea-field
         class="mt2"
         :label="$t('project_templates.fields.description')"
         v-model="form.description"
@@ -62,6 +62,7 @@ import BaseModal from '@/components/modals/BaseModal.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
+import TextareaField from '@/components/widgets/TextareaField.vue'
 import {
   PRODUCTION_TYPE_OPTIONS,
   PRODUCTION_STYLE_OPTIONS
