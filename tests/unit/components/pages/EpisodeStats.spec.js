@@ -46,6 +46,10 @@ const taskTypes = [
   { id: 'anim', name: 'Animation' }
 ]
 
+const savedSearches = [
+  { id: 'search-1', name: 'No E02', search_query: 'hiddenEpisodes=e02' }
+]
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -68,6 +72,8 @@ const mountPage = async ({ getters = {}, query = {} } = {}) => {
       episodeRetakeStats: () => episodeRetakeStats,
       episodeSearchText: () => '',
       episodeStats: () => episodeStats,
+      episodeStatsSearchFilterGroups: () => [],
+      episodeStatsSearchQueries: () => savedSearches,
       episodeStatColumns: () => ['layout', 'anim'],
       clientAccess: () => ({ isTaskTypeVisible: () => true }),
       isCurrentUserClient: () => false,
@@ -85,7 +91,7 @@ const mountPage = async ({ getters = {}, query = {} } = {}) => {
   wrapper = shallowMount(EpisodeStats, {
     global: {
       plugins: [store, router],
-      stubs: { SearchField: false }
+      stubs: { PanelLayout: false, SearchField: false }
     }
   })
   await flushPromises()
@@ -145,6 +151,82 @@ describe('EpisodeStats page', () => {
 
     test('keeps every column for the studio', async () => {
       await mountPage()
+      expect(listProps().validationColumns).toEqual(['layout', 'anim'])
+    })
+  })
+
+  describe('panel layout', () => {
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    test('lays its filters and its list out in the two panels', async () => {
+      await mountPage()
+
+      expect(
+        wrapper.find('.filters-panel').findComponent(SearchField).exists()
+      ).toBe(true)
+      expect(
+        wrapper.find('.list-panel').findComponent(EpisodeStatsList).exists()
+      ).toBe(true)
+    })
+
+    test('saves the filters of the URL, by production', async () => {
+      await mountPage()
+
+      expect(
+        wrapper.findComponent({ name: 'SearchQueryList' }).props()
+      ).toMatchObject({
+        productionId: 'production-1',
+        queries: savedSearches,
+        type: 'episodeStats',
+        withRouteQuery: true
+      })
+    })
+
+    test('keeps the saved searches from a client', async () => {
+      await mountPage({ getters: { isCurrentUserClient: () => true } })
+
+      expect(wrapper.findComponent({ name: 'SearchQueryList' }).exists()).toBe(
+        false
+      )
+    })
+
+    // A saved search, or the back button, sets a search the page did not
+    // write.
+    test('follows the search of the URL', async () => {
+      const { store } = await mountPage()
+
+      await router.push({ query: { search: 'e01' } })
+      await flushPromises()
+
+      expect(store.dispatch).toHaveBeenLastCalledWith('setEpisodeSearch', 'e01')
+    })
+
+    test('offers the reset only when the URL holds a filter', async () => {
+      await mountPage()
+      expect(findButton('remove')).toBeUndefined()
+
+      await router.push({ query: { hiddenEpisodes: 'e02' } })
+      await flushPromises()
+
+      expect(findButton('remove').exists()).toBe(true)
+    })
+
+    test('shows everything again on reset', async () => {
+      const { store } = await mountPage({
+        query: { search: 'e01', hiddenTaskTypes: 'anim' }
+      })
+
+      await findButton('remove').vm.$emit('click')
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query).toEqual({})
+      expect(store.dispatch).toHaveBeenLastCalledWith(
+        'setEpisodeSearch',
+        undefined
+      )
       expect(listProps().validationColumns).toEqual(['layout', 'anim'])
     })
   })

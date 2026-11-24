@@ -1,77 +1,87 @@
 <template>
-  <div class="sequences page fixed-page">
-    <div class="sequence-list-header page-header flexrow">
-      <search-field
-        class="flexrow-item search-field"
-        ref="sequence-search-field"
-        :can-save="true"
-        @change="onSearchChange"
-        @save="saveSearchQuery"
-        placeholder="ex: e01 s01"
+  <panel-layout class="sequence-stats">
+    <template #filters>
+      <div class="sequence-list-header flexrow">
+        <search-field
+          class="flexrow-item search-field"
+          ref="sequence-search-field"
+          @change="onSearchChange"
+          placeholder="ex: e01 s01"
+          v-if="!isCurrentUserClient"
+        />
+        <combobox-visible-options
+          class="flexrow-item options-filter"
+          :label="$t('sequences.title')"
+          :options="sequenceOptions"
+          v-model:hidden="hiddenSequenceIds"
+        />
+        <combobox-task-type-options
+          class="flexrow-item options-filter"
+          :label="$t('task_types.title')"
+          :task-types="columnTaskTypes"
+          v-model:hidden="hiddenTaskTypeIds"
+        />
+        <combobox
+          class="mb0 flexrow-item"
+          :label="$t('statistics.display_mode')"
+          locale-key-prefix="statistics."
+          :options="STATS_DISPLAY_MODE_OPTIONS"
+          v-model="displayMode"
+        />
+        <combobox
+          class="mb0 flexrow-item"
+          :label="$t('statistics.count_mode')"
+          locale-key-prefix="statistics."
+          :options="countModeOptions"
+          v-model="countMode"
+        />
+        <span class="filler"></span>
+        <button-simple
+          class="flexrow-item"
+          icon="refresh"
+          :title="$t('main.reload')"
+          @click="reloadData"
+        />
+        <button-simple
+          class="flexrow-item export-button"
+          icon="download"
+          :title="$t('main.csv.export_file')"
+          @click="exportStatisticsToCsv"
+        />
+        <button-simple
+          class="flexrow-item reset-filters"
+          icon="remove"
+          :title="$t('main.clear_filters')"
+          @click="resetFilters"
+          v-if="hasFilters"
+        />
+      </div>
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="sequenceStatsSearchFilterGroups"
+        :is-group-enabled="true"
+        :production-id="currentProduction?.id"
+        :queries="sequenceStatsSearchQueries"
+        type="sequenceStats"
+        with-route-query
         v-if="!isCurrentUserClient"
       />
-      <combobox-visible-options
-        class="flexrow-item options-filter"
-        :label="$t('sequences.title')"
-        :options="sequenceOptions"
-        v-model:hidden="hiddenSequenceIds"
-      />
-      <combobox-task-type-options
-        class="flexrow-item options-filter"
-        :label="$t('task_types.title')"
-        :task-types="columnTaskTypes"
-        v-model:hidden="hiddenTaskTypeIds"
-      />
-      <combobox
-        class="mb0 flexrow-item"
-        :label="$t('statistics.display_mode')"
-        locale-key-prefix="statistics."
-        :options="STATS_DISPLAY_MODE_OPTIONS"
-        v-model="displayMode"
-      />
-      <combobox
-        class="mb0 flexrow-item"
-        :label="$t('statistics.count_mode')"
-        locale-key-prefix="statistics."
-        :options="countModeOptions"
-        v-model="countMode"
-      />
-      <span class="filler"></span>
-      <button-simple
-        class="flexrow-item"
-        icon="refresh"
-        :title="$t('main.reload')"
-        @click="reloadData"
-      />
-      <button-simple
-        class="flexrow-item export-button"
-        icon="download"
-        :title="$t('main.csv.export_file')"
-        @click="exportStatisticsToCsv"
-      />
-    </div>
 
-    <div class="query-list mt1" v-if="!isCurrentUserClient">
-      <search-query-list
-        ref="sequence-search-query-list"
-        :queries="sequenceSearchQueries"
-        type="sequenceStat"
-        :production-id="currentProduction?.id"
+      <sequence-stats-list
+        :count-mode="countMode"
+        :display-mode="displayMode"
+        :entries="displayedSequences"
+        :is-loading="isShotsLoading || initialLoading"
+        :is-error="isShotsLoadingError"
+        :is-filtered="isFiltered"
+        :validation-columns="displayedColumns"
+        :sequence-stats="displayedStats"
+        :shot-counts="sequenceShotCounts"
       />
-    </div>
-
-    <sequence-stats-list
-      :count-mode="countMode"
-      :display-mode="displayMode"
-      :entries="displayedSequences"
-      :is-loading="isShotsLoading || initialLoading"
-      :is-error="isShotsLoadingError"
-      :is-filtered="isFiltered"
-      :validation-columns="displayedColumns"
-      :sequence-stats="displayedStats"
-      :shot-counts="sequenceShotCounts"
-    />
-  </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -92,6 +102,7 @@ import csv from '@/lib/csv'
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import SequenceStatsList from '@/components/lists/SequenceStatsList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -108,7 +119,6 @@ const store = useStore()
 // State
 // --------------------------------------------------------------------------
 const searchFieldRef = useTemplateRef('sequence-search-field')
-const searchQueryListRef = useTemplateRef('sequence-search-query-list')
 
 const countMode = ref('count')
 const initialLoading = ref(true)
@@ -130,8 +140,11 @@ const searchSequenceFilters = computed(
   () => store.getters.searchSequenceFilters
 )
 const sequenceMap = computed(() => store.getters.sequenceMap)
-const sequenceSearchQueries = computed(
-  () => store.getters.sequenceSearchQueries
+const sequenceStatsSearchFilterGroups = computed(
+  () => store.getters.sequenceStatsSearchFilterGroups
+)
+const sequenceStatsSearchQueries = computed(
+  () => store.getters.sequenceStatsSearchQueries
 )
 const sequenceShotCounts = computed(() => store.getters.sequenceShotCounts)
 const sequenceStats = computed(() => store.getters.sequenceStats)
@@ -155,9 +168,11 @@ const {
   displayedColumns,
   displayedRows: displayedSequences,
   getDisplayedStats,
+  hasFilters,
   hiddenColumnIds: hiddenTaskTypeIds,
   hiddenRowIds: hiddenSequenceIds,
   isFiltered,
+  resetFilters,
   rowOptions: sequenceOptions
 } = useStatsPage({
   preferenceKey: 'stats:sequence-display-mode',
@@ -203,10 +218,6 @@ const onSearchChange = () => {
     query: { ...route.query, search: searchQuery || undefined }
   })
   store.dispatch('setSequenceStatsSearch', searchQuery)
-}
-
-const saveSearchQuery = searchQuery => {
-  searchQueryListRef.value?.addSearch(searchQuery)
 }
 
 const exportStatisticsToCsv = () => {
@@ -293,12 +304,6 @@ useHead({
   // Mobile is read-only.
   .export-button {
     display: none;
-  }
-
-  // Without saved searches this block is empty: its margin only pushed the
-  // cards down.
-  .query-list {
-    margin-bottom: 0;
   }
 }
 </style>
