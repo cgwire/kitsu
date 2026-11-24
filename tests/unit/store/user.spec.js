@@ -763,6 +763,12 @@ describe('User store', () => {
     { page: 'News Feed', type: 'NewsFeed', listType: 'newsfeed' },
     { page: 'Timesheets', type: 'Timesheets', listType: 'timesheets' },
     {
+      page: 'Concepts',
+      type: 'Concepts',
+      listType: 'concepts',
+      productionId: 'production-1'
+    },
+    {
       page: 'Production News Feed',
       type: 'ProductionNewsFeed',
       listType: 'newsfeed',
