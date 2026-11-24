@@ -3031,6 +3031,26 @@ th.validation-cell {
     }
   }
 }
+
+// vue-at styles the suggestion list of the comment fields for a light page
+// only, its scroll bar included.
+.dark .atwho-view {
+  background: var(--background-alt);
+  color: var(--text);
+
+  .atwho-cur {
+    background: var(--background-selected);
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #5e6169;
+  }
+}
+
 // Opt-in card layout for data tables on mobile. Cells carrying a data-label
 // become a "label / value" line, .card-head cells stack on top as plain
 // blocks, every other cell is hidden. Landscape phones, wider than 768px,
