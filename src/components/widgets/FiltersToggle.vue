@@ -52,7 +52,8 @@ defineEmits(['reset'])
   padding: 0 14px;
 }
 
-.reset-filters {
-  margin-right: 1rem;
+// on the toggle: a page may hide it and keep the reset
+.reset-filters + .filters-toggle {
+  margin-left: 1rem;
 }
 </style>

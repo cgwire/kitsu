@@ -33,7 +33,8 @@ const router = createRouter({
       path: '/productions/:production_id/concepts',
       name: 'concepts',
       component: Concepts
-    }
+    },
+    { path: '/other', name: 'other', component: { template: '<div />' } }
   ]
 })
 
@@ -53,6 +54,12 @@ const buildRequestFailure = message => {
   const failure = new Error(message)
   markRequestFailure(failure)
   return failure
+}
+
+const savedSearch = {
+  id: 'search-1',
+  name: 'By Ada',
+  search_query: 'publisher=person-2'
 }
 
 const mountPage = async ({
@@ -93,6 +100,8 @@ const mountPage = async ({
       uploadProgress: state => state.uploadProgress,
       selectedConcepts: state =>
         new Map(state.selection.map(concept => [concept.id, concept])),
+      conceptsSearchFilterGroups: () => [],
+      conceptsSearchQueries: () => [savedSearch],
       taskStatusMap: () => new Map()
     }
   })
@@ -104,7 +113,7 @@ const mountPage = async ({
     global: {
       plugins: [store, router],
       config: { globalProperties: { $socket: socket } },
-      stubs
+      stubs: { PanelLayout: false, ...stubs }
     }
   })
   await flushPromises()
@@ -191,7 +200,7 @@ describe('Concepts page', () => {
 
   describe('multiple selection', () => {
     const stubs = {
-      TaskInfo: { template: '<div class="panel"><slot name="selection" /></div>' }
+      TaskInfo: { template: '<div class="task-panel"><slot name="selection" /></div>' }
     }
 
     test('shows the selected concepts in the side panel', async () => {
@@ -202,7 +211,7 @@ describe('Concepts page', () => {
         stubs
       })
 
-      const cards = wrapper.find('.panel').findAllComponents(ConceptCard)
+      const cards = wrapper.find('.task-panel').findAllComponents(ConceptCard)
       expect(cards.map(card => card.props('concept'))).toEqual(concepts)
       expect(cards.every(card => card.props('compact'))).toBe(true)
     })
@@ -210,7 +219,7 @@ describe('Concepts page', () => {
     test('opens the side drawer on a selection and closes it on demand', async () => {
       const concepts = [buildConcept('concept-1')]
       const closed = await mountPage({ concepts, stubs })
-      expect(closed.wrapper.find('.side-column').classes()).not.toContain(
+      expect(closed.wrapper.find('.drawer-backdrop').classes()).not.toContain(
         'is-open'
       )
 
@@ -219,7 +228,7 @@ describe('Concepts page', () => {
         selection: concepts,
         stubs
       })
-      expect(wrapper.find('.side-column').classes()).toContain('is-open')
+      expect(wrapper.find('.drawer-backdrop').classes()).toContain('is-open')
 
       await wrapper.find('.drawer-backdrop').trigger('click')
       expect(dispatch).toHaveBeenCalledWith('clearSelectedConcepts')
@@ -246,7 +255,7 @@ describe('Concepts page', () => {
       })
 
       wrapper
-        .find('.panel')
+        .find('.task-panel')
         .findAllComponents(ConceptCard)[0]
         .vm.$emit('click', {})
       await flushPromises()
@@ -830,6 +839,101 @@ describe('Concepts page', () => {
       expect(query()).toEqual({ publisher: 'person-2', sort: 'updated_at' })
     })
 
+    const toggleOf = wrapper => wrapper.findComponent({ name: 'FiltersToggle' })
+
+    // The sort is how the page shows the concepts, not a filter.
+    test('counts the extra filters set and offers a reset', async () => {
+      const bare = await mountPage({
+        concepts: [buildConcept('concept-1')],
+        query: { sort: 'updated_at' }
+      })
+      expect(toggleOf(bare.wrapper).props()).toMatchObject({
+        count: 0,
+        resettable: false
+      })
+
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1')],
+        query: { asset: 'none', status: 'status-1' }
+      })
+      expect(toggleOf(wrapper).props()).toMatchObject({
+        count: 1,
+        resettable: true
+      })
+    })
+
+    test('clears its filters and keeps its sort', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1', 'person-2')],
+        people,
+        query: {
+          asset: 'none',
+          publisher: 'person-2',
+          sort: 'updated_at',
+          status: 'status-1'
+        }
+      })
+
+      toggleOf(wrapper).vm.$emit('reset')
+      await flushPromises()
+
+      expect(query()).toEqual({ sort: 'updated_at' })
+      expect(toggleOf(wrapper).props('resettable')).toBe(false)
+    })
+
+    test('lists its saved searches, which hold its filters and its sort', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(
+        wrapper.findComponent({ name: 'SearchQueryList' }).props()
+      ).toMatchObject({
+        groups: [],
+        isGroupEnabled: true,
+        keptQueryKeys: ['concept-id', 'concept-preview', 'folder'],
+        queries: [savedSearch],
+        type: 'concepts',
+        withRouteQuery: true
+      })
+    })
+
+    // A saved search, or the back button, changes the query of the page
+    // shown: a filter missing from it is unset.
+    test('shows the filters of a new query', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1', 'person-2')],
+        people,
+        query: { status: 'status-1' }
+      })
+
+      await router.push({
+        name: 'concepts',
+        params: { production_id: 'production-1' },
+        query: { publisher: 'person-2', sort: 'updated_at' }
+      })
+      await flushPromises()
+
+      expect(wrapper.findComponent(ComboboxStatus).props('modelValue')).toBe(
+        null
+      )
+      expect(wrapper.findComponent(PeopleField).props('modelValue')).toEqual(
+        people[0]
+      )
+      expect(sortFilter(wrapper).props('modelValue')).toBe('updated_at')
+      expect(query()).toEqual({ publisher: 'person-2', sort: 'updated_at' })
+    })
+
+    test('leaves the query of the next page alone', async () => {
+      await mountPage({
+        concepts: [buildConcept('concept-1')],
+        query: { status: 'status-1' }
+      })
+
+      await router.push('/other?status=other')
+      await flushPromises()
+
+      expect(router.currentRoute.value.fullPath).toBe('/other?status=other')
+    })
+
     // Each update waits for the previous one: a failed one must not stop
     // the next ones.
     test('keeps following the filters after a failed query update', async () => {
@@ -1040,7 +1144,9 @@ describe('Concepts page', () => {
     expect(filters.classes()).toContain('folded')
     expect(filters.findAll('.extra-filter')).toHaveLength(3)
 
-    await filters.find('.filters-toggle').trigger('click')
+    await wrapper
+      .findComponent({ name: 'FiltersToggle' })
+      .vm.$emit('update:modelValue', true)
     expect(filters.classes()).not.toContain('folded')
   })
 
