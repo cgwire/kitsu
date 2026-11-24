@@ -1,10 +1,7 @@
 <template>
-  <div class="logs fixed-page">
-    <route-tabs :active-tab="activeTab" :tabs="tabs" />
-    <event-logs v-if="activeTab === 'events'" />
-    <login-logs v-else-if="activeTab === 'logins'" />
-    <preview-files v-else-if="activeTab === 'preview_files'" />
-  </div>
+  <component :is="TAB_PAGES[activeTab]">
+    <route-tabs class="logs-tabs" :active-tab="activeTab" :tabs="tabs" />
+  </component>
 </template>
 
 <script setup>
@@ -19,6 +16,13 @@ import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
 const { t } = useI18n()
 const route = useRoute()
+
+// each tab is a page in panels, which shows the tabs above its filters
+const TAB_PAGES = {
+  events: EventLogs,
+  logins: LoginLogs,
+  preview_files: PreviewFiles
+}
 
 // Computed
 
@@ -36,20 +40,8 @@ const activeTab = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-.fixed-page {
-  color: var(--text);
-  margin-top: 60px;
-  overflow: scroll;
-  padding: 2em;
-}
-
-:deep(.tabs) {
-  overflow: visible;
-}
-
-@media screen and (max-width: 768px) {
-  .fixed-page {
-    padding: 1em;
-  }
+// Bulma sets the tabs apart from what follows: the panel already does
+.tabs.logs-tabs {
+  margin-bottom: 0;
 }
 </style>

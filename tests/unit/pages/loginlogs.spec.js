@@ -12,9 +12,10 @@ vi.mock('vue-i18n', async importOriginal => ({
   useI18n: () => ({ t: key => key })
 }))
 
+const routing = vi.hoisted(() => ({ query: {}, push: vi.fn() }))
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ query: {} }),
-  useRouter: () => ({ push: vi.fn() })
+  useRoute: () => ({ query: routing.query }),
+  useRouter: () => ({ push: routing.push })
 }))
 
 const person = { id: 'person-1', email: 'jane@studio.com', full_name: 'Jane' }
@@ -36,10 +37,14 @@ const logs = [
   }
 ]
 
-const mountPage = async (result = logs) => {
+const mountPage = async (result = logs, query = {}) => {
+  routing.query = query
+  routing.push.mockClear()
   const store = createStore({
     getters: {
       dateFormat: () => 'YYYY-MM-DD',
+      loginLogsSearchFilterGroups: () => [],
+      loginLogsSearchQueries: () => [],
       people: () => [person],
       personMap: () => new Map([[person.id, person]]),
       use12HourClock: () => false,
@@ -47,12 +52,63 @@ const mountPage = async (result = logs) => {
     }
   })
   store.dispatch = vi.fn(() => Promise.resolve(result))
-  const wrapper = shallowMount(LoginLogs, { global: { plugins: [store] } })
+  const wrapper = shallowMount(LoginLogs, {
+    global: { plugins: [store], stubs: { PanelLayout: false } },
+    slots: { default: '<nav class="page-tabs" />' }
+  })
   await flushPromises()
   return wrapper
 }
 
 describe('pages/logs/LoginLogs', () => {
+  describe('panel layout', () => {
+    const resetButton = wrapper =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.props('icon') === 'remove')
+
+    test('shows the tabs of the page above its filters', async () => {
+      const wrapper = await mountPage()
+      const filters = wrapper.find('.filters-panel')
+
+      expect(filters.find('.page-tabs').exists()).toBe(true)
+      expect(filters.findComponent({ name: 'DateField' }).exists()).toBe(true)
+      expect(wrapper.find('.list-panel table').exists()).toBe(true)
+    })
+
+    test('saves the filters of the URL, whatever the tab', async () => {
+      const wrapper = await mountPage()
+
+      expect(
+        wrapper
+          .find('.list-panel')
+          .findComponent({ name: 'SearchQueryList' })
+          .props()
+      ).toMatchObject({
+        keptQueryKeys: ['tab'],
+        type: 'loginLogs',
+        withRouteQuery: true
+      })
+    })
+
+    test('offers no reset without a filter', async () => {
+      const wrapper = await mountPage(logs, { tab: 'logins' })
+
+      expect(resetButton(wrapper)).toBeUndefined()
+    })
+
+    test('clears the filters and keeps the tab', async () => {
+      const wrapper = await mountPage(logs, {
+        tab: 'logins',
+        person_ids: [person.id]
+      })
+
+      await resetButton(wrapper).vm.$emit('click')
+
+      expect(routing.push).toHaveBeenCalledWith({ query: { tab: 'logins' } })
+    })
+  })
+
   describe('card layout', () => {
     test('lists the logins in a card table', async () => {
       const wrapper = await mountPage()

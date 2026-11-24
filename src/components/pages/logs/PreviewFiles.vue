@@ -1,43 +1,48 @@
 <template>
-  <div class="mt1">
-    <p class="flexrow">
-      <em class="flexrow-item">{{ $t('logs.preview_files.explanation') }}</em>
-      <span class="filler"></span>
-      <button-simple
-        class="flexrow-item"
-        icon="refresh"
-        :is-loading="loading.previewFiles"
-        :title="$t('main.reload')"
-        @click="reload"
-      />
-    </p>
-    <div class="has-text-centered" v-if="loading.previewFiles">
-      <spinner />
-    </div>
-    <p class="empty" v-else-if="!previewFiles.length">
-      {{ $t('logs.preview_files.empty_list') }}
-    </p>
-    <template v-else>
-      <preview-file-list
-        :preview-files="previewFiles"
-        :is-loading="loading.previewFiles"
-        @mark-broken-clicked="markBrokenClicked"
-      />
-      <div class="has-text-centered mt1" v-if="hasMorePreviewFiles">
+  <panel-layout class="preview-files">
+    <template #filters>
+      <slot />
+      <p class="flexrow">
+        <em class="flexrow-item">{{ $t('logs.preview_files.explanation') }}</em>
+        <span class="filler"></span>
         <button-simple
-          :is-loading="loading.morePreviewFiles"
-          :text="$t('main.load_more')"
-          @click="loadMorePreviewFiles"
+          icon="refresh"
+          :is-loading="loading.previewFiles"
+          :title="$t('main.reload')"
+          @click="reload"
         />
-      </div>
+      </p>
     </template>
-  </div>
+    <template #list>
+      <div class="has-text-centered" v-if="loading.previewFiles">
+        <spinner />
+      </div>
+      <p class="empty" v-else-if="!previewFiles.length">
+        {{ $t('logs.preview_files.empty_list') }}
+      </p>
+      <template v-else>
+        <preview-file-list
+          :preview-files="previewFiles"
+          :is-loading="loading.previewFiles"
+          @mark-broken-clicked="markBrokenClicked"
+        />
+        <div class="has-text-centered" v-if="hasMorePreviewFiles">
+          <button-simple
+            :is-loading="loading.morePreviewFiles"
+            :text="$t('main.load_more')"
+            @click="loadMorePreviewFiles"
+          />
+        </div>
+      </template>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { useStore } from 'vuex'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import PreviewFileList from '@/components/lists/PreviewFileList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -104,6 +109,12 @@ onMounted(reload)
 </script>
 
 <style lang="scss" scoped>
+// the list has no scrolling frame of its own: the panel scrolls it, with the
+// button that loads more
+.preview-files :deep(.list-panel) {
+  overflow-y: auto;
+}
+
 .empty {
   color: var(--text);
   font-size: 1.2em;

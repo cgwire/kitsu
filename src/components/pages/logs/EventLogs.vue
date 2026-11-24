@@ -1,146 +1,161 @@
 <template>
-  <div class="mt1">
-    <div class="flexrow filters" :class="{ collapsed: !showFilters }">
-      <date-field
-        class="date-range flexrow-item"
-        :can-delete="false"
-        :label="$t('logs.date_range_label')"
-        :max-date="today"
-        :placeholder="$t('logs.date_range_placeholder')"
-        range
-        v-model="dateRange"
-        @change="onDateRangeChange"
-      />
-      <people-field
-        class="flexrow-item field collapsible"
-        multiple
-        search-email
-        :label="$t('logs.people_label')"
-        :people="people"
-        :placeholder="$t('logs.people_placeholder')"
-        v-model="selectedPeople"
-        @select="onPeopleSelect"
-      />
-      <combobox-production
-        class="flexrow-item collapsible"
-        :label="$t('main.production')"
-        :production-list="productionList"
-        v-model="selectedProductionId"
-        @update:model-value="onProductionChange"
-      />
-      <multiselect-field
-        class="flexrow-item collapsible"
-        :label="$t('logs.object_label')"
-        :options="objectOptions"
-        :placeholder="$t('logs.object_placeholder')"
-        v-model="selectedObjects"
-        @update:model-value="onObjectsChange"
-      />
-      <multiselect-field
-        class="flexrow-item collapsible"
-        :label="$t('logs.action_label')"
-        :options="actionOptions"
-        :placeholder="$t('logs.action_placeholder')"
-        v-model="selectedActions"
-        @update:model-value="onActionsChange"
-      />
-      <checkbox
-        class="flexrow-item mt2 collapsible"
-        :label="$t('logs.only_files')"
-        toggle
-        v-model="onlyFiles"
-        @change="onOnlyFilesChange"
-      />
-      <span class="filler"></span>
-      <button-simple
-        class="flexrow-item small mt2"
-        icon="refresh"
-        :is-loading="loading.events"
-        :title="$t('main.reload')"
-        @click="loadEvents"
-      />
-      <button-simple
-        class="flexrow-item small mt2 export-button"
-        :disabled="!events.length"
-        icon="download"
-        :title="$t('main.csv.export_file')"
-        @click="exportCsv"
-      />
-      <button-simple
-        class="flexrow-item small filters-toggle"
-        icon="funnel"
-        :aria-expanded="`${showFilters}`"
-        :is-on="showFilters"
-        :title="$t(showFilters ? 'main.less_filters' : 'main.more_filters')"
-        @click="showFilters = !showFilters"
-      />
-    </div>
-
-    <div class="has-text-centered" v-if="loading.events">
-      <spinner />
-    </div>
-    <div class="mt2 empty" v-else-if="!events.length">
-      {{ $t('logs.empty_list') }}
-    </div>
-    <div class="log-list" v-else>
-      <div class="event-count">
-        {{ $t('logs.nb_events', { count: events.length }) }}
-      </div>
-      <div
-        class="event-line"
-        :key="event.id"
-        role="button"
-        tabindex="0"
-        @click="selectLine(event)"
-        @keydown.enter.prevent="selectLine(event)"
-        v-for="event in events"
-      >
-        <span class="date tag mr1">{{ event.date }}</span>
-        <span class="type tag mr1" :data-status="event.shortType">
-          {{ event.type }}
-        </span>
-        <span class="name tag mr1">{{ event.name }}</span>
-        <span class="production tag mr1" v-if="event.production">
-          {{ event.production.name }}
-        </span>
-        <ul v-if="selectedEvents[event.id]" @click.stop>
-          <li class="flexrow">
-            <span class="key">user</span>
-            <people-avatar
-              class="flexrow-item"
-              :size="20"
-              :font-size="10"
-              :person="event.person"
-              v-if="event.user_id"
-            />
-            <people-name
-              class="flexrow-item"
-              :person="event.person"
-              with-link
-              v-if="event.user_id"
-            />
-          </li>
-          <li
-            :key="`${event.id}-${key}`"
-            v-for="key in Object.keys(event.data).sort()"
-          >
-            <span class="key">{{ key }}</span>
-            <a :href="getLink(event, key)" v-if="isLink(event, key)">
-              {{ event.data[key] }}
-            </a>
-            <template v-else>{{ event.data[key] }}</template>
-          </li>
-        </ul>
-      </div>
-      <div class="has-text-centered mt1" v-if="hasMoreEvents">
+  <panel-layout class="event-logs" :class="{ collapsed: !showFilters }">
+    <template #filters>
+      <slot />
+      <div class="flexrow filters">
+        <date-field
+          class="date-range flexrow-item"
+          :can-delete="false"
+          :label="$t('logs.date_range_label')"
+          :max-date="today"
+          :placeholder="$t('logs.date_range_placeholder')"
+          range
+          v-model="dateRange"
+          @change="onDateRangeChange"
+        />
+        <people-field
+          class="flexrow-item field collapsible"
+          multiple
+          search-email
+          :label="$t('logs.people_label')"
+          :people="people"
+          :placeholder="$t('logs.people_placeholder')"
+          v-model="selectedPeople"
+          @select="onPeopleSelect"
+        />
+        <combobox-production
+          class="flexrow-item collapsible"
+          :label="$t('main.production')"
+          :production-list="productionList"
+          v-model="selectedProductionId"
+          @update:model-value="onProductionChange"
+        />
+        <span class="filler"></span>
         <button-simple
-          :is-loading="loading.moreEvents"
-          :text="$t('main.load_more')"
-          @click="loadMoreEvents"
+          class="flexrow-item"
+          icon="refresh"
+          :is-loading="loading.events"
+          :title="$t('main.reload')"
+          @click="loadEvents"
+        />
+        <button-simple
+          class="flexrow-item export-button"
+          :disabled="!events.length"
+          icon="download"
+          :title="$t('main.csv.export_file')"
+          @click="exportCsv"
+        />
+        <filters-toggle
+          class="flexrow-item"
+          :count="secondRowFilterCount"
+          :resettable="hasFilters"
+          v-model="showFilters"
+          @reset="resetFilters"
         />
       </div>
-    </div>
-  </div>
+      <div class="flexrow filters collapsible">
+        <multiselect-field
+          class="flexrow-item"
+          :label="$t('logs.object_label')"
+          :options="objectOptions"
+          :placeholder="$t('logs.object_placeholder')"
+          v-model="selectedObjects"
+          @update:model-value="onObjectsChange"
+        />
+        <multiselect-field
+          class="flexrow-item"
+          :label="$t('logs.action_label')"
+          :options="actionOptions"
+          :placeholder="$t('logs.action_placeholder')"
+          v-model="selectedActions"
+          @update:model-value="onActionsChange"
+        />
+        <checkbox
+          class="flexrow-item only-files"
+          :label="$t('logs.only_files')"
+          toggle
+          v-model="onlyFiles"
+          @change="onOnlyFilesChange"
+        />
+      </div>
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="eventLogsSearchFilterGroups"
+        :is-group-enabled="true"
+        :kept-query-keys="KEPT_QUERY_KEYS"
+        :queries="eventLogsSearchQueries"
+        type="eventLogs"
+        with-route-query
+      />
+
+      <div class="has-text-centered" v-if="loading.events">
+        <spinner />
+      </div>
+      <div class="empty" v-else-if="!events.length">
+        {{ $t('logs.empty_list') }}
+      </div>
+      <div class="log-list" v-else>
+        <div class="event-count">
+          {{ $t('logs.nb_events', { count: events.length }) }}
+        </div>
+        <div
+          class="event-line"
+          :key="event.id"
+          role="button"
+          tabindex="0"
+          @click="selectLine(event)"
+          @keydown.enter.prevent="selectLine(event)"
+          v-for="event in events"
+        >
+          <span class="date tag mr1">{{ event.date }}</span>
+          <span class="type tag mr1" :data-status="event.shortType">
+            {{ event.type }}
+          </span>
+          <span class="name tag mr1">{{ event.name }}</span>
+          <span class="production tag mr1" v-if="event.production">
+            {{ event.production.name }}
+          </span>
+          <ul v-if="selectedEvents[event.id]" @click.stop>
+            <li class="flexrow">
+              <span class="key">user</span>
+              <people-avatar
+                class="flexrow-item"
+                :size="20"
+                :font-size="10"
+                :person="event.person"
+                v-if="event.user_id"
+              />
+              <people-name
+                class="flexrow-item"
+                :person="event.person"
+                with-link
+                v-if="event.user_id"
+              />
+            </li>
+            <li
+              :key="`${event.id}-${key}`"
+              v-for="key in Object.keys(event.data).sort()"
+            >
+              <span class="key">{{ key }}</span>
+              <a :href="getLink(event, key)" v-if="isLink(event, key)">
+                {{ event.data[key] }}
+              </a>
+              <template v-else>{{ event.data[key] }}</template>
+            </li>
+          </ul>
+        </div>
+        <div class="has-text-centered mt1" v-if="hasMoreEvents">
+          <button-simple
+            :is-loading="loading.moreEvents"
+            :text="$t('main.load_more')"
+            @click="loadMoreEvents"
+          />
+        </div>
+      </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -159,15 +174,21 @@ import {
   parseSimpleDate
 } from '@/lib/time'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import MultiselectField from '@/components/widgets/MultiselectField.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+
+// the tab is where the logs are read, not one of their filters
+const KEPT_QUERY_KEYS = ['tab']
 
 const PAGE_SIZE = 1000
 
@@ -213,9 +234,28 @@ const asArray = value => {
 
 // Computed
 
+const eventLogsSearchFilterGroups = computed(
+  () => store.getters.eventLogsSearchFilterGroups
+)
+const eventLogsSearchQueries = computed(
+  () => store.getters.eventLogsSearchQueries
+)
 const people = computed(() => store.getters.people)
 const personMap = computed(() => store.getters.personMap)
 const productionMap = computed(() => store.getters.productionMap)
+
+const secondRowFilterCount = computed(
+  () =>
+    [
+      selectedObjects.value.length,
+      selectedActions.value.length,
+      onlyFiles.value
+    ].filter(Boolean).length
+)
+
+const hasFilters = computed(() =>
+  Object.keys(route.query).some(key => !KEPT_QUERY_KEYS.includes(key))
+)
 
 const productionList = computed(() => [
   { id: '', color: '#999', name: t('main.all'), short_name: t('main.all') },
@@ -273,6 +313,10 @@ const pushQuery = changes => {
     }
   })
   router.push({ query })
+}
+
+const resetFilters = () => {
+  router.push({ query: { tab: route.query.tab } })
 }
 
 const onDateRangeChange = value => {
@@ -475,15 +519,51 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
 .filters {
   align-items: flex-start;
   flex-wrap: wrap;
+  row-gap: 1em;
+
+  > .flexrow-item {
+    margin-bottom: 0;
+  }
+
+  > :last-child {
+    margin-right: 0;
+  }
+
+  > .button {
+    align-self: flex-end;
+    height: 42px;
+  }
+
+  // one label height and one control height for the whole row
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  :deep(.production-combo) {
+    height: 42px;
+  }
+
+  // App.vue sizes the date input under #app
+  :deep(.datepicker input) {
+    height: 42px !important;
+  }
 }
 
-// small screens only: the filters fold behind the toggle
-.filters-toggle {
+.collapsed .filters.collapsible {
   display: none;
 }
 
+// as tall as the fields beside it, its toggle on their middle line
+.only-files {
+  align-items: center;
+  align-self: flex-end;
+  display: flex;
+  height: 42px;
+}
+
 .event-count {
-  padding: 1em;
+  padding: 0 0.25em 1em;
   font-style: italic;
 }
 
@@ -560,10 +640,16 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
   }
 }
 
+// a sheet of the page color, as the frame of a table: the tags of a line
+// take the color of the panel
 .log-list {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 2em;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1em;
 }
 
 @media screen and (max-width: 768px) {
@@ -571,23 +657,10 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
     align-items: flex-end;
     row-gap: 0.5em;
 
-    .filler {
+    .filler,
+    :deep(.reset-filters) {
       display: none;
     }
-
-    // measured: 32px buttons against the 40px date input
-    .button {
-      height: 40px;
-    }
-
-    .mt2 {
-      margin-top: 0;
-    }
-  }
-
-  .filters-toggle {
-    display: flex;
-    flex: none;
   }
 
   // the .field bottom margin of DateField lifted it above the buttons
