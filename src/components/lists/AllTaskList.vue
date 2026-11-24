@@ -371,6 +371,11 @@ td.due-date {
   margin-top: 0.6em;
 }
 
+// keeps the first header off the rounded corner of the frame
+.datatable-head th.project {
+  padding-left: 1em;
+}
+
 .datatable-body {
   overflow-x: auto;
   overflow-y: scroll;

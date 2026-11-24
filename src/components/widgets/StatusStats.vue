@@ -1,68 +1,88 @@
 <template>
-  <div class="status-stats">
-    <div :key="'stat-' + stat.name" class="stat-wrapper" v-for="stat in stats">
-      <div
-        :key="'stat-value-' + stat.name.toLowerCase()"
-        class="stat-line"
-        :title="stat.name + ': ' + stat.value"
-        :style="{
-          background: stat.color,
-          width: (stat.value / statMax) * 100 + '%'
-        }"
-      >
-        <span class="stat-text">{{ stat.name }} : {{ stat.value }}</span>
-      </div>
-    </div>
-  </div>
+  <ul class="status-stats">
+    <li
+      class="stat"
+      :key="stat.name"
+      :title="`${stat.name}: ${stat.value}`"
+      v-for="stat in stats"
+    >
+      <validation-tag
+        class="stat-name"
+        is-static
+        :is-priority="false"
+        :task="{ task_status_id: stat.status.id }"
+      />
+      <span class="stat-value">{{ stat.value }}</span>
+      <span class="stat-track">
+        <span
+          class="stat-bar"
+          :style="{
+            background: stat.color,
+            width: `${(stat.value / statMax) * 100}%`
+          }"
+        ></span>
+      </span>
+    </li>
+  </ul>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
+
 const props = defineProps({
-  stats: Array
+  stats: { type: Array, default: () => [] }
 })
 
-const statMax = computed(() => {
-  if (props.stats) {
-    return props.stats.reduce((max, stat) => {
-      return Math.max(stat.value, max)
-    }, 0)
-  } else {
-    return 0
-  }
-})
+const statMax = computed(() =>
+  props.stats.reduce((max, stat) => Math.max(stat.value, max), 0)
+)
 </script>
 
 <style lang="scss" scoped>
 .status-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  // a global ul rule indents lists by 14px
+  margin: 0;
   text-align: left;
   width: 100%;
-  flex: 1;
+}
 
-  .stat-line {
-    border-radius: 6px;
-    display: inline-block;
-    margin-right: 1em;
-    margin-top: 0;
-    margin-bottom: 0.4em;
-    padding-left: 4px;
-    padding-top: 1px;
-    font-size: 0.8em;
-    font-weight: bold;
-    width: 100%;
-    height: 32px;
-  }
+.stat {
+  align-items: center;
+  display: grid;
+  gap: 6px 8px;
+  grid-template-columns: 1fr auto;
+}
 
-  .stat-text {
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.8);
-    font-weight: bold;
-    padding: 4px 8px;
-    margin-top: 3px;
-    color: $black;
-    border-radius: 6px;
-    white-space: nowrap;
-  }
+.stat-name {
+  justify-self: start;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-value {
+  color: var(--text-strong);
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.stat-track {
+  background: var(--background);
+  border-radius: 3px;
+  grid-column: 1 / -1;
+  height: 6px;
+  overflow: hidden;
+}
+
+.stat-bar {
+  border-radius: 3px;
+  display: block;
+  height: 100%;
 }
 </style>

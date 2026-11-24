@@ -126,8 +126,8 @@ describe('AllTasks page', () => {
   it('draws the bar of the default status in grey', async () => {
     const wrapper = await mountPage()
     expect(wrapper.findComponent(StatusStats).props('stats')).toEqual([
-      { name: 'TODO', color: '#6F727A', value: 3 },
-      { name: 'WIP', color: '#3273dc', value: 1 }
+      { name: 'TODO', color: '#6F727A', status: todoStatus, value: 3 },
+      { name: 'WIP', color: '#3273dc', status: wipStatus, value: 1 }
     ])
     wrapper.unmount()
   })
