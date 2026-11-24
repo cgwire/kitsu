@@ -192,7 +192,9 @@ export const useModal = (active, emit, containerRef = null) => {
 
   const onKeyDown = event => {
     if (!isTop()) return
-    if (event.key === 'Escape') {
+    // A held Escape repeats its keydown: only its first press closes a modal,
+    // not the ones under it.
+    if (event.key === 'Escape' && !event.repeat) {
       // Tells isFreeEscape the key is taken: a page listener added after
       // this one finds the modal closed.
       event.preventDefault()
