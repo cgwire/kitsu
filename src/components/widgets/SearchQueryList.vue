@@ -247,6 +247,7 @@ import {
   Trash2Icon
 } from 'lucide-vue-next'
 
+import { toSortedQueryString } from '@/lib/query'
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
@@ -435,12 +436,6 @@ const removeErrorText = computed(() =>
 const pageQuery = computed(() =>
   props.withRouteQuery ? new URLSearchParams(route.query).toString() : ''
 )
-
-const toSortedQueryString = query => {
-  const searchParams = new URLSearchParams(query)
-  searchParams.sort()
-  return searchParams.toString()
-}
 
 const sortedPageQuery = computed(() => toSortedQueryString(route.query))
 

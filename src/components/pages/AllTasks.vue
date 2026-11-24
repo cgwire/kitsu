@@ -149,6 +149,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { toSortedQueryString } from '@/lib/query'
 import { sortPeople } from '@/lib/sorting'
 import { getStatusColor } from '@/lib/stats'
 
@@ -344,12 +345,6 @@ const resetFilters = () => {
 
 const syncRouteQuery = () => {
   router.push({ query: pageQuery.value })
-}
-
-const toSortedQueryString = query => {
-  const searchParams = new URLSearchParams(query)
-  searchParams.sort()
-  return searchParams.toString()
 }
 
 const isPageQuery = query =>

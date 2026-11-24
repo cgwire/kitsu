@@ -125,6 +125,7 @@ import { isBehindModal } from '@/composables/modal'
 import { useTime } from '@/composables/time'
 import { logRequestFailure } from '@/lib/errors'
 import { isCaretMoveOnMac, isFreeEscape } from '@/lib/keyboard'
+import { toSortedQueryString } from '@/lib/query'
 import {
   formatFullDateWithRevertedTimezone,
   formatFullDateWithTimezone,
@@ -251,12 +252,6 @@ const filterQuery = computed(() => ({
 }))
 
 // Functions
-
-const toSortedQueryString = query => {
-  const searchParams = new URLSearchParams(query)
-  searchParams.sort()
-  return searchParams.toString()
-}
 
 // Without its unset filters, as the router keeps it.
 const isPageQuery = query =>
