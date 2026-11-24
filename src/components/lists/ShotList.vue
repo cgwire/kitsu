@@ -409,7 +409,6 @@
                   :entity="shot"
                   :is-assignees="displaySettings.showAssignations"
                   :is-casting-ready="isCastingReady(shot, columnId)"
-                  :is-static="true"
                   :left="
                     offsets['validation-' + j]
                       ? `${offsets['validation-' + j]}px`

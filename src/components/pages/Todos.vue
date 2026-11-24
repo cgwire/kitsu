@@ -105,7 +105,6 @@
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
           :tasks="notPendingTasks"
-          :selection-grid="todoSelectionGrid"
           @scroll="setTodoListScrollPosition"
           v-if="isActiveTab('todos')"
         />
@@ -118,7 +117,6 @@
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
           :tasks="pendingTasks"
-          :selection-grid="todoSelectionGrid"
           @scroll="setTodoListScrollPosition"
           v-if="isActiveTab('pending')"
         />
@@ -132,7 +130,6 @@
           :with-illustration="false"
           :is-loading="loading.doneTasks || isTodosLoading"
           :is-error="isTodosLoadingError"
-          :selection-grid="doneSelectionGrid"
           :tasks="sortedDoneTasks"
           v-if="isActiveTab('done')"
         />
@@ -361,7 +358,6 @@ const dayOffListRef = useTemplateRef('day-off-list')
 // --------------------------------------------------------------------------
 const displayedDoneTasks = computed(() => store.getters.displayedDoneTasks)
 const displayedTodos = computed(() => store.getters.displayedTodos)
-const doneSelectionGrid = computed(() => store.getters.doneSelectionGrid)
 const isTodosLoading = computed(() => store.getters.isTodosLoading)
 const isTodosLoadingError = computed(() => store.getters.isTodosLoadingError)
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
@@ -373,7 +369,6 @@ const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const timeSpentMap = computed(() => store.getters.timeSpentMap)
 const timeSpentTotal = computed(() => store.getters.timeSpentTotal)
 const todoSearchQueries = computed(() => store.getters.todoSearchQueries)
-const todoSelectionGrid = computed(() => store.getters.todoSelectionGrid)
 const user = computed(() => store.getters.user)
 
 const sortedTasks = computed(() => filterAndSortTasks(displayedTodos.value))

@@ -87,7 +87,6 @@
       :is-error="isImportPeopleLoadingError"
       :import-error="errors.importingError"
       :parsed-csv="parsedCSV"
-      :form-data="personCsvFormData"
       :columns="[...dataMatchers, ...csvColumns, ...optionalCsvColumns]"
       :data-matchers="dataMatchers"
       :database="filteredPeople"
@@ -101,7 +100,6 @@
       active
       :is-loading="isImportPeopleLoading"
       :is-error="errors.importing"
-      :form-data="personCsvFormData"
       :columns="[...dataMatchers, ...csvColumns]"
       :optional-columns="optionalCsvColumns"
       @cancel="hideImportModal"
@@ -321,7 +319,6 @@ const isPeopleLoading = computed(() => store.getters.isPeopleLoading)
 const isPeopleLoadingError = computed(() => store.getters.isPeopleLoadingError)
 const mainConfig = computed(() => store.getters.mainConfig)
 const peopleSearchQueries = computed(() => store.getters.peopleSearchQueries)
-const personCsvFormData = computed(() => store.getters.personCsvFormData)
 const studioMap = computed(() => store.getters.studioMap)
 const user = computed(() => store.getters.user)
 const userLimit = computed(() => store.getters.userLimit)

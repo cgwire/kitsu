@@ -137,7 +137,6 @@
       :confirm-label="$t('main.confirmation')"
       :is-loading="loading.addPreview"
       :is-error="errors.addPreview"
-      :form-data="addPreviewFormData"
       :title="
         modals.task
           ? `${modals.task.entity_name} / ${taskTypeMap.get(modals.task.task_type_id)?.name || ''}`
@@ -199,7 +198,6 @@ const props = defineProps({
 
 // State
 // --------------------------------------------------------------------------
-const addPreviewFormData = ref(null)
 const draggedTask = ref(null)
 const dropColumnId = ref(null)
 const initialClientX = ref(null)

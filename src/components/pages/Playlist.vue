@@ -12,7 +12,6 @@
             class="flexrow-item selector mb1"
             :task-type-list="taskTypeList"
             :label="$t('playlists.filter_task_type')"
-            :thin="true"
             v-model="taskTypeId"
             v-if="!isListToggled && !isCurrentUserClient"
           />

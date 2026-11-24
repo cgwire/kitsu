@@ -308,7 +308,6 @@
                   :contact-sheet="displaySettings.contactSheetMode"
                   :entity="episode"
                   :is-assignees="displaySettings.showAssignations"
-                  :is-static="true"
                   :left="
                     offsets['validation-' + j]
                       ? `${offsets['validation-' + j]}px`

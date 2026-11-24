@@ -184,7 +184,6 @@
       :is-error="errors.importing"
       :import-error="errors.importingError"
       :parsed-csv="parsedCSV"
-      :form-data="assetsCsvFormData"
       :columns="renderColumns"
       :data-matchers="dataMatchers"
       :database="filteredAssets"
@@ -198,7 +197,6 @@
       :active="modals.isImportDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
-      :form-data="assetsCsvFormData"
       :columns="dataMatchers"
       :optional-columns="optionalColumns"
       :generic-columns="genericColumns"
@@ -321,7 +319,6 @@ let resetTimeout = null
 // --------------------------------------------------------------------------
 
 const assetMap = computed(() => store.getters.assetMap)
-const assetsCsvFormData = computed(() => store.getters.assetsCsvFormData)
 const assetSearchText = computed(() => store.getters.assetSearchText)
 const assetSorting = computed(() => store.getters.assetSorting)
 const assetValidationColumns = computed(() =>

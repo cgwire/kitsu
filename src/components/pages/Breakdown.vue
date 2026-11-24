@@ -91,7 +91,6 @@
             class="flexrow-item desktop-only"
             :title="$t('main.csv.export_file')"
             icon="export-lines"
-            :is-responsive="true"
             :path="exportUrlPath"
             v-if="isCurrentUserManager"
           />
@@ -363,7 +362,6 @@
       :is-error="errors.importing"
       :import-error="errors.importingError"
       :parsed-csv="parsedCSV"
-      :form-data="importCsvFormData"
       :columns="renderColumns"
       :data-matchers="dataMatchers"
       :database="filteredCasting"
@@ -378,7 +376,6 @@
       :active="modals.importing"
       :is-loading="loading.importing"
       :is-error="errors.importing"
-      :form-data="importCsvFormData"
       :columns="csvColumns"
       :optional-columns="optionalCsvColumns"
       @cancel="hideImportModal"
@@ -389,7 +386,6 @@
       :active="modals.isEditLabelDisplayed"
       :is-loading="loading.editLabel"
       :is-error="errors.editLabel"
-      :asset="editedAsset"
       :label="editedAssetLinkLabel"
       @cancel="modals.isEditLabelDisplayed = false"
       @confirm="confirmEditLabel"
@@ -529,7 +525,6 @@ const columnWidth = ref({})
 const editedAsset = ref(null)
 const editedAssetLinkLabel = ref(null)
 const editedEntityId = ref(null)
-const importCsvFormData = ref({})
 const isBigMode = ref(false)
 const isOnlyCurrentEpisode = ref(false)
 const isTextMode = ref(false)
@@ -1119,7 +1114,6 @@ const uploadImportFile = async data => {
   loading.importing = true
   errors.importing = false
   errors.importingError = null
-  importCsvFormData.value = formData
   try {
     await store.dispatch('uploadCastingFile', formData)
     hideImportRenderModal()
@@ -1137,7 +1131,6 @@ const resetImport = () => {
   errors.importing = false
   errors.importingError = null
   hideImportRenderModal()
-  importCsvFormData.value = undefined
   importModalRef.value?.reset()
   showImportModal()
 }

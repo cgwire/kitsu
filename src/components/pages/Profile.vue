@@ -210,7 +210,6 @@
       :active="changeAvatar.isModalShown"
       :is-loading="changeAvatar.isLoading"
       :is-error="changeAvatar.isLoadingError"
-      :form-data="changeAvatar.formData"
       :title="$t('profile.avatar.title')"
       @fileselected="selectFile"
       @confirm="uploadAvatarFile"
@@ -272,8 +271,7 @@ const passwordForm = ref({
 const changeAvatar = reactive({
   isModalShown: false,
   isLoading: false,
-  isLoadingError: false,
-  formData: null
+  isLoadingError: false
 })
 
 const loading = reactive({ info: false, notifications: false })

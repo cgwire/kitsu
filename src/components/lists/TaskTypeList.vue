@@ -70,7 +70,6 @@
               </td>
               <row-actions-cell
                 class="datatable-row-footer"
-                :task-type-id="taskType.id"
                 @delete-clicked="$emit('delete-clicked', taskType)"
                 @edit-clicked="$emit('edit-clicked', taskType)"
               />

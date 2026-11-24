@@ -80,7 +80,6 @@
                 :placeholder="$t('productions.creation.placeholder_fps')"
                 :errored="!hasValidFPS"
                 v-model="productionToCreate.settings.fps"
-                thin
               />
               <span class="input-separator flexrow-item mr1"></span>
               <text-field
@@ -91,7 +90,6 @@
                 :step="0.01"
                 :placeholder="$t('productions.creation.placeholder_ratio1')"
                 v-model="productionToCreate.settings.ratio[0]"
-                thin
               />
               <span class="input-separator flexrow-item mt15 mr0">:</span>
               <text-field
@@ -102,7 +100,6 @@
                 :placeholder="$t('productions.creation.placeholder_ratio2')"
                 :empty-label="true"
                 v-model="productionToCreate.settings.ratio[1]"
-                thin
               />
               <span class="input-separator flexrow-item mr1"></span>
               <text-field
@@ -115,7 +112,6 @@
                   $t('productions.creation.placeholder_resolution1')
                 "
                 v-model="productionToCreate.settings.resolution[0]"
-                thin
               />
               <span class="input-separator flexrow-item mt15 mr05">x</span>
               <text-field
@@ -128,7 +124,6 @@
                 :step="1"
                 :empty-label="true"
                 v-model="productionToCreate.settings.resolution[1]"
-                thin
               />
             </div>
             <div class="mb1 explanation">
@@ -466,7 +461,6 @@
       :is-error="errors.importingAssets"
       :import-error="errors.importingAssetsError"
       :parsed-csv="parsedAssetsCSV"
-      :form-data="assetsCsvFormData"
       :columns="assetsRenderColumns"
       :data-matchers="assetsDataMatchers"
       :database="{}"
@@ -481,7 +475,6 @@
       :active="modals.isAssetsImportDisplayed"
       :is-loading="loading.importingAssets"
       :is-error="errors.readingAssetsCsv"
-      :form-data="assetsCsvFormData"
       :columns="assetsDataMatchers"
       :optional-columns="assetsOptionalColumns"
       :generic-columns="genericColumns"
@@ -495,7 +488,6 @@
       :is-error="errors.importingShots"
       :import-error="errors.importingShotsError"
       :parsed-csv="parsedShotsCSV"
-      :form-data="shotsCsvFormData"
       :columns="shotsRenderColumns"
       :data-matchers="shotsDataMatchers"
       :database="{}"
@@ -511,7 +503,6 @@
       :active="modals.isShotsImportDisplayed"
       :is-loading="loading.importingShots"
       :is-error="errors.readingShotsCsv"
-      :form-data="shotsCsvFormData"
       :columns="shotsDataMatchers"
       :optional-columns="shotsOptionalColumns"
       :generic-columns="genericColumns"
@@ -638,12 +629,10 @@ const genericColumns = [
 const productionStyleOptions = PRODUCTION_STYLE_OPTIONS
 const productionTypeOptions = PRODUCTION_TYPE_OPTIONS
 
-const assetsCsvFormData = computed(() => store.getters.assetsCsvFormData)
 const assetTaskTypes = computed(() => store.getters.assetTaskTypes)
 const assetTypes = computed(() => store.getters.assetTypes)
 const productionStatus = computed(() => store.getters.productionStatus)
 const projectTemplates = computed(() => store.getters.projectTemplates)
-const shotsCsvFormData = computed(() => store.getters.shotsCsvFormData)
 const shotTaskTypes = computed(() => store.getters.shotTaskTypes)
 const taskStatus = computed(() => store.getters.taskStatus)
 

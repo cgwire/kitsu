@@ -101,7 +101,6 @@
               :production-id="entry.project_id"
               :task-type="getTaskType(entry)"
               :style="{ left: colTypePosX }"
-              :is-link="false"
               :data-label="$t('tasks.fields.task_type')"
             />
             <td

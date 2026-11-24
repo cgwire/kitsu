@@ -24,7 +24,6 @@
         <div class="selected-production-line flexrow-item">
           <production-name
             :production="currentProduction"
-            :no-link="true"
             :size="25"
             v-if="currentProduction"
           />
@@ -46,11 +45,7 @@
           @click="selectProduction(production)"
           v-for="(production, index) in productionList"
         >
-          <production-name
-            :size="25"
-            :no-link="true"
-            :production="production"
-          />
+          <production-name :size="25" :production="production" />
         </div>
       </div>
     </div>

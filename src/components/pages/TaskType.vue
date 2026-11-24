@@ -251,7 +251,6 @@
                 :label="$t('tasks.colors.title')"
                 :options="schedule.colorOptions"
                 locale-key-prefix="tasks.colors."
-                no-field
                 v-model="schedule.currentColor"
               />
             </div>
@@ -260,7 +259,6 @@
                 class="mt0 nowrap"
                 :label="$t('schedule.zoom_level')"
                 :options="zoomOptions"
-                no-field
                 v-model="schedule.zoomLevel"
                 v-if="isActiveTab('schedule')"
               />
@@ -391,7 +389,6 @@
           :imported-rows="importedRows"
           :parsed-csv="parsedCSV"
           :file-headers="importFileHeaders"
-          :form-data="importCsvFormData"
           :columns="[...dataMatchers, ...optionalColumns]"
           :data-matchers="dataMatchers"
           :required-values="dataMatchers"
@@ -408,7 +405,6 @@
           :active="modals.importing"
           :is-loading="loading.importing"
           :is-error="errors.importing"
-          :form-data="importCsvFormData"
           :columns="dataMatchers"
           :optional-columns="optionalColumns"
           :generic-columns="genericColumns"

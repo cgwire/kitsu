@@ -56,7 +56,6 @@
               <div class="render-select">
                 <combobox
                   :options="columnOptions"
-                  :value="cell"
                   :error="isDuplicated(index)"
                   v-model="columnSelect[index]"
                   @update:model-value="checkForDuplicate"

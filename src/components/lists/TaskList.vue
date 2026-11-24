@@ -194,7 +194,6 @@
               :is-border="false"
               :is-assignees="false"
               :selectable="false"
-              :is-static="true"
             />
             <td class="assignees">
               <div class="flexrow">

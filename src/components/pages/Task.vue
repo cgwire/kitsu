@@ -420,7 +420,6 @@
         :active="modals.addPreview"
         :is-loading="loading.addPreview"
         :is-error="errors.addPreview"
-        :form-data="addPreviewFormData"
         :fps="currentFps"
         :expected-frames="entityFrames"
         :title="
@@ -440,7 +439,6 @@
           :active="modals.addExtraPreview"
           :is-loading="loading.addExtraPreview"
           :is-error="errors.addExtraPreview"
-          :form-data="addExtraPreviewFormData"
           message=""
           :upload-progress="uploadProgress"
           :title="
@@ -597,8 +595,6 @@ const previewForms = ref([])
 const currentFrame = ref(0)
 const isUseCurrentFrame = ref(false)
 const hookupPlaylistTaskIds = ref([])
-const addPreviewFormData = ref(null)
-const addExtraPreviewFormData = ref(null)
 // The file the trash of the player removes and the revision its "+" adds a
 // file to, each with the task of the revision shown at the click.
 const removedFile = ref(null)

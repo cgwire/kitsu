@@ -46,7 +46,6 @@
             class="task-type-name"
             :task-type="taskType"
             :production-id="news.project_id"
-            :is-static="true"
           />
         </div>
 
@@ -111,7 +110,6 @@
           class="flexrow-item"
           :person="personMap.get(news.author_id)"
           :size="30"
-          :no-link="true"
           v-if="personMap.get(news.author_id)"
         />
 

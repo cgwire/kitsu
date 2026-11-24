@@ -75,7 +75,6 @@
         />
         <sequence-list
           ref="sequence-list"
-          :contact-sheet-mode="contactSheetMode"
           :display-settings="displaySettings"
           :displayed-sequences="displayedSequences"
           :is-loading="isLoading || initialLoading"
@@ -275,7 +274,6 @@ const { t } = useI18n()
 const store = useStore()
 
 const type = 'sequence'
-const contactSheetMode = false
 
 // State
 // --------------------------------------------------------------------------

@@ -127,7 +127,6 @@
     <div class="column side-column" v-if="showInfo">
       <people-timesheet-info
         :person="currentPerson"
-        :production="productionId"
         :year="currentYear"
         :month="currentMonth"
         :week="currentWeek"

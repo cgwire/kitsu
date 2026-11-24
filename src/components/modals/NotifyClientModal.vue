@@ -37,7 +37,7 @@
             :size="30"
             :is-link="false"
           />
-          <people-name class="flexrow-item" :person="client" :is-link="false" />
+          <people-name class="flexrow-item" :person="client" />
         </div>
       </template>
     </div>

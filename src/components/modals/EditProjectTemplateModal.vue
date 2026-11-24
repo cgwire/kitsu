@@ -43,7 +43,6 @@
         class="mt2"
         :label="$t('project_templates.fields.description')"
         v-model="form.description"
-        is-textarea
       />
     </form>
     <modal-footer
