@@ -519,8 +519,16 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
   margin-top: 0;
 }
 
+// the frame runs down to the task count, which closes the panel without
+// the padding it adds under itself
 .list-panel :deep(.datatable-wrapper) {
   border-radius: 10px;
+  flex: 1;
+  margin-bottom: 4px;
+}
+
+.list-panel :deep(.nb-tasks) {
+  padding-bottom: 0;
 }
 
 // phones get borderless cards instead
