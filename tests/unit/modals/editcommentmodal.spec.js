@@ -7,6 +7,7 @@ import { createStore } from 'vuex'
 
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 import { shallowMountWithI18n } from '../fixtures/i18n'
 
@@ -227,6 +228,19 @@ describe('modals/EditCommentModal', () => {
       expect(wrapper.find('textarea').element.value).toBe(
         'Ready v1 00:00:00:00 (1) '
       )
+    })
+
+    // The other comment fields show the same avatar, which is no link.
+    it('lists people with the small avatar of the comment fields', async () => {
+      await wrapper.setProps({
+        team: [{ id: 'person-1', full_name: 'Kevin Layout', role: 'user' }]
+      })
+      await wrapper.find('textarea').setValue('Ready @Kev')
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(
+        wrapper.find('.atwho-li').findComponent(PeopleAvatar).props()
+      ).toMatchObject({ size: 20, fontSize: 11, isLazy: false, isLink: false })
     })
   })
 })

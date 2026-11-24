@@ -66,6 +66,9 @@
                       class="flexrow-item"
                       :person="item"
                       :size="20"
+                      :font-size="11"
+                      :is-lazy="false"
+                      :is-link="false"
                     />
                     <span class="flexrow-item">
                       {{ item.full_name }}
