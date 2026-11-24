@@ -365,11 +365,15 @@ const estimationUpdated = (event, task) => {
   }
 }
 
+// The rows a search hides stay selected: the estimation goes to the ones
+// shown.
 const saveEstimations = (estimation, task) => {
-  const selection = Object.keys(selectionGrid.value)
+  const selection = tasksByPerson.value.filter(
+    ({ id }) => selectionGrid.value[id]
+  )
   if (selection.length > 1) {
-    selection.forEach(taskId => {
-      emit('estimation-changed', { taskId, estimation })
+    selection.forEach(({ id }) => {
+      emit('estimation-changed', { taskId: id, estimation })
     })
   } else {
     emit('estimation-changed', { taskId: task.id, estimation })

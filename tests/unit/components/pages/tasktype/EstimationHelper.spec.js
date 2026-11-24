@@ -233,4 +233,22 @@ describe('EstimationHelper', () => {
     expect(selectedRows(wrapper)).toEqual([true, true, true, true])
     wrapper.unmount()
   })
+
+  // The rows a search hides stay selected, out of sight: the estimation
+  // typed in a row shown, reached with Tab, went to them too.
+  it('saves a typed estimation in the selected rows a search leaves', async () => {
+    const wrapper = mountHelper(false, { tasks: assignedTasks.slice(0, 3) })
+    const cells = taskCells(wrapper)
+    await cells[0].trigger('click')
+    await cells[2].trigger('click', { shiftKey: true })
+
+    await wrapper.setProps({ tasks: assignedTasks.slice(1, 3) })
+    await taskCells(wrapper)[0].find('input').setValue('2')
+
+    expect(wrapper.emitted('estimation-changed')).toEqual([
+      [{ taskId: 'task-2', estimation: 16 * 60 }],
+      [{ taskId: 'task-3', estimation: 16 * 60 }]
+    ])
+    wrapper.unmount()
+  })
 })
