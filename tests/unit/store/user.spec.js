@@ -773,6 +773,24 @@ describe('User store', () => {
       productionId: 'production-1'
     },
     {
+      page: 'Asset Type Stats',
+      type: 'AssetTypeStats',
+      listType: 'assettypestats',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Sequence Stats',
+      type: 'SequenceStats',
+      listType: 'sequencestats',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Episode Stats',
+      type: 'EpisodeStats',
+      listType: 'episodestats',
+      productionId: 'production-1'
+    },
+    {
       page: 'Production News Feed',
       type: 'ProductionNewsFeed',
       listType: 'newsfeed',

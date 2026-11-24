@@ -250,7 +250,10 @@ const PAGE_SEARCHES = [
   { type: 'myChecks', listType: 'mychecks' },
   { type: 'eventLogs', listType: 'eventlogs' },
   { type: 'loginLogs', listType: 'loginlogs' },
-  { type: 'concepts', listType: 'concepts', isInProduction: true }
+  { type: 'concepts', listType: 'concepts', isInProduction: true },
+  { type: 'assetTypeStats', listType: 'assettypestats', isInProduction: true },
+  { type: 'sequenceStats', listType: 'sequencestats', isInProduction: true },
+  { type: 'episodeStats', listType: 'episodestats', isInProduction: true }
 ]
 
 const pageSearchGetters = Object.fromEntries(
