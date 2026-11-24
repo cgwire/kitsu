@@ -18,7 +18,7 @@ describe('PanelLayout', () => {
   it('lays the filters and the list in two panels of the main column', () => {
     const wrapper = mountLayout()
 
-    const panels = wrapper.findAll('.main-column .panel')
+    const panels = wrapper.findAll('.main-column .page-panel')
     expect(panels).toHaveLength(2)
     expect(panels[0].classes()).toContain('filters-panel')
     expect(panels[0].find('.my-filters').exists()).toBe(true)

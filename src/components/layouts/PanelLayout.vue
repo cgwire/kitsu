@@ -8,10 +8,10 @@
         class="panels"
         :style="maxWidth ? { maxWidth: `${maxWidth}px` } : null"
       >
-        <div class="panel filters-panel" v-if="$slots.filters">
+        <div class="page-panel filters-panel" v-if="$slots.filters">
           <slot name="filters" />
         </div>
-        <div class="panel list-panel">
+        <div class="page-panel list-panel">
           <slot name="list" />
         </div>
       </div>
@@ -53,7 +53,8 @@ defineProps({
   margin: 0 auto;
 }
 
-.panel {
+// not .panel: Bulma gives that one a bottom margin and a font size
+.page-panel {
   background: var(--background-panel);
   border-radius: 12px;
   padding: 14px;
