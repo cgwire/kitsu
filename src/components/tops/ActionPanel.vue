@@ -998,7 +998,10 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
-import { useAtMentionsMembers } from '@/composables/atMentions'
+import {
+  useAtMentionsMembers,
+  useAtSuggestions
+} from '@/composables/atMentions'
 import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
 import { intersection } from '@/lib/array'
 import { logRequestFailure } from '@/lib/errors'
@@ -1113,10 +1116,6 @@ const errors = reactive({
 const currentHost = window.location.host
 
 let linkQueue = Promise.resolve()
-
-// vue-at reopens its list at each change of its members, even with the focus
-// elsewhere: it gets this one array, refreshed in place.
-const mentionMembers = []
 
 // Computed
 // --------------------------------------------------------------------------
@@ -1483,6 +1482,18 @@ const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => mentionTaskTypes.value,
   () => mentionDepartmentIds.value
 )
+// The frame points at the preview of one task. Zou copies an #All comment to
+// every other task of each selected entity: for several tasks, All is only
+// typed on purpose.
+const { members: mentionMembers, closeSuggestions: closeCommentSuggestions } =
+  useAtSuggestions(commentSuggestionsRef, () => [
+    ...membersForAts['@'].filter(
+      member => !member.isTime || nbSelectedTasks.value === 1
+    ),
+    ...membersForAts['#'].filter(
+      member => !member.isAll || nbSelectedTasks.value === 1
+    )
+  ])
 
 const isInDepartment = computed(() =>
   selectedTaskIds.value.every(taskId => {
@@ -1675,18 +1686,6 @@ const runTaskStatusChange = async () => {
     logRequestFailure(err)
   } finally {
     loading.changeStatus = false
-  }
-}
-
-// vue-at leaves its list open once the field loses the focus, over the button
-// and the confirmation it opens: a press or a focus anywhere else closes it.
-const closeCommentSuggestions = () => {
-  commentSuggestionsRef.value?.closePanel()
-}
-
-const onDocumentPressOrFocus = event => {
-  if (!commentSuggestionsRef.value?.$el.contains(event.target)) {
-    closeCommentSuggestions()
   }
 }
 
@@ -2066,24 +2065,6 @@ const confirmBuildFilter = query => {
 // Watchers
 // --------------------------------------------------------------------------
 
-// The frame points at the preview of one task. Zou copies an #All comment to
-// every other task of each selected entity: for several tasks, All is only
-// typed on purpose.
-watch(
-  () => [
-    ...membersForAts['@'].filter(
-      member => !member.isTime || nbSelectedTasks.value === 1
-    ),
-    ...membersForAts['#'].filter(
-      member => !member.isAll || nbSelectedTasks.value === 1
-    )
-  ],
-  members => {
-    mentionMembers.splice(0, mentionMembers.length, ...members)
-  },
-  { immediate: true }
-)
-
 const watchEntitySelection = (count, threshold = 0) => {
   watch(count, () => {
     autoChooseSelectBar()
@@ -2133,14 +2114,10 @@ onMounted(() => {
   // The task panel shows this one with its selection already made: the
   // watchers only see the changes that follow.
   autoChooseSelectBar()
-  document.addEventListener('pointerdown', onDocumentPressOrFocus, true)
-  document.addEventListener('focusin', onDocumentPressOrFocus, true)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
-  document.removeEventListener('pointerdown', onDocumentPressOrFocus, true)
-  document.removeEventListener('focusin', onDocumentPressOrFocus, true)
 })
 </script>
 

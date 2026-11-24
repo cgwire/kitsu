@@ -1,4 +1,4 @@
-import { computed, reactive, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
 import { useStore } from 'vuex'
 
 // The departments are the ones of the current production, unless a getter of
@@ -81,4 +81,70 @@ export const useAtMentionsMembers = (
   )
 
   return { membersForAts, atOptionsFilter }
+}
+
+// vue-at leaves its list open once the field loses the focus, and reopens it
+// at each new array of members, even with the focus elsewhere: the members
+// stay in one array, refreshed in place. A press or a focus outside the field
+// closes the list, but for the focus a press on the list gives to a container
+// of the field.
+export const useAtSuggestions = (atRef, membersGetter) => {
+  const members = []
+
+  const closeSuggestions = () => {
+    atRef.value?.closePanel()
+  }
+
+  const isInField = event => Boolean(atRef.value?.$el.contains(event.target))
+
+  // A press on the list moves the focus to the closest focusable container of
+  // the field, such as a player: that focus keeps the list, not one a key
+  // gives to the container. The window gets a key before the document, where
+  // the players listen.
+  let isPressOnList = false
+
+  const isAroundField = event =>
+    Boolean(atRef.value && event.target.contains(atRef.value.$el))
+
+  const onDocumentPress = event => {
+    isPressOnList =
+      isInField(event) && Boolean(event.target.closest('.atwho-panel'))
+    if (!isInField(event)) {
+      closeSuggestions()
+    }
+  }
+
+  const onDocumentFocus = event => {
+    const isKept = isInField(event) || (isPressOnList && isAroundField(event))
+    isPressOnList = false
+    if (!isKept) {
+      closeSuggestions()
+    }
+  }
+
+  const onWindowKeydown = () => {
+    isPressOnList = false
+  }
+
+  watch(
+    membersGetter,
+    values => {
+      members.splice(0, members.length, ...values)
+    },
+    { immediate: true }
+  )
+
+  onMounted(() => {
+    document.addEventListener('pointerdown', onDocumentPress, true)
+    document.addEventListener('focusin', onDocumentFocus, true)
+    window.addEventListener('keydown', onWindowKeydown, true)
+  })
+
+  onBeforeUnmount(() => {
+    document.removeEventListener('pointerdown', onDocumentPress, true)
+    document.removeEventListener('focusin', onDocumentFocus, true)
+    window.removeEventListener('keydown', onWindowKeydown, true)
+  })
+
+  return { members, closeSuggestions }
 }

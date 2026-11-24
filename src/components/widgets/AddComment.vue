@@ -41,8 +41,9 @@
       </div>
 
       <at-ta
+        ref="commentSuggestionsRef"
         :ats="['#', '@']"
-        :members="[...membersForAts['@'], ...membersForAts['#']]"
+        :members="mentionMembers"
         name-key="full_name"
         :limit="2"
         :filter-match="atOptionsFilter"
@@ -455,7 +456,10 @@ import preferences from '@/lib/preferences'
 import strings from '@/lib/string'
 import filesApi from '@/store/api/files'
 
-import { useAtMentionsMembers } from '@/composables/atMentions'
+import {
+  useAtMentionsMembers,
+  useAtSuggestions
+} from '@/composables/atMentions'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -549,10 +553,17 @@ const wrapperRef = ref(null)
 const commentTextareaRef = ref(null)
 const inputLinkRef = ref(null)
 const addAttachmentModalRef = ref(null)
+const commentSuggestionsRef = ref(null)
 
 const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.team,
   () => props.taskTypes
+)
+// vue-at gets one array of members: the form renders again at each frame
+// of the player.
+const { members: mentionMembers } = useAtSuggestions(
+  commentSuggestionsRef,
+  () => [...membersForAts['@'], ...membersForAts['#']]
 )
 
 const isFrameAddition = ref(false)
