@@ -3032,6 +3032,20 @@ th.validation-cell {
   }
 }
 
+// vue-at caps the suggestion list of the comment fields at 180 px and clips
+// the spans of its entries: a long name ends in an ellipsis, and the thin
+// chip of a task type gets a line height that fits its letters.
+.atwho-view {
+  .flexrow,
+  .tag {
+    min-width: 0;
+  }
+
+  .atwho-li .tag.thin {
+    line-height: 1.2em;
+  }
+}
+
 // vue-at styles the suggestion list of the comment fields for a light page
 // only, its scroll bar included.
 .dark .atwho-view {

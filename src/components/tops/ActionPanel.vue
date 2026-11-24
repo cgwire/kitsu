@@ -338,12 +338,13 @@
                         background: item.color,
                         width: '10px',
                         height: '10px',
-                        'border-radius': '50%'
+                        'border-radius': '50%',
+                        'flex-shrink': 0
                       }"
                     >
                       &nbsp;
                     </span>
-                    {{ item.full_name }}
+                    <span>{{ item.full_name }}</span>
                   </template>
                   <template v-else-if="item.isTaskType">
                     <task-type-name
@@ -2218,12 +2219,6 @@ onBeforeUnmount(() => {
   bottom: auto;
   left: 0;
   top: 4px;
-}
-
-// vue-at clips the spans of its list, and the thin task type chip has a line
-// height smaller than its letters.
-.atwho-li .tag.thin {
-  line-height: 1.2em;
 }
 
 .prefix-field,

@@ -59,12 +59,13 @@
                 background: item.color,
                 width: '10px',
                 height: '10px',
-                'border-radius': '50%'
+                'border-radius': '50%',
+                'flex-shrink': 0
               }"
             >
               &nbsp;
             </span>
-            {{ item.full_name }}
+            <span>{{ item.full_name }}</span>
           </template>
           <template v-else-if="item.isTaskType">
             <task-type-name
@@ -1256,11 +1257,6 @@ article.add-comment {
     font-weight: 600;
     // border-bottom: 1px solid $green;
   }
-}
-
-// tag for vue-at
-.tag.thin {
-  line-height: 1.2em;
 }
 
 .attachment-title {

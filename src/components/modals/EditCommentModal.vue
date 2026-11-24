@@ -43,12 +43,13 @@
                       background: item.color,
                       width: '10px',
                       height: '10px',
-                      'border-radius': '50%'
+                      'border-radius': '50%',
+                      'flex-shrink': 0
                     }"
                   >
                     &nbsp;
                   </span>
-                  {{ item.full_name }}
+                  <span>{{ item.full_name }}</span>
                 </template>
                 <template v-else-if="item.isTaskType">
                   <task-type-name
