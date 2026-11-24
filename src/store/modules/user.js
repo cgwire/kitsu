@@ -246,6 +246,10 @@ const PAGE_SEARCHES = [
   { type: 'newsFeed', listType: 'newsfeed' },
   { type: 'productionNewsFeed', listType: 'newsfeed', isInProduction: true },
   { type: 'timesheets', listType: 'timesheets' },
+  { type: 'bots', listType: 'bots' },
+  { type: 'myChecks', listType: 'mychecks' },
+  { type: 'eventLogs', listType: 'eventlogs' },
+  { type: 'loginLogs', listType: 'loginlogs' },
   { type: 'concepts', listType: 'concepts', isInProduction: true }
 ]
 
