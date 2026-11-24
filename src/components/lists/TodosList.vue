@@ -80,8 +80,8 @@
             }"
             role="button"
             tabindex="0"
-            @click="selectTask($event, i, entry)"
-            @keydown.enter.prevent="selectTask($event, i, entry)"
+            @click="selectTask($event, entry)"
+            @keydown.enter.prevent="selectTask($event, entry)"
             v-for="(entry, i) in tasks"
           >
             <td
@@ -631,7 +631,7 @@ const updateDueDate = date =>
     )
   })
 
-const selectTask = (event, index, task) => {
+const selectTask = (event, task) => {
   if (
     event &&
     event.target &&
@@ -649,7 +649,7 @@ const selectTask = (event, index, task) => {
       ['cell day selected'].includes(event.target.className))
   )
     return
-  applySelection(event, index, task)
+  applySelection(event, task)
 }
 
 // The parent pages restore the scroll position and trigger header

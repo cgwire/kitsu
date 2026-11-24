@@ -1041,9 +1041,8 @@ const initData = force => {
         const taskId = route.query.task_id
         const task = taskMap.value.get(taskId)
         if (task) {
-          const index = tasks.value.findIndex(t => t.id === taskId)
           nextTick(() => {
-            taskListRef.value?.selectTask({}, index, task)
+            taskListRef.value?.selectTask({}, task)
           })
         }
       })

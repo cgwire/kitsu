@@ -38,6 +38,7 @@ import ErrorText from '@/components/widgets/ErrorText.vue'
 import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
 import { buildRefusal } from '../fixtures/refusal'
 import { buildSearchQueryListStub } from '../fixtures/search-query-list'
+import { trackTaskSelection } from '../fixtures/task-selection'
 
 const SearchFieldStub = {
   props: { canSave: { type: Boolean, default: false } },
@@ -82,6 +83,7 @@ const mountPage = async ({
     }
   ],
   section = 'estimation',
+  state,
   mutations = {},
   socket = { on: vi.fn(), off: vi.fn() },
   stubs = {}
@@ -93,6 +95,7 @@ const mountPage = async ({
     ...actions
   }
   const store = createStore({
+    state,
     mutations,
     getters: {
       isInAssetTypeWorkflow: () => () => true,
@@ -499,7 +502,7 @@ describe('TaskType page', () => {
       methods: {
         resetSelection: () => {},
         // as the list does: the store first, then the event
-        selectTask(event, index, task) {
+        selectTask(event, task) {
           this.$store.dispatch('addSelectedTask', { task })
           this.$emit('task-selected', task)
         }
@@ -696,7 +699,7 @@ describe('TaskType page', () => {
       await mountSelectable('')
       const historyLength = window.history.length
 
-      wrapper.findComponent(TaskListStub).vm.selectTask({}, 0, statusTasks[0])
+      wrapper.findComponent(TaskListStub).vm.selectTask({}, statusTasks[0])
       await flushPromises()
 
       expect(wrapper.vm.$route.query.task_id).toBe('task-10')
@@ -1134,6 +1137,128 @@ describe('TaskType page', () => {
       expect(leftoverRows[0].children).toHaveLength(3)
       expect(rows).not.toBe(leftoverRows)
       expect(nbScrollsAfterDrop).toBe(0)
+    })
+  })
+
+  // A link to a task opens the page with that task selected, in the list
+  // that the filters of the link leave.
+  describe('selection from a link to a task', () => {
+    // Five props sorted by name: the first status keeps the 1st, 4th and 5th.
+    const linkTasks = [
+      'status-1',
+      'status-2',
+      'status-2',
+      'status-1',
+      'status-1'
+    ].map((statusId, index) => ({
+      id: `task-${index + 20}`,
+      assignees: [],
+      difficulty: 3,
+      entity: { id: `asset-${index + 20}` },
+      entity_id: `asset-${index + 20}`,
+      entity_name: `Prop ${index + 1}`,
+      retake_count: 0,
+      task_status_id: statusId,
+      task_type_id: 'task-type-1'
+    }))
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    })
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      linkTasks.forEach(({ entity_id }) =>
+        assetStore.cache.assetMap.delete(entity_id)
+      )
+    })
+
+    const openLink = async query => {
+      const selection = trackTaskSelection()
+      const page = await mountPage({
+        section: 'tasks',
+        query,
+        // the list links each row to its task
+        routes: [
+          {
+            path: '/productions/:production_id/assets/task-types/:task_type_id/:section',
+            component: Page
+          },
+          {
+            name: 'task',
+            path: '/productions/:production_id/:type/tasks/:task_id',
+            component: Page
+          }
+        ],
+        state: selection.state,
+        mutations: selection.mutations,
+        stubs: { TaskList: false },
+        actions: {
+          ...selection.actions,
+          initTaskType: vi.fn(() => {
+            linkTasks.forEach(linkTask => {
+              assetStore.cache.assetMap.set(linkTask.entity_id, {
+                id: linkTask.entity_id,
+                asset_type_id: 'props',
+                tasks: [linkTask.id]
+              })
+            })
+          }),
+          loadScheduleItems: vi.fn(() => [])
+        },
+        getters: {
+          ...selection.getters,
+          assetValidationColumns: () => [],
+          productionAssetTypes: () => [{ id: 'props', name: 'Props' }],
+          taskMap: () => new Map(linkTasks.map(t => [t.id, t])),
+          taskTypeMap: () => new Map(),
+          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' })
+        }
+      })
+      wrapper = page.wrapper
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+      return selection
+    }
+
+    // A Shift+click reached past the list and threw: the filter had dropped
+    // rows above the task.
+    it('extends a Shift+click from the task of a link with a filter', async () => {
+      const selection = await openLink('?task_status_id=status-1&task_id=task-24')
+      expect(selection.selectedIds()).toEqual(['task-24'])
+
+      await wrapper.findAll('tbody td.name')[0].trigger('click', {
+        shiftKey: true
+      })
+
+      expect(selection.selectedIds()).toEqual(['task-20', 'task-23', 'task-24'])
+    })
+
+    it('moves Alt+Up from the task of a link with a filter', async () => {
+      const selection = await openLink('?task_status_id=status-1&task_id=task-24')
+
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { altKey: true, keyCode: 38 })
+      )
+      await nextTick()
+
+      expect(selection.selectedIds()).toEqual(['task-23'])
+    })
+
+    // The panel shows the task, but no row: a Shift+click starts from the
+    // first row, as on a page just opened.
+    it('extends a Shift+click from the first row when the filter hides the task', async () => {
+      const selection = await openLink('?task_status_id=status-1&task_id=task-22')
+      expect(selection.selectedIds()).toEqual(['task-22'])
+
+      await wrapper.findAll('tbody td.name')[1].trigger('click', {
+        shiftKey: true
+      })
+
+      expect(selection.selectedIds()).toEqual(['task-20', 'task-23'])
     })
   })
 
