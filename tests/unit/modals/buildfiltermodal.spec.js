@@ -299,6 +299,29 @@ describe('BuildFilterModal', () => {
           expect(confirmedQuery(modal)).toBe(expected)
         }
       )
+
+      it('opens on Equal for an excluded asset type the search does not know', async () => {
+        const modal = await mountOnQuery('type=-Chars')
+        const row = modal.find('.asset-type-filter')
+        expect(operatorSelect(row).element.value).toBe('equal')
+        expect(row.find('.value-column select').element.value).toBe(
+          'entities.build_filter.all_types'
+        )
+        expect(confirmedQuery(modal)).toBe('')
+      })
+
+      it('shows all asset types for an asset type the search does not know', async () => {
+        const modal = await mountOnQuery('type=Chars')
+        const row = modal.find('.asset-type-filter')
+        expect(valueFields(row)).toHaveLength(1)
+        await operatorSelect(row).setValue('in')
+        const valueSelect = row.find('.value-column select')
+        expect(valueSelect.find('option[value=""]').exists()).toBe(false)
+        expect(valueSelect.element.value).toBe(
+          'entities.build_filter.all_types'
+        )
+        expect(confirmedQuery(modal)).toBe('')
+      })
     })
   })
 

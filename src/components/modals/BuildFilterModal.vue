@@ -860,11 +860,17 @@ const onOperatorChanged = (filter, operator) => {
 // Helpers to set filters from search query
 
 const setFiltersFromAssetTypeQuery = filter => {
-  assetTypeFilters.operator = getFilterOperator(
-    filter.excluding,
-    filter.assetTypes.length > 1
-  )
-  assetTypeFilters.values = filter.assetTypes.map(assetType => assetType.id)
+  // The search keeps a type name that matches no asset type, as after a rename.
+  if (filter.assetTypes.length === 0) {
+    assetTypeFilters.operator = '='
+    assetTypeFilters.values = ['-']
+  } else {
+    assetTypeFilters.operator = getFilterOperator(
+      filter.excluding,
+      filter.assetTypes.length > 1
+    )
+    assetTypeFilters.values = filter.assetTypes.map(assetType => assetType.id)
+  }
 }
 
 const getFilterOperator = (excluding, isMany) => {
