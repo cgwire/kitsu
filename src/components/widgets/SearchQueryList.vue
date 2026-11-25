@@ -13,6 +13,20 @@
       <folder-plus-icon :size="12" />
     </span>
     <span
+      class="tag folder add mr1"
+      :class="{ disabled: !pageQuery }"
+      role="button"
+      tabindex="0"
+      :aria-disabled="`${!pageQuery}`"
+      @click="addPageSearch()"
+      @keydown.enter.prevent="addPageSearch()"
+      @keydown.space.prevent="addPageSearch()"
+      :title="$t('main.search_query_add')"
+      v-if="withRouteQuery"
+    >
+      <funnel-plus-icon :size="12" />
+    </span>
+    <span
       class="tag folder mr1"
       :class="{
         active: isEditing
@@ -91,6 +105,7 @@
             <div
               class="tag"
               :class="{
+                active: isActiveSearch(searchQuery),
                 'is-shared': searchQuery.is_shared,
                 'is-editing': isEditing
               }"
@@ -132,6 +147,7 @@
     <span
       class="tag"
       :class="{
+        active: isActiveSearch(searchQuery),
         'is-shared': searchQuery.is_shared,
         'is-editing': isEditing
       }"
@@ -186,6 +202,7 @@
       :is-loading="loading.edit"
       :is-error="errors.edit"
       :is-group-enabled="isGroupEnabled"
+      :is-query-editable="!withRouteQuery"
       :production-id="productionId"
       :queries="sortedFilters"
       :search-query-to-edit="searchQueryToEdit"
@@ -217,6 +234,7 @@ import {
   ChevronUpIcon,
   Edit2Icon,
   FolderPlusIcon,
+  FunnelPlusIcon,
   PencilIcon,
   Trash2Icon
 } from 'lucide-vue-next'
@@ -275,6 +293,13 @@ const props = defineProps({
   productionId: {
     type: String,
     default: null
+  },
+  // A search holds the whole URL query of the page, its filters and view,
+  // rather than a search text: the list saves the current one and a search
+  // replaces it.
+  withRouteQuery: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -399,6 +424,22 @@ const removeErrorText = computed(() =>
     : t('main.remove_search_filter_group_error')
 )
 
+const pageQuery = computed(() =>
+  props.withRouteQuery ? new URLSearchParams(route.query).toString() : ''
+)
+
+const toSortedQueryString = query => {
+  const searchParams = new URLSearchParams(query)
+  searchParams.sort()
+  return searchParams.toString()
+}
+
+const sortedPageQuery = computed(() => toSortedQueryString(route.query))
+
+const isActiveSearch = searchQuery =>
+  props.withRouteQuery &&
+  toSortedQueryString(searchQuery.search_query) === sortedPageQuery.value
+
 const setQueryPaths = () => {
   props.queries.forEach(query => {
     queryPaths.value[query.id] = queryRoute(query)
@@ -408,10 +449,9 @@ const setQueryPaths = () => {
 const queryRoute = searchQuery => {
   return {
     ...route,
-    query: {
-      ...route.query,
-      search: searchQuery.search_query
-    }
+    query: props.withRouteQuery
+      ? Object.fromEntries(new URLSearchParams(searchQuery.search_query))
+      : { ...route.query, search: searchQuery.search_query }
   }
 }
 
@@ -454,6 +494,12 @@ const editSearch = searchQuery => {
 
 const addSearch = searchQuery => {
   editSearch({ name: searchQuery, search_query: searchQuery })
+}
+
+const addPageSearch = () => {
+  if (pageQuery.value) {
+    editSearch({ name: '', search_query: pageQuery.value })
+  }
 }
 
 const navigateToSearchQuery = searchQuery => {
@@ -623,9 +669,9 @@ defineExpose({ addSearch })
     border-bottom-right-radius: 1em;
     display: flex;
     flex-direction: column;
-    left: -1px;
+    left: 0;
     max-height: 200px;
-    min-width: calc(100% + 2px + 1em);
+    min-width: calc(100% + 1em);
     overflow-x: hidden;
     overflow-y: auto;
     padding: 0.5rem 0;
@@ -642,6 +688,12 @@ defineExpose({ addSearch })
   }
 }
 
+// the list of a shared group starts under its 1px border
+.search-queries .group.is-shared .group-list {
+  left: -1px;
+  min-width: calc(100% + 2px + 1em);
+}
+
 .search-queries .tag {
   margin: 0 1em 0.2em 0;
 
@@ -652,6 +704,15 @@ defineExpose({ addSearch })
 
 .search-queries .tag:hover {
   transform: scale(1.03);
+}
+
+.search-queries .tag.disabled {
+  cursor: default;
+  opacity: 0.5;
+
+  &:hover {
+    transform: none;
+  }
 }
 
 .search-queries .group.tag:hover, // avoid bug (overflow)
@@ -724,6 +785,28 @@ defineExpose({ addSearch })
 
   .dark & {
     box-shadow: inset 0 0 4px 2px #444;
+  }
+}
+
+// the search the page runs. The tags sit between two pixels (em sizes): a
+// box-shadow ring smears over two rows there, where a border keeps the same
+// width on every side.
+.search-queries .tag.active:not(.folder) {
+  border: 2px solid $purple-strong;
+  box-shadow: none;
+  // the padding gives up the width of the border, so that the tags after it
+  // stay in place
+  padding-left: calc(0.75em - 2px);
+  padding-right: calc(0.75em - 2px);
+
+  .dark & {
+    border-color: $blue;
+  }
+
+  // a shared tag already has a 1px border
+  &.is-shared {
+    padding-left: calc(0.75em - 1px);
+    padding-right: calc(0.75em - 1px);
   }
 }
 </style>

@@ -2,99 +2,121 @@
   <page-layout :class="{ 'with-info': hasSelection }">
     <template #main>
       <div class="all-tasks" :class="{ collapsed: !showFilters }">
-        <div class="filters flexrow">
-          <combobox-production
-            class="combobox-production flexrow-item mb0"
-            :label="$t('main.production')"
-            :production-list="productionList"
-            v-model="filters.productionId"
-          />
-          <combobox-status
-            class="flexrow-item mb0 collapsible"
-            :label="$t('news.task_status')"
-            :task-status-list="taskStatusList"
-            v-model="filters.taskStatusId"
-          />
-          <combobox-task-type
-            class="flexrow-item mb0 collapsible"
-            :label="$t('news.task_type')"
-            :task-type-list="taskTypeList"
-            v-model="filters.taskTypeId"
-          />
-          <div class="filler"></div>
-          <button-simple
-            class="flexrow-item burndown-button"
-            icon="chart"
-            :active="showBurndown"
-            :title="$t('burndown.title')"
-            @click="showBurndown = !showBurndown"
-          />
-          <button-simple
-            class="flexrow-item filters-toggle"
-            icon="funnel"
-            :aria-expanded="`${showFilters}`"
-            :is-on="showFilters"
-            :title="$t(showFilters ? 'main.less_filters' : 'main.more_filters')"
-            @click="showFilters = !showFilters"
-          />
+        <div class="filters-panel">
+          <div class="filters flexrow">
+            <combobox-production
+              class="combobox-production flexrow-item mb0"
+              :label="$t('main.production')"
+              :production-list="productionList"
+              v-model="filters.productionId"
+            />
+            <combobox-status
+              class="flexrow-item mb0 collapsible"
+              :label="$t('news.task_status')"
+              :task-status-list="taskStatusList"
+              v-model="filters.taskStatusId"
+            />
+            <combobox-task-type
+              class="flexrow-item mb0 collapsible"
+              :label="$t('news.task_type')"
+              :task-type-list="taskTypeList"
+              v-model="filters.taskTypeId"
+            />
+            <div class="filler"></div>
+            <button-simple
+              class="flexrow-item burndown-button"
+              icon="chart"
+              :active="showBurndown"
+              :title="$t('burndown.title')"
+              @click="showBurndown = !showBurndown"
+            />
+            <button-simple
+              class="flexrow-item reset-filters"
+              icon="remove"
+              :title="$t('main.clear_filters')"
+              @click="resetFilters"
+              v-if="hasFilters"
+            />
+            <button-simple
+              class="flexrow-item filters-toggle"
+              :icon="showFilters ? 'minus' : 'plus'"
+              :aria-expanded="`${showFilters}`"
+              :is-on="showFilters"
+              :text="secondRowFilterCount ? `${secondRowFilterCount}` : ''"
+              :title="
+                $t(showFilters ? 'main.less_filters' : 'main.more_filters')
+              "
+              @click="showFilters = !showFilters"
+            />
+          </div>
+          <div class="filters flexrow collapsible">
+            <combobox-studio
+              class="flexrow-item"
+              all-studios-label
+              :label="$t('people.fields.studio')"
+              v-model="filters.studioId"
+            />
+            <combobox-department
+              class="flexrow-item"
+              all-departments-label
+              :label="$t('main.department')"
+              v-model="filters.departmentId"
+            />
+            <people-field
+              class="flexrow-item"
+              :label="$t('main.person')"
+              multiple
+              :people="personList"
+              v-model="filters.person"
+            />
+            <date-field
+              class="flexrow-item"
+              :label="$t('tasks.fields.start_date')"
+              model-type="yyyy-MM-dd"
+              :with-margin="false"
+              v-model="filters.startDate"
+            />
+            <date-field
+              class="flexrow-item"
+              :label="$t('tasks.fields.due_date')"
+              model-type="yyyy-MM-dd"
+              :with-margin="false"
+              v-model="filters.dueDate"
+            />
+          </div>
         </div>
-        <div class="filters flexrow collapsible">
-          <combobox-studio
-            class="flexrow-item"
-            all-studios-label
-            :label="$t('people.fields.studio')"
-            v-model="filters.studioId"
+        <div class="list-panel">
+          <search-query-list
+            class="query-list"
+            :groups="allTasksSearchFilterGroups"
+            :is-group-enabled="true"
+            :queries="allTasksSearchQueries"
+            type="allTasks"
+            with-route-query
           />
-          <combobox-department
-            class="flexrow-item"
-            all-departments-label
-            :label="$t('main.department')"
-            v-model="filters.departmentId"
-          />
-          <people-field
-            class="flexrow-item"
-            :label="$t('main.person')"
-            multiple
-            :people="personList"
-            v-model="filters.person"
-          />
-          <date-field
-            class="flexrow-item"
-            :label="$t('tasks.fields.start_date')"
-            model-type="yyyy-MM-dd"
-            :with-margin="false"
-            v-model="filters.startDate"
-          />
-          <date-field
-            class="flexrow-item"
-            :label="$t('tasks.fields.due_date')"
-            model-type="yyyy-MM-dd"
-            :with-margin="false"
-            v-model="filters.dueDate"
-          />
-        </div>
-        <template v-if="showBurndown">
-          <burndown-chart
-            :burndown="burndown"
-            :is-loading="isBurndownLoading"
-            :is-error="isBurndownError"
-          />
-          <tasks-stats-line
-            class="burndown-stats"
+          <template v-if="showBurndown">
+            <burndown-chart
+              :burndown="burndown"
+              :is-loading="isBurndownLoading"
+              :is-error="isBurndownError"
+            />
+            <tasks-stats-line
+              class="burndown-stats"
+              :stats="stats"
+              v-if="!isLoading"
+            />
+          </template>
+          <all-task-list
+            :tasks="tasks"
             :stats="stats"
-            v-if="!isLoading"
+            :is-loading="isLoading"
+            :is-error="isLoadingError"
+            :is-more="isMore"
+            :is-more-loading="isMoreLoading"
+            @more-clicked="loadMore"
+            v-else
           />
-        </template>
-        <all-task-list
-          :tasks="tasks"
-          :stats="stats"
-          :is-loading="isLoading"
-          :is-error="isLoadingError"
-          :is-more="isMore"
-          :is-more-loading="isMoreLoading"
-          @more-clicked="loadMore"
-          v-else
-        />
+        </div>
       </div>
     </template>
     <template #side>
@@ -142,6 +164,7 @@ import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import StatusStats from '@/components/widgets/StatusStats.vue'
 import TasksStatsLine from '@/components/widgets/TasksStatsLine.vue'
 
@@ -166,29 +189,44 @@ const showFilters = ref(false)
 const stats = ref({ status: [] })
 const tasks = ref([])
 
-// reading the query here instead of in onMounted spares the double reload
-// the deep filters watcher used to trigger on pages opened with filters
-const filters = reactive({
-  departmentId: route.query.department_id || null,
-  dueDate: route.query.due_date || null,
-  person: route.query.person_id
-    ? store.getters.activePeopleWithoutBot.filter(person =>
-        route.query.person_id.split(',').includes(person.id)
-      )
+// A filter missing from the query is unset: a saved search replaces the
+// whole query. The person map holds the people gone inactive since the search
+// was saved, whom dropping would widen it to everybody.
+const filtersFromQuery = query => ({
+  departmentId: query.department_id || null,
+  dueDate: query.due_date || null,
+  person: query.person_id
+    ? query.person_id
+        .split(',')
+        .map(personId => store.getters.personMap.get(personId))
+        .filter(Boolean)
     : null,
-  productionId: route.query.project_id || null,
-  startDate: route.query.start_date || null,
-  studioId: route.query.studio_id || null,
-  taskStatusId: route.query.task_status_id || null,
-  taskTypeId: route.query.task_type_id || null
+  productionId: query.project_id || null,
+  startDate: query.start_date || null,
+  studioId: query.studio_id || null,
+  taskStatusId: query.task_status_id || null,
+  taskTypeId: query.task_type_id || null
 })
 
+// reading the query here instead of in onMounted spares the double reload
+// the deep filters watcher used to trigger on pages opened with filters
+const filters = reactive(filtersFromQuery(route.query))
+
 let page = 1
+// The route watcher sees the query of the next page too, before this one
+// unmounts.
+const pagePath = route.path
 
 // Computed
 // --------------------------------------------------------------------------
 const activePeopleWithoutBot = computed(
   () => store.getters.activePeopleWithoutBot
+)
+const allTasksSearchFilterGroups = computed(
+  () => store.getters.allTasksSearchFilterGroups
+)
+const allTasksSearchQueries = computed(
+  () => store.getters.allTasksSearchQueries
 )
 const getProductionTaskStatuses = computed(
   () => store.getters.getProductionTaskStatuses
@@ -226,7 +264,7 @@ const taskTypeList = computed(() =>
   )
 )
 
-const personList = computed(() => {
+const selectablePeople = computed(() => {
   const production = productionMap.value.get(filters.productionId)
   if (!production) return activePeopleWithoutBot.value
   return sortPeople(
@@ -234,6 +272,17 @@ const personList = computed(() => {
       .map(personId => personMap.value.get(personId))
       .filter(person => person && !person.is_bot)
   )
+})
+
+// The field drops a selected person it does not list: the people of the
+// filter stay listed, gone inactive or out of the team.
+const personList = computed(() => {
+  const missingPeople = (filters.person || []).filter(
+    person => !selectablePeople.value.some(({ id }) => id === person.id)
+  )
+  return missingPeople.length > 0
+    ? sortPeople([...selectablePeople.value, ...missingPeople])
+    : selectablePeople.value
 })
 
 const params = computed(() => ({
@@ -247,6 +296,28 @@ const params = computed(() => ({
   due_date: filters.dueDate
 }))
 
+// The toggle shows how many filters its folded row holds.
+const secondRowFilterCount = computed(
+  () =>
+    [
+      filters.studioId,
+      filters.departmentId,
+      filters.person?.length,
+      filters.startDate,
+      filters.dueDate
+    ].filter(Boolean).length
+)
+
+const hasFilters = computed(() => Object.values(params.value).some(Boolean))
+
+const pageQuery = computed(() => {
+  const query = Object.fromEntries(
+    Object.entries(params.value).filter(([, value]) => value)
+  )
+  if (showBurndown.value) query.view = 'burndown'
+  return query
+})
+
 // statusStats would shadow the StatusStats component tag in the template
 const statusStatsList = computed(() =>
   [...stats.value.status]
@@ -257,6 +328,7 @@ const statusStatsList = computed(() =>
       return {
         name: taskStatus.short_name.toUpperCase(),
         color: getStatusColor(taskStatus),
+        status: taskStatus,
         value: stat.amount
       }
     })
@@ -265,13 +337,23 @@ const statusStatsList = computed(() =>
 
 // Functions
 // --------------------------------------------------------------------------
-const syncRouteQuery = () => {
-  const query = Object.fromEntries(
-    Object.entries(params.value).filter(([, value]) => value)
-  )
-  if (showBurndown.value) query.view = 'burndown'
-  router.push({ query })
+// The route watcher clears the filters the query no longer holds.
+const resetFilters = () => {
+  router.push({ query: showBurndown.value ? { view: 'burndown' } : {} })
 }
+
+const syncRouteQuery = () => {
+  router.push({ query: pageQuery.value })
+}
+
+const toSortedQueryString = query => {
+  const searchParams = new URLSearchParams(query)
+  searchParams.sort()
+  return searchParams.toString()
+}
+
+const isPageQuery = query =>
+  toSortedQueryString(query) === toSortedQueryString(pageQuery.value)
 
 const loadBurndown = async () => {
   isBurndownLoading.value = true
@@ -292,7 +374,6 @@ const reload = async () => {
   store.dispatch('clearSelectedTasks')
   tasks.value = []
   syncRouteQuery()
-  if (showBurndown.value) loadBurndown()
   try {
     const taskInfos = await store.dispatch('loadOpenTasks', params.value)
     tasks.value = taskInfos.data
@@ -337,14 +418,30 @@ watch(filters, () => {
 
 watch(showBurndown, () => {
   syncRouteQuery()
-  if (showBurndown.value) loadBurndown()
 })
+
+// A query setting the filters and the view at once loads the burndown once.
+watch([params, showBurndown], ([, isShown]) => {
+  if (isShown) loadBurndown()
+})
+
+// A saved search, or the back button, sets a query the page did not write.
+watch(
+  () => route.query,
+  query => {
+    if (route.path === pagePath && !isPageQuery(query)) {
+      Object.assign(filters, filtersFromQuery(query))
+      showBurndown.value = query.view === 'burndown'
+    }
+  }
+)
 
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
   socket.on('task:update', onTaskUpdate)
   reload()
+  if (showBurndown.value) loadBurndown()
 })
 
 onBeforeUnmount(() => {
@@ -360,12 +457,24 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
 .all-tasks {
   display: flex;
   flex-direction: column;
-  gap: 1em;
+  gap: 14px;
   // a definite height (not only a max) so the burndown chart can flex to
   // fill the page; the task list scrolls inside either way
   height: 100%;
-  padding: 5em 1em 1em 1em;
+  // 1em all around on phones, under the 60px topbar
+  padding: calc(60px + 1em) 1em 1em;
   color: var(--text);
+}
+
+// the panel of the Concepts filters
+.filters-panel {
+  background: var(--background-panel);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  // the labels of this page lose the 5px padding-top Concepts keeps
+  padding: 14px;
 }
 
 .filters {
@@ -374,15 +483,122 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
   row-gap: 1em;
 }
 
+.reset-filters,
 .burndown-button,
 .filters-toggle {
   align-self: flex-end;
   height: 42px;
+  padding: 0 14px;
+  // Bulma's near-black button text outweighs the grey of the filter labels
+  color: var(--text);
 }
 
-// small screens only: the second filter row folds behind the toggle and
-// the back button brings the list back in place of the task panel
-.filters-toggle,
+.filters-toggle {
+  flex: none;
+}
+
+.collapsed .filters.collapsible {
+  display: none;
+}
+
+// the saved searches and the list or the burndown, as the Concepts list
+.list-panel {
+  background: var(--background-panel);
+  border-radius: 12px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75em;
+  min-height: 0;
+  padding: 14px;
+}
+
+// the table frame takes the panel corners, and sits right under the saved
+// searches
+.list-panel :deep(.data-list) {
+  margin-top: 0;
+}
+
+// the frame runs down to the task count, which closes the panel without
+// the padding it adds under itself
+.list-panel :deep(.datatable-wrapper) {
+  border-radius: 10px;
+  flex: 1;
+  margin-bottom: 4px;
+}
+
+.list-panel :deep(.nb-tasks) {
+  padding-bottom: 0;
+}
+
+// phones get borderless cards instead
+@media screen and (min-width: 769px) {
+  .list-panel :deep(.datatable-wrapper) {
+    border: 1px solid var(--border);
+  }
+}
+
+// the tags take the panel tag color: the page one is the panel gray in light
+// theme (groups keep their inline tint)
+.list-panel :deep(.search-queries .tag:not(.empty)) {
+  background-color: var(--background-panel-tag);
+}
+
+// the dropdown of a group takes the same color, lifted off the panel
+.list-panel :deep(.search-queries .group-list) {
+  background-color: var(--background-panel-tag);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+// the global .query-list margins indent it from the filters, and the page
+// already spaces its blocks with a gap
+.query-list {
+  margin: 0;
+}
+
+// as on the Timesheets page, the task panel is its own surface: the column
+// only frames it
+// 20px under the 60px margin of the column puts the panel top level with
+// the filters panel, at the 80px padding of the main column; the right and
+// the bottom take the same 20px as the page
+:deep(.column.side-column) {
+  background: transparent;
+  padding: 20px 20px 20px 0;
+}
+
+:deep(.side.task-info) {
+  background: var(--background-panel);
+  border-radius: 12px;
+}
+
+// its first line sits as high as the first filter label
+:deep(.side.task-info.empty) {
+  padding-top: 6px;
+}
+
+// 20px all around the page; on the right the resize gutter already
+// separates the list from the panel
+@media screen and (min-width: 769px) {
+  .all-tasks {
+    padding: 80px 0 20px 20px;
+  }
+}
+
+// the resize handle becomes the gutter before the panel, its line showing
+// only on hover (the column selector outweighs the dark theme color)
+:deep(.column.side-column .extend-bar) {
+  background: transparent;
+  margin-left: 0;
+  width: 1em;
+
+  &:hover {
+    background: linear-gradient(var(--border), var(--border)) center / 3px 100%
+      no-repeat;
+  }
+}
+
+// small screens only: the back button brings the list back in place of the
+// task panel
 .back-to-list {
   display: none;
 }
@@ -416,11 +632,6 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
 }
 
 @media screen and (max-width: 768px) {
-  .filters-toggle {
-    display: flex;
-    flex: none;
-  }
-
   // the production combobox is 300px wide by default, which pushed the
   // toggle to a second line on phones
   .combobox-production {
@@ -456,15 +667,27 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
     display: none;
   }
 
+  // read-only: the saved searches stay, without their editing
+  .query-list :deep(.tag.folder) {
+    display: none;
+  }
+
   // the panel takes the whole width in place of the list
   .with-info :deep(.main-column) {
     display: none;
   }
 
+  // the cards carry their own padding
+  .list-panel {
+    padding: 0.5em;
+  }
+
+  // TaskInfo writes the width of its resizable panel inline on the column
   :deep(.column.side-column) {
     display: none;
     max-width: none;
-    padding: 0.5em;
+    min-width: 0 !important;
+    padding: 1em;
     width: 100%;
   }
 

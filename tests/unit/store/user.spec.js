@@ -8,12 +8,16 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@/lib/auth', () => ({ default: { logIn: vi.fn(), logOut: vi.fn() } }))
 vi.mock('@/store/api/people', () => ({
   default: {
+    createFilter: vi.fn(),
+    createFilterGroup: vi.fn(),
     enableEmailOTP: vi.fn(),
     enableTOTP: vi.fn(),
     loadDone: vi.fn(),
     loadTasksToCheck: vi.fn(),
     loadTimeSpents: vi.fn(),
     registerFIDO: vi.fn(),
+    removeFilter: vi.fn(),
+    removeFilterGroup: vi.fn(),
     unregisterFIDO: vi.fn(),
     updatePerson: vi.fn(),
     updatePersonLocale: vi.fn()
@@ -694,6 +698,131 @@ describe('User store', () => {
       expect(doneTask.task_status_short_name).toEqual('done')
       store.mutations.SET_TODOS_SEARCH(state, 'done')
       expect(state.displayedDoneTasks).toEqual([doneTask])
+    })
+  })
+
+  // The All Tasks page lists its searches straight from the user filters,
+  // through the getter.
+  describe('All Tasks searches', () => {
+    const late = {
+      id: 'filter-1',
+      name: 'Late',
+      search_query: 'due_date=2026-11-30'
+    }
+    const mountStore = (userFilters = {}) =>
+      createStore({
+        modules: {
+          user: {
+            state: { userFilters },
+            getters: store.getters,
+            mutations: store.mutations,
+            actions: store.actions
+          }
+        }
+      })
+
+    afterEach(() => {
+      vi.clearAllMocks()
+    })
+
+    test('lists the searches loaded with the context', () => {
+      const realStore = mountStore()
+      const queries = computed(() => realStore.getters.allTasksSearchQueries)
+      expect(queries.value).toEqual([])
+
+      realStore.commit('LOAD_USER_FILTERS_END', { alltasks: { all: [late] } })
+
+      expect(queries.value).toEqual([late])
+    })
+
+    test('saves a search out of any production', async () => {
+      peopleApi.createFilter.mockResolvedValue(late)
+      const realStore = mountStore()
+      const queries = computed(() => realStore.getters.allTasksSearchQueries)
+      const searchFilter = { name: 'Late', search_query: late.search_query }
+
+      await realStore.dispatch('saveAllTasksSearch', searchFilter)
+
+      expect(peopleApi.createFilter).toHaveBeenCalledWith(
+        'alltasks',
+        searchFilter,
+        null,
+        null
+      )
+      expect(queries.value).toEqual([late])
+    })
+
+    test('drops a removed search', async () => {
+      peopleApi.removeFilter.mockResolvedValue()
+      const kept = { ...late, id: 'filter-2', name: 'Mine' }
+      const realStore = mountStore({ alltasks: { all: [late, kept] } })
+      const queries = computed(() => realStore.getters.allTasksSearchQueries)
+
+      await realStore.dispatch('removeAllTasksSearch', late)
+
+      expect(peopleApi.removeFilter).toHaveBeenCalledWith(late)
+      expect(queries.value).toEqual([kept])
+    })
+
+    test('saves a group out of any production', async () => {
+      const group = { id: 'group-1', name: 'Mine', color: '#000' }
+      peopleApi.createFilterGroup.mockResolvedValue(group)
+      const realStore = createStore({
+        modules: {
+          user: {
+            state: { userFilters: {}, userFilterGroups: {} },
+            getters: store.getters,
+            mutations: store.mutations,
+            actions: store.actions
+          }
+        }
+      })
+      const groups = computed(
+        () => realStore.getters.allTasksSearchFilterGroups
+      )
+      expect(groups.value).toEqual([])
+
+      await realStore.dispatch('saveAllTasksSearchFilterGroup', {
+        name: 'Mine',
+        color: '#000',
+        is_shared: false
+      })
+
+      expect(peopleApi.createFilterGroup).toHaveBeenCalledWith(
+        'alltasks',
+        'Mine',
+        '#000',
+        null,
+        false,
+        undefined
+      )
+      expect(groups.value).toEqual([group])
+    })
+
+    test('drops a removed group', async () => {
+      const group = { id: 'group-1', name: 'Mine' }
+      peopleApi.removeFilterGroup.mockResolvedValue()
+      const realStore = createStore({
+        modules: {
+          user: {
+            state: {
+              userFilters: {},
+              userFilterGroups: { alltasks: { all: [group] } }
+            },
+            getters: store.getters,
+            mutations: store.mutations,
+            actions: store.actions
+          }
+        }
+      })
+      const groups = computed(
+        () => realStore.getters.allTasksSearchFilterGroups
+      )
+
+      await realStore.dispatch('removeAllTasksSearchFilterGroup', group)
+
+      expect(peopleApi.removeFilterGroup).toHaveBeenCalledWith(group)
+      expect(groups.value).toEqual([])
     })
   })
 

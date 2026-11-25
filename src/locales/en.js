@@ -889,6 +889,7 @@ export default {
       '"{name}" could not be saved: the previous value is back. Please reload the page and try again.',
     cells_save_error:
       'Some changes could not be saved: the previous values are back. Please reload the page and try again.',
+    clear_filters: 'Clear current filters',
     clear_selection: 'Clear current selection',
     clear_sorting: 'Clear current sorting',
     click_to_add: 'Click to add',

@@ -440,6 +440,7 @@
       "cancel": "取消",
       "cell_save_error": "無法儲存「{name}」：已還原為先前的值。請重新載入頁面並再試一次。",
       "cells_save_error": "部分變更無法儲存：已還原為先前的值。請重新載入頁面並再試一次。",
+      "clear_filters": "清除目前的篩選",
       "clear_selection": "清除目前所選",
       "click_to_add": "按一下以新增",
       "click_to_remove": "按一下以移除",

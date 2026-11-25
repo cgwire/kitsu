@@ -22,7 +22,11 @@
         :maxlength="QUERY_MAX_LENGTH"
         v-model.trim="form.search_query"
         @enter="runConfirmation"
+        v-if="isQueryEditable"
       />
+      <p class="error query-error" v-else-if="isQueryTooLong">
+        {{ $t('main.search_query_too_long', { count: QUERY_MAX_LENGTH }) }}
+      </p>
 
       <boolean-field
         :label="$t('main.is_shared')"
@@ -89,7 +93,7 @@ import TextField from '@/components/widgets/TextField.vue'
 
 // The lengths of the Zou columns.
 const NAME_MAX_LENGTH = 200
-const QUERY_MAX_LENGTH = 500
+const QUERY_MAX_LENGTH = 5000
 
 const { t } = useI18n()
 const store = useStore()
@@ -102,6 +106,8 @@ const props = defineProps({
   isError: { type: Boolean, default: false },
   isGroupEnabled: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  // Off for a query the page builds, such as its whole URL query.
+  isQueryEditable: { type: Boolean, default: true },
   productionId: { type: String, default: null },
   queries: { type: Array, default: () => [] },
   searchQueryToEdit: { type: Object, default: () => ({}) }
