@@ -1,5 +1,10 @@
 <template>
   <div class="data-list">
+    <error-text
+      class="save-error"
+      :text="cellSaveErrorText"
+      v-if="cellSaveErrorText"
+    />
     <div>
       <table class="datatable datatable--cards" ref="headerWrapper">
         <thead class="datatable-head">
@@ -71,11 +76,23 @@
             </td>
             <td
               class="estimation"
+              :class="{ editing: isEditing(task) }"
               :data-label="
                 getTaskEstimation(task) ? $t('tasks.fields.estimation') : null
               "
             >
-              {{ getTaskEstimation(task) }}
+              <input
+                class="input editor"
+                min="0"
+                step="any"
+                type="number"
+                :value="formatDuration(task.estimation, false)"
+                @change="updateEstimation($event.target, task)"
+                @click.stop
+                @keydown.enter.stop
+                v-if="isEditing(task)"
+              />
+              <span class="value">{{ getTaskEstimation(task) }}</span>
             </td>
             <td
               class="duration"
@@ -87,21 +104,50 @@
             </td>
             <td
               class="startdate"
+              :class="{ editing: isEditing(task) }"
               :data-label="
                 getTaskStartDate(task)
                   ? $t('tasks.fields.start_date_short')
                   : null
               "
             >
-              {{ getTaskStartDate(task) }}
+              <date-field
+                class="editor"
+                :with-margin="false"
+                :model-value="getDate(task.start_date)"
+                @click.stop
+                @keydown.enter.stop
+                @update:model-value="
+                  date =>
+                    saveEdit(
+                      task,
+                      getTaskStartDateEdit(organisation, task, date)
+                    )
+                "
+                v-if="isEditing(task)"
+              />
+              <span class="value">{{ getTaskStartDate(task) }}</span>
             </td>
             <td
               class="duedate"
+              :class="{ editing: isEditing(task) }"
               :data-label="
                 getTaskDueDate(task) ? $t('tasks.fields.due_date') : null
               "
             >
-              {{ getTaskDueDate(task) }}
+              <date-field
+                class="editor"
+                :with-margin="false"
+                :model-value="getDate(task.due_date)"
+                @click.stop
+                @keydown.enter.stop
+                @update:model-value="
+                  date =>
+                    saveEdit(task, getTaskDueDateEdit(organisation, task, date))
+                "
+                v-if="isEditing(task)"
+              />
+              <span class="value">{{ getTaskDueDate(task) }}</span>
             </td>
             <td
               class="assignees"
@@ -168,20 +214,35 @@
 </template>
 
 <script setup>
+import moment from 'moment-timezone'
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
+import { useCellSave } from '@/composables/cellSave'
 import { useFormat } from '@/composables/format'
+import { isSupervisorInDepartments } from '@/lib/descriptors'
+import {
+  durationToMinutes,
+  getTaskDueDateEdit,
+  getTaskEstimationEdit,
+  getTaskStartDateEdit
+} from '@/lib/time'
 
 /* eslint-disable no-unused-vars */
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
+import DateField from '@/components/widgets/DateField.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 /* eslint-enable no-unused-vars */
 
 const store = useStore()
-const { formatDuration } = useFormat()
+const { formatDuration, organisation } = useFormat()
+const { cellSaveErrorText, saveCell } = useCellSave(
+  task => store.getters.taskTypeMap.get(task.task_type_id)?.name,
+  { rowsAreTasks: true }
+)
 
 // Props / Emits
 // --------------------------------------------------------------------------
@@ -202,6 +263,12 @@ const headerWrapper = ref(null)
 const currentProduction = computed(() => store.getters.currentProduction)
 const getTaskTypePriority = computed(() => store.getters.getTaskTypePriority)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
+)
 const isCurrentUserVendor = computed(() => store.getters.isCurrentUserVendor)
 const personMap = computed(() => store.getters.personMap)
 const taskMap = computed(() => store.getters.taskMap)
@@ -295,6 +362,37 @@ const getTaskType = entry => {
 const getAssignees = entry => getTask(entry)?.assignees || []
 
 const selectTask = task => emit('task-selected', task)
+
+// The planning of the selected task takes fields, for who plans it: a
+// manager, or a supervisor of its department.
+const isEditing = task =>
+  props.selectedTaskId === task.id &&
+  (isCurrentUserManager.value ||
+    isSupervisorInDepartments(
+      store.getters.user,
+      isCurrentUserSupervisor.value,
+      taskTypeMap.value.get(task.task_type_id)?.department_id
+    ))
+
+const getDate = date => (date ? moment(date, 'YYYY-MM-DD').toDate() : null)
+
+const saveEdit = (task, data) => {
+  if (!data) return
+  saveCell(task, () => store.dispatch('updateTask', { taskId: task.id, data }))
+}
+
+// A field left on something that is no number, or on a negative one, takes
+// the stored estimation back. An emptied field saves 0.
+const updateEstimation = (input, task) => {
+  if (input.validity.badInput || input.valueAsNumber < 0) {
+    input.value = formatDuration(task.estimation, false)
+    return
+  }
+  const estimation = durationToMinutes(organisation.value, input.value)
+  if (estimation !== task.estimation) {
+    saveEdit(task, getTaskEstimationEdit(organisation.value, task, estimation))
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -312,17 +410,18 @@ const selectTask = task => emit('task-selected', task)
   min-width: 250px;
 }
 
+// room for the fields the selected task shows
 .estimation,
 .duration {
-  max-width: 50px;
-  min-width: 50px;
+  max-width: 80px;
+  min-width: 80px;
   text-align: right;
 }
 
 .startdate,
 .duedate {
-  max-width: 100px;
-  min-width: 100px;
+  max-width: 140px;
+  min-width: 140px;
   white-space: nowrap;
 }
 
@@ -348,6 +447,25 @@ const selectTask = task => emit('task-selected', task)
   margin-right: 0.5em;
 }
 
+// the fields of the selected task stand in for its values
+.editing .value {
+  display: none;
+}
+
+.estimation .editor {
+  // no arrows: Firefox draws them by this property, the others by the
+  // pseudo-elements below
+  -moz-appearance: textfield;
+  padding: 0 0.3em;
+  text-align: right;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
 .task-list-body {
   overflow-y: auto;
 }
@@ -368,6 +486,15 @@ const selectTask = task => emit('task-selected', task)
 
   .task-list-body {
     overflow: visible;
+  }
+
+  // read-only: the cards keep the values
+  .editor {
+    display: none;
+  }
+
+  .editing .value {
+    display: inline;
   }
 
   .avatar-wrapper:last-child,

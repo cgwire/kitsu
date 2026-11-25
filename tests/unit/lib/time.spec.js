@@ -30,6 +30,9 @@ import {
   getMonthRange,
   getMonthsBetween,
   getStartDateFromString,
+  getTaskDueDateEdit,
+  getTaskEstimationEdit,
+  getTaskStartDateEdit,
   getWeekRange,
   hoursToDays,
   hoursToMinutes,
@@ -643,5 +646,71 @@ describe('formatDayOffLabel', () => {
     expect(formatDayOffLabel({ date: '2026-10-09' }, 'Day off')).toBe(
       'Day off (2026-10-09)'
     )
+  })
+})
+
+describe('edits of the planning of a task', () => {
+  const organisation = { hours_by_day: 8 }
+  // three days of work, from a Monday to the Wednesday
+  const task = {
+    estimation: 3 * 8 * 60,
+    start_date: '2026-01-12T00:00:00',
+    due_date: '2026-01-14T00:00:00'
+  }
+
+  test('a new start date moves the due date after the estimation', () => {
+    expect(
+      getTaskStartDateEdit(organisation, task, new Date(2026, 0, 15))
+    ).toEqual({ start_date: '2026-01-15', due_date: '2026-01-19' })
+  })
+
+  test('a new due date moves the start date before the estimation', () => {
+    expect(
+      getTaskDueDateEdit(organisation, task, new Date(2026, 0, 16))
+    ).toEqual({ start_date: '2026-01-14', due_date: '2026-01-16' })
+  })
+
+  test('a task without estimation keeps its other date', () => {
+    const open = { ...task, estimation: 0 }
+    expect(
+      getTaskStartDateEdit(organisation, open, new Date(2026, 0, 13))
+    ).toEqual({ start_date: '2026-01-13', due_date: '2026-01-14' })
+    expect(
+      getTaskDueDateEdit(organisation, open, new Date(2026, 0, 20))
+    ).toEqual({ start_date: '2026-01-12', due_date: '2026-01-20' })
+  })
+
+  test('a date the task already has changes nothing', () => {
+    expect(
+      getTaskStartDateEdit(organisation, task, new Date(2026, 0, 12))
+    ).toBeNull()
+    expect(
+      getTaskDueDateEdit(organisation, task, new Date(2026, 0, 14))
+    ).toBeNull()
+  })
+
+  test('a date emptied leaves the other one', () => {
+    expect(getTaskStartDateEdit(organisation, task, null)).toEqual({
+      start_date: null,
+      due_date: task.due_date
+    })
+    expect(getTaskDueDateEdit(organisation, task, null)).toEqual({
+      start_date: task.start_date,
+      due_date: null
+    })
+  })
+
+  test('a new estimation moves the due date of a started task', () => {
+    expect(getTaskEstimationEdit(organisation, task, 5 * 8 * 60)).toEqual({
+      estimation: 5 * 8 * 60,
+      start_date: '2026-01-12',
+      due_date: '2026-01-16'
+    })
+  })
+
+  test('a new estimation alone on a task without start date', () => {
+    expect(
+      getTaskEstimationEdit(organisation, { ...task, start_date: null }, 480)
+    ).toEqual({ estimation: 480 })
   })
 })
