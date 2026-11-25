@@ -57,9 +57,9 @@
         tabindex="0"
         :aria-label="group.name"
         :aria-expanded="`${toggleGroupId === group.id}`"
-        @click="toggleFilterGroup(group)"
-        @keydown.enter.prevent="toggleFilterGroup(group)"
-        @keydown.space.prevent="toggleFilterGroup(group)"
+        @click="onGroupClick(group, $event)"
+        @keydown.enter.self.prevent="onGroupKey(group, $event)"
+        @keydown.space.self.prevent="onGroupKey(group, $event)"
         v-for="group in userFilterGroups"
       >
         <div class="group-header">
@@ -597,6 +597,25 @@ const removeSearch = () => {
 
 const toggleFilterGroup = group => {
   toggleGroupId.value = toggleGroupId.value !== group.id ? group.id : null
+}
+
+// A click on a filter of an open group also closes the group, under the
+// filter that held the focus: the focus goes back to the group, or it would
+// fall to the page.
+const onGroupClick = (group, event) => {
+  const groupElement = event.currentTarget
+  const isFocusInList = Boolean(
+    groupElement.querySelector('.group-list')?.contains(document.activeElement)
+  )
+  toggleFilterGroup(group)
+  if (isFocusInList && toggleGroupId.value !== group.id) {
+    nextTick(() => groupElement.focus())
+  }
+}
+
+// A held key repeats its keydown: only the first one toggles the group.
+const onGroupKey = (group, event) => {
+  if (!event.repeat) toggleFilterGroup(group)
 }
 
 const getSearchQueryTitle = searchQuery => {
