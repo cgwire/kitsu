@@ -20,9 +20,69 @@
       :range="range ? { partialRange: false } : false"
       :teleport="!fullScreenContainer"
       :time-config="{ enableTimePicker: false }"
+      ref="pickerRef"
       v-model="localValue"
+      v-if="isPickerLoaded"
     >
     </vue-date-picker>
+    <!-- The markup of the picker input, which the app styles address -->
+    <div
+      :class="[
+        'dp--main',
+        isDark || isDarkTheme ? 'dp--theme-dark' : 'dp--theme-light',
+        'datepicker',
+        { range }
+      ]"
+      v-else
+    >
+      <div @click="loadPicker">
+        <div class="dp--input-wrap">
+          <input
+            aria-expanded="false"
+            aria-haspopup="dialog"
+            :aria-disabled="disabled || undefined"
+            :aria-label="PICKER_INPUT_LABEL"
+            autocomplete="off"
+            :class="inputClasses"
+            :disabled="disabled"
+            inputmode="none"
+            :placeholder="placeholder"
+            role="combobox"
+            :value="inputText"
+            @blur="isInputFocused = false"
+            @focus="isInputFocused = true"
+            @input="onInput"
+            @keydown="onInputKeydown"
+          />
+          <div></div>
+          <button
+            :aria-label="PICKER_CLEAR_LABEL"
+            class="dp--clear-btn"
+            type="button"
+            @click.prevent.stop="clear"
+            @keydown.enter.prevent.stop="clear"
+            @keydown.space.prevent.stop="clear"
+            v-if="canDelete && inputText && !disabled"
+          >
+            <svg
+              aria-hidden="true"
+              class="dp--icon dp--input-icons"
+              fill="currentColor"
+              role="img"
+              viewBox="0 0 32 32"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M23.057 7.057l-16 16c-0.52 0.52-0.52 1.365 0 1.885s1.365 0.52 1.885 0l16-16c0.52-0.52 0.52-1.365 0-1.885s-1.365-0.52-1.885 0z"
+              ></path>
+              <path
+                d="M7.057 8.943l16 16c0.52 0.52 1.365 0.52 1.885 0s0.52-1.365 0-1.885l-16-16c-0.52-0.52-1.365-0.52-1.885 0s-0.52 1.365 0 1.885z"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -32,7 +92,7 @@ import { VueDatePicker } from '@vuepic/vue-datepicker'
 /* eslint-enable no-unused-vars */
 import '@vuepic/vue-datepicker/dist/main.css'
 
-import { format as formatDate } from 'date-fns'
+import { format as formatDate, isValid, parse as parseDate } from 'date-fns'
 import {
   da,
   de,
@@ -51,7 +111,7 @@ import {
   zhCN,
   zhTW
 } from 'date-fns/locale'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import { useFullScreenContainer } from '@/composables/fullScreen'
@@ -75,6 +135,10 @@ const DATE_FNS_LOCALES = {
   ru,
   zh: zhCN
 }
+
+// The default labels of the picker
+const PICKER_INPUT_LABEL = 'Datepicker input'
+const PICKER_CLEAR_LABEL = 'Clear value'
 
 const store = useStore()
 
@@ -113,6 +177,12 @@ const props = defineProps({
   label: {
     default: '',
     type: String
+  },
+  // Shows the input alone and loads the picker when the field is used: a
+  // list can hold a field per row.
+  lazy: {
+    default: false,
+    type: Boolean
   },
   minDate: {
     default: null,
@@ -206,6 +276,80 @@ const localValue = computed({
     emit('change', date)
   }
 })
+
+// Until the picker loads, the field shows the input of the picker as the
+// picker would render it, and behaves as it does.
+const isPickerLoaded = ref(!props.lazy)
+const isInputFocused = ref(false)
+const pickerRef = ref(null)
+
+const inputClasses = computed(() => ({
+  'dp--pointer': !props.disabled,
+  'dp--disabled': props.disabled,
+  'dp--input-readonly': true,
+  'dp--input': true,
+  'dp--input-not-clearable': !props.canDelete,
+  'dp--input-focus': isInputFocused.value,
+  'dp--input-reg': true
+}))
+
+// A model of a model type is a string in that format.
+const toShownDate = value => {
+  if (typeof value !== 'string') return value
+  return props.modelType
+    ? parseDate(value, props.modelType, new Date())
+    : new Date(value)
+}
+
+// The picker shows no text for a value it cannot read.
+const inputText = computed(() => {
+  const value = localValue.value
+  if (!value) return ''
+  const dates = (props.range ? value : [value]).map(toShownDate)
+  if (dates.length !== (props.range ? 2 : 1) || !dates.every(isValid)) {
+    return ''
+  }
+  if (props.range) return inputFormat.value(dates)
+  return formatDate(dates[0], props.format, { locale: dateFnsLocale.value })
+})
+
+// The picker input keeps its clicks and Enter away from the page, a list row
+// included.
+const loadPicker = event => {
+  event.stopPropagation()
+  if (props.disabled) return
+  isPickerLoaded.value = true
+  nextTick(() => {
+    rootRef.value?.querySelector('input')?.focus({ preventScroll: true })
+    pickerRef.value?.openMenu()
+  })
+}
+
+const onInputKeydown = event => {
+  if (event.key === 'Enter') loadPicker(event)
+  if (event.code !== 'Tab') event.preventDefault()
+}
+
+const clear = () => {
+  localValue.value = null
+}
+
+// Cut, Delete, a paste, or a drop change the text with no key: the picker
+// clears an emptied input, and reads any other text, once loaded.
+const onInput = event => {
+  const text = event.target.value
+  if (!text) {
+    clear()
+    return
+  }
+  loadPicker(event)
+  if (!isPickerLoaded.value) return
+  nextTick(() => {
+    const input = rootRef.value.querySelector('input')
+    input.value = text
+    input.dispatchEvent(new Event('input'))
+  })
+}
 </script>
 
 <style lang="scss" scoped>
