@@ -271,7 +271,7 @@
         class="assets-column"
       >
         <h2 class="subtitle">
-          {{ $t('breakdown.all_assets') }}
+          {{ $t('breakdown.link_assets') }}
         </h2>
         <div class="flexrow mt1 mb1">
           <button-simple

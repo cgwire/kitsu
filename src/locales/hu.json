@@ -74,7 +74,7 @@
       "workflow_studio": "A stúdió munkafolyamata"
     },
     "breakdown": {
-      "all_assets": "Minden rendelkezésre álló asset",
+      "link_assets": "Assetek összekapcsolása",
       "copy_casting": "Szereposztás másolása (a ctrl + V beilleszti a kijelölt sorokba)",
       "edit_label": "Asset címkéjének megváltoztatása",
       "empty": "Üres szereposztás",

@@ -74,7 +74,7 @@
       "workflow_studio": "Workflow van de studio"
     },
     "breakdown": {
-      "all_assets": "Alle beschikbare assets",
+      "link_assets": "Assets koppelen",
       "copy_casting": "Deze casting kopiëren (ctrl + V plakt deze op de geselecteerde regels)",
       "edit_label": "Assetlabel aanpassen",
       "empty": "Lege casting",

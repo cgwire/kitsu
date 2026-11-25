@@ -74,7 +74,7 @@
       "workflow_studio": "스튜디오 워크플로"
     },
     "breakdown": {
-      "all_assets": "사용 가능한 모든 어셋",
+      "link_assets": "어셋 연결",
       "copy_casting": "이 캐스팅 복사 (ctrl + V로 선택한 줄에 붙여넣기)",
       "edit_label": "어셋 레이블 변경",
       "empty": "캐스팅 없음",

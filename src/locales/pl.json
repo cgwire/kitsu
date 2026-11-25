@@ -122,7 +122,7 @@
       }
     },
     "breakdown": {
-      "all_assets": "Wszystkie dostępne assety",
+      "link_assets": "Powiąż assety",
       "copy_casting": "Skopiuj ten casting (ctrl + V wkleja go do zaznaczonych wierszy)",
       "edit_label": "Zmień etykietę assetu",
       "empty": "Pusty casting",

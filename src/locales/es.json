@@ -74,7 +74,7 @@
       "workflow_studio": "Flujo de trabajo del estudio"
     },
     "breakdown": {
-      "all_assets": "Todos los recursos disponibles",
+      "link_assets": "Vincular recursos",
       "copy_casting": "Copiar este casting (ctrl + V lo pega en las líneas seleccionadas)",
       "edit_label": "Cambiar la etiqueta del recurso",
       "empty": "Casting vacío",

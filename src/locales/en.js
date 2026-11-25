@@ -128,11 +128,11 @@ export default {
   },
 
   breakdown: {
-    all_assets: 'All available assets',
     copy_casting: 'Copy this casting (ctrl + V pastes it on the selected lines)',
     edit_label: 'Change the asset\'s label',
     empty: 'Empty casting',
     label: 'Label',
+    link_assets: 'Link assets',
     nb_assets: '{count} asset | {count} assets',
     nb_occurrences: '{count} occurrence | {count} occurrences',
     nb_ready: '{ready} / {total} ready',

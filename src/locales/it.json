@@ -74,7 +74,7 @@
       "workflow_studio": "Flusso di lavoro dello studio"
     },
     "breakdown": {
-      "all_assets": "Tutti gli asset disponibili",
+      "link_assets": "Collega asset",
       "copy_casting": "Copia questo casting (ctrl + V lo incolla nelle righe selezionate)",
       "edit_label": "Cambia l'etichetta dell'asset",
       "empty": "Casting vuoto",

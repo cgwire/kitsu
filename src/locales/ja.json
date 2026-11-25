@@ -74,7 +74,7 @@
       "workflow_studio": "スタジオのワークフロー"
     },
     "breakdown": {
-      "all_assets": "利用可能なすべてのアセット",
+      "link_assets": "アセットをリンク",
       "copy_casting": "このキャスティングをコピー（ctrl + V で選択した行に貼り付け）",
       "edit_label": "アセットのラベルを変更",
       "empty": "キャスティングなし",

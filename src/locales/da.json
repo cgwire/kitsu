@@ -74,7 +74,7 @@
       "workflow_studio": "Studiets workflow"
     },
     "breakdown": {
-      "all_assets": "Alle tilgængelige assets",
+      "link_assets": "Tilknyt assets",
       "copy_casting": "Kopiér denne casting (ctrl + V indsætter den på de valgte linjer)",
       "edit_label": "Rediger assettens label",
       "empty": "Tom casting",

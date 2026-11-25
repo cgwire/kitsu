@@ -74,7 +74,7 @@
       "workflow_studio": "Studio-Workflow"
     },
     "breakdown": {
-      "all_assets": "Alle verfügbaren Assets",
+      "link_assets": "Assets verknüpfen",
       "copy_casting": "Dieses Casting kopieren (Strg + V fügt es in die ausgewählten Zeilen ein)",
       "edit_label": "Etikett bearbeiten",
       "empty": "Leeres Casting",
