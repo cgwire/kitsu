@@ -778,6 +778,7 @@ describe('User store', () => {
       listType: 'assettypestats',
       productionId: 'production-1'
     },
+    { page: 'Asset Library', type: 'AssetLibrary', listType: 'assetlibrary' },
     {
       page: 'Sequence Stats',
       type: 'SequenceStats',

@@ -250,6 +250,7 @@ const PAGE_SEARCHES = [
   { type: 'myChecks', listType: 'mychecks' },
   { type: 'eventLogs', listType: 'eventlogs' },
   { type: 'loginLogs', listType: 'loginlogs' },
+  { type: 'assetLibrary', listType: 'assetlibrary' },
   { type: 'concepts', listType: 'concepts', isInProduction: true },
   { type: 'assetTypeStats', listType: 'assettypestats', isInProduction: true },
   { type: 'sequenceStats', listType: 'sequencestats', isInProduction: true },
