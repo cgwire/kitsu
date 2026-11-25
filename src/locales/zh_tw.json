@@ -620,7 +620,6 @@
         "explanation": "可以匯入常見的 OpenTimelineIO 支援檔案 (otio、fcp_xml、fcpx_xml、edl)。鏡頭會依指定的影格範圍、入點影格和出點影格建立或更新。入點影格從 0 開始。"
       },
       "active": "活躍",
-      "activity": "活動",
       "archived": "已封存",
       "avatar": {
         "open_page": "開啟 {personName} 頁面",

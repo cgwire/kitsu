@@ -623,7 +623,6 @@
         "explanation": "È possibile importare i formati OpenTimelineIO più comuni (otio, fcp_xml, fcpx_xml, edl). Gli shot verranno creati o aggiornati con l'intervallo di fotogrammi, il fotogramma in e il fotogramma out indicati. Il fotogramma in parte da 0."
       },
       "active": "Attivo",
-      "activity": "Attività",
       "archived": "Archiviato",
       "avatar": {
         "open_page": "Apri la pagina di {personName}",

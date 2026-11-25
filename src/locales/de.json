@@ -620,7 +620,6 @@
         "explanation": "Es ist möglich, gängige von OpenTimelineIO unterstützte Dateien zu importieren (otio, fcp_xml, fcpx_xml, edl). Shots werden mit dem angegebenen Frame-Bereich, Frame-In und Frame-Out erstellt oder aktualisiert. Frame in beginnt bei 0."
       },
       "active": "Aktiv",
-      "activity": "Aktivität",
       "archived": "Archiviert",
       "avatar": {
         "open_page": "Seite von {personName} öffnen",

@@ -620,7 +620,6 @@
         "explanation": "OpenTimelineIO 対応の一般的なファイル（otio、fcp_xml、fcpx_xml、edl）をインポートできます。記載されたフレーム範囲・開始フレーム・最終フレームに従ってショットが作成または更新されます。開始フレームは 0 起点です。"
       },
       "active": "アクティブ",
-      "activity": "アクティビティ",
       "archived": "アーカイブ",
       "avatar": {
         "open_page": "{personName} のページを開く",

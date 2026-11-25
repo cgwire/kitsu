@@ -620,7 +620,6 @@
         "explanation": "É possível importar arquivos comuns compatíveis com o OpenTimelineIO (otio, fcp_xml, fcpx_xml, edl). Os shots serão criados ou atualizados com o intervalo de quadros, a entrada e a saída de quadros fornecidos. O quadro de entrada começa em 0."
       },
       "active": "Ativo",
-      "activity": "Atividade",
       "archived": "Arquivado",
       "avatar": {
         "open_page": "Abrir a página de {personName}",

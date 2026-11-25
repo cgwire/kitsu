@@ -623,7 +623,6 @@
         "explanation": "Il est possible d'importer des fichiers OpenTimelineIO courants (otio, fcp_xml, fcpx_xml, edl). Les plans seront créés ou mis à jour avec la plage d'images donnée, l'image d'entrée et l'image de sortie. L'image d'entrée commence à 0."
       },
       "active": "Actif",
-      "activity": "Activité",
       "archived": "Archivé",
       "avatar": {
         "open_page": "Ouvrir la page de {personName}",

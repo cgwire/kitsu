@@ -620,7 +620,6 @@
         "explanation": "Es posible importar archivos comunes soportados por OpenTimelineIO (otio, fcp_xml, fcpx_xml, edl). Las tomas se crearán o actualizarán con el rango de fotogramas, el fotograma de entrada y el fotograma de salida dados. El fotograma de entrada empieza en 0."
       },
       "active": "Activo",
-      "activity": "Actividad",
       "archived": "Archivado",
       "avatar": {
         "open_page": "Abrir la página de {personName}",

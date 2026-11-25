@@ -620,7 +620,6 @@
         "explanation": "일반적인 OpenTimelineIO 지원 파일(otio, fcp_xml, fcpx_xml, edl)을 가져올 수 있습니다. 지정된 프레임 범위, 프레임 인 및 프레임 아웃으로 샷이 생성되거나 업데이트됩니다. 프레임 인은 0에서 시작합니다."
       },
       "active": "활성",
-      "activity": "활동",
       "archived": "아카이브",
       "avatar": {
         "open_page": "{personName} 페이지 열기",

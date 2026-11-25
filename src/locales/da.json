@@ -620,7 +620,6 @@
         "explanation": "Det er muligt at importere almindelige OpenTimelineIO-understøttede filer (otio, fcp_xml, fcpx_xml, edl). Shots vil blive oprettet eller opdateret med det angivne frame-interval, frame ind og frame ud. Frame ind starter ved 0."
       },
       "active": "Aktiv",
-      "activity": "Aktivitet",
       "archived": "Arkiveret",
       "avatar": {
         "open_page": "Åbn {personName}s side",

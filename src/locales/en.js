@@ -875,7 +875,6 @@ export default {
   main: {
     about: 'About',
     active: 'Active',
-    activity: 'Activity',
     add: 'Add',
     after: 'After',
     admin: 'Admin',

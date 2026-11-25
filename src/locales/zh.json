@@ -620,7 +620,6 @@
         "explanation": "可以导入常见的 OpenTimelineIO 支持文件（otio、fcp_xml、fcpx_xml、edl）。将根据给定的帧范围、帧入和帧出创建或更新镜头。帧入从 0 开始。"
       },
       "active": "活跃",
-      "activity": "活动",
       "archived": "已归档",
       "avatar": {
         "open_page": "打开 {personName} 页面",

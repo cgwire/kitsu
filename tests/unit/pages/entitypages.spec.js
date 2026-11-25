@@ -1495,7 +1495,7 @@ describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name
 describe.each(
   [
     ['Asset', ['chat', 'concepts', 'casting', 'schedule', 'time-logs', 'preview-files', 'working-files', 'output-files']],
-    ['Edit', ['chat', 'schedule', 'time-logs', 'preview-files', 'activity', 'working-files', 'output-files']],
+    ['Edit', ['chat', 'schedule', 'time-logs', 'preview-files', 'working-files', 'output-files']],
     ['Episode', ['chat', 'casting', 'schedule', 'time-logs', 'preview-files']],
     ['Sequence', ['chat', 'casting', 'schedule', 'time-logs', 'preview-files']],
     ['Shot', ['chat', 'casting', 'schedule', 'time-logs', 'preview-files', 'working-files', 'output-files']]

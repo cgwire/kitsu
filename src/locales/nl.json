@@ -620,7 +620,6 @@
         "explanation": "Het is mogelijk om veelgebruikte door OpenTimelineIO ondersteunde bestanden te importeren (otio, fcp_xml, fcpx_xml, edl). Opnamen worden gemaakt of bijgewerkt met het opgegeven framebereik, frame in en frame uit. Frame in begint bij 0."
       },
       "active": "Actief",
-      "activity": "Activiteit",
       "archived": "Gearchiveerd",
       "avatar": {
         "open_page": "Open {personName} pagina",

@@ -164,11 +164,6 @@
           v-if="currentSection === 'preview-files'"
         />
 
-        <entity-news
-          :entity="currentEdit"
-          v-if="currentSection === 'activity'"
-        />
-
         <entity-time-logs
           :entity="currentEdit"
           v-if="currentSection === 'time-logs'"
@@ -310,7 +305,6 @@ const editTabs = computed(() => [
   { label: t('main.label.schedule'), name: 'schedule' },
   { label: t('main.label.timelog'), name: 'time-logs' },
   { label: t('main.label.preview_files'), name: 'preview-files' },
-  { label: t('main.activity'), name: 'activity' },
   { label: t('main.label.working_files'), name: 'working-files' },
   { label: t('main.label.output_files'), name: 'output-files' }
 ])
