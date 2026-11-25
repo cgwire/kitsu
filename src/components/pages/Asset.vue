@@ -1,6 +1,6 @@
 <template>
   <panel-layout
-    class="asset xyz-in"
+    class="asset entity-page xyz-in"
     xyz="fade"
     :class="{ 'drawer-open': isDrawerOpen }"
     :side="hasSidePanel"
@@ -65,7 +65,7 @@
     </template>
 
     <template #list>
-      <div class="asset-data" v-if="!loadError">
+      <div class="entity-data" v-if="!loadError">
         <route-section-tabs
           class="section-tabs"
           :active-tab="currentSection"
@@ -150,7 +150,7 @@
           v-if="currentSection === 'chat'"
         />
 
-        <div class="asset-casted-in" v-show="currentSection === 'casting'">
+        <div class="entity-casting" v-show="currentSection === 'casting'">
           <template v-if="currentAsset">
             <div v-if="currentAsset.castInShotsBySequence?.[0]?.length > 0">
               <div class="casting-title flexrow">
@@ -461,7 +461,7 @@
         />
       </div>
       <entity-load-error
-        class="asset-data"
+        class="entity-data"
         :error="loadError"
         @reload="init()"
         v-else
@@ -901,80 +901,23 @@ useHead({ title: computed(() => `${title.value} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .table-body {
-    border: 1px solid var(--border);
-  }
-}
+@use '@/styles/entity-page.scss' as entity;
+
+@include entity.page;
+@include entity.casting;
 
 .ready-for {
   margin-top: 0em;
   margin-bottom: 0em;
 }
 
-h2.subtitle {
-  border-bottom: 0;
-  margin-top: 0;
-  margin-bottom: 0.5em;
-  font-size: 1.5em;
+.field-label {
+  width: 120px;
 }
 
-.page-header {
-  align-items: center;
-  margin: 0;
-
-  .entity-title {
-    font-weight: 500;
-  }
-}
-
-.asset-data {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.asset-casted-in,
 .concepts {
+  flex: 1;
   overflow-y: auto;
-}
-
-.concepts {
-  flex: 1;
-}
-
-.casting-title {
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-.casting-group {
-  margin-bottom: 2em;
-}
-
-.casting-group-header {
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1em;
-  padding-bottom: 0.3em;
-
-  .group-name {
-    color: var(--text);
-    font-size: 1.3em;
-    font-weight: 500;
-  }
-
-  .tag {
-    background: var(--background-tag);
-    color: var(--text);
-  }
-}
-
-.casting-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 200px);
-  gap: 20px;
 }
 
 .concept-list {
@@ -986,277 +929,18 @@ h2.subtitle {
   padding: 4px 4px 1em;
 }
 
-.casting-card {
-  background: var(--background);
-  border-radius: 1em;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-  color: var(--text-strong);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-
-  .dark & {
-    background: var(--background-alt);
-  }
-
-  &:hover {
-    background: var(--background-hover);
-  }
-
-  .card-preview {
-    position: relative;
-  }
-
-  .nb-occurences {
-    background: rgba(160, 160, 180, 0.8);
-    border-radius: 2px;
-    bottom: 4px;
-    color: white;
-    font-size: 0.8em;
-    padding: 2px 4px;
-    position: absolute;
-    right: 4px;
-  }
-
-  .card-description {
-    padding: 0.5em 1em;
-  }
-
-  .card-name {
-    font-weight: bold;
-  }
-
-  .asset-label {
-    background: $dark-green;
-    border-radius: 4px;
-    color: $white;
-    font-size: 0.7em;
-    font-weight: 500;
-    padding: 2px 6px;
-
-    &[label='fixed'] {
-      background: $orange-carrot;
-    }
-  }
-
-  .ready-for {
-    color: var(--text-alt);
-    font-size: 0.9em;
-    font-weight: normal;
-    margin-top: 0.4em;
-  }
-
-  .remove-button {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 28px;
-    height: 28px;
-    min-height: 0;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.55);
-    color: $white;
-    opacity: 0;
-    transition:
-      opacity 0.15s,
-      background 0.15s;
-
-    :deep(.icon) {
-      width: 16px;
-      height: 16px;
-    }
-
-    &:hover {
-      background: $red;
-      color: $white;
-    }
-  }
-
-  &:hover .remove-button,
-  .remove-button:focus-visible {
-    opacity: 1;
-  }
-}
-
-.field-label {
-  font-weight: bold;
-  width: 120px;
-}
-
-.back-link {
-  padding-top: 3px;
-}
-
-// the header and the rows of the tasks on one sheet, as tall as the panel
-.task-list {
-  background: var(--background);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  flex: 1;
-  margin: 0;
-  min-height: 150px;
-  min-width: 100%;
-  overflow: hidden;
-}
-
-.datatable-row {
-  user-select: text;
-}
-
-// The sections are sheets of the page color, as the lists of the other
-// panels: the schedule here, and the files and the time logs by their root.
-.asset-data .wrapper {
-  background: var(--background);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  flex: 1;
-  min-height: 0;
-}
-
-.asset-data .entity-chat {
-  background: var(--background);
-}
-
-// the row of the tabs already sets the sections apart
-.asset-data > .wrapper,
-.asset-data > .entity-chat {
-  margin-top: 0;
-}
-
-.schedule {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-
-  .wrapper {
-    height: 100%;
-    overflow: hidden;
-  }
-}
-
-.entity-thumbnail {
-  margin-bottom: 0;
-  border-radius: 10px;
-}
-
-@media screen and (max-width: 768px) {
-  .entity-title {
-    font-size: 1.3em;
-    line-height: 1.5em;
-  }
-
-  .ready-for {
-    display: none;
-  }
-
-  .edit-button {
-    display: none;
-  }
-
-  .task-list {
-    background: transparent;
-    border: 0;
-    min-height: 0;
-    overflow: visible;
-  }
-
-  .schedule {
-    overflow-x: auto;
-
-    // The schedule widget keeps a 180px entity column on mobile: give the
-    // timeline room.
-    .wrapper {
-      min-width: 520px;
-    }
-  }
-
-  .news-column {
-    max-height: none;
-  }
-}
-
-.tag-standby {
-  background: $red;
-  color: $white;
-  cursor: default;
-  text-transform: uppercase;
-}
-
-.dark .tag-standby {
-  background: $dark-red;
-}
-
-.section-tabs {
-  min-height: 36px;
-  margin-bottom: 0;
-}
-
-.infos,
-.information {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.edit-button {
-  align-self: flex-end;
-  margin-bottom: 0.5em;
-}
-
-// a sheet of the page color, as the lists of the panel
-.metadata-infos {
-  background: var(--background);
-  border: 1px solid var(--border);
-  flex: unset;
-}
-
-.news-column {
-  max-height: 85%;
-}
-
-.drawer-close,
-.drawer-backdrop {
+.drawer-close {
   display: none;
 }
 
-// Under 1024px the side panels slide in from the right over the page, like
-// the news feed drawer. The backdrop catches outside taps to close.
+@media screen and (max-width: 768px) {
+  .ready-for {
+    display: none;
+  }
+}
+
+// the panel of a concept has no close button of its own
 @media (max-width: 1024px) {
-  // The xyz-in entry animation fills forward and leaves an identity
-  // transform on the page, which would turn it into the containing block
-  // and stacking context of the fixed drawers below.
-  .asset {
-    animation-fill-mode: none;
-  }
-
-  // as many classes as the rule of the layout that makes the column a frame
-  .asset.panel-layout.paneled-side :deep(.side-column) {
-    background: var(--background-panel);
-    bottom: 0;
-    padding: 0;
-    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    margin-top: 0 !important;
-    max-width: min(100vw, 420px) !important;
-    // TaskInfo writes its resizable panel width inline on the side column.
-    min-width: 0 !important;
-    overflow-y: auto;
-    position: fixed;
-    right: 0;
-    top: 60px;
-    transform: translateX(100%);
-    transition: transform 0.25s ease;
-    width: min(100vw, 420px) !important;
-    z-index: 250;
-  }
-
-  .asset.panel-layout.paneled-side.drawer-open :deep(.side-column) {
-    transform: translateX(0);
-  }
-
   .drawer-close {
     align-items: center;
     background: var(--background);
@@ -1279,22 +963,6 @@ h2.subtitle {
       background: var(--background-hover);
       border-color: var(--border-strong);
       color: var(--text-strong);
-    }
-  }
-
-  .drawer-backdrop {
-    background: rgba(0, 0, 0, 0.4);
-    display: block;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    position: fixed;
-    transition: opacity 0.25s ease;
-    z-index: 249;
-
-    &.is-open {
-      opacity: 1;
-      pointer-events: auto;
     }
   }
 }

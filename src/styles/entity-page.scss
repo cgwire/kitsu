@@ -1,0 +1,370 @@
+@use '@/variables.scss' as *;
+
+// The page of an entity in the panel layout: its header in the panel of the
+// filters, its tabs and their section in the panel of the list, its task
+// panel on the side. The root takes .entity-page, and the sections sit in
+// .entity-data.
+@mixin page {
+  .dark {
+    .table-body {
+      border: 1px solid var(--border);
+    }
+  }
+
+  h2.subtitle {
+    border-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0.5em;
+    font-size: 1.5em;
+  }
+
+  .page-header {
+    align-items: center;
+    margin: 0;
+
+    .entity-title {
+      font-weight: 500;
+    }
+  }
+
+  .back-link {
+    padding-top: 3px;
+  }
+
+  .entity-thumbnail {
+    margin-bottom: 0;
+    border-radius: 10px;
+  }
+
+  .entity-data {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .section-tabs {
+    min-height: 36px;
+    margin-bottom: 0;
+  }
+
+  .infos,
+  .information {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  // the header and the rows of the tasks on one sheet, as tall as the panel
+  .task-list {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    flex: 1;
+    margin: 0;
+    min-height: 150px;
+    min-width: 100%;
+    overflow: hidden;
+  }
+
+  .datatable-row {
+    user-select: text;
+  }
+
+  .edit-button {
+    align-self: flex-end;
+    margin-bottom: 0.5em;
+  }
+
+  // a sheet of the page color, as the lists of the panel
+  .metadata-infos {
+    background: var(--background);
+    border: 1px solid var(--border);
+    flex: unset;
+  }
+
+  .field-label {
+    font-weight: bold;
+    width: 140px;
+  }
+
+  // The sections are sheets of the page color, as the lists of the other
+  // panels: the schedule here, and the files and the time logs by their root.
+  .entity-data .wrapper {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .entity-data .entity-chat {
+    background: var(--background);
+  }
+
+  // the row of the tabs already sets the sections apart
+  .entity-data > .wrapper,
+  .entity-data > .entity-chat {
+    margin-top: 0;
+  }
+
+  .schedule {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+
+    .wrapper {
+      height: 100%;
+      overflow: hidden;
+    }
+  }
+
+  .news-column {
+    max-height: 85%;
+  }
+
+  .drawer-backdrop {
+    display: none;
+  }
+
+  @media screen and (max-width: 768px) {
+    .entity-title {
+      font-size: 1.3em;
+      line-height: 1.5em;
+    }
+
+    .edit-button {
+      display: none;
+    }
+
+    .task-list {
+      background: transparent;
+      border: 0;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    .schedule {
+      overflow-x: auto;
+
+      // The schedule widget keeps a 180px entity column on mobile: give the
+      // timeline room.
+      .wrapper {
+        min-width: 520px;
+      }
+    }
+
+    .news-column {
+      max-height: none;
+    }
+  }
+
+  // Under 1024px the side panel slides in from the right over the page, like
+  // the news feed drawer. The backdrop catches outside taps to close.
+  @media (max-width: 1024px) {
+    // The xyz-in entry animation fills forward and leaves an identity
+    // transform on the page, which would turn it into the containing block
+    // and stacking context of the fixed drawer below.
+    .entity-page {
+      animation-fill-mode: none;
+    }
+
+    // as many classes as the rule of the layout that makes the column a frame
+    .entity-page.panel-layout.paneled-side :deep(.side-column) {
+      background: var(--background-panel);
+      bottom: 0;
+      padding: 0;
+      box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      margin-top: 0 !important;
+      max-width: min(100vw, 420px) !important;
+      // TaskInfo writes its resizable panel width inline on the side column.
+      min-width: 0 !important;
+      overflow-y: auto;
+      position: fixed;
+      right: 0;
+      top: 60px;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      width: min(100vw, 420px) !important;
+      z-index: 250;
+    }
+
+    .entity-page.panel-layout.paneled-side.drawer-open :deep(.side-column) {
+      transform: translateX(0);
+    }
+
+    .drawer-backdrop {
+      background: rgba(0, 0, 0, 0.4);
+      bottom: 0;
+      display: block;
+      left: 0;
+      opacity: 0;
+      pointer-events: none;
+      position: fixed;
+      right: 0;
+      top: 0;
+      transition: opacity 0.25s ease;
+      z-index: 249;
+
+      &.is-open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+  }
+}
+
+// The casting of an entity: its groups, as cards or as a list.
+@mixin casting {
+  .entity-casting {
+    overflow-y: auto;
+  }
+
+  .casting-title {
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+
+  .casting-group {
+    margin-bottom: 2em;
+  }
+
+  .casting-group-header {
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1em;
+    padding-bottom: 0.3em;
+
+    .group-name {
+      color: var(--text);
+      font-size: 1.3em;
+      font-weight: 500;
+    }
+
+    .tag {
+      background: var(--background-tag);
+      color: var(--text);
+    }
+  }
+
+  .casting-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 200px);
+    gap: 20px;
+  }
+
+  .casting-card {
+    background: var(--background);
+    border-radius: 1em;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--text-strong);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    .dark & {
+      background: var(--background-alt);
+    }
+
+    &:hover {
+      background: var(--background-hover);
+    }
+
+    &.shared {
+      box-shadow: 0 0 3px 2px var(--shared-color);
+    }
+
+    .ready-for .no-link {
+      cursor: inherit;
+    }
+
+    .card-preview {
+      position: relative;
+    }
+
+    .nb-occurences {
+      background: rgba(160, 160, 180, 0.8);
+      border-radius: 2px;
+      bottom: 4px;
+      color: white;
+      font-size: 0.8em;
+      padding: 2px 4px;
+      position: absolute;
+      right: 4px;
+    }
+
+    .card-description {
+      padding: 0.5em 1em;
+    }
+
+    .card-name {
+      font-weight: bold;
+    }
+
+    .asset-label {
+      background: $dark-green;
+      border-radius: 4px;
+      color: $white;
+      font-size: 0.7em;
+      font-weight: 500;
+      padding: 2px 6px;
+
+      &[label='fixed'] {
+        background: $orange-carrot;
+      }
+    }
+
+    .ready-for {
+      color: var(--text-alt);
+      font-size: 0.9em;
+      font-weight: normal;
+      margin-top: 0.4em;
+    }
+
+    .remove-button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      color: $white;
+      opacity: 0;
+      transition:
+        opacity 0.15s,
+        background 0.15s;
+
+      :deep(.icon) {
+        width: 16px;
+        height: 16px;
+      }
+
+      &:hover {
+        background: $red;
+        color: $white;
+      }
+    }
+
+    &:hover .remove-button,
+    .remove-button:focus-visible {
+      opacity: 1;
+    }
+  }
+
+  .tag-standby {
+    background: $red;
+    color: $white;
+    cursor: default;
+    text-transform: uppercase;
+  }
+
+  .dark .tag-standby {
+    background: $dark-red;
+  }
+}
