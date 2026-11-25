@@ -37,6 +37,9 @@ const getters = {
   currentProductionScreen: state => state.currentProductionScreen,
   currentSection: state => state.currentSection,
   isDarkTheme: state => state.isDarkTheme,
+  // A switch of the Zou instance, off by default, that unlocks edits such as
+  // the real dates of the tasks.
+  isExpertMode: state => state.mainConfig?.expert_mode_enabled === true,
   isSidebarHidden: state => state.isSidebarHidden,
   isSupportChat: state => state.isSupportChat,
   isUserMenuHidden: state => state.isUserMenuHidden,

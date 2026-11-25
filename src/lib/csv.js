@@ -64,16 +64,25 @@ const ESTIMATIONS_PARENTS = {
   Shot: { field: 'sequence_name', labelKey: 'tasks.fields.sequence' }
 }
 
+// The real date columns of the estimations import, by the name Zou reads,
+// with the key of their label.
+export const ESTIMATIONS_REAL_DATES = {
+  'WIP date': 'tasks.fields.real_start_date',
+  'Feedback date': 'tasks.fields.real_end_date',
+  'Approval date': 'tasks.fields.done_date'
+}
+
 /*
  * The columns of a task type export that the estimations import of Zou
  * reads, by the name Zou reads, with the key of their label: the export
  * writes these labels and the import gives them their name back. The parent
  * of a sequence or an edit is its episode, so only a TV show has one, and an
- * episode has none.
+ * episode has none. Zou reads the real dates only in expert mode, for the
+ * studio managers.
  */
 export const getEstimationsCsvLabelKeys = (
   entityType,
-  { isPaperProduction = false, isTVShow = false } = {}
+  { isPaperProduction = false, isTVShow = false, withRealDates = false } = {}
 ) => {
   const hasParent =
     ESTIMATIONS_PARENTS[entityType] &&
@@ -85,7 +94,8 @@ export const getEstimationsCsvLabelKeys = (
     Difficulty: 'tasks.fields.difficulty',
     Estimation: 'tasks.fields.estimation',
     'Start date': 'tasks.fields.start_date',
-    'Due date': 'tasks.fields.due_date'
+    'Due date': 'tasks.fields.due_date',
+    ...(withRealDates && ESTIMATIONS_REAL_DATES)
   }
 }
 

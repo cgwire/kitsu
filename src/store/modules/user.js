@@ -281,6 +281,11 @@ const getters = {
     if (role === 'manager') return true
     return role === 'supervisor' && !(state.user.departments || []).length
   },
+  // Status changes set the real dates of a task. The expert mode of the
+  // instance lets the studio managers set them too, the only ones zou reads
+  // them from at the import.
+  canEditRealDates: (state, getters, rootState, rootGetters) =>
+    rootGetters.isExpertMode && getters.isCurrentUserAdmin === true,
   // Mirrors zou: admins, the person, the managers of a production of the
   // person, and its supervisors sharing a department with the person (a
   // supervisor without department supervises everybody). Nobody reads the

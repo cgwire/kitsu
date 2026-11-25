@@ -311,6 +311,38 @@ describe('User store', () => {
     })
   })
 
+  describe('canEditRealDates', () => {
+    const call = ({ user, isExpertMode = true, projectRoles = {} }) => {
+      const state = { user, projectRoles }
+      return store.getters.canEditRealDates(
+        state,
+        { isCurrentUserAdmin: store.getters.isCurrentUserAdmin(state) },
+        {},
+        { isExpertMode }
+      )
+    }
+    const person = role => ({ id: 'person-1', role })
+
+    test('the studio managers edit them in expert mode', () => {
+      expect(call({ user: person('admin') })).toBe(true)
+    })
+
+    test('nobody edits them without the expert mode', () => {
+      expect(call({ user: person('admin'), isExpertMode: false })).toBe(false)
+    })
+
+    test('the production managers and the other roles do not', () => {
+      expect(call({ user: person('manager') })).toBe(false)
+      const projectRoles = { 'production-1': 'manager' }
+      expect(call({ user: person('user'), projectRoles })).toBe(false)
+      expect(call({ user: person('supervisor') })).toBe(false)
+    })
+
+    test('nobody edits them without a user', () => {
+      expect(call({ user: null })).toBe(false)
+    })
+  })
+
   describe('canReadDaysOff', () => {
     const colleague = { id: 'person-2', departments: ['dep-1'], is_bot: false }
     const call = (role, departments, options = {}) => {
