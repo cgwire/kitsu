@@ -477,7 +477,6 @@
       "for": "Voor",
       "go_productions": "Terug naar productie",
       "history": "geschiedenis",
-      "info": "Informatie",
       "or": "of",
       "next": "Volgende",
       "no": "Nee",
@@ -660,6 +659,7 @@
         "metadata": "Metadata",
         "working_files": "Werkbestanden",
         "output_files": "Uitvoerbestanden",
+        "preview": "Preview",
         "preview_files": "Previewbestanden",
         "schedule": "Planning",
         "timelog": "Tijdlog"

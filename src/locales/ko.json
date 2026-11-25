@@ -477,7 +477,6 @@
       "for": "다음에 대하여:",
       "go_productions": "프로덕션으로 돌아가기",
       "history": "기록",
-      "info": "정보",
       "or": "또는",
       "next": "다음",
       "no": "아니요",
@@ -660,6 +659,7 @@
         "metadata": "메타데이터",
         "working_files": "작업 파일",
         "output_files": "출력 파일",
+        "preview": "미리 보기",
         "preview_files": "미리 보기 파일",
         "schedule": "일정",
         "timelog": "타임로그"

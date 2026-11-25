@@ -477,7 +477,6 @@
       "for": "Für",
       "go_productions": "Zurück zur Produktion",
       "history": "Historie",
-      "info": "Informationen",
       "or": "oder",
       "next": "Weiter",
       "no": "Nein",
@@ -660,6 +659,7 @@
         "metadata": "Metadaten",
         "working_files": "Arbeitsdateien",
         "output_files": "Ausgabedateien",
+        "preview": "Vorschau",
         "preview_files": "Vorschau-Dateien",
         "schedule": "Zeitplan",
         "timelog": "Zeiterfassung"

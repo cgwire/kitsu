@@ -477,7 +477,6 @@
       "for": "Ennek:",
       "go_productions": "Vissza a produkcióhoz",
       "history": "előzmények",
-      "info": "Információ",
       "or": "vagy",
       "next": "Következő",
       "no": "Nem",
@@ -657,6 +656,7 @@
         "metadata": "Metaadat",
         "working_files": "Munkafájlok",
         "output_files": "Kimeneti fájlok",
+        "preview": "Előnézet",
         "preview_files": "Előnézeti fájlok",
         "schedule": "Időbeosztás",
         "timelog": "Munkaidő-napló"

@@ -931,7 +931,6 @@
       "hide_support_chat": "Ukryj czat wsparcia",
       "history": "historia",
       "home": "Wróć do strony głównej",
-      "info": "Informacje",
       "import": "Importuj",
       "is_shared": "Udostępnione całemu zespołowi",
       "label": {
@@ -941,6 +940,7 @@
         "metadata": "Metadane",
         "working_files": "Pliki robocze",
         "output_files": "Pliki wyjściowe",
+        "preview": "Podgląd",
         "preview_files": "Pliki podglądu",
         "schedule": "Harmonogram",
         "timelog": "Rejestr czasu"

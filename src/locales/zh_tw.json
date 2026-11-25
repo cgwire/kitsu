@@ -477,7 +477,6 @@
       "for": "給",
       "go_productions": "返回製作項目",
       "history": "歷史",
-      "info": "資訊",
       "or": "或",
       "next": "下一個",
       "no": "否",
@@ -660,6 +659,7 @@
         "metadata": "中繼資料",
         "working_files": "工作檔案",
         "output_files": "輸出檔案",
+        "preview": "預覽",
         "preview_files": "預覽檔案",
         "schedule": "時間表",
         "timelog": "時間記錄"

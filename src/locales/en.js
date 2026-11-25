@@ -968,7 +968,6 @@ export default {
     hide_support_chat: 'Hide support chat',
     history: 'history',
     home: 'Return to the home page',
-    info: 'Information',
     import: 'Import',
     is_shared: 'Shared with the whole team',
     label:{
@@ -977,6 +976,7 @@ export default {
       concepts: 'Concepts',
       metadata: 'Metadata',
       output_files: 'Output Files',
+      preview: 'Preview',
       preview_files: 'Preview Files',
       schedule: 'Schedule',
       timelog: 'Timelog',

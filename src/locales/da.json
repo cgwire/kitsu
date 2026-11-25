@@ -477,7 +477,6 @@
       "for": "For",
       "go_productions": "Vend tilbage til produktion",
       "history": "historik",
-      "info": "Information",
       "or": "eller",
       "next": "Næste",
       "no": "Nej",
@@ -660,6 +659,7 @@
         "metadata": "Metadata",
         "working_files": "Arbejdsfiler",
         "output_files": "Output-filer",
+        "preview": "Preview",
         "preview_files": "Preview-filer",
         "schedule": "Tidsplan",
         "timelog": "Tidslog"

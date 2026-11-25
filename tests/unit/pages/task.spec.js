@@ -27,6 +27,7 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import drafts from '@/lib/drafts'
 import { markRequestFailure } from '@/lib/errors'
@@ -190,6 +191,8 @@ const mountPage = async ({
         // reset() runs on every page reset; the default stub has no such
         // method and the resulting throw would cut the reset short.
         AddPreviewModal: { template: '<div />', methods: { reset: () => {} } },
+        // The layout holds the page in its slots.
+        PanelLayout: false,
         // The default stub swallows its slot, which holds the page title.
         RouterLink: {
           props: ['to'],
@@ -699,6 +702,92 @@ describe('Task.vue task that fails to load', () => {
     expect(reloadButton(wrapper)).toBeUndefined()
   })
 
+  it('lays the task out in panels, its comments on the side', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper } = await mountWithActions({})
+
+    expect(wrapper.find('.page-tabs .page-header').exists()).toBe(true)
+    expect(wrapper.find('.list-panel .preview-column').exists()).toBe(true)
+    expect(wrapper.find('.side-column .comments-column').exists()).toBe(true)
+  })
+
+  it('keeps the side panel for a task that shows', async () => {
+    const { wrapper } = await mountWithActions({
+      loadTask: () => Promise.reject(requestFailure(404))
+    })
+
+    expect(wrapper.find('.list-panel .load-error').exists()).toBe(true)
+    expect(wrapper.find('.side-column').exists()).toBe(false)
+  })
+
+  it('shows the metadata of the task in a tab of its own', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper, router } = await mountWithActions({})
+    const tabs = wrapper.findComponent(RouteSectionTabs)
+    const isHidden = selector =>
+      wrapper.find(selector).attributes('style')?.includes('display: none') ??
+      false
+
+    expect(tabs.props('tabs').map(tab => tab.name)).toEqual([
+      'preview',
+      'metadata'
+    ])
+    expect(tabs.props('activeTab')).toBe('preview')
+    expect(isHidden('.preview-column')).toBe(false)
+    expect(isHidden('.info-block')).toBe(true)
+
+    await router.push({
+      name: 'task',
+      params: TASK_ROUTE_PARAMS,
+      query: { section: 'metadata' }
+    })
+    await flushPromises()
+
+    expect(tabs.props('activeTab')).toBe('metadata')
+    expect(isHidden('.preview-column')).toBe(true)
+    expect(isHidden('.info-block')).toBe(false)
+  })
+
+  // A client reads no metadata.
+  it('keeps a client on the preview, without tabs', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper, router } = await mountWithActions(
+      {},
+      {
+        getterOverrides: {
+          isCurrentUserClient: () => true,
+          taskMap: () => taskMap
+        }
+      }
+    )
+    await router.push({
+      name: 'task',
+      params: TASK_ROUTE_PARAMS,
+      query: { section: 'metadata' }
+    })
+    await flushPromises()
+
+    expect(wrapper.findComponent(RouteSectionTabs).exists()).toBe(false)
+    expect(wrapper.find('.preview-column').attributes('style')).toBeUndefined()
+  })
+
+  it('marks the editing a phone hides', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper } = await mountWithActions(
+      {},
+      {
+        getterOverrides: {
+          isCurrentUserProductionManager: () => true,
+          taskMap: () => taskMap
+        },
+        previews: [revision({ ...revisionFile(TASK_ID), extension: 'mp4' })]
+      }
+    )
+
+    expect(wrapper.find('button.set-preview-button').exists()).toBe(true)
+    expect(wrapper.find('label.use-current-frame').exists()).toBe(true)
+  })
+
   // A deleted task, one out of the user's reach, and a malformed id from a
   // broken link.
   it.each([400, 403, 404])('tells the task is missing on a %i', async status => {
@@ -712,7 +801,7 @@ describe('Task.vue task that fails to load', () => {
     expect(wrapper.text()).toContain('not_found.text')
     expect(homeLink(wrapper)).toBeDefined()
     expect(reloadButton(wrapper)).toBeUndefined()
-    expect(wrapper.find('.task-columns').exists()).toBe(false)
+    expect(wrapper.find('.preview-column').exists()).toBe(false)
     expect(dispatched).not.toContain('loadAssets')
     expect(consoleError.mock.calls).toEqual([[failure]])
   })
@@ -751,14 +840,14 @@ describe('Task.vue task that fails to load', () => {
     const { wrapper } = await mountWithActions({ loadTaskComments })
 
     expect(headerTitle(wrapper)).toBe('main.loading_error')
-    expect(wrapper.find('.task-columns').exists()).toBe(false)
+    expect(wrapper.find('.preview-column').exists()).toBe(false)
 
     await reloadButton(wrapper).vm.$emit('click')
     await flushPromises()
 
     expect(loadTaskComments).toHaveBeenCalledTimes(2)
     expect(headerTitle(wrapper)).toContain('SH01')
-    expect(wrapper.find('.task-columns').exists()).toBe(true)
+    expect(wrapper.find('.preview-column').exists()).toBe(true)
     expect(consoleError.mock.calls).toEqual([[failure]])
   })
 
@@ -847,7 +936,7 @@ describe('Task.vue task that fails to load', () => {
     })
 
     expect(rejections).toEqual([])
-    expect(wrapper.find('.task-columns').exists()).toBe(true)
+    expect(wrapper.find('.preview-column').exists()).toBe(true)
     expect(wrapper.find('.load-error').exists()).toBe(false)
     expect(wrapper.findComponent(Spinner).exists()).toBe(false)
     expect(setCurrentEpisode).not.toHaveBeenCalled()
@@ -1537,10 +1626,25 @@ describe('Task.vue task that fails to load', () => {
     taskMap.set(TASK_ID, buildTask())
     window.scrollTo.mockClear()
 
-    const { wrapper } = await mountWithActions({})
+    await mountWithActions({})
 
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
-    expect(wrapper.find('.task-columns').element.scrollTop).toBe(100)
+  })
+
+  // The comment box takes the focus when it shows: a narrow page, which
+  // scrolls as a whole, goes down to it.
+  it('scrolls the page back to its top once the first task shows', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const listLoad = deferred()
+    const { wrapper } = await mountWithActions({
+      loadShots: () => listLoad.promise
+    })
+    wrapper.element.scrollTop = 400
+
+    listLoad.resolve()
+    await flushPromises()
+
+    expect(wrapper.element.scrollTop).toBe(0)
   })
 
   // The list load puts its own copy of each task in the store, where a

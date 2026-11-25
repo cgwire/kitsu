@@ -479,7 +479,6 @@
       "for": "Pour",
       "go_productions": "Revenir à la production",
       "history": "Historique",
-      "info": "Information",
       "or": "ou",
       "next": "Suivant",
       "no": "Non",
@@ -663,6 +662,7 @@
         "metadata": "Métadonnées",
         "working_files": "Fichiers de travail",
         "output_files": "Fichiers de sortie",
+        "preview": "Preview",
         "preview_files": "Fichiers de preview",
         "schedule": "Planning",
         "timelog": "Temps passé"

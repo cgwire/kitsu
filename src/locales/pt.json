@@ -477,7 +477,6 @@
       "for": "Para",
       "go_productions": "Voltar para a produção",
       "history": "histórico",
-      "info": "Informação",
       "or": "ou",
       "next": "Próximo",
       "no": "Não",
@@ -660,6 +659,7 @@
         "metadata": "Metadados",
         "working_files": "Arquivos de trabalho",
         "output_files": "Arquivos de saída",
+        "preview": "Visualização",
         "preview_files": "Arquivos de visualização",
         "schedule": "Cronograma",
         "timelog": "Registro de tempo"

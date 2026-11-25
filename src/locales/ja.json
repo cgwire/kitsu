@@ -477,7 +477,6 @@
       "for": "対象",
       "go_productions": "プロダクションに戻る",
       "history": "履歴",
-      "info": "情報",
       "or": "または",
       "next": "次へ",
       "no": "いいえ",
@@ -660,6 +659,7 @@
         "metadata": "メタデータ",
         "working_files": "作業ファイル",
         "output_files": "出力ファイル",
+        "preview": "プレビュー",
         "preview_files": "プレビューファイル",
         "schedule": "スケジュール",
         "timelog": "タイムログ"
