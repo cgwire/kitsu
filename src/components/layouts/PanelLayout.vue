@@ -140,9 +140,11 @@ defineProps({
   border-radius: 10px;
 }
 
-// the side panel is its own surface: the column only frames it
+// the side panel is its own surface: the column only frames it, level with
+// the filters panel
 .panel-layout.paneled-side .side-column {
   background: transparent;
+  padding: 1em;
 }
 
 .paneled-side .side-column :deep(.side.task-info) {
@@ -165,10 +167,6 @@ defineProps({
 }
 
 @media screen and (min-width: 769px) {
-  .main-column {
-    padding: 80px 20px 20px;
-  }
-
   // the tabs run over the two columns, the side one as wide as it asks
   .with-tabs {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -176,18 +174,11 @@ defineProps({
 
   .page-tabs {
     grid-column: 1 / -1;
-    padding: 80px 20px 0;
   }
 
   // the gutter before the side panel belongs to its column
   .paneled-side.with-side .main-column {
     padding-right: 0;
-  }
-
-  // 20px under the 60px margin of the column puts the side panel level with
-  // the filters panel
-  .paneled-side .side-column {
-    padding: 20px 20px 20px 14px;
   }
 
   // The frame of a list is a sheet of the page color: the rows of a list in
@@ -238,10 +229,6 @@ defineProps({
     max-width: none;
     min-width: 0 !important;
     width: 100%;
-  }
-
-  .paneled-side .side-column {
-    padding: 1em;
   }
 
   .side-focused .main-column {
