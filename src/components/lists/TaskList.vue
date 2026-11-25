@@ -154,9 +154,9 @@
             }"
             role="button"
             tabindex="0"
-            @click="selectTask($event, index, task)"
-            @keydown.enter.prevent="selectTask($event, index, task)"
-            v-for="(task, index) in tasks"
+            @click="selectTask($event, task)"
+            @keydown.enter.prevent="selectTask($event, task)"
+            v-for="task in tasks"
           >
             <td class="thumbnail flexrow">
               <entity-thumbnail
@@ -427,9 +427,9 @@
             :key="task.id"
             role="button"
             tabindex="0"
-            @click="selectTaskFromCard($event, index, task)"
-            @keydown.enter.prevent="selectTaskFromCard($event, index, task)"
-            v-for="(task, index) in taskGroup.tasks"
+            @click="selectTaskFromCard($event, task)"
+            @keydown.enter.prevent="selectTaskFromCard($event, task)"
+            v-for="task in taskGroup.tasks"
           >
             <entity-preview
               class="flexrow-item"
@@ -934,7 +934,7 @@ const onBodyScroll = event => {
   emit('scroll', { top: position.scrollTop })
 }
 
-const selectTask = (event, index, task) => {
+const selectTask = (event, task) => {
   if (
     event &&
     event.target &&
@@ -956,15 +956,15 @@ const selectTask = (event, index, task) => {
       ['cell day selected'].includes(event.target.className))
   )
     return
-  applySelection(event, index, task)
+  applySelection(event, task)
 }
 
 // Card clicks skip the table-oriented guard above (it swallows most of
 // the card surface); only the avatar and its unassign menu must not
 // select.
-const selectTaskFromCard = (event, index, task) => {
+const selectTaskFromCard = (event, task) => {
   if (event.target?.closest?.('.avatar-wrapper')) return
-  applySelection(event, index, task)
+  applySelection(event, task)
 }
 
 const setScrollPosition = top => {

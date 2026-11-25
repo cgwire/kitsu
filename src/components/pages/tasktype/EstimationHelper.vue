@@ -270,8 +270,10 @@ const props = defineProps({
 const emit = defineEmits(['estimation-changed'])
 
 // State
-const lastSelection = ref(0)
-const lastShiftSelection = ref(0)
+// The tasks the arrows and the Shift+click go on from, none before a click:
+// a search, a task update, or a new assignee moves their rows.
+const lastSelectedId = ref(null)
+const rangeStartId = ref(null)
 const selectionGrid = ref({})
 // Imperative focus targets only, no reactivity needed
 const estimationInputs = new Map()
@@ -363,11 +365,15 @@ const estimationUpdated = (event, task) => {
   }
 }
 
+// The rows a search hides stay selected: the estimation goes to the ones
+// shown.
 const saveEstimations = (estimation, task) => {
-  const selection = Object.keys(selectionGrid.value)
+  const selection = tasksByPerson.value.filter(
+    ({ id }) => selectionGrid.value[id]
+  )
   if (selection.length > 1) {
-    selection.forEach(taskId => {
-      emit('estimation-changed', { taskId, estimation })
+    selection.forEach(({ id }) => {
+      emit('estimation-changed', { taskId: id, estimation })
     })
   } else {
     emit('estimation-changed', { taskId: task.id, estimation })
@@ -416,34 +422,36 @@ const selectTask = (event, task, index) => {
   }
 }
 
+// The first row stands for a task the rows leave out, or for no task.
+const findRow = taskId => {
+  const index = tasksByPerson.value.findIndex(({ id }) => id === taskId)
+  return index >= 0 ? index : 0
+}
+
 const selectPrevious = shiftKey => {
-  const index =
-    lastSelection.value - 1 < 0
-      ? tasksByPerson.value.length - 1
-      : lastSelection.value - 1
+  const lastRow = findRow(lastSelectedId.value)
+  const index = lastRow - 1 < 0 ? tasksByPerson.value.length - 1 : lastRow - 1
   selectTask({ shiftKey }, tasksByPerson.value[index], index)
 }
 
 const selectNext = shiftKey => {
-  const index =
-    lastSelection.value + 1 >= tasksByPerson.value.length
-      ? 0
-      : lastSelection.value + 1
+  const lastRow = findRow(lastSelectedId.value)
+  const index = lastRow + 1 >= tasksByPerson.value.length ? 0 : lastRow + 1
   selectTask({ shiftKey }, tasksByPerson.value[index], index)
 }
 
 const selectSingleTask = index => {
-  addToSelection(tasksByPerson.value[index].id)
-  lastSelection.value = index
-  lastShiftSelection.value = index
+  const taskId = tasksByPerson.value[index].id
+  addToSelection(taskId)
+  lastSelectedId.value = taskId
+  rangeStartId.value = taskId
 }
 
 const selectTaskRange = index => {
-  lastSelection.value = index
+  lastSelectedId.value = tasksByPerson.value[index].id
+  const startRow = findRow(rangeStartId.value)
   const taskIndices =
-    lastShiftSelection.value > index
-      ? range(index, lastShiftSelection.value)
-      : range(lastShiftSelection.value, index)
+    startRow > index ? range(index, startRow) : range(startRow, index)
   taskIndices.forEach(i => {
     addToSelection(tasksByPerson.value[i].id)
   })

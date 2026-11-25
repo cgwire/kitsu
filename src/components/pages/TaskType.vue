@@ -1042,24 +1042,7 @@ const initData = force => {
           setSearchFromUrl()
           resetTaskTypeDates()
         }, 200)
-
-        const view = readQueryView(route.query)
-        dueDateFilter.value = view.dueDate
-        estimationFilter.value = view.late
-        priorityFilter.value = view.priority
-        difficultyFilter.value = view.difficulty
-        retakeCountFilter.value = view.retakeCount
-        assetTypeIdsFilter.value = view.assetTypeIds
-        taskStatusIdsFilter.value = view.taskStatusIds
-
-        const taskId = route.query.task_id
-        const task = taskMap.value.get(taskId)
-        if (task) {
-          const index = tasks.value.findIndex(t => t.id === taskId)
-          nextTick(() => {
-            taskListRef.value?.selectTask({}, index, task)
-          })
-        }
+        applyQueryView()
       })
       .catch(err => {
         console.error(err)
@@ -1073,6 +1056,28 @@ const initData = force => {
       resetTaskTypeDates()
       loading.entities = false
       applySearchAndScheduleState()
+      applyQueryView()
+    })
+  }
+}
+
+// A return to the page finds its entities still loaded and skips their
+// load: both paths read the URL.
+const applyQueryView = () => {
+  const view = readQueryView(route.query)
+  dueDateFilter.value = view.dueDate
+  estimationFilter.value = view.late
+  priorityFilter.value = view.priority
+  difficultyFilter.value = view.difficulty
+  retakeCountFilter.value = view.retakeCount
+  assetTypeIdsFilter.value = view.assetTypeIds
+  taskStatusIdsFilter.value = view.taskStatusIds
+
+  const taskId = route.query.task_id
+  const task = taskMap.value.get(taskId)
+  if (task) {
+    nextTick(() => {
+      taskListRef.value?.selectTask({}, task)
     })
   }
 }

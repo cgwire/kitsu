@@ -245,6 +245,44 @@ describe('lists/TaskList', () => {
     wrapper.unmount()
   })
 
+  // The cards of a contact sheet grouped by sequence were numbered per
+  // group: a Shift+click in the second group selected cards of the first.
+  test('extends a Shift+click between the cards of a later group', async () => {
+    const shotMap = shotStore.cache.shotMap
+    onTestFinished(() => shotMap.clear())
+    const tasks = [1, 2, 3, 4].map(number => {
+      const sequenceNumber = number < 3 ? 1 : 2
+      shotMap.set(`shot-${number}`, {
+        id: `shot-${number}`,
+        name: `SH0${number}0`,
+        sequence_id: `sequence-${sequenceNumber}`
+      })
+      return {
+        ...task,
+        id: `task-${number}`,
+        entity: { id: `shot-${number}` },
+        sequence_name: `SQ0${sequenceNumber}`
+      }
+    })
+    const selection = trackTaskSelection()
+    const wrapper = mountList(undefined, {
+      selection,
+      props: {
+        entityType: 'Shot',
+        isContactSheet: true,
+        isGrouped: true,
+        tasks
+      }
+    })
+    onTestFinished(() => wrapper.unmount())
+    const cards = wrapper.findAll('.task-card')
+
+    await cards[2].trigger('click')
+    await cards[3].trigger('click', { shiftKey: true })
+
+    expect(selection.selectedIds()).toEqual(['task-3', 'task-4'])
+  })
+
   // Alt+Down came back to the only row and unselected it.
   test('keeps the only row selected on Alt+Down', async () => {
     const selection = trackTaskSelection()

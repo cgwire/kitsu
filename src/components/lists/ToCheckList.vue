@@ -57,9 +57,9 @@
             }"
             role="button"
             tabindex="0"
-            @click="selectTask($event, i, entry)"
-            @keydown.enter.prevent="selectTask($event, i, entry)"
-            v-for="(entry, i) in tasks"
+            @click="selectTask($event, entry)"
+            @keydown.enter.prevent="selectTask($event, entry)"
+            v-for="entry in tasks"
           >
             <td
               class="production datatable-row-header datatable-row-header--nobd card-head"
@@ -453,7 +453,7 @@ const updateDueDate = date =>
     )
   })
 
-const selectTask = (event, index, task) => {
+const selectTask = (event, task) => {
   if (
     event &&
     event.target &&
@@ -464,7 +464,7 @@ const selectTask = (event, index, task) => {
       ['cell day selected'].includes(event.target.className))
   )
     return
-  applySelection(event, index, task)
+  applySelection(event, task)
 }
 
 // Lifecycle

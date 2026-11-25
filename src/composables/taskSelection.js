@@ -57,11 +57,21 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
     lastSelection.value = index
   }
 
-  const applySelection = (event, index, task) => {
+  // The row of a task in the listed tasks, not a loop index of the caller: a
+  // card grid restarts its index in each group. A task left out, the one of
+  // a link its filters hide, has no row: a Shift+click then starts from the
+  // first row.
+  const findRow = task => {
+    const index = tasks().findIndex(({ id }) => id === task.id)
+    return index >= 0 ? index : null
+  }
+
+  const applySelection = (event, task) => {
     // The page a link of the row opens can replace the list, and clear the
     // selection, before the click reaches the row: a task selected then
     // would stay selected on that page, out of sight.
     if (isUnmounted) return
+    const index = findRow(task)
     const isSelected = selectionGrid.value[task.id]
     const isManySelection = Object.keys(selectionGrid.value).length > 1
     if (!(event.ctrlKey || event.metaKey) && !event.shiftKey) {
