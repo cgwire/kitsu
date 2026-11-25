@@ -1492,18 +1492,25 @@ describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name
   }
 )
 
-describe('Asset page, panel layout', () => {
+describe.each(
+  [
+    ['Asset', ['chat', 'concepts', 'casting', 'schedule', 'time-logs', 'preview-files', 'working-files', 'output-files']],
+    ['Edit', ['chat', 'schedule', 'time-logs', 'preview-files', 'activity', 'working-files', 'output-files']],
+    ['Episode', ['chat', 'casting', 'schedule', 'time-logs', 'preview-files']],
+    ['Sequence', ['chat', 'casting', 'schedule', 'time-logs', 'preview-files']],
+    ['Shot', ['chat', 'casting', 'schedule', 'time-logs', 'preview-files', 'working-files', 'output-files']]
+  ].map(([name, sections]) => ({
+    ...pages.find(page => page.name === name),
+    sections
+  }))
+)('$name page, panel layout', ({ entityMap, entityParam, name, page, sections }) => {
   const mountSection = section => {
-    assetStore.cache.assetMap.set('entity-1', {
-      id: 'entity-1',
-      name: 'Tree',
-      tasks: []
-    })
-    return mountPage(Asset, 'asset_id', production, {}, {}, { section })
+    entityMap.set('entity-1', { id: 'entity-1', name: 'E01', tasks: [] })
+    return mountPage(page, entityParam, production, {}, {}, { section })
   }
 
   afterEach(() => {
-    assetStore.cache.assetMap.clear()
+    entityMap.clear()
   })
 
   test('lays its header, its sections and its task panel out', async () => {
@@ -1515,20 +1522,11 @@ describe('Asset page, panel layout', () => {
     expect(list.findComponent(EntityTaskList).exists()).toBe(true)
     const side = wrapper.find('.side-column')
     expect(side.findComponent({ name: 'TaskInfo' }).props('entityType')).toBe(
-      'Asset'
+      name
     )
   })
 
-  test('shows the panel of the concepts on their section', async () => {
-    const { wrapper } = await mountSection('concepts')
-
-    const panels = wrapper
-      .find('.side-column')
-      .findAllComponents({ name: 'TaskInfo' })
-    expect(panels.map(panel => panel.props('entityType'))).toEqual(['Concept'])
-  })
-
-  test('sets the information of the asset apart from its tasks', async () => {
+  test('opens on the tasks, the metadata in the tab after', async () => {
     const { wrapper } = await mountSection('information')
 
     const tabs = wrapper.findComponent(RouteSectionTabs).props('tabs')
@@ -1536,23 +1534,10 @@ describe('Asset page, panel layout', () => {
       { label: 'main.tasks', name: 'infos' },
       { label: 'main.label.info', name: 'information' }
     ])
-    expect(tabs.slice(-4)).toEqual([
-      { label: 'main.label.timelog', name: 'time-logs' },
-      { label: 'main.label.preview_files', name: 'preview-files' },
-      { label: 'main.label.working_files', name: 'working-files' },
-      { label: 'main.label.output_files', name: 'output-files' }
-    ])
+    expect(tabs.slice(2).map(tab => tab.name)).toEqual(sections)
     expect(wrapper.find('.infos .metadata-infos').exists()).toBe(false)
     expect(wrapper.find('.information .metadata-infos').exists()).toBe(true)
     expect(wrapper.find('.side-column').exists()).toBe(false)
-  })
-
-  test('lists the working files of the asset on their section', async () => {
-    const { wrapper } = await mountSection('working-files')
-
-    expect(
-      wrapper.findComponent({ name: 'EntityWorkingFiles' }).props('entity')
-    ).toMatchObject({ id: 'entity-1' })
   })
 
   test('keeps the side panel for the sections that have one', async () => {
@@ -1560,6 +1545,38 @@ describe('Asset page, panel layout', () => {
 
     expect(wrapper.find('.side-column').exists()).toBe(false)
     expect(wrapper.find('.drawer-backdrop').exists()).toBe(false)
+  })
+
+  if (sections.includes('working-files')) {
+    test('lists the working files of its entity on their section', async () => {
+      const { wrapper } = await mountSection('working-files')
+
+      expect(
+        wrapper.findComponent({ name: 'EntityWorkingFiles' }).props('entity')
+      ).toMatchObject({ id: 'entity-1' })
+    })
+  }
+})
+
+describe('Asset page, panel of the concepts', () => {
+  afterEach(() => {
+    assetStore.cache.assetMap.clear()
+  })
+
+  test('shows the panel of the concepts on their section', async () => {
+    assetStore.cache.assetMap.set('entity-1', {
+      id: 'entity-1',
+      name: 'Tree',
+      tasks: []
+    })
+    const { wrapper } = await mountPage(Asset, 'asset_id', production, {}, {}, {
+      section: 'concepts'
+    })
+
+    const panels = wrapper
+      .find('.side-column')
+      .findAllComponents({ name: 'TaskInfo' })
+    expect(panels.map(panel => panel.props('entityType'))).toEqual(['Concept'])
   })
 })
 
