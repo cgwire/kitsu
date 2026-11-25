@@ -631,6 +631,20 @@ describe('lists/TaskList', () => {
       wrapper.unmount()
     })
 
+    // A selection can hold a thousand rows: their calendars would take
+    // seconds to load at once.
+    test('makes the date fields of a selected row lazy', async () => {
+      const wrapper = mountDatedList()
+      await wrapper.find('tbody td.name').trigger('click')
+
+      const cells = ['start-date', 'due-date', ...realDateCells]
+      expect(cells.map(cell => dateField(wrapper, cell).props('lazy'))).toEqual(
+        cells.map(() => true)
+      )
+
+      wrapper.unmount()
+    })
+
     // As the import of Zou: a mistyped year would spread the task over
     // decades of quota days.
     test('offers the days from 2000 to 2100 only', async () => {
