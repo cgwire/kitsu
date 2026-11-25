@@ -204,7 +204,9 @@ defineEmits(['click'])
 </script>
 
 <style lang="scss" scoped>
-.is-primary {
+// Production builds load this CSS before Bulma and App.vue, so the rules
+// that compete with their .button rules take the .button prefix to win.
+.button.is-primary {
   border-radius: 10px;
 }
 
@@ -214,7 +216,7 @@ defineEmits(['click'])
   padding: 0.5em 1em;
 }
 
-.is-medium {
+.button.is-medium {
   font-size: 1rem;
   height: 40px;
 }
@@ -225,7 +227,7 @@ defineEmits(['click'])
   padding: 0.25em 0.5em;
 }
 
-.active {
+.button.active {
   box-shadow: inset 0 0 2px 2px var(--box-shadow);
 }
 
