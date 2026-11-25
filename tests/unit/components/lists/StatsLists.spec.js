@@ -483,6 +483,18 @@ describe('lists/EpisodeStatsList expander', () => {
     expect(takeRows(wrapper)).toHaveLength(0)
   })
 
+  // A role="button" answers Space as well as Enter.
+  test.each(['Enter', ' '])('toggles them with the %j key', async key => {
+    const wrapper = mountEpisodes({ dataMode: 'retakes' })
+    const expander = wrapper.find('td.expander[role="button"]')
+
+    await expander.trigger('keydown', { key })
+    expect(takeRows(wrapper)).toHaveLength(2)
+
+    await expander.trigger('keydown', { key })
+    expect(takeRows(wrapper)).toHaveLength(0)
+  })
+
   // Hiding every task type an episode has retakes for empties its total.
   test('expands an episode without retake total into no take row', async () => {
     const wrapper = mountEpisodes({
