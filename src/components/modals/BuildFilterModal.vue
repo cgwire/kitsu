@@ -809,6 +809,7 @@ const onDescriptorChanged = (descriptorFilter, filter) => {
     }
   } else if (descriptor.data_type === 'boolean') {
     descriptorFilter.values = ['-true']
+    descriptorFilter.operator = '='
   } else {
     descriptorFilter.values = ['']
   }

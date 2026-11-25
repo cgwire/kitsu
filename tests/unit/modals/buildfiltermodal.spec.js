@@ -48,7 +48,13 @@ describe('BuildFilterModal', () => {
             name: 'Difficulty',
             choices: ['easy', 'hard']
           },
-          { id: 'descriptor-2', name: 'Size' }
+          { id: 'descriptor-2', name: 'Size' },
+          {
+            id: 'descriptor-5',
+            name: 'Approved',
+            data_type: 'boolean',
+            choices: []
+          }
         ],
         assetSearchText: state => state.assetSearchText,
         assetValidationColumns: () => ['task-type-1', 'task-type-2'],
@@ -209,7 +215,7 @@ describe('BuildFilterModal', () => {
         })
     })
 
-    describe('operator change', () => {
+    describe('row changes', () => {
       // The real combobox, whose select emits the operator chosen.
       const mountOnQuery = async query => {
         store.commit('CHANGE_SEARCH', query)
@@ -322,6 +328,25 @@ describe('BuildFilterModal', () => {
         )
         expect(confirmedQuery(modal)).toBe('')
       })
+
+      it.each([
+        [
+          'Not in',
+          'Difficulty=[-easy,hard]',
+          'not_checked',
+          '[Approved]=[-true]'
+        ],
+        ['Not equal', 'Difficulty=-easy', 'checked', '[Approved]=[true]']
+      ])(
+        'filters on the checkbox value chosen when a %s row moves to a checkbox field',
+        async (_, query, choice, expected) => {
+          const modal = await mountOnQuery(query)
+          const row = modal.find('.descriptor-filter')
+          await row.findAll('select')[0].setValue('Approved')
+          await row.findAll('select')[1].setValue(choice)
+          expect(confirmedQuery(modal)).toBe(expected)
+        }
+      )
     })
   })
 
