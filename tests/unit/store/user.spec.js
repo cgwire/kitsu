@@ -791,6 +791,24 @@ describe('User store', () => {
       productionId: 'production-1'
     },
     {
+      page: 'Team',
+      type: 'Team',
+      listType: 'team',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Quotas',
+      type: 'Quotas',
+      listType: 'quotas',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Production Schedule',
+      type: 'ProductionSchedule',
+      listType: 'productionschedule',
+      productionId: 'production-1'
+    },
+    {
       page: 'Production News Feed',
       type: 'ProductionNewsFeed',
       listType: 'newsfeed',

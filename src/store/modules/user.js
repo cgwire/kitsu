@@ -253,7 +253,14 @@ const PAGE_SEARCHES = [
   { type: 'concepts', listType: 'concepts', isInProduction: true },
   { type: 'assetTypeStats', listType: 'assettypestats', isInProduction: true },
   { type: 'sequenceStats', listType: 'sequencestats', isInProduction: true },
-  { type: 'episodeStats', listType: 'episodestats', isInProduction: true }
+  { type: 'episodeStats', listType: 'episodestats', isInProduction: true },
+  { type: 'team', listType: 'team', isInProduction: true },
+  { type: 'quotas', listType: 'quotas', isInProduction: true },
+  {
+    type: 'productionSchedule',
+    listType: 'productionschedule',
+    isInProduction: true
+  }
 ]
 
 const pageSearchGetters = Object.fromEntries(
