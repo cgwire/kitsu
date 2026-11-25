@@ -66,6 +66,9 @@
             class="flexrow-item"
             :task-type-list="taskTypeListWithAll"
             :with-margin="false"
+            @update:model-value="
+              taskTypeId => onTaskTypeChanged(taskTypeFilter, taskTypeId)
+            "
             v-model="taskTypeFilter.id"
           />
           <combobox
@@ -785,6 +788,14 @@ const removeTaskTypeFilter = taskTypeFilter => {
   taskTypeFilters.values = taskTypeFilters.values.filter(
     f => f.localId !== taskTypeFilter.localId
   )
+}
+
+// All task types offer no Without a task or With a task operator.
+const onTaskTypeChanged = (taskTypeFilter, taskTypeId) => {
+  if (!taskTypeId && isTaskPresence(taskTypeFilter.operator)) {
+    onOperatorChanged(taskTypeFilter, '=')
+    taskTypeFilter.operator = '='
+  }
 }
 
 const addInDescriptorFilter = descriptorFilter => {

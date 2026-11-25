@@ -4,6 +4,7 @@ import { createStore } from 'vuex'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 
 import productionStoreFixture from '../fixtures/production-store'
 
@@ -347,6 +348,53 @@ describe('BuildFilterModal', () => {
           expect(confirmedQuery(modal)).toBe(expected)
         }
       )
+
+      // An empty id stands for All.
+      const chooseTaskType = async (modal, row, taskTypeId) => {
+        row
+          .findComponent(ComboboxTaskType)
+          .vm.$emit('update:model-value', taskTypeId)
+        await modal.vm.$nextTick()
+      }
+
+      it.each([
+        ['Without a task', 'Modeling=empty'],
+        ['With a task', 'Modeling=-empty']
+      ])(
+        'goes back to Equal when a restored %s row moves to all task types',
+        async (_, query) => {
+          const modal = await mountOnQuery(query)
+          const row = modal.find('.task-type-filter')
+          expect(valueFields(row)).toHaveLength(0)
+          await chooseTaskType(modal, row, '')
+          const operator = operatorSelect(row)
+          expect(operator.find('option[value=""]').exists()).toBe(false)
+          expect(operator.element.value).toBe('equal')
+          expect(valueFields(row)).toHaveLength(1)
+          expect(confirmedQuery(modal)).toBe('status=[Done]')
+        }
+      )
+
+      it('shows the status kept under Without a task when the row moves to all task types', async () => {
+        const modal = await mountOnQuery('Modeling=WIP')
+        const row = modal.find('.task-type-filter')
+        await operatorSelect(row).setValue('without_task')
+        expect(valueFields(row)).toHaveLength(0)
+        await chooseTaskType(modal, row, '')
+        const operator = operatorSelect(row)
+        expect(operator.find('option[value=""]').exists()).toBe(false)
+        expect(operator.element.value).toBe('equal')
+        expect(valueFields(row)).toHaveLength(1)
+        expect(confirmedQuery(modal)).toBe('status=[WIP]')
+      })
+
+      it('keeps Without a task when the row moves to another task type', async () => {
+        const modal = await mountOnQuery('Modeling=empty')
+        const row = modal.find('.task-type-filter')
+        await chooseTaskType(modal, row, 'task-type-2')
+        expect(valueFields(row)).toHaveLength(0)
+        expect(confirmedQuery(modal)).toBe('[Rigging]=empty')
+      })
     })
   })
 
