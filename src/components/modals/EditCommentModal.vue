@@ -16,7 +16,7 @@
         <form @submit.prevent>
           <combobox-status
             :label="$t('task_status.title')"
-            :production-id="currentProduction?.id || ''"
+            :production-id="taskProductionId"
             :task-status-list="taskStatuses"
             v-model="form.task_status_id"
           />
@@ -261,8 +261,9 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const getTaskStatusForCurrentUser = computed(
   () => store.getters.getTaskStatusForCurrentUser
 )
-const taskStatusForCurrentUser = computed(
-  () => store.getters.taskStatusForCurrentUser
+// The hosts that pass no production show tasks of the current one.
+const taskProductionId = computed(
+  () => props.productionId || currentProduction.value?.id || ''
 )
 
 const isConceptTask = computed(() => route.path.includes('concept'))
@@ -270,7 +271,7 @@ const isConceptTask = computed(() => route.path.includes('concept'))
 const taskStatuses = computed(() =>
   isConceptTask.value
     ? getTaskStatusForCurrentUser.value(null, true)
-    : taskStatusForCurrentUser.value.filter(status => !status.for_concept)
+    : getTaskStatusForCurrentUser.value(taskProductionId.value)
 )
 
 const isPreviewsComment = computed(

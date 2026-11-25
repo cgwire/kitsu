@@ -16,8 +16,7 @@ const store = createStore({
     departmentMap: () => new Map(),
     getProductionDepartmentIds: () => () => [],
     getTaskStatusForCurrentUser: () => () => [],
-    isCurrentUserClient: () => false,
-    taskStatusForCurrentUser: () => []
+    isCurrentUserClient: () => false
   }
 })
 
@@ -137,48 +136,100 @@ describe('modals/EditCommentModal', () => {
     expect(confirmForm(wrapper).text).toBe('`S:\\8_anim\\_lib`')
   })
 
-  // The comment form of a task shows the same order.
-  it('lists the statuses in the order of the production', async () => {
+  // The comment form of a task lists the same statuses, in the same order.
+  describe('statuses', () => {
     const statuses = [
       { id: 'status-retake', name: 'Retake', short_name: 'retake' },
       { id: 'status-wip', name: 'Work In Progress', short_name: 'wip' }
     ]
-    const production = {
-      id: 'production-1',
+    const done = { id: 'status-done', name: 'Done', short_name: 'done' }
+    const buildProduction = (id, retakePriority, wipPriority) => ({
+      id,
       task_statuses_link: {
-        'status-retake': { priority: 2 },
-        'status-wip': { priority: 1 }
+        'status-retake': { priority: retakePriority },
+        'status-wip': { priority: wipPriority }
       }
+    })
+
+    const listStatuses = async (
+      currentProduction,
+      productions,
+      props = {},
+      statusesOf = () => statuses
+    ) => {
+      const productionStore = createStore({
+        getters: {
+          currentProduction: () => currentProduction,
+          departmentMap: () => new Map(),
+          getProductionDepartmentIds: () => () => [],
+          getTaskStatusForCurrentUser: () => productionId =>
+            statusesOf(productionId),
+          isCurrentUserClient: () => false,
+          isDarkTheme: () => false,
+          productionMap: () =>
+            new Map(productions.map(production => [production.id, production])),
+          taskStatusMap: () =>
+            new Map([...statuses, done].map(status => [status.id, status]))
+        }
+      })
+      wrapper.unmount()
+      wrapper = shallowMountWithI18n(EditCommentModal, {
+        global: {
+          plugins: [productionStore],
+          stubs: { ComboboxStatus: false, TextField: TextFieldStub }
+        },
+        props: { active: false, commentToEdit: null, ...props }
+      })
+      await openOn(wrapper, buildComment('comment-1', []))
+      await wrapper.find('[role="combobox"]').trigger('click')
+      return wrapper
+        .findAll('[role="option"] .tag')
+        .map(tag => tag.attributes('title'))
     }
-    const productionStore = createStore({
-      getters: {
-        currentProduction: () => production,
-        departmentMap: () => new Map(),
-        getProductionDepartmentIds: () => () => [],
-        getTaskStatusForCurrentUser: () => () => [],
-        isCurrentUserClient: () => false,
-        isDarkTheme: () => false,
-        productionMap: () => new Map([[production.id, production]]),
-        taskStatusForCurrentUser: () => statuses,
-        taskStatusMap: () =>
-          new Map(statuses.map(status => [status.id, status]))
+
+    it('lists the statuses in the order of the production', async () => {
+      const production = buildProduction('production-1', 2, 1)
+
+      expect(await listStatuses(production, [production])).toEqual([
+        'Work In Progress',
+        'Retake'
+      ])
+    })
+
+    // On My Tasks, the current production can be any other one.
+    it('lists the statuses in the order of the given production', async () => {
+      const currentProduction = buildProduction('production-1', 1, 2)
+      const taskProduction = buildProduction('production-2', 2, 1)
+
+      expect(
+        await listStatuses(
+          currentProduction,
+          [currentProduction, taskProduction],
+          { productionId: 'production-2' }
+        )
+      ).toEqual(['Work In Progress', 'Retake'])
+    })
+
+    it('lists the statuses of the given production', async () => {
+      const currentProduction = buildProduction('production-1', 1, 2)
+      const taskProduction = {
+        id: 'production-2',
+        task_statuses_link: {
+          'status-done': { priority: 2 },
+          'status-wip': { priority: 1 }
+        }
       }
-    })
-    wrapper.unmount()
-    wrapper = shallowMountWithI18n(EditCommentModal, {
-      global: {
-        plugins: [productionStore],
-        stubs: { ComboboxStatus: false, TextField: TextFieldStub }
-      },
-      props: { active: false, commentToEdit: null }
-    })
-    await openOn(wrapper, buildComment('comment-1', []))
 
-    await wrapper.find('[role="combobox"]').trigger('click')
-
-    expect(
-      wrapper.findAll('[role="option"] .tag').map(tag => tag.attributes('title'))
-    ).toEqual(['Work In Progress', 'Retake'])
+      expect(
+        await listStatuses(
+          currentProduction,
+          [currentProduction, taskProduction],
+          { productionId: 'production-2' },
+          productionId =>
+            productionId === 'production-2' ? [done, statuses[1]] : statuses
+        )
+      ).toEqual(['Work In Progress', 'Done'])
+    })
   })
 
   describe('suggestion list', () => {
@@ -299,8 +350,7 @@ describe('modals/EditCommentModal', () => {
               ? ['department-model']
               : ['department-layout'],
           getTaskStatusForCurrentUser: () => () => [],
-          isCurrentUserClient: () => false,
-          taskStatusForCurrentUser: () => []
+          isCurrentUserClient: () => false
         }
       })
       wrapper.unmount()
