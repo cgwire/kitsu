@@ -301,6 +301,21 @@ describe('store/api endpoints', () => {
     })
   })
 
+  // A query string reads "+" as a space: Zou looked up another address, so
+  // the email code never came and the FIDO challenge was refused.
+  describe('people 2FA requests by email', () => {
+    test.each([
+      ['sendEmailOTP', '/api/auth/email-otp'],
+      ['getFIDOChallenge', '/api/auth/fido']
+    ])('%s keeps the plus sign of the email', (name, path) => {
+      peopleApi[name]('ada+kitsu@example.com')
+
+      expect(client.pget).toHaveBeenCalledWith(
+        `${path}?email=ada%2Bkitsu%40example.com`
+      )
+    })
+  })
+
   describe('people setTimeSpent', () => {
     const path =
       '/api/actions/tasks/task-1/time-spents/2026-10-06/persons/person-1'

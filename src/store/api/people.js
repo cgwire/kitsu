@@ -188,7 +188,7 @@ export default {
   },
 
   sendEmailOTP(email) {
-    return client.pget(`/api/auth/email-otp?email=${email}`)
+    return client.pget(`/api/auth/email-otp?email=${encodeURIComponent(email)}`)
   },
 
   preEnableEmailOTP() {
@@ -223,7 +223,7 @@ export default {
   },
 
   getFIDOChallenge(email) {
-    return client.pget(`/api/auth/fido?email=${email}`)
+    return client.pget(`/api/auth/fido?email=${encodeURIComponent(email)}`)
   },
 
   unregisterFIDO(deviceName, twoFactorPayload) {
