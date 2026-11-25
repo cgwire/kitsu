@@ -450,6 +450,11 @@
           v-if="currentSection === 'time-logs'"
         />
 
+        <entity-working-files
+          :entity="currentAsset"
+          v-if="currentSection === 'working-files'"
+        />
+
         <entity-output-files
           :entity="currentAsset"
           v-if="currentSection === 'output-files'"
@@ -554,6 +559,7 @@ import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
+import EntityWorkingFiles from '@/components/pages/entities/EntityWorkingFiles.vue'
 import Schedule from '@/components/schedule/Schedule.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -669,8 +675,9 @@ const assetTabs = computed(() => [
   { label: t('main.label.concepts'), name: 'concepts' },
   { label: t('main.label.casting'), name: 'casting' },
   { label: t('main.label.schedule'), name: 'schedule' },
-  { label: t('main.label.preview_files'), name: 'preview-files' },
   { label: t('main.label.timelog'), name: 'time-logs' },
+  { label: t('main.label.preview_files'), name: 'preview-files' },
+  { label: t('main.label.working_files'), name: 'working-files' },
   { label: t('main.label.output_files'), name: 'output-files' }
 ])
 

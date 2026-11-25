@@ -276,6 +276,9 @@
         "uploader": "Subido por",
         "uploaded_at": "Fecha de subida"
       },
+      "working_files": {
+        "no_working_files": "No hay archivos de trabajo para esta entidad."
+      },
       "output_files": {
         "extension": "Extensión",
         "name": "Nombre",
@@ -656,6 +659,7 @@
         "chat": "Chat",
         "concepts": "Conceptos",
         "info": "Información",
+        "working_files": "Archivos de trabajo",
         "output_files": "Archivos de salida",
         "preview_files": "Archivos de vista previa",
         "schedule": "Calendario",

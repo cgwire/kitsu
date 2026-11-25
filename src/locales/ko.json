@@ -276,6 +276,9 @@
         "uploader": "업로드한 사람",
         "uploaded_at": "업로드 일시"
       },
+      "working_files": {
+        "no_working_files": "이 엔티티에 대한 작업 파일이 없습니다."
+      },
       "output_files": {
         "extension": "확장자",
         "name": "이름",
@@ -656,6 +659,7 @@
         "chat": "채팅",
         "concepts": "컨셉",
         "info": "정보",
+        "working_files": "작업 파일",
         "output_files": "출력 파일",
         "preview_files": "미리 보기 파일",
         "schedule": "일정",

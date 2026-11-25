@@ -276,6 +276,9 @@
         "uploader": "آپلود شده توسط",
         "uploaded_at": "آپلود شده در"
       },
+      "working_files": {
+        "no_working_files": "هیچ فایل کاری برای این مورد وجود ندارد."
+      },
       "output_files": {
         "extension": "پسوند",
         "name": "نام",
@@ -656,6 +659,7 @@
         "chat": "چت",
         "concepts": "کانسپت ها",
         "info": "اطلاعات",
+        "working_files": "فایل‌های کاری",
         "output_files": "فایل‌های خروجی",
         "preview_files": "فایل‌های پیش‌نمایش",
         "schedule": "زمان‌بندی",

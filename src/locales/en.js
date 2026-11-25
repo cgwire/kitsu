@@ -642,6 +642,10 @@ export default {
       undefined: 'Undefined',
       undefined_pattern: 'Undefined',
       upload: 'Add Thumbnails'
+    },
+
+    working_files: {
+      no_working_files: 'There are no working files for this entity.'
     }
   },
 
@@ -977,6 +981,7 @@ export default {
       preview_files: 'Preview Files',
       schedule: 'Schedule',
       timelog: 'Timelog',
+      working_files: 'Working Files'
     },
     less_filters: 'Fewer filters',
     link: 'Link',

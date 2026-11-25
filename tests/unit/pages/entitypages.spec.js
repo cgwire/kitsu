@@ -1536,9 +1536,23 @@ describe('Asset page, panel layout', () => {
       { label: 'main.tasks', name: 'infos' },
       { label: 'main.label.info', name: 'information' }
     ])
+    expect(tabs.slice(-4)).toEqual([
+      { label: 'main.label.timelog', name: 'time-logs' },
+      { label: 'main.label.preview_files', name: 'preview-files' },
+      { label: 'main.label.working_files', name: 'working-files' },
+      { label: 'main.label.output_files', name: 'output-files' }
+    ])
     expect(wrapper.find('.infos .metadata-infos').exists()).toBe(false)
     expect(wrapper.find('.information .metadata-infos').exists()).toBe(true)
     expect(wrapper.find('.side-column').exists()).toBe(false)
+  })
+
+  test('lists the working files of the asset on their section', async () => {
+    const { wrapper } = await mountSection('working-files')
+
+    expect(
+      wrapper.findComponent({ name: 'EntityWorkingFiles' }).props('entity')
+    ).toMatchObject({ id: 'entity-1' })
   })
 
   test('keeps the side panel for the sections that have one', async () => {

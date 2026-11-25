@@ -276,6 +276,9 @@
         "uploader": "Geüpload door",
         "uploaded_at": "Geüpload op"
       },
+      "working_files": {
+        "no_working_files": "Er zijn geen werkbestanden voor deze entiteit."
+      },
       "output_files": {
         "extension": "Extensie",
         "name": "Naam",
@@ -656,6 +659,7 @@
         "chat": "Chat",
         "concepts": "Concepten",
         "info": "Info",
+        "working_files": "Werkbestanden",
         "output_files": "Uitvoerbestanden",
         "preview_files": "Previewbestanden",
         "schedule": "Planning",

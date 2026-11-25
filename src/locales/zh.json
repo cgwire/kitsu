@@ -276,6 +276,9 @@
         "uploader": "上传者",
         "uploaded_at": "上传于"
       },
+      "working_files": {
+        "no_working_files": "该实体没有工作文件。"
+      },
       "output_files": {
         "extension": "扩展名",
         "name": "名称",
@@ -656,6 +659,7 @@
         "chat": "聊天",
         "concepts": "概念",
         "info": "信息",
+        "working_files": "工作文件",
         "output_files": "输出文件",
         "preview_files": "预览文件",
         "schedule": "时间安排",

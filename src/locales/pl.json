@@ -574,6 +574,9 @@
       "logs": {
         "no_logs": "Brak wpisów czasu pracy dla tego obiektu."
       },
+      "working_files": {
+        "no_working_files": "Brak plików roboczych dla tego obiektu."
+      },
       "output_files": {
         "extension": "Rozszerzenie",
         "name": "Nazwa",
@@ -937,6 +940,7 @@
         "chat": "Czat",
         "concepts": "Koncepty",
         "info": "Info",
+        "working_files": "Pliki robocze",
         "output_files": "Pliki wyjściowe",
         "preview_files": "Pliki podglądu",
         "schedule": "Harmonogram",

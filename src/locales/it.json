@@ -276,6 +276,9 @@
         "uploader": "Caricato da",
         "uploaded_at": "Caricato il"
       },
+      "working_files": {
+        "no_working_files": "Non ci sono file di lavoro per questa entità."
+      },
       "output_files": {
         "extension": "Estensione",
         "name": "Nome",
@@ -659,6 +662,7 @@
         "chat": "Chat",
         "concepts": "Concept",
         "info": "Info",
+        "working_files": "File di lavoro",
         "output_files": "File di output",
         "preview_files": "File di anteprima",
         "schedule": "Pianificazione",

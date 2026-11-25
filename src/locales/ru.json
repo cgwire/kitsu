@@ -276,6 +276,9 @@
         "uploader": "Кем загружено",
         "uploaded_at": "Загружено"
       },
+      "working_files": {
+        "no_working_files": "Нет рабочих файлов для этого объекта."
+      },
       "output_files": {
         "extension": "Расширение",
         "name": "Название",
@@ -656,6 +659,7 @@
         "chat": "Чат",
         "concepts": "Концепты",
         "info": "Информация",
+        "working_files": "Рабочие файлы",
         "output_files": "Выходные файлы",
         "preview_files": "Файлы превью",
         "schedule": "Расписание",

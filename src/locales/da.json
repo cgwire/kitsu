@@ -276,6 +276,9 @@
         "uploader": "Uploadet af",
         "uploaded_at": "Uploadet den"
       },
+      "working_files": {
+        "no_working_files": "Der er ingen arbejdsfiler for denne enhed."
+      },
       "output_files": {
         "extension": "Filtypenavn",
         "name": "Navn",
@@ -656,6 +659,7 @@
         "chat": "Chat",
         "concepts": "Koncepter",
         "info": "Info",
+        "working_files": "Arbejdsfiler",
         "output_files": "Output-filer",
         "preview_files": "Preview-filer",
         "schedule": "Tidsplan",

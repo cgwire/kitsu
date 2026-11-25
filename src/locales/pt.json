@@ -276,6 +276,9 @@
         "uploader": "Carregado por",
         "uploaded_at": "Carregado em"
       },
+      "working_files": {
+        "no_working_files": "Não há arquivos de trabalho para essa entidade."
+      },
       "output_files": {
         "extension": "Extensão",
         "name": "Nome",
@@ -656,6 +659,7 @@
         "chat": "Bate-papo",
         "concepts": "Conceitos",
         "info": "Informações",
+        "working_files": "Arquivos de trabalho",
         "output_files": "Arquivos de saída",
         "preview_files": "Arquivos de visualização",
         "schedule": "Cronograma",

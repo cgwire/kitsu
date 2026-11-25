@@ -276,6 +276,9 @@
         "uploader": "アップロード者",
         "uploaded_at": "アップロード日時"
       },
+      "working_files": {
+        "no_working_files": "このエンティティの作業ファイルはありません。"
+      },
       "output_files": {
         "extension": "拡張子",
         "name": "名前",
@@ -656,6 +659,7 @@
         "chat": "チャット",
         "concepts": "コンセプト",
         "info": "情報",
+        "working_files": "作業ファイル",
         "output_files": "出力ファイル",
         "preview_files": "プレビューファイル",
         "schedule": "スケジュール",

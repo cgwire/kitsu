@@ -265,6 +265,9 @@
       "logs": {
         "no_logs": "Nincs munkaidő-napló ehhez az elemhez."
       },
+      "working_files": {
+        "no_working_files": "Nincs munkafájl ehhez az elemhez."
+      },
       "output_files": {
         "extension": "Kiterjesztés",
         "name": "Név",
@@ -653,6 +656,7 @@
         "chat": "Chat",
         "concepts": "Koncepciók",
         "info": "Információ",
+        "working_files": "Munkafájlok",
         "output_files": "Kimeneti fájlok",
         "preview_files": "Előnézeti fájlok",
         "schedule": "Időbeosztás",

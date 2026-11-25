@@ -276,6 +276,9 @@
         "uploader": "上傳者",
         "uploaded_at": "上傳於"
       },
+      "working_files": {
+        "no_working_files": "此實體沒有工作檔案。"
+      },
       "output_files": {
         "extension": "副檔名",
         "name": "名稱",
@@ -656,6 +659,7 @@
         "chat": "聊天",
         "concepts": "概念",
         "info": "資訊",
+        "working_files": "工作檔案",
         "output_files": "輸出檔案",
         "preview_files": "預覽檔案",
         "schedule": "時間表",

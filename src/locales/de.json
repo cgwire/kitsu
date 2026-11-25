@@ -276,6 +276,9 @@
         "uploader": "Hochgeladen von",
         "uploaded_at": "Hochgeladen am"
       },
+      "working_files": {
+        "no_working_files": "Für diese Entität gibt es keine Arbeitsdateien."
+      },
       "output_files": {
         "extension": "Erweiterung",
         "name": "Name",
@@ -656,6 +659,7 @@
         "chat": "Chat",
         "concepts": "Konzepte",
         "info": "Infos",
+        "working_files": "Arbeitsdateien",
         "output_files": "Ausgabedateien",
         "preview_files": "Vorschau-Dateien",
         "schedule": "Zeitplan",
