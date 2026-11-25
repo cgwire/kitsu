@@ -3061,7 +3061,7 @@ th.validation-cell {
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #5e6169;
+    background-color: var(--scrollbar-thumb-alt);
   }
 }
 

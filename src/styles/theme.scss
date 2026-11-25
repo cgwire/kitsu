@@ -36,6 +36,9 @@
   --poster-color: #000;
   --purple: #cfd1ff;
   --shared-color: #f9e04b;
+  // The scroll bar thumb of the suggestion lists of the comment fields. Only
+  // the dark theme reads it: the light value repeats the one of vue-at.
+  --scrollbar-thumb-alt: #c4c4c4;
 }
 
 // .dp--theme-dark also carries the dark values: datepicker menus teleport
@@ -76,6 +79,7 @@
   --selectable-accent: #7375bc;
   --selectable-accent-rgb: 115, 117, 188;
   --purple: #5e60ba;
+  --scrollbar-thumb-alt: #5e6169;
 }
 
 // Datepicker theming goes through vue-datepicker's own variables, set on
