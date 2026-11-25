@@ -179,8 +179,13 @@ const mountPage = async (
     global: {
       plugins: [store],
       mocks: { $route: routeHolder.route, $t },
-      // The reason an entity is not shown renders with the page.
-      stubs: { EntityLoadError: false, RouterLink: RouterLinkStub }
+      // The reason an entity is not shown renders with the page, and a page
+      // in panels through the slots of its layout.
+      stubs: {
+        EntityLoadError: false,
+        PanelLayout: false,
+        RouterLink: RouterLinkStub
+      }
     }
   })
   await flushPromises()
@@ -1486,6 +1491,63 @@ describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name
     })
   }
 )
+
+describe('Asset page, panel layout', () => {
+  const mountSection = section => {
+    assetStore.cache.assetMap.set('entity-1', {
+      id: 'entity-1',
+      name: 'Tree',
+      tasks: []
+    })
+    return mountPage(Asset, 'asset_id', production, {}, {}, { section })
+  }
+
+  afterEach(() => {
+    assetStore.cache.assetMap.clear()
+  })
+
+  test('lays its header, its sections and its task panel out', async () => {
+    const { wrapper } = await mountSection()
+
+    expect(wrapper.find('.filters-panel .entity-title').exists()).toBe(true)
+    const list = wrapper.find('.list-panel')
+    expect(list.findComponent(RouteSectionTabs).exists()).toBe(true)
+    expect(list.findComponent(EntityTaskList).exists()).toBe(true)
+    const side = wrapper.find('.side-column')
+    expect(side.findComponent({ name: 'TaskInfo' }).props('entityType')).toBe(
+      'Asset'
+    )
+  })
+
+  test('shows the panel of the concepts on their section', async () => {
+    const { wrapper } = await mountSection('concepts')
+
+    const panels = wrapper
+      .find('.side-column')
+      .findAllComponents({ name: 'TaskInfo' })
+    expect(panels.map(panel => panel.props('entityType'))).toEqual(['Concept'])
+  })
+
+  test('sets the information of the asset apart from its tasks', async () => {
+    const { wrapper } = await mountSection('information')
+
+    const tabs = wrapper.findComponent(RouteSectionTabs).props('tabs')
+    expect(tabs.slice(0, 2)).toEqual([
+      { label: 'main.tasks', name: 'infos' },
+      { label: 'main.label.info', name: 'information' }
+    ])
+    expect(wrapper.find('.infos .metadata-infos').exists()).toBe(false)
+    expect(wrapper.find('.information .metadata-infos').exists()).toBe(true)
+    expect(wrapper.find('.side-column').exists()).toBe(false)
+  })
+
+  test('keeps the side panel for the sections that have one', async () => {
+    const { wrapper } = await mountSection('chat')
+
+    expect(wrapper.find('.side-column').exists()).toBe(false)
+    expect(wrapper.find('.drawer-backdrop').exists()).toBe(false)
+  })
+})
 
 describe('Asset page, concepts', () => {
   afterEach(() => {

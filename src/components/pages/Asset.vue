@@ -1,10 +1,12 @@
 <template>
-  <div
-    class="columns fixed-page asset xyz-in"
+  <panel-layout
+    class="asset xyz-in"
     xyz="fade"
+    :class="{ 'drawer-open': isDrawerOpen }"
+    :side="hasSidePanel"
     v-if="currentProduction"
   >
-    <div class="page column main-column">
+    <template #filters>
       <div class="page-header flexrow">
         <router-link
           class="flexrow-item has-text-centered back-link ml1"
@@ -60,8 +62,10 @@
           <chevron-right-icon />
         </router-link>
       </div>
+    </template>
 
-      <div class="asset-data block" v-if="!loadError">
+    <template #list>
+      <div class="asset-data" v-if="!loadError">
         <route-section-tabs
           class="section-tabs"
           :active-tab="currentSection"
@@ -92,7 +96,6 @@
         </div>
 
         <div class="flexcolumn infos" v-show="currentSection === 'infos'">
-          <page-subtitle :text="$t('main.tasks')" />
           <entity-task-list
             class="task-list"
             :entries="localTasks"
@@ -101,19 +104,19 @@
             :is-error="false"
             @task-selected="onTaskSelected"
           />
-          <div class="flexrow">
-            <page-subtitle :text="$t('main.info')" />
-            <div class="filler"></div>
-            <div class="flexrow-item has-text-right">
-              <button-simple
-                icon="edit"
-                :title="$t('assets.edit_title')"
-                @click="showEditModal"
-                v-if="isCurrentUserManager"
-              />
-            </div>
-          </div>
+        </div>
 
+        <div
+          class="flexcolumn information"
+          v-show="currentSection === 'information'"
+        >
+          <button-simple
+            class="edit-button"
+            icon="edit"
+            :title="$t('assets.edit_title')"
+            @click="showEditModal"
+            v-if="isCurrentUserManager"
+          />
           <div class="table-body metadata-infos">
             <table class="datatable no-header" v-if="currentAsset">
               <tbody class="table-body">
@@ -453,59 +456,41 @@
         />
       </div>
       <entity-load-error
-        class="asset-data block"
+        class="asset-data"
         :error="loadError"
         @reload="init()"
         v-else
       />
-    </div>
+    </template>
 
-    <div
-      class="drawer-backdrop"
-      :class="{ 'is-open': isTaskDrawerOpen }"
-      @click="closeTask"
-      v-show="currentSection === 'infos'"
-    ></div>
-    <div
-      class="column side-column"
-      :class="{ 'is-open': isTaskDrawerOpen }"
-      v-show="currentSection === 'infos'"
-    >
+    <template #side>
       <task-info
-        v-if="clientAccess.isTaskPanelVisible"
         :task="currentTask"
         entity-type="Asset"
         with-actions
+        v-if="currentSection === 'infos'"
       >
         <entity-news class="news-column" :entity="currentAsset" />
       </task-info>
-    </div>
+      <template v-else>
+        <button
+          class="drawer-close"
+          type="button"
+          :title="$t('main.close')"
+          @click="closeConcept"
+        >
+          <x-icon :size="20" />
+        </button>
+        <task-info entity-type="Concept" :task="currentConceptTask" />
+      </template>
+    </template>
 
     <div
       class="drawer-backdrop"
-      :class="{ 'is-open': isConceptDrawerOpen }"
-      @click="closeConcept"
-      v-show="currentSection === 'concepts'"
+      :class="{ 'is-open': isDrawerOpen }"
+      @click="closeDrawer"
+      v-if="hasSidePanel"
     ></div>
-    <div
-      class="column side-column"
-      :class="{ 'is-open': isConceptDrawerOpen }"
-      v-show="currentSection === 'concepts'"
-    >
-      <button
-        class="drawer-close"
-        type="button"
-        :title="$t('main.close')"
-        @click="closeConcept"
-      >
-        <x-icon :size="20" />
-      </button>
-      <task-info
-        v-if="clientAccess.isTaskPanelVisible"
-        entity-type="Concept"
-        :task="currentConceptTask"
-      />
-    </div>
 
     <view-playlist-modal
       active
@@ -524,7 +509,7 @@
       @cancel="modals.edit = false"
       @confirm="confirmEditAsset"
     />
-  </div>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -559,6 +544,7 @@ import assetStore from '@/store/modules/assets'
 
 /* eslint-disable no-unused-vars */
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
@@ -676,7 +662,9 @@ const assetsPath = computed(() => {
 })
 
 const assetTabs = computed(() => [
-  { label: t('main.label.info'), name: 'infos' },
+  // the section of the tasks keeps its name: links and the default use it
+  { label: t('main.tasks'), name: 'infos' },
+  { label: t('main.label.info'), name: 'information' },
   { label: t('main.label.chat'), name: 'chat' },
   { label: t('main.label.concepts'), name: 'concepts' },
   { label: t('main.label.casting'), name: 'casting' },
@@ -701,8 +689,17 @@ const taskStatusList = computed(() => {
   return [allStatusItem, ...conceptTaskStatusList]
 })
 
-const isConceptDrawerOpen = computed(() => Boolean(currentConcept.value))
-const isTaskDrawerOpen = computed(() => Boolean(currentTask.value))
+// the task of the asset on its infos, the task of a concept on the concepts
+const hasSidePanel = computed(
+  () =>
+    clientAccess.value.isTaskPanelVisible &&
+    ['infos', 'concepts'].includes(currentSection.value)
+)
+const isDrawerOpen = computed(() =>
+  Boolean(
+    currentSection.value === 'infos' ? currentTask.value : currentConcept.value
+  )
+)
 
 const filteredLinkedConcepts = computed(() =>
   currentConceptStatus.value
@@ -818,6 +815,9 @@ const viewPlaylist = (entities, entityType) => {
   }
 }
 
+const closeDrawer = () =>
+  currentSection.value === 'infos' ? closeTask() : closeConcept()
+
 const closeConcept = () => {
   store.dispatch('clearSelectedConcepts')
   currentConcept.value = null
@@ -898,22 +898,11 @@ useHead({ title: computed(() => `${title.value} - Kitsu`) })
   .table-body {
     border: 1px solid var(--border);
   }
-
-  .wrapper {
-    background: var(--background);
-  }
 }
 
 .ready-for {
   margin-top: 0em;
   margin-bottom: 0em;
-}
-
-.main-column {
-  display: flex;
-  flex-direction: column;
-  background: var(--background-page);
-  padding-bottom: 1em;
 }
 
 h2.subtitle {
@@ -925,10 +914,8 @@ h2.subtitle {
 
 .page-header {
   align-items: center;
-  margin-top: calc(50px + 2em);
-  margin-bottom: 0.8em;
-  margin-left: 1em;
-  margin-right: 1em;
+  margin: 0;
+
   .entity-title {
     font-weight: 500;
   }
@@ -938,8 +925,7 @@ h2.subtitle {
   display: flex;
   flex: 1;
   flex-direction: column;
-  margin: 0 1em 0 1em;
-  max-height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -1096,9 +1082,13 @@ h2.subtitle {
   padding-top: 3px;
 }
 
+// the header and the rows of the tasks on one sheet, as tall as the panel
 .task-list {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
   flex: 1;
-  margin-bottom: 3em;
+  margin: 0;
   min-height: 150px;
   min-width: 100%;
   overflow: hidden;
@@ -1108,6 +1098,26 @@ h2.subtitle {
   user-select: text;
 }
 
+// The sections are sheets of the page color, as the lists of the other
+// panels: the schedule here, and the files and the time logs by their root.
+.asset-data .wrapper {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  flex: 1;
+  min-height: 0;
+}
+
+.asset-data .entity-chat {
+  background: var(--background);
+}
+
+// the row of the tabs already sets the sections apart
+.asset-data > .wrapper,
+.asset-data > .entity-chat {
+  margin-top: 0;
+}
+
 .schedule {
   position: relative;
   height: 100%;
@@ -1115,7 +1125,7 @@ h2.subtitle {
 
   .wrapper {
     height: 100%;
-    border-radius: 10px;
+    overflow: hidden;
   }
 }
 
@@ -1125,30 +1135,6 @@ h2.subtitle {
 }
 
 @media screen and (max-width: 768px) {
-  // The main column is the scroller, not the page: a scrolling ancestor
-  // would count the off-screen drawers in its scroll range, and focusing
-  // their content on open would shift the whole page sideways.
-  .asset {
-    overflow: visible;
-  }
-
-  .main-column {
-    flex: 1;
-    margin: 0;
-    max-width: 100%;
-    min-height: 0;
-    overflow-y: auto;
-    width: 100%;
-  }
-
-  .column:first-child {
-    margin-right: 0;
-  }
-
-  .page-header {
-    margin: calc(60px + 1em) 0.5em 0.5em;
-  }
-
   .entity-title {
     font-size: 1.3em;
     line-height: 1.5em;
@@ -1158,32 +1144,18 @@ h2.subtitle {
     display: none;
   }
 
-  .asset-data {
-    margin: 0 0.5em;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .infos,
-  .asset-casted-in,
-  .concepts,
-  .schedule {
-    height: auto;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .infos .button {
+  .edit-button {
     display: none;
   }
 
   .task-list {
+    background: transparent;
+    border: 0;
     min-height: 0;
     overflow: visible;
   }
 
   .schedule {
-    height: 60vh;
     overflow-x: auto;
 
     // The schedule widget keeps a 180px entity column on mobile: give the
@@ -1214,18 +1186,23 @@ h2.subtitle {
   margin-bottom: 0;
 }
 
-.infos {
-  height: 100%;
-  margin-top: 1em;
-  margin-bottom: 1em;
-  max-height: 100%;
+.infos,
+.information {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+}
 
-  .metadata-infos {
-    flex: unset;
-    min-height: 100px;
-    overflow: auto;
-  }
+.edit-button {
+  align-self: flex-end;
+  margin-bottom: 0.5em;
+}
+
+// a sheet of the page color, as the lists of the panel
+.metadata-infos {
+  background: var(--background);
+  border: 1px solid var(--border);
+  flex: unset;
 }
 
 .news-column {
@@ -1247,9 +1224,11 @@ h2.subtitle {
     animation-fill-mode: none;
   }
 
-  .side-column {
-    background: var(--background);
+  // as many classes as the rule of the layout that makes the column a frame
+  .asset.panel-layout.paneled-side :deep(.side-column) {
+    background: var(--background-panel);
     bottom: 0;
+    padding: 0;
     box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
@@ -1265,10 +1244,10 @@ h2.subtitle {
     transition: transform 0.25s ease;
     width: min(100vw, 420px) !important;
     z-index: 250;
+  }
 
-    &.is-open {
-      transform: translateX(0);
-    }
+  .asset.panel-layout.paneled-side.drawer-open :deep(.side-column) {
+    transform: translateX(0);
   }
 
   .drawer-close {
