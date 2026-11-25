@@ -452,13 +452,15 @@ describe('ActionPanel, suggestions of the comment', () => {
     // The task panel gives the team of the production of the first task.
     const wrapper = shallowMountWithI18n(ActionPanel, {
       attachTo: document.body,
-      props: { productionId: tasks[0].project_id, team },
+      props: { productionId: tasks[0]?.project_id ?? 'production-1', team },
       global: { plugins: [router, store], stubs: { AtTextarea: false } }
     })
     await flushPromises()
     mountedPanels.push(wrapper)
-    if (!wrapper.find('.action-bar').exists()) {
-      await wrapper.find('.status-item').trigger('click')
+    // Without a selected task, the panel has no status bar.
+    const statusItem = wrapper.find('.status-item')
+    if (!wrapper.find('.action-bar').exists() && statusItem.exists()) {
+      await statusItem.trigger('click')
     }
     return { store, wrapper }
   }
@@ -657,6 +659,31 @@ describe('ActionPanel, suggestions of the comment', () => {
     store.commit('SELECT_TASK', secondTask)
     await vi.advanceTimersByTimeAsync(20)
     expect(suggested(wrapper, isTaskType)).not.toContain('All')
+  })
+
+  // Without a selected task, the # list names no task type: the walk of
+  // every task loaded is left out.
+  test('leaves the loaded tasks alone without a selected task', async () => {
+    let entityReads = 0
+    const otherTask = {
+      ...shotTask('shot-9', 'task-type-layout'),
+      get entity_id() {
+        entityReads += 1
+        return 'shot-9'
+      }
+    }
+    const [task] = shotTasks()
+    const { store } = await mountOn(
+      '/productions/production-1/shots',
+      [],
+      [alice],
+      [otherTask]
+    )
+    expect(entityReads).toBe(0)
+
+    store.commit('SELECT_TASK', task)
+    await vi.advanceTimersByTimeAsync(20)
+    expect(entityReads).toBeGreaterThan(0)
   })
 
   test('offers the task types of every selected entity', async () => {

@@ -1439,6 +1439,7 @@ const mentionTaskTypes = computed(() => {
   const entityIds = new Set(
     Array.from(selectedTasks.value.values()).map(task => task.entity_id)
   )
+  if (entityIds.size === 0) return []
   const taskTypeIds = new Set(
     Array.from(toRaw(taskMap.value).values())
       .filter(task => entityIds.has(task.entity_id))
