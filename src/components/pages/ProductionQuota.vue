@@ -1,7 +1,12 @@
 <template>
-  <div class="columns fixed-page">
-    <div class="column main-column">
-      <route-tabs :active-tab="activeTab" :tabs="tabs" />
+  <panel-layout
+    class="quotas"
+    :class="{ collapsed: !showFilters }"
+    :side="showInfo && Boolean(currentPerson)"
+    :side-focused="showInfo && Boolean(currentPerson)"
+  >
+    <template #filters>
+      <route-tabs class="quota-tabs" :active-tab="activeTab" :tabs="tabs" />
 
       <div class="flexrow filters">
         <combobox-task-type
@@ -52,10 +57,33 @@
           v-model="params.computeMode"
         />
         <info-question-mark
-          class="mt2 flexrow-item"
+          class="flexrow-item compute-help"
           :text="$t(`quota.explanation_${params.computeMode}`)"
         />
         <div class="filler"></div>
+        <button-simple
+          class="flexrow-item"
+          :title="$t('quota.export_quotas')"
+          icon="download"
+          @click="exportQuotas"
+        />
+        <filters-toggle
+          class="flexrow-item"
+          :count="secondRowFilterCount"
+          :resettable="hasFilters"
+          v-model="showFilters"
+          @reset="resetFilters"
+        />
+      </div>
+
+      <div class="flexrow filters collapsible">
+        <!-- v-show: the field holds its text, a tab away and back -->
+        <search-field
+          ref="search-field"
+          class="search-field flexrow-item"
+          @change="onSearchChange"
+          v-show="activeTab === 'tasktypes'"
+        />
         <template v-if="activeTab === 'tasktypes'">
           <combobox-department
             class="flexrow-item"
@@ -67,37 +95,29 @@
             class="flexrow-item"
             :label="$t('people.fields.role')"
             locale-key-prefix="people.role."
-            open-left
             :options="roleOptions"
             v-model="params.role"
           />
         </template>
-        <button-simple
-          class="flexrow-item"
-          :title="$t('quota.export_quotas')"
-          icon="download"
-          @click="exportQuotas"
-        />
-      </div>
-
-      <div class="flexrow mb2 mt0">
-        <search-field
-          class="search-field flexrow-item"
-          @change="onSearchChange"
-          v-if="activeTab === 'tasktypes'"
-        />
-
-        <span class="label flexrow-item">
-          {{ $t('quota.highlight_quotas') }}
-        </span>
-
         <text-field
           class="flexrow-item max-quota-input"
+          :label="$t('quota.highlight_quotas')"
           type="number"
           v-model="maxQuota"
         />
       </div>
+    </template>
 
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="quotasSearchFilterGroups"
+        :is-group-enabled="true"
+        :production-id="currentProduction?.id"
+        :queries="quotasSearchQueries"
+        type="quotas"
+        with-route-query
+      />
       <quota
         ref="quota-list"
         :task-type-id="activeTab === 'tasktypes' ? params.taskTypeId : null"
@@ -114,8 +134,9 @@
         :search-text="searchText"
         :max-quota="maxQuota"
       />
-    </div>
-    <div class="column side-column" v-if="showInfo && currentPerson">
+    </template>
+
+    <template #side>
       <people-quota-info
         :person="currentPerson"
         :year="currentYear"
@@ -127,8 +148,8 @@
         :shots="personShots"
         :count-mode="params.countMode"
       />
-    </div>
-  </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -151,6 +172,7 @@ import stringHelpers from '@/lib/string'
 import { monthToString, range } from '@/lib/time'
 import personStore from '@/store/modules/people'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import Quota from '@/components/pages/quota/Quota.vue'
 import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -158,10 +180,12 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 const { t } = useI18n()
@@ -174,6 +198,7 @@ const personMap = personStore.cache.personMap
 // State
 // --------------------------------------------------------------------------
 const quotaListRef = useTemplateRef('quota-list')
+const searchFieldRef = useTemplateRef('search-field')
 
 const activeTab = ref('tasktypes')
 const currentDay = ref(moment().date())
@@ -196,6 +221,7 @@ const params = ref({
 })
 const personShots = ref([])
 const searchText = ref('')
+const showFilters = ref(false)
 const showInfo = ref(false)
 const yearString = ref(`${moment().year()}`)
 
@@ -218,7 +244,24 @@ const isPaperProduction = computed(() => store.getters.isPaperProduction)
 const productionShotTaskTypes = computed(
   () => store.getters.productionShotTaskTypes
 )
+const quotasSearchFilterGroups = computed(
+  () => store.getters.quotasSearchFilterGroups
+)
+const quotasSearchQueries = computed(() => store.getters.quotasSearchQueries)
 const user = computed(() => store.getters.user)
+
+// the filters of the folded row: its people filters and the highlight
+const secondRowFilterCount = computed(
+  () =>
+    [
+      params.value.departmentId,
+      params.value.role !== 'all',
+      searchText.value,
+      Number(maxQuota.value) > 0
+    ].filter(Boolean).length
+)
+
+const hasFilters = computed(() => secondRowFilterCount.value > 0)
 
 const tabs = computed(() => [
   { name: 'tasktypes', label: t('task_types.title') },
@@ -386,6 +429,18 @@ const onSearchChange = text => {
   searchText.value = text
 }
 
+const setSearch = text => {
+  searchText.value = text
+  searchFieldRef.value?.setValue(text)
+}
+
+const resetFilters = () => {
+  params.value.departmentId = ''
+  params.value.role = 'all'
+  maxQuota.value = 0
+  setSearch('')
+}
+
 const paramsKey = () => `quota:${currentProduction.value.id}:params`
 
 // Params of the current production: the route query first, then the ones
@@ -411,7 +466,20 @@ const initParams = () => {
     params.value.taskTypeId =
       savedParams.taskTypeId || productionShotTaskTypes.value[0]?.id
   }
+  setSearch(query.search || '')
   paramsProductionId = currentProduction.value.id
+}
+
+// A saved search, or the back button, sets a query the page did not write.
+// The page writes its whole query: a filter missing from one is unset. The
+// bare URL of the navigation keeps the params of the last visit.
+const applyRouteQuery = () => {
+  const { query } = route
+  if (!Object.keys(query).length) return
+  params.value.countMode = query.countMode || params.value.countMode
+  params.value.departmentId = query.department || ''
+  params.value.role = query.role || 'all'
+  setSearch(query.search || '')
 }
 
 const getQuery = () => {
@@ -426,14 +494,11 @@ const getQuery = () => {
     tab: activeTab.value || 'tasktypes',
     taskTypeId:
       activeTab.value === 'tasktypes' ? params.value.taskTypeId : undefined,
-    department:
-      activeTab.value === 'tasktypes'
-        ? params.value.departmentId || undefined
-        : undefined,
-    role:
-      activeTab.value === 'tasktypes' && params.value.role !== 'all'
-        ? params.value.role
-        : undefined,
+    // both tabs keep the filters only one of them shows: the URL is all a
+    // saved search holds
+    department: params.value.departmentId || undefined,
+    role: params.value.role !== 'all' ? params.value.role : undefined,
+    search: searchText.value || undefined,
     personId: personId || undefined
   }
 }
@@ -498,7 +563,12 @@ watch(monthString, () => {
 })
 
 watch(
-  () => [params.value.countMode, params.value.departmentId, params.value.role],
+  () => [
+    params.value.countMode,
+    params.value.departmentId,
+    params.value.role,
+    searchText.value
+  ],
   () => resetRouteQuery()
 )
 
@@ -536,6 +606,7 @@ watch(
     // A production switch: the production watcher starts over from the
     // params of the new production.
     if (route.params.production_id !== paramsProductionId) return
+    applyRouteQuery()
     resetRouteQuery()
     loadRoute()
   }
@@ -565,67 +636,95 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.filters {
-  color: var(--text);
-  padding-bottom: 2rem;
+// Bulma sets the tabs apart from what follows: the panel already does
+.tabs.quota-tabs {
+  margin-bottom: 0;
+}
 
-  .field {
-    padding-bottom: 0;
+// One label height and one control height for the whole row, as on the
+// Timesheets.
+.filters {
+  align-items: flex-end;
+  flex-wrap: wrap;
+  row-gap: 1em;
+
+  > .flexrow-item {
     margin-bottom: 0;
   }
 
-  // the export button renders 32px tall: stretch it to the controls and
-  // sit it on the row's bottom edge, under the labels (as on Timesheets)
+  > :last-child {
+    margin-right: 0;
+  }
+
   > .button {
-    align-self: flex-end;
     height: 42px;
   }
 
-  // the department combo's control renders 38px tall against 42px for
-  // the Bulma selects, and its label carries a 5px padding-top
-  :deep(.department-combo) {
+  .field {
+    padding-bottom: 0;
+  }
+
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  // the department and role combos render 38px tall against 42px for the
+  // Bulma selects
+  :deep(.department-combo),
+  :deep(.combo) {
     display: flex;
     flex-direction: column;
     height: 42px;
     justify-content: center;
   }
-
-  :deep(.department-combo .label) {
-    margin-bottom: 5px;
-    padding-top: 0;
-  }
 }
 
-.fixed-page {
-  padding-top: 60px;
-  padding-left: 2em;
+.collapsed .filters.collapsible {
+  display: none;
 }
 
-.main-column {
-  border: 0;
+// centered on the select it explains
+.compute-help {
+  align-items: center;
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding-top: 2em;
-  padding-right: 2em;
+  height: 42px;
 }
 
-.side-column {
-  border-left: 1px solid var(--border);
-  padding: 0;
-  margin: 0;
-}
-
+// The search field gives its width up before the row wraps.
 .search-field {
-  color: var(--text);
-}
-
-.label {
-  font-weight: 300;
-  color: var(--text);
+  flex: 1 1 200px;
+  max-width: 420px;
 }
 
 .max-quota-input {
-  width: 80px;
+  // its label is longer than the number it takes: wrapped, it raised the row
+  :deep(.label) {
+    white-space: nowrap;
+  }
+
+  :deep(.input) {
+    height: 42px;
+    width: 110px;
+  }
+}
+
+// the shots of a person are the side panel: its own surface, no divider
+.quotas .people-quota-info {
+  background: var(--background-panel);
+  border: 0;
+  border-radius: 12px;
+  height: auto;
+  min-height: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  // Mobile is read-only: no export, and the filters keep their toggle.
+  .filters {
+    > .button,
+    :deep(.reset-filters) {
+      display: none;
+    }
+  }
 }
 </style>

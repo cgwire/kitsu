@@ -81,6 +81,14 @@ const holdLoads = () => {
   return { loads, load }
 }
 
+// The page writes the text of the URL into the field through its ref.
+const searchFieldStub = {
+  name: 'SearchField',
+  emits: ['change'],
+  template: '<div />',
+  methods: { setValue: vi.fn() }
+}
+
 let wrapper
 
 const mountPage = async (
@@ -101,6 +109,8 @@ const mountPage = async (
       isPaperProduction: () => false,
       personMap: () => personStore.cache.personMap,
       productionShotTaskTypes: () => shotTaskTypes,
+      quotasSearchFilterGroups: () => [],
+      quotasSearchQueries: () => [],
       taskTypeMap: () => new Map(),
       user: () => ({ id: 'user-1' }),
       ...getters
@@ -113,7 +123,10 @@ const mountPage = async (
   await router.push({ path, query })
   await router.isReady()
   wrapper = shallowMount(ProductionQuota, {
-    global: { plugins: [store, router], stubs }
+    global: {
+      plugins: [store, router],
+      stubs: { PanelLayout: false, SearchField: searchFieldStub, ...stubs }
+    }
   })
   await flushPromises()
   return { store, wrapper }
@@ -142,6 +155,147 @@ describe('ProductionQuota', () => {
     expect(combobox.props('modelValue')).toBe('shot-1')
     expect(combobox.props('disabled')).toBe(false)
     expect(wrapper.findComponent(PeopleField).exists()).toBe(false)
+  })
+
+  describe('panel layout', () => {
+    it('lays its tabs, its filters and its list out in the two panels', async () => {
+      const { wrapper } = await mountPage()
+      const filters = wrapper.find('.filters-panel')
+      const list = wrapper.find('.list-panel')
+
+      expect(filters.findComponent({ name: 'RouteTabs' }).exists()).toBe(true)
+      expect(filters.findComponent(ComboboxTaskType).exists()).toBe(true)
+      expect(list.findComponent({ name: 'SearchQueryList' }).exists()).toBe(
+        true
+      )
+      expect(list.findComponent({ name: 'Quota' }).exists()).toBe(true)
+    })
+
+    it('shows the shots of a person in the side panel', async () => {
+      personStore.cache.personMap.set(jane.id, jane)
+      const { wrapper } = await mountPage({}, { path: personWeekPath(42) })
+
+      expect(
+        wrapper.find('.side-column').findComponent(PeopleQuotaInfo).exists()
+      ).toBe(true)
+    })
+  })
+
+  describe('saved searches', () => {
+    const quotaList = wrapper => wrapper.findComponent({ name: 'Quota' })
+
+    it('saves the filters of the URL, by production', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(
+        wrapper.findComponent({ name: 'SearchQueryList' }).props()
+      ).toMatchObject({
+        productionId: 'production-1',
+        type: 'quotas',
+        withRouteQuery: true
+      })
+    })
+
+    it('writes the searched text in the URL', async () => {
+      const { wrapper } = await mountPage()
+
+      await wrapper
+        .findComponent({ name: 'SearchField' })
+        .vm.$emit('change', 'jane')
+      await flushPromises()
+
+      expect(router.currentRoute.value.query.search).toBe('jane')
+      expect(quotaList(wrapper).props('searchText')).toBe('jane')
+    })
+
+    // A saved search, or the back button, sets a query the page did not
+    // write.
+    it('follows the filters of the URL', async () => {
+      const { wrapper } = await mountPage()
+
+      await router.push({
+        query: {
+          ...router.currentRoute.value.query,
+          countMode: 'seconds',
+          department: 'department-1',
+          role: 'supervisor',
+          search: 'jane'
+        }
+      })
+      await flushPromises()
+
+      expect(quotaList(wrapper).props()).toMatchObject({
+        countMode: 'seconds',
+        departmentId: 'department-1',
+        role: 'supervisor',
+        searchText: 'jane'
+      })
+      expect(searchFieldStub.methods.setValue).toHaveBeenLastCalledWith('jane')
+      expect(router.currentRoute.value.query).toMatchObject({
+        countMode: 'seconds',
+        department: 'department-1',
+        role: 'supervisor',
+        search: 'jane'
+      })
+    })
+
+    // The filters show on one tab only: the other one keeps them in its
+    // URL, for the way back.
+    it('keeps the filters of the URL on the people tab', async () => {
+      await mountPage({ department: 'department-1', role: 'supervisor' })
+
+      await router.push({
+        query: { ...router.currentRoute.value.query, tab: 'persons' }
+      })
+      await flushPromises()
+
+      expect(router.currentRoute.value.query).toMatchObject({
+        department: 'department-1',
+        role: 'supervisor',
+        tab: 'persons'
+      })
+    })
+  })
+
+  describe('filters reset', () => {
+    const toggle = wrapper => wrapper.findComponent({ name: 'FiltersToggle' })
+
+    it('counts no filter on a first visit', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(toggle(wrapper).props()).toMatchObject({
+        count: 0,
+        resettable: false
+      })
+    })
+
+    it('counts the filters of the folded row and clears them', async () => {
+      const { wrapper } = await mountPage({
+        department: 'department-1',
+        role: 'supervisor',
+        search: 'jane'
+      })
+      expect(toggle(wrapper).props()).toMatchObject({
+        count: 3,
+        resettable: true
+      })
+
+      await toggle(wrapper).vm.$emit('reset')
+      await flushPromises()
+
+      expect(wrapper.findComponent({ name: 'Quota' }).props()).toMatchObject({
+        departmentId: '',
+        role: 'all',
+        searchText: ''
+      })
+      const { query } = router.currentRoute.value
+      expect([query.department, query.role, query.search]).toEqual([
+        undefined,
+        undefined,
+        undefined
+      ])
+      expect(toggle(wrapper).props('resettable')).toBe(false)
+    })
   })
 
   it('shows no quota for a production without shot task types', async () => {
