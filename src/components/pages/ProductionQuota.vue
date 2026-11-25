@@ -716,6 +716,11 @@ useHead({
   border-radius: 12px;
   height: auto;
   min-height: 100%;
+
+  // the rows of the loading skeleton are wider than the panel
+  :deep(.list-loading-skeleton) {
+    overflow: hidden;
+  }
 }
 
 @media screen and (max-width: 768px) {
