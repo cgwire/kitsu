@@ -163,6 +163,12 @@ defineProps({
   border-radius: 12px;
 }
 
+// The task panel keeps the height of its column and scrolls what it holds:
+// left alone it grows with it, for a column that scrolls.
+.paneled-side .side-column :deep(.side-wrapper) {
+  height: 100%;
+}
+
 // The resize handle of the task panel lies over the gutter before it, its
 // line showing only on hover (the layout selector outweighs the dark theme
 // color).
