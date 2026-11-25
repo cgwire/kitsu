@@ -43,6 +43,22 @@
           v-model="filters.person"
         />
 
+        <combobox
+          class="flexrow-item collapsible"
+          :label="$t('main.show')"
+          :options="filterOptions"
+          locale-key-prefix="tasks."
+          v-model="filters.currentFilter"
+        />
+
+        <combobox
+          class="flexrow-item collapsible"
+          :label="$t('main.sorted_by')"
+          :options="sortOptions"
+          locale-key-prefix="tasks.fields."
+          v-model="filters.currentSort"
+        />
+
         <span class="filler"></span>
 
         <filters-toggle
@@ -51,23 +67,6 @@
           :resettable="hasFilters"
           v-model="showFilters"
           @reset="resetFilters"
-        />
-      </div>
-      <div class="filters flexrow collapsible">
-        <combobox
-          class="flexrow-item"
-          :label="$t('main.show')"
-          :options="filterOptions"
-          locale-key-prefix="tasks."
-          v-model="filters.currentFilter"
-        />
-
-        <combobox
-          class="flexrow-item"
-          :label="$t('main.sorted_by')"
-          :options="sortOptions"
-          locale-key-prefix="tasks.fields."
-          v-model="filters.currentSort"
         />
       </div>
     </template>
@@ -512,7 +511,8 @@ useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
   }
 }
 
-.collapsed .filters.collapsible {
+// every filter shows on a desktop: the toggle only folds them on phones
+.filters :deep(.filters-toggle) {
   display: none;
 }
 
@@ -532,6 +532,10 @@ useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
     .filler,
     :deep(.reset-filters) {
       display: none;
+    }
+
+    :deep(.filters-toggle) {
+      display: inline-flex;
     }
   }
 
