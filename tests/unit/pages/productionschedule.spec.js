@@ -232,6 +232,8 @@ const mountPage = async ({
       }),
       personMap: () => new Map(),
       productionAssetTypes: () => [],
+      productionScheduleSearchFilterGroups: () => [],
+      productionScheduleSearchQueries: () => [],
       scheduleVersions: state => state.scheduleVersions,
       use12HourClock: () => false,
       user: () => ({ id: 'manager-1', departments: [] }),
@@ -267,7 +269,7 @@ const mountPage = async ({
       mocks: {
         $t: (key, values) => (values ? `${key} ${JSON.stringify(values)}` : key)
       },
-      stubs: { Schedule: scheduleWidget, ...stubs }
+      stubs: { PanelLayout: false, Schedule: scheduleWidget, ...stubs }
     }
   })
   mountedPage = wrapper
@@ -477,6 +479,149 @@ describe('ProductionSchedule page', () => {
       expect(rowNames(wrapper)).toEqual(['Asset / Modeling'])
       expect(findCombobox(wrapper, 'schedule.mode')).toBeDefined()
       expect(wrapper.findComponent(ComboboxOptions).exists()).toBe(false)
+    })
+  })
+
+  describe('panel layout', () => {
+    it('lays its toolbar and its schedule out in the two panels', async () => {
+      const { wrapper } = await mountPage()
+      const filters = wrapper.find('.filters-panel')
+      const list = wrapper.find('.list-panel')
+
+      expect(filters.find('.schedule-toolbar').exists()).toBe(true)
+      expect(list.findComponent({ name: 'SearchQueryList' }).exists()).toBe(
+        true
+      )
+      expect(findSchedule(list).exists()).toBe(true)
+    })
+  })
+
+  describe('saved searches', () => {
+    const zoomField = wrapper => wrapper.findComponent(ComboboxNumber)
+
+    it('saves the filters of the URL, by production', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(
+        wrapper.findComponent({ name: 'SearchQueryList' }).props()
+      ).toMatchObject({
+        productionId: 'production-1',
+        type: 'productionSchedule',
+        withRouteQuery: true
+      })
+    })
+
+    // A search is saved from the URL: the filters of the last visit must
+    // show there as they show on the page.
+    it('writes the filters of the last visit in the URL', async () => {
+      const first = await mountPage()
+      findCombobox(first.wrapper, 'main.entities').vm.$emit(
+        'update:model-value',
+        'Shot'
+      )
+      await setTaskTypeVisible(first.wrapper, 'tt-animation', false)
+      first.wrapper.unmount()
+
+      const { router } = await mountPage()
+
+      expect(router.currentRoute.value.query).toMatchObject({
+        hiddenTypes: 'tt-animation',
+        type: 'Shot'
+      })
+    })
+
+    // A saved search, or the back button, sets a query the page did not
+    // write.
+    it('follows the filters of the URL', async () => {
+      const { router, wrapper } = await mountPage()
+
+      await router.push({
+        query: { type: 'Shot', hiddenTypes: 'tt-animation', mode: 'real' }
+      })
+      await flushPromises()
+
+      expect(rowNames(wrapper)).toEqual(['Shot / Layout'])
+      expect(findCombobox(wrapper, 'schedule.mode').props('modelValue')).toBe(
+        'real'
+      )
+
+      await router.push({ query: {} })
+      await flushPromises()
+
+      expect(rowNames(wrapper)).toHaveLength(3)
+      expect(findCombobox(wrapper, 'schedule.mode').props('modelValue')).toBe(
+        'prev'
+      )
+    })
+
+    it('reads again a query it wrote, back then forward', async () => {
+      const { router, wrapper } = await mountPage()
+      findCombobox(wrapper, 'main.entities').vm.$emit(
+        'update:model-value',
+        'Shot'
+      )
+      await flushPromises()
+      expect(rowNames(wrapper)).toHaveLength(2)
+
+      router.back()
+      await flushPromises()
+      expect(rowNames(wrapper)).toHaveLength(3)
+
+      router.forward()
+      await flushPromises()
+      expect(rowNames(wrapper)).toEqual(['Shot / Layout', 'Shot / Animation'])
+    })
+
+    it('keeps its zoom on a URL that names none', async () => {
+      const { router, wrapper } = await mountPage({ query: { zoom: '2' } })
+
+      await router.push({ query: { type: 'Shot' } })
+      await flushPromises()
+
+      expect(zoomField(wrapper).props('modelValue')).toBe(2)
+    })
+
+    // The panel would keep planning a task type the search took away.
+    it('closes the side panel on a row the URL filters out', async () => {
+      const { router, wrapper } = await mountPage()
+      await toggleSidePanel(wrapper)
+      await pickTaskType(wrapper, 'tt-layout')
+      expect(wrapper.find('.side-column').exists()).toBe(true)
+
+      await router.push({ query: { type: 'Asset' } })
+      await flushPromises()
+
+      expect(wrapper.find('.side-column').exists()).toBe(false)
+    })
+  })
+
+  describe('filters reset', () => {
+    const toggle = wrapper => wrapper.findComponent({ name: 'FiltersToggle' })
+
+    it('shows only when a filter is set', async () => {
+      const { wrapper } = await mountPage()
+      expect(toggle(wrapper).props('resettable')).toBe(false)
+
+      await setTaskTypeVisible(wrapper, 'tt-animation', false)
+
+      expect(toggle(wrapper).props('resettable')).toBe(true)
+    })
+
+    it('shows every row again, on the next visit too', async () => {
+      const first = await mountPage({
+        query: { type: 'Shot', hiddenTypes: 'tt-animation', mode: 'real' }
+      })
+
+      await toggle(first.wrapper).vm.$emit('reset')
+      await flushPromises()
+
+      expect(rowNames(first.wrapper)).toHaveLength(3)
+      // the mode is no filter
+      expect(first.router.currentRoute.value.query).toEqual({ mode: 'real' })
+      first.wrapper.unmount()
+
+      const { wrapper } = await mountPage()
+      expect(rowNames(wrapper)).toHaveLength(3)
     })
   })
 
@@ -1030,7 +1175,9 @@ describe('ProductionSchedule page', () => {
       // the page is not attached to the document: read the v-show style
       expect(rows[1].attributes('style')).toContain('display: none')
 
-      await wrapper.find('.toggle-filters').trigger('click')
+      await wrapper
+        .findComponent({ name: 'FiltersToggle' })
+        .vm.$emit('update:modelValue', true)
       expect(rows[1].attributes('style') ?? '').not.toContain('display: none')
     })
   })
