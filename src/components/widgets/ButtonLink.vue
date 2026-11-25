@@ -11,7 +11,7 @@
     <rotate-ccw-icon class="icon is-small" v-else-if="icon === 'restore'" />
     <span
       :class="{
-        'is-hidden-touch': isResponsive
+        'visuallyhidden-touch': isResponsive
       }"
       v-if="text"
     >

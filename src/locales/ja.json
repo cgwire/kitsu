@@ -119,6 +119,7 @@
       "add_preview": "リビジョンにプレビューを追加",
       "change_preview": "プレビューを変更",
       "comment_from_client": "クライアントからのコメント",
+      "copy_to_new_comment": "新しいコメントにコピー",
       "edit_title": "コメントを編集",
       "action_error": "保存できませんでした。もう一度お試しください。",
       "edit_error": "コメント編集中にエラーが発生しました。サポートチームまでお問い合わせください。",
@@ -157,6 +158,7 @@
       "pinned_revision": "ピン留めされたリビジョン",
       "edited_by": "{name} が編集",
       "add_attachment_to_reply": "返信に添付ファイルを追加",
+      "add_frame_to_checklist": "現在のフレームを追加",
       "add_frame_to_comment": "現在のフレームをコメントに追加",
       "add_emoji": "絵文字を追加",
       "for_client_badge": "クライアントに表示されるテキスト",
@@ -211,6 +213,9 @@
     "entities": {
       "build_filter": {
         "asset_type": "アセットタイプ",
+        "add_descriptor_filter": "メタデータのフィルターを追加",
+        "add_status_filter": "タスクステータスのフィルターを追加",
+        "add_value": "値を追加",
         "all_types": "すべてのアセットタイプ",
         "assignation": "アサイン",
         "assignation_exists_for": "アサイン済み",
@@ -431,6 +436,10 @@
       "reset_change_password_token_failed": "このリンクは有効期限が切れているか、すでに使用されています。"
     },
     "main": {
+      "changelog": "変更履歴",
+      "next_entity": "次のエンティティ",
+      "previous_entity": "前のエンティティ",
+      "select_section": "セクションを選択",
       "technical_details": "技術的な詳細:",
       "about": "Kitsu について",
       "add": "追加",
@@ -456,6 +465,7 @@
       "delete_all": "すべて削除",
       "delete_text": "{name} をデータベースから削除してもよろしいですか？",
       "documentation": "ドキュメント",
+      "download": "ダウンロード",
       "edit": "編集",
       "edit_deleted_error": "「{name}」を保存できませんでした。その間に削除されました。",
       "empty_comment": "コメントが空です",
@@ -494,6 +504,7 @@
       "studio": "スタジオ",
       "tutorials": "チュートリアル",
       "user": "ユーザー",
+      "view_preview": "プレビューを表示",
       "white_theme": "ライトテーマ",
       "yes": "はい",
       "csv": {
@@ -559,6 +570,8 @@
       "search_query_too_long": "この検索クエリは長すぎます。上限は{count}文字です。 | この検索クエリは長すぎます。上限は{count}文字です。",
       "to": "終了日",
       "workspace": "ワークスペース",
+      "collapse": "折りたたむ",
+      "column_options": "列のオプション",
       "column_visibility": "表示する列",
       "estimation": "工数",
       "estimation_short": "工数",
@@ -659,6 +672,7 @@
       "back": "戻る",
       "edit_mode_on": "編集モードの切り替え",
       "entities": "エンティティ",
+      "expand": "展開",
       "expand_all": "すべて展開",
       "hours": "時間 | 時間",
       "remove_search_query": "検索クエリ「{name}」を削除してもよろしいですか？",
@@ -956,6 +970,7 @@
         "next_shot": "次のエンティティ",
         "pause": "一時停止",
         "play": "再生",
+        "playlist_list": "プレイリスト一覧を表示/非表示",
         "previous_frame": "前のフレーム",
         "previous_shot": "前のエンティティ",
         "save_playlist": "プレイリストを保存",
@@ -990,6 +1005,7 @@
         "default": "デフォルト",
         "exit_play_full": "フルムービー再生を終了",
         "select_background": "背景を選択",
+        "select_animation": "アニメーションを選択",
         "toggle_environment_skybox": "スカイボックス背景を表示/非表示",
         "toggle_wireframe": "ワイヤーフレームレンダリングを有効/無効",
         "open_link": "リンクを開く",
@@ -1372,7 +1388,8 @@
           "error_enable": "メールによる OTP の有効化中にエラーが発生しました。",
           "error_disable": "メールによる OTP の無効化中にエラーが発生しました。",
           "description": "ログインのたびにメールでワンタイムコードを受け取ります。",
-          "name": "メール"
+          "name": "メール",
+          "new_code_sent": "新しいコードをメールで送信しました。最新のメールのコードのみ有効です。"
         },
         "recovery_codes": {
           "title": "リカバリーコード",
@@ -1383,6 +1400,7 @@
         },
         "fido": {
           "device_name": "FIDO デバイス名",
+          "delete_device": "{name} を削除",
           "registered_devices_title": "登録された FIDO デバイス:",
           "button_register": "新しい FIDO デバイスを登録",
           "error_register": "FIDO デバイスの登録中にエラーが発生しました。",
@@ -1542,6 +1560,7 @@
       "assign_no_fit": "{count} 件のタスクが日付範囲に収まりませんでした。 | {count} 件のタスクが日付範囲に収まりませんでした。",
       "batch_schedule": "タスクを一括スケジュール",
       "confirm_move_children": "このバーを移動すると {count} 件のサブ項目の日付も変わります。続行しますか？ | このバーを移動すると {count} 件のサブ項目の日付も変わります。続行しますか？",
+      "clear_daily_quota": "入力した値をクリア",
       "create_version": "スケジュールバージョンの作成",
       "daily_quota": "担当者1人あたりの1日のタスク数",
       "daily_quota_estimated": "すべてのタスクに見積もりがあります。日付はそれに従います（1人1日あたり {quota}）。入力した値は見積もり済みを含むすべてのタスクに適用されます。",
@@ -1789,6 +1808,7 @@
       "no_preview": "このタスクにプレビューはありません。",
       "no_task_selected": "タスクが選択されていません",
       "number": "タスク | タスク",
+      "open_page": "タスクページを開く",
       "preview": "プレビュー",
       "previous": "前のタスク",
       "unsubscribe_notifications": "通知の購読を解除",
@@ -2209,6 +2229,7 @@
       "join_error": "チャットへの参加中にエラーが発生しました。",
       "leave_error": "チャットからの退出中にエラーが発生しました。",
       "loading_error": "チャットの読み込み中にエラーが発生しました。",
+      "send": "送信",
       "send_error": "メッセージの送信中にエラーが発生しました。"
     },
     "concepts": {

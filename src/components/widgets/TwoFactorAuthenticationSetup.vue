@@ -6,7 +6,7 @@
     />
 
     <div v-if="twoFA.OTPRecoveryCodes" class="recovery-codes-panel">
-      <label class="label label-recovery-codes">
+      <label class="label label-recovery-codes" :for="recoveryCodesId">
         {{ $t('profile.two_factor_authentication.recovery_codes.title') }}
       </label>
       <x-circle-icon
@@ -17,7 +17,9 @@
         @click="closeRecoveryCodes"
         @keydown.enter.prevent="closeRecoveryCodes"
         @keydown.space.prevent="closeRecoveryCodes"
-      />
+      >
+        <title>{{ $t('main.close') }}</title>
+      </x-circle-icon>
       <save-icon
         class="action-icon"
         :size="20"
@@ -26,7 +28,9 @@
         @click="saveRecoveryCodesToFile"
         @keydown.enter.prevent="saveRecoveryCodesToFile"
         @keydown.space.prevent="saveRecoveryCodesToFile"
-      />
+      >
+        <title>{{ $t('main.download') }}</title>
+      </save-icon>
       <copy-icon
         class="action-icon"
         :size="20"
@@ -35,8 +39,11 @@
         @click="copyRecoveryCodesToClipboard"
         @keydown.enter.prevent="copyRecoveryCodesToClipboard"
         @keydown.space.prevent="copyRecoveryCodesToClipboard"
-      />
+      >
+        <title>{{ $t('main.copy') }}</title>
+      </copy-icon>
       <textarea
+        :id="recoveryCodesId"
         class="input recovery-codes"
         v-text="twoFA.OTPRecoveryCodes.join('\t')"
         readonly
@@ -218,12 +225,24 @@
         </p>
 
         <div v-if="twoFA.emailOTPPreEnabled" class="two-fa-flow">
+          <p
+            v-if="isNewEmailCodeSent"
+            :id="newCodeSentId"
+            class="new-code-sent"
+          >
+            {{
+              $t('profile.two_factor_authentication.email_otp.new_code_sent')
+            }}
+          </p>
           <div class="field">
             <p class="control has-icon">
               <input
                 class="input is-medium otp-input"
                 type="text"
                 autocomplete="one-time-code"
+                :aria-describedby="
+                  isNewEmailCodeSent ? newCodeSentId : undefined
+                "
                 v-model.trim="twoFA.validationOTP"
                 @keyup.enter="nextEnable"
                 :placeholder="placeholderInputEnableOTP"
@@ -441,7 +460,9 @@
           @click="unregisterFIDORequested(device)"
           @keydown.enter.prevent="unregisterFIDORequested(device)"
           @keydown.space.prevent="unregisterFIDORequested(device)"
-        />
+        >
+          <title>{{ deleteDeviceLabel(device) }}</title>
+        </trash-icon>
       </li>
     </ul>
 
@@ -469,7 +490,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import QrcodeVue from 'qrcode.vue'
@@ -528,6 +549,8 @@ const twoFA = reactive({
     newRecoveryCodes: false
   }
 })
+const newCodeSentId = useId()
+const recoveryCodesId = useId()
 
 // Computed
 
@@ -605,6 +628,10 @@ const textWrongOTPError = computed(() => {
   if (twoFA.emailOTPPreEnabled) return t('login.wrong_email_otp')
   return ''
 })
+
+const isNewEmailCodeSent = computed(
+  () => (store.getters.emailOTPCodesSent[user.value.email] ?? 0) > 1
+)
 
 // Methods
 
@@ -818,6 +845,13 @@ const registerFIDORequested = twoFactorPayload => {
       twoFA.FIDONewDeviceName = ''
     })
 }
+
+// A <title> keeps its text as written, line breaks included: a short call
+// keeps the name on one line.
+const deleteDeviceLabel = deviceName =>
+  t('profile.two_factor_authentication.fido.delete_device', {
+    name: deviceName
+  })
 
 const unregisterFIDORequested = deviceName => {
   if (twoFAButtonsDisabled.value) return
@@ -1040,6 +1074,12 @@ onUnmounted(() => {
   .field {
     margin-bottom: 1em;
   }
+}
+
+.new-code-sent {
+  color: var(--text);
+  font-size: 0.9em;
+  margin-bottom: 0.75em;
 }
 
 .two-fa-flow-actions {

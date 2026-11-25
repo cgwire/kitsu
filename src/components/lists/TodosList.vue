@@ -101,7 +101,6 @@
               :production-id="entry.project_id"
               :task-type="getTaskType(entry)"
               :style="{ left: colTypePosX }"
-              :is-link="false"
               :data-label="$t('tasks.fields.task_type')"
             />
             <td
@@ -323,6 +322,7 @@ import {
   getMetadataChecklistValues,
   getMetadataFieldValue
 } from '@/lib/descriptors'
+import { getOwnValue } from '@/lib/models'
 import { getTaskEntityPath } from '@/lib/path'
 import {
   durationToMinutes,
@@ -432,7 +432,7 @@ const metadataDescriptorsMap = computed(() => {
         descriptor.departments.includes(department)
       )
       if (isUserDepartment) {
-        if (!(descriptor.field_name in descriptorsMap)) {
+        if (getOwnValue(descriptorsMap, descriptor.field_name) === undefined) {
           descriptorsMap[descriptor.field_name] = {}
         }
         const descriptorFieldNameEntry = descriptorsMap[descriptor.field_name]

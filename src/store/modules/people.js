@@ -280,7 +280,12 @@ const getters = {
   personTaskSelectionGrid: state => state.personTaskSelectionGrid,
   personTasksScrollPosition: state => state.personTasksScrollPosition,
 
-  getPerson: state => id => cache.personMap.get(id),
+  // The person map keeps its identity: the version read makes a computed or a
+  // render over the lookup follow a person loaded, edited, or deleted.
+  getPerson: state => id => {
+    state.personMapVersion // eslint-disable-line no-unused-expressions
+    return cache.personMap.get(id)
+  },
   // the full done list, which a search does not filter
   getPersonDoneTask: state => id =>
     cache.personDoneTasks.find(task => task.id === id),
@@ -412,9 +417,10 @@ const actions = {
     return person
   },
 
+  // The person:delete event, when it comes back, finds the person gone.
   async deletePeople({ commit }, person) {
     await peopleApi.deletePerson(person)
-    commit(DELETE_PEOPLE_END)
+    commit(DELETE_PEOPLE_END, person)
   },
 
   async archivePerson({ commit }, person) {
@@ -810,6 +816,10 @@ const mutations = {
     if (person) {
       // A new list: readers of the same array would miss the deletion.
       cache.people = cache.people.filter(({ id }) => id !== person.id)
+      if (cache.guests.some(({ id }) => id === person.id)) {
+        cache.guests = cache.guests.filter(({ id }) => id !== person.id)
+        state.guests = cache.guests
+      }
       cache.personMap.delete(person.id)
     }
     state.personMapVersion++

@@ -124,6 +124,7 @@
             <th class="column-selector">
               <button-simple
                 class="is-small"
+                :title="$t('main.column_visibility')"
                 icon="down"
                 @click="toggleColumnSelector"
               />
@@ -193,7 +194,6 @@
               :is-border="false"
               :is-assignees="false"
               :selectable="false"
-              :is-static="true"
             />
             <td class="assignees">
               <div class="flexrow">

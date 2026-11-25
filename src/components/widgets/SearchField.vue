@@ -37,7 +37,11 @@
     </div>
 
     <div class="flexrow-item save-search" v-if="canSave">
-      <button class="button save-button" @click="onSaveClicked">
+      <button
+        class="button save-button"
+        :title="$t('main.search_query_add')"
+        @click="onSaveClicked"
+      >
         <save-icon class="icon is-small" />
       </button>
     </div>

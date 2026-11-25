@@ -11,7 +11,6 @@
     <combobox
       class="comparison-combobox dark"
       :options="taskTypeOptions"
-      :is-dark="true"
       :thin="true"
       v-model="taskTypeId"
       v-if="showPanel && isComparing && (!light || isComparisonEnabled)"
@@ -19,7 +18,6 @@
     <combobox
       class="comparison-combobox dark"
       :options="previewFileOptions"
-      :is-dark="true"
       :thin="true"
       v-model="previewToCompareId"
       v-if="
@@ -32,7 +30,6 @@
     <combobox
       class="comparison-combobox"
       :options="comparisonModeOptions"
-      :is-dark="true"
       :thin="true"
       v-model="comparisonMode"
       v-if="

@@ -129,6 +129,7 @@
         <div class="nav-item" v-if="!isCurrentUserClient">
           <a
             class="changelog-button"
+            :title="$t('main.changelog')"
             target="_blank"
             href="https://cgwire.canny.io/changelog"
           >
@@ -139,6 +140,7 @@
         <div class="nav-item">
           <a
             class="help-button"
+            :title="$t('main.documentation')"
             href="https://kitsu.cg-wire.com/"
             target="_blank"
           >

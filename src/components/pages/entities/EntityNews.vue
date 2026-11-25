@@ -32,7 +32,6 @@
         <div class="flexrow-item task-type-wrapper ml1">
           <task-type-name
             class="task-type-name"
-            :is-static="true"
             :production-id="currentProduction?.id"
             :task-type="buildTaskTypeFromNews(news)"
           />

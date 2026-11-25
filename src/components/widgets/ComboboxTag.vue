@@ -1,6 +1,6 @@
 <template>
   <div :class="{ field: withMargin }">
-    <label class="label" v-if="label.length > 0">
+    <label class="label" :id="labelId" v-if="label.length > 0">
       {{ label }}
     </label>
     <div
@@ -17,6 +17,8 @@
         class="flexrow"
         :title="renderedValue"
         role="combobox"
+        :aria-labelledby="label.length > 0 ? labelId : undefined"
+        :aria-label="ariaLabel || undefined"
         tabindex="0"
         aria-haspopup="listbox"
         :aria-expanded="showList"
@@ -90,6 +92,11 @@ const props = defineProps({
     default: '',
     type: String
   },
+  // Names the combobox when it shows no label.
+  ariaLabel: {
+    default: '',
+    type: String
+  },
   options: {
     default: () => [],
     type: Array
@@ -124,6 +131,7 @@ const listStyle = ref({})
 const selectRef = ref(null)
 const listRef = ref(null)
 const listId = useId()
+const labelId = useId()
 
 const selectedValues = computed(() => {
   const optionValues = props.options.map(option => option.value)

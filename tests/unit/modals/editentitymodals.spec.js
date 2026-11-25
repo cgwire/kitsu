@@ -309,6 +309,67 @@ describe.each(modals)('modals/$name, column changed while open', ({ modal, type,
   })
 })
 
+// A column named "Constructor" has the field name of a property every object
+// inherits.
+describe.each(modals)('modals/$name, Constructor column', ({ modal, type, entityProp, confirm }) => {
+  afterEach(() => {
+    Object.values(entityMaps).forEach(map => map.clear())
+    store.commit('clearColumns')
+  })
+
+  const mountWith = async data => {
+    store.commit('setColumns', { type, fieldNames: ['constructor'] })
+    const wrapper = shallowMountWithI18n(modal, {
+      global: { plugins: [store], renderStubDefaultSlot: true },
+      props: { active: true, [entityProp]: { id: 'entity-1', name: 'Tree', data } }
+    })
+    await nextTick()
+    return wrapper
+  }
+
+  const fieldValue = wrapper =>
+    wrapper
+      .findAllComponents(MetadataField)
+      .find(field => field.props('descriptor').field_name === 'constructor')
+      .props('modelValue')
+
+  test('opens an empty field for an entity without a value, and sends none', async () => {
+    const wrapper = await mountWith({})
+
+    expect(fieldValue(wrapper)).toBe('')
+    await confirm(wrapper)
+    expect(Object.keys(sentData(wrapper))).not.toContain('constructor')
+  })
+
+  // The comboboxes show the value the modal hands them back.
+  test.each(['constructor', 'notes'])('shows the value typed into an empty %s field', async fieldName => {
+    store.commit('setColumns', { type, fieldNames: [fieldName] })
+    const wrapper = shallowMountWithI18n(modal, {
+      global: { plugins: [store], renderStubDefaultSlot: true },
+      props: { active: true, [entityProp]: { id: 'entity-1', name: 'Tree', data: {} } }
+    })
+    await nextTick()
+
+    await typeInColumn(wrapper, fieldName, 'Unit 2')
+
+    expect(
+      wrapper
+        .findAllComponents(MetadataField)
+        .find(field => field.props('descriptor').field_name === fieldName)
+        .props('modelValue')
+    ).toBe('Unit 2')
+  })
+
+  test('opens the field with the value of the entity, and sends the one typed', async () => {
+    const wrapper = await mountWith({ constructor: 'Unit 1' })
+
+    expect(fieldValue(wrapper)).toBe('Unit 1')
+    await typeInColumn(wrapper, 'constructor', 'Unit 2')
+    await confirm(wrapper)
+    expect(Object.entries(sentData(wrapper))).toContainEqual(['constructor', 'Unit 2'])
+  })
+})
+
 // The resolution field writes in the data, where no column holds it. The
 // shot modal keeps it out of the data.
 describe.each(modals.filter(({ name }) => name !== 'EditShotModal'))(

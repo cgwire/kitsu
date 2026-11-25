@@ -1,6 +1,6 @@
 <template>
   <div>
-    <label class="label" v-if="label.length">
+    <label class="label" :id="labelId" v-if="label.length">
       {{ label }}
     </label>
     <div
@@ -18,6 +18,8 @@
       <div
         class="flexrow"
         role="combobox"
+        :aria-labelledby="label.length ? labelId : undefined"
+        :aria-label="ariaLabel || undefined"
         tabindex="0"
         aria-haspopup="listbox"
         :aria-expanded="showDepartmentList"
@@ -63,7 +65,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
@@ -82,6 +84,11 @@ const props = defineProps({
     type: Boolean
   },
   label: {
+    default: '',
+    type: String
+  },
+  // Names the combobox when it shows no label.
+  ariaLabel: {
     default: '',
     type: String
   },
@@ -130,6 +137,7 @@ const emit = defineEmits(['update:model-value'])
 
 const combobox = ref(null)
 const showDepartmentList = ref(false)
+const labelId = useId()
 
 const departmentMap = computed(() => store.getters.departmentMap)
 const departments = computed(() => store.getters.departments)

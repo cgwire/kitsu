@@ -889,3 +889,29 @@ describe('getEntityCsvLines', () => {
     ).toEqual([['E02', '', '', '']])
   })
 })
+
+// A column named "Constructor" has the field name of a property every object
+// inherits.
+describe('getEntityCsvLines with a Constructor column', () => {
+  test('writes an empty cell for a row without a value', () => {
+    expect(
+      getEntityCsvLines(
+        [
+          { name: 'SQ01', data: {} },
+          { name: 'SQ02', data: { constructor: 'true' } }
+        ],
+        {
+          descriptors: [{ field_name: 'constructor', data_type: 'boolean' }]
+        }
+      )
+    ).toEqual([
+      ['SQ01', '', false],
+      ['SQ02', '', true]
+    ])
+    expect(
+      getEntityCsvLines([{ name: 'SQ01', data: {} }], {
+        descriptors: [{ field_name: 'constructor', data_type: 'string' }]
+      })
+    ).toEqual([['SQ01', '', undefined]])
+  })
+})

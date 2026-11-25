@@ -26,6 +26,7 @@
             <div class="filler"></div>
             <div class="flexrow flexrow-item">
               <combobox-department
+                :aria-label="$t('main.department')"
                 class="combobox-department flexrow-item"
                 :selectable-departments="selectableDepartments('Shot')"
                 :display-all-and-my-departments="true"
@@ -143,7 +144,6 @@
 
     <manage-shots-modal
       :active="modals.isManageDisplayed"
-      :is-loading="loading.manage"
       @add-episode="addEpisode"
       @add-sequence="addSequence"
       @add-shot="addShot"
@@ -208,7 +208,6 @@
       :is-error="errors.importing"
       :import-error="errors.importingError"
       :parsed-csv="parsedCSV"
-      :form-data="shotsCsvFormData"
       :columns="renderColumns"
       :data-matchers="dataMatchers"
       :database="filteredShots"
@@ -223,7 +222,6 @@
       :active="modals.isImportDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
-      :form-data="shotsCsvFormData"
       :columns="dataMatchers"
       :optional-columns="optionalColumns"
       :generic-columns="genericColumns"
@@ -400,7 +398,6 @@ const isShotsLoadingError = computed(() => store.getters.isShotsLoadingError)
 const isShotTime = computed(() => store.getters.isShotTime)
 const isTVShow = computed(() => store.getters.isTVShow)
 const selectedTasks = computed(() => store.getters.selectedTasks)
-const shotsCsvFormData = computed(() => store.getters.shotsCsvFormData)
 const shotSearchFilterGroups = computed(
   () => store.getters.shotSearchFilterGroups
 )

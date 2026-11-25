@@ -77,7 +77,6 @@
               :production-id="entry.project_id"
               :task-type="getTaskType(entry)"
               :style="{ left: colTypePosX }"
-              :is-link="false"
               :data-label="$t('tasks.fields.task_type')"
             />
             <td
@@ -169,7 +168,6 @@
               class="status unselectable"
               :is-assignees="false"
               :is-border="false"
-              :is-static="true"
               :selectable="false"
               :selected="selectionGrid[entry.id]"
               :task-test="entry"

@@ -15,14 +15,23 @@ describe('ComboboxTaskType', () => {
     { id: 'tt-3', name: 'Rigging', color: '#4ABB56' }
   ]
 
-  beforeEach(() => {
-    store = createStore({
+  const makeStore = ({ isDarkTheme = false } = {}) =>
+    createStore({
       strict: true,
+      state: { isDarkTheme },
       getters: {
-        isDarkTheme: () => false,
+        isDarkTheme: state => state.isDarkTheme,
         taskTypeMap: () => new Map(taskTypeList.map(tt => [tt.id, tt]))
+      },
+      mutations: {
+        setDarkTheme: (state, isDark) => {
+          state.isDarkTheme = isDark
+        }
       }
     })
+
+  beforeEach(() => {
+    store = makeStore()
 
     wrapper = shallowMountWithI18n(ComboboxTaskType, {
       props: {
@@ -101,6 +110,76 @@ describe('ComboboxTaskType', () => {
     expect(findTeleportedList()).not.toBeNull()
     await trigger.trigger('keydown', { key: 'Escape' })
     expect(findTeleportedList()).toBeNull()
+  })
+
+  it('opens a light list in the light theme', async () => {
+    await wrapper.find('.flexrow.selector').trigger('click')
+
+    expect(findTeleportedList().classList.contains('dark')).toBe(false)
+  })
+
+  it('opens a dark list in the dark theme', async () => {
+    wrapper.unmount()
+    wrapper = shallowMountWithI18n(ComboboxTaskType, {
+      props: { taskTypeList, modelValue: 'tt-2' },
+      global: {
+        plugins: [makeStore({ isDarkTheme: true })],
+        stubs: { teleport: false }
+      }
+    })
+
+    await wrapper.find('.flexrow.selector').trigger('click')
+
+    expect(findTeleportedList().classList.contains('dark')).toBe(true)
+  })
+
+  // A page can stay dark in the light theme, such as the Playlists page.
+  describe('in a dark area', () => {
+    let area = null
+
+    beforeEach(() => {
+      area = document.body.appendChild(document.createElement('div'))
+      area.classList.add('dark')
+      wrapper.unmount()
+      wrapper = shallowMountWithI18n(ComboboxTaskType, {
+        props: { taskTypeList, modelValue: 'tt-2' },
+        attachTo: area.appendChild(document.createElement('div')),
+        global: { plugins: [store], stubs: { teleport: false } }
+      })
+    })
+
+    afterEach(() => {
+      area.remove()
+    })
+
+    it('opens a dark list in the light theme', async () => {
+      await wrapper.find('.flexrow.selector').trigger('click')
+
+      expect(findTeleportedList().classList.contains('dark')).toBe(true)
+    })
+
+    it('opens a dark list from the keyboard', async () => {
+      await wrapper
+        .find('.flexrow.selector')
+        .trigger('keydown', { key: 'ArrowDown' })
+
+      expect(findTeleportedList().classList.contains('dark')).toBe(true)
+    })
+
+    // The list takes the theme of its area as it opens. In the dark theme,
+    // that area is the dark root of the app, which the light theme removes.
+    it('closes its list as the theme changes', async () => {
+      store.commit('setDarkTheme', true)
+      await nextTick()
+      await wrapper.find('.flexrow.selector').trigger('click')
+      expect(findTeleportedList().classList.contains('dark')).toBe(true)
+
+      store.commit('setDarkTheme', false)
+      area.classList.remove('dark')
+      await nextTick()
+
+      expect(findTeleportedList()).toBeNull()
+    })
   })
 
   // The browser shows the element in full screen alone, like a player

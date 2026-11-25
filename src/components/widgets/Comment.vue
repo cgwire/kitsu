@@ -102,10 +102,13 @@
                 :size="12"
                 role="button"
                 tabindex="0"
+                v-if="isDuplicable"
                 @click="emit('duplicate-comment', comment)"
                 @keydown.enter.prevent="emit('duplicate-comment', comment)"
                 @keydown.space.prevent="emit('duplicate-comment', comment)"
-              />
+              >
+                <title>{{ $t('comments.copy_to_new_comment') }}</title>
+              </copy-icon>
             </p>
             <p
               class="for-client-tag"
@@ -665,6 +668,10 @@ const props = defineProps({
     default: false
   },
   canMove: {
+    type: Boolean,
+    default: false
+  },
+  isDuplicable: {
     type: Boolean,
     default: false
   },

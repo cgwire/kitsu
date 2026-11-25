@@ -127,6 +127,7 @@
       <task-info>
         <a
           class="close-button"
+          :title="$t('main.close')"
           role="button"
           tabindex="0"
           @click="toggleTaskSidePanel"

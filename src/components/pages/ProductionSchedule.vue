@@ -79,6 +79,7 @@
           <div class="flexrow-item" v-if="hasTaskTypeFilter">
             <label class="label">{{ $t('task_types.title') }}</label>
             <combobox-options
+              :aria-label="$t('task_types.title')"
               :title="taskTypeFilterTitle"
               :options="taskTypeFilterOptions"
               :model-value="taskTypeVisibilityMap"
@@ -189,6 +190,7 @@
           </h2>
           <a
             class="close-button"
+            :title="$t('main.close')"
             role="button"
             tabindex="0"
             @click="unselectAndCloseSidePanel"
@@ -373,6 +375,7 @@
                 />
                 <a
                   class="reset-quotas ml05"
+                  :title="$t('schedule.clear_daily_quota')"
                   role="button"
                   tabindex="0"
                   @click="assignments.forcedDailyQuota = null"

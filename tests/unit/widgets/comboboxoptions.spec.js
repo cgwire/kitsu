@@ -54,6 +54,26 @@ describe('ComboboxOptions', () => {
     expect(list.attributes('aria-multiselectable')).toBe('true')
   })
 
+  // Chromium drops a title that repeats the text shown in a combobox.
+  it('names the combobox by its title', () => {
+    expect(wrapper.find('[role="combobox"]').attributes('aria-label')).toBe(
+      'Display options'
+    )
+  })
+
+  // A title such as "All" or "(2/3)" sums up what the list shows.
+  it('names the combobox by its aria-label rather than its title', () => {
+    const named = shallowMount(ComboboxOptions, {
+      props: { ariaLabel: 'Task Types', title: '(2/3)', options },
+      global: { stubs: { teleport: false } }
+    })
+
+    expect(named.find('[role="combobox"]').attributes('aria-label')).toBe(
+      'Task Types'
+    )
+    named.unmount()
+  })
+
   it('renders an option through the option slot instead of its label', async () => {
     wrapper = shallowMount(ComboboxOptions, {
       props: { title: 'Display options', options, modelValue: {} },

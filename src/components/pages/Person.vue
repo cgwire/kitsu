@@ -7,12 +7,7 @@
       <div class="person page task-page" v-if="person">
         <div class="flexrow page-header">
           <div class="flexrow-item">
-            <people-avatar
-              :person="person"
-              :size="80"
-              :font-size="30"
-              :is-text="false"
-            />
+            <people-avatar :person="person" :size="80" :font-size="30" />
           </div>
           <div class="flexrow-item entity-title">
             {{ person.name }}
@@ -130,7 +125,6 @@
             :empty-text="$t('people.no_task_assigned')"
             :is-loading="isTasksLoading"
             :is-error="isTasksLoadingError"
-            :selection-grid="personTaskSelectionGrid"
             :tasks="sortedTasks"
             @scroll="setPersonTasksScrollPosition"
             v-if="isActiveTab('todos')"
@@ -143,7 +137,6 @@
             :empty-text="$t('people.no_task_assigned')"
             :is-loading="isDoneTasksLoading"
             :is-error="isDoneTasksLoadingError"
-            :selection-grid="personTaskSelectionGrid"
             :tasks="sortedDoneTasks"
             v-else-if="isActiveTab('done')"
           />
@@ -397,9 +390,6 @@ const organisation = computed(() => store.getters.organisation)
 const personMap = computed(() => store.getters.personMap)
 const personTaskSearchQueries = computed(
   () => store.getters.personTaskSearchQueries
-)
-const personTaskSelectionGrid = computed(
-  () => store.getters.personTaskSelectionGrid
 )
 const personTimeSpentMap = computed(() => store.getters.personTimeSpentMap)
 const personTimeSpentTotal = computed(() => store.getters.personTimeSpentTotal)

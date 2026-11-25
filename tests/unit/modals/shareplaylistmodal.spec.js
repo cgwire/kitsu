@@ -98,10 +98,11 @@ describe('modals/SharePlaylistModal', () => {
     expect(wrapper.findComponent(Checkbox).props('modelValue')).toBe(true)
   })
 
-  it('lets the date field follow the theme', async () => {
+  // The playlist page holding the modal is dark in the light theme too.
+  it('keeps the date field dark like the playlist page', async () => {
     const wrapper = await openCreateForm()
 
-    expect(wrapper.findComponent(DateField).props('isDark')).toBe(false)
+    expect(wrapper.findComponent(DateField).props('isDark')).toBe(true)
   })
 
   it('proposes an expiration date in 30 days', async () => {

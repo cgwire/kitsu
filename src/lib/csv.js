@@ -1,6 +1,7 @@
 import Papa from 'papaparse'
 
 import { downloadBlob } from '@/lib/download'
+import { getOwnValue } from '@/lib/models'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { getPercentage } from '@/lib/stats'
 import stringHelpers from '@/lib/string'
@@ -103,7 +104,7 @@ export const getEstimationsParentField = entityType =>
   ESTIMATIONS_PARENTS[entityType]?.field
 
 const getDescriptorCsvValue = (entity, descriptor, personMap) => {
-  const value = entity.data[descriptor.field_name]
+  const value = getOwnValue(entity.data, descriptor.field_name)
   if (descriptor.data_type === 'boolean') {
     return value?.toLowerCase() === 'true'
   }

@@ -8,6 +8,7 @@
     <div class="production-menu">
       <div
         class="flexrow"
+        :title="$t('library.select_production')"
         role="button"
         tabindex="0"
         @click="toggleProductionList"
@@ -17,7 +18,6 @@
         <div class="selected-production-line flexrow-item unselectable">
           <production-name
             :production="currentProduction"
-            :no-link="true"
             :size="25"
             v-if="currentProduction"
           />
@@ -39,7 +39,6 @@
               <production-name
                 class="link"
                 :size="25"
-                :no-link="true"
                 :production="production"
               />
             </span>

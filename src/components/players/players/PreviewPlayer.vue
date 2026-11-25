@@ -184,7 +184,6 @@
         :is-full-screen="fullScreen"
         :movie-dimensions="movieDimensions"
         :nb-frames="nbFrames"
-        :width="width"
         :handle-in="handleIn"
         :handle-out="handleOut"
         :preview-id="isMovie && currentPreview ? currentPreview.id : ''"
@@ -348,6 +347,7 @@
           >
             <combobox-styled
               class="preview-combo flexrow-item"
+              :aria-label="$t('entities.preview_files.revision')"
               :options="lastPreviewFileOptions"
               is-reversed
               is-preview
@@ -685,7 +685,6 @@ const pictureBackgroundColor = ref('#000000')
 const soundDuration = ref(0)
 const soundTime = ref(0)
 const videoDuration = ref(0)
-const width = ref(0)
 
 // Vuex getters
 // Declared before `useAnnotation` so the composable can consume them; the

@@ -24,7 +24,6 @@
         class="flexrow-item selector"
         :label="$t('news.task_type')"
         :task-type-list="taskTypeList"
-        :up="true"
         v-model="form.task_type_id"
       />
     </form>

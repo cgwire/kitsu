@@ -8,6 +8,7 @@ import {
   removeFromIdList,
   getEntityTasks,
   getFilledColumns,
+  getOwnValue,
   groupEntitiesByParents,
   populateTask,
   remove,
@@ -337,6 +338,38 @@ describe('trackEdit', () => {
     expect(edits[2].undo()).toEqual({ id: 'shot-1', description: 'Wi' })
   })
 
+  // A column named "Constructor" has the field name of a property every
+  // object inherits.
+  it('gives back no value for a Constructor column the entity had none in', () => {
+    const shot = buildShot()
+    const edit = trackEdit(
+      () => shot,
+      () => commitEdit(shot, { data: { constructor: 'Unit 2' } })
+    )
+
+    expect(edit.undo()).toEqual({
+      id: 'shot-1',
+      data: { constructor: undefined }
+    })
+  })
+
+  it('gives back no Constructor value once edits of it are refused in turn', () => {
+    const shot = buildShot()
+    const edits = ['U', 'Un', 'Uni'].map(constructor =>
+      trackEdit(
+        () => shot,
+        () => commitEdit(shot, { data: { constructor } })
+      )
+    )
+
+    expect(edits[0].undo()).toBeNull()
+    expect(edits[1].undo()).toBeNull()
+    expect(edits[2].undo()).toEqual({
+      id: 'shot-1',
+      data: { constructor: undefined }
+    })
+  })
+
   it('gives nothing for an entity the cache no longer holds', () => {
     const shot = buildShot()
     let cached = shot
@@ -420,4 +453,50 @@ describe('getEntityTasks', () => {
     ])
     stop()
   })
+})
+
+// A column named "Constructor" has the field name of a property every object
+// inherits.
+describe('getOwnValue', () => {
+  it('reads a key the object holds', () => {
+    expect(getOwnValue({ family: 'big' }, 'family')).toBe('big')
+    expect(getOwnValue({ family: null }, 'family')).toBeNull()
+    expect(getOwnValue({ constructor: 'Unit 2' }, 'constructor')).toBe(
+      'Unit 2'
+    )
+  })
+
+  it('reads nothing the object only inherits', () => {
+    expect(getOwnValue({}, 'constructor')).toBeUndefined()
+    expect(getOwnValue({}, 'toString')).toBeUndefined()
+  })
+
+  it('reads nothing without an object', () => {
+    expect(getOwnValue(null, 'family')).toBeUndefined()
+    expect(getOwnValue(undefined, 'family')).toBeUndefined()
+    expect(getOwnValue('big', 'family')).toBeUndefined()
+  })
+
+  // A cell or a field read before its value comes must show it once it does.
+  it.each(['constructor', 'family'])(
+    'follows a %s key added later to a reactive object',
+    key => {
+      const data = reactive({})
+      let value
+      const runner = effect(() => {
+        value = getOwnValue(data, key)
+      })
+      try {
+        expect(value).toBeUndefined()
+
+        data[key] = 'big'
+        expect(value).toBe('big')
+
+        delete data[key]
+        expect(value).toBeUndefined()
+      } finally {
+        stop(runner)
+      }
+    }
+  )
 })

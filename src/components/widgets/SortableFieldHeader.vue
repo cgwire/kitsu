@@ -15,6 +15,7 @@
     </span>
     <span
       class="asset-field-menu-button header-icon pointer"
+      :title="$t('main.column_options')"
       role="button"
       tabindex="0"
       @click="showMenu"

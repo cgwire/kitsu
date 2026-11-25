@@ -55,9 +55,11 @@
         }"
         role="button"
         tabindex="0"
-        @click="toggleFilterGroup(group)"
-        @keydown.enter.prevent="toggleFilterGroup(group)"
-        @keydown.space.prevent="toggleFilterGroup(group)"
+        :aria-label="group.name"
+        :aria-expanded="`${toggleGroupId === group.id}`"
+        @click="onGroupClick(group, $event)"
+        @keydown.enter.self.prevent="onGroupKey(group, $event)"
+        @keydown.space.self.prevent="onGroupKey(group, $event)"
         v-for="group in userFilterGroups"
       >
         <div class="group-header">
@@ -78,6 +80,7 @@
           <chevron-up-icon class="chevron ml05" :size="12" v-else />
           <button
             class="edit"
+            :title="$t('main.filter_group_edit')"
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="editGroup(group)"
             v-if="canChange(group)"
@@ -86,6 +89,7 @@
           </button>
           <button
             class="del"
+            :title="$t('main.remove')"
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="confirmRemoveGroup(group)"
             v-if="!group.queries.length && canChange(group)"
@@ -123,6 +127,7 @@
               </router-link>
               <button
                 class="edit"
+                :title="$t('main.search_query_edit')"
                 :style="{
                   backgroundColor: `${group.color}53`
                 }"
@@ -133,6 +138,7 @@
               </button>
               <button
                 class="del"
+                :title="$t('main.remove')"
                 :style="{ backgroundColor: `${group.color}53` }"
                 @click.stop="confirmRemoveSearch(searchQuery)"
                 v-if="canChange(searchQuery)"
@@ -170,6 +176,7 @@
       </router-link>
       <button
         class="edit"
+        :title="$t('main.search_query_edit')"
         @click.stop="editSearch(searchQuery)"
         v-if="canChange(searchQuery)"
       >
@@ -177,6 +184,7 @@
       </button>
       <button
         class="del"
+        :title="$t('main.remove')"
         @click.stop="confirmRemoveSearch(searchQuery)"
         v-if="canChange(searchQuery)"
       >
@@ -589,6 +597,25 @@ const removeSearch = () => {
 
 const toggleFilterGroup = group => {
   toggleGroupId.value = toggleGroupId.value !== group.id ? group.id : null
+}
+
+// A click on a filter of an open group also closes the group, under the
+// filter that held the focus: the focus goes back to the group, or it would
+// fall to the page.
+const onGroupClick = (group, event) => {
+  const groupElement = event.currentTarget
+  const isFocusInList = Boolean(
+    groupElement.querySelector('.group-list')?.contains(document.activeElement)
+  )
+  toggleFilterGroup(group)
+  if (isFocusInList && toggleGroupId.value !== group.id) {
+    nextTick(() => groupElement.focus())
+  }
+}
+
+// A held key repeats its keydown: only the first one toggles the group.
+const onGroupKey = (group, event) => {
+  if (!event.repeat) toggleFilterGroup(group)
 }
 
 const getSearchQueryTitle = searchQuery => {

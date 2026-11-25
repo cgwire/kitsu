@@ -23,6 +23,13 @@ const mountWidget = (props = {}) =>
 const combobox = wrapper => wrapper.findComponent(ComboboxOptions)
 
 describe('ComboboxStatusMultiple', () => {
+  // The title sums up the selection: the label names the combobox.
+  it('names the combobox by its label', () => {
+    const wrapper = mountWidget({ label: 'Task Status' })
+
+    expect(combobox(wrapper).props('ariaLabel')).toBe('Task Status')
+  })
+
   it('lists every status and reads "all" when none is selected', () => {
     const wrapper = mountWidget()
     expect(combobox(wrapper).props()).toMatchObject({

@@ -29,6 +29,7 @@
                 <div class="flexrow task-types">
                   <span class="workflow-combo">
                     <combobox-task-type-options
+                      :aria-label="$t('asset_types.fields.task_types')"
                       :hidden="getHiddenTaskTypeIds(assetType.id)"
                       :task-types="taskTypes"
                       teleported

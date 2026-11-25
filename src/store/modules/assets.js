@@ -40,6 +40,7 @@ import {
 } from '@/lib/selection'
 import {
   getFilledColumns,
+  getOwnValue,
   groupEntitiesByParents,
   removeModelFromList,
   setCanceled,
@@ -840,15 +841,14 @@ const actions = {
       ])
       asset.data = asset.data || {}
       sortedDescriptors.forEach(descriptor => {
+        const value = getOwnValue(asset.data, descriptor.field_name)
         if (descriptor.data_type === 'boolean') {
-          assetLine.push(
-            asset.data[descriptor.field_name]?.toLowerCase() === 'true'
-          )
+          assetLine.push(value?.toLowerCase() === 'true')
         } else if (descriptor.data_type === 'person') {
-          const person = personMap.get(asset.data[descriptor.field_name])
+          const person = personMap.get(value)
           assetLine.push(person ? person.full_name : '')
         } else {
-          assetLine.push(asset.data[descriptor.field_name])
+          assetLine.push(value)
         }
       })
       if (state.isAssetTime) {

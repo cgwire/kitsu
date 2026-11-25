@@ -69,6 +69,25 @@ describe('lib/descriptors', () => {
       const task = { data: { reviewer: 'task-value' }, entity_data: { reviewer: 'shot-value' } }
       expect(getMetadataFieldValue(descriptor, task)).toBe('task-value')
     })
+
+    // A column named "Constructor" has the field name of a property every
+    // object inherits.
+    test('reads no value an entity only inherits', () => {
+      const descriptor = { field_name: 'constructor', entity_type: 'Shot' }
+      expect(getMetadataFieldValue(descriptor, { data: {} })).toBe('')
+      expect(
+        getMetadataFieldValue(descriptor, { data: {}, entity_data: {} })
+      ).toBe('')
+      expect(
+        getMetadataFieldValue(descriptor, {
+          data: {},
+          entity_data: { constructor: 'Unit 2' }
+        })
+      ).toBe('Unit 2')
+      expect(
+        getMetadataFieldValue(descriptor, { data: { constructor: 'Unit 1' } })
+      ).toBe('Unit 1')
+    })
   })
 
   describe('getMetadataChecklistValues', () => {

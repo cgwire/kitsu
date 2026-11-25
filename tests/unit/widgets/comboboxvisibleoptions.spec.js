@@ -16,6 +16,20 @@ const mountWidget = (props = {}) =>
 const combobox = wrapper => wrapper.findComponent(ComboboxOptions)
 
 describe('ComboboxVisibleOptions', () => {
+  // The title sums up the selection: the label names the combobox.
+  it('names the combobox by its label', () => {
+    const wrapper = mountWidget({ label: 'Task Types' })
+
+    expect(combobox(wrapper).props('ariaLabel')).toBe('Task Types')
+  })
+
+  // The workflow pickers of the asset type settings show no label.
+  it('names the combobox by its aria-label without a label', () => {
+    const wrapper = mountWidget({ ariaLabel: 'Workflow' })
+
+    expect(combobox(wrapper).props('ariaLabel')).toBe('Workflow')
+  })
+
   it('shows every option as visible by default', () => {
     const wrapper = mountWidget()
     expect(combobox(wrapper).props()).toMatchObject({

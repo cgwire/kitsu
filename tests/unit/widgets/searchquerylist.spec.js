@@ -44,6 +44,7 @@ const sharedGroup = { ...group, id: 'group-2', name: 'Team', is_shared: true }
 const mountList = async ({
   type = 'shot',
   actions = {},
+  attachTo,
   entityType,
   groups = [group],
   isAdmin = false,
@@ -95,6 +96,7 @@ const mountList = async ({
     })
   }
   return shallowMount(SearchQueryList, {
+    attachTo,
     props,
     global: { plugins: [store, router, i18n], stubs }
   })
@@ -579,6 +581,150 @@ describe('SearchQueryList, tooltips', () => {
     expect(wrapper.find('.tag.group .filter-label').attributes('title')).toBe(
       'Mine'
     )
+  })
+})
+
+describe('SearchQueryList, group buttons', () => {
+  // A group holds the edit and delete buttons of the edit mode, and the
+  // filters it lists when open: their names would join its own.
+  test('names a group after itself alone', async () => {
+    const held = { ...search, search_filter_group_id: group.id }
+    const wrapper = await mountList({ queries: [held] })
+    await wrapper.find('.tag.folder[title="main.edit_mode_on"]').trigger('click')
+    await wrapper.find('.tag.group').trigger('click')
+    const tag = wrapper.find('.tag.group')
+
+    expect(tag.classes()).toContain('is-editing')
+    expect(tag.find('.group-header button.edit').exists()).toBe(true)
+    expect(tag.find('.group-list .filter-label').text()).toBe('wip')
+    expect(tag.attributes('aria-label')).toBe('Mine')
+  })
+
+  test('tells whether a group is open', async () => {
+    const wrapper = await mountList({ groups: [group, sharedGroup] })
+    const tags = () => wrapper.findAll('.tag.group')
+    const expanded = () => tags().map(tag => tag.attributes('aria-expanded'))
+    expect(expanded()).toEqual(['false', 'false'])
+
+    await tags()[0].trigger('click')
+    expect(tags()[0].find('.group-list').exists()).toBe(true)
+    expect(expanded()).toEqual(['true', 'false'])
+
+    await tags()[1].trigger('click')
+    expect(expanded()).toEqual(['false', 'true'])
+
+    await tags()[1].trigger('keydown', { key: 'Enter' })
+    expect(expanded()).toEqual(['false', 'false'])
+  })
+
+  test.each([
+    ['Enter', 'Enter'],
+    ['Space', ' ']
+  ])('opens a group with %s pressed on it', async (_, key) => {
+    const wrapper = await mountList()
+    const event = new KeyboardEvent('keydown', {
+      key,
+      bubbles: true,
+      cancelable: true
+    })
+
+    wrapper.find('.tag.group').element.dispatchEvent(event)
+    await nextTick()
+
+    expect(event.defaultPrevented).toBe(true)
+    expect(wrapper.find('.tag.group').attributes('aria-expanded')).toBe('true')
+  })
+
+  // The group answers only the keys pressed on itself, and leaves the others
+  // to the filters and buttons it holds. In a browser, the click that Enter
+  // fires on a filter then closes the group, as a mouse click does: jsdom
+  // fires none, so the group stays open here.
+  test.each([
+    ['Enter on a filter', '.group-list .filter-name', 'Enter'],
+    ['Enter on the edit button of a filter', '.group-list button.edit', 'Enter'],
+    ['Enter on its edit button', '.group-header button.edit', 'Enter'],
+    ['Space on its edit button', '.group-header button.edit', ' ']
+  ])('leaves %s to the browser', async (_, selector, key) => {
+    const held = { ...search, search_filter_group_id: group.id }
+    const wrapper = await mountList({ queries: [held] })
+    await wrapper.find('.tag.folder[title="main.edit_mode_on"]').trigger('click')
+    await wrapper.find('.tag.group').trigger('click')
+    const event = new KeyboardEvent('keydown', {
+      key,
+      bubbles: true,
+      cancelable: true
+    })
+
+    wrapper.find(`.tag.group ${selector}`).element.dispatchEvent(event)
+    await nextTick()
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(wrapper.find('.tag.group').attributes('aria-expanded')).toBe('true')
+  })
+
+  // Applying a filter closes its group: the focus, which the filter held,
+  // goes back to the group instead of falling to the page.
+  test('gives the focus back to a group closed by one of its filters', async () => {
+    const held = { ...search, search_filter_group_id: group.id }
+    const wrapper = await mountList({
+      attachTo: document.body,
+      queries: [held]
+    })
+    onTestFinished(() => wrapper.unmount())
+    await wrapper.find('.tag.group').trigger('click')
+    // The stub renders its link without href: a tabindex makes it focusable,
+    // as the real link is.
+    const link = wrapper.find('.tag.group .filter-name')
+    link.element.tabIndex = 0
+    link.element.focus()
+    expect(document.activeElement).toBe(link.element)
+
+    await link.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('.tag.group .group-list').exists()).toBe(false)
+    expect(document.activeElement).toBe(wrapper.find('.tag.group').element)
+  })
+
+  test('leaves the focus on a button of its header when it closes', async () => {
+    const held = { ...search, search_filter_group_id: group.id }
+    const wrapper = await mountList({
+      attachTo: document.body,
+      queries: [held]
+    })
+    onTestFinished(() => wrapper.unmount())
+    await wrapper.find('.tag.folder[title="main.edit_mode_on"]').trigger('click')
+    await wrapper.find('.tag.group').trigger('click')
+    const edit = wrapper.find('.tag.group .group-header button.edit')
+    edit.element.focus()
+
+    await wrapper.find('.tag.group').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('.tag.group .group-list').exists()).toBe(false)
+    expect(document.activeElement).toBe(edit.element)
+  })
+
+  // A held key repeats its keydown: only the first one toggles the group.
+  test('toggles a group once for a held key', async () => {
+    const wrapper = await mountList()
+    const press = repeat => {
+      const event = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        repeat,
+        bubbles: true,
+        cancelable: true
+      })
+      wrapper.find('.tag.group').element.dispatchEvent(event)
+      return event
+    }
+
+    press(false)
+    const repeated = press(true)
+    await nextTick()
+
+    expect(repeated.defaultPrevented).toBe(true)
+    expect(wrapper.find('.tag.group').attributes('aria-expanded')).toBe('true')
   })
 })
 

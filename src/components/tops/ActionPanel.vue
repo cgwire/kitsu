@@ -443,7 +443,7 @@
             </div>
             <combobox-styled
               class="flexrow-item"
-              is-thin
+              :aria-label="$t('tasks.change_priority_to')"
               :options="priorityOptions"
               v-model="priority"
             />

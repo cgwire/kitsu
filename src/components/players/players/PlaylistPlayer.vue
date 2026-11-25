@@ -300,7 +300,6 @@
           ref="object-player"
           class="object-player"
           :background-url="backgroundUrl"
-          :full-screen="fullScreen"
           :is-environment-skybox="isEnvironmentSkybox"
           :is-wireframe="isWireframe"
           :preview-url="isCurrentPreviewModel ? currentPreviewDlPath : null"
@@ -442,7 +441,6 @@
         class="flexrow-item task-info-column"
         :current-frame="taskInfoFrame"
         :current-parent-preview="currentPreview"
-        :fps="fps"
         :extendable="false"
         :in-playlist="true"
         :is-preview="false"
@@ -834,6 +832,7 @@
               <template v-else>
                 <button
                   class="job-button mr05"
+                  :title="$t('playlists.actions.play')"
                   v-if="!joinedRoom"
                   @click="playBuild(job)"
                 >

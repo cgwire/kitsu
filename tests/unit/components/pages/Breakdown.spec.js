@@ -33,6 +33,7 @@ vi.mock('@/lib/preferences', () => ({
   }
 }))
 
+import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -634,7 +635,7 @@ describe('Breakdown page, casting helpers', () => {
   const villain = link('asset-2', 'Villain', 'Characters', 3)
   const forest = link('asset-3', 'Forest', 'Environments', 1)
 
-  const mountCasting = async (actions = {}) => {
+  const mountCasting = async (actions = {}, getters = {}) => {
     const mounted = mountPage({
       state: {
         isTVShow: false,
@@ -653,7 +654,8 @@ describe('Breakdown page, casting helpers', () => {
         productionShotTaskTypes: () => [
           { id: 'animation', name: 'Animation' },
           { id: 'layout', name: 'Layout' }
-        ]
+        ],
+        ...getters
       },
       stubs: { CastingTypeTotal: false }
     })
@@ -689,6 +691,38 @@ describe('Breakdown page, casting helpers', () => {
         'breakdown.nb_occurrences {"count":1}'
       ]
     })
+  })
+
+  // A column named "Constructor" has the field name of a property every
+  // object inherits.
+  test('exports an empty Constructor cell for a shot without a value', async () => {
+    const { wrapper } = await mountCasting(
+      {},
+      {
+        shotMetadataDescriptors: () => [
+          {
+            id: 'descriptor-c',
+            name: 'Constructor',
+            field_name: 'constructor',
+            data_type: 'string'
+          }
+        ]
+      }
+    )
+
+    const buildCsvFile = vi
+      .spyOn(csv, 'buildCsvFile')
+      .mockImplementation(() => {})
+    try {
+      wrapper.vm.exportViewToCsv()
+
+      const [headers, ...lines] = buildCsvFile.mock.calls[0][1]
+      const column = headers.indexOf('Constructor')
+      expect(column).toBeGreaterThan(-1)
+      expect(lines.map(line => line[column])).toEqual(['', '', ''])
+    } finally {
+      buildCsvFile.mockRestore()
+    }
   })
 
   test('displays the lines without casting only', async () => {

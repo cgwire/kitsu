@@ -33,7 +33,8 @@
           :descriptor="descriptor"
           :entity="editToEdit"
           @enter="runConfirmation"
-          v-model="form.data[descriptor.field_name]"
+          :model-value="getOwnValue(form.data, descriptor.field_name)"
+          @update:model-value="form.data[descriptor.field_name] = $event"
           v-for="descriptor in editMetadataDescriptors"
         />
       </template>
@@ -59,6 +60,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { dropRemovedDataKeys } from '@/lib/descriptors'
+import { getOwnValue } from '@/lib/models'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'

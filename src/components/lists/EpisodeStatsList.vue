@@ -77,10 +77,14 @@
             <tr class="datatable-row">
               <td
                 class="expander"
+                :title="
+                  expanded[entry.id] ? $t('main.collapse') : $t('main.expand')
+                "
                 role="button"
                 tabindex="0"
                 @click="toggleExpanded(entry.id)"
                 @keydown.enter.prevent="toggleExpanded(entry.id)"
+                @keydown.space.prevent="toggleExpanded(entry.id)"
                 v-if="isRetakes"
               >
                 <chevron-down-icon v-if="expanded[entry.id]" />

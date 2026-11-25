@@ -61,6 +61,7 @@
         />
         <a
           class="view-icon"
+          :title="$t('main.view_preview')"
           role="button"
           tabindex="0"
           v-if="!noPreview"

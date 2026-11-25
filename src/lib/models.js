@@ -1,5 +1,17 @@
 import { toRaw } from 'vue'
 
+// A column named "Constructor" has the field name of a property every object
+// inherits: an object holds a value only under a key of its own. The `in`
+// check makes Vue track the key of a reactive object even while it is
+// missing, which hasOwnProperty alone does not.
+export const getOwnValue = (object, key) =>
+  typeof object === 'object' &&
+  object !== null &&
+  key in object &&
+  Object.prototype.hasOwnProperty.call(object, key)
+    ? object[key]
+    : undefined
+
 export const populateTask = task => {
   const type = task.entity_type_name
   const parts = []
@@ -158,7 +170,7 @@ const copyFields = ({ data, ...fields }) => ({ fields, data: { ...data } })
 
 const getChangedKeys = (before, after) =>
   [...new Set([...Object.keys(before), ...Object.keys(after)])].filter(
-    key => before[key] !== after[key]
+    key => getOwnValue(before, key) !== getOwnValue(after, key)
   )
 
 // The edits of each cached entity still waiting for their save, oldest first.
@@ -203,15 +215,17 @@ export const trackEdit = (getEntity, applyEdit) => {
       const valuesBefore = edit.before[part]
       const valuesAfter = edit.after[part]
       getChangedKeys(valuesBefore, valuesAfter).forEach(key => {
-        if (current[part][key] === valuesAfter[key]) {
-          formerValues[part][key] = valuesBefore[key]
+        const valueBefore = getOwnValue(valuesBefore, key)
+        const valueAfter = getOwnValue(valuesAfter, key)
+        if (getOwnValue(current[part], key) === valueAfter) {
+          formerValues[part][key] = valueBefore
         } else {
           const nextEdit = laterEdits.find(
             later =>
-              later.before[part][key] === valuesAfter[key] &&
-              later.after[part][key] !== valuesAfter[key]
+              getOwnValue(later.before[part], key) === valueAfter &&
+              getOwnValue(later.after[part], key) !== valueAfter
           )
-          if (nextEdit) nextEdit.before[part][key] = valuesBefore[key]
+          if (nextEdit) nextEdit.before[part][key] = valueBefore
         }
       })
     })

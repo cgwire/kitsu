@@ -23,7 +23,6 @@
     />
 
     <department-links
-      :type="activeTab"
       :linked-items="linkedItems"
       :items="items"
       @link-item="onLinkItem"

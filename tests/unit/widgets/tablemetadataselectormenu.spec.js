@@ -124,6 +124,52 @@ describe('TableMetadataSelectorMenu', () => {
     return event
   }
 
+  // A column named "Constructor" has the field name of a property every
+  // object inherits.
+  describe('Constructor column', () => {
+    const openConstructorMenu = async modelValue => {
+      const store = createStore({
+        getters: { isCurrentUserManager: () => false }
+      })
+      wrapper = mountWithI18n(TableMetadataSelectorMenu, {
+        props: {
+          descriptors: [
+            {
+              id: 'descriptor-c',
+              entity_type: 'Shot',
+              field_name: 'constructor',
+              name: 'Constructor',
+              position: 0
+            }
+          ],
+          modelValue,
+          namespace: 'shots'
+        },
+        global: { plugins: [store] }
+      })
+      placeHost(219)
+      await wrapper.setProps({ isOpen: true })
+      await nextTick()
+    }
+
+    test('lists the column and shows it by default', async () => {
+      await openConstructorMenu({})
+
+      expect(wrapper.emitted('update:model-value')[0][0]).toEqual({
+        constructor: true
+      })
+      expect(menu().textContent).toContain('Constructor')
+    })
+
+    // The list hands back the headers the menu emitted.
+    test('lists the column once among the columns shown', async () => {
+      await openConstructorMenu({ constructor: true })
+
+      expect(menu().textContent.match(/Constructor/g)).toHaveLength(1)
+      expect(menu().textContent).not.toContain('function')
+    })
+  })
+
   // Closed before the page sees the key, the menu leaves only that mark: the
   // action panel would clear the task selection on it too.
   test('takes the Escape it closes on', async () => {

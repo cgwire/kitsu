@@ -71,6 +71,7 @@
           <div class="flexrow-item">
             <label class="label">{{ $t('productions.title') }}</label>
             <combobox-options
+              :aria-label="$t('productions.title')"
               :title="productionFilterTitle"
               :options="productionFilterOptions"
               :model-value="productionVisibilityMap"
@@ -80,6 +81,7 @@
           <div class="flexrow-item">
             <label class="label">{{ $t('task_types.title') }}</label>
             <combobox-options
+              :aria-label="$t('task_types.title')"
               :title="taskTypeFilterTitle"
               :options="taskTypeFilterOptions"
               :model-value="taskTypeVisibilityMap"

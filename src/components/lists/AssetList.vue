@@ -60,6 +60,7 @@
                 <template #actions>
                   <button-simple
                     class="is-small flexrow-item add-metadata-button"
+                    :title="$t('productions.metadata.title')"
                     icon="plus"
                     :text="''"
                     @click="onAddMetadataClicked"
@@ -264,6 +265,7 @@
 
               <button-simple
                 class="is-small is-pulled-right mr05"
+                :title="$t('main.column_visibility')"
                 icon="down"
                 @click="toggleColumnSelector"
                 v-if="displaySettings.showInfos"
@@ -362,7 +364,7 @@
                 <td
                   class="metadata-descriptor datatable-row-header"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="asset.data ? asset.data[descriptor.field_name] : ''"
+                  :title="getOwnValue(asset.data, descriptor.field_name)"
                   :style="{
                     'z-index':
                       descriptor.data_type === 'taglist'
@@ -406,7 +408,6 @@
                   :row-x="getIndex(i, k)"
                   :column-y="j"
                   :minimized="hiddenColumns[columnId]"
-                  :is-static="true"
                   :is-assignees="displaySettings.showAssignations"
                   :hide-task="!isInWorkflow(asset, columnId)"
                   :selectable="isSelectable(asset, columnId)"
@@ -521,7 +522,7 @@
                 <td
                   class="metadata-descriptor"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="asset.data ? asset.data[descriptor.field_name] : ''"
+                  :title="getOwnValue(asset.data, descriptor.field_name)"
                   :key="'desc' + asset.id + '-' + descriptor.id"
                   v-for="(
                     descriptor, j
@@ -559,7 +560,6 @@
                   :row-x="getIndex(i, k)"
                   :column-y="j"
                   :minimized="hiddenColumns[columnId]"
-                  :is-static="true"
                   :is-assignees="displaySettings.showAssignations"
                   :hide-task="!isInWorkflow(asset, columnId)"
                   :selectable="isSelectable(asset, columnId)"
@@ -615,6 +615,7 @@ import emptyAssetIllustration from '@/assets/illustrations/empty_asset.png'
 import { useEntityList } from '@/composables/entityList'
 import { useFormat } from '@/composables/format'
 import { getMetadataFieldValue } from '@/lib/descriptors'
+import { getOwnValue } from '@/lib/models'
 import { getTaskHref } from '@/lib/path'
 import { sortTaskTypes } from '@/lib/sorting'
 import { range } from '@/lib/time'

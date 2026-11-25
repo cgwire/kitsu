@@ -1,3 +1,4 @@
+import { CopyIcon } from 'lucide-vue-next'
 import { RouterLink, createRouter, createWebHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -94,11 +95,13 @@ const mountComment = ({
   comment = makeComment(),
   isAcknowledgeable,
   isActionError = false,
+  isDuplicable,
   isEditable = true,
   isReplyable,
   storeOptions,
   stubs = {},
   attachTo,
+  renderStubDefaultSlot = false,
   urlPrefix = ''
 } = {}) =>
   shallowMountWithI18n(Comment, {
@@ -107,6 +110,7 @@ const mountComment = ({
       comment,
       isAcknowledgeable,
       isActionError,
+      isDuplicable,
       isEditable,
       isReplyable,
       task,
@@ -116,6 +120,7 @@ const mountComment = ({
     },
     global: {
       plugins: [makeStore(storeOptions), router],
+      renderStubDefaultSlot,
       stubs: {
         AttachmentAudioPlayer: true,
         AttachmentVideoPlayer: true,
@@ -303,6 +308,40 @@ describe('Comment', () => {
       const wrapper = mountComment({ comment, storeOptions: { user: null } })
       expect(avatarLinks(wrapper)).toEqual([false, false])
     })
+  })
+
+  // Screen readers announced a bare "button", and the mouse got no tooltip.
+  test('names the icon that copies a client comment', () => {
+    const wrapper = mountComment({
+      comment: makeComment({
+        person_id: 'person-2',
+        person: { id: 'person-2', role: 'client' }
+      }),
+      isDuplicable: true,
+      renderStubDefaultSlot: true
+    })
+
+    const icon = wrapper.findComponent(CopyIcon)
+
+    expect(icon.attributes('role')).toBe('button')
+    expect(icon.element.querySelector('title')?.textContent ?? null).toBe(
+      'Copy into a new comment'
+    )
+  })
+
+  // The copy fills the comment form, which a user who may not comment lacks.
+  test('shows the copy icon only when the comment can be duplicated', () => {
+    const comment = makeComment({
+      person_id: 'person-2',
+      person: { id: 'person-2', role: 'client' }
+    })
+
+    const withoutCopy = mountComment({ comment })
+    expect(withoutCopy.find('.client-comment').exists()).toBe(true)
+    expect(withoutCopy.findComponent(CopyIcon).exists()).toBe(false)
+
+    const withCopy = mountComment({ comment, isDuplicable: true })
+    expect(withCopy.findComponent(CopyIcon).exists()).toBe(true)
   })
 
   // Zou hands the client the internal comments that carry a preview, emptied

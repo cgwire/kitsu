@@ -1,5 +1,6 @@
 import { firstBy } from 'thenby'
 
+import { getOwnValue } from '@/lib/models'
 import { PAGE_SIZE } from '@/lib/pagination'
 import {
   getTaskStatusPriorityOfProd,
@@ -441,8 +442,8 @@ const getChecklistScore = checklist => {
 }
 
 const getMetadataValues = (sortInfo, a, b, defaultValue = '') => {
-  let dataA = a.data?.[sortInfo.column] ?? defaultValue
-  let dataB = b.data?.[sortInfo.column] ?? defaultValue
+  let dataA = getOwnValue(a.data, sortInfo.column) ?? defaultValue
+  let dataB = getOwnValue(b.data, sortInfo.column) ?? defaultValue
 
   if (typeof dataA === 'number') dataA = String(dataA)
   if (typeof dataB === 'number') dataB = String(dataB)

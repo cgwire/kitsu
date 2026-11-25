@@ -20,6 +20,7 @@
             <div class="filler"></div>
             <div class="flexrow flexrow-item">
               <combobox-department
+                :aria-label="$t('main.department')"
                 class="combobox-department flexrow-item"
                 :selectable-departments="selectableDepartments('Sequence')"
                 :display-all-and-my-departments="true"
@@ -74,7 +75,6 @@
         />
         <sequence-list
           ref="sequence-list"
-          :contact-sheet-mode="contactSheetMode"
           :display-settings="displaySettings"
           :displayed-sequences="displayedSequences"
           :is-loading="isLoading || initialLoading"
@@ -274,7 +274,6 @@ const { t } = useI18n()
 const store = useStore()
 
 const type = 'sequence'
-const contactSheetMode = false
 
 // State
 // --------------------------------------------------------------------------

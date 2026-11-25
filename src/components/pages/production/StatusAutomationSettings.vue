@@ -8,6 +8,7 @@
         >
           <combobox-status-automation
             class="flexrow-item selector"
+            :aria-label="$t('status_automations.title')"
             :status-automations-list="remainingAutomations"
             v-model="automationToAdd"
           />

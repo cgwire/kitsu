@@ -4,6 +4,7 @@ import {
   buildTaskTypeIndex,
   indexSearch
 } from '@/lib/indexing'
+import { getOwnValue } from '@/lib/models'
 
 const UNION_REGEX = /\+\(.*\)/
 const EQUAL_REGEX =
@@ -112,10 +113,10 @@ const applyFiltersFunctions = {
     // descriptors stay in data only, so a same-named entity column does not
     // leak into the task filter.
     let dataValue =
-      entry.data?.[filter.descriptor.field_name] ??
+      getOwnValue(entry.data, filter.descriptor.field_name) ??
       (filter.descriptor.entity_type === 'Task'
         ? undefined
-        : entry.entity_data?.[filter.descriptor.field_name])
+        : getOwnValue(entry.entity_data, filter.descriptor.field_name))
     const isBlank =
       dataValue === undefined || dataValue === null || dataValue === ''
     if (isBlank && filter.values) {

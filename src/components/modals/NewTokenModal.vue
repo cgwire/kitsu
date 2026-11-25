@@ -18,7 +18,6 @@
             {{ $t('bots.new_token_warning') }}
           </p>
           <date-field
-            :invalid="!isValidExpirationDate"
             :label="$t('bots.fields.expiration_date')"
             :min-date="today"
             v-model="form.expiration_date"

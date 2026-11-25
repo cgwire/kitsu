@@ -91,7 +91,6 @@
             class="flexrow-item desktop-only"
             :title="$t('main.csv.export_file')"
             icon="export-lines"
-            :is-responsive="true"
             :path="exportUrlPath"
             v-if="isCurrentUserManager"
           />
@@ -121,6 +120,7 @@
 
           <button-simple
             class="is-small mr05"
+            :title="$t('main.column_visibility')"
             icon="down"
             @click="toggleColumnSelector"
             v-if="isShowInfosBreakdown"
@@ -362,7 +362,6 @@
       :is-error="errors.importing"
       :import-error="errors.importingError"
       :parsed-csv="parsedCSV"
-      :form-data="importCsvFormData"
       :columns="renderColumns"
       :data-matchers="dataMatchers"
       :database="filteredCasting"
@@ -377,7 +376,6 @@
       :active="modals.importing"
       :is-loading="loading.importing"
       :is-error="errors.importing"
-      :form-data="importCsvFormData"
       :columns="csvColumns"
       :optional-columns="optionalCsvColumns"
       @cancel="hideImportModal"
@@ -388,7 +386,6 @@
       :active="modals.isEditLabelDisplayed"
       :is-loading="loading.editLabel"
       :is-error="errors.editLabel"
-      :asset="editedAsset"
       :label="editedAssetLinkLabel"
       @cancel="modals.isEditLabelDisplayed = false"
       @confirm="confirmEditLabel"
@@ -449,6 +446,7 @@ import { useBreakdownLoader } from '@/composables/breakdownLoader'
 import { useCellSave } from '@/composables/cellSave'
 import clipboard from '@/lib/clipboard'
 import csv from '@/lib/csv'
+import { getOwnValue } from '@/lib/models'
 import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
 import { range } from '@/lib/time'
@@ -527,7 +525,6 @@ const columnWidth = ref({})
 const editedAsset = ref(null)
 const editedAssetLinkLabel = ref(null)
 const editedEntityId = ref(null)
-const importCsvFormData = ref({})
 const isBigMode = ref(false)
 const isOnlyCurrentEpisode = ref(false)
 const isTextMode = ref(false)
@@ -1117,7 +1114,6 @@ const uploadImportFile = async data => {
   loading.importing = true
   errors.importing = false
   errors.importingError = null
-  importCsvFormData.value = formData
   try {
     await store.dispatch('uploadCastingFile', formData)
     hideImportRenderModal()
@@ -1135,7 +1131,6 @@ const resetImport = () => {
   errors.importing = false
   errors.importingError = null
   hideImportRenderModal()
-  importCsvFormData.value = undefined
   importModalRef.value?.reset()
   showImportModal()
 }
@@ -1418,7 +1413,7 @@ const getCsvEntries = () =>
       ...(isFrameIn.value ? [entity.data.frame_in] : []),
       ...(isFrameOut.value ? [entity.data.frame_out] : []),
       ...metadataDescriptors.value.map(
-        descriptor => entity.data[descriptor.field_name] || ''
+        descriptor => getOwnValue(entity.data, descriptor.field_name) || ''
       ),
       ...castingAssetTypes.value.map(assetTypeName =>
         getCsvCastingCell(

@@ -2,6 +2,7 @@
   <div>
     <label class="label" v-if="label">{{ label }}</label>
     <combobox-options
+      :aria-label="ariaLabel || label || undefined"
       :title="title"
       :options="options"
       :model-value="visibilityMap"
@@ -33,6 +34,8 @@ const { t } = useI18n()
 // Props / Emits
 // --------------------------------------------------------------------------
 const props = defineProps({
+  // Names the combobox when it shows no label.
+  ariaLabel: { type: String, default: '' },
   hidden: { type: Array, default: () => [] },
   label: { type: String, default: '' },
   options: { type: Array, default: () => [] },

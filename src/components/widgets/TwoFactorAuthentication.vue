@@ -11,6 +11,7 @@
           class="input is-medium password"
           type="text"
           autocomplete="one-time-code"
+          :aria-describedby="informationId"
           :placeholder="placeholderInputText"
           @input="updatePayload"
           @keyup.enter="validate"
@@ -42,16 +43,16 @@
       <p class="control error" v-else-if="errorRequestingFIDOChallenge">
         {{ $t('login.error_requesting_fido') }}
       </p>
-      <p class="control error" v-else-if="errorSendingEmail">
+      <p class="control error" v-if="errorSendingEmail">
         {{ $t('login.error_sending_email') }}
       </p>
       <p v-if="chosenTwoFA === 'email_otp'">
         <a
           role="button"
           tabindex="0"
-          @click="requestSendEmailOTP"
-          @keydown.enter.prevent="requestSendEmailOTP"
-          @keydown.space.prevent="requestSendEmailOTP"
+          @click="requestSendEmailOTP()"
+          @keydown.enter.prevent="requestSendEmailOTP()"
+          @keydown.space.prevent="requestSendEmailOTP()"
         >
           {{ $t('login.send_email_otp') }}
         </a>
@@ -69,9 +70,10 @@
         </a>
       </p>
 
-      <p class="control">
+      <p :id="informationId" class="control">
         {{ informationTwoFA }}
       </p>
+      <p class="visuallyhidden" role="status">{{ emailSendingStatus }}</p>
       <div v-if="othersTwoFA.length >= 1">
         <p class="control">
           {{ unableToVerify }}
@@ -95,7 +97,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
@@ -148,9 +150,18 @@ const OTPValue = ref('')
 const twoFactorPayload = ref({})
 const errorSendingEmail = ref(false)
 const errorRequestingFIDOChallenge = ref(false)
+const emailSendingStatus = ref('')
+let lastEmailSending = 0
+const informationId = useId()
 
 const textValidateButtonOrVerify = computed(
   () => props.textValidateButton || t('login.verify')
+)
+
+const isNewEmailCodeSent = computed(
+  () =>
+    !errorSendingEmail.value &&
+    (store.getters.emailOTPCodesSent[props.email] ?? 0) > 1
 )
 
 const placeholderInputText = computed(() => {
@@ -184,7 +195,9 @@ const informationTwoFA = computed(() => {
     case 'totp':
       return t('login.information_totp')
     case 'email_otp':
-      return t('login.information_email_otp')
+      return isNewEmailCodeSent.value
+        ? t('profile.two_factor_authentication.email_otp.new_code_sent')
+        : t('login.information_email_otp')
     case 'recovery_code':
       return t('login.information_recovery_code')
     case 'fido':
@@ -242,22 +255,43 @@ const changeTwoFAText = twoFA => {
   return ''
 }
 
-const changeTwoFA = (twoFA, emitChanged = true) => {
+const changeTwoFA = (twoFA, isOpening = false) => {
   removeErrors()
+  emailSendingStatus.value = ''
   chosenTwoFA.value = twoFA
   if (chosenTwoFA.value === 'email_otp') {
-    requestSendEmailOTP()
+    requestSendEmailOTP({ isOpening })
   } else if (chosenTwoFA.value === 'fido') {
     requestGetFIDOChallenge()
   }
-  if (emitChanged) emit('changed-two-fa', chosenTwoFA.value)
+  if (!isOpening) emit('changed-two-fa', chosenTwoFA.value)
 }
 
-const requestSendEmailOTP = () => {
+// A status region speaks only when its text changes: emptied first, it reads
+// the help line once a resend or a method switch has sent a code, and the
+// error of a failed sending. The field takes the focus at the opening, before
+// the code is sent: the help line is read again only if that code changed it.
+// A newer sending or a method switch makes a result stale.
+const requestSendEmailOTP = ({ isOpening = false } = {}) => {
   removeErrors()
-  store.dispatch('sendEmailOTP', props.email).catch(() => {
-    errorSendingEmail.value = true
-  })
+  emailSendingStatus.value = ''
+  const sending = ++lastEmailSending
+  const helpBeforeSending = informationTwoFA.value
+  const isStale = () =>
+    sending !== lastEmailSending || chosenTwoFA.value !== 'email_otp'
+  store
+    .dispatch('sendEmailOTP', props.email)
+    .then(() => {
+      const isHelpChanged = informationTwoFA.value !== helpBeforeSending
+      if (!isStale() && (!isOpening || isHelpChanged)) {
+        emailSendingStatus.value = informationTwoFA.value
+      }
+    })
+    .catch(() => {
+      if (isStale()) return
+      errorSendingEmail.value = true
+      emailSendingStatus.value = t('login.error_sending_email')
+    })
 }
 
 const requestGetFIDOChallenge = () => {
@@ -280,7 +314,7 @@ const requestGetFIDOChallenge = () => {
 }
 
 onMounted(() => {
-  changeTwoFA(props.preferredTwoFa, false)
+  changeTwoFA(props.preferredTwoFa, true)
 })
 </script>
 

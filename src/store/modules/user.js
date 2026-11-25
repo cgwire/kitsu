@@ -29,6 +29,7 @@ import {
   USER_DISABLE_TOTP_SUCCESS,
   USER_ENABLE_EMAIL_OTP_SUCCESS,
   USER_DISABLE_EMAIL_OTP_SUCCESS,
+  USER_EMAIL_OTP_SENT,
   USER_REGISTER_FIDO_SUCCESS,
   USER_UNREGISTER_FIDO_SUCCESS,
   USER_LOAD_TODOS_START,
@@ -178,6 +179,9 @@ const initialState = {
   // projectId -> explicit role of the current user on that production,
   // absent entries mean the global role applies (from the user context)
   projectRoles: {},
+  // email -> codes sent by email in the page: each one makes Zou refuse the
+  // codes of the earlier emails
+  emailOTPCodesSent: {},
 
   avatarFormData: null,
   isSaveProfileLoading: false,
@@ -233,6 +237,7 @@ const routeRole = (state, rootState) =>
 const getters = {
   user: state => state.user,
   isAuthenticated: state => state.isAuthenticated,
+  emailOTPCodesSent: state => state.emailOTPCodesSent,
   isCurrentUserManager: (state, getters, rootState) =>
     state.user && ['admin', 'manager'].includes(routeRole(state, rootState)),
   isCurrentUserAdmin: state => state.user && state.user.role === 'admin',
@@ -342,6 +347,17 @@ const getters = {
     state.plugins.filter(plugin => plugin.frontend_project_enabled)
 }
 
+// Zou stores the new code before it mails it: past the time limit, the code
+// of the earlier email may already be refused, so the request counts too.
+const countEmailOTPSent = (request, commit, email) =>
+  request.then(
+    () => commit(USER_EMAIL_OTP_SENT, email),
+    err => {
+      if (err.isTimeout) commit(USER_EMAIL_OTP_SENT, email)
+      throw err
+    }
+  )
+
 const actions = {
   async saveUserLocale({ commit, state }, locale) {
     await peopleApi.updatePersonLocale(state.user.id, locale)
@@ -405,7 +421,8 @@ const actions = {
   },
 
   preEnableEmailOTP({ commit, state }) {
-    return peopleApi.preEnableEmailOTP()
+    const request = peopleApi.preEnableEmailOTP()
+    return countEmailOTPSent(request, commit, state.user.email)
   },
 
   enableEmailOTP({ commit, state }, { otp, twoFactorPayload }) {
@@ -418,7 +435,7 @@ const actions = {
   },
 
   sendEmailOTP({ commit, state }, email) {
-    return peopleApi.sendEmailOTP(email)
+    return countEmailOTPSent(peopleApi.sendEmailOTP(email), commit, email)
   },
 
   disableEmailOTP({ commit, state }, twoFactorPayload) {
@@ -754,6 +771,15 @@ const mutations = {
   [USER_DISABLE_EMAIL_OTP_SUCCESS](state) {
     state.user.email_otp_enabled = false
     preferNextTwoFactor(state.user, 'email_otp')
+  },
+
+  // A new object: RESET_ALL puts back the one of initialState, which has to
+  // stay empty.
+  [USER_EMAIL_OTP_SENT](state, email) {
+    state.emailOTPCodesSent = {
+      ...state.emailOTPCodesSent,
+      [email]: (state.emailOTPCodesSent[email] ?? 0) + 1
+    }
   },
 
   [USER_REGISTER_FIDO_SUCCESS](state, deviceName) {

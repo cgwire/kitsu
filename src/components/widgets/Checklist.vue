@@ -11,7 +11,10 @@
     >
       <span
         class="checklist-checkbox"
-        role="button"
+        role="checkbox"
+        :aria-checked="entry.checked"
+        :aria-label="entry.text || $t('comments.checklist')"
+        :aria-disabled="!isEditable || undefined"
         tabindex="0"
         @click="toggleEntryChecked(entry)"
         @keydown.enter.prevent="toggleEntryChecked(entry)"
@@ -48,6 +51,7 @@
       </span>
       <span
         class="checklist-clock"
+        :title="$t('comments.add_frame_to_checklist')"
         role="button"
         tabindex="0"
         @click="setFrame(entry)"

@@ -2,6 +2,7 @@
   <div>
     <label class="label" v-if="label">{{ label }}</label>
     <combobox-options
+      :aria-label="label || undefined"
       :title="title"
       :options="options"
       :model-value="selectionMap"

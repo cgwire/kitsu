@@ -4,13 +4,14 @@
       field: withMargin
     }"
   >
-    <label class="label" v-if="label">
+    <label class="label" :id="labelId" v-if="label">
       {{ label }}
     </label>
     <div class="production-combo">
       <div
         class="flexrow"
         role="combobox"
+        :aria-labelledby="label ? labelId : undefined"
         tabindex="0"
         aria-haspopup="listbox"
         :aria-expanded="showProductionList"
@@ -23,7 +24,6 @@
         <div class="selected-production-line flexrow-item">
           <production-name
             :production="currentProduction"
-            :no-link="true"
             :size="25"
             v-if="currentProduction"
           />
@@ -45,11 +45,7 @@
           @click="selectProduction(production)"
           v-for="(production, index) in productionList"
         >
-          <production-name
-            :size="25"
-            :no-link="true"
-            :production="production"
-          />
+          <production-name :size="25" :production="production" />
         </div>
       </div>
     </div>
@@ -61,7 +57,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { ChevronDownIcon } from 'lucide-vue-next'
 
 import { useCombobox } from '@/composables/combobox'
@@ -97,6 +93,7 @@ const {
   select: selectProduction
 } = useCombobox(emit)
 
+const labelId = useId()
 const listRef = ref(null)
 const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
   isOpen: showProductionList,

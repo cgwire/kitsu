@@ -121,6 +121,7 @@
             >
               {{ attachment.name }}
               <span
+                :title="$t('main.remove')"
                 role="button"
                 tabindex="0"
                 @click="removeAttachment(attachment)"

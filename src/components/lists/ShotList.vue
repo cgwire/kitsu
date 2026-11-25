@@ -56,6 +56,7 @@
                 <template #actions>
                   <button-simple
                     class="is-small flexrow"
+                    :title="$t('productions.metadata.title')"
                     icon="plus"
                     :text="''"
                     @click="onAddMetadataClicked"
@@ -288,6 +289,7 @@
 
               <button-simple
                 class="is-small is-pulled-right mr05"
+                :title="$t('main.column_visibility')"
                 icon="down"
                 @click="toggleColumnSelector"
                 v-if="displaySettings.showInfos"
@@ -368,7 +370,7 @@
                 <td
                   class="metadata-descriptor datatable-row-header"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="shot.data ? shot.data[descriptor.field_name] : ''"
+                  :title="getOwnValue(shot.data, descriptor.field_name)"
                   :style="{
                     'z-index':
                       descriptor.data_type === 'taglist'
@@ -407,7 +409,6 @@
                   :entity="shot"
                   :is-assignees="displaySettings.showAssignations"
                   :is-casting-ready="isCastingReady(shot, columnId)"
-                  :is-static="true"
                   :left="
                     offsets['validation-' + j]
                       ? `${offsets['validation-' + j]}px`
@@ -694,7 +695,7 @@
                 <td
                   class="metadata-descriptor"
                   @keyup.ctrl="onInputKeyUp"
-                  :title="shot.data ? shot.data[descriptor.field_name] : ''"
+                  :title="getOwnValue(shot.data, descriptor.field_name)"
                   :key="shot.id + '-' + descriptor.id"
                   v-for="(
                     descriptor, j
@@ -813,6 +814,7 @@ import { useEntityList } from '@/composables/entityList'
 import { useFormat } from '@/composables/format'
 import vNumberValue from '@/directives/number-value'
 import { getMetadataFieldValue } from '@/lib/descriptors'
+import { getOwnValue } from '@/lib/models'
 import { readNumberInput } from '@/lib/number'
 import { getTaskHref } from '@/lib/path'
 import { range } from '@/lib/time'

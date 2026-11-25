@@ -47,7 +47,7 @@
     "fabric": "7.4.0",
     "fabricjs-psbrush": "cgwire/fabricjs-psbrush",
     "lucide-vue-next": "0.577.0",
-    "marked": "18.2.1",
+    "marked": "18.3.0",
     "marked-emoji": "3.0.0",
     "moment": "2.31.0",
     "moment-timezone": "0.6.6",
@@ -71,7 +71,7 @@
     "vuedraggable": "4.1.0",
     "vuex": "4.1.0",
     "vuex-router-sync": "6.0.0-rc.1",
-    "wavesurfer.js": "8.1.0"
+    "wavesurfer.js": "8.1.1"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

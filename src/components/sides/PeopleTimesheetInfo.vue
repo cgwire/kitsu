@@ -1,7 +1,11 @@
 <template>
   <div class="people-timesheet-info">
     <div class="close">
-      <router-link class="close-button" :to="closeTarget">
+      <router-link
+        class="close-button"
+        :title="$t('main.close')"
+        :to="closeTarget"
+      >
         <x-icon :size="16" />
       </router-link>
     </div>

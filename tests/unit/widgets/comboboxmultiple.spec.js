@@ -17,6 +17,13 @@ const mountWidget = (props = {}) =>
 const combobox = wrapper => wrapper.findComponent(ComboboxOptions)
 
 describe('ComboboxMultiple', () => {
+  // The title sums up the selection: the label names the combobox.
+  it('names the combobox by its label', () => {
+    const wrapper = mountWidget({ label: 'Asset Type' })
+
+    expect(combobox(wrapper).props('ariaLabel')).toBe('Asset Type')
+  })
+
   it('reads "all" when nothing is selected', () => {
     const wrapper = mountWidget()
     expect(combobox(wrapper).props()).toMatchObject({

@@ -426,6 +426,15 @@ describe('ProductionSchedule page', () => {
       expect(wrapper.find('.side-column').exists()).toBe(false)
     })
 
+    // Its title counts what it shows: "All" or "(2/3)".
+    it('names the filter by its label', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(wrapper.findComponent(ComboboxOptions).props('ariaLabel')).toBe(
+        'task_types.title'
+      )
+    })
+
     it('ticks and counts the visible types of the current view', async () => {
       const { wrapper } = await mountPage({
         query: { hiddenTypes: 'tt-animation' }

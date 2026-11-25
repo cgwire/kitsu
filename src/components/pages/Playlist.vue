@@ -12,13 +12,13 @@
             class="flexrow-item selector mb1"
             :task-type-list="taskTypeList"
             :label="$t('playlists.filter_task_type')"
-            :thin="true"
             v-model="taskTypeId"
             v-if="!isListToggled && !isCurrentUserClient"
           />
           <span class="filler" v-if="!isListToggled"></span>
           <button-simple
             class="flexrow-item"
+            :title="$t('playlists.actions.playlist_list')"
             style="flex: 0"
             :icon="isListToggled ? 'right' : 'left'"
             @click="isListToggled = !isListToggled"
@@ -232,6 +232,7 @@
               <span class="filler"></span>
               <a
                 class="close-button"
+                :title="$t('main.close')"
                 role="button"
                 tabindex="0"
                 @click="toggleAddEntities"

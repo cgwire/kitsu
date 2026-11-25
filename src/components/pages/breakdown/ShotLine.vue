@@ -163,7 +163,7 @@
     <template v-if="isShowInfosBreakdown">
       <div
         class="metadata-descriptor flexrow-item"
-        :title="entity.data ? entity.data[descriptor.field_name] : ''"
+        :title="getOwnValue(entity.data, descriptor.field_name)"
         :key="'desc' + entity.id + '-' + descriptor.id"
         :style="{
           'min-width': columnWidth[descriptor.id]
@@ -310,6 +310,7 @@ import {
   getMetadataEventValue,
   getMetadataFieldValue
 } from '@/lib/descriptors'
+import { getOwnValue } from '@/lib/models'
 import { readNumberInput } from '@/lib/number'
 import { renderMarkdown } from '@/lib/render'
 

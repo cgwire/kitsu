@@ -38,6 +38,7 @@ import {
 } from '@/lib/selection'
 import {
   getFilledColumns,
+  getOwnValue,
   groupEntitiesByParents,
   removeModelFromList,
   setCanceled,
@@ -783,15 +784,14 @@ const actions = {
         shot.description
       ])
       sortedDescriptors.forEach(descriptor => {
+        const value = getOwnValue(shot.data, descriptor.field_name)
         if (descriptor.data_type === 'boolean') {
-          shotLine.push(
-            shot.data[descriptor.field_name]?.toLowerCase() === 'true'
-          )
+          shotLine.push(value?.toLowerCase() === 'true')
         } else if (descriptor.data_type === 'person') {
-          const person = personMap.get(shot.data[descriptor.field_name])
+          const person = personMap.get(value)
           shotLine.push(person ? person.full_name : '')
         } else {
-          shotLine.push(shot.data[descriptor.field_name])
+          shotLine.push(value)
         }
       })
       if (state.isShotTime) {

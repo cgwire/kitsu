@@ -8,6 +8,7 @@
         <div class="flexrow header-title" v-else-if="task">
           <router-link
             class="flexrow-item has-text-centered back-link"
+            :title="$t('main.back')"
             :to="taskEntitiesPath"
           >
             <corner-left-up-icon />
@@ -16,6 +17,7 @@
           <div class="flexrow-item block flexrow task-type">
             <router-link
               class="flexrow-item mt05"
+              :title="$t('tasks.previous')"
               :to="previousEntityTaskPath"
               v-if="previousEntityTaskPath"
             >
@@ -24,6 +26,7 @@
 
             <router-link
               class="flexrow-item mt05"
+              :title="$t('tasks.next')"
               :to="nextEntityTaskPath"
               v-if="nextEntityTaskPath"
             >
@@ -99,6 +102,7 @@
 
             <router-link
               class="flexrow-item"
+              :title="$t('main.previous_entity')"
               :to="previousTaskPath"
               v-if="previousTaskPath"
             >
@@ -107,6 +111,7 @@
 
             <router-link
               class="flexrow-item"
+              :title="$t('main.next_entity')"
               :to="nextTaskPath"
               v-if="nextTaskPath"
             >
@@ -123,6 +128,7 @@
               <div class="flexrow-item" v-if="isPreviews">
                 <combobox-styled
                   class="preview-combo flexrow-item"
+                  :aria-label="$t('entities.preview_files.revision')"
                   :options="previewOptions"
                   is-preview
                   :model-value="currentPreviewId"
@@ -281,7 +287,7 @@
                           linkForDescriptor(descriptor)
                         "
                       >
-                        {{ task.data[descriptor.field_name] }}
+                        {{ getOwnValue(task.data, descriptor.field_name) }}
                       </a>
                       <span
                         class="flexrow"
@@ -364,6 +370,7 @@
                       isDepartmentSupervisor ||
                       isCurrentUserManager
                     "
+                    :is-duplicable="isCommentingAllowed"
                     :is-editable="
                       (user && user.id === comment.person?.id) ||
                       isCurrentUserManager
@@ -413,7 +420,6 @@
         :active="modals.addPreview"
         :is-loading="loading.addPreview"
         :is-error="errors.addPreview"
-        :form-data="addPreviewFormData"
         :fps="currentFps"
         :expected-frames="entityFrames"
         :title="
@@ -433,7 +439,6 @@
           :active="modals.addExtraPreview"
           :is-loading="loading.addExtraPreview"
           :is-error="errors.addExtraPreview"
-          :form-data="addExtraPreviewFormData"
           message=""
           :upload-progress="uploadProgress"
           :title="
@@ -520,6 +525,7 @@ import {
   logRequestFailure
 } from '@/lib/errors'
 import func from '@/lib/func'
+import { getOwnValue } from '@/lib/models'
 import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
 import { formatRevision } from '@/lib/preview'
 import {
@@ -589,8 +595,6 @@ const previewForms = ref([])
 const currentFrame = ref(0)
 const isUseCurrentFrame = ref(false)
 const hookupPlaylistTaskIds = ref([])
-const addPreviewFormData = ref(null)
-const addExtraPreviewFormData = ref(null)
 // The file the trash of the player removes and the revision its "+" adds a
 // file to, each with the task of the revision shown at the click.
 const removedFile = ref(null)
@@ -1115,7 +1119,7 @@ const formatDuration = (minutes, toLocale = true) =>
   formatDurationLib(organisation.value, minutes, toLocale)
 
 const getTaskMetadataValue = descriptor => {
-  const value = task.value?.data?.[descriptor.field_name]
+  const value = getOwnValue(task.value?.data, descriptor.field_name)
   if (value == null || value === '') return ''
   if (descriptor.data_type === 'date') {
     return formatDisplayDate(value)
@@ -1130,11 +1134,12 @@ const getTaskMetadataValue = descriptor => {
 }
 
 const personForDescriptor = descriptor =>
-  personMap.value.get(task.value?.data?.[descriptor.field_name]) || null
+  personMap.value.get(getOwnValue(task.value?.data, descriptor.field_name)) ||
+  null
 
 // The url field accepts any absolute URL, javascript: included.
 const linkForDescriptor = descriptor =>
-  safeUrl(task.value?.data?.[descriptor.field_name])
+  safeUrl(getOwnValue(task.value?.data, descriptor.field_name))
 
 // Functions (routing)
 // --------------------------------------------------------------------------

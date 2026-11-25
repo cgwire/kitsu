@@ -32,6 +32,37 @@ const mountCombobox = ({ props = {}, getters = {} } = {}) => {
 const listedIds = wrapper => wrapper.vm.departmentList.map(({ id }) => id)
 
 describe('ComboboxDepartment', () => {
+  it('names the combobox by its label', () => {
+    const labeled = mountCombobox({ props: { label: 'Department' } })
+    const unlabeled = mountCombobox()
+
+    const labelId = labeled.find('label').attributes('id')
+    expect(labelId).toBeTruthy()
+    expect(
+      labeled.find('[role="combobox"]').attributes('aria-labelledby')
+    ).toBe(labelId)
+    expect(
+      unlabeled.find('[role="combobox"]').attributes('aria-labelledby')
+    ).toBeUndefined()
+    labeled.unmount()
+    unlabeled.unmount()
+  })
+
+  // The page filters show no label next to the picker.
+  it('names the combobox without a label', () => {
+    const named = mountCombobox({ props: { ariaLabel: 'Department' } })
+    const unnamed = mountCombobox()
+
+    expect(named.find('[role="combobox"]').attributes('aria-label')).toBe(
+      'Department'
+    )
+    expect(
+      unnamed.find('[role="combobox"]').attributes('aria-label')
+    ).toBeUndefined()
+    named.unmount()
+    unnamed.unmount()
+  })
+
   describe('with displayAllAndMyDepartments', () => {
     it('lists my departments, all of them and every department', () => {
       const wrapper = mountCombobox()

@@ -76,8 +76,6 @@
       class="model-viewer"
       :background-url="backgroundUrl"
       :default-height="defaultHeight"
-      :empty="!is3DModel"
-      :full-screen="isFullScreen"
       :is-environment-skybox="isEnvironmentSkybox"
       :is-wireframe="isWireframe"
       :light="isLight"

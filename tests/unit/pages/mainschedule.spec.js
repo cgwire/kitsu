@@ -190,6 +190,17 @@ describe('MainSchedule filters', () => {
     ])
   })
 
+  // Their titles count what they show: "All" or "(2/3)".
+  it('names the filters by their labels', async () => {
+    const wrapper = await mountFilteredPage()
+    const [productionCombo, taskTypeCombo] = wrapper.findAllComponents({
+      name: 'ComboboxOptions'
+    })
+
+    expect(productionCombo.props('ariaLabel')).toBe('productions.title')
+    expect(taskTypeCombo.props('ariaLabel')).toBe('task_types.title')
+  })
+
   const taskTypeComboOf = wrapper =>
     wrapper.findAllComponents({ name: 'ComboboxOptions' })[1]
 

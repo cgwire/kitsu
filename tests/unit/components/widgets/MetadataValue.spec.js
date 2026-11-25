@@ -38,4 +38,34 @@ describe('widgets/MetadataValue', () => {
       expect(wrapper.text()).toBe('javascript:alert(1)')
     })
   })
+
+  // A column named "Constructor" has the field name of a property every
+  // object inherits.
+  describe('Constructor column', () => {
+    const mountConstructor = data =>
+      mount(MetadataValue, {
+        props: {
+          descriptor: {
+            id: 'descriptor-2',
+            field_name: 'constructor',
+            data_type: 'string'
+          },
+          entity: { id: 'asset-1', data }
+        },
+        global: {
+          plugins: [
+            createStore({ getters: { personMap: () => new Map() } }),
+            createI18n({ legacy: false, locale: 'en' })
+          ]
+        }
+      })
+
+    test('shows nothing for an entity without a value', () => {
+      expect(mountConstructor({}).text()).toBe('')
+    })
+
+    test('shows the value the entity holds', () => {
+      expect(mountConstructor({ constructor: 'Unit 2' }).text()).toBe('Unit 2')
+    })
+  })
 })

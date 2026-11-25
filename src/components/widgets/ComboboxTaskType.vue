@@ -31,7 +31,7 @@
           role="listbox"
           :class="[
             { 'open-top': openTop },
-            { dark: isDarkTheme },
+            { dark: isInDarkArea || isDarkTheme },
             { 'in-full-screen': fullScreenContainer }
           ]"
           :style="tooltipStyle"
@@ -118,6 +118,7 @@ const emit = defineEmits(['change', 'update:model-value'])
 // The label names the combobox: a <label for> cannot point to a div.
 const labelId = useId()
 const showTaskTypeList = ref(false)
+const isInDarkArea = ref(false)
 const tooltipPosition = ref({ top: 0, left: 0 })
 
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -171,6 +172,9 @@ const toggleTaskTypeList = event => {
   // Keyboard-triggered opens (via useComboboxKeyboard) call toggle() with no
   // event, so fall back to the trigger element for positioning.
   const curDiv = event?.currentTarget ?? triggerRef.value
+  // The list opens out of the field's area, which can stay dark in the
+  // light theme, such as the Playlists page.
+  isInDarkArea.value = Boolean(curDiv.closest('.dark'))
   const rect = curDiv.getBoundingClientRect()
   // An element in full screen starts at the top left of the screen, whatever
   // the scroll of the page.
@@ -200,6 +204,11 @@ const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
 
 // The list would stay where the full screen put it, away from its trigger.
 watch(fullScreenContainer, () => {
+  showTaskTypeList.value = false
+})
+
+// The list takes the theme of its area as it opens, and would keep it.
+watch(isDarkTheme, () => {
   showTaskTypeList.value = false
 })
 </script>
@@ -271,7 +280,7 @@ watch(fullScreenContainer, () => {
 }
 
 .select-input {
-  background: $white;
+  background: var(--background);
   border: 1px solid var(--border);
   margin-left: -1px;
   max-height: 200px;
