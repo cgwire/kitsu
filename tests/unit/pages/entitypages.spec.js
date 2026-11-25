@@ -1532,7 +1532,7 @@ describe.each(
     const tabs = wrapper.findComponent(RouteSectionTabs).props('tabs')
     expect(tabs.slice(0, 2)).toEqual([
       { label: 'main.tasks', name: 'infos' },
-      { label: 'main.label.info', name: 'information' }
+      { label: 'main.label.metadata', name: 'information' }
     ])
     expect(tabs.slice(2).map(tab => tab.name)).toEqual(sections)
     expect(wrapper.find('.infos .metadata-infos').exists()).toBe(false)

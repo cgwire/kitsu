@@ -976,7 +976,7 @@ export default {
       casting: 'Casting',
       chat: 'Chat',
       concepts: 'Concepts',
-      info: 'Info',
+      metadata: 'Metadata',
       output_files: 'Output Files',
       preview_files: 'Preview Files',
       schedule: 'Schedule',

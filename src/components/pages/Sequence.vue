@@ -466,7 +466,7 @@ const sequencesPath = computed(() => ({
 const sequenceTabs = computed(() => [
   // the section of the tasks keeps its name: links and the default use it
   { label: t('main.tasks'), name: 'infos' },
-  { label: t('main.label.info'), name: 'information' },
+  { label: t('main.label.metadata'), name: 'information' },
   { label: t('main.label.chat'), name: 'chat' },
   { label: t('main.label.casting'), name: 'casting' },
   { label: t('main.label.schedule'), name: 'schedule' },
