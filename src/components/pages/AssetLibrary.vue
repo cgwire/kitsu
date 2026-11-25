@@ -1,100 +1,112 @@
 <template>
-  <page-layout :side="showSidePanel">
-    <template #main>
-      <div class="asset-library">
-        <div class="filters flexrow">
-          <search-field
-            ref="searchFieldRef"
-            class="flexrow-item"
-            @change="onSearchChange"
-            :can-save="false"
-            v-focus
-          />
-          <combobox-production
-            class="flexrow-item"
-            :label="$t('main.production')"
-            :production-list="productionList"
-            v-model="filters.productionId"
-          />
-          <span class="filler"></span>
-          <combobox
-            class="flexrow-item"
-            :label="$t('main.sorted_by')"
-            :options="sorting.options"
-            locale-key-prefix="library.fields."
-            v-model="sorting.current"
-          />
+  <panel-layout class="asset-library" :side="showSidePanel">
+    <template #filters>
+      <div class="filters flexrow">
+        <search-field
+          ref="searchFieldRef"
+          class="flexrow-item"
+          @change="onSearchChange"
+          :can-save="false"
+          v-focus
+        />
+        <combobox-production
+          class="flexrow-item"
+          :label="$t('main.production')"
+          :production-list="productionList"
+          v-model="filters.productionId"
+        />
+        <span class="filler"></span>
+        <combobox
+          class="flexrow-item"
+          :label="$t('main.sorted_by')"
+          :options="sorting.options"
+          locale-key-prefix="library.fields."
+          v-model="sorting.current"
+        />
+        <button-simple
+          class="flexrow-item reset-filters"
+          icon="remove"
+          :title="$t('main.clear_filters')"
+          @click="resetFilters"
+          v-if="hasFilters"
+        />
+      </div>
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :queries="assetLibrarySearchQueries"
+        type="assetLibrary"
+        with-route-query
+      />
+      <div class="entities">
+        <table-info
+          :is-loading="loading.sharedAssets"
+          :is-error="errors.sharedAssets"
+          v-if="loading.sharedAssets || errors.sharedAssets"
+        />
+        <div
+          class="has-text-centered"
+          v-else-if="!displayedSharedAssets.length"
+        >
+          {{ $t('library.no_shared_assets') }}
         </div>
-
-        <div class="entities mb2">
-          <table-info
-            :is-loading="loading.sharedAssets"
-            :is-error="errors.sharedAssets"
-            v-if="loading.sharedAssets || errors.sharedAssets"
-          />
+        <template v-else>
           <div
-            class="has-text-centered"
-            v-else-if="!displayedSharedAssets.length"
+            class="pb1"
+            :key="index"
+            v-for="(group, index) in sortedSharedAssetsByType"
           >
-            {{ $t('library.no_shared_assets') }}
-          </div>
-          <template v-else>
-            <div
-              class="pb1"
-              :key="index"
-              v-for="(group, index) in sortedSharedAssetsByType"
-            >
-              <h2 class="mt0">
-                {{ group[0].asset_type_name }} ({{ group.length }})
-              </h2>
-              <ul class="items">
-                <li
-                  class="item flexcolumn"
-                  :class="{
-                    'selectable-item': isCurrentUserManager,
-                    'selected-item': isSelected(entity)
-                  }"
-                  :key="entity.id"
-                  role="button"
-                  tabindex="0"
-                  @click="isCurrentUserManager && toggleEntity(entity)"
-                  @keydown.enter.prevent="
-                    isCurrentUserManager && toggleEntity(entity)
-                  "
-                  v-for="entity in group"
-                >
-                  <div class="card" :title="entity.full_name">
-                    <entity-preview
-                      :empty-height="100"
-                      :empty-width="150"
-                      :height="100"
-                      :width="150"
-                      :entity="entity"
-                      is-rounded-top-border
+            <h2 class="mt0">
+              {{ group[0].asset_type_name }} ({{ group.length }})
+            </h2>
+            <ul class="items">
+              <li
+                class="item flexcolumn"
+                :class="{
+                  'selectable-item': isCurrentUserManager,
+                  'selected-item': isSelected(entity)
+                }"
+                :key="entity.id"
+                role="button"
+                tabindex="0"
+                @click="isCurrentUserManager && toggleEntity(entity)"
+                @keydown.enter.prevent="
+                  isCurrentUserManager && toggleEntity(entity)
+                "
+                v-for="entity in group"
+              >
+                <div class="card" :title="entity.full_name">
+                  <entity-preview
+                    :empty-height="100"
+                    :empty-width="150"
+                    :height="100"
+                    :width="150"
+                    :entity="entity"
+                    is-rounded-top-border
+                  />
+                  <div class="item-description flexrow">
+                    <production-name
+                      class="flexrow-item mr0"
+                      :production="entity.production"
+                      :size="20"
+                      only-avatar
                     />
-                    <div class="item-description flexrow">
-                      <production-name
-                        class="flexrow-item mr0"
-                        :production="entity.production"
-                        :size="20"
-                        only-avatar
-                      />
-                      <div class="entity-name ml1 flexrow-item">
-                        {{ entity.name }}
-                      </div>
+                    <div class="entity-name ml1 flexrow-item">
+                      {{ entity.name }}
                     </div>
                   </div>
-                </li>
-              </ul>
-            </div>
-          </template>
-        </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </template>
       </div>
     </template>
     <template #side>
       <manage-library @library-updated="refresh(true)" />
     </template>
-  </page-layout>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -113,13 +125,15 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
-import PageLayout from '@/components/layouts/PageLayout.vue'
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import ManageLibrary from '@/components/sides/ManageLibrary.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 const { t } = useI18n()
@@ -151,6 +165,9 @@ const sorting = reactive({
 
 // Computed
 
+const assetLibrarySearchQueries = computed(
+  () => store.getters.assetLibrarySearchQueries
+)
 const displayedSharedAssets = computed(
   () => store.getters.displayedSharedAssets
 )
@@ -164,6 +181,7 @@ const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const showSidePanel = computed(
   () => isCurrentUserManager.value && isDesktop.value
 )
+const hasFilters = computed(() => Object.keys(route.query).length > 0)
 const openProductions = computed(() => store.getters.openProductions)
 const productionMap = computed(() => store.getters.productionMap)
 const selectedAssets = computed(() => store.getters.selectedAssets)
@@ -212,6 +230,21 @@ const onSearchChange = () => {
   setSearchInUrl()
 }
 
+const resetFilters = () => {
+  router.push({ query: {} })
+}
+
+// A saved search, the reset or the back button set a query the page did not
+// write.
+const applyRouteQuery = () => {
+  filters.productionId = route.query.production || undefined
+  const search = route.query.search || ''
+  if ((searchFieldRef.value?.getValue() || '') !== search) {
+    searchFieldRef.value?.setValue(search)
+    store.dispatch('setSharedAssetSearch', search)
+  }
+}
+
 const refresh = async (silent = false) => {
   loading.sharedAssets = !silent
   errors.sharedAssets = false
@@ -251,6 +284,15 @@ watch(
   }
 )
 
+// the query of the next page shows before this one is unmounted
+const { path } = route
+watch(
+  () => route.query,
+  () => {
+    if (route.path === path) applyRouteQuery()
+  }
+)
+
 // Lifecycle
 
 onMounted(() => {
@@ -271,26 +313,48 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.asset-library {
-  color: var(--text);
-  display: flex;
-  flex-direction: column;
-  margin-left: auto;
-  margin-right: auto;
-  max-height: 100%;
-  padding: 6em 2em 1em 2em;
-}
-
 .filters {
+  align-items: flex-end;
   flex-wrap: wrap;
-  gap: 0.5em;
+  gap: 1em 0.5em;
 
   > .flexrow-item {
     margin-right: 0;
   }
+
+  // the gap and the panel padding space the fields
+  :deep(.field) {
+    margin-bottom: 0;
+  }
+
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+}
+
+.reset-filters {
+  color: var(--text);
+  height: 42px;
+  padding: 0 14px;
+}
+
+// the side panel is its own surface, like the two panels beside it
+.asset-library :deep(.side.manage-library) {
+  background: var(--background-panel);
+  border-radius: 12px;
 }
 
 .entities {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+
+  // the panel padding and the saved searches already space the first type
+  > :first-child h2 {
+    margin-top: 0;
+  }
+
   .items {
     display: flex;
     flex-wrap: wrap;
@@ -346,23 +410,8 @@ useHead({
 }
 
 @media screen and (max-width: 768px) {
-  .asset-library {
-    padding: 4.5em 0.75em 1em;
-  }
-
-  // Drop the mt1 utility on the page title so the heading hugs the page
-  // top padding instead of stacking another 1em on top.
-  header {
-    margin-bottom: 1em;
-
-    :deep(.page-title) {
-      margin-top: 0;
-    }
-  }
-
   .filters {
     gap: 0.75em;
-    margin-bottom: 1em;
 
     // Stretch each filter to the full width so they stack cleanly when
     // wrapped; the spacer between them collapses to nothing.
@@ -370,17 +419,9 @@ useHead({
       flex: 1 1 100%;
     }
 
-    > .filler {
+    > .filler,
+    > .reset-filters {
       display: none;
-    }
-
-    // ComboboxProduction / Combobox wrap themselves in a global .field
-    // (margin-bottom: 2em) that compounds with the row gap. SearchField
-    // doesn't, so the stacked spacing reads as tight above the
-    // production combobox and loose below it. Reset the bottom margin
-    // and let `gap` alone drive the rhythm.
-    :deep(.field) {
-      margin-bottom: 0;
     }
   }
 
