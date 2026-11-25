@@ -78,6 +78,17 @@ describe('lists/PeopleTimesheetList', () => {
     }
   )
 
+  // the sheet fills the panel: its empty message shows on it, not under it
+  test('tells an empty list on its sheet', () => {
+    const period = { detailLevel: 'month', year: 2025, month: 1 }
+    const wrapper = mountList({ ...period, people: [], timesheet: {} })
+
+    expect(wrapper.find('.datatable-wrapper .empty').text()).toBe(
+      'timesheets.empty'
+    )
+    expect(mountList(period).find('.empty').exists()).toBe(false)
+  })
+
   // the totals open the grid, next to the names, so that they stay in view
   // while the periods scroll
   test('the totals lead the rows and the columns', () => {
