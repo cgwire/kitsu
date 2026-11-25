@@ -240,8 +240,23 @@ describe('modals/EditCommentModal', () => {
       wrapper.unmount()
       wrapper = mountModal({ AtTextarea: false }, { attachTo: document.body })
       await openOn(wrapper, buildComment('comment-1', []))
+      await wrapper.setProps({ isMovie: true })
       await wrapper.find('textarea').setValue('Ready @')
       await vi.advanceTimersByTimeAsync(20)
+    })
+
+    // A frame points at a movie: a picture or no preview has none.
+    it('leaves the frame out beside a picture', async () => {
+      await wrapper.setProps({ isMovie: false })
+      const field = wrapper.find('textarea')
+
+      await field.setValue('Ready @fra')
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+
+      await field.setValue('Ready @frame ')
+      await vi.advanceTimersByTimeAsync(20)
+      expect(field.element.value).toBe('Ready @frame ')
     })
 
     it('closes its list on a press elsewhere in the window', async () => {

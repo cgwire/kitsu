@@ -677,6 +677,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  isMovie: {
+    type: Boolean,
+    default: false
+  },
   isPinnable: {
     type: Boolean,
     default: false
@@ -715,10 +719,13 @@ const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => store.getters.getProductionDepartmentIds(props.task?.project_id)
 )
 // vue-at gets one array of members: the comment renders again at each frame
-// of the player.
+// of the player. A frame points at a movie: a picture or no preview has none.
 const { members: mentionMembers } = useAtSuggestions(
   replySuggestionsRef,
-  () => [...membersForAts['@'], ...membersForAts['#']]
+  () => [
+    ...membersForAts['@'].filter(member => !member.isTime || props.isMovie),
+    ...membersForAts['#']
+  ]
 )
 
 const checklistItems = ref([])
@@ -1086,7 +1093,7 @@ const onDeleteReplyClicked = reply => {
 }
 
 const onAtTextChanged = input => {
-  if (input.includes('@frame')) {
+  if (props.isMovie && input.includes('@frame')) {
     replyText.value = replaceTimeWithTimecode(
       input,
       props.revision,

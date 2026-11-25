@@ -1477,13 +1477,16 @@ const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => mentionTaskTypes.value,
   () => mentionDepartmentIds.value
 )
-// The frame points at the preview of one task. Zou copies an #All comment to
+// The frame points at the movie of one task. Zou copies an #All comment to
 // every other task of each selected entity: for several tasks, All is only
 // typed on purpose.
+const isFrameOffered = computed(
+  () => nbSelectedTasks.value === 1 && props.isMoviePreview
+)
 const { members: mentionMembers, closeSuggestions: closeCommentSuggestions } =
   useAtSuggestions(commentSuggestionsRef, () => [
     ...membersForAts['@'].filter(
-      member => !member.isTime || nbSelectedTasks.value === 1
+      member => !member.isTime || isFrameOffered.value
     ),
     ...membersForAts['#'].filter(
       member => !member.isAll || nbSelectedTasks.value === 1
@@ -1649,7 +1652,7 @@ const storagePrefix = computed(() => {
 // --------------------------------------------------------------------------
 
 const onAtTextChanged = input => {
-  if (nbSelectedTasks.value === 1 && input.includes('@frame')) {
+  if (isFrameOffered.value && input.includes('@frame')) {
     statusComment.value = replaceTimeWithTimecode(
       input,
       props.revision,

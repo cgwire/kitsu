@@ -157,6 +157,7 @@
         :can-comment="canComment"
         :current-frame="currentFrameNumber"
         :entity="currentEntity || {}"
+        :is-movie="isMovie"
         @status-changed="onStatusChanged"
         @time-code-clicked="onTimeCodeClicked"
         v-if="!isCommentsHidden && token"

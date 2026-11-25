@@ -222,6 +222,7 @@ const props = defineProps({
   frame: { type: Number, default: 0 },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  isMovie: { type: Boolean, default: false },
   productionId: { type: String, default: null },
   revision: { type: Number, default: 1 },
   taskTypes: { type: Array, default: () => [] },
@@ -239,9 +240,13 @@ const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => store.getters.getProductionDepartmentIds(props.productionId)
 )
 const commentSuggestionsRef = ref(null)
+// A frame points at a movie: a picture or no preview has none.
 const { members: mentionMembers } = useAtSuggestions(
   commentSuggestionsRef,
-  () => [...membersForAts['@'], ...membersForAts['#']]
+  () => [
+    ...membersForAts['@'].filter(member => !member.isTime || props.isMovie),
+    ...membersForAts['#']
+  ]
 )
 
 const extensions = files.ALL_EXTENSIONS_STRING
@@ -357,7 +362,7 @@ const onInsertChecklistItem = item => {
 }
 
 const onAtTextChanged = input => {
-  if (input.includes('@frame')) {
+  if (props.isMovie && input.includes('@frame')) {
     form.value.text = replaceTimeWithTimecode(
       input,
       props.revision,

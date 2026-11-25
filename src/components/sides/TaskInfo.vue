@@ -242,6 +242,7 @@
                         (user && user.id === comment.person?.id) ||
                         isCurrentUserManager
                       "
+                      :is-movie="isMoviePreview"
                       :is-pinnable="
                         isDepartmentSupervisor || isCurrentUserManager
                       "
@@ -325,6 +326,7 @@
           :frame="displayedFrame"
           :is-loading="loading.editComment"
           :is-error="errors.editComment"
+          :is-movie="isMoviePreview"
           :production-id="currentProductionId"
           :revision="currentRevision"
           :team="currentTeam"
@@ -852,7 +854,14 @@ const displayedFrame = computed(
   () => props.currentFrame || currentFrameRaw.value
 )
 
-const extension = computed(() => currentPreview.value?.extension ?? '')
+// The playlist and the full screen player show a preview of their own, as for
+// the revision.
+const extension = computed(
+  () =>
+    props.currentParentPreview?.extension ||
+    currentPreview.value?.extension ||
+    ''
+)
 
 const isMoviePreview = computed(() => extension.value === 'mp4')
 

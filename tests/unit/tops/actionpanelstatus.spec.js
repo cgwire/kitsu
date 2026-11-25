@@ -579,6 +579,7 @@ describe('ActionPanel, suggestions of the comment', () => {
       [firstTask],
       [alice]
     )
+    await wrapper.setProps({ isMoviePreview: true })
     expect(suggested(wrapper, isFrame)).toEqual(['frame'])
 
     store.commit('SELECT_TASK', secondTask)
@@ -594,7 +595,12 @@ describe('ActionPanel, suggestions of the comment', () => {
       [task],
       [alice]
     )
-    await wrapper.setProps({ fps: 25, getFrame: () => 29, revision: 2 })
+    await wrapper.setProps({
+      fps: 25,
+      getFrame: () => 29,
+      isMoviePreview: true,
+      revision: 2
+    })
 
     await typeComment(wrapper, 'Ready @fra')
     await commentField(wrapper).trigger('keydown.enter')
@@ -610,10 +616,30 @@ describe('ActionPanel, suggestions of the comment', () => {
       shotTasks(),
       [alice]
     )
-    await wrapper.setProps({ fps: 25, getFrame: () => 29, revision: 2 })
+    await wrapper.setProps({
+      fps: 25,
+      getFrame: () => 29,
+      isMoviePreview: true,
+      revision: 2
+    })
 
     await typeComment(wrapper, 'Ready @frame ')
 
+    expect(commentField(wrapper).element.value).toBe('Ready @frame ')
+  })
+
+  // A frame points at a movie: a picture or no preview has none.
+  test('leaves the frame out beside a picture', async () => {
+    const [task] = shotTasks()
+    const { wrapper } = await mountOn(
+      '/productions/production-1/shots',
+      [task],
+      [alice]
+    )
+    await wrapper.setProps({ fps: 25, getFrame: () => 29, revision: 2 })
+
+    expect(suggested(wrapper, isFrame)).toEqual([])
+    await typeComment(wrapper, 'Ready @frame ')
     expect(commentField(wrapper).element.value).toBe('Ready @frame ')
   })
 

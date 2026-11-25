@@ -370,6 +370,56 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  // A frame points at a movie: the comment fields offer it beside one only.
+  describe('frame of the comment fields', () => {
+    it('tells the comment fields that the preview is a movie', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ assignees: [USER_ID] }),
+        previews: [{ id: 'preview-1', revision: 1, extension: 'mp4' }],
+        comments: [{ id: 'comment-1', mentions: [], replies: [] }]
+      })
+
+      expect(wrapper.findComponent(AddComment).props('isMovie')).toBe(true)
+      expect(wrapper.findComponent(Comment).props('isMovie')).toBe(true)
+      expect(wrapper.findComponent(EditCommentModal).props('isMovie')).toBe(
+        true
+      )
+    })
+
+    // The playlist and the full screen player show a preview of their own:
+    // a pinned or older revision, or another file of the revision.
+    describe('in a player', () => {
+      const mountInPlayer = (taskExtension, shownExtension) =>
+        mountPanel({
+          task: buildTask({ assignees: [USER_ID] }),
+          previews: [{ id: 'preview-2', revision: 2, extension: taskExtension }],
+          comments: [{ id: 'comment-1', mentions: [], replies: [] }],
+          props: {
+            currentParentPreview: {
+              id: 'preview-1',
+              revision: 1,
+              extension: shownExtension
+            },
+            isPreview: false
+          }
+        })
+      const movieFlags = wrapper =>
+        [AddComment, Comment, EditCommentModal].map(component =>
+          wrapper.findComponent(component).props('isMovie')
+        )
+
+      it('offers the frame of the movie it shows', async () => {
+        const { wrapper } = await mountInPlayer('png', 'mp4')
+        expect(movieFlags(wrapper)).toEqual([true, true, true])
+      })
+
+      it('leaves the frame out beside the picture it shows', async () => {
+        const { wrapper } = await mountInPlayer('mp4', 'png')
+        expect(movieFlags(wrapper)).toEqual([false, false, false])
+      })
+    })
+  })
+
   describe('title', () => {
     it('names the entity the task belongs to', async () => {
       const { wrapper } = await mountPanel()

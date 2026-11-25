@@ -16,7 +16,7 @@
         :checklist="checklistItems"
         :frame="(currentFrame || 0) + 1"
         :revision="entity?.preview_file_revision || 1"
-        :is-movie-preview="currentFrame != null"
+        :is-movie-preview="isMovie && currentFrame != null"
         @add-item="onAddChecklistItem"
         @insert-item="onInsertChecklistItem"
         @remove-task="removeChecklistEntry"
@@ -61,7 +61,7 @@
           class="tool-button"
           :title="$t('comments.add_frame_to_comment')"
           @click="insertFrameMention"
-          v-if="currentFrame != null"
+          v-if="isMovie && currentFrame != null"
         >
           <film-icon :size="16" />
         </button>
@@ -164,6 +164,7 @@
           :fps="fps"
           :frame="currentFrame || 0"
           :is-loading="isEditing"
+          :is-movie="isMovie"
           :is-error="editError"
           @confirm="confirmEditComment"
           @cancel="modals.edit = false"
@@ -226,7 +227,8 @@ const props = defineProps({
   currentTaskId: { type: String, default: '' },
   canComment: { type: Boolean, default: false },
   currentFrame: { type: Number, default: null },
-  entity: { type: Object, default: () => ({}) }
+  entity: { type: Object, default: () => ({}) },
+  isMovie: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['status-changed', 'time-code-clicked'])

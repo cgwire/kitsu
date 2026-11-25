@@ -145,6 +145,22 @@ describe('players/SharedPlaylistPlayer', () => {
     delete Element.prototype.scrollTo
   })
 
+  // The comments panel offers the frame of a movie only.
+  it('tells the comments panel whether the preview is a movie', async () => {
+    const isMovieFor = async entities => {
+      const wrapper = mountPlayer({ entities })
+      await nextTick()
+      try {
+        return wrapper.findComponent(SharedCommentsPanel).props('isMovie')
+      } finally {
+        wrapper.unmount()
+      }
+    }
+
+    expect(await isMovieFor([entity])).toBe(true)
+    expect(await isMovieFor([picture])).toBe(false)
+  })
+
   it('counts the frames from the preview duration, like the studio player', async () => {
     // The decoder duration floored to the frame plus the Chromium offset
     // read one frame more than the studio player on the same clip.

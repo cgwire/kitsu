@@ -563,10 +563,13 @@ const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => store.getters.getProductionDepartmentIds(props.task?.project_id)
 )
 // vue-at gets one array of members: the form renders again at each frame
-// of the player.
+// of the player. A frame points at a movie: a picture or no preview has none.
 const { members: mentionMembers } = useAtSuggestions(
   commentSuggestionsRef,
-  () => [...membersForAts['@'], ...membersForAts['#']]
+  () => [
+    ...membersForAts['@'].filter(member => !member.isTime || props.isMovie),
+    ...membersForAts['#']
+  ]
 )
 
 const isFrameAddition = ref(false)
@@ -792,7 +795,8 @@ const runAddComment = (
     return
   }
 
-  if (isFrameAddition.value) {
+  // The toggle hides beside a picture, and stays on.
+  if (isFrameAddition.value && props.isMovie) {
     textVal = '@frame \n\n' + textVal
     textVal = replaceTimeWithTimecode(
       textVal,
@@ -991,7 +995,7 @@ const setValue = async comment => {
 }
 
 const onAtTextChanged = input => {
-  if (input.includes('@frame')) {
+  if (props.isMovie && input.includes('@frame')) {
     text.value = replaceTimeWithTimecode(
       input,
       props.revision,

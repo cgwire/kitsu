@@ -368,6 +368,7 @@
                       (user && user.id === comment.person?.id) ||
                       isCurrentUserManager
                     "
+                    :is-movie="isMovie"
                     :is-pinnable="
                       isDepartmentSupervisor || isCurrentUserManager
                     "
@@ -461,6 +462,7 @@
         :frame="currentFrame"
         :is-loading="loading.editComment"
         :is-error="errors.editComment"
+        :is-movie="isMovie"
         :comment-to-edit="commentToEdit"
         :team="currentTeam"
         :task-types="currentTaskTypes"

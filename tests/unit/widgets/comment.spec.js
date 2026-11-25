@@ -97,6 +97,7 @@ const mountComment = ({
   isAcknowledgeable,
   isActionError = false,
   isEditable = true,
+  isMovie,
   isReplyable,
   storeOptions,
   stubs = {},
@@ -110,6 +111,7 @@ const mountComment = ({
       isAcknowledgeable,
       isActionError,
       isEditable,
+      isMovie,
       isReplyable,
       task,
       taskTypes: [],
@@ -470,8 +472,9 @@ describe('Comment', () => {
 
   describe('reply suggestions', () => {
     const mounted = []
-    const mountReplyable = storeOptions => {
+    const mountReplyable = (storeOptions, { isMovie = true } = {}) => {
       const wrapper = mountComment({
+        isMovie,
         isReplyable: true,
         storeOptions,
         stubs: { AtTextarea: false },
@@ -518,6 +521,20 @@ describe('Comment', () => {
 
       expect(wrapper.find('.atwho-view').text()).toContain('Modeling')
       expect(wrapper.find('.atwho-view').text()).not.toContain('Layout')
+    })
+
+    // A frame points at a movie: a picture or no preview has none.
+    test('leaves the frame out beside a picture', async () => {
+      const wrapper = mountReplyable(undefined, { isMovie: false })
+
+      await typeReply(wrapper, 'Ready @fra')
+      expect(isListOpen(wrapper)).toBe(false)
+
+      await wrapper.find('textarea.reply').setValue('Ready @frame ')
+      await vi.advanceTimersByTimeAsync(20)
+      expect(wrapper.find('textarea.reply').element.value).toBe(
+        'Ready @frame '
+      )
     })
 
     test('closes its list once the focus leaves the field', async () => {

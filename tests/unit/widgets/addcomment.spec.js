@@ -2,6 +2,7 @@ import { nextTick, reactive } from 'vue'
 import { createStore } from 'vuex'
 import { createRouter, createWebHistory } from 'vue-router'
 
+import drafts from '@/lib/drafts'
 import tasksStore from '@/store/modules/tasks'
 
 import AddComment from '@/components/widgets/AddComment.vue'
@@ -174,6 +175,42 @@ describe('AddComment', () => {
     await mountComment({ isCurrentUserClient: () => true })
     expect(wrapper.findAll('.tab-row span')).toHaveLength(1)
     expect(draftComment.mode).toBe('status')
+  })
+
+  // A client turns the frame on once for every comment, and the toggle hides
+  // beside a picture.
+  describe('frame toggle of a client', () => {
+    const postAsClient = async props => {
+      wrapper.unmount()
+      await mountComment(
+        { isCurrentUserClient: () => true },
+        { AtTextarea: false }
+      )
+      await wrapper.setProps({ fps: 25, frame: 24, revision: 3, ...props })
+      await wrapper.find('textarea').setValue('Nice')
+      await wrapper.find('.post-button').trigger('click')
+      return wrapper.emitted('add-comment')[0][0]
+    }
+
+    beforeEach(() => {
+      localStorage.setItem('comments:add-frame-when-posting', 'true')
+    })
+
+    // The form keeps its text as a draft of the task.
+    afterEach(() => {
+      localStorage.removeItem('comments:add-frame-when-posting')
+      drafts.clearTaskDraft(task.id)
+    })
+
+    it('puts the frame first beside a movie', async () => {
+      expect(await postAsClient({ isMovie: true })).toBe(
+        'v3 00:00:00:24 (25) \n\nNice'
+      )
+    })
+
+    it('leaves the frame out beside a picture', async () => {
+      expect(await postAsClient({ isMovie: false })).toBe('Nice')
+    })
   })
 
   it('has the comment input area in status mode', () => {
@@ -667,6 +704,7 @@ describe('AddComment', () => {
         {},
         { attachTo: document.body }
       )
+      await wrapper.setProps({ isMovie: true })
     })
 
     afterEach(() => {
@@ -697,6 +735,17 @@ describe('AddComment', () => {
 
       expect(wrapper.find('.atwho-view').text()).toContain('Modeling')
       expect(wrapper.find('.atwho-view').text()).not.toContain('Layout')
+    })
+
+    // A frame points at a movie: a picture or no preview has none.
+    it('leaves the frame out beside a picture', async () => {
+      await wrapper.setProps({ isMovie: false })
+
+      await typeComment('Ready @fra')
+      expect(isListOpen()).toBe(false)
+
+      await typeComment('Ready @frame ')
+      expect(wrapper.find('textarea').element.value).toBe('Ready @frame ')
     })
 
     it('closes its list on a press elsewhere, not on the list', async () => {
@@ -777,6 +826,7 @@ describe('AddComment', () => {
         {},
         { attachTo: document.body }
       )
+      await wrapper.setProps({ isMovie: true })
       player = wrapper.element.parentElement
       player.tabIndex = -1
       await typeComment('Ready @')
