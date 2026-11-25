@@ -131,7 +131,7 @@ describe('BuildFilterModal', () => {
         taskStatusMap: () =>
           new Map(
             Object.entries({
-              'task-status-1': { id: 'task-status-1', short_name: 'WFA' },
+              'task-status-1': { id: 'task-status-1', short_name: 'Done' },
               'task-status-2': { id: 'task-status-2', short_name: 'WIP' },
               'task-status-3': { id: 'task-status-3', short_name: 'Retake' }
             })
@@ -331,7 +331,7 @@ describe('BuildFilterModal', () => {
               }
             })
             const query = wrapper.vm.buildFilter()
-            expect(query).toBe('[Modeling]=[-WIP,WFA]')
+            expect(query).toBe('[Modeling]=[-WIP,Done]')
           })
           it.each([
             ['empty', '[Modeling]=empty'],
