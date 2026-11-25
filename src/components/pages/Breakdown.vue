@@ -1,277 +1,274 @@
 <template>
-  <div class="breakdown page">
-    <div class="breakdown-columns">
-      <div class="breakdown-column casting-column">
-        <div class="flexrow mb1 casting-toolbar">
-          <combobox-styled
-            class="mr1"
-            :label="$t('main.for')"
-            :options="castingTypeOptions"
-            v-model="castingType"
-            v-if="!isEpisodeCasting"
-          />
-          <combobox-styled
-            :label="$t('shots.fields.sequence')"
-            :options="castingSequencesOptions"
-            v-model="sequenceId"
-            v-if="isShotCasting"
-          />
-          <combobox-styled
-            :label="$t('tasks.fields.asset_type')"
-            :options="castingAssetTypesOptions"
-            v-model="assetTypeId"
-            v-if="isAssetCasting"
-          />
-          <combobox-styled
-            class="ml1"
-            :label="$t('breakdown.filters.label')"
-            :options="lineFilterOptions"
-            v-model="lineFilter"
-          />
-          <combobox-task-type
-            class="ml1 desktop-only"
-            :label="$t('assets.fields.ready_for')"
-            :task-type-list="readyForTaskTypes"
-            :with-margin="false"
-            v-model="readyTaskTypeId"
-            v-if="isShotCasting"
-          />
-          <input
-            class="input casted-asset-search ml1 desktop-only"
-            type="search"
-            :aria-label="$t('breakdown.filters.asset')"
-            :placeholder="$t('breakdown.filters.asset')"
-            v-model="castedAssetSearch"
-          />
-          <span class="filler"></span>
-          <button-simple
-            class="flexrow-item desktop-only"
-            icon="undo"
-            :disabled="!canUndo"
-            :title="$t('breakdown.undo')"
-            @click="undoCasting"
-            v-if="isCurrentUserManager"
-          />
-          <show-infos-button class="flexrow-item desktop-only" />
-          <button-simple
-            class="flexrow-item"
-            :title="
-              isTextMode
-                ? $t('breakdown.picture_mode')
-                : $t('breakdown.text_mode')
-            "
-            icon="type"
-            :is-on="isTextMode"
-            :is-responsive="true"
-            @click="toggleTextMode"
-          />
-          <button-simple
-            class="flexrow-item"
-            icon="big-thumbnail"
-            :is-on="isBigMode"
-            :title="$t('tasks.big_thumbnails')"
-            @click="isBigMode = !isBigMode"
-          />
-          <button-simple
-            class="flexrow-item desktop-only"
-            :title="$t('main.csv.import_file')"
-            icon="import"
-            :is-responsive="true"
-            @click="showImportModal"
-            v-if="isCurrentUserManager"
-          />
-          <button-simple
-            class="flexrow-item desktop-only"
-            icon="export"
-            :is-responsive="true"
-            :title="$t('main.csv.export_current_view')"
-            @click="exportViewToCsv"
-          />
-          <button-href-link
-            class="flexrow-item desktop-only"
-            :title="$t('main.csv.export_file')"
-            icon="export-lines"
-            :path="exportUrlPath"
-            v-if="isCurrentUserManager"
-          />
-        </div>
+  <panel-layout class="breakdown" :side="isCurrentUserManager">
+    <template #filters>
+      <div class="flexrow casting-toolbar">
+        <combobox-styled
+          class="mr1"
+          :label="$t('main.for')"
+          :options="castingTypeOptions"
+          v-model="castingType"
+          v-if="!isEpisodeCasting"
+        />
+        <combobox-styled
+          :label="$t('shots.fields.sequence')"
+          :options="castingSequencesOptions"
+          v-model="sequenceId"
+          v-if="isShotCasting"
+        />
+        <combobox-styled
+          :label="$t('tasks.fields.asset_type')"
+          :options="castingAssetTypesOptions"
+          v-model="assetTypeId"
+          v-if="isAssetCasting"
+        />
+        <combobox-styled
+          class="ml1"
+          :label="$t('breakdown.filters.label')"
+          :options="lineFilterOptions"
+          v-model="lineFilter"
+        />
+        <combobox-task-type
+          class="ml1 desktop-only"
+          :label="$t('assets.fields.ready_for')"
+          :task-type-list="readyForTaskTypes"
+          :with-margin="false"
+          v-model="readyTaskTypeId"
+          v-if="isShotCasting"
+        />
+        <input
+          class="input casted-asset-search ml1 desktop-only"
+          type="search"
+          :aria-label="$t('breakdown.filters.asset')"
+          :placeholder="$t('breakdown.filters.asset')"
+          v-model="castedAssetSearch"
+        />
+        <span class="filler"></span>
+        <button-simple
+          class="flexrow-item desktop-only"
+          icon="undo"
+          :disabled="!canUndo"
+          :title="$t('breakdown.undo')"
+          @click="undoCasting"
+          v-if="isCurrentUserManager"
+        />
+        <show-infos-button class="flexrow-item desktop-only" />
+        <button-simple
+          class="flexrow-item"
+          :title="
+            isTextMode
+              ? $t('breakdown.picture_mode')
+              : $t('breakdown.text_mode')
+          "
+          icon="type"
+          :is-on="isTextMode"
+          :is-responsive="true"
+          @click="toggleTextMode"
+        />
+        <button-simple
+          class="flexrow-item"
+          icon="big-thumbnail"
+          :is-on="isBigMode"
+          :title="$t('tasks.big_thumbnails')"
+          @click="isBigMode = !isBigMode"
+        />
+        <button-simple
+          class="flexrow-item desktop-only"
+          :title="$t('main.csv.import_file')"
+          icon="import"
+          :is-responsive="true"
+          @click="showImportModal"
+          v-if="isCurrentUserManager"
+        />
+        <button-simple
+          class="flexrow-item desktop-only"
+          icon="export"
+          :is-responsive="true"
+          :title="$t('main.csv.export_current_view')"
+          @click="exportViewToCsv"
+        />
+        <button-href-link
+          class="flexrow-item desktop-only"
+          :title="$t('main.csv.export_file')"
+          icon="export-lines"
+          :path="exportUrlPath"
+          v-if="isCurrentUserManager"
+        />
+      </div>
+    </template>
+    <template #list>
+      <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
 
-        <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
+      <spinner class="mt1" v-if="isLoading" />
 
-        <spinner class="mt1" v-if="isLoading" />
+      <div class="flexrow list-options" v-if="isShowInfosBreakdown">
+        <table-metadata-selector-menu
+          namespace="breakdown"
+          :descriptors="metadataDescriptors"
+          :exclude="{
+            fps: true,
+            estimation: true,
+            resolution: true,
+            maxRetakes: true,
+            timeSpent: true
+          }"
+          :production-id="currentProduction?.id"
+          v-model="metadataDisplayHeaders"
+          v-model:is-open="columnSelectorDisplayed"
+          v-if="isShowInfosBreakdown"
+        />
+        <span class="filler"></span>
 
-        <div class="flexrow mb05 list-options">
-          <table-metadata-selector-menu
-            namespace="breakdown"
-            :descriptors="metadataDescriptors"
-            :exclude="{
-              fps: true,
-              estimation: true,
-              resolution: true,
-              maxRetakes: true,
-              timeSpent: true
-            }"
-            :production-id="currentProduction?.id"
-            v-model="metadataDisplayHeaders"
-            v-model:is-open="columnSelectorDisplayed"
-            v-if="isShowInfosBreakdown"
-          />
-          <span class="filler"></span>
-
-          <button-simple
-            class="is-small mr05"
-            :title="$t('main.column_visibility')"
-            icon="down"
-            @click="toggleColumnSelector"
-            v-if="isShowInfosBreakdown"
-          />
-        </div>
-
-        <div class="casting-list" v-if="!isLoading">
-          <div class="shot-lines">
-            <div class="casting-header flexrow">
-              <div
-                class="entity-header"
-                :style="{ 'min-width': nameHeaderMinWidth }"
-              >
-                <div>
-                  {{ $t('shots.fields.name') }}
-                </div>
-                <div class="filler"></div>
-                <div
-                  class="resizable-knob"
-                  @mousedown.prevent="initResize($event)"
-                ></div>
-              </div>
-              <div class="standby-header" v-if="isShowInfosBreakdown">
-                {{ $t('breakdown.fields.standby') }}
-              </div>
-              <div
-                class="description-header"
-                v-if="isShowInfosBreakdown && isDescription"
-              >
-                {{ $t('shots.fields.description') }}
-              </div>
-              <div
-                class="frames-header"
-                v-if="
-                  isShotCasting &&
-                  isFrames &&
-                  isShowInfosBreakdown &&
-                  metadataDisplayHeaders.frames
-                "
-              >
-                {{ $t('shots.fields.nb_frames') }}
-              </div>
-              <div
-                class="frames-header"
-                v-if="
-                  isShotCasting &&
-                  isFrameIn &&
-                  isShowInfosBreakdown &&
-                  metadataDisplayHeaders.frameIn
-                "
-              >
-                {{ $t('shots.fields.frame_in') }}
-              </div>
-              <div
-                class="frames-header"
-                v-if="
-                  isShotCasting &&
-                  isFrameOut &&
-                  isShowInfosBreakdown &&
-                  metadataDisplayHeaders.frameOut
-                "
-              >
-                {{ $t('shots.fields.frame_out') }}
-              </div>
-              <div
-                class="descriptor-header"
-                :key="'descriptor-header-' + descriptor.id"
-                :style="{
-                  'min-width': columnWidth[descriptor.id]
-                    ? columnWidth[descriptor.id] + 'px'
-                    : '110px'
-                }"
-                v-for="descriptor in visibleMetadataDescriptors"
-                v-show="isShowInfosBreakdown"
-              >
-                <span
-                  class="descriptor-departments mr05"
-                  v-if="descriptorCurrentDepartments(descriptor).length"
-                >
-                  <department-name
-                    :key="department.id"
-                    :department="department"
-                    no-padding
-                    only-dot
-                    v-for="department in descriptorCurrentDepartments(
-                      descriptor
-                    )"
-                  />
-                </span>
-                <span
-                  class="ellipsis nowrap descriptor-name filler"
-                  :title="descriptor.name"
-                >
-                  {{ descriptor.name }}
-                </span>
-                <div
-                  class="resizable-knob"
-                  @mousedown.prevent="initResize($event, descriptor.id)"
-                ></div>
-              </div>
-              <div
-                :key="assetType"
-                class="asset-type-header"
-                v-for="assetType in castingAssetTypes"
-              >
-                <span class="ellipsis nowrap" :title="assetType">
-                  {{ assetType }}
-                </span>
-                <casting-type-total
-                  :asset-type="assetType"
-                  :entities="displayedEntities"
-                />
-              </div>
-
-              <div class="actions filler"></div>
-            </div>
-            <shot-line
-              :key="`${entity.id}-${lineRedraws[entity.id] || 0}`"
-              :entity="entity"
-              :preview-file-id="entity.preview_file_id"
-              :selection="selection"
-              :name="getEntityName(entity)"
-              :asset-types="castingAssetTypes"
-              :read-only="!isCurrentUserManager"
-              :ready-task-type-id="isShotCasting ? readyTaskTypeId : ''"
-              :text-mode="isTextMode"
-              :metadata-descriptors="metadataDescriptors"
-              :metadata-display-headers="metadataDisplayHeaders"
-              :big-mode="isBigMode"
-              :is-description="isDescription"
-              :is-save-error="saveErrors[entity.id]"
-              :column-width="columnWidth"
-              @add-one="addOneAsset"
-              @click="selectEntity"
-              @copy-casting="copyEntityCasting"
-              @drop-asset="onAssetDropped"
-              @edit-label="onEditLabelClicked"
-              @field-changed="onFieldChanged"
-              @metadata-changed="onMetadataChanged"
-              @remove-one="removeOneAssetFromSelection"
-              v-for="entity in displayedEntities"
-            />
-          </div>
-        </div>
+        <button-simple
+          class="is-small mr05"
+          :title="$t('main.column_visibility')"
+          icon="down"
+          @click="toggleColumnSelector"
+          v-if="isShowInfosBreakdown"
+        />
       </div>
 
+      <div class="casting-list" v-if="!isLoading">
+        <div class="shot-lines">
+          <div class="casting-header flexrow">
+            <div
+              class="entity-header"
+              :style="{ 'min-width': nameHeaderMinWidth }"
+            >
+              <div>
+                {{ $t('shots.fields.name') }}
+              </div>
+              <div class="filler"></div>
+              <div
+                class="resizable-knob"
+                @mousedown.prevent="initResize($event)"
+              ></div>
+            </div>
+            <div class="standby-header" v-if="isShowInfosBreakdown">
+              {{ $t('breakdown.fields.standby') }}
+            </div>
+            <div
+              class="description-header"
+              v-if="isShowInfosBreakdown && isDescription"
+            >
+              {{ $t('shots.fields.description') }}
+            </div>
+            <div
+              class="frames-header"
+              v-if="
+                isShotCasting &&
+                isFrames &&
+                isShowInfosBreakdown &&
+                metadataDisplayHeaders.frames
+              "
+            >
+              {{ $t('shots.fields.nb_frames') }}
+            </div>
+            <div
+              class="frames-header"
+              v-if="
+                isShotCasting &&
+                isFrameIn &&
+                isShowInfosBreakdown &&
+                metadataDisplayHeaders.frameIn
+              "
+            >
+              {{ $t('shots.fields.frame_in') }}
+            </div>
+            <div
+              class="frames-header"
+              v-if="
+                isShotCasting &&
+                isFrameOut &&
+                isShowInfosBreakdown &&
+                metadataDisplayHeaders.frameOut
+              "
+            >
+              {{ $t('shots.fields.frame_out') }}
+            </div>
+            <div
+              class="descriptor-header"
+              :key="'descriptor-header-' + descriptor.id"
+              :style="{
+                'min-width': columnWidth[descriptor.id]
+                  ? columnWidth[descriptor.id] + 'px'
+                  : '110px'
+              }"
+              v-for="descriptor in visibleMetadataDescriptors"
+              v-show="isShowInfosBreakdown"
+            >
+              <span
+                class="descriptor-departments mr05"
+                v-if="descriptorCurrentDepartments(descriptor).length"
+              >
+                <department-name
+                  :key="department.id"
+                  :department="department"
+                  no-padding
+                  only-dot
+                  v-for="department in descriptorCurrentDepartments(descriptor)"
+                />
+              </span>
+              <span
+                class="ellipsis nowrap descriptor-name filler"
+                :title="descriptor.name"
+              >
+                {{ descriptor.name }}
+              </span>
+              <div
+                class="resizable-knob"
+                @mousedown.prevent="initResize($event, descriptor.id)"
+              ></div>
+            </div>
+            <div
+              :key="assetType"
+              class="asset-type-header"
+              v-for="assetType in castingAssetTypes"
+            >
+              <span class="ellipsis nowrap" :title="assetType">
+                {{ assetType }}
+              </span>
+              <casting-type-total
+                :asset-type="assetType"
+                :entities="displayedEntities"
+              />
+            </div>
+
+            <div class="actions filler"></div>
+          </div>
+          <shot-line
+            :key="`${entity.id}-${lineRedraws[entity.id] || 0}`"
+            :entity="entity"
+            :preview-file-id="entity.preview_file_id"
+            :selection="selection"
+            :name="getEntityName(entity)"
+            :asset-types="castingAssetTypes"
+            :read-only="!isCurrentUserManager"
+            :ready-task-type-id="isShotCasting ? readyTaskTypeId : ''"
+            :text-mode="isTextMode"
+            :metadata-descriptors="metadataDescriptors"
+            :metadata-display-headers="metadataDisplayHeaders"
+            :big-mode="isBigMode"
+            :is-description="isDescription"
+            :is-save-error="saveErrors[entity.id]"
+            :column-width="columnWidth"
+            @add-one="addOneAsset"
+            @click="selectEntity"
+            @copy-casting="copyEntityCasting"
+            @drop-asset="onAssetDropped"
+            @edit-label="onEditLabelClicked"
+            @field-changed="onFieldChanged"
+            @metadata-changed="onMetadataChanged"
+            @remove-one="removeOneAssetFromSelection"
+            v-for="entity in displayedEntities"
+          />
+        </div>
+      </div>
+    </template>
+    <template #side>
       <div
         ref="asset-list"
         @scroll.passive="onAssetListScroll"
-        class="breakdown-column assets-column"
-        v-if="isCurrentUserManager"
+        class="assets-column"
       >
         <h2 class="subtitle">
           {{ $t('breakdown.all_assets') }}
@@ -354,7 +351,7 @@
           </div>
         </template>
       </div>
-    </div>
+    </template>
 
     <import-render-modal
       :active="modals.isImportRenderDisplayed"
@@ -420,7 +417,7 @@
       @confirm="confirmAssetRemoval"
       @cancel="modals.isRemoveConfirmationDisplayed = false"
     />
-  </div>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -451,6 +448,7 @@ import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
 import { range } from '@/lib/time'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
@@ -1707,32 +1705,6 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .breakdown {
-    background: $dark-grey-2;
-  }
-  .breakdown-column {
-    background: $dark-grey-light;
-    border: 1px solid #222;
-    box-shadow: 0 0 6px #222;
-  }
-}
-
-.breakdown {
-  color: var(--text);
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  background: #fafafa;
-  padding-left: 1em;
-  padding-right: 1em;
-  padding-bottom: 1em;
-}
-
 // The comboboxes carry a label above their control: the buttons line up with
 // the control, not with the middle of label + control.
 // Wraps rather than squeezing its controls: the room depends on the asset
@@ -1772,37 +1744,18 @@ useHead({
   max-width: 200px;
 }
 
-.breakdown-columns {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  overflow-y: auto;
-  margin-top: 0.5em;
-}
-
-.breakdown-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  padding: 1em;
-  background: white;
-  border: 1px solid #eee;
-  box-shadow: 0 0 6px #e0e0e0;
-  border-radius: 1em;
-
-  &:not(:first-child) {
-    margin-left: 0.5em;
-  }
-}
-
-.casting-column {
-  overflow: hidden;
-  flex: 1;
+// the asset picker is the side panel: wider than a task panel, for its tiles
+.breakdown :deep(.side-column) {
+  max-width: 460px;
+  width: 460px;
 }
 
 .assets-column {
-  max-width: 460px;
+  background: var(--background-panel);
+  border-radius: 12px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 14px;
 }
 
 .asset-type,
@@ -1985,26 +1938,25 @@ useHead({
   margin-bottom: 0.5em;
 }
 
+// the casting is a sheet of the page color, framed like the lists of the
+// other pages
+.casting-list {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
 // Tablet: the asset picker leaves more room to the casting.
 @media screen and (max-width: 1000px) {
-  .assets-column {
+  .breakdown :deep(.side-column) {
     max-width: 300px;
+    width: 300px;
   }
 }
 
 // Mobile is read-only: the casting alone, as one card per entity (see
 // ShotLine), without the asset picker, the exports and the info columns.
 @media screen and (max-width: 768px) {
-  .breakdown {
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-    padding-bottom: 0.5em;
-  }
-
-  .breakdown-column {
-    padding: 0.5em;
-  }
-
   .casting-toolbar {
     flex-wrap: wrap;
     gap: 0.5em;
@@ -2016,7 +1968,6 @@ useHead({
     }
   }
 
-  .assets-column,
   .list-options,
   .desktop-only,
   .casting-header {

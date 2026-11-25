@@ -136,6 +136,7 @@ const mountPage = ({
       mixins,
       // The page drives its search field through a ref.
       stubs: {
+        PanelLayout: false,
         SearchField: {
           name: 'SearchField',
           template: '<div />',
@@ -154,6 +155,28 @@ const moveScope = async (store, scope) => {
   Object.assign(store.state, scope)
   await nextTick()
 }
+
+describe('Breakdown page, panel layout', () => {
+  test('lays its toolbar, its casting and its asset picker out in panels', async () => {
+    const { wrapper } = mountPage()
+    await flushPromises()
+
+    expect(wrapper.find('.filters-panel .casting-toolbar').exists()).toBe(true)
+    expect(wrapper.find('.list-panel .casting-list').exists()).toBe(true)
+    expect(wrapper.find('.side-column .assets-column').exists()).toBe(true)
+    wrapper.unmount()
+  })
+
+  test('keeps the asset picker for the managers', async () => {
+    const { wrapper } = mountPage({
+      getters: { isCurrentUserProductionManager: () => false }
+    })
+    await flushPromises()
+
+    expect(wrapper.find('.side-column').exists()).toBe(false)
+    wrapper.unmount()
+  })
+})
 
 // The load races are covered by the spec of useBreakdownLoader.
 describe('Breakdown page, loading', () => {

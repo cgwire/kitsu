@@ -160,7 +160,8 @@ const addTenAssets = () => {
   margin-bottom: 1em;
   font-size: 0.8em;
   cursor: default;
-  background: $white-grey;
+  // a tile of the page color, set on the grey panel of the picker
+  background: var(--background);
   border-radius: 8px;
 
   &.big-asset {
