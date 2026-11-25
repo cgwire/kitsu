@@ -46,7 +46,7 @@ const mountPage = ({
     listName: 'ProductionList',
     config: { globalProperties: { $socket: socket }, errorHandler },
     getters: { productions: [production] },
-    actions,
+    actions: { loadProductionStats: () => ({}), ...actions },
     stubs: { PanelLayout: false }
   })
 
@@ -112,6 +112,52 @@ describe('Productions page, layout', () => {
     expect(
       wrapper.find('.list-panel').findComponent({ name: 'ProductionList' }).exists()
     ).toBe(true)
+  })
+})
+
+describe('Productions page, stats', () => {
+  const stats = { 'production-1': { all: { count: 3 } } }
+  // the list stub of the fixture declares no such prop
+  const listedStats = wrapper =>
+    wrapper.findComponent({ name: 'ProductionList' }).vm.$attrs[
+      'production-stats'
+    ]
+  const statsButton = wrapper =>
+    wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(button => button.props('text').startsWith('productions.'))
+
+  test('shows the stats when the page opens', async () => {
+    const { wrapper } = await mountPage({
+      actions: { loadProductionStats: () => stats }
+    })
+
+    expect(listedStats(wrapper)).toEqual(stats)
+    expect(statsButton(wrapper).props('text')).toBe('productions.hide_stats')
+  })
+
+  test('hides them on request', async () => {
+    const { wrapper } = await mountPage({
+      actions: { loadProductionStats: () => stats }
+    })
+
+    await statsButton(wrapper).vm.$emit('click')
+    await flushPromises()
+
+    expect(listedStats(wrapper)).toEqual({})
+  })
+
+  test('logs a failed request and stops waiting for it', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = new Error('Bad Gateway')
+    errors.markRequestFailure(error)
+    const { wrapper } = await mountPage({
+      actions: { loadProductionStats: () => Promise.reject(error) }
+    })
+
+    expect(consoleError).toHaveBeenCalledWith(error)
+    expect(statsButton(wrapper).props('isLoading')).toBe(false)
+    expect(listedStats(wrapper)).toEqual({})
   })
 })
 

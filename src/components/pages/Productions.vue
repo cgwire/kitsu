@@ -417,8 +417,11 @@ const toggleStats = async () => {
     return
   }
   loading.stats = true
-  productionStats.value = await store.dispatch('loadProductionStats')
-  loading.stats = false
+  try {
+    productionStats.value = await store.dispatch('loadProductionStats')
+  } finally {
+    loading.stats = false
+  }
 }
 
 // A column created or changed, by this tab too (Zou names no author), marks
@@ -443,6 +446,9 @@ const socketEvents = {
 // Lifecycle
 
 productionsListing = store.dispatch('loadProductions')
+
+// the stats show from the start: the button hides them
+toggleStats().catch(logRequestFailure)
 
 // Zou sends no event again for the changes made while the socket was down.
 // The manager of the socket announces each reconnection, a drop that began
