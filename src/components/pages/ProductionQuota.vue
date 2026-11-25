@@ -5,9 +5,10 @@
     :side="showInfo && Boolean(currentPerson)"
     :side-focused="showInfo && Boolean(currentPerson)"
   >
+    <template #tabs>
+      <route-tabs :active-tab="activeTab" :tabs="tabs" />
+    </template>
     <template #filters>
-      <route-tabs class="quota-tabs" :active-tab="activeTab" :tabs="tabs" />
-
       <div class="flexrow filters">
         <combobox-task-type
           class="flexrow-item"
@@ -636,11 +637,6 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-// Bulma sets the tabs apart from what follows: the panel already does
-.tabs.quota-tabs {
-  margin-bottom: 0;
-}
-
 // One label height and one control height for the whole row, as on the
 // Timesheets.
 .filters {

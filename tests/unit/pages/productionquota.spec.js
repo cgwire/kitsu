@@ -158,12 +158,15 @@ describe('ProductionQuota', () => {
   })
 
   describe('panel layout', () => {
-    it('lays its tabs, its filters and its list out in the two panels', async () => {
+    it('lays its tabs above its filters and its list, in two panels', async () => {
       const { wrapper } = await mountPage()
       const filters = wrapper.find('.filters-panel')
       const list = wrapper.find('.list-panel')
 
-      expect(filters.findComponent({ name: 'RouteTabs' }).exists()).toBe(true)
+      expect(
+        wrapper.find('.page-tabs').findComponent({ name: 'RouteTabs' }).exists()
+      ).toBe(true)
+      expect(filters.findComponent({ name: 'RouteTabs' }).exists()).toBe(false)
       expect(filters.findComponent(ComboboxTaskType).exists()).toBe(true)
       expect(list.findComponent({ name: 'SearchQueryList' }).exists()).toBe(
         true
