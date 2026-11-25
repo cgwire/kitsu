@@ -81,7 +81,7 @@
             </tr>
             <tr class="datatable-row" v-if="outputFile.path">
               <td class="path card-head" colspan="9">
-                {{ outputFile.path }}
+                {{ renderPath(outputFile.path) }}
               </td>
             </tr>
           </template>
@@ -101,7 +101,7 @@ import { FolderOutputIcon } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
-import { renderFileSize } from '@/lib/render'
+import { renderFilePath, renderFileSize } from '@/lib/render'
 
 /* eslint-disable no-unused-vars */
 import PeopleNameCell from '@/components/cells/PeopleNameCell.vue'
@@ -141,6 +141,9 @@ const getFileStatus = outputFile =>
 const getOutputType = outputFile =>
   outputFileTypeMap.value.get(outputFile.output_type_id)
 
+const renderPath = path =>
+  renderFilePath(path, currentProduction.value.file_tree?.output?.mountpoint)
+
 const reset = async () => {
   isLoading.value = true
   if (fileStatusMap.value.size === 0) {
@@ -173,37 +176,46 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.datatable-body {
-  overflow-y: auto;
-}
+// each column as wide as what it holds, the last one takes what is left
 table.datatable {
   table-layout: fixed;
+  width: 100%;
 }
 
-td.type {
+.tasktype {
+  width: 150px;
+}
+
+.name {
+  width: 130px;
+}
+
+.type,
+.status {
   width: 100px;
 }
+
+.extension,
 .revision {
-  width: 80px;
+  width: 90px;
 }
-.extension {
-  width: 80px;
-}
+
 .size {
-  width: 50px;
+  width: 70px;
 }
-.status {
-  width: 120px;
-}
-.name {
-  width: 250px;
-}
+
 .person {
-  width: 250px;
+  width: 190px;
+}
+
+// a path has no space to wrap at
+.path {
+  white-space: normal;
+  word-break: break-all;
 }
 
 .output-files {
-  overflow-y: auto;
+  overflow: auto;
 }
 
 .dark .wrapper.output-files {

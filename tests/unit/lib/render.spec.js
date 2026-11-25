@@ -2,6 +2,7 @@
 
 import {
   renderComment,
+  renderFilePath,
   renderFileSize,
   renderMarkdown,
   replaceTimeWithTimecode,
@@ -221,6 +222,27 @@ describe('render', () => {
     expect(renderMarkdown(':unknown: at 10:30:00').trim()).toEqual(
       '<p>:unknown: at 10:30:00</p>'
     )
+  })
+
+  // zou writes a path from the mount point of the production, a folder of
+  // the machine it is mounted on
+  test.each([
+    ['/home/artist/', '/home/artist//productions/tree_v001'],
+    ['/home/artist', '/home/artist/productions/tree_v001']
+  ])('renderFilePath starts from the mount point %s', (mountpoint, path) => {
+    expect(renderFilePath(path, mountpoint)).toBe('productions/tree_v001')
+  })
+
+  test.each([
+    ['/home/artistic/productions/tree_v001', '/home/artist'],
+    ['/productions/tree_v001', '/'],
+    ['/productions/tree_v001', undefined]
+  ])('renderFilePath keeps %s out of the mount point %s', (path, mountpoint) => {
+    expect(renderFilePath(path, mountpoint)).toBe(path)
+  })
+
+  test('renderFilePath of a file without path', () => {
+    expect(renderFilePath(null, '/home/artist')).toBe('')
   })
 
   test('renderFileSize', () => {
