@@ -54,7 +54,7 @@ const mountPage = async (result = logs, query = {}) => {
   store.dispatch = vi.fn(() => Promise.resolve(result))
   const wrapper = shallowMount(LoginLogs, {
     global: { plugins: [store], stubs: { PanelLayout: false } },
-    slots: { default: '<nav class="page-tabs" />' }
+    slots: { default: '<nav class="my-tabs" />' }
   })
   await flushPromises()
   return wrapper
@@ -67,11 +67,12 @@ describe('pages/logs/LoginLogs', () => {
         .findAllComponents({ name: 'ButtonSimple' })
         .find(button => button.props('icon') === 'remove')
 
-    test('shows the tabs of the page above its filters', async () => {
+    test('shows the tabs of the page above its panels', async () => {
       const wrapper = await mountPage()
       const filters = wrapper.find('.filters-panel')
 
-      expect(filters.find('.page-tabs').exists()).toBe(true)
+      expect(wrapper.find('.page-tabs .my-tabs').exists()).toBe(true)
+      expect(filters.find('.my-tabs').exists()).toBe(false)
       expect(filters.findComponent({ name: 'DateField' }).exists()).toBe(true)
       expect(wrapper.find('.list-panel table').exists()).toBe(true)
     })

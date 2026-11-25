@@ -12,7 +12,7 @@ vi.mock('vue-router', () => ({
   useRoute: () => ({ query: routing.query })
 }))
 
-// each tab is a page of its own, which shows the tabs in its filters panel
+// each tab is a page of its own, which shows the tabs above its panels
 const tabStub = name => ({ name, template: '<div><slot /></div>' })
 
 const mountPage = query => {

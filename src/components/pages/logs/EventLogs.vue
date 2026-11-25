@@ -1,7 +1,9 @@
 <template>
   <panel-layout class="event-logs" :class="{ collapsed: !showFilters }">
-    <template #filters>
+    <template #tabs>
       <slot />
+    </template>
+    <template #filters>
       <div class="flexrow filters">
         <date-field
           class="date-range flexrow-item"

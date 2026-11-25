@@ -1,6 +1,6 @@
 <template>
   <component :is="TAB_PAGES[activeTab]">
-    <route-tabs class="logs-tabs" :active-tab="activeTab" :tabs="tabs" />
+    <route-tabs :active-tab="activeTab" :tabs="tabs" />
   </component>
 </template>
 
@@ -17,7 +17,7 @@ import RouteTabs from '@/components/widgets/RouteTabs.vue'
 const { t } = useI18n()
 const route = useRoute()
 
-// each tab is a page in panels, which shows the tabs above its filters
+// each tab is a page in panels, which shows the tabs above them
 const TAB_PAGES = {
   events: EventLogs,
   logins: LoginLogs,
@@ -38,10 +38,3 @@ const activeTab = computed(() => {
   return tabs.value.some(({ name }) => name === tab) ? tab : 'events'
 })
 </script>
-
-<style lang="scss" scoped>
-// Bulma sets the tabs apart from what follows: the panel already does
-.tabs.logs-tabs {
-  margin-bottom: 0;
-}
-</style>

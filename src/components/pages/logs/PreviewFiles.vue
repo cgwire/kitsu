@@ -1,7 +1,9 @@
 <template>
   <panel-layout class="preview-files">
-    <template #filters>
+    <template #tabs>
       <slot />
+    </template>
+    <template #filters>
       <p class="flexrow">
         <em class="flexrow-item">{{ $t('logs.preview_files.explanation') }}</em>
         <span class="filler"></span>

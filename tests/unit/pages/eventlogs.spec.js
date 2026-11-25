@@ -35,7 +35,7 @@ const mountPage = (query = {}) => {
   store.dispatch = vi.fn(() => Promise.resolve([]))
   return shallowMount(EventLogs, {
     global: { plugins: [store], stubs: { PanelLayout: false } },
-    slots: { default: '<nav class="page-tabs" />' }
+    slots: { default: '<nav class="my-tabs" />' }
   })
 }
 
@@ -51,11 +51,12 @@ describe('pages/logs/EventLogs', () => {
   })
 
   describe('panel layout', () => {
-    test('shows the tabs of the page above its filters', () => {
+    test('shows the tabs of the page above its panels', () => {
       const wrapper = mountPage()
       const filters = wrapper.find('.filters-panel')
 
-      expect(filters.find('.page-tabs').exists()).toBe(true)
+      expect(wrapper.find('.page-tabs .my-tabs').exists()).toBe(true)
+      expect(filters.find('.my-tabs').exists()).toBe(false)
       expect(filters.findComponent({ name: 'DateField' }).exists()).toBe(true)
     })
 
