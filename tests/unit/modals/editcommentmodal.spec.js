@@ -7,14 +7,16 @@ import { createStore } from 'vuex'
 
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+
+import { shallowMountWithI18n } from '../fixtures/i18n'
 
 const store = createStore({
   getters: {
     departmentMap: () => new Map(),
+    getProductionDepartmentIds: () => () => [],
     getTaskStatusForCurrentUser: () => () => [],
-    isCurrentUserClient: () => false,
-    productionDepartmentIds: () => [],
-    taskStatusForCurrentUser: () => []
+    isCurrentUserClient: () => false
   }
 })
 
@@ -53,8 +55,9 @@ const TextFieldStub = {
 describe('modals/EditCommentModal', () => {
   let wrapper
 
-  const mountModal = (stubs = {}) =>
+  const mountModal = (stubs = {}, options = {}) =>
     shallowMount(EditCommentModal, {
+      ...options,
       global: {
         plugins: [store],
         stubs: { TextField: TextFieldStub, ...stubs }
@@ -131,5 +134,268 @@ describe('modals/EditCommentModal', () => {
       clipboardData: { files: [], getData: () => 'S:\\8_anim\\_lib' }
     })
     expect(confirmForm(wrapper).text).toBe('`S:\\8_anim\\_lib`')
+  })
+
+  // The comment form of a task lists the same statuses, in the same order.
+  describe('statuses', () => {
+    const statuses = [
+      { id: 'status-retake', name: 'Retake', short_name: 'retake' },
+      { id: 'status-wip', name: 'Work In Progress', short_name: 'wip' }
+    ]
+    const done = { id: 'status-done', name: 'Done', short_name: 'done' }
+    const buildProduction = (id, retakePriority, wipPriority) => ({
+      id,
+      task_statuses_link: {
+        'status-retake': { priority: retakePriority },
+        'status-wip': { priority: wipPriority }
+      }
+    })
+
+    const listStatuses = async (
+      currentProduction,
+      productions,
+      props = {},
+      statusesOf = () => statuses
+    ) => {
+      const productionStore = createStore({
+        getters: {
+          currentProduction: () => currentProduction,
+          departmentMap: () => new Map(),
+          getProductionDepartmentIds: () => () => [],
+          getTaskStatusForCurrentUser: () => productionId =>
+            statusesOf(productionId),
+          isCurrentUserClient: () => false,
+          isDarkTheme: () => false,
+          productionMap: () =>
+            new Map(productions.map(production => [production.id, production])),
+          taskStatusMap: () =>
+            new Map([...statuses, done].map(status => [status.id, status]))
+        }
+      })
+      wrapper.unmount()
+      wrapper = shallowMountWithI18n(EditCommentModal, {
+        global: {
+          plugins: [productionStore],
+          stubs: { ComboboxStatus: false, TextField: TextFieldStub }
+        },
+        props: { active: false, commentToEdit: null, ...props }
+      })
+      await openOn(wrapper, buildComment('comment-1', []))
+      await wrapper.find('[role="combobox"]').trigger('click')
+      return wrapper
+        .findAll('[role="option"] .tag')
+        .map(tag => tag.attributes('title'))
+    }
+
+    it('lists the statuses in the order of the production', async () => {
+      const production = buildProduction('production-1', 2, 1)
+
+      expect(await listStatuses(production, [production])).toEqual([
+        'Work In Progress',
+        'Retake'
+      ])
+    })
+
+    // On My Tasks, the current production can be any other one.
+    it('lists the statuses in the order of the given production', async () => {
+      const currentProduction = buildProduction('production-1', 1, 2)
+      const taskProduction = buildProduction('production-2', 2, 1)
+
+      expect(
+        await listStatuses(
+          currentProduction,
+          [currentProduction, taskProduction],
+          { productionId: 'production-2' }
+        )
+      ).toEqual(['Work In Progress', 'Retake'])
+    })
+
+    it('lists the statuses of the given production', async () => {
+      const currentProduction = buildProduction('production-1', 1, 2)
+      const taskProduction = {
+        id: 'production-2',
+        task_statuses_link: {
+          'status-done': { priority: 2 },
+          'status-wip': { priority: 1 }
+        }
+      }
+
+      expect(
+        await listStatuses(
+          currentProduction,
+          [currentProduction, taskProduction],
+          { productionId: 'production-2' },
+          productionId =>
+            productionId === 'production-2' ? [done, statuses[1]] : statuses
+        )
+      ).toEqual(['Work In Progress', 'Done'])
+    })
+  })
+
+  describe('suggestion list', () => {
+    const isListOpen = () => wrapper.find('.atwho-panel').exists()
+
+    // vue-at opens its list 10 ms after the keystroke.
+    beforeEach(async () => {
+      wrapper.unmount()
+      wrapper = mountModal({ AtTextarea: false }, { attachTo: document.body })
+      await openOn(wrapper, buildComment('comment-1', []))
+      await wrapper.setProps({ isMovie: true })
+      await wrapper.find('textarea').setValue('Ready @')
+      await vi.advanceTimersByTimeAsync(20)
+    })
+
+    // A frame points at a movie: a picture or no preview has none.
+    it('leaves the frame out beside a picture', async () => {
+      await wrapper.setProps({ isMovie: false })
+      const field = wrapper.find('textarea')
+
+      await field.setValue('Ready @fra')
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+
+      await field.setValue('Ready @frame ')
+      await vi.advanceTimersByTimeAsync(20)
+      expect(field.element.value).toBe('Ready @frame ')
+    })
+
+    it('closes its list on a press elsewhere in the window', async () => {
+      expect(isListOpen()).toBe(true)
+
+      wrapper
+        .find('.box')
+        .element.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+    })
+
+    it('closes its list once the focus leaves the field', async () => {
+      expect(isListOpen()).toBe(true)
+
+      const nextField = document.createElement('button')
+      wrapper.find('.box').element.appendChild(nextField)
+      nextField.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+    })
+
+    // vue-at closes its list on Escape and lets the key go on to the window.
+    it('closes its list on Escape, and the window on the next one', async () => {
+      const field = wrapper.find('textarea')
+
+      await field.trigger('keydown', { key: 'Escape', keyCode: 27 })
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+      expect(wrapper.emitted('cancel')).toBeUndefined()
+
+      await field.trigger('keydown', { key: 'Escape', keyCode: 27 })
+      expect(wrapper.emitted('cancel')).toHaveLength(1)
+    })
+
+    // vue-at reads the field again 50 ms after a keystroke.
+    it('keeps its list closed after an Escape until the next input', async () => {
+      const field = wrapper.find('textarea')
+
+      await field.trigger('keydown', { keyCode: 65 })
+      await field.trigger('keydown', { key: 'Escape', keyCode: 27 })
+      await vi.advanceTimersByTimeAsync(100)
+      expect(isListOpen()).toBe(false)
+
+      await field.setValue('Ready @a')
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(true)
+    })
+
+    // A held key repeats its keydown.
+    it('keeps the window open while Escape is held', async () => {
+      const field = wrapper.find('textarea')
+
+      await field.trigger('keydown', { key: 'Escape', keyCode: 27 })
+      await field.trigger('keydown', { key: 'Escape', keyCode: 27, repeat: true })
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+      expect(wrapper.emitted('cancel')).toBeUndefined()
+    })
+
+    // A press on the list, released outside it, leaves the focus on the window
+    // and the list open.
+    it('closes its list alone on Escape with the focus on the window', async () => {
+      wrapper
+        .find('.atwho-li')
+        .element.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      wrapper.element.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(true)
+
+      await wrapper.trigger('keydown', { key: 'Escape', keyCode: 27 })
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+      expect(wrapper.emitted('cancel')).toBeUndefined()
+    })
+
+    // A press on the list moves the focus to the window, the closest focusable
+    // container of the field.
+    it('keeps its list open while an entry is picked with the mouse', async () => {
+      const entry = wrapper.find('.atwho-li')
+      entry.element.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      wrapper.element.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(document.activeElement).toBe(wrapper.element)
+      expect(isListOpen()).toBe(true)
+
+      // The frame entry gives the time of the frame.
+      await entry.trigger('click')
+      expect(wrapper.find('textarea').element.value).toBe(
+        'Ready v1 00:00:00:00 (1) '
+      )
+    })
+
+    // The window of a task of another production than the current one, as
+    // on My Tasks.
+    it('offers the departments of the given production', async () => {
+      const departmentStore = createStore({
+        getters: {
+          departmentMap: () =>
+            new Map([
+              ['department-layout', { id: 'department-layout', name: 'Layout' }],
+              ['department-model', { id: 'department-model', name: 'Modeling' }]
+            ]),
+          getProductionDepartmentIds: () => productionId =>
+            productionId === 'production-2'
+              ? ['department-model']
+              : ['department-layout'],
+          getTaskStatusForCurrentUser: () => () => [],
+          isCurrentUserClient: () => false
+        }
+      })
+      wrapper.unmount()
+      wrapper = shallowMount(EditCommentModal, {
+        attachTo: document.body,
+        global: {
+          plugins: [departmentStore],
+          stubs: { AtTextarea: false, TextField: TextFieldStub }
+        },
+        props: { active: false, commentToEdit: null, productionId: 'production-2' }
+      })
+      await openOn(wrapper, buildComment('comment-1', []))
+      await wrapper.find('textarea').setValue('Ready @')
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(wrapper.find('.atwho-view').text()).toContain('Modeling')
+      expect(wrapper.find('.atwho-view').text()).not.toContain('Layout')
+    })
+
+    // The other comment fields show the same avatar, which is no link.
+    it('lists people with the small avatar of the comment fields', async () => {
+      await wrapper.setProps({
+        team: [{ id: 'person-1', full_name: 'Kevin Layout', role: 'user' }]
+      })
+      await wrapper.find('textarea').setValue('Ready @Kev')
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(
+        wrapper.find('.atwho-li').findComponent(PeopleAvatar).props()
+      ).toMatchObject({ size: 20, fontSize: 11, isLazy: false, isLink: false })
+    })
   })
 })

@@ -1,13 +1,15 @@
-import { computed, reactive, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, watch } from 'vue'
 import { useStore } from 'vuex'
 
-export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
+export const useAtMentionsMembers = (
+  teamGetter,
+  taskTypesGetter,
+  departmentIdsGetter
+) => {
   const store = useStore()
   const departmentMap = computed(() => store.getters.departmentMap)
   const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
-  const productionDepartmentIds = computed(
-    () => store.getters.productionDepartmentIds
-  )
+  const departmentIds = computed(departmentIdsGetter)
 
   const membersForAts = reactive({ '@': [], '#': [] })
 
@@ -29,6 +31,7 @@ export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
       }))
       taskTypeOptions.push({
         isTaskType: true,
+        isAll: true,
         color: '#000',
         full_name: 'All'
       })
@@ -38,8 +41,8 @@ export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
   )
 
   watch(
-    teamGetter,
-    teamValues => {
+    [teamGetter, departmentIds],
+    ([teamValues]) => {
       let teamOptions
       if (isCurrentUserClient.value) {
         teamOptions = teamValues.filter(person =>
@@ -50,7 +53,7 @@ export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
       }
       if (!isCurrentUserClient.value) {
         teamOptions = teamOptions.concat(
-          productionDepartmentIds.value
+          departmentIds.value
             .map(departmentId => departmentMap.value.get(departmentId))
             .filter(Boolean)
             .map(department => ({
@@ -72,4 +75,124 @@ export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
   )
 
   return { membersForAts, atOptionsFilter }
+}
+
+// vue-at leaves its list open once the field loses the focus, and reopens it
+// at each new array of members, even with the focus elsewhere: the members
+// stay in one array, refreshed in place. A press or a focus outside the field
+// closes the list, but for the focus a press on the list gives to a container
+// of the field.
+export const useAtSuggestions = (atRef, membersGetter) => {
+  const members = []
+
+  const closeSuggestions = () => {
+    atRef.value?.closePanel()
+  }
+
+  const isInField = event => Boolean(atRef.value?.$el.contains(event.target))
+
+  // A press on the list moves the focus to the closest focusable container of
+  // the field, such as a modal or a player: that focus keeps the list, not
+  // one a key gives to the container. The window gets a key before the
+  // document, where the players listen.
+  let isPressOnList = false
+
+  const isAroundField = event =>
+    Boolean(atRef.value && event.target.contains(atRef.value.$el))
+
+  const onDocumentPress = event => {
+    isPressOnList =
+      isInField(event) && Boolean(event.target.closest('.atwho-panel'))
+    if (!isInField(event)) {
+      closeSuggestions()
+    }
+  }
+
+  const onDocumentFocus = event => {
+    const isKept = isInField(event) || (isPressOnList && isAroundField(event))
+    isPressOnList = false
+    if (!isKept) {
+      closeSuggestions()
+    }
+  }
+
+  const onWindowKeydown = () => {
+    isPressOnList = false
+  }
+
+  // vue-at picks its highlighted entry on key code 13, whatever the modifiers.
+  // The document gets the key before the field: the list closes on Ctrl+Enter
+  // or Cmd+Enter, and the text stays as typed. On Escape, vue-at closes its
+  // list but lets the key go on to a modal around the field, which would close
+  // with the text: the key stops once the list closes. It may come from a
+  // container of the field, which a press on the list focuses. vue-at also
+  // reads the field again 50 ms after a keystroke, later on a busy page: the
+  // list stays closed until the next input in the field.
+  let isClosedUntilInput = false
+
+  const onDocumentKeydown = event => {
+    if (
+      event.keyCode === 13 &&
+      (event.ctrlKey || event.metaKey) &&
+      isInField(event)
+    ) {
+      isClosedUntilInput = true
+      closeSuggestions()
+    }
+    if (
+      event.key === 'Escape' &&
+      atRef.value?.atwho &&
+      (isInField(event) || isAroundField(event))
+    ) {
+      event.stopPropagation()
+      isClosedUntilInput = true
+      closeSuggestions()
+    }
+  }
+
+  const onDocumentInput = event => {
+    if (isInField(event)) {
+      isClosedUntilInput = false
+    }
+  }
+
+  const listen = method => {
+    document[method]('pointerdown', onDocumentPress, true)
+    document[method]('focusin', onDocumentFocus, true)
+    document[method]('keydown', onDocumentKeydown, true)
+    document[method]('input', onDocumentInput, true)
+    window[method]('keydown', onWindowKeydown, true)
+  }
+
+  watch(
+    membersGetter,
+    values => {
+      members.splice(0, members.length, ...values)
+    },
+    { immediate: true }
+  )
+
+  watch(
+    () => atRef.value?.atwho,
+    atwho => {
+      if (atwho && isClosedUntilInput) {
+        closeSuggestions()
+      }
+    }
+  )
+
+  // A list of comments holds one field per comment: only a rendered field
+  // listens.
+  watch(
+    () => Boolean(atRef.value),
+    isShown => {
+      listen(isShown ? 'addEventListener' : 'removeEventListener')
+    }
+  )
+
+  onBeforeUnmount(() => {
+    listen('removeEventListener')
+  })
+
+  return { members, closeSuggestions }
 }

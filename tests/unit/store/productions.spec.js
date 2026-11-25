@@ -182,6 +182,35 @@ describe('Productions store', () => {
         ])
     })
 
+    // A task panel shows tasks of any production on My Tasks.
+    test('getProductionDepartmentIds', () => {
+      const getters = {
+        getProductionTaskTypes: productionId =>
+          productionId === 'production-2'
+            ? [
+                { id: 'task-type-1', department_id: 'department-2' },
+                { id: 'task-type-2' },
+                { id: 'task-type-3', department_id: 'department-1' },
+                { id: 'task-type-4', department_id: 'department-2' }
+              ]
+            : [],
+        productionTaskTypes: [
+          { id: 'task-type-5', department_id: 'department-3' }
+        ]
+      }
+      const getDepartmentIds = store.getters.getProductionDepartmentIds(
+        {},
+        getters
+      )
+
+      expect(getDepartmentIds('production-2')).toEqual([
+        'department-2',
+        'department-1'
+      ])
+      // Without a production, the current one.
+      expect(getDepartmentIds(null)).toEqual(['department-3'])
+    })
+
     test('currentProduction', () => {
       let state = {
         openProductions: []

@@ -2,6 +2,7 @@ import { nextTick, reactive } from 'vue'
 import { createStore } from 'vuex'
 import { createRouter, createWebHistory } from 'vue-router'
 
+import drafts from '@/lib/drafts'
 import tasksStore from '@/store/modules/tasks'
 
 import AddComment from '@/components/widgets/AddComment.vue'
@@ -71,7 +72,8 @@ describe('AddComment', () => {
   const mountComment = async (
     getterOverrides = {},
     stubs = {},
-    storeOptions = {}
+    storeOptions = {},
+    mountOptions = {}
   ) => {
     draftComment = makeDraftComment()
     clearedProgress = []
@@ -87,8 +89,8 @@ describe('AddComment', () => {
         isCurrentUserManager: () => false,
         currentUserRoleForProduction: () => () => null,
         departmentMap: () => new Map(),
+        getProductionDepartmentIds: () => () => [],
         isTaskRevisionTaken: () => () => false,
-        productionDepartmentIds: () => [],
         productionMap: () =>
           new Map([
             [
@@ -120,6 +122,7 @@ describe('AddComment', () => {
     await router.isReady()
 
     wrapper = shallowMountWithI18n(AddComment, {
+      ...mountOptions,
       props: {
         task,
         taskStatus: taskStatusList,
@@ -148,6 +151,13 @@ describe('AddComment', () => {
 
   beforeEach(() => mountComment())
 
+  // A form listens on the document until it is unmounted.
+  afterEach(() => {
+    if (wrapper.exists()) {
+      wrapper.unmount()
+    }
+  })
+
   it('renders the status tab as active by default', () => {
     const tabs = wrapper.findAll('.tab-row span')
     const statusTab = tabs[0]
@@ -165,6 +175,42 @@ describe('AddComment', () => {
     await mountComment({ isCurrentUserClient: () => true })
     expect(wrapper.findAll('.tab-row span')).toHaveLength(1)
     expect(draftComment.mode).toBe('status')
+  })
+
+  // A client turns the frame on once for every comment, and the toggle hides
+  // beside a picture.
+  describe('frame toggle of a client', () => {
+    const postAsClient = async props => {
+      wrapper.unmount()
+      await mountComment(
+        { isCurrentUserClient: () => true },
+        { AtTextarea: false }
+      )
+      await wrapper.setProps({ fps: 25, frame: 24, revision: 3, ...props })
+      await wrapper.find('textarea').setValue('Nice')
+      await wrapper.find('.post-button').trigger('click')
+      return wrapper.emitted('add-comment')[0][0]
+    }
+
+    beforeEach(() => {
+      localStorage.setItem('comments:add-frame-when-posting', 'true')
+    })
+
+    // The form keeps its text as a draft of the task.
+    afterEach(() => {
+      localStorage.removeItem('comments:add-frame-when-posting')
+      drafts.clearTaskDraft(task.id)
+    })
+
+    it('puts the frame first beside a movie', async () => {
+      expect(await postAsClient({ isMovie: true })).toBe(
+        'v3 00:00:00:24 (25) \n\nNice'
+      )
+    })
+
+    it('leaves the frame out beside a picture', async () => {
+      expect(await postAsClient({ isMovie: false })).toBe('Nice')
+    })
   })
 
   it('has the comment input area in status mode', () => {
@@ -634,6 +680,240 @@ describe('AddComment', () => {
       wrapper.element.appendChild(modalBox)
       dropFileOn(dropMask)
       expect(draftComment.attachments).toHaveLength(0)
+    })
+  })
+
+  describe('suggestion list', () => {
+    // vue-at opens its list 10 ms after the keystroke.
+    const typeComment = async text => {
+      await wrapper.find('textarea').setValue(text)
+      await vi.advanceTimersByTimeAsync(20)
+    }
+    const isListOpen = () => wrapper.find('.atwho-panel').exists()
+    const pressOn = async element => {
+      element.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      await vi.advanceTimersByTimeAsync(20)
+    }
+
+    beforeEach(async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper.unmount()
+      await mountComment(
+        {},
+        { AtTextarea: false },
+        {},
+        { attachTo: document.body }
+      )
+      await wrapper.setProps({ isMovie: true })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    // My Tasks shows tasks of any production, whatever the current one.
+    it('offers the departments of the production of its task', async () => {
+      wrapper.unmount()
+      await mountComment(
+        {
+          departmentMap: () =>
+            new Map([
+              ['department-layout', { id: 'department-layout', name: 'Layout' }],
+              ['department-model', { id: 'department-model', name: 'Modeling' }]
+            ]),
+          getProductionDepartmentIds: () => productionId =>
+            productionId === 'production-1'
+              ? ['department-model']
+              : ['department-layout']
+        },
+        { AtTextarea: false },
+        {},
+        { attachTo: document.body }
+      )
+
+      await typeComment('Ready @')
+
+      expect(wrapper.find('.atwho-view').text()).toContain('Modeling')
+      expect(wrapper.find('.atwho-view').text()).not.toContain('Layout')
+    })
+
+    // A frame points at a movie: a picture or no preview has none.
+    it('leaves the frame out beside a picture', async () => {
+      await wrapper.setProps({ isMovie: false })
+
+      await typeComment('Ready @fra')
+      expect(isListOpen()).toBe(false)
+
+      await typeComment('Ready @frame ')
+      expect(wrapper.find('textarea').element.value).toBe('Ready @frame ')
+    })
+
+    it('closes its list on a press elsewhere, not on the list', async () => {
+      await typeComment('Ready @')
+      expect(isListOpen()).toBe(true)
+
+      await pressOn(wrapper.find('.atwho-li').element)
+      expect(isListOpen()).toBe(true)
+
+      await pressOn(document.body)
+      expect(isListOpen()).toBe(false)
+    })
+
+    // In a player, a press on the list moves the focus to the player, the
+    // closest focusable container of the field.
+    it('keeps its list open while an entry is picked in a player', async () => {
+      await typeComment('Ready @')
+      const player = wrapper.element.parentElement
+      player.tabIndex = -1
+
+      const entry = wrapper.find('.atwho-li')
+      entry.element.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      player.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(true)
+
+      // The frame entry gives the time of the frame.
+      await entry.trigger('click')
+      expect(wrapper.find('textarea').element.value).toBe(
+        'Ready v1 00:00:00:00 (1) '
+      )
+    })
+
+    // Shift+Tab in a player gives the focus to the player.
+    it('closes its list once a player takes the focus from the field', async () => {
+      await typeComment('Ready @')
+      const player = wrapper.element.parentElement
+      player.tabIndex = -1
+      const field = wrapper.find('textarea').element
+      field.focus()
+      // A press in the field moves the caret.
+      await pressOn(field)
+      expect(isListOpen()).toBe(true)
+
+      player.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+    })
+
+    it('keeps its list open for the one focus a press on the list gives to a player', async () => {
+      await typeComment('Ready @')
+      const player = wrapper.element.parentElement
+      player.tabIndex = -1
+      await pressOn(wrapper.find('.atwho-li').element)
+      player.focus()
+      wrapper.find('textarea').element.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(true)
+
+      player.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+    })
+
+    // A press on the scroll bar of the list moves no focus. A player listens
+    // to the keys on the document, and takes the focus on Shift+Tab.
+    it('closes its list once a key gives the focus to a player', async () => {
+      let player = null
+      const onFocusToggle = () => player.focus()
+      document.addEventListener('keydown', onFocusToggle, true)
+      onTestFinished(() => {
+        document.removeEventListener('keydown', onFocusToggle, true)
+      })
+      wrapper.unmount()
+      await mountComment(
+        {},
+        { AtTextarea: false },
+        {},
+        { attachTo: document.body }
+      )
+      await wrapper.setProps({ isMovie: true })
+      player = wrapper.element.parentElement
+      player.tabIndex = -1
+      await typeComment('Ready @')
+      await pressOn(wrapper.find('.atwho-view').element)
+      expect(isListOpen()).toBe(true)
+
+      await wrapper
+        .find('textarea')
+        .trigger('keydown', { key: 'Tab', shiftKey: true })
+      await vi.advanceTimersByTimeAsync(20)
+      expect(document.activeElement).toBe(player)
+      expect(isListOpen()).toBe(false)
+    })
+
+    it('closes its list once the focus leaves the field', async () => {
+      await typeComment('Ready @')
+      // A focus on the field keeps the list: vue-at focuses it again when an
+      // entry is picked.
+      wrapper.find('textarea').element.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(true)
+
+      const nextField = document.createElement('button')
+      document.body.appendChild(nextField)
+      nextField.focus()
+      await vi.advanceTimersByTimeAsync(20)
+      nextField.remove()
+      expect(isListOpen()).toBe(false)
+    })
+
+    // vue-at reopens its list at each new array of members, and the form
+    // renders again at each frame of the player.
+    it('keeps its list closed while the frame changes', async () => {
+      await typeComment('Ready @')
+      await pressOn(document.body)
+
+      await wrapper.setProps({ frame: 12 })
+      await vi.advanceTimersByTimeAsync(20)
+      expect(isListOpen()).toBe(false)
+    })
+
+    // vue-at picks its highlighted entry on Enter, whatever the modifiers.
+    it.each([
+      ['Ctrl', 'ctrlKey'],
+      ['Cmd', 'metaKey']
+    ])(
+      'posts the text as typed on %s+Enter, its list open',
+      async (key, modifier) => {
+        await typeComment('Ready @')
+        expect(isListOpen()).toBe(true)
+
+        const field = wrapper.find('textarea')
+        await field.trigger('keydown.enter', { [modifier]: true })
+        await field.trigger('keyup.enter', { [modifier]: true })
+
+        expect(isListOpen()).toBe(false)
+        expect(wrapper.emitted('add-comment')[0][0]).toBe('Ready @')
+      }
+    )
+
+    // vue-at reads the field again 50 ms after a keystroke: a send within that
+    // delay got its list back over the text sent.
+    it('keeps its list closed after a send right after a keystroke', async () => {
+      await typeComment('Ready @')
+      const field = wrapper.find('textarea')
+      await field.trigger('keydown', { keyCode: 50 })
+      await field.trigger('keydown.enter', { ctrlKey: true })
+      await field.trigger('keyup.enter', { ctrlKey: true })
+
+      await vi.advanceTimersByTimeAsync(200)
+      expect(isListOpen()).toBe(false)
+    })
+
+    // On a busy page, that read of vue-at comes later still.
+    it('keeps its list closed after a send until the next input', async () => {
+      await typeComment('Ready @')
+      const field = wrapper.find('textarea')
+      await field.trigger('keydown.enter', { ctrlKey: true })
+      await field.trigger('keyup.enter', { ctrlKey: true })
+      await vi.advanceTimersByTimeAsync(200)
+
+      await field.trigger('keydown', { keyCode: 50 })
+      await vi.advanceTimersByTimeAsync(60)
+      expect(isListOpen()).toBe(false)
+
+      await typeComment('Ready @')
+      expect(isListOpen()).toBe(true)
     })
   })
 })

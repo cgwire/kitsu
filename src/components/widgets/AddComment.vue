@@ -41,8 +41,9 @@
       </div>
 
       <at-ta
+        ref="commentSuggestionsRef"
         :ats="['#', '@']"
-        :members="[...membersForAts['@'], ...membersForAts['#']]"
+        :members="mentionMembers"
         name-key="full_name"
         :limit="2"
         :filter-match="atOptionsFilter"
@@ -58,12 +59,13 @@
                 background: item.color,
                 width: '10px',
                 height: '10px',
-                'border-radius': '50%'
+                'border-radius': '50%',
+                'flex-shrink': 0
               }"
             >
               &nbsp;
             </span>
-            {{ item.full_name }}
+            <span>{{ item.full_name }}</span>
           </template>
           <template v-else-if="item.isTaskType">
             <task-type-name
@@ -455,7 +457,10 @@ import preferences from '@/lib/preferences'
 import strings from '@/lib/string'
 import filesApi from '@/store/api/files'
 
-import { useAtMentionsMembers } from '@/composables/atMentions'
+import {
+  useAtMentionsMembers,
+  useAtSuggestions
+} from '@/composables/atMentions'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -549,10 +554,22 @@ const wrapperRef = ref(null)
 const commentTextareaRef = ref(null)
 const inputLinkRef = ref(null)
 const addAttachmentModalRef = ref(null)
+const commentSuggestionsRef = ref(null)
 
+// On My Tasks, the task is not always of the current production.
 const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.team,
-  () => props.taskTypes
+  () => props.taskTypes,
+  () => store.getters.getProductionDepartmentIds(props.task?.project_id)
+)
+// vue-at gets one array of members: the form renders again at each frame
+// of the player. A frame points at a movie: a picture or no preview has none.
+const { members: mentionMembers } = useAtSuggestions(
+  commentSuggestionsRef,
+  () => [
+    ...membersForAts['@'].filter(member => !member.isTime || props.isMovie),
+    ...membersForAts['#']
+  ]
 )
 
 const isFrameAddition = ref(false)
@@ -778,7 +795,8 @@ const runAddComment = (
     return
   }
 
-  if (isFrameAddition.value) {
+  // The toggle hides beside a picture, and stays on.
+  if (isFrameAddition.value && props.isMovie) {
     textVal = '@frame \n\n' + textVal
     textVal = replaceTimeWithTimecode(
       textVal,
@@ -977,7 +995,7 @@ const setValue = async comment => {
 }
 
 const onAtTextChanged = input => {
-  if (input.includes('@frame')) {
+  if (props.isMovie && input.includes('@frame')) {
     text.value = replaceTimeWithTimecode(
       input,
       props.revision,
@@ -1245,11 +1263,6 @@ article.add-comment {
     font-weight: 600;
     // border-bottom: 1px solid $green;
   }
-}
-
-// tag for vue-at
-.tag.thin {
-  line-height: 1.2em;
 }
 
 .attachment-title {

@@ -16,6 +16,7 @@
         <form @submit.prevent>
           <combobox-status
             :label="$t('task_status.title')"
+            :production-id="taskProductionId"
             :task-status-list="taskStatuses"
             v-model="form.task_status_id"
           />
@@ -25,8 +26,9 @@
               {{ $t('comments.text') }}
             </label>
             <at-ta
+              ref="commentSuggestionsRef"
               :ats="['#', '@']"
-              :members="[...membersForAts['@'], ...membersForAts['#']]"
+              :members="mentionMembers"
               name-key="full_name"
               limit="2"
               :filter-match="atOptionsFilter"
@@ -41,12 +43,13 @@
                       background: item.color,
                       width: '10px',
                       height: '10px',
-                      'border-radius': '50%'
+                      'border-radius': '50%',
+                      'flex-shrink': 0
                     }"
                   >
                     &nbsp;
                   </span>
-                  {{ item.full_name }}
+                  <span>{{ item.full_name }}</span>
                 </template>
                 <template v-else-if="item.isTaskType">
                   <task-type-name
@@ -64,6 +67,9 @@
                       class="flexrow-item"
                       :person="item"
                       :size="20"
+                      :font-size="11"
+                      :is-lazy="false"
+                      :is-link="false"
                     />
                     <span class="flexrow-item">
                       {{ item.full_name }}
@@ -188,7 +194,10 @@ import { computed, ref, toRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
-import { useAtMentionsMembers } from '@/composables/atMentions'
+import {
+  useAtMentionsMembers,
+  useAtSuggestions
+} from '@/composables/atMentions'
 import { useModal } from '@/composables/modal'
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
@@ -214,6 +223,8 @@ const props = defineProps({
   frame: { type: Number, default: 0 },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  isMovie: { type: Boolean, default: false },
+  productionId: { type: String, default: null },
   revision: { type: Number, default: 1 },
   taskTypes: { type: Array, default: () => [] },
   team: { type: Array, default: () => [] }
@@ -223,9 +234,20 @@ const emit = defineEmits(['cancel', 'confirm'])
 
 useModal(toRef(props, 'active'), emit)
 
+// On My Tasks, the task is not always of the current production.
 const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.team,
-  () => props.taskTypes
+  () => props.taskTypes,
+  () => store.getters.getProductionDepartmentIds(props.productionId)
+)
+const commentSuggestionsRef = ref(null)
+// A frame points at a movie: a picture or no preview has none.
+const { members: mentionMembers } = useAtSuggestions(
+  commentSuggestionsRef,
+  () => [
+    ...membersForAts['@'].filter(member => !member.isTime || props.isMovie),
+    ...membersForAts['#']
+  ]
 )
 
 const extensions = files.ALL_EXTENSIONS_STRING
@@ -241,11 +263,13 @@ const form = ref({
   link: null
 })
 
+const currentProduction = computed(() => store.getters.currentProduction)
 const getTaskStatusForCurrentUser = computed(
   () => store.getters.getTaskStatusForCurrentUser
 )
-const taskStatusForCurrentUser = computed(
-  () => store.getters.taskStatusForCurrentUser
+// The hosts that pass no production show tasks of the current one.
+const taskProductionId = computed(
+  () => props.productionId || currentProduction.value?.id || ''
 )
 
 const isConceptTask = computed(() => route.path.includes('concept'))
@@ -253,7 +277,7 @@ const isConceptTask = computed(() => route.path.includes('concept'))
 const taskStatuses = computed(() =>
   isConceptTask.value
     ? getTaskStatusForCurrentUser.value(null, true)
-    : taskStatusForCurrentUser.value.filter(status => !status.for_concept)
+    : getTaskStatusForCurrentUser.value(taskProductionId.value)
 )
 
 const isPreviewsComment = computed(
@@ -339,7 +363,7 @@ const onInsertChecklistItem = item => {
 }
 
 const onAtTextChanged = input => {
-  if (input.includes('@frame')) {
+  if (props.isMovie && input.includes('@frame')) {
     form.value.text = replaceTimeWithTimecode(
       input,
       props.revision,

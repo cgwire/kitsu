@@ -77,6 +77,17 @@ describe('composables/modal', () => {
     wrapper.unmount()
   })
 
+  // A held Escape repeats its keydown.
+  it('leaves a repeated Escape alone', () => {
+    const wrapper = createModalWrapper(true)
+    const { emit } = wrapper.vm
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', repeat: true })
+    )
+    wrapper.unmount()
+    expect(emit).not.toHaveBeenCalled()
+  })
+
   it('does not emit cancel on other keys', () => {
     const wrapper = createModalWrapper(true)
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
@@ -502,6 +513,21 @@ describe('composables/modal', () => {
       expect(lower.emit).not.toHaveBeenCalled()
       upper.wrapper.unmount()
       lower.wrapper.unmount()
+    })
+
+    it('closes only the top modal while Escape is held', async () => {
+      const lower = await openDialog()
+      const upper = await openDialog()
+
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      upper.wrapper.unmount()
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', repeat: true })
+      )
+      lower.wrapper.unmount()
+
+      expect(upper.emit).toHaveBeenCalledWith('cancel')
+      expect(lower.emit).not.toHaveBeenCalled()
     })
 
     it('gives the focus back to the opener when an open modal unmounts', async () => {

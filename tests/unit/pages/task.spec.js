@@ -378,6 +378,21 @@ describe('Task.vue', () => {
     })
   })
 
+  // A frame points at a movie: the comment fields offer it beside one only.
+  it('tells the comment fields that the preview is a movie', async () => {
+    const { wrapper } = await mountPage({
+      task: buildTask({ assignees: ['user-1'] }),
+      comments: [{ id: 'comment-1', text: 'v1' }],
+      previews: [
+        { id: 'preview-1', revision: 1, extension: 'mp4', task_id: TASK_ID }
+      ]
+    })
+
+    expect(wrapper.findComponent(AddComment).props('isMovie')).toBe(true)
+    expect(wrapper.findComponent(Comment).props('isMovie')).toBe(true)
+    expect(wrapper.findComponent(EditCommentModal).props('isMovie')).toBe(true)
+  })
+
   // The client sees the name and avatar of whoever answers a comment it is
   // shown: there, the production managers answer for the studio, and the
   // client once it is mentioned.

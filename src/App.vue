@@ -3047,6 +3047,40 @@ th.validation-cell {
     }
   }
 }
+
+// vue-at caps the suggestion list of the comment fields at 180 px and clips
+// the spans of its entries: a long name ends in an ellipsis, and the thin
+// chip of a task type gets a line height that fits its letters.
+.atwho-view {
+  .flexrow,
+  .tag {
+    min-width: 0;
+  }
+
+  .atwho-li .tag.thin {
+    line-height: 1.2em;
+  }
+}
+
+// vue-at styles the suggestion list of the comment fields for a light page
+// only, its scroll bar included.
+.dark .atwho-view {
+  background: var(--background-alt);
+  color: var(--text);
+
+  .atwho-cur {
+    background: var(--background-selected);
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb-alt);
+  }
+}
+
 // Opt-in card layout for data tables on mobile. Cells carrying a data-label
 // become a "label / value" line, .card-head cells stack on top as plain
 // blocks, every other cell is hidden. Landscape phones, wider than 768px,

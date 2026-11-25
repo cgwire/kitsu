@@ -166,6 +166,9 @@ const mountPanel = async (
       currentUserRoleForProduction: () => productionId =>
         projectRoles[productionId] ?? role,
       getCustomActionsByType: () => () => customActions,
+      // No production of these tests lists its task types: the store then
+      // gives them all.
+      getProductionTaskTypes: () => () => taskTypes,
       isCurrentUserAdmin: () => isAdmin,
       isCurrentUserArtist: () => isArtist,
       isCurrentUserClient: () => false,
@@ -192,7 +195,8 @@ const mountPanel = async (
     props: { productionId: 'production-1' },
     global: {
       plugins: [router, store],
-      stubs,
+      // The suggestion component wraps the comment field of the status bar.
+      stubs: { AtTextarea: false, ...stubs },
       ...(errorHandler ? { config: { errorHandler } } : {})
     }
   })

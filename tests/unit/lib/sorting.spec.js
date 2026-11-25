@@ -15,6 +15,7 @@ import {
   sortSequences,
   sortShots,
   sortTaskNames,
+  sortTaskStatuses,
   sortTaskTypes,
   sortTasks,
   sortValidationColumns, sortComments, sortRevisionPreviewFiles, sortAssetResult, sortEpisodeResult, sortShotResult,
@@ -589,6 +590,35 @@ describe('lib/sorting', () => {
 
     results = sortProductions([])
     expect(results).toHaveLength(0)
+  })
+
+  // The list often belongs to a caller's state: the order is a copy.
+  it('sortTaskStatuses', () => {
+    const statuses = [
+      { id: 'status-1', name: 'Done', priority: 3 },
+      { id: 'status-2', name: 'Retake', priority: 2 },
+      { id: 'status-3', name: 'Todo', priority: 1 },
+      { id: 'status-4', name: 'Approved', priority: 3 }
+    ]
+    const production = {
+      task_statuses_link: {
+        'status-1': { priority: 1 },
+        'status-3': { priority: 5 }
+      }
+    }
+
+    expect(
+      sortTaskStatuses(statuses, production).map(status => status.name)
+    ).toEqual(['Done', 'Retake', 'Approved', 'Todo'])
+    expect(
+      sortTaskStatuses(statuses, undefined).map(status => status.name)
+    ).toEqual(['Todo', 'Retake', 'Approved', 'Done'])
+    expect(statuses.map(status => status.id)).toEqual([
+      'status-1',
+      'status-2',
+      'status-3',
+      'status-4'
+    ])
   })
 
   it('sortTasks', () => {

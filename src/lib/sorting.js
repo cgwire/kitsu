@@ -161,7 +161,7 @@ export const sortRevisionPreviewFiles = previewFiles => {
 }
 
 export const sortTaskStatuses = (taskStatuses, currentProduction) => {
-  return taskStatuses.sort(
+  return [...taskStatuses].sort(
     firstBy((taskStatusA, taskStatusB) => {
       const taskStatusAPriority = getTaskStatusPriorityOfProd(
         taskStatusA,

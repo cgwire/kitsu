@@ -16,9 +16,12 @@
             nbSelectedTasks > 0 ||
             nbSelectedValidations > 0)
         "
+        :fps="currentFps"
+        :get-frame="getDisplayedFrame"
         :is-movie-preview="isMoviePreview"
         :is-set-frame-thumbnail-loading="loading.setFrameThumbnail"
         :production-id="currentProductionId"
+        :revision="currentRevision"
         :team="currentTeam"
         @export-task="onExportClick"
         @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
@@ -243,6 +246,7 @@
                         (user && user.id === comment.person?.id) ||
                         isCurrentUserManager
                       "
+                      :is-movie="isMoviePreview"
                       :is-pinnable="
                         isDepartmentSupervisor || isCurrentUserManager
                       "
@@ -326,6 +330,8 @@
           :frame="displayedFrame"
           :is-loading="loading.editComment"
           :is-error="errors.editComment"
+          :is-movie="isMoviePreview"
+          :production-id="currentProductionId"
           :revision="currentRevision"
           :team="currentTeam"
           :task-types="currentTaskTypes"
@@ -656,7 +662,9 @@ const currentTeam = computed(() => {
 // Task types of the same project, filtered by the current task entity type
 // (Shot or Asset), each with a url pointing to the matching task.
 const currentTaskTypes = computed(() => {
-  if (!props.task || !currentProduction.value) return []
+  // On My Tasks, the task is not always of the current production.
+  const production = productionMap.value.get(props.task?.project_id)
+  if (!production) return []
 
   const taskType = taskTypeMap.value.get(props.task.task_type_id)
   if (!taskType) return []
@@ -670,7 +678,7 @@ const currentTaskTypes = computed(() => {
     ])
   )
 
-  return currentProduction.value.task_types
+  return (production.task_types ?? [])
     .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
     .filter(taskType => taskType?.for_entity === taskTypeEntity)
     .filter(taskType => entityTasks[taskType.id])
@@ -850,7 +858,14 @@ const displayedFrame = computed(
   () => props.currentFrame || currentFrameRaw.value
 )
 
-const extension = computed(() => currentPreview.value?.extension ?? '')
+// The playlist and the full screen player show a preview of their own, as for
+// the revision.
+const extension = computed(
+  () =>
+    props.currentParentPreview?.extension ||
+    currentPreview.value?.extension ||
+    ''
+)
 
 const isMoviePreview = computed(() => extension.value === 'mp4')
 
@@ -1463,6 +1478,10 @@ const timeCodeClicked = payload => {
 const onFrameUpdated = frame => {
   currentFrameRaw.value = frame
 }
+
+// The action panel gets this function, not the frame: the function keeps its
+// reference across renders, so the panel stays still while the player plays.
+const getDisplayedFrame = () => displayedFrame.value
 
 const extractAnnotationSnapshots = async (withLabel = false) => {
   const previewPlayer = previewPlayerRef.value || props.player

@@ -324,6 +324,100 @@ describe('TaskInfo.vue', () => {
       })
       expect(wrapper.findComponent(ActionPanel).exists()).toBe(false)
     })
+
+    describe('beside a movie', () => {
+      const previews = [{ id: 'preview-1', revision: 1, extension: 'mp4' }]
+      const mountWithMovie = (stubs = {}) =>
+        mountPanel({
+          task: buildTask({ assignees: [USER_ID] }),
+          previews,
+          props: { withActions: true },
+          getterOverrides: { nbSelectedTasks: () => 1 },
+          stubs
+        })
+
+      it('gives the actions the frame the player shows', async () => {
+        const { wrapper } = await mountWithMovie()
+
+        wrapper.findComponent(PreviewPlayer).vm.$emit('frame-updated', 12)
+
+        expect(wrapper.findComponent(ActionPanel).props('getFrame')()).toBe(12)
+      })
+
+      // The player emits each frame while it plays.
+      it('keeps the actions still while the player plays', async () => {
+        let updates = 0
+        const { wrapper } = await mountWithMovie({
+          ActionPanel: {
+            template: '<div />',
+            updated: () => {
+              updates += 1
+            }
+          }
+        })
+        expect(wrapper.findComponent(ActionPanel).exists()).toBe(true)
+        const updatesBefore = updates
+
+        const player = wrapper.findComponent(PreviewPlayer)
+        player.vm.$emit('frame-updated', 12)
+        await nextTick()
+        player.vm.$emit('frame-updated', 13)
+        await nextTick()
+
+        expect(wrapper.findComponent(AddComment).props('frame')).toBe(13)
+        expect(updates).toBe(updatesBefore)
+      })
+    })
+  })
+
+  // A frame points at a movie: the comment fields offer it beside one only.
+  describe('frame of the comment fields', () => {
+    it('tells the comment fields that the preview is a movie', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ assignees: [USER_ID] }),
+        previews: [{ id: 'preview-1', revision: 1, extension: 'mp4' }],
+        comments: [{ id: 'comment-1', mentions: [], replies: [] }]
+      })
+
+      expect(wrapper.findComponent(AddComment).props('isMovie')).toBe(true)
+      expect(wrapper.findComponent(Comment).props('isMovie')).toBe(true)
+      expect(wrapper.findComponent(EditCommentModal).props('isMovie')).toBe(
+        true
+      )
+    })
+
+    // The playlist and the full screen player show a preview of their own:
+    // a pinned or older revision, or another file of the revision.
+    describe('in a player', () => {
+      const mountInPlayer = (taskExtension, shownExtension) =>
+        mountPanel({
+          task: buildTask({ assignees: [USER_ID] }),
+          previews: [{ id: 'preview-2', revision: 2, extension: taskExtension }],
+          comments: [{ id: 'comment-1', mentions: [], replies: [] }],
+          props: {
+            currentParentPreview: {
+              id: 'preview-1',
+              revision: 1,
+              extension: shownExtension
+            },
+            isPreview: false
+          }
+        })
+      const movieFlags = wrapper =>
+        [AddComment, Comment, EditCommentModal].map(component =>
+          wrapper.findComponent(component).props('isMovie')
+        )
+
+      it('offers the frame of the movie it shows', async () => {
+        const { wrapper } = await mountInPlayer('png', 'mp4')
+        expect(movieFlags(wrapper)).toEqual([true, true, true])
+      })
+
+      it('leaves the frame out beside the picture it shows', async () => {
+        const { wrapper } = await mountInPlayer('mp4', 'png')
+        expect(movieFlags(wrapper)).toEqual([false, false, false])
+      })
+    })
   })
 
   describe('title', () => {
@@ -598,6 +692,55 @@ describe('TaskInfo.vue', () => {
         name: 'shot',
         params: { production_id: 'production-2', shot_id: ENTITY_ID }
       })
+    })
+  })
+
+  // My Tasks shows tasks of any production, whatever the current one.
+  describe('task of another production than the current one', () => {
+    const modeling = {
+      id: 'task-type-2',
+      name: 'Modeling',
+      for_entity: 'Shot',
+      department_id: 'department-2'
+    }
+    const mountOnOtherProduction = () =>
+      mountPanel({
+        task: buildTask({
+          assignees: [USER_ID],
+          project_id: 'production-2',
+          task_type_id: modeling.id
+        }),
+        getterOverrides: {
+          productionMap: () =>
+            new Map([
+              ['production-1', { id: 'production-1', task_types: [taskType.id] }],
+              ['production-2', { id: 'production-2', task_types: [modeling.id] }]
+            ]),
+          taskTypeMap: () =>
+            new Map([
+              [taskType.id, taskType],
+              [modeling.id, modeling]
+            ])
+        }
+      })
+
+    it('offers the task types of its production to the comment form', async () => {
+      const { wrapper } = await mountOnOtherProduction()
+
+      expect(
+        wrapper
+          .findComponent(AddComment)
+          .props('taskTypes')
+          .map(taskTypeValue => taskTypeValue.name)
+      ).toEqual(['Modeling'])
+    })
+
+    it('gives its production to the comment edit window', async () => {
+      const { wrapper } = await mountOnOtherProduction()
+
+      expect(wrapper.findComponent(EditCommentModal).props('productionId')).toBe(
+        'production-2'
+      )
     })
   })
 

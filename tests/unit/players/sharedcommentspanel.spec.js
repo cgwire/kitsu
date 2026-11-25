@@ -8,6 +8,7 @@ import { markRequestFailure } from '@/lib/errors'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import SharedCommentsPanel from '@/components/players/sides/SharedCommentsPanel.vue'
+import Checklist from '@/components/widgets/Checklist.vue'
 import TaskComment from '@/components/widgets/Comment.vue'
 
 import { resetFullScreen, setFullScreenElement } from '../fixtures/full-screen'
@@ -252,6 +253,29 @@ describe('players/SharedCommentsPanel', () => {
 
   const isBoxChecked = wrapper =>
     findComment(wrapper, 'comment-2').props('comment').checklist[0].checked
+
+  // A frame points at a movie: a picture has none.
+  it('offers the frame of a movie only', async () => {
+    actions.loadSharedPlaylistContext.mockResolvedValue({
+      task_statuses: [{ id: 'status-1', is_client_allowed: true }]
+    })
+    const wrapper = await mountGuestPanel()
+    const toolButton = title =>
+      wrapper
+        .findAll('button.tool-button')
+        .find(button => button.attributes('title') === i18n.global.t(title))
+    const frameButton = () => toolButton('comments.add_frame_to_comment')
+    await toolButton('comments.add_checklist').trigger('click')
+    await wrapper.setProps({ currentFrame: 12, isMovie: true })
+    expect(frameButton()).toBeDefined()
+    expect(wrapper.findComponent(Checklist).props('isMoviePreview')).toBe(true)
+    expect(wrapper.findComponent(EditCommentModal).props('isMovie')).toBe(true)
+
+    await wrapper.setProps({ isMovie: false })
+    expect(frameButton()).toBeUndefined()
+    expect(wrapper.findComponent(Checklist).props('isMoviePreview')).toBe(false)
+    expect(wrapper.findComponent(EditCommentModal).props('isMovie')).toBe(false)
+  })
 
   // Zou answers 404 for a comment deleted since the comments were last
   // loaded, by the studio or by the guest in another tab, and for a link

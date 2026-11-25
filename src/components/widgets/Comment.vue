@@ -283,8 +283,9 @@
               >
                 <template v-if="showReply">
                   <at-ta
+                    ref="replySuggestionsRef"
                     :ats="['#', '@']"
-                    :members="[...membersForAts['@'], ...membersForAts['#']]"
+                    :members="mentionMembers"
                     :filter-match="atOptionsFilter"
                     name-key="full_name"
                     :limit="2"
@@ -299,12 +300,13 @@
                             background: item.color,
                             width: '10px',
                             height: '10px',
-                            'border-radius': '50%'
+                            'border-radius': '50%',
+                            'flex-shrink': 0
                           }"
                         >
                           &nbsp;
                         </span>
-                        {{ item.full_name }}
+                        <span>{{ item.full_name }}</span>
                       </template>
                       <template v-else-if="item.isTaskType">
                         <task-type-name
@@ -601,7 +603,10 @@ import {
 } from '@/lib/time'
 import stringHelpers from '@/lib/string'
 
-import { useAtMentionsMembers } from '@/composables/atMentions'
+import {
+  useAtMentionsMembers,
+  useAtSuggestions
+} from '@/composables/atMentions'
 import { pauseEvent } from '@/composables/dom'
 import { useTime } from '@/composables/time'
 
@@ -679,6 +684,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  isMovie: {
+    type: Boolean,
+    default: false
+  },
   isPinnable: {
     type: Boolean,
     default: false
@@ -706,12 +715,24 @@ const props = defineProps({
 })
 
 const replyRef = ref(null)
+const replySuggestionsRef = ref(null)
 const addAttachmentModalRef = ref(null)
 const menuWrapper = ref(null)
 
+// On My Tasks, the task is not always of the current production.
 const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.team,
-  () => props.taskTypes
+  () => props.taskTypes,
+  () => store.getters.getProductionDepartmentIds(props.task?.project_id)
+)
+// vue-at gets one array of members: the comment renders again at each frame
+// of the player. A frame points at a movie: a picture or no preview has none.
+const { members: mentionMembers } = useAtSuggestions(
+  replySuggestionsRef,
+  () => [
+    ...membersForAts['@'].filter(member => !member.isTime || props.isMovie),
+    ...membersForAts['#']
+  ]
 )
 
 const checklistItems = ref([])
@@ -1079,7 +1100,7 @@ const onDeleteReplyClicked = reply => {
 }
 
 const onAtTextChanged = input => {
-  if (input.includes('@frame')) {
+  if (props.isMovie && input.includes('@frame')) {
     replyText.value = replaceTimeWithTimecode(
       input,
       props.revision,
