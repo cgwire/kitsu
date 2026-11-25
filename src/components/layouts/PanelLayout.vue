@@ -140,6 +140,17 @@ defineProps({
   border-radius: 10px;
 }
 
+// A search field has no background of its own: on a panel it takes the one
+// of the comboboxes beside it.
+.page-panel :deep(.search-field-wrapper),
+.paneled-side .side-column :deep(.search-field-wrapper) {
+  background: var(--background);
+
+  .dark & {
+    background: $dark-grey-light;
+  }
+}
+
 // the side panel is its own surface: the column only frames it, level with
 // the filters panel
 .panel-layout.paneled-side .side-column {
