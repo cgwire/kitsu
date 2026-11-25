@@ -4,9 +4,13 @@
     :class="{
       'paneled-side': !plainSide,
       'side-focused': sideFocused,
-      'with-side': side
+      'with-side': side,
+      'with-tabs': $slots.tabs
     }"
   >
+    <div class="page-tabs" v-if="$slots.tabs">
+      <slot name="tabs" />
+    </div>
     <div class="column main-column">
       <div
         class="panels"
@@ -30,7 +34,8 @@
 <script setup>
 /*
  * The panel layout of a page: its filters in a panel, its saved searches and
- * its list in a second one, and a side panel when it has one.
+ * its list in a second one, and a side panel when it has one. The tabs of a
+ * page go above them all.
  */
 defineProps({
   // the width the two panels stop growing at, in pixels
@@ -59,6 +64,32 @@ defineProps({
   gap: 14px;
   height: 100%;
   margin: 0 auto;
+}
+
+// The tabs of a page run above its columns, in the place of their margin
+// under the topbar: a row for them, another for the column a phone shows.
+.with-tabs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.page-tabs {
+  padding: calc(60px + 1em) 1em 0;
+
+  // Bulma sets the tabs apart from what follows: the columns already do
+  :deep(.tabs) {
+    margin-bottom: 0;
+  }
+}
+
+.with-tabs .main-column,
+.with-tabs.paneled-side .side-column {
+  padding-top: 14px;
+}
+
+.with-tabs .side-column {
+  margin-top: 0;
 }
 
 // not .panel: Bulma gives that one a bottom margin and a font size
@@ -136,6 +167,16 @@ defineProps({
 @media screen and (min-width: 769px) {
   .main-column {
     padding: 80px 20px 20px;
+  }
+
+  // the tabs run over the two columns, the side one as wide as it asks
+  .with-tabs {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .page-tabs {
+    grid-column: 1 / -1;
+    padding: 80px 20px 0;
   }
 
   // the gutter before the side panel belongs to its column

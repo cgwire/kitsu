@@ -34,6 +34,18 @@ describe('PanelLayout', () => {
     expect(wrapper.find('.filters-panel').exists()).toBe(false)
   })
 
+  it('lays the tabs of a page above its columns', () => {
+    expect(mountLayout().find('.page-tabs').exists()).toBe(false)
+
+    const wrapper = mountLayout({}, { tabs: '<p class="my-tabs" />' })
+
+    expect(wrapper.classes()).toContain('with-tabs')
+    expect(wrapper.find('.page-tabs .my-tabs').exists()).toBe(true)
+    expect(wrapper.find('.page-tabs').element.parentElement).toBe(
+      wrapper.element
+    )
+  })
+
   // TaskInfo resizes the element holding it when it is the side column.
   it('holds the side content right in its side column, when it has one', () => {
     expect(mountLayout().find('.side-column').exists()).toBe(false)
