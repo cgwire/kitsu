@@ -2513,7 +2513,7 @@
       "archive": "Arkivér"
     },
     "project_templates": {
-      "add_metadata": "Tilføj en metadata-kolonne",
+      "add_metadata": "Tilføj metadata-kolonne",
       "apply": "Anvend skabelon",
       "click_name_to_edit": "Klik på et skabelonnavn for at redigere dets konfiguration.",
       "create_error": "Der opstod en fejl under gemning af denne skabelon. Er du sikker på, at der ikke findes en skabelon med et lignende navn?",

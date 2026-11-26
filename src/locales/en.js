@@ -542,7 +542,7 @@ export default {
     duplicate_name: 'A production template with this name already exists.',
     ratio_error: 'Ratio must follow the x:y format (e.g. 16:9).',
     resolution_error: 'Resolution must follow the WxH format (e.g. 1920x1080).',
-    add_metadata: 'Add a metadata column',
+    add_metadata: 'Add metadata column',
     backgrounds_explanation: '3D backgrounds offered in the player for the 3D previews of the productions created from this template.',
     clients: {
       access_description: 'These settings choose what clients see in the productions created from this template, preview account included.',
@@ -1756,7 +1756,7 @@ export default {
       textarea: 'Long text',
       tags: 'List of tags',
       url: 'Link',
-      title: 'Add Metadata Column'
+      title: 'Add metadata column'
     },
 
     brief: {

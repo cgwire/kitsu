@@ -2513,7 +2513,7 @@
       "archive": "Archivar"
     },
     "project_templates": {
-      "add_metadata": "Añadir una columna de metadatos",
+      "add_metadata": "Añadir columna de metadatos",
       "apply": "Aplicar plantilla",
       "click_name_to_edit": "Haga clic en el nombre de una plantilla para editar su configuración.",
       "create_error": "Se ha producido un error al guardar esta plantilla. ¿Está seguro de que no hay ninguna plantilla con un nombre similar?",
