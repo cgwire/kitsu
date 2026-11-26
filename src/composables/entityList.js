@@ -102,10 +102,7 @@ export const showHeaderMenuAt = (
  * Left offset of each sticky column: the full width of the columns before
  * it, from the template refs of the headers.
  */
-export const getStickyOffsets = (
-  refs,
-  { showInfos, metadataCount, validationCount }
-) => {
+export const getStickyOffsets = (refs, { metadataCount, validationCount }) => {
   const nameWidth = refs['th-name'] ? getWidth(refs['th-name']) : 0
   let offset = nameWidth
   if (refs['th-episode']) offset += getWidth(refs['th-episode'])
@@ -117,7 +114,7 @@ export const getStickyOffsets = (
       offset += getWidth(refs[key][0].$el)
     })
   }
-  if (showInfos) place('editor', metadataCount)
+  place('editor', metadataCount)
   place('validation', validationCount)
   return { nameWidth, offsets }
 }
@@ -403,7 +400,6 @@ export const useEntityList = ({
     if (props.isLoading) return
     nextTick(() => {
       const sticky = getStickyOffsets(instance.refs, {
-        showInfos: props.displaySettings.showInfos,
         metadataCount: stickedVisibleMetadataDescriptors.value.length,
         validationCount: stickedDisplayedValidationColumns.value.length
       })
@@ -975,7 +971,7 @@ export const useEntityList = ({
   watch(stickedColumns, updateOffsets)
   watch(() => props.isLoading, updateOffsets)
   watch(() => props.displaySettings.bigThumbnails, updateOffsets)
-  // The infos add or remove sticky columns (metadata, TV show episodes).
+  // The infos add or remove the sticky episode column of the assets.
   watch(() => props.displaySettings.showInfos, updateOffsets)
   watch(() => props.validationColumns, initHiddenColumns, { deep: true })
 

@@ -68,6 +68,13 @@ export const stubResizeObserver = () => {
 export const stickyLeft = (wrapper, stub) =>
   wrapper.find(`thead ${stub}`).attributes('left')
 
+// A row with more or fewer cells than the header shifts the next cells under
+// the wrong header.
+export const columnCounts = wrapper => ({
+  header: wrapper.find('thead tr').element.children.length,
+  row: wrapper.find('tbody tr.datatable-row').element.children.length
+})
+
 // Sticks the metadata descriptor and the task type for the production.
 export const stickColumns = type => {
   localStorage.setItem(

@@ -5,6 +5,7 @@ import { flushPromises } from '@vue/test-utils'
 import SequenceList from '@/components/lists/SequenceList.vue'
 
 import {
+  columnCounts,
   descriptor,
   filledColumns,
   mountEntityList,
@@ -76,6 +77,31 @@ describe('lists/SequenceList sticky columns', () => {
   test('places the sticky columns right after the sequence names', async () => {
     const wrapper = await mountList()
 
+    expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('200px')
+    expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('320px')
+
+    wrapper.unmount()
+  })
+
+  test('keeps the sticky metadata columns while the infos are hidden', async () => {
+    const wrapper = await mountEntityList(SequenceList, {
+      getters: {
+        currentProduction: production,
+        displayedSequencesLength: 1,
+        sequenceFilledColumns: filledColumns,
+        sequenceMetadataDescriptors: [descriptor]
+      },
+      props: {
+        displaySettings: { showInfos: false },
+        displayedSequences: [{ id: 'sequence-1', name: 'SQ01', data: {} }]
+      }
+    })
+
+    const cells = wrapper.findAll('tbody td.metadata-descriptor')
+    expect(cells).toHaveLength(1)
+    const { header, row } = columnCounts(wrapper)
+    expect(row).toBe(header)
+    expect(cells[0].element.style.left).toBe('200px')
     expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('200px')
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('320px')
 

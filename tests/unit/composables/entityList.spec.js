@@ -157,7 +157,6 @@ describe('entity list sticky offsets', () => {
     }
 
     const sticky = getStickyOffsets(refs, {
-      showInfos: true,
       metadataCount: 0,
       validationCount: 2
     })
@@ -178,7 +177,6 @@ describe('entity list sticky offsets', () => {
     }
 
     const sticky = getStickyOffsets(refs, {
-      showInfos: true,
       metadataCount: 1,
       validationCount: 1
     })
@@ -187,21 +185,6 @@ describe('entity list sticky offsets', () => {
       'editor-0': 280.5,
       'validation-0': 401.5
     })
-  })
-
-  test('skips the metadata columns while the infos are hidden', () => {
-    const refs = {
-      'th-name': header(200),
-      'validation-0': [{ $el: header(150) }]
-    }
-
-    const sticky = getStickyOffsets(refs, {
-      showInfos: false,
-      metadataCount: 1,
-      validationCount: 1
-    })
-
-    expect(sticky.offsets).toEqual({ 'validation-0': 200 })
   })
 })
 

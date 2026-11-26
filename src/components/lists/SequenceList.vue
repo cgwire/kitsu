@@ -66,21 +66,19 @@
                 </template>
               </sortable-field-header>
             </th>
-            <template v-if="displaySettings.showInfos">
-              <metadata-header
-                :ref="`editor-${j}`"
-                :key="descriptor.id"
-                :descriptor="descriptor"
-                :left="
-                  offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
-                "
-                is-stick
-                @show-metadata-header-menu="
-                  event => showMetadataHeaderMenu(descriptor.id, event)
-                "
-                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-              />
-            </template>
+            <metadata-header
+              :ref="`editor-${j}`"
+              :key="descriptor.id"
+              :descriptor="descriptor"
+              :left="
+                offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
+              "
+              is-stick
+              @show-metadata-header-menu="
+                event => showMetadataHeaderMenu(descriptor.id, event)
+              "
+              v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+            />
             <validation-header
               :ref="`validation-${columnIndexInGrid}`"
               :key="columnId"
@@ -259,7 +257,7 @@
               </th>
 
               <!-- Metadata stick -->
-              <template v-if="displaySettings.showInfos && !isLoading">
+              <template v-if="!isLoading">
                 <td
                   class="metadata-descriptor datatable-row-header"
                   @keyup.ctrl="onInputKeyUp"

@@ -5,6 +5,7 @@ import { flushPromises } from '@vue/test-utils'
 import EditList from '@/components/lists/EditList.vue'
 
 import {
+  columnCounts,
   descriptor,
   filledColumns,
   mountEntityList,
@@ -85,13 +86,16 @@ describe('lists/EditList sticky columns', () => {
     localStorage.clear()
   })
 
-  test('hides the sticky metadata columns along with the other infos', async () => {
+  test('keeps the sticky metadata columns while the infos are hidden', async () => {
     const wrapper = await mountList({ showInfos: false })
 
-    expect(wrapper.find('tbody th.name').exists()).toBe(true)
-    expect(wrapper.find('thead metadata-header-stub').exists()).toBe(false)
-    expect(wrapper.findAll('tbody td.metadata-descriptor')).toHaveLength(0)
-    expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('200px')
+    const cells = wrapper.findAll('tbody td.metadata-descriptor')
+    expect(cells).toHaveLength(1)
+    const { header, row } = columnCounts(wrapper)
+    expect(row).toBe(header)
+    expect(cells[0].element.style.left).toBe('200px')
+    expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('200px')
+    expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('320px')
 
     wrapper.unmount()
   })
