@@ -566,6 +566,7 @@
       "less_filters": "Moins de filtres",
       "more_filters": "Plus de filtres",
       "reload": "Recharger",
+      "search_example": "ex : {example}",
       "search_query": "Recherche",
       "search_query_add": "Ajouter un filtre",
       "search_query_add_error": "Une erreur s'est produite lors de l'enregistrement du filtre de recherche.",
@@ -1122,6 +1123,7 @@
         "title": "Clients",
         "unavailable": "Les comptes de prévisualisation nécessitent une authentification locale avec mot de passe. Sinon, créez un compte client classique."
       },
+      "closed_name": "{name} (fermée)",
       "current": "Production sélectionnée",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ? Veuillez confirmer en tapant le nom de la production à supprimer dans le champ.",
       "delete_error": "Une erreur s'est produite lors de la suppression de cette production. Il se peut que des données existantes soient actuellement liées à cette production. Êtes-vous sûr que cette production n'a pas de tâche, de plan ou d'asset lié à elle ? Kitsu ne permet pas de supprimer une production. Si vous ne voulez plus voir la production, vous pouvez la fermer.",

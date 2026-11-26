@@ -46,7 +46,7 @@
           class="search-field flexrow-item"
           :focus-options="{ preventScroll: true }"
           @change="onSearchChange"
-          placeholder="ex: retake chara"
+          :placeholder="$t('main.search_example', { example: 'retake chara' })"
         />
         <filters-toggle
           class="flexrow-item"

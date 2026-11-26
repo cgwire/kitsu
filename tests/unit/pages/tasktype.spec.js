@@ -704,7 +704,9 @@ describe('TaskType page', () => {
       expect(layout.classes()).toContain('side-beside-tabs')
       const filters = wrapper.find('.filters-panel')
       expect(filters.find('.back-link').exists()).toBe(true)
-      expect(filters.findComponent(SearchFieldStub).exists()).toBe(true)
+      expect(
+        filters.findComponent(SearchFieldStub).attributes('placeholder')
+      ).toBe('main.search_example')
       // the status and the sort fold with the filters
       const folded = filters.find('.filters.collapsible')
       expect(

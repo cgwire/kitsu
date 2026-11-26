@@ -564,6 +564,7 @@
       "less_filters": "Menos filtros",
       "more_filters": "Más filtros",
       "reload": "Actualizar",
+      "search_example": "ej.: {example}",
       "search_query": "Consulta de búsqueda",
       "search_query_add": "Añadir filtro de búsqueda",
       "search_query_add_error": "Se ha producido un error al guardar este filtro de búsqueda.",
@@ -1122,6 +1123,7 @@
         "title": "Clientes",
         "unavailable": "Las cuentas de vista previa requieren autenticación local con contraseñas. De lo contrario, cree una cuenta de cliente normal."
       },
+      "closed_name": "{name} (cerrada)",
       "current": "Producción seleccionada",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos? Confirme escribiendo a continuación el nombre de la producción que desea eliminar.",
       "delete_error": "Se ha producido un error al eliminar esta producción. Es probable que haya datos asociados. ¿Está seguro de que esta producción no tiene ninguna tarea, toma o recurso asociado? Kitsu no permite la eliminación de producciones. Si no desea verla más, puede cerrarla.",

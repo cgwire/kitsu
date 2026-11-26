@@ -360,11 +360,13 @@ const dailyRates = computed(() =>
 
 const productionList = computed(() => {
   const productionOptions = sortByName([...productions.value]).map(
-    production => {
-      const suffix =
-        production.project_status_name === 'Closed' ? ' (closed)' : ''
-      return { ...production, name: production.name + suffix }
-    }
+    production =>
+      production.project_status_name === 'Closed'
+        ? {
+            ...production,
+            name: t('productions.closed_name', { name: production.name })
+          }
+        : production
   )
   return [{ id: '', name: t('main.all') }, ...productionOptions]
 })

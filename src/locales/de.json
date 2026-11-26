@@ -564,6 +564,7 @@
       "less_filters": "Weniger Filter",
       "more_filters": "Mehr Filter",
       "reload": "Erneut laden",
+      "search_example": "z. B. {example}",
       "search_query": "Suchanfrage",
       "search_query_add": "Suchfilter hinzufügen",
       "search_query_add_error": "Beim Speichern dieses Suchfilters ist ein Fehler aufgetreten.",
@@ -1122,6 +1123,7 @@
         "title": "Kunden",
         "unavailable": "Vorschau-Konten erfordern lokale Authentifizierung mit Passwörtern. Erstellen Sie andernfalls ein reguläres Kundenkonto."
       },
+      "closed_name": "{name} (geschlossen)",
       "current": "Ausgewählte Produktion",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten? Bitte bestätigen Sie, indem Sie den Namen der zu löschenden Produktion in das Textfeld eingeben.",
       "delete_error": "Beim Löschen dieser Produktion ist ein Fehler aufgetreten. Möglicherweise sind noch Daten damit verknüpft. Sind Sie sicher, dass diese Produktion keine Aufgabe, keinen Shot und kein Asset enthält? Kitsu erlaubt das Löschen von Produktionen nicht. Wenn Sie die Produktion nicht mehr sehen möchten, können Sie sie stattdessen schließen.",

@@ -1002,6 +1002,7 @@
       "reply": "Odpowiedz",
       "shared_by": "Udostępnione przez {name}",
       "save": "Zapisz",
+      "search_example": "np. {example}",
       "search_query": "Zapytanie wyszukiwania",
       "search_query_add": "Dodaj filtr wyszukiwania",
       "search_query_add_error": "Wystąpił błąd podczas zapisywania filtra wyszukiwania.",
@@ -1526,6 +1527,7 @@
         "title": "Klienci",
         "unavailable": "Konta podglądu wymagają uwierzytelniania lokalnego z hasłami. W przeciwnym razie utwórz zwykłe konto klienta."
       },
+      "closed_name": "{name} (zamknięta)",
       "current": "Wybrana produkcja",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych? Potwierdź, wpisując w polu tekstowym nazwę produkcji, którą chcesz usunąć.",
       "delete_error": "Wystąpił błąd podczas usuwania tej produkcji. Mogą z nią być nadal powiązane istniejące dane. Czy na pewno z tą produkcją nie jest powiązane żadne zadanie, ujęcie ani asset? Kitsu nie pozwala na usuwanie produkcji. Jeśli nie chcesz już widzieć tej produkcji, możesz ją zamiast tego zamknąć.",

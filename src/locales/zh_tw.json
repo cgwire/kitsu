@@ -564,6 +564,7 @@
       "less_filters": "較少篩選條件",
       "more_filters": "更多篩選條件",
       "reload": "重新載入",
+      "search_example": "例如：{example}",
       "search_query": "搜尋查詢",
       "search_query_add": "新增搜尋篩選器",
       "search_query_add_error": "儲存搜尋篩選器時發生錯誤。",
@@ -1122,6 +1123,7 @@
         "title": "客戶",
         "unavailable": "預覽帳號需要使用密碼的本機驗證。否則，請建立一般客戶帳號。"
       },
+      "closed_name": "{name}（已關閉）",
       "current": "所選製作項目",
       "delete_text": "您確定要從資料庫中刪除{name}嗎？請在文字欄位中輸入要刪除的製作項目名稱，以進行確認。",
       "delete_error": "刪除此製作項目時發生錯誤。目前可能有資料連結至此。您確定沒有任務、鏡頭或資產連結至此製作項目嗎？Kitsu 不允許刪除製作項目。如果您不想再看到此製作項目，可以改為將它關閉。",

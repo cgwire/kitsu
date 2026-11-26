@@ -564,6 +564,7 @@
       "less_filters": "Minder filters",
       "more_filters": "Meer filters",
       "reload": "Herlaad",
+      "search_example": "bijv. {example}",
       "search_query": "Zoekopdracht",
       "search_query_add": "Zoekfilter toevoegen",
       "search_query_add_error": "Er is een fout opgetreden bij het opslaan van dit zoekfilter.",
@@ -1122,6 +1123,7 @@
         "title": "Klanten",
         "unavailable": "Voorbeeldaccounts vereisen lokale authenticatie met wachtwoorden. Maak anders een gewoon klantaccount aan."
       },
+      "closed_name": "{name} (gesloten)",
       "current": "Geselecteerde productie",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen? Bevestig door in het tekstveld de naam te typen van de productie die je wilt verwijderen.",
       "delete_error": "Er is een probleem opgetreden tijdens het verwijderen van deze productie. Mogelijk zijn er gegevens aan gekoppeld. Weet je zeker dat de productie geen taken, opnamen of assets gekoppeld heeft? Kitsu staat het verwijderen van producties niet toe. Indien je de productie niet meer wilt zien, kun je deze afsluiten.",

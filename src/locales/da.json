@@ -564,6 +564,7 @@
       "less_filters": "Færre filtre",
       "more_filters": "Flere filtre",
       "reload": "Genindlæs",
+      "search_example": "f.eks. {example}",
       "search_query": "Søgeforespørgsel",
       "search_query_add": "Tilføj søgefilter",
       "search_query_add_error": "Der opstod en fejl under gemning af søgefilteret.",
@@ -1122,6 +1123,7 @@
         "title": "Klienter",
         "unavailable": "Forhåndsvisningskonti kræver lokal godkendelse med adgangskoder. Ellers kan du oprette en almindelig klientkonto."
       },
+      "closed_name": "{name} (lukket)",
       "current": "Valgt produktion",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database? Bekræft venligst ved at skrive navnet på den produktion, du ønsker at slette, i tekstfeltet.",
       "delete_error": "Der opstod en fejl under sletning af denne produktion. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne produktion ikke har nogen opgave, shot eller asset knyttet til sig? Kitsu tillader ikke sletning af produktioner. Hvis du ikke længere ønsker at se produktionen, kan du i stedet lukke den.",

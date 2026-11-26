@@ -1044,6 +1044,7 @@ export default {
     select_section: 'Select a section',
     shared_by: 'Shared by {name}',
     save: 'Save',
+    search_example: 'ex: {example}',
     search_query: 'Search query',
     search_query_add: 'Add search filter',
     search_query_add_error: 'An error occurred while saving the search filter.',
@@ -1534,6 +1535,7 @@ export default {
   },
 
   productions: {
+    closed_name: '{name} (closed)',
     current: 'Selected production',
     delete_text: 'Are you sure you want to remove {name} from your database? Please confirm by typing the name of the production you want to delete in the text field.',
     delete_error: 'An error occurred while deleting this production. There may be existing data currently linked to it. Are you sure this production has no task, shot, or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',

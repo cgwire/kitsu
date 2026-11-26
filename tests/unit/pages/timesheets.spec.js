@@ -14,6 +14,7 @@ import { downloadBlob } from '@/lib/download'
 import Timesheets from '@/components/pages/Timesheets.vue'
 import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 
 const alice = { id: 'person-1', full_name: 'Alice', active: true }
 const bob = { id: 'person-2', full_name: 'Bob', active: true }
@@ -94,6 +95,21 @@ describe('Timesheets', () => {
     wrapper?.unmount()
     vi.useRealTimers()
     vi.clearAllMocks()
+  })
+
+  test('names a closed production through its message', async () => {
+    await mountPage('/timesheets/day/2026/11', {
+      getters: {
+        productions: () => [
+          { id: 'production-1', name: 'Old', project_status_name: 'Closed' }
+        ]
+      }
+    })
+
+    const [, closed] = wrapper
+      .findComponent(ComboboxProduction)
+      .props('productionList')
+    expect(closed.name).toBe('productions.closed_name')
   })
 
   describe('export', () => {

@@ -49,6 +49,7 @@
 // Imports
 import { firstBy } from 'thenby'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { getTaskPath as buildTaskPath } from '@/lib/path'
@@ -60,6 +61,7 @@ import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 // Composables
+const { t } = useI18n()
 const store = useStore()
 
 // Props
@@ -115,8 +117,9 @@ const projects = computed(() => {
 // --------------------------------------------------------------------------
 const productionLabel = task => {
   const production = productionMap.value.get(task.project_id)
-  const suffix = production?.project_status_name === 'Closed' ? ' (closed)' : ''
-  return task.project_name + suffix
+  return production?.project_status_name === 'Closed'
+    ? t('productions.closed_name', { name: task.project_name })
+    : task.project_name
 }
 
 const entityName = task => {

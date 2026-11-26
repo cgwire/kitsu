@@ -564,6 +564,7 @@
       "less_filters": "Menos filtros",
       "more_filters": "Mais filtros",
       "reload": "Recarregar",
+      "search_example": "ex.: {example}",
       "search_query": "Pesquisar",
       "search_query_add": "Adicionar filtro de pesquisa",
       "search_query_add_error": "Ocorreu um erro ao salvar o filtro de pesquisa.",
@@ -1122,6 +1123,7 @@
         "title": "Clientes",
         "unavailable": "As contas de pré-visualização exigem autenticação local com senhas. Caso contrário, crie uma conta de cliente normal."
       },
+      "closed_name": "{name} (fechada)",
       "current": "Produção selecionada",
       "delete_text": "Tem certeza de que deseja remover {name} do seu banco de dados? Por favor, confirme digitando o nome da produção que você quer excluir no campo de texto.",
       "delete_error": "Ocorreu um erro ao excluir esta produção. Provavelmente há dados vinculados a ela. Tem certeza de que esta produção não tem nenhuma tarefa, shot ou asset vinculado a ela? Kitsu não permite a exclusão de produções. Se você não quiser mais ver a produção, pode fechá-la.",

@@ -564,6 +564,7 @@
       "less_filters": "Kevesebb szűrő",
       "more_filters": "Több szűrő",
       "reload": "Újratöltés",
+      "search_example": "pl. {example}",
       "search_query": "Keresőkifejezés",
       "search_query_add": "Keresési szűrő hozzáadása",
       "search_query_add_error": "Hiba történt a keresési szűrő mentésekor.",
@@ -1122,6 +1123,7 @@
         "title": "Ügyfelek",
         "unavailable": "Az előnézeti fiókokhoz jelszavas helyi hitelesítés szükséges. Egyébként hozz létre szokásos ügyfélfiókot."
       },
+      "closed_name": "{name} (lezárva)",
       "current": "Kiválasztott produkció",
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból? Kérlek erősítsd meg a törölni kívánt produkció nevének begépelésével.",
       "delete_error": "Hiba történt a produkció törlésekor. Valószínűleg adat hivatkozik rá. Biztos vagy benne, hogy nem hivatkozik rá feladat, shot vagy asset? A Kitsu nem engedi a produkciók törlését. Ha nem akarod többé látni a produkciót, inkább zárd le.",
