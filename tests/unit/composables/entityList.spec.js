@@ -856,6 +856,116 @@ describe('entity list task range selection', () => {
   })
 })
 
+// One stuck column, then two scrolled ones: the refs number the cells across
+// both, each cell its place in its own group.
+const stuckGrid = [0, 1].map(rowX => [
+  gridCell(rowX, 0, { task: { id: `task-${rowX}-stuck` } }),
+  gridCell(rowX, 0, { task: { id: `task-${rowX}-a` } }),
+  gridCell(rowX, 1, { task: { id: `task-${rowX}-b` } })
+])
+
+describe('entity list selection across a stuck column', () => {
+  beforeEach(() => {
+    stickColumns('shot')
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+  })
+
+  const mountStuckHost = (getters = {}) =>
+    mountHost(getters, {
+      cells: stuckGrid,
+      props: { validationColumns: [taskTypeId] }
+    })
+
+  // The first scrolled cell: the second of the grid, the first of its group.
+  const clickScrolledCell = wrapper =>
+    wrapper.vm.list.onTaskSelected(
+      { x: 0, y: 0, task: stuckGrid[0][1].task, isUserClick: true },
+      false
+    )
+
+  test('moves from a scrolled cell with Alt and an arrow', async () => {
+    const wrapper = await mountStuckHost()
+    const onClick = vi.fn()
+    wrapper.vm.$refs['validation-0-2'][0].$el.addEventListener('click', onClick)
+    clickScrolledCell(wrapper)
+
+    const event = new KeyboardEvent('keydown', { altKey: true })
+    Object.defineProperty(event, 'keyCode', { value: 39 })
+    window.dispatchEvent(event)
+
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  test('scrolls to a clicked scrolled cell past the list', async () => {
+    const wrapper = await mountStuckHost({ nbSelectedTasks: 1 })
+    const body = wrapper.vm.$refs.body
+    body.getBoundingClientRect = () => ({ x: 0, top: 0, width: 800, height: 300, right: 800, bottom: 300, left: 0 })
+    wrapper.vm.$refs['validation-0-1'][0].$el.getBoundingClientRect = () => ({
+      x: 780,
+      top: 100,
+      width: 100,
+      height: 30,
+      right: 880,
+      bottom: 130,
+      left: 780
+    })
+    clickScrolledCell(wrapper)
+    await nextTick()
+    await nextTick()
+
+    expect(body.scrollLeft).toBe(100)
+  })
+
+  const selectedCells = wrapper =>
+    committed(wrapper, 'ADD_SELECTED_TASKS')[0].map(({ task, x, y }) => [
+      task.id,
+      x,
+      y
+    ])
+
+  const wholeGrid = [
+    ['task-0-stuck', 0, 0],
+    ['task-0-a', 0, 1],
+    ['task-0-b', 0, 2],
+    ['task-1-stuck', 1, 0],
+    ['task-1-a', 1, 1],
+    ['task-1-b', 1, 2]
+  ]
+
+  test('selects the stuck cells from a first click in the stuck column', async () => {
+    const wrapper = await mountStuckHost()
+
+    wrapper.vm.list.onTaskSelected(
+      { x: 0, y: 0, task: stuckGrid[0][0].task, isUserClick: true },
+      true
+    )
+    wrapper.vm.list.onTaskSelected(
+      { x: 1, y: 1, task: stuckGrid[1][2].task, isShiftKey: true },
+      false
+    )
+
+    expect(selectedCells(wrapper)).toEqual(wholeGrid)
+  })
+
+  test('selects the stuck cells from a first click in a scrolled column', async () => {
+    const wrapper = await mountStuckHost()
+
+    wrapper.vm.list.onTaskSelected(
+      { x: 0, y: 1, task: stuckGrid[0][2].task, isUserClick: true },
+      false
+    )
+    wrapper.vm.list.onTaskSelected(
+      { x: 1, y: 0, task: stuckGrid[1][0].task, isShiftKey: true },
+      true
+    )
+
+    expect(selectedCells(wrapper)).toEqual(wholeGrid)
+  })
+})
+
 describe('entity list task unselection', () => {
   const info = { x: 0, y: 0, task: { id: 'task-1' } }
 

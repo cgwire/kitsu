@@ -682,20 +682,10 @@ export const useEntityList = ({
     if (validationInfo.isShiftKey) {
       const anchor = getLastSelection()
       if (anchor) {
-        let startX = anchor.x
-        let endX = validationInfo.x
-        let startY = anchor.y
-        if (!sticked) startY += columnOffset
-        let endY = validationInfo.y
-        if (validationInfo.x < anchor.x) {
-          startX = validationInfo.x
-          endX = anchor.x
-        }
-        if (validationInfo.y < anchor.y) {
-          startY = validationInfo.y
-          endY = anchor.y
-          if (!sticked) endY += columnOffset
-        }
+        const startX = Math.min(anchor.x, validationInfo.x)
+        const endX = Math.max(anchor.x, validationInfo.x)
+        const startY = Math.min(anchor.y, validationInfo.y)
+        const endY = Math.max(anchor.y, validationInfo.y)
 
         for (let i = startX; i <= endX; i++) {
           for (let j = startY; j <= endY; j++) {
@@ -707,9 +697,7 @@ export const useEntityList = ({
                 column: validationCell.column,
                 task: validationCell.task,
                 x: validationCell.rowX,
-                y: sticked
-                  ? validationCell.columnY
-                  : validationCell.columnY + columnOffset
+                y: j
               })
             }
           }
@@ -727,8 +715,9 @@ export const useEntityList = ({
     updateTaskInQuery()
 
     if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
-      const x = validationInfo.x
-      const y = sticked ? validationInfo.y : validationInfo.y - columnOffset
+      // Kept in grid columns, the stuck ones first: a range may end in the
+      // other group.
+      const { x, y } = validationInfo
       lastSelection = { x, y, entityId: validationInfo.entity?.id }
       const validationCell = getValidationCell(x, y)
       nextTick(() => {
