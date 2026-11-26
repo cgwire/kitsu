@@ -368,7 +368,10 @@ let picturePlayFrame = null
 // Frame of its slot clicked on the playlist bar for a sound not decoded yet.
 let pendingSoundFrame = null
 
-let mediaPointerStart = null
+// Where and on which element each pointer on the media landed. A gesture
+// with two of them is no tap, until the last one lifts.
+const mediaPointerStarts = new Map()
+let isMediaPinch = false
 let panelsBeforePhoneFullScreen = null
 let pictureResizeObserver = null
 let playerResizeTimeout = null
@@ -881,19 +884,47 @@ const togglePhoneFullScreen = () => {
 // media. They stop the release of a finger on the window, where the other
 // listeners still hear it.
 const onMediaPointerDown = event => {
-  mediaPointerStart = { x: event.clientX, y: event.clientY }
+  // A primary pointer lands with no other of its kind down: a pointer still
+  // noted on an element that left the page can have lost its release with
+  // it. Only those go: Firefox can also call a finger landing beside
+  // another primary (before 126, and on Android per bug 1909197).
+  if (event.isPrimary) {
+    mediaPointerStarts.forEach(({ target }, pointerId) => {
+      if (!target.isConnected) mediaPointerStarts.delete(pointerId)
+    })
+  }
+  // A pointer landing with none noted starts a new gesture.
+  if (mediaPointerStarts.size === 0) isMediaPinch = false
+  mediaPointerStarts.set(event.pointerId, {
+    x: event.clientX,
+    y: event.clientY,
+    target: event.target
+  })
+  if (mediaPointerStarts.size > 1) isMediaPinch = true
+}
+
+// The start of a lifted pointer, unless it took part in a pinch.
+const releaseMediaPointer = event => {
+  const start = mediaPointerStarts.get(event.pointerId)
+  mediaPointerStarts.delete(event.pointerId)
+  return isMediaPinch ? null : start
 }
 
 const onMediaPointerUp = event => {
+  const start = releaseMediaPointer(event)
   if (!videoContainer.value?.contains(event.target)) return
   if (!isPhoneLandscape.value || !isPhoneFullScreen.value) return
-  if (isAnnotating.value || !mediaPointerStart) return
+  if (isAnnotating.value || !start) return
   const isTap =
-    Math.abs(event.clientX - mediaPointerStart.x) < TAP_TOLERANCE &&
-    Math.abs(event.clientY - mediaPointerStart.y) < TAP_TOLERANCE
+    Math.abs(event.clientX - start.x) < TAP_TOLERANCE &&
+    Math.abs(event.clientY - start.y) < TAP_TOLERANCE
   if (isTap) {
     isPhoneFullScreenBarsShown.value = !isPhoneFullScreenBarsShown.value
   }
+}
+
+const onMediaPointerCancel = event => {
+  releaseMediaPointer(event)
 }
 
 const toggleFullScreen = async () => {
@@ -1240,6 +1271,7 @@ watch(
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown, false)
   window.addEventListener('pointerup', onMediaPointerUp, true)
+  window.addEventListener('pointercancel', onMediaPointerCancel, true)
   document.addEventListener('fullscreenchange', onFullScreenChange)
   document.addEventListener('webkitfullscreenchange', onFullScreenChange)
   updatePictureHeight()
@@ -1252,6 +1284,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('pointerup', onMediaPointerUp, true)
+  window.removeEventListener('pointercancel', onMediaPointerCancel, true)
   document.removeEventListener('fullscreenchange', onFullScreenChange)
   document.removeEventListener('webkitfullscreenchange', onFullScreenChange)
   pictureResizeObserver?.disconnect()

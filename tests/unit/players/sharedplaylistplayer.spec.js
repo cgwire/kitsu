@@ -126,14 +126,18 @@ const mountPlayer = ({
 }
 
 // A finger on a tablet: a touch pointer, bubbling like the real one.
-const finger = (target, type, { id = 1, x = 0, y = 100 } = {}) =>
+const finger = (
+  target,
+  type,
+  { id = 1, x = 0, y = 100, isPrimary = id === 1 } = {}
+) =>
   target.dispatchEvent(
     new PointerEvent(type, {
       bubbles: true,
       cancelable: true,
       clientX: x,
       clientY: y,
-      isPrimary: id === 1,
+      isPrimary,
       pointerId: id,
       pointerType: 'touch'
     })
@@ -1209,6 +1213,119 @@ describe('players/SharedPlaylistPlayer', () => {
         const movie = wrapper.find('canvas.playlist-movie').element
         finger(movie, 'pointerdown', { x: 100 })
         finger(movie, 'pointerup', { x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      // The second finger of the pinch stays still: its release looked like
+      // a tap.
+      it('leaves the bars alone after a pinch', async () => {
+        const wrapper = await mountFullScreen()
+        const movie = wrapper.find('canvas.playlist-movie').element
+        finger(movie, 'pointerdown', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 2, x: 200 })
+        finger(movie, 'pointermove', { id: 1, x: 50 })
+        finger(movie, 'pointerup', { id: 1, x: 50 })
+        finger(movie, 'pointerup', { id: 2, x: 200 })
+        await nextTick()
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('brings the bars back on a tap after a cancelled finger', async () => {
+        const wrapper = await mountFullScreen()
+        const movie = wrapper.find('canvas.playlist-movie').element
+        finger(movie, 'pointerdown', { id: 1, x: 100 })
+        finger(movie, 'pointercancel', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 2, x: 100, isPrimary: true })
+        finger(movie, 'pointerup', { id: 2, x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      // A release can get lost on the way when the element under the finger
+      // leaves the page: sent to that element, it never reaches the window.
+      // The next finger to land alone forgets the fingers on such an
+      // element, and only those.
+      it('brings the bars back on a tap after a lost release', async () => {
+        const wrapper = await mountFullScreen()
+        const media = wrapper.find('.video-container').element
+        const movie = wrapper.find('canvas.playlist-movie').element
+        const viewer = media.appendChild(document.createElement('div'))
+        const picture = viewer.appendChild(document.createElement('img'))
+        finger(picture, 'pointerdown', { id: 1, x: 100 })
+        viewer.remove()
+        finger(picture, 'pointerup', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 2, x: 100, isPrimary: true })
+        finger(movie, 'pointerup', { id: 2, x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('brings the bars back on a tap after a pinch whose last release got lost', async () => {
+        const wrapper = await mountFullScreen()
+        const media = wrapper.find('.video-container').element
+        const movie = wrapper.find('canvas.playlist-movie').element
+        const viewer = media.appendChild(document.createElement('div'))
+        const picture = viewer.appendChild(document.createElement('img'))
+        finger(movie, 'pointerdown', { id: 1, x: 100 })
+        finger(picture, 'pointerdown', { id: 2, x: 200 })
+        finger(movie, 'pointerup', { id: 1, x: 100 })
+        viewer.remove()
+        finger(picture, 'pointerup', { id: 2, x: 200 })
+        finger(movie, 'pointerdown', { id: 3, x: 100, isPrimary: true })
+        finger(movie, 'pointerup', { id: 3, x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      // In Chrome, a finger whose element left the page lives on: its next
+      // events go to what lies under it.
+      it('leaves the bars alone after a pinch with a finger whose element left the page while it was down', async () => {
+        const wrapper = await mountFullScreen()
+        const media = wrapper.find('.video-container').element
+        const movie = wrapper.find('canvas.playlist-movie').element
+        const viewer = media.appendChild(document.createElement('div'))
+        const picture = viewer.appendChild(document.createElement('img'))
+        finger(picture, 'pointerdown', { id: 1, x: 100 })
+        viewer.remove()
+        finger(movie, 'pointerdown', { id: 2, x: 200 })
+        finger(movie, 'pointerup', { id: 2, x: 200 })
+        finger(movie, 'pointerup', { id: 1, x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      // Firefox can flag a finger landing beside another primary: before 126
+      // by its place in the list of touches, and on Android per bug 1909197.
+      it('leaves the bars alone after a pinch whose finger put back comes flagged primary', async () => {
+        const wrapper = await mountFullScreen()
+        const movie = wrapper.find('canvas.playlist-movie').element
+        finger(movie, 'pointerdown', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 2, x: 200 })
+        finger(movie, 'pointerup', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 3, x: 100, isPrimary: true })
+        finger(movie, 'pointerup', { id: 3, x: 100 })
+        finger(movie, 'pointerup', { id: 2, x: 200 })
+        await nextTick()
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('brings the bars back on a tap after a pinch', async () => {
+        const wrapper = await mountFullScreen()
+        const movie = wrapper.find('canvas.playlist-movie').element
+        finger(movie, 'pointerdown', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 2, x: 200 })
+        finger(movie, 'pointerup', { id: 1, x: 100 })
+        finger(movie, 'pointerup', { id: 2, x: 200 })
+        finger(movie, 'pointerdown', { id: 3, x: 100, isPrimary: true })
+        finger(movie, 'pointerup', { id: 3, x: 100 })
         await nextTick()
         expect(wrapper.classes()).not.toContain('bars-hidden')
         wrapper.unmount()
