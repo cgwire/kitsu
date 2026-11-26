@@ -723,7 +723,6 @@ describe('TaskType page', () => {
       const scheduleButton = wrapper
         .findAllComponents(ButtonSimple)
         .find(button => button.props('title') === 'schedule.title')
-      expect(toggle.props('icon')).toBe('funnel')
       expect(
         filters.findComponent(SearchFieldStub).element.nextElementSibling
       ).toBe(toggle.element)

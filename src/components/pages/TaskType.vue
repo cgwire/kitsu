@@ -51,7 +51,6 @@
         <filters-toggle
           class="flexrow-item"
           :count="setFilterNames.length"
-          icon="funnel"
           :resettable="hasFilters"
           v-model="showFilters"
           @reset="resetFilters"
