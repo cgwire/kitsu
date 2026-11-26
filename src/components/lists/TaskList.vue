@@ -342,19 +342,18 @@
             </td>
             <td
               class="real-start-date"
-              :class="{ editing: isRealDateEditable(task) }"
               v-if="!withSchedule && isColumnVisible('realStartDate')"
             >
               <date-field
                 class="flexrow-item"
                 :with-margin="false"
-                :min-date="realDateMin"
-                :max-date="realDateMax"
+                :min-date="getRealDateBounds(task, 'real_start_date').min"
+                :max-date="getRealDateBounds(task, 'real_start_date').max"
                 :model-value="getDate(task.real_start_date)"
                 @update:model-value="
                   date => updateRealDate('real_start_date', date)
                 "
-                v-if="isRealDateEditable(task)"
+                v-if="isRealDateEditable(task, 'real_start_date')"
               />
               <template v-else>
                 {{ formatDisplayDate(task.real_start_date) }}
@@ -362,17 +361,16 @@
             </td>
             <td
               class="real-end-date"
-              :class="{ editing: isRealDateEditable(task) }"
               v-if="!withSchedule && isColumnVisible('realEndDate')"
             >
               <date-field
                 class="flexrow-item"
                 :with-margin="false"
-                :min-date="realDateMin"
-                :max-date="realDateMax"
+                :min-date="getRealDateBounds(task, 'end_date').min"
+                :max-date="getRealDateBounds(task, 'end_date').max"
                 :model-value="getDate(task.end_date)"
                 @update:model-value="date => updateRealDate('end_date', date)"
-                v-if="isRealDateEditable(task)"
+                v-if="isRealDateEditable(task, 'end_date')"
               />
               <template v-else>
                 {{ formatDisplayDate(task.end_date) }}
@@ -380,17 +378,16 @@
             </td>
             <td
               class="done-date"
-              :class="{ editing: isRealDateEditable(task) }"
               v-if="!withSchedule && isColumnVisible('doneDate')"
             >
               <date-field
                 class="flexrow-item"
                 :with-margin="false"
-                :min-date="realDateMin"
-                :max-date="realDateMax"
+                :min-date="getRealDateBounds(task, 'done_date').min"
+                :max-date="getRealDateBounds(task, 'done_date').max"
                 :model-value="getDate(task.done_date)"
                 @update:model-value="date => updateRealDate('done_date', date)"
-                v-if="isRealDateEditable(task)"
+                v-if="isRealDateEditable(task, 'done_date')"
               />
               <template v-else>
                 {{ formatDisplayDate(task.done_date) }}
@@ -896,15 +893,59 @@ const updateTasksEstimation = ({ estimation }) => {
   })
 }
 
-const isRealDateEditable = task =>
-  canEditRealDates.value && Boolean(selectionGrid.value[task.id])
+// The rules of the import of Zou, which the task PUT does not check: a
+// Feedback date needs a feedback or done status, an Approval date a done
+// status, and the dates follow the order of these fields.
+const REAL_DATE_FIELDS = ['real_start_date', 'end_date', 'done_date']
+
+const isRealDateAllowed = (task, field) => {
+  const status = store.getters.taskStatusMap.get(task.task_status_id)
+  if (field === 'end_date') {
+    return Boolean(status?.is_feedback_request || status?.is_done)
+  }
+  if (field === 'done_date') return Boolean(status?.is_done)
+  return true
+}
+
+const getRealDays = (task, field) => {
+  const index = REAL_DATE_FIELDS.indexOf(field)
+  const daysOf = fields =>
+    fields.map(other => task[other]?.substring(0, 10)).filter(Boolean)
+  return {
+    before: daysOf(REAL_DATE_FIELDS.slice(0, index)),
+    after: daysOf(REAL_DATE_FIELDS.slice(index + 1))
+  }
+}
+
+const getRealDateBounds = (task, field) => {
+  const { before, after } = getRealDays(task, field)
+  return {
+    min: before.length ? getDate(before.sort().reverse()[0]) : realDateMin,
+    max: after.length ? getDate(after.sort()[0]) : realDateMax
+  }
+}
+
+const isRealDateEditable = (task, field) =>
+  canEditRealDates.value &&
+  Boolean(selectionGrid.value[task.id]) &&
+  isRealDateAllowed(task, field)
 
 // Zou counts a real date on the calendar day of each user: 10:00 UTC is the
 // same day from UTC-10 to UTC+13, where midnight is the day before west of
 // UTC.
 const updateRealDate = (field, date) => {
-  updateTasksData({
-    [field]: date ? `${formatSimpleDate(date)}T10:00:00` : null
+  if (!date) {
+    updateTasksData({ [field]: null })
+    return
+  }
+  const day = formatSimpleDate(date)
+  applyToSelection(task => {
+    const { before, after } = getRealDays(task, field)
+    const isInOrder =
+      before.every(other => other <= day) && after.every(other => other >= day)
+    return isRealDateAllowed(task, field) && isInOrder
+      ? { [field]: `${day}T10:00:00` }
+      : null
   })
 }
 
@@ -1226,15 +1267,12 @@ th.due-date {
 }
 
 td.start-date,
-td.due-date {
+td.due-date,
+td.real-start-date,
+td.real-end-date,
+td.done-date {
   text-align: center;
   margin: 0;
-  padding: 0;
-}
-
-// The date field of a real date widens its column, as a planned date does.
-td.editing {
-  max-width: none;
   padding: 0;
 }
 
