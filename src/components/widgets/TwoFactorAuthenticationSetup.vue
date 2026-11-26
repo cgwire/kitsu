@@ -127,6 +127,7 @@
                 class="input is-medium otp-input"
                 type="text"
                 autocomplete="one-time-code"
+                inputmode="numeric"
                 v-model.trim="twoFA.validationOTP"
                 @keyup.enter="nextEnable"
                 :placeholder="placeholderInputEnableOTP"
@@ -261,6 +262,7 @@
                 class="input is-medium otp-input"
                 type="text"
                 autocomplete="one-time-code"
+                inputmode="numeric"
                 :aria-describedby="
                   isNewEmailCodeSent ? newCodeSentId : undefined
                 "

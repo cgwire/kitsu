@@ -10,7 +10,8 @@
         <input
           class="input is-medium password"
           type="text"
-          autocomplete="one-time-code"
+          :autocomplete="isDigitCode ? 'one-time-code' : 'off'"
+          :inputmode="isDigitCode ? 'numeric' : null"
           :aria-describedby="informationId"
           :placeholder="placeholderInputText"
           @input="updatePayload"
@@ -148,7 +149,7 @@ const props = defineProps({
 
 const emit = defineEmits(['changed-two-fa', 'validate'])
 
-const chosenTwoFA = ref('')
+const chosenTwoFA = ref(props.preferredTwoFa)
 const OTPValue = ref('')
 const twoFactorPayload = ref({})
 const errorSendingEmail = ref(false)
@@ -178,6 +179,11 @@ const placeholderInputText = computed(() => {
   }
   return ''
 })
+
+// Recovery codes hold letters, and match none of the codes a browser offers.
+const isDigitCode = computed(() =>
+  ['totp', 'email_otp'].includes(chosenTwoFA.value)
+)
 
 const wrongOTPError = computed(() => {
   switch (chosenTwoFA.value) {

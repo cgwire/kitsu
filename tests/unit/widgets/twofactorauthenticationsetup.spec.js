@@ -211,20 +211,23 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
   })
 
   // Safari then offers the code that Mail received, or the one its Passwords
-  // app generates.
+  // app generates, and phones open their numeric keypad.
   it.each([
     { name: 'TOTP', open: 'totp.button_enable' },
     { name: 'OTP via email', open: 'email_otp.button_enable' }
-  ])('marks the $name setup field as a one-time code', async ({ open }) => {
-    const wrapper = mountSetup({}, { preEnableEmailOTP: () => {} })
+  ])(
+    'marks the $name setup field as a numeric one-time code',
+    async ({ open }) => {
+      const wrapper = mountSetup({}, { preEnableEmailOTP: () => {} })
 
-    await findButton(wrapper, label(open)).trigger('click')
-    await flushPromises()
+      await findButton(wrapper, label(open)).trigger('click')
+      await flushPromises()
+      const input = wrapper.find('.otp-input')
 
-    expect(wrapper.find('.otp-input').attributes('autocomplete')).toBe(
-      'one-time-code'
-    )
-  })
+      expect(input.attributes('autocomplete')).toBe('one-time-code')
+      expect(input.attributes('inputmode')).toBe('numeric')
+    }
+  )
 
   // Each Enable makes Zou send a new code and refuse the earlier ones: the
   // code of the first email, typed after a Cancel and a second Enable, was

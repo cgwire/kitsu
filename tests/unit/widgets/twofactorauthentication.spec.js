@@ -96,20 +96,76 @@ describe('widgets/TwoFactorAuthentication', () => {
   })
 
   // Safari then offers the code that Mail received, or the one its Passwords
-  // app generates.
-  it.each(['totp', 'email_otp'])(
-    'marks the %s field as a one-time code',
-    method => {
-      const wrapper = mountWidget(
-        { preferredTwoFa: method, twoFasEnabled: [method] },
-        { sendEmailOTP: () => {} }
+  // app generates, and phones open their numeric keypad. The field takes the
+  // focus as the step mounts, and a browser reads its hints then: the step
+  // must know its method at its first render.
+  describe('when the field takes the focus', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    // A FIDO device needs no code: its field took the focus, then went away
+    // once the step picked FIDO.
+    it('focuses no code field for a FIDO device', () => {
+      const focused = []
+      vi.spyOn(HTMLElement.prototype, 'focus').mockImplementation(
+        function () {
+          focused.push(this.tagName)
+        }
       )
 
-      expect(wrapper.find('input').attributes('autocomplete')).toBe(
-        'one-time-code'
+      mountWidget(
+        { preferredTwoFa: 'fido', twoFasEnabled: ['fido'] },
+        { getFIDOChallenge: () => new Promise(() => {}) }
       )
-    }
-  )
+
+      expect(focused).toEqual([])
+    })
+
+    it.each(['totp', 'email_otp'])(
+      'marks the %s field as a numeric one-time code',
+      method => {
+        const hints = []
+        vi.spyOn(HTMLElement.prototype, 'focus').mockImplementation(
+          function () {
+            hints.push({
+              autocomplete: this.getAttribute('autocomplete'),
+              inputmode: this.getAttribute('inputmode')
+            })
+          }
+        )
+
+        mountWidget(
+          { preferredTwoFa: method, twoFasEnabled: [method] },
+          { sendEmailOTP: () => {} }
+        )
+
+        expect(hints).toEqual([
+          { autocomplete: 'one-time-code', inputmode: 'numeric' }
+        ])
+      }
+    )
+  })
+
+  // Recovery codes hold letters. A browser offered the code of an email or of
+  // an authenticator app there: a tap filled it in, and Verify sent it as a
+  // recovery code, which Zou refused, and counted as a failed login on the
+  // login page.
+  it('takes a recovery code as plain text', async () => {
+    const wrapper = mountWidget()
+    await flushPromises()
+    const input = wrapper.find('input')
+    expect(input.attributes('inputmode')).toBe('numeric')
+    expect(input.attributes('autocomplete')).toBe('one-time-code')
+
+    await wrapper
+      .findAll('a')
+      .find(link => link.text() === 'login.choose_recovery_code')
+      .trigger('click')
+
+    expect(input.attributes('inputmode')).toBeUndefined()
+    expect(input.attributes('autocomplete')).toBe('off')
+  })
 
   // Each email makes Zou refuse the codes of the earlier ones: after a click
   // on "Resend OTP by email", the code of the first email was refused with
