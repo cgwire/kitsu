@@ -300,7 +300,7 @@ describe('lists/TimesheetList', () => {
       { date: '2026-08-05', duration: 60 }
     ]
 
-    const mountWeekList = () => {
+    const mountWeekList = (props = {}) => {
       const loadPersonTimeSpentsByPeriod = vi.fn(() => timeSpents)
       const store = createListStore({ loadPersonTimeSpentsByPeriod })
       const wrapper = shallowMount(TimesheetList, {
@@ -314,13 +314,35 @@ describe('lists/TimesheetList', () => {
         props: {
           initialDate: '2026-08-05',
           personId: 'person-1',
-          timeSpentTotal: 2
+          timeSpentTotal: 2,
+          ...props
         }
       })
       return { loadPersonTimeSpentsByPeriod, wrapper }
     }
 
     const weekTotal = wrapper => wrapper.find('.week-time-spent-total').text()
+    const dayTotal = wrapper => wrapper.find('.time-spent-total')
+
+    // The day total of the page is the one of the day left until the day
+    // shown is read, and the week total would count that day twice.
+    it('shows no total while the day shown is not read', async () => {
+      const { wrapper } = mountWeekList({ isLoading: true })
+      await flushPromises()
+
+      expect(dayTotal(wrapper).exists()).toBe(false)
+      expect(wrapper.find('.week-time-spent-total').exists()).toBe(false)
+
+      await wrapper.setProps({ isLoading: false })
+
+      expect(dayTotal(wrapper).find('strong').text()).toBe('2')
+      expect(weekTotal(wrapper)).toBe('timesheets.week_total:7')
+
+      await wrapper.setProps({ isError: true })
+
+      expect(dayTotal(wrapper).exists()).toBe(false)
+      expect(wrapper.find('.week-time-spent-total').exists()).toBe(false)
+    })
 
     it('adds the live day total to the other days of the week', async () => {
       const { loadPersonTimeSpentsByPeriod, wrapper } = mountWeekList()

@@ -25,7 +25,7 @@
           @click="shiftSelectedDate(1)"
         />
       </div>
-      <div class="time-spent-total">
+      <div class="time-spent-total" v-if="isDayRead">
         <strong>{{ timeSpentTotal }}</strong>
         {{ $t('timesheets.hours') }}
       </div>
@@ -403,9 +403,13 @@ const displayedTasks = computed(() =>
   sortedTasks.value.slice(0, page.value * (PAGE_SIZE / 2))
 )
 
+// Until the day shown is read, the day total of the page is the one of the
+// day left.
+const isDayRead = computed(() => !props.isLoading && !props.isError)
+
 // The selected day comes from the live total, so the edits show at once.
 const weekTimeSpentTotal = computed(() =>
-  otherDaysDuration.value === null
+  otherDaysDuration.value === null || !isDayRead.value
     ? null
     : otherDaysDuration.value / 60 + props.timeSpentTotal
 )
