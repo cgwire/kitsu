@@ -31,6 +31,7 @@ vi.mock('@/components/sides/TaskInfo.vue', async () => {
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
+import { markRequestFailure } from '@/lib/errors'
 import { today } from '@/lib/timesheet'
 
 import TimesheetList from '@/components/lists/TimesheetList.vue'
@@ -111,10 +112,12 @@ const mountPage = async (
     props = {},
     query = {},
     socket = { on: vi.fn(), off: vi.fn() },
-    stubs = {}
+    stubs = {},
+    timeSpentDate = moment().format('YYYY-MM-DD')
   } = {}
 ) => {
   const store = createStore({
+    state: () => ({ timeSpentDate }),
     getters: {
       displayedDoneTasks: () => [],
       displayedTodos: () => todos,
@@ -129,6 +132,7 @@ const mountPage = async (
       taskStatuses: () => [],
       taskStatusMap: () => taskStatusMap,
       taskTypeMap: () => new Map(),
+      timeSpentDate: state => state.timeSpentDate,
       timeSpentMap: () => new Map(),
       timeSpentTotal: () => 0,
       todoListScrollPosition: () => 0,
@@ -136,6 +140,11 @@ const mountPage = async (
       todoSelectionGrid: () => ({}),
       user: () => ({ id: 'user-1' }),
       ...getters
+    },
+    mutations: {
+      USER_LOAD_TIME_SPENTS_END: (state, { date }) => {
+        state.timeSpentDate = date
+      }
     },
     actions: {
       clearSelectedTasks: vi.fn(),
@@ -682,6 +691,185 @@ describe('Todos page', () => {
       await flushPromises()
 
       expect(consoleError).toHaveBeenCalledWith(error)
+      wrapper.unmount()
+    })
+
+    // Each read answers on demand, and commits its day as the store does
+    const deferReads = () => {
+      const reads = []
+      const loadUserTimeSpents = vi.fn(
+        ({ commit }, { date }) =>
+          new Promise((resolve, reject) => {
+            reads.push({
+              date,
+              answer: () => {
+                commit('USER_LOAD_TIME_SPENTS_END', { date, timeSpents: [] })
+                resolve()
+              },
+              fail: reject
+            })
+          })
+      )
+      return { loadUserTimeSpents, reads }
+    }
+
+    const mountTimesheet = async (options = {}) => {
+      const { loadUserTimeSpents, reads } = deferReads()
+      const wrapper = await mountPage([], {
+        ...options,
+        actions: { loadUserTimeSpents, ...options.actions },
+        query: { section: 'timesheets', ...options.query }
+      })
+      await flushPromises()
+      return { list: wrapper.findComponent(TimesheetList), reads, wrapper }
+    }
+
+    const readDays = reads => reads.map(({ date }) => date)
+
+    it('keeps the timesheet loading until the day picked last is read', async () => {
+      const { list, reads, wrapper } = await mountTimesheet()
+
+      list.vm.$emit('date-changed', new Date(2026, 7, 4))
+      list.vm.$emit('date-changed', new Date(2026, 7, 3))
+      await flushPromises()
+      reads[0].answer()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(true)
+
+      reads[1].answer()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(false)
+      wrapper.unmount()
+    })
+
+    // A day read from the URL, after a calendar click or Back, ends the
+    // loading as a step does.
+    it('ends the timesheet loading once the day of the URL is read', async () => {
+      const { list, reads, wrapper } = await mountTimesheet()
+
+      list.vm.$emit('date-changed', new Date(2026, 7, 4))
+      await flushPromises()
+      await wrapper.vm.$router.push({
+        query: { ...wrapper.vm.$route.query, day: '2026-08-02' }
+      })
+      await flushPromises()
+      reads.forEach(read => read.answer())
+      await flushPromises()
+
+      expect(readDays(reads)).toEqual(['2026-08-04', '2026-08-02'])
+      expect(list.props('isLoading')).toBe(false)
+      wrapper.unmount()
+    })
+
+    // The tasks kept from an earlier visit come without a read of the day:
+    // the store can still hold the time spents of the day shown then.
+    it('reads the day shown when the store holds another day', async () => {
+      const { list, reads, wrapper } = await mountTimesheet({
+        timeSpentDate: '2026-08-04'
+      })
+
+      expect(readDays(reads)).toEqual([moment().format('YYYY-MM-DD')])
+      expect(list.props('isLoading')).toBe(true)
+
+      reads[0].answer()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('does not read again the day the tasks load read', async () => {
+      const { reads, wrapper } = await mountTimesheet()
+
+      expect(reads).toEqual([])
+      wrapper.unmount()
+    })
+
+    it('says that the time spents of the day could not be read', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = new Error('timeout')
+      markRequestFailure(failure)
+      const { list, reads, wrapper } = await mountTimesheet()
+
+      list.vm.$emit('date-changed', new Date(2026, 7, 4))
+      await flushPromises()
+      reads[0].fail(failure)
+      await flushPromises()
+
+      expect(consoleError).toHaveBeenCalledWith(failure)
+      expect(list.props('isLoading')).toBe(true)
+      expect(list.props('isError')).toBe(true)
+
+      list.vm.$emit('date-changed', new Date(2026, 7, 3))
+      await flushPromises()
+
+      expect(list.props('isError')).toBe(false)
+
+      reads[1].answer()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(false)
+
+      // a new read of the day that failed
+      list.vm.$emit('date-changed', new Date(2026, 7, 4))
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(true)
+      expect(list.props('isError')).toBe(false)
+      wrapper.unmount()
+    })
+
+    // Two steps whose reads both fail, the one of the day shown first
+    it('keeps saying that the day shown could not be read', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = new Error('timeout')
+      markRequestFailure(failure)
+      const { list, reads, wrapper } = await mountTimesheet()
+
+      list.vm.$emit('date-changed', new Date(2026, 7, 4))
+      list.vm.$emit('date-changed', new Date(2026, 7, 3))
+      await flushPromises()
+      reads[1].fail(failure)
+      await flushPromises()
+      reads[0].fail(failure)
+      await flushPromises()
+
+      expect(readDays(reads)).toEqual(['2026-08-04', '2026-08-03'])
+      expect(consoleError).toHaveBeenCalledTimes(2)
+      expect(list.props('isLoading')).toBe(true)
+      expect(list.props('isError')).toBe(true)
+      wrapper.unmount()
+    })
+
+    // The day of the URL is read twice on a reload: by the page and with the
+    // tasks.
+    it('shows the day read with the tasks when its other read fails', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = new Error('timeout')
+      markRequestFailure(failure)
+      const loadTodos = vi.fn(({ commit }, { date }) =>
+        commit('USER_LOAD_TIME_SPENTS_END', { date, timeSpents: [] })
+      )
+      const { list, reads, wrapper } = await mountTimesheet({
+        actions: { loadTodos },
+        query: { day: '2026-08-02' }
+      })
+
+      reads[0].fail(failure)
+      await flushPromises()
+
+      expect(readDays(reads)).toEqual(['2026-08-02'])
+      expect(consoleError).toHaveBeenCalledWith(failure)
+      expect(list.props('isLoading')).toBe(false)
+      expect(list.props('isError')).toBe(false)
       wrapper.unmount()
     })
   })

@@ -15,6 +15,7 @@ vi.mock('@/store/api/people', () => ({
     loadDone: vi.fn(),
     loadTasksToCheck: vi.fn(),
     loadTimeSpents: vi.fn(),
+    loadTodos: vi.fn(),
     preEnableEmailOTP: vi.fn(),
     registerFIDO: vi.fn(),
     removeFilter: vi.fn(),
@@ -509,6 +510,60 @@ describe('User store', () => {
       store.mutations.RESET_ALL(state)
 
       expect(state.emailOTPCodesSent).toEqual({})
+    })
+
+    // The day held names the time spents held: a list that cannot be read
+    // changes neither.
+    test('USER_LOAD_TIME_SPENTS_END keeps the day held on an answer with no list', () => {
+      const state = {}
+      store.mutations.RESET_ALL(state)
+      store.mutations.USER_LOAD_TIME_SPENTS_END(state, {
+        date: '2026-08-05',
+        timeSpents: [{ task_id: 'task-1', duration: 90 }]
+      })
+
+      expect(() =>
+        store.mutations.USER_LOAD_TIME_SPENTS_END(state, {
+          date: '2026-08-06',
+          timeSpents: null
+        })
+      ).toThrow()
+
+      expect(state.timeSpentDate).toBe('2026-08-05')
+      expect(state.timeSpentTotal).toBe(1.5)
+    })
+
+    // A reload of the tasks keeps the time spents of the day held until it
+    // reads them again, so their total stays with them.
+    test('USER_LOAD_TODOS_START keeps the total of the day held', () => {
+      const state = {}
+      store.mutations.RESET_ALL(state)
+      store.mutations.USER_LOAD_TIME_SPENTS_END(state, {
+        date: '2026-08-05',
+        timeSpents: [{ task_id: 'task-1', duration: 90 }]
+      })
+
+      store.mutations.USER_LOAD_TODOS_START(state)
+
+      expect(state.isTodosLoading).toBe(true)
+      expect(state.timeSpentDate).toBe('2026-08-05')
+      expect(state.timeSpentTotal).toBe(1.5)
+    })
+
+    test('USER_LOAD_TIME_SPENTS_END keeps the day of the time spents', () => {
+      const state = {}
+      store.mutations.RESET_ALL(state)
+
+      store.mutations.USER_LOAD_TIME_SPENTS_END(state, {
+        date: '2026-08-05',
+        timeSpents: [{ task_id: 'task-1', duration: 90 }]
+      })
+
+      expect(state.timeSpentDate).toBe('2026-08-05')
+      expect(state.timeSpentMap).toEqual({
+        'task-1': { task_id: 'task-1', duration: 90 }
+      })
+      expect(state.timeSpentTotal).toBe(1.5)
     })
 
     // Zou picks the next preferred method in the same order
@@ -1137,7 +1192,126 @@ describe('User store', () => {
         )
 
         expect(peopleApi.loadTimeSpents).toHaveBeenCalledWith('2026-08-06')
-        expect(commit).toHaveBeenCalledWith('USER_LOAD_TIME_SPENTS_END', [])
+        expect(commit).toHaveBeenCalledWith('USER_LOAD_TIME_SPENTS_END', {
+          date: '2026-08-06',
+          timeSpents: []
+        })
+      })
+    })
+
+    // The timesheet steps from a day to the next faster than Zou answers
+    describe('time spents of a day left since', () => {
+      const deferred = () => {
+        const handlers = {}
+        const promise = new Promise(resolve => {
+          handlers.resolve = resolve
+        })
+        return { promise, ...handlers }
+      }
+      const firstDayTime = { task_id: 'task-1', duration: 60 }
+      const secondDayTime = { task_id: 'task-2', duration: 120 }
+      const timeSpentCommits = commit =>
+        commit.mock.calls.filter(
+          ([type]) => type === 'USER_LOAD_TIME_SPENTS_END'
+        )
+
+      afterEach(() => {
+        peopleApi.loadTimeSpents.mockReset()
+        peopleApi.loadTodos.mockReset()
+      })
+
+      test('keeps the time spents of the day asked last', async () => {
+        const firstDay = deferred()
+        peopleApi.loadTimeSpents
+          .mockReturnValueOnce(firstDay.promise)
+          .mockResolvedValueOnce([secondDayTime])
+        const commit = vi.fn()
+
+        const firstLoad = store.actions.loadUserTimeSpents(
+          { commit },
+          { date: '2026-08-04' }
+        )
+        await store.actions.loadUserTimeSpents(
+          { commit },
+          { date: '2026-08-05' }
+        )
+        firstDay.resolve([firstDayTime])
+        await firstLoad
+
+        expect(timeSpentCommits(commit)).toEqual([
+          [
+            'USER_LOAD_TIME_SPENTS_END',
+            { date: '2026-08-05', timeSpents: [secondDayTime] }
+          ]
+        ])
+      })
+
+      test('keeps the tasks but not the time spents of a day left meanwhile', async () => {
+        const todos = deferred()
+        peopleApi.loadTodos.mockReturnValueOnce(todos.promise)
+        peopleApi.loadTimeSpents.mockImplementation(async date =>
+          date === '2026-08-04' ? [firstDayTime] : [secondDayTime]
+        )
+        const commit = vi.fn()
+        const context = {
+          commit,
+          rootGetters: { taskTypeMap: new Map(), userFilters: {} },
+          state: { todos: [] }
+        }
+
+        const todoLoad = store.actions.loadTodos(context, {
+          date: '2026-08-04',
+          forced: true
+        })
+        await store.actions.loadUserTimeSpents(
+          { commit },
+          { date: '2026-08-05' }
+        )
+        todos.resolve([{ id: 'task-1' }])
+        await todoLoad
+
+        expect(commit).toHaveBeenCalledWith('USER_LOAD_TODOS_END', {
+          tasks: [{ id: 'task-1' }],
+          userFilters: {},
+          taskTypeMap: new Map()
+        })
+        expect(timeSpentCommits(commit)).toEqual([
+          [
+            'USER_LOAD_TIME_SPENTS_END',
+            { date: '2026-08-05', timeSpents: [secondDayTime] }
+          ]
+        ])
+      })
+
+      // The page read another day on an earlier visit
+      test('reads the time spents of the day along with the tasks', async () => {
+        peopleApi.loadTodos.mockResolvedValue([])
+        peopleApi.loadTimeSpents.mockImplementation(async date =>
+          date === '2026-08-04' ? [firstDayTime] : [secondDayTime]
+        )
+        const commit = vi.fn()
+        const context = {
+          commit,
+          rootGetters: { taskTypeMap: new Map(), userFilters: {} },
+          state: { todos: [] }
+        }
+
+        await store.actions.loadUserTimeSpents(
+          { commit },
+          { date: '2026-08-04' }
+        )
+        await store.actions.loadTodos(context, { date: '2026-08-05' })
+
+        expect(timeSpentCommits(commit)).toEqual([
+          [
+            'USER_LOAD_TIME_SPENTS_END',
+            { date: '2026-08-04', timeSpents: [firstDayTime] }
+          ],
+          [
+            'USER_LOAD_TIME_SPENTS_END',
+            { date: '2026-08-05', timeSpents: [secondDayTime] }
+          ]
+        ])
       })
     })
 

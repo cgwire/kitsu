@@ -110,6 +110,40 @@ describe('People store', () => {
       expect(state.personTimeSpentTotal).toEqual(2)
     })
 
+    test('PERSON_LOAD_TIME_SPENTS_END keeps the person and day of the time spents', () => {
+      store.mutations.PERSON_LOAD_TIME_SPENTS_END(state, {
+        personId: 'person-1',
+        date: '2026-11-02',
+        timeSpents: [{ task_id: 'task-1', duration: 90 }]
+      })
+      expect(state.personTimeSpentKey).toBe('person-1/2026-11-02')
+      expect(state.personTimeSpentMap).toEqual({
+        'task-1': { task_id: 'task-1', duration: 90 }
+      })
+      expect(state.personTimeSpentTotal).toBe(1.5)
+    })
+
+    // The key names the time spents held: a list that cannot be read changes
+    // neither.
+    test('PERSON_LOAD_TIME_SPENTS_END keeps the key held on an answer with no list', () => {
+      store.mutations.PERSON_LOAD_TIME_SPENTS_END(state, {
+        personId: 'person-1',
+        date: '2026-11-02',
+        timeSpents: [{ task_id: 'task-1', duration: 90 }]
+      })
+
+      expect(() =>
+        store.mutations.PERSON_LOAD_TIME_SPENTS_END(state, {
+          personId: 'person-1',
+          date: '2026-11-03',
+          timeSpents: null
+        })
+      ).toThrow()
+
+      expect(state.personTimeSpentKey).toBe('person-1/2026-11-02')
+      expect(state.personTimeSpentTotal).toBe(1.5)
+    })
+
     // The done tasks of the person page never reach the tasks module map,
     // unlike the todo ones registered on LOAD_PERSON_TASKS_END.
     test('SET_PREVIEW refreshes the person done list', () => {
@@ -584,9 +618,11 @@ describe('People store loadPersonTasks action', () => {
       'person-1',
       '2026-11-02'
     )
-    expect(commit).toHaveBeenCalledWith('PERSON_LOAD_TIME_SPENTS_END', [
-      timeSpent
-    ])
+    expect(commit).toHaveBeenCalledWith('PERSON_LOAD_TIME_SPENTS_END', {
+      personId: 'person-1',
+      date: '2026-11-02',
+      timeSpents: [timeSpent]
+    })
   })
 
   test('leaves the time spents out when not asked', async () => {
@@ -598,7 +634,136 @@ describe('People store loadPersonTasks action', () => {
     )
 
     expect(peopleApi.getTimeSpents).not.toHaveBeenCalled()
-    expect(commit).toHaveBeenCalledWith('PERSON_LOAD_TIME_SPENTS_END', [])
+    expect(commit).toHaveBeenCalledWith('PERSON_LOAD_TIME_SPENTS_END', {
+      personId: 'person-1',
+      date: '2026-11-02',
+      timeSpents: []
+    })
+  })
+})
+
+// The timesheet steps from a day to the next faster than Zou answers
+describe('People store time spents of a day left since', () => {
+  const rootGetters = { taskTypeMap: new Map(), userFilters: {} }
+  const deferred = () => {
+    const handlers = {}
+    const promise = new Promise(resolve => {
+      handlers.resolve = resolve
+    })
+    return { promise, ...handlers }
+  }
+  const firstTime = { task_id: 'task-1', duration: 60 }
+  const secondTime = { task_id: 'task-2', duration: 120 }
+  const timeSpentCommits = commit =>
+    commit.mock.calls.filter(([type]) => type === 'PERSON_LOAD_TIME_SPENTS_END')
+
+  beforeEach(() => {
+    peopleApi.getPersonTasks.mockResolvedValue([])
+    peopleApi.getTimeSpents.mockReset()
+  })
+
+  test('keeps the time spents of the day asked last', async () => {
+    const firstDay = deferred()
+    peopleApi.getTimeSpents
+      .mockReturnValueOnce(firstDay.promise)
+      .mockResolvedValueOnce([secondTime])
+    const commit = vi.fn()
+
+    const firstLoad = store.actions.loadPersonTimeSpents(
+      { commit },
+      { personId: 'person-1', date: '2026-11-02' }
+    )
+    await store.actions.loadPersonTimeSpents(
+      { commit },
+      { personId: 'person-1', date: '2026-11-03' }
+    )
+    firstDay.resolve([firstTime])
+    await firstLoad
+
+    expect(timeSpentCommits(commit)).toEqual([
+      [
+        'PERSON_LOAD_TIME_SPENTS_END',
+        { personId: 'person-1', date: '2026-11-03', timeSpents: [secondTime] }
+      ]
+    ])
+  })
+
+  test('keeps the time spents of the person shown next', async () => {
+    const firstPerson = deferred()
+    peopleApi.getTimeSpents
+      .mockReturnValueOnce(firstPerson.promise)
+      .mockResolvedValueOnce([secondTime])
+    const commit = vi.fn()
+
+    const firstLoad = store.actions.loadPersonTimeSpents(
+      { commit },
+      { personId: 'person-1', date: '2026-11-02' }
+    )
+    await store.actions.loadPersonTasks(
+      { commit, rootGetters },
+      { personId: 'person-2', date: '2026-11-02', withTimeSpents: true }
+    )
+    firstPerson.resolve([firstTime])
+    await firstLoad
+
+    expect(timeSpentCommits(commit)).toEqual([
+      [
+        'PERSON_LOAD_TIME_SPENTS_END',
+        { personId: 'person-2', date: '2026-11-02', timeSpents: [secondTime] }
+      ]
+    ])
+  })
+
+  test('keeps the time spents of a day picked during the task load', async () => {
+    const tasks = deferred()
+    peopleApi.getPersonTasks.mockReturnValueOnce(tasks.promise)
+    peopleApi.getTimeSpents.mockImplementation(async (personId, date) =>
+      date === '2026-11-02' ? [firstTime] : [secondTime]
+    )
+    const commit = vi.fn()
+
+    const taskLoad = store.actions.loadPersonTasks(
+      { commit, rootGetters },
+      { personId: 'person-1', date: '2026-11-02', withTimeSpents: true }
+    )
+    await store.actions.loadPersonTimeSpents(
+      { commit },
+      { personId: 'person-1', date: '2026-11-03' }
+    )
+    tasks.resolve([{ id: 'task-1' }])
+    await taskLoad
+
+    expect(commit).toHaveBeenCalledWith('LOAD_PERSON_TASKS_END', {
+      personId: 'person-1',
+      tasks: [{ id: 'task-1' }],
+      userFilters: {},
+      taskTypeMap: new Map()
+    })
+    expect(timeSpentCommits(commit)).toEqual([
+      [
+        'PERSON_LOAD_TIME_SPENTS_END',
+        { personId: 'person-1', date: '2026-11-03', timeSpents: [secondTime] }
+      ]
+    ])
+  })
+
+  // pget answers null to a 2xx without a JSON body, as loadUserTimeSpents
+  // expects
+  test('reads no time spent from an answer with no list', async () => {
+    peopleApi.getTimeSpents.mockResolvedValueOnce(null)
+    const commit = vi.fn()
+
+    await store.actions.loadPersonTimeSpents(
+      { commit },
+      { personId: 'person-1', date: '2026-11-03' }
+    )
+
+    expect(timeSpentCommits(commit)).toEqual([
+      [
+        'PERSON_LOAD_TIME_SPENTS_END',
+        { personId: 'person-1', date: '2026-11-03', timeSpents: [] }
+      ]
+    ])
   })
 })
 
