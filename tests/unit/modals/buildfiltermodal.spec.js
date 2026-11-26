@@ -3,6 +3,8 @@ import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 
 import productionStoreFixture from '../fixtures/production-store'
 
@@ -47,7 +49,13 @@ describe('BuildFilterModal', () => {
             name: 'Difficulty',
             choices: ['easy', 'hard']
           },
-          { id: 'descriptor-2', name: 'Size' }
+          { id: 'descriptor-2', name: 'Size' },
+          {
+            id: 'descriptor-5',
+            name: 'Approved',
+            data_type: 'boolean',
+            choices: []
+          }
         ],
         assetSearchText: state => state.assetSearchText,
         assetValidationColumns: () => ['task-type-1', 'task-type-2'],
@@ -131,7 +139,7 @@ describe('BuildFilterModal', () => {
         taskStatusMap: () =>
           new Map(
             Object.entries({
-              'task-status-1': { id: 'task-status-1', short_name: 'WFA' },
+              'task-status-1': { id: 'task-status-1', short_name: 'Done' },
               'task-status-2': { id: 'task-status-2', short_name: 'WIP' },
               'task-status-3': { id: 'task-status-3', short_name: 'Retake' }
             })
@@ -206,6 +214,187 @@ describe('BuildFilterModal', () => {
           await wrapper.vm.$nextTick()
           expect(wrapper.find('.descriptor-filter').exists()).toBeTruthy()
         })
+    })
+
+    describe('row changes', () => {
+      // The real combobox, whose select emits the operator chosen.
+      const mountOnQuery = async query => {
+        store.commit('CHANGE_SEARCH', query)
+        const modal = shallowMount(BuildFilterModal, {
+          global: { plugins: [store, i18n], stubs: { Combobox: false } },
+          props: { entityType: 'asset' }
+        })
+        await modal.vm.$nextTick()
+        return modal
+      }
+      const operatorSelect = row =>
+        row
+          .findAll('select')
+          .find(select => select.find('option[value="in"]').exists())
+      const valueFields = row => row.findAll('.value-column > .flexrow-item')
+      const confirmedQuery = modal => {
+        modal.findComponent(ModalFooter).vm.$emit('confirm')
+        return modal.emitted('confirm')[0][0]
+      }
+
+      it.each([
+        [
+          'asset type',
+          'type=[chars,sets]',
+          '.asset-type-filter',
+          'type=[chars]'
+        ],
+        [
+          'status',
+          'Modeling=WIP,Done',
+          '.task-type-filter',
+          '[Modeling]=[WIP]'
+        ],
+        [
+          'descriptor',
+          'Difficulty=[easy,hard]',
+          '.descriptor-filter',
+          '[Difficulty]=[easy]'
+        ]
+      ])(
+        'keeps only the first %s value when In becomes Equal',
+        async (_, query, rowSelector, expected) => {
+          const modal = await mountOnQuery(query)
+          const row = modal.find(rowSelector)
+          expect(valueFields(row)).toHaveLength(2)
+          await operatorSelect(row).setValue('equal')
+          expect(valueFields(row)).toHaveLength(1)
+          expect(confirmedQuery(modal)).toBe(expected)
+        }
+      )
+
+      it('keeps only the first descriptor value when In becomes Not equal', async () => {
+        const modal = await mountOnQuery('Difficulty=[easy,hard]')
+        const row = modal.find('.descriptor-filter')
+        expect(valueFields(row)).toHaveLength(2)
+        await operatorSelect(row).setValue('not_equal')
+        expect(valueFields(row)).toHaveLength(1)
+        expect(confirmedQuery(modal)).toBe('[Difficulty]=[-easy]')
+      })
+
+      it.each([
+        [
+          'asset type',
+          'type=[chars,sets]',
+          '.asset-type-filter',
+          'type=[-chars,sets]'
+        ],
+        [
+          'status',
+          'Modeling=WIP,Done',
+          '.task-type-filter',
+          '[Modeling]=[-WIP,Done]'
+        ],
+        [
+          'descriptor',
+          'Difficulty=[easy,hard]',
+          '.descriptor-filter',
+          '[Difficulty]=[-easy,hard]'
+        ]
+      ])(
+        'keeps every %s value when In becomes Not in',
+        async (_, query, rowSelector, expected) => {
+          const modal = await mountOnQuery(query)
+          const row = modal.find(rowSelector)
+          await operatorSelect(row).setValue('not_in')
+          expect(valueFields(row)).toHaveLength(2)
+          expect(confirmedQuery(modal)).toBe(expected)
+        }
+      )
+
+      it('opens on Equal for an excluded asset type the search does not know', async () => {
+        const modal = await mountOnQuery('type=-Chars')
+        const row = modal.find('.asset-type-filter')
+        expect(operatorSelect(row).element.value).toBe('equal')
+        expect(row.find('.value-column select').element.value).toBe(
+          'entities.build_filter.all_types'
+        )
+        expect(confirmedQuery(modal)).toBe('')
+      })
+
+      it('shows all asset types for an asset type the search does not know', async () => {
+        const modal = await mountOnQuery('type=Chars')
+        const row = modal.find('.asset-type-filter')
+        expect(valueFields(row)).toHaveLength(1)
+        await operatorSelect(row).setValue('in')
+        const valueSelect = row.find('.value-column select')
+        expect(valueSelect.find('option[value=""]').exists()).toBe(false)
+        expect(valueSelect.element.value).toBe(
+          'entities.build_filter.all_types'
+        )
+        expect(confirmedQuery(modal)).toBe('')
+      })
+
+      it.each([
+        [
+          'Not in',
+          'Difficulty=[-easy,hard]',
+          'not_checked',
+          '[Approved]=[-true]'
+        ],
+        ['Not equal', 'Difficulty=-easy', 'checked', '[Approved]=[true]']
+      ])(
+        'filters on the checkbox value chosen when a %s row moves to a checkbox field',
+        async (_, query, choice, expected) => {
+          const modal = await mountOnQuery(query)
+          const row = modal.find('.descriptor-filter')
+          await row.findAll('select')[0].setValue('Approved')
+          await row.findAll('select')[1].setValue(choice)
+          expect(confirmedQuery(modal)).toBe(expected)
+        }
+      )
+
+      // An empty id stands for All.
+      const chooseTaskType = async (modal, row, taskTypeId) => {
+        row
+          .findComponent(ComboboxTaskType)
+          .vm.$emit('update:model-value', taskTypeId)
+        await modal.vm.$nextTick()
+      }
+
+      it.each([
+        ['Without a task', 'Modeling=empty'],
+        ['With a task', 'Modeling=-empty']
+      ])(
+        'goes back to Equal when a restored %s row moves to all task types',
+        async (_, query) => {
+          const modal = await mountOnQuery(query)
+          const row = modal.find('.task-type-filter')
+          expect(valueFields(row)).toHaveLength(0)
+          await chooseTaskType(modal, row, '')
+          const operator = operatorSelect(row)
+          expect(operator.find('option[value=""]').exists()).toBe(false)
+          expect(operator.element.value).toBe('equal')
+          expect(valueFields(row)).toHaveLength(1)
+          expect(confirmedQuery(modal)).toBe('status=[Done]')
+        }
+      )
+
+      it('shows the status kept under Without a task when the row moves to all task types', async () => {
+        const modal = await mountOnQuery('Modeling=WIP')
+        const row = modal.find('.task-type-filter')
+        await operatorSelect(row).setValue('without_task')
+        expect(valueFields(row)).toHaveLength(0)
+        await chooseTaskType(modal, row, '')
+        const operator = operatorSelect(row)
+        expect(operator.find('option[value=""]').exists()).toBe(false)
+        expect(operator.element.value).toBe('equal')
+        expect(valueFields(row)).toHaveLength(1)
+        expect(confirmedQuery(modal)).toBe('status=[WIP]')
+      })
+
+      it('keeps Without a task when the row moves to another task type', async () => {
+        const modal = await mountOnQuery('Modeling=empty')
+        const row = modal.find('.task-type-filter')
+        await chooseTaskType(modal, row, 'task-type-2')
+        expect(valueFields(row)).toHaveLength(0)
+        expect(confirmedQuery(modal)).toBe('[Rigging]=empty')
+      })
     })
   })
 
@@ -331,7 +520,7 @@ describe('BuildFilterModal', () => {
               }
             })
             const query = wrapper.vm.buildFilter()
-            expect(query).toBe('[Modeling]=[-WIP,WFA]')
+            expect(query).toBe('[Modeling]=[-WIP,Done]')
           })
           it.each([
             ['empty', '[Modeling]=empty'],

@@ -29,7 +29,9 @@
             locale-key-prefix="entities.build_filter."
             :options="operatorOptions"
             :with-margin="false"
-            @update:model-value="onOperatorChanged(assetTypeFilters)"
+            @update:model-value="
+              operator => onOperatorChanged(assetTypeFilters, operator)
+            "
             v-model="assetTypeFilters.operator"
           />
           <div class="flexrow-item flexrow value-column">
@@ -64,6 +66,9 @@
             class="flexrow-item"
             :task-type-list="taskTypeListWithAll"
             :with-margin="false"
+            @update:model-value="
+              taskTypeId => onTaskTypeChanged(taskTypeFilter, taskTypeId)
+            "
             v-model="taskTypeFilter.id"
           />
           <combobox
@@ -73,7 +78,9 @@
               taskTypeFilter.id ? taskTypeOperatorOptions : operatorOptions
             "
             :with-margin="false"
-            @update:model-value="onOperatorChanged(taskTypeFilter)"
+            @update:model-value="
+              operator => onOperatorChanged(taskTypeFilter, operator)
+            "
             v-model="taskTypeFilter.operator"
           />
           <div
@@ -155,7 +162,9 @@
               locale-key-prefix="entities.build_filter."
               :options="operatorOptions"
               :with-margin="false"
-              @update:model-value="onOperatorChanged(descriptorFilter)"
+              @update:model-value="
+                operator => onOperatorChanged(descriptorFilter, operator)
+              "
               v-model="descriptorFilter.operator"
               v-else
             />
@@ -781,6 +790,14 @@ const removeTaskTypeFilter = taskTypeFilter => {
   )
 }
 
+// All task types offer no Without a task or With a task operator.
+const onTaskTypeChanged = (taskTypeFilter, taskTypeId) => {
+  if (!taskTypeId && isTaskPresence(taskTypeFilter.operator)) {
+    onOperatorChanged(taskTypeFilter, '=')
+    taskTypeFilter.operator = '='
+  }
+}
+
 const addInDescriptorFilter = descriptorFilter => {
   const descriptor = getDescriptor(descriptorFilter.id)
   const value = descriptor.choices.length ? descriptor.choices[0] : ''
@@ -803,6 +820,7 @@ const onDescriptorChanged = (descriptorFilter, filter) => {
     }
   } else if (descriptor.data_type === 'boolean') {
     descriptorFilter.values = ['-true']
+    descriptorFilter.operator = '='
   } else {
     descriptorFilter.values = ['']
   }
@@ -842,10 +860,11 @@ const removeDescriptorFilter = descriptorFilter => {
   )
 }
 
-const onOperatorChanged = filter => {
+// Runs before v-model writes the new operator into the filter.
+const onOperatorChanged = (filter, operator) => {
   if (!filter.values.length) {
     filter.values = [taskStatuses.value[0].id]
-  } else if (!isMultiple(filter.operator)) {
+  } else if (!isMultiple(operator)) {
     filter.values = [filter.values[0]]
   }
 }
@@ -853,11 +872,17 @@ const onOperatorChanged = filter => {
 // Helpers to set filters from search query
 
 const setFiltersFromAssetTypeQuery = filter => {
-  assetTypeFilters.operator = getFilterOperator(
-    filter.excluding,
-    filter.assetTypes.length > 1
-  )
-  assetTypeFilters.values = filter.assetTypes.map(assetType => assetType.id)
+  // The search keeps a type name that matches no asset type, as after a rename.
+  if (filter.assetTypes.length === 0) {
+    assetTypeFilters.operator = '='
+    assetTypeFilters.values = ['-']
+  } else {
+    assetTypeFilters.operator = getFilterOperator(
+      filter.excluding,
+      filter.assetTypes.length > 1
+    )
+    assetTypeFilters.values = filter.assetTypes.map(assetType => assetType.id)
+  }
 }
 
 const getFilterOperator = (excluding, isMany) => {
