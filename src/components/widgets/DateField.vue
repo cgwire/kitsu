@@ -259,6 +259,9 @@ const localValue = computed({
     return toPickerDate(props.modelValue)
   },
   set(value) {
+    // The picker clears its input again when Tab leaves it empty: a list
+    // would apply that clear to all its selected rows.
+    if (!value && !props.modelValue) return
     if (props.range) {
       // partialRange is disabled in the template: combined with auto-apply,
       // the picker would otherwise apply [start, null] and close the menu on

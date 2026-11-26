@@ -196,6 +196,54 @@ describe('DateField', () => {
     })
   })
 
+  // The picker clears its value when Tab leaves its empty input, and a list
+  // applies a clear to all its selected rows, the ones holding a date too.
+  describe('clear', () => {
+    it.each([
+      ['a day', {}],
+      ['a range', { range: true }]
+    ])('sends none when Tab leaves an empty field of %s', async (_, props) => {
+      const wrapper = mount(DateField, {
+        props: { ...props, modelValue: null },
+        global: {
+          plugins: [
+            createStore({
+              getters: {
+                isDarkTheme: () => false,
+                user: () => ({ locale: 'en_US' })
+              }
+            })
+          ]
+        }
+      })
+      await flushPromises()
+
+      await wrapper.find('input').trigger('keydown', { key: 'Tab' })
+
+      expect(wrapper.emitted('update:model-value')).toBeUndefined()
+      expect(wrapper.emitted('change')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    it.each([
+      ['a day', { modelValue: new Date(2026, 7, 5) }],
+      [
+        'a range',
+        {
+          range: true,
+          modelValue: [new Date(2026, 7, 4), new Date(2026, 7, 6)]
+        }
+      ]
+    ])('sends the clear of %s', (_, props) => {
+      const wrapper = mountField(props)
+
+      pick(wrapper, null)
+
+      expect(wrapper.emitted('update:model-value')).toEqual([[null]])
+      expect(wrapper.emitted('change')).toEqual([[null]])
+    })
+  })
+
   // A list can show a date field on each of a thousand selected rows: a
   // lazy one shows the input alone, and loads its calendar when used.
   describe('lazy', () => {
