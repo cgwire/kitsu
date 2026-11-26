@@ -726,19 +726,24 @@ const entityListsByType = {
   Shot: () => shotsStore.cache.shots
 }
 
+// The plain load of the sequences and of the episodes brings no task: the
+// chevrons walk the tasks.
+const LIST_LOADS = {
+  Episode: 'loadEpisodesWithTasks',
+  Sequence: 'loadSequencesWithTasks'
+}
+
 // The page loads the list of its episode once the task shows, and a list load
 // replaces the cached array out of sight of Vue: the chevrons walk the list
-// once that load is over. The sequences and the episodes reload without the
-// tasks the chevrons read: their lists stay as they were.
+// once that load is over. Other pages load the sequences and the episodes
+// without the tasks the chevrons read: such a list has nothing to walk.
 const entityList = computed(() => {
   const type = currentType.value
-  if (
-    ['Asset', 'Edit', 'Shot'].includes(type) &&
-    !isListOfPageLoaded(store.getters, type)
-  ) {
-    return []
-  }
-  return entityListsByType[type]()
+  const isLoaded =
+    type === 'Episode'
+      ? store.getters.isEpisodeListLoadedWithTasks
+      : isListOfPageLoaded(store.getters, type)
+  return isLoaded ? entityListsByType[type]() : []
 })
 
 // Computed (task)
@@ -1376,7 +1381,7 @@ const loadPage = async () => {
   const type = currentType.value
   if (listReadWithTask !== type || !isListOfPageLoaded(store.getters, type)) {
     const isFailed = await store
-      .dispatch(`load${type}s`)
+      .dispatch(LIST_LOADS[type] ?? `load${type}s`)
       // The shots, the assets, and the edits answer a failure with an empty
       // list and their error flag; the sequences and the episodes pass it on.
       .then(() => Boolean(store.getters[`is${type}sLoadingError`]))

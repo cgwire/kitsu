@@ -32,6 +32,7 @@ import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import drafts from '@/lib/drafts'
 import { markRequestFailure } from '@/lib/errors'
 import { DEFAULT_FPS } from '@/lib/video'
+import episodesStore from '@/store/modules/episodes'
 import sequencesStore from '@/store/modules/sequences'
 import shotsStore from '@/store/modules/shots'
 import tasksStore from '@/store/modules/tasks'
@@ -302,7 +303,7 @@ describe('Task.vue', () => {
       const { dispatched } = await mountPage({
         task: buildTask({ entity_type_name: 'Episode' })
       })
-      expect(dispatched).toContain('loadEpisodes')
+      expect(dispatched).toContain('loadEpisodesWithTasks')
     })
 
     it('clears the task selection on mount', async () => {
@@ -1851,17 +1852,19 @@ describe('Task.vue task that fails to load', () => {
       entity_type_name: 'Sequence'
     })
     const failure = requestFailure(502)
-    const loadSequences = vi
+    const loadSequencesWithTasks = vi
       .fn()
       .mockRejectedValueOnce(failure)
       .mockResolvedValue()
-    const { wrapper, router } = await mountWithActions({ loadSequences })
+    const { wrapper, router } = await mountWithActions({
+      loadSequencesWithTasks
+    })
     expect(consoleError.mock.calls).toEqual([[failure]])
 
     await goTo(router, OTHER_TASK_ID)
 
     expect(headerTitle(wrapper)).toContain('SH02')
-    expect(loadSequences).toHaveBeenCalledTimes(2)
+    expect(loadSequencesWithTasks).toHaveBeenCalledTimes(2)
   })
 
   // Reading an edit task loads the assets, not the edits.
@@ -1909,23 +1912,29 @@ describe('Task.vue task that fails to load', () => {
     }
   )
 
-  // The other lists reload with the tasks the arrows walk.
-  it('loads the sequences of a sequence task the store holds already', async () => {
-    taskMap.set(TASK_ID, buildTask({ entity_type_name: 'Sequence' }))
-    const loadSequences = vi.fn(() => Promise.resolve())
-    await mountWithActions(
-      { loadSequences },
-      {
-        getterOverrides: {
-          isSequencesLoading: () => false,
-          sequencesLoadingKey: () => 'production-1/',
-          taskMap: () => taskMap
+  // The plain load of the sequences and of the episodes brings no task: a
+  // task opened by its link showed no arrow.
+  it.each(['Sequence', 'Episode'])(
+    'loads the %s list with the tasks the arrows walk',
+    async type => {
+      taskMap.set(TASK_ID, buildTask({ entity_type_name: type }))
+      const loadList = vi.fn(() => Promise.resolve())
+      const loadWithTasks = vi.fn(() => Promise.resolve())
+      await mountWithActions(
+        { [`load${type}s`]: loadList, [`load${type}sWithTasks`]: loadWithTasks },
+        {
+          getterOverrides: {
+            isSequencesLoading: () => false,
+            sequencesLoadingKey: () => 'production-1/',
+            taskMap: () => taskMap
+          }
         }
-      }
-    )
+      )
 
-    expect(loadSequences).toHaveBeenCalledTimes(1)
-  })
+      expect(loadWithTasks).toHaveBeenCalledTimes(1)
+      expect(loadList).not.toHaveBeenCalled()
+    }
+  )
 
   it('leaves the page alone when its list load ends while a newer read runs', async () => {
     taskMap.set(TASK_ID, buildTask())
@@ -4480,8 +4489,28 @@ describe('Task.vue navigation', () => {
       ).toEqual(['episode-1', 'episode-1'])
     })
 
-    // The page reloads them without the tasks the chevrons read.
-    it('keeps walking the sequences the store holds', async () => {
+    it.each([
+      [true, ['task-0-anim', 'task-3-anim']],
+      [false, []]
+    ])('walks the episodes loaded with their tasks (%s)', async (isLoaded, links) => {
+      episodesStore.cache.episodes = [...entities]
+      const { wrapper } = await mountWith({
+        entities: [],
+        currentTask: buildTask({
+          task_type_id: 'tt-anim',
+          entity_type_name: 'Episode'
+        }),
+        getterOverrides: { isEpisodeListLoadedWithTasks: () => isLoaded }
+      })
+      expect(entityLinks(wrapper)).toEqual(links)
+      episodesStore.cache.episodes = []
+    })
+
+    // A list loaded without its tasks, by another page, has none to walk.
+    it.each([
+      ['production-1/', ['task-0-anim', 'task-3-anim']],
+      ['production-1/#partial', []]
+    ])('walks the sequences loaded with their tasks (%s)', async (key, links) => {
       sequencesStore.cache.sequences.push(...entities)
       const { wrapper } = await mountWith({
         entities: [],
@@ -4489,9 +4518,12 @@ describe('Task.vue navigation', () => {
           task_type_id: 'tt-anim',
           entity_type_name: 'Sequence'
         }),
-        getterOverrides: { sequencesLoadingKey: () => 'production-1/#partial' }
+        getterOverrides: {
+          isSequencesLoading: () => false,
+          sequencesLoadingKey: () => key
+        }
       })
-      expect(entityLinks(wrapper)).toEqual(['task-0-anim', 'task-3-anim'])
+      expect(entityLinks(wrapper)).toEqual(links)
     })
   })
 })
