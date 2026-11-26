@@ -1453,7 +1453,8 @@
       "import_from_production": "Importálás másik produkcióból",
       "no_more_available_items": "Nincs több hozzáadható elem.",
       "preferences_title": "Beállítások",
-      "remove_logo": "Stúdió logó eltávolítása"
+      "remove_logo": "Stúdió logó eltávolítása",
+      "remove_logo_error": "Nem sikerült eltávolítani a stúdió logóját. Kérlek próbáld újra."
     },
     "task_status": {
       "create_error": "Hiba történt a feladat állapotok mentése közben. Biztosan nincs megegyező nevű feladat állapot?",
@@ -1496,6 +1497,8 @@
       "delete_force": "Leválasztás és törlés",
       "edit_title": "Feladat típus szerkesztése",
       "create_error": "Hiba történt a feladat típus létrehozásakor. Kérlek ellenőrizd, hogy nincs-e azonos nevű feladat típus.",
+      "name_taken": "Egy másik feladat típus már használja ezt a nevet: {name} ({entity}).",
+      "name_taken_archived": "Egy archivált feladat típus már használja ezt a nevet: {name} ({entity}).",
       "new_task_type": "Feladat típus hozzáadása",
       "number": "feladat típus | feladat típus",
       "title": "Feladat típusok",

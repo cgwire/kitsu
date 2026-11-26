@@ -342,6 +342,7 @@ const onAvatarClicked = person => {
 
 const onDeleteClicked = person => {
   personToDelete.value = person
+  errors.del = false
   modals.del = true
 }
 

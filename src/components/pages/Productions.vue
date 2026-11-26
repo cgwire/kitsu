@@ -281,14 +281,18 @@ const confirmDeleteProduction = () => {
     })
 }
 
+// A save or a deletion can still fail after Cancel: its error is cleared on
+// opening, not on closing.
 const onEditClicked = production => {
   store.dispatch('storeProductionPicture', null)
   productionToEdit.value = production
+  errors.edit = false
   modals.isEditDisplayed = true
 }
 
 const onDeleteClicked = production => {
   productionToDelete.value = production
+  errors.del = false
   modals.isDeleteDisplayed = true
 }
 
@@ -333,6 +337,7 @@ const onEditProjectMetadata = fieldName => {
 
 const onDeleteProjectMetadataField = fieldName => {
   fieldNameForDeleteMetadata.value = fieldName
+  errors.deleteProjectMetadata = false
   modals.isDeleteProjectMetadata = true
 }
 

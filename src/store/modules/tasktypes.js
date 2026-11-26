@@ -141,6 +141,13 @@ const actions = {
     })
   },
 
+  // The task types as Zou lists them now, archived ones included, for a
+  // check that must not replace the store: a page may hold changes it has
+  // not saved yet, a reorder for instance.
+  getTaskTypes() {
+    return taskTypesApi.getTaskTypes()
+  },
+
   loadTaskType({ commit, state }, taskTypeId) {
     return taskTypesApi.getTaskType(taskTypeId).then(taskType => {
       commit(EDIT_TASK_TYPE_END, taskType)

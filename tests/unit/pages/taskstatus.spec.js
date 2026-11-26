@@ -8,7 +8,9 @@ vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import TaskStatusList from '@/components/lists/TaskStatusList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditTaskStatusModal from '@/components/modals/EditTaskStatusModal.vue'
 import TaskStatus from '@/components/pages/TaskStatus.vue'
+import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 
 const buildStatuses = (names, fields = {}) =>
   names.map((name, index) => ({
@@ -24,11 +26,12 @@ const router = createRouter({
 })
 
 // Each drop makes the list emit the statuses in their new order. A status
-// saves in 100 ms.
+// saves in 100 ms. The save implementation answers the form saves.
 const mountPage = async ({
   failing = [],
   deleteError = null,
-  deletion = null
+  deletion = null,
+  save = null
 } = {}) => {
   const store = createStore({
     state: {
@@ -52,6 +55,9 @@ const mountPage = async ({
   })
   const saves = []
   store.dispatch = vi.fn((action, status) => {
+    if (['newTaskStatus', 'saveTaskStatus'].includes(action) && save) {
+      return save()
+    }
     if (action === 'deleteTaskStatus' && deletion) return deletion
     if (action === 'deleteTaskStatus' && deleteError) {
       return Promise.reject(deleteError)
@@ -296,5 +302,55 @@ describe('TaskStatus', () => {
 
       expect(modal.props('active')).toBe(true)
     })
+  })
+
+  // Regression: the page kept the error of a failed save, so the next opening
+  // of the form showed it. A save failing after Cancel must not show either.
+  describe('the task status form', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it.each([
+      [
+        'a new status',
+        wrapper => wrapper.findComponent(ListPageHeader).vm.$emit('new-clicked')
+      ],
+      [
+        'a status to edit',
+        wrapper =>
+          wrapper
+            .findComponent(TaskStatusList)
+            .vm.$emit('edit-clicked', { id: 'wip', name: 'WIP' })
+      ]
+    ])(
+      'opens on %s without the error of a save failed after Cancel',
+      async (target, emitOpen) => {
+        vi.spyOn(console, 'error').mockImplementation(() => {})
+        let failSave
+        const { wrapper } = await mountPage({
+          save: () =>
+            new Promise((resolve, reject) => {
+              failSave = reject
+            })
+        })
+        const open = async () => {
+          emitOpen(wrapper)
+          await flushPromises()
+        }
+        const modal = () => wrapper.findComponent(EditTaskStatusModal)
+        await open()
+        modal().vm.$emit('confirm', { name: 'Layout' })
+        await modal().vm.$emit('cancel')
+        failSave(new Error('Bad Request'))
+        await flushPromises()
+        expect(modal().props()).toMatchObject({ active: false, isError: true })
+
+        await open()
+
+        expect(modal().props()).toMatchObject({ active: true, isError: false })
+        expect(console.error).toHaveBeenCalled()
+      }
+    )
   })
 })

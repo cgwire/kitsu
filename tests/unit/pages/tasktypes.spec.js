@@ -8,7 +8,9 @@ vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import TaskTypeList from '@/components/lists/TaskTypeList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditTaskTypeModal from '@/components/modals/EditTaskTypeModal.vue'
 import TaskTypes from '@/components/pages/TaskTypes.vue'
+import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 
 const taskType = {
   id: 'task-type-1',
@@ -326,5 +328,72 @@ describe('TaskTypes', () => {
       expect(errorHandler).toHaveBeenCalledTimes(1)
       expect(errorHandler.mock.calls[0][0]).toBe(error)
     })
+  })
+
+  // Regression: the page kept the error of a failed save, so the next opening
+  // of the form showed it. A save failing after Cancel must not show either.
+  describe('the task type form', () => {
+    const mountForSave = async save => {
+      const store = createStore({
+        getters: {
+          archivedTaskTypes: () => [],
+          departmentMap: () => new Map(),
+          taskTypes: () => shotTaskTypes
+        }
+      })
+      store.dispatch = vi.fn((action, payload) =>
+        ['editTaskType', 'newTaskType'].includes(action)
+          ? save(payload)
+          : Promise.resolve()
+      )
+      await router.push('/task-types?entity=shots')
+      await router.isReady()
+      const wrapper = shallowMount(TaskTypes, {
+        global: { plugins: [store, router] }
+      })
+      await flushPromises()
+      return wrapper
+    }
+
+    it.each([
+      [
+        'a new task type',
+        wrapper => wrapper.findComponent(ListPageHeader).vm.$emit('new-clicked')
+      ],
+      [
+        'a task type to edit',
+        wrapper =>
+          wrapper
+            .findComponent(TaskTypeList)
+            .vm.$emit('edit-clicked', shotTaskTypes[0])
+      ]
+    ])(
+      'opens on %s without the error of a save failed after Cancel',
+      async (target, emitOpen) => {
+        let failSave
+        const wrapper = await mountForSave(
+          () =>
+            new Promise((resolve, reject) => {
+              failSave = reject
+            })
+        )
+        const open = async () => {
+          emitOpen(wrapper)
+          await flushPromises()
+        }
+        const modal = () => wrapper.findComponent(EditTaskTypeModal)
+        await open()
+        modal().vm.$emit('confirm', { name: 'Layout' })
+        await modal().vm.$emit('cancel')
+        failSave(new Error('Bad Request'))
+        await flushPromises()
+        expect(modal().props()).toMatchObject({ active: false, isError: true })
+
+        await open()
+
+        expect(modal().props()).toMatchObject({ active: true, isError: false })
+        expect(console.error).toHaveBeenCalled()
+      }
+    )
   })
 })

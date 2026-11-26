@@ -1451,6 +1451,7 @@
       },
       "webhook_error": "Si è verificato un errore durante l'invio del webhook",
       "remove_logo": "Rimuovi il logo dello studio",
+      "remove_logo_error": "Impossibile rimuovere il logo dello studio. Riprova.",
       "available_items": "Elementi disponibili",
       "import_from_production": "Importa da un'altra produzione",
       "no_more_available_items": "Non ci sono altri elementi disponibili da aggiungere."
@@ -1496,6 +1497,8 @@
       "delete_force": "Scollega ed elimina",
       "edit_title": "Modifica tipo di task",
       "create_error": "Si è verificato un errore durante la creazione del tipo di task. Verifica che non esista già un tipo di task con un nome simile.",
+      "name_taken": "Un altro tipo di task usa già questo nome: {name} ({entity}).",
+      "name_taken_archived": "Un tipo di task archiviato usa già questo nome: {name} ({entity}).",
       "new_task_type": "Aggiungi un tipo di task",
       "number": "tipo di task | tipi di task",
       "title": "Tipi di task",

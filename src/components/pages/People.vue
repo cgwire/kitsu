@@ -84,7 +84,7 @@
     <import-render-modal
       active
       :is-loading="isImportPeopleLoading"
-      :is-error="isImportPeopleLoadingError"
+      :is-error="Boolean(errors.importingError)"
       :import-error="errors.importingError"
       :parsed-csv="parsedCSV"
       :columns="[...dataMatchers, ...csvColumns, ...optionalCsvColumns]"
@@ -312,9 +312,6 @@ const isGuestsLoadingError = computed(() => store.getters.isGuestsLoadingError)
 const isImportPeopleLoading = computed(
   () => store.getters.isImportPeopleLoading
 )
-const isImportPeopleLoadingError = computed(
-  () => store.getters.isImportPeopleLoadingError
-)
 const isPeopleLoading = computed(() => store.getters.isPeopleLoading)
 const isPeopleLoadingError = computed(() => store.getters.isPeopleLoadingError)
 const mainConfig = computed(() => store.getters.mainConfig)
@@ -504,6 +501,9 @@ const renderImport = async (data, mode) => {
       mode === 'file' ? data.get('file') : data
     )
     hideImportModal()
+    // An upload can still fail after Cancel: its error is cleared when the
+    // next preview opens, not on closing.
+    errors.importingError = null
     modals.isImportRenderDisplayed = true
   } catch (err) {
     errors.importing = true
@@ -744,6 +744,7 @@ const onAvatarClicked = person => {
 
 const onDeleteClicked = person => {
   personToDelete.value = person
+  errors.del = false
   modals.del = true
 }
 

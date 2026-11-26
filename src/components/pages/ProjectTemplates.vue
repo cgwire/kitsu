@@ -122,13 +122,19 @@ const onExportClicked = () => {
   csv.buildCsvFile(name, entries)
 }
 
+// A save or a deletion can still fail after Cancel: its error is cleared on
+// opening, not on closing.
 const onNewClicked = () => {
   templateToEdit.value = { name: '', description: '' }
+  errors.edit = false
+  errors.duplicate = false
   modals.edit = true
 }
 
 const onEditClicked = template => {
   templateToEdit.value = template
+  errors.edit = false
+  errors.duplicate = false
   modals.edit = true
 }
 
@@ -163,6 +169,7 @@ const confirmEditTemplate = async form => {
 
 const onDeleteClicked = template => {
   templateToDelete.value = template
+  errors.del = false
   modals.del = true
 }
 

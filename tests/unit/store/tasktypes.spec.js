@@ -238,6 +238,17 @@ describe('Task types store', () => {
       expect(rejections).toEqual([])
     })
 
+    test('getTaskTypes resolves with the task types and leaves the store as it is', async () => {
+      vi.spyOn(taskTypesApi, 'getTaskTypes').mockResolvedValue([...taskTypes])
+      const commit = vi.fn()
+
+      await expect(store.actions.getTaskTypes({ commit })).resolves.toEqual(
+        taskTypes
+      )
+
+      expect(commit).not.toHaveBeenCalled()
+    })
+
     test('newTaskType', async () => {
       const data = { name: 'Rigging' }
       const taskType = { id: 'task-type-9', name: 'Rigging' }

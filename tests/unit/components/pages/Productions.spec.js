@@ -6,6 +6,9 @@ vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 import errors from '@/lib/errors'
 
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditProductionModal from '@/components/modals/EditProductionModal.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import Productions from '@/components/pages/Productions.vue'
 
 import { mountEntityPage } from '../../fixtures/entity-page'
@@ -45,6 +48,60 @@ const mountPage = ({
     getters: { productions: [production] },
     actions
   })
+
+// Regression: a save or a deletion failing after Cancel showed its error on
+// the next opening.
+describe('Productions page, production modals', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  test.each([
+    ['edit', 'edit-clicked', production, EditProductionModal, 'editProduction'],
+    [
+      'deletion',
+      'delete-clicked',
+      production,
+      HardDeleteModal,
+      'deleteProduction'
+    ],
+    [
+      'column deletion',
+      'delete-metadata',
+      descriptor.field_name,
+      DeleteModal,
+      'deleteProjectMetadataByFieldName'
+    ]
+  ])(
+    'opens the %s modal without the error of a failure after Cancel',
+    async (_, event, entry, Modal, action) => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      let fail
+      const { wrapper } = await mountPage({
+        actions: {
+          [action]: () =>
+            new Promise((resolve, reject) => {
+              fail = reject
+            })
+        }
+      })
+      const list = wrapper.findComponent({ name: 'ProductionList' })
+      const modal = () => wrapper.findComponent(Modal)
+      await list.vm.$emit(event, entry)
+      await modal().vm.$emit('confirm', { name: 'Renamed' })
+      await modal().vm.$emit('cancel')
+      const error = new Error('Bad Request')
+      fail(error)
+      await flushPromises()
+      expect(consoleError).toHaveBeenCalledWith(error)
+
+      await list.vm.$emit(event, entry)
+
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('isError')).toBe(false)
+    }
+  )
+})
 
 // Zou refuses a column named like another one: a close keeps the error, the
 // next opening drops it.
