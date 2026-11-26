@@ -279,6 +279,7 @@ describe('TaskType page, estimations export labels', () => {
       }
     )
 
+    // The export writes the descriptors before the real dates.
     it('keeps the column of a descriptor named like one', async () => {
       const descriptor = {
         id: 'descriptor-1',
@@ -289,7 +290,7 @@ describe('TaskType page, estimations export labels', () => {
         departments: []
       }
 
-      const { imported } = await reimportExport({
+      const { exported, imported } = await reimportExport({
         canEditRealDates: true,
         descriptors: [descriptor],
         forEntity: 'Asset',
@@ -297,7 +298,11 @@ describe('TaskType page, estimations export labels', () => {
         type: 'assets'
       })
 
-      expect(imported.filter(header => header === 'WIP date')).toHaveLength(2)
+      expect(imported.filter(header => header === 'WIP date')).toHaveLength(1)
+      expect(imported.indexOf('WIP date')).toBe(
+        exported.indexOf('WIP date')
+      )
+      expect(imported).toContain('Unknown column')
     })
 
     it.each([

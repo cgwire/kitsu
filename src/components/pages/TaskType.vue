@@ -2146,14 +2146,17 @@ const renameExportLabels = headers => {
 
 // A re-imported export would write back the real dates it holds, which
 // status changes may have moved since: the preview leaves their columns
-// unmatched until the user picks them in the menu of the column.
+// unmatched until the user picks them in the menu of the column. A
+// descriptor named like one keeps the first column of that name: the
+// export writes the descriptors before the real dates.
 const leaveRealDatesUnmatched = headers => {
   if (!canEditRealDates.value) return headers
   const descriptorNames = taskMetadataDescriptors.value.map(
     descriptor => descriptor.name
   )
-  return headers.map(header =>
-    realDateColumns.includes(header) && !descriptorNames.includes(header)
+  return headers.map((header, index) =>
+    realDateColumns.includes(header) &&
+    !(descriptorNames.includes(header) && headers.indexOf(header) === index)
       ? t('main.csv.unknown')
       : header
   )
