@@ -60,10 +60,7 @@
                     icon="plus"
                     :text="''"
                     @click="onAddMetadataClicked"
-                    v-if="
-                      (isCurrentUserManager || isCurrentUserSupervisor) &&
-                      !isLoading
-                    "
+                    v-if="isMetadataAddAllowed"
                   />
                 </template>
               </sortable-field-header>
@@ -280,8 +277,10 @@
                   max_retakes: !isMaxRetakes
                 }"
                 :production-id="currentProduction?.id"
+                :is-add-allowed="isMetadataAddAllowed"
                 v-model="metadataDisplayHeaders"
                 v-model:is-open="columnSelectorDisplayed"
+                @add-metadata="onAddMetadataClicked"
                 v-if="displaySettings.showInfos"
               />
 
@@ -897,9 +896,6 @@ const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
-const isCurrentUserSupervisor = computed(
-  () => store.getters.isCurrentUserProductionSupervisor
-)
 const isFps = computed(() => store.getters.isFps)
 const isFrameIn = computed(() => store.getters.isFrameIn)
 const isFrameOut = computed(() => store.getters.isFrameOut)
@@ -944,6 +940,7 @@ const {
   getValidationStyle,
   hiddenColumns,
   isEmptyTask,
+  isMetadataAddAllowed,
   isMetadataColumnEditAllowed,
   isValidResolution,
   lastHeaderMenuDisplayed,

@@ -80,13 +80,22 @@
             </li>
           </template>
         </ul>
+        <button
+          class="column-menu__add"
+          type="button"
+          @click="onAddClicked"
+          v-if="isAddAllowed"
+        >
+          <plus-icon class="column-menu__add-icon" :size="14" />
+          {{ $t('productions.metadata.title') }}
+        </button>
       </div>
     </template>
   </teleport>
 </template>
 
 <script setup>
-import { GripVerticalIcon } from 'lucide-vue-next'
+import { GripVerticalIcon, PlusIcon } from 'lucide-vue-next'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
@@ -110,6 +119,8 @@ const props = defineProps({
   modelValue: { type: Object, required: true },
   namespace: { type: String, required: true },
   externalReorder: { type: Function, default: null },
+  // Offers a new metadata column, which the list then asks the page for.
+  isAddAllowed: { type: Boolean, default: false },
   isOpen: { type: Boolean, default: false },
   // Production the displayed columns belong to. Left unset by
   // cross-production consumers (ProductionList.vue), which keep the
@@ -117,7 +128,11 @@ const props = defineProps({
   productionId: { type: String, default: null }
 })
 
-const emit = defineEmits(['update:model-value', 'update:is-open'])
+const emit = defineEmits([
+  'add-metadata',
+  'update:model-value',
+  'update:is-open'
+])
 
 // State
 
@@ -215,6 +230,11 @@ const positionMenu = () => {
 }
 
 const closeMenu = () => emit('update:is-open', false)
+
+const onAddClicked = () => {
+  closeMenu()
+  emit('add-metadata')
+}
 
 const onKeyEscape = event => {
   if (event.key === 'Escape' && props.isOpen) {
@@ -404,6 +424,37 @@ onBeforeUnmount(() => {
     list-style-type: none;
     margin: 0;
   }
+}
+
+.column-menu__add {
+  align-items: center;
+  background: var(--background);
+  border: 0;
+  border-top: 1px solid var(--border);
+  bottom: 0;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 0.6em;
+  padding: 0.8em;
+  position: sticky;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    background: var(--background-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $green;
+    outline-offset: -2px;
+  }
+}
+
+.column-menu__add-icon {
+  flex-shrink: 0;
+  opacity: 0.7;
 }
 
 .column-menu__mask {

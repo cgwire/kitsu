@@ -55,12 +55,12 @@ describe('TableMetadataSelectorMenu', () => {
     })
   }
 
-  const openMenu = async ({ namespace = 'shots', hostTop }) => {
+  const openMenu = async ({ namespace = 'shots', hostTop, props = {} }) => {
     const store = createStore({
       getters: { isCurrentUserManager: () => false }
     })
     wrapper = mountWithI18n(TableMetadataSelectorMenu, {
-      props: { descriptors, modelValue: {}, namespace },
+      props: { descriptors, modelValue: {}, namespace, ...props },
       global: { plugins: [store] }
     })
     placeHost(hostTop)
@@ -186,6 +186,34 @@ describe('TableMetadataSelectorMenu', () => {
     await wrapper.setProps({ isOpen: false })
 
     expect(pressEscape().defaultPrevented).toBe(false)
+  })
+
+  describe('add a metadata column entry', () => {
+    const addButton = () => document.querySelector('.column-menu__add')
+
+    test('offers it when the list allows it', async () => {
+      await openMenu({ hostTop: 219, props: { isAddAllowed: true } })
+
+      expect(addButton().tagName).toBe('BUTTON')
+      expect(addButton().getAttribute('type')).toBe('button')
+      expect(addButton().textContent.trim()).toBe('Add metadata column')
+    })
+
+    test('closes the menu and asks the list for the new column', async () => {
+      await openMenu({ hostTop: 219, props: { isAddAllowed: true } })
+
+      addButton().click()
+
+      expect(wrapper.emitted('update:is-open')).toEqual([[false]])
+      expect(wrapper.emitted('add-metadata')).toHaveLength(1)
+    })
+
+    test('leaves it out by default', async () => {
+      await openMenu({ hostTop: 219 })
+
+      expect(menu()).not.toBeNull()
+      expect(addButton()).toBeNull()
+    })
   })
 
   describe('column reorder', () => {

@@ -9,6 +9,7 @@ import resizableColumn from '@/directives/resizable-column'
 import peopleStore from '@/store/modules/people'
 
 import ProductionList from '@/components/lists/ProductionList.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
 
 import { shallowMountWithI18n } from '../../fixtures/i18n'
 
@@ -461,5 +462,34 @@ describe('lists/ProductionList', () => {
       'Urgent (1)'
     ])
     wrapper.unmount()
+  })
+
+  describe('visible columns menu', () => {
+    const findMenu = getters => {
+      const { wrapper } = mountList({
+        productions: [production(1, 'Alpha')],
+        getters
+      })
+      onTestFinished(() => wrapper.unmount())
+      return { menu: wrapper.findComponent(TableMetadataSelectorMenu), wrapper }
+    }
+
+    test.each([
+      ['a manager', { isCurrentUserManager: () => true }, true],
+      ['a supervisor', { isCurrentUserSupervisor: () => true }, true],
+      ['an artist', {}, false]
+    ])('lets %s add a metadata column', (_, getters, isAllowed) => {
+      const { menu } = findMenu(getters)
+
+      expect(menu.props('isAddAllowed')).toBe(isAllowed)
+    })
+
+    test('passes the menu request on to the page', async () => {
+      const { menu, wrapper } = findMenu({ isCurrentUserManager: () => true })
+
+      await menu.vm.$emit('add-metadata')
+
+      expect(wrapper.emitted('add-metadata')).toHaveLength(1)
+    })
   })
 })

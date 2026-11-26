@@ -15,6 +15,7 @@ import { trackTaskSelection } from '../../fixtures/task-selection'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
 import TaskList from '@/components/lists/TaskList.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
 import assetStore from '@/store/modules/assets'
 import editStore from '@/store/modules/edits'
 import episodeStore from '@/store/modules/episodes'
@@ -403,6 +404,38 @@ describe('lists/TaskList', () => {
     ])
 
     wrapper.unmount()
+  })
+
+  describe('visible columns menu', () => {
+    test.each([
+      ['offers', true],
+      ['leaves out', false]
+    ])(
+      '%s a new metadata column as the page allows',
+      (_, isMetadataAddAllowed) => {
+        const wrapper = mountList(undefined, {
+          props: { isMetadataAddAllowed }
+        })
+        onTestFinished(() => wrapper.unmount())
+
+        expect(
+          wrapper.findComponent(TableMetadataSelectorMenu).props('isAddAllowed')
+        ).toBe(isMetadataAddAllowed)
+      }
+    )
+
+    test('passes the menu request on to the page', async () => {
+      const wrapper = mountList(undefined, {
+        props: { isMetadataAddAllowed: true }
+      })
+      onTestFinished(() => wrapper.unmount())
+
+      await wrapper
+        .findComponent(TableMetadataSelectorMenu)
+        .vm.$emit('add-metadata')
+
+      expect(wrapper.emitted('add-metadata')).toHaveLength(1)
+    })
   })
 
   describe('estimation field', () => {
