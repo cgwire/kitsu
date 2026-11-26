@@ -4109,6 +4109,172 @@ describe('PlaylistPlayer.vue', () => {
 
       expect(heard).toEqual(['touch'])
     })
+
+    describe('in a comparison', () => {
+      // The picture of Layout is the one compared.
+      const pictures = {
+        id: 'shot-1',
+        preview_file_id: 'shot-1-anim',
+        preview_file_extension: 'png',
+        preview_files: {
+          'tt-anim': [{ id: 'shot-1-anim', revision: 1, extension: 'png' }],
+          'tt-layout': [{ id: 'shot-1-layout', revision: 1, extension: 'png' }]
+        }
+      }
+      const movieWithPicture = {
+        ...pictures,
+        preview_file_extension: 'mp4',
+        preview_files: {
+          ...pictures.preview_files,
+          'tt-anim': [{ id: 'shot-1-anim', revision: 1, extension: 'mp4' }]
+        }
+      }
+      // panzoom moves the compared picture inside its own viewer.
+      const comparedViewer = setPanZoom => ({
+        name: 'PictureViewer',
+        template: `
+          <div class="picture-player">
+            <div class="picture-subwrapper">
+              <div><img /></div>
+            </div>
+          </div>
+        `,
+        methods: {
+          getPictureElement() {
+            return this.$el.querySelector('img')
+          },
+          setPanZoom
+        }
+      })
+      const placeAt = (element, left) => {
+        element.getBoundingClientRect = () => ({
+          left,
+          top: 0,
+          right: left + 400,
+          bottom: 300,
+          width: 400,
+          height: 300
+        })
+      }
+      const openComparison = async ({
+        entities,
+        zoomAt = () => {},
+        setPanZoom = () => {}
+      }) => {
+        wrapper = mountPlayer({
+          entities,
+          taskTypeMap: comparedTaskTypeMap,
+          stubs: {
+            MultiPictureViewer: pictureViewer(zoomAt),
+            PictureViewer: comparedViewer(setPanZoom)
+          }
+        })
+        await flushPromises()
+        wrapper
+          .findComponent({ name: 'PlayerComparisonBar' })
+          .vm.$emit('compare-clicked')
+        await flushPromises()
+        return wrapper.findComponent({ ref: 'picture-player-comparison' })
+      }
+
+      // A first finger on the compared picture and a second one on the main
+      // picture made panzoom divide by a length it never measured ("zoom
+      // requires valid numbers").
+      it('keeps the fingers on the compared picture from panzoom', async () => {
+        const compared = await openComparison({ entities: [pictures] })
+        const image = compared.find('img').element
+        const heard = vi.fn()
+        image.parentElement.addEventListener('touchstart', heard)
+
+        image.dispatchEvent(new Event('touchstart', { bubbles: true }))
+
+        expect(heard).not.toHaveBeenCalled()
+      })
+
+      it('keeps the fingers on the compared movie from panzoom', async () => {
+        wrapper = mountPlayer({
+          entities: [comparedEntity('shot-1')],
+          taskTypeMap: comparedTaskTypeMap,
+          stubs: { MultiVideoViewer: movieViewer(() => {}) }
+        })
+        await flushPromises()
+        wrapper
+          .findComponent({ name: 'PlayerComparisonBar' })
+          .vm.$emit('compare-clicked')
+        await flushPromises()
+        const movie = wrapper
+          .findComponent({ ref: 'raw-player-comparison' })
+          .find('canvas').element
+        const heard = vi.fn()
+        movie.parentElement.addEventListener('touchstart', heard)
+
+        movie.dispatchEvent(new Event('touchstart', { bubbles: true }))
+
+        expect(heard).not.toHaveBeenCalled()
+      })
+
+      // The compared picture mirrors the main one, which sits 20 px into its
+      // viewer. Side by side, the compared viewer stands 500 px to the right,
+      // its picture 30 px into it; laid over, it shares the box of the main
+      // viewer, its picture elsewhere in it.
+      const pinchCompared = async ({ viewerAt, imageAt }) => {
+        const zoomAt = vi.fn()
+        const compared = await openComparison({ entities: [pictures], zoomAt })
+        const main = wrapper.findComponent({ ref: 'picture-player' })
+        const image = compared.find('img').element
+        placeAt(main.element, 0)
+        placeAt(main.find('img').element, 20)
+        placeAt(compared.element, viewerAt)
+        placeAt(image, imageAt)
+
+        pointer(image, 'pointerdown', { id: 1, x: imageAt + 100, y: 100 })
+        pointer(image, 'pointerdown', { id: 2, x: imageAt + 200, y: 100 })
+        pointer(image, 'pointermove', { id: 2, x: imageAt + 300, y: 100 })
+        return zoomAt
+      }
+
+      it('zooms the main picture at the spot pinched beside it', async () => {
+        const zoomAt = await pinchCompared({ viewerAt: 500, imageAt: 530 })
+        expect(zoomAt.mock.calls).toEqual([[220, 100, 2]])
+      })
+
+      it('zooms the main picture at the spot pinched over it', async () => {
+        const zoomAt = await pinchCompared({ viewerAt: 0, imageAt: 50 })
+        expect(zoomAt.mock.calls).toEqual([[250, 100, 2]])
+      })
+
+      // The band around the compared picture belongs to its viewer.
+      it('zooms the main picture from the band of the compared one', async () => {
+        const zoomAt = vi.fn()
+        const compared = await openComparison({ entities: [pictures], zoomAt })
+        const main = wrapper.findComponent({ ref: 'picture-player' })
+        const image = compared.find('img').element
+        const band = compared.find('.picture-subwrapper').element
+        placeAt(main.element, 0)
+        placeAt(main.find('img').element, 20)
+        placeAt(compared.element, 500)
+        placeAt(image, 530)
+
+        pointer(band, 'pointerdown', { id: 1, x: 600, y: 100 })
+        pointer(image, 'pointerdown', { id: 2, x: 700, y: 100 })
+        pointer(image, 'pointermove', { id: 2, x: 800, y: 100 })
+
+        expect(zoomAt.mock.calls).toEqual([[190, 100, 2]])
+      })
+
+      // Only a compared movie followed a movie.
+      it('moves a picture compared with a movie along with the movie', async () => {
+        const setPanZoom = vi.fn()
+        await openComparison({ entities: [movieWithPicture], setPanZoom })
+
+        wrapper
+          .findComponent({ ref: 'raw-player' })
+          .vm.$emit('panzoom-changed', { x: 10, y: 20, scale: 2 })
+        await flushPromises()
+
+        expect(setPanZoom).toHaveBeenCalledWith(10, 20, 2)
+      })
+    })
   })
 
   // On a phone the keyboard resizes the player as it opens: the canvas

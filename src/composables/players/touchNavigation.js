@@ -48,8 +48,9 @@ const pointerInit = event =>
  * @param {Object} options
  * @param {Ref<HTMLElement>} options.container element holding the surfaces
  * @param {Function} options.surfaces elements where a finger navigates:
- *   the annotation overlay and the viewer of the media, not only the
- *   media's parent, which the bands around a picture lie outside of
+ *   the annotation overlay, the viewer of the media (not only the media's
+ *   parent, which the bands around a picture lie outside of), and the
+ *   viewer of the media it is compared with
  * @param {Function} options.overlay the annotation overlay, where one
  *   finger uses the tool turned on
  * @param {Ref<Boolean>} options.isAnnotating an annotation tool is on

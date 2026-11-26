@@ -1001,6 +1001,7 @@ import { usePlayerTransport } from '@/composables/players/transport'
 import { usePreviewRoom } from '@/composables/previewRoom'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
 import { isValidRoomId } from '@/lib/players/events'
+import { pointOnMainMedia } from '@/lib/players/panzoom'
 import { scrubFrame } from '@/lib/players/scrub'
 import { warmPlaylistMovies } from '@/lib/playlist'
 import preferences from '@/lib/preferences'
@@ -2124,15 +2125,41 @@ const getMainViewer = () => {
   return null
 }
 
+// A compared movie or picture follows the main media: the fingers on either
+// side move the main one. A movie compared with a picture plays in a plain
+// video, with its controls.
+const getComparisonViewer = () => {
+  if (isCurrentPreviewMovie.value && isMovieComparison.value) {
+    return rawPlayerComparison.value
+  }
+  return isPictureComparison.value ? picturePlayerComparison.value : null
+}
+
+const getComparisonMedia = () => {
+  const viewer = getComparisonViewer()
+  return viewer?.getDisplaySurface?.() || viewer?.getPictureElement?.() || null
+}
+
 useTouchNavigation({
   container: videoContainer,
-  surfaces: () => [mainAnnotationCanvas.value?.overlay, getMainViewer()?.$el],
+  surfaces: () => [
+    mainAnnotationCanvas.value?.overlay,
+    getMainViewer()?.$el,
+    getComparisonViewer()?.$el
+  ],
   overlay: () => mainAnnotationCanvas.value?.overlay,
   isAnnotating: isAnnotationToolOn,
   isEnabled: isTouchNavigationEnabled,
   panBy: (dx, dy) => getMainViewer()?.panBy(dx, dy),
-  zoomAt: (clientX, clientY, ratio) =>
-    getMainViewer()?.zoomAt(clientX, clientY, ratio)
+  zoomAt: (clientX, clientY, ratio) => {
+    const { x, y } = pointOnMainMedia(clientX, clientY, {
+      mainArea: getMainViewer()?.$el?.getBoundingClientRect(),
+      comparisonArea: getComparisonViewer()?.$el?.getBoundingClientRect(),
+      main: mainMediaElement.value?.getBoundingClientRect(),
+      compared: getComparisonMedia()?.getBoundingClientRect()
+    })
+    getMainViewer()?.zoomAt(x, y, ratio)
+  }
 })
 
 const { cursor: annotationCursor } = useAnnotationCursor({
@@ -4887,11 +4914,7 @@ const onMainPanZoomReady = () => {
 }
 
 const setComparisonPanZoom = (x, y, scale) => {
-  if (isCurrentPreviewMovie.value) {
-    rawPlayerComparison.value?.setPanZoom(x, y, scale)
-  } else if (isCurrentPreviewPicture.value) {
-    picturePlayerComparison.value?.setPanZoom(x, y, scale)
-  }
+  getComparisonViewer()?.setPanZoom(x, y, scale)
 }
 
 const onPanZoomChanged = ({ x, y, scale }) => {
