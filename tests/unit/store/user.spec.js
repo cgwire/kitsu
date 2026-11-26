@@ -762,6 +762,11 @@ describe('User store', () => {
     { page: 'Team Schedule', type: 'TeamSchedule', listType: 'teamschedule' },
     { page: 'News Feed', type: 'NewsFeed', listType: 'newsfeed' },
     { page: 'Timesheets', type: 'Timesheets', listType: 'timesheets' },
+    {
+      page: 'Notifications',
+      type: 'Notifications',
+      listType: 'notifications'
+    },
     { page: 'Bots', type: 'Bots', listType: 'bots' },
     { page: 'My Checks', type: 'MyChecks', listType: 'mychecks' },
     { page: 'Event Logs', type: 'EventLogs', listType: 'eventlogs' },
