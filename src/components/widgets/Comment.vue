@@ -142,6 +142,17 @@
               @time-code-clicked="onChecklistTimecodeClicked"
               v-if="checklistItems.length > 0"
             />
+            <p v-if="pendingAttachmentNames.length > 0">
+              <span
+                :key="`pending-attachment-${index}`"
+                :title="name"
+                class="attachment-file-link pending-attachment"
+                v-for="(name, index) in pendingAttachmentNames"
+              >
+                <paperclip-icon class="attachment-icon" :size="16" />
+                <span class="attachment-file-name">{{ name }}</span>
+              </span>
+            </p>
             <p v-if="comment.attachment_files.length > 0">
               <attachment-image
                 v-for="attachment in pictureAttachments"
@@ -815,11 +826,17 @@ const canMoveComment = computed(() => props.canMove && !isPreviewBound.value)
 // for the comment Zou sends back.
 const isPending = computed(() => Boolean(props.comment.isPending))
 
+// The files sent with it: until Zou saved them, nothing to open.
+const pendingAttachmentNames = computed(
+  () => props.comment.pendingAttachmentNames || []
+)
+
 const isEmpty = computed(() => {
   return (
     props.comment.text.length === 0 &&
     (!props.comment.checklist || props.comment.checklist.length === 0) &&
     props.comment.attachment_files.length === 0 &&
+    pendingAttachmentNames.value.length === 0 &&
     props.comment.previews.length === 0
   )
 })
@@ -1452,6 +1469,14 @@ p {
   &:hover .attachment-download-icon,
   &:focus-visible .attachment-download-icon {
     opacity: 1;
+  }
+
+  &.pending-attachment {
+    cursor: default;
+
+    &:hover {
+      background: var(--background-page);
+    }
   }
 }
 

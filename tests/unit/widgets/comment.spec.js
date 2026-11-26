@@ -280,6 +280,38 @@ describe('Comment', () => {
       expect(wrapper.find('span.reply-button').exists()).toBe(false)
     })
 
+    test('names the files sent with it, with nothing to open yet', () => {
+      const wrapper = mountPending({
+        pendingAttachmentNames: ['take_v2.mov', 'notes.pdf']
+      })
+      const files = wrapper.findAll('.pending-attachment')
+      expect(files.map(file => file.text())).toEqual([
+        'take_v2.mov',
+        'notes.pdf'
+      ])
+      expect(files.every(file => file.element.tagName === 'SPAN')).toBe(true)
+      expect(wrapper.find('a.attachment-file-link').exists()).toBe(false)
+    })
+
+    test('gives the whole name of each file on hover', () => {
+      const wrapper = mountPending({
+        pendingAttachmentNames: ['sq010_sh0040_layout_v012_client_notes.pdf']
+      })
+      expect(wrapper.find('.pending-attachment').attributes('title')).toBe(
+        'sq010_sh0040_layout_v012_client_notes.pdf'
+      )
+    })
+
+    test('names the files when they are all it holds', () => {
+      const wrapper = mountPending({
+        text: '',
+        checklist: [],
+        pendingAttachmentNames: ['take_v2.mov']
+      })
+      expect(wrapper.find('.empty-comment').exists()).toBe(false)
+      expect(wrapper.find('.pending-attachment').text()).toBe('take_v2.mov')
+    })
+
     test('keeps its checklist read only', async () => {
       const wrapper = mountPending()
       await wrapper.vm.$nextTick()

@@ -144,31 +144,43 @@ const reloadAfterFailure = ({ dispatch }, taskIds) => {
 const showCommentsAtOnce = (context, comments) => {
   const { commit, rootGetters } = context
   const pendingComments = new Map(
-    comments.map(({ taskId, taskStatusId, text, checklist, forClient }) => [
-      taskId,
-      {
-        id: `pending-${++lastPendingCommentId}`,
-        isPending: true,
-        object_id: taskId,
-        person_id: rootGetters.user?.id,
-        // A guest is not in the person map the authors are read from.
-        person: rootGetters.user,
-        task_status_id: taskStatusId,
-        text: text || '',
-        checklist: checklist || [],
-        for_client: forClient || false,
-        // Zou dates are UTC, without a zone.
-        created_at: new Date().toISOString().slice(0, 19),
-        acknowledgements: [],
-        attachment_files: [],
-        department_mentions: [],
-        links: [],
-        mentions: [],
-        pinned: false,
-        previews: [],
-        replies: []
-      }
-    ])
+    comments.map(
+      ({
+        taskId,
+        taskStatusId,
+        text,
+        checklist,
+        forClient,
+        attachmentNames
+      }) => [
+        taskId,
+        {
+          id: `pending-${++lastPendingCommentId}`,
+          isPending: true,
+          object_id: taskId,
+          person_id: rootGetters.user?.id,
+          // A guest is not in the person map the authors are read from.
+          person: rootGetters.user,
+          task_status_id: taskStatusId,
+          text: text || '',
+          checklist: checklist || [],
+          for_client: forClient || false,
+          // Zou dates are UTC, without a zone.
+          created_at: new Date().toISOString().slice(0, 19),
+          acknowledgements: [],
+          // Zou gives the files their ids, which their links need: until
+          // then, the comment shows their names alone.
+          attachment_files: [],
+          pendingAttachmentNames: attachmentNames || [],
+          department_mentions: [],
+          links: [],
+          mentions: [],
+          pinned: false,
+          previews: [],
+          replies: []
+        }
+      ]
+    )
   )
   const taskIds = [...pendingComments.keys()]
   const edits = editTasksAtOnce(context, taskIds, taskId =>
@@ -829,7 +841,14 @@ const actions = {
       forClient
     }
     const takePendingCommentBack = showCommentsAtOnce(context, [
-      { taskId, taskStatusId, text: comment, checklist, forClient }
+      {
+        taskId,
+        taskStatusId,
+        text: comment,
+        checklist,
+        forClient,
+        attachmentNames: helpers.getFileNames(attachment || [])
+      }
     ])
     return tasksApi.commentTask(data).then(
       comment => {
@@ -1469,7 +1488,12 @@ const mutations = {
 
   [LOAD_TASK_COMMENTS_END](state, { taskId, comments }) {
     comments.forEach(comment => helpers.enrichCommentAuthors(comment))
-    state.taskComments[taskId] = sortComments([...comments])
+    // Zou lists a comment once saved: those shown meanwhile stay until their
+    // answer (see showCommentsAtOnce).
+    const pendingComments = (state.taskComments[taskId] || []).filter(
+      ({ isPending }) => isPending
+    )
+    state.taskComments[taskId] = sortComments([...pendingComments, ...comments])
     state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
       if (comment.previews && comment.previews.length > 0) {
         const preview = comment.previews[0]

@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { vi } from 'vitest'
+import { onTestFinished, vi } from 'vitest'
 
 // Importing the tasks module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -264,6 +264,127 @@ describe('Tasks store, writes shown before Zou answers', () => {
       await posted.catch(() => {})
 
       expect(renderedComments.map(({ id }) => id)).toEqual(expected)
+    })
+
+    // The files leave in the request that saves the comment: their upload
+    // can last minutes.
+    test('names the files sent with the comment while Zou saves it', async () => {
+      const request = defer()
+      tasksApi.commentTask.mockReturnValueOnce(request.promise)
+      const attach = name => {
+        const form = new FormData()
+        form.append('file', new File(['data'], name))
+        return form
+      }
+
+      const posted = store.dispatch('commentTask', {
+        taskId: 'task-1',
+        taskStatusId: 'status-wip',
+        comment: 'New take',
+        attachment: [attach('take_v2.mov'), attach('notes.pdf')]
+      })
+
+      const [pending] = store.getters.getTaskComments('task-1')
+      expect(pending.pendingAttachmentNames).toEqual([
+        'take_v2.mov',
+        'notes.pdf'
+      ])
+      // Only Zou gives the files their ids, which their links need.
+      expect(pending.attachment_files).toEqual([])
+
+      request.resolve(buildComment('task-1', 'wip', 'comment-1'))
+      await posted
+    })
+
+    // Back from another task, the panel reads the comments again while the
+    // files may still be on their way: Zou lists the comment once saved.
+    test('keeps showing the comment when the comments load again before Zou saved it', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      onTestFinished(() => vi.useRealTimers())
+      vi.setSystemTime(new Date('2026-06-01T10:00:00Z'))
+      // Each read of Zou brings new copies of the comments it lists.
+      const loadComments = comments =>
+        store.commit('LOAD_TASK_COMMENTS_END', {
+          taskId: 'task-1',
+          comments: comments.map(([id, createdAt]) => ({
+            ...buildComment('task-1', 'todo', id),
+            created_at: createdAt
+          }))
+        })
+      loadComments([
+        ['comment-3', '2026-02-01T10:00:00'],
+        ['comment-0', '2026-01-01T10:00:00']
+      ])
+      const request = defer()
+      tasksApi.commentTask.mockReturnValueOnce(request.promise)
+      const posted = post()
+      const [pending] = store.getters.getTaskComments('task-1')
+
+      // Meanwhile, a colleague commented and comment-3 was deleted.
+      loadComments([
+        ['comment-2', '2026-06-01T10:05:00'],
+        ['comment-0', '2026-01-01T10:00:00']
+      ])
+
+      const renderedComments = store.getters.getTaskComments('task-1')
+      expect(renderedComments.map(({ id }) => id)).toEqual([
+        'comment-2',
+        pending.id,
+        'comment-0'
+      ])
+
+      request.resolve(buildComment('task-1', 'wip', 'comment-1'))
+      await posted
+
+      expect(renderedComments.map(({ id }) => id)).toEqual([
+        'comment-1',
+        'comment-2',
+        'comment-0'
+      ])
+    })
+
+    // A second comment can be on its way at the same time: a status changed
+    // for a selection holding the task, or another post.
+    test('keeps every comment Zou is saving when the comments load again', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      onTestFinished(() => vi.useRealTimers())
+      vi.setSystemTime(new Date('2026-06-01T10:00:00Z'))
+      const firstRequest = defer()
+      const secondRequest = defer()
+      tasksApi.commentTask
+        .mockReturnValueOnce(firstRequest.promise)
+        .mockReturnValueOnce(secondRequest.promise)
+      const firstPosted = post()
+      vi.setSystemTime(new Date('2026-06-01T10:01:00Z'))
+      const secondPosted = post()
+      const [second, first] = store.getters.getTaskComments('task-1')
+
+      store.commit('LOAD_TASK_COMMENTS_END', {
+        taskId: 'task-1',
+        comments: [
+          {
+            ...buildComment('task-1', 'todo', 'comment-0'),
+            created_at: '2026-01-01T10:00:00'
+          }
+        ]
+      })
+
+      const renderedComments = store.getters.getTaskComments('task-1')
+      expect(renderedComments.map(({ id }) => id)).toEqual([
+        second.id,
+        first.id,
+        'comment-0'
+      ])
+
+      firstRequest.resolve(buildComment('task-1', 'wip', 'comment-1'))
+      secondRequest.resolve(buildComment('task-1', 'wip', 'comment-2'))
+      await Promise.all([firstPosted, secondPosted])
+
+      expect(renderedComments.map(({ id }) => id)).toEqual([
+        'comment-2',
+        'comment-1',
+        'comment-0'
+      ])
     })
 
     test('takes the comment and its status back once Zou refuses it', async () => {
