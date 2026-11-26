@@ -31,7 +31,10 @@ const mountViewer = (props = {}) => {
   const store = createStore({
     getters: { currentProduction: () => ({ fps: '25' }) }
   })
+  // Attached: isVisible() reads the computed style, which a detached tree
+  // lacks.
   return mount(MultiVideoViewer, {
+    attachTo: document.body,
     props: {
       entities: [
         { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },
@@ -820,6 +823,7 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
         }
       })
       const wrapper = mount(MultiVideoViewer, {
+        attachTo: document.body,
         props: {
           entities: [
             { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },

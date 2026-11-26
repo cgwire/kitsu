@@ -131,7 +131,10 @@ const mountPlayer = ({
   store.commit = vi.fn()
   store.$socket = { on: vi.fn(), off: vi.fn(), emit: vi.fn() }
 
+  // Attached: isVisible() reads the computed style, which a detached tree
+  // lacks.
   return shallowMount(PlaylistPlayer, {
+    attachTo: document.body,
     props: { playlist: playlistProp, entities, ...props },
     global: {
       plugins: [store],

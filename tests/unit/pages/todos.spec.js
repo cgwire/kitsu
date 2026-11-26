@@ -162,7 +162,10 @@ const mountPage = async (
   })
   await router.push({ path: '/', query })
   onRouter(router)
+  // Attached: isVisible() reads the computed style, which a detached tree
+  // lacks.
   const wrapper = shallowMount(Todos, {
+    attachTo: document.body,
     props,
     global: {
       config: { errorHandler },

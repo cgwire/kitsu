@@ -106,7 +106,7 @@ describe('AnnotationCanvas.vue', () => {
     expect([canvas.width, canvas.height]).toEqual([400, 300])
     expect(wrapper.emitted('resized')).toHaveLength(resizes)
     expect(overlay.style.transform).toBe(
-      'translate(0px, 0px) scale(1) scale(0.5, 0.5)'
+      'translate(0px) scale(1) scale(0.5)'
     )
   })
 
@@ -136,6 +136,6 @@ describe('AnnotationCanvas.vue', () => {
     expect(wrapper.emitted('resized').at(-1)).toEqual([
       { width: 200, height: 150 }
     ])
-    expect(overlay.style.transform).toBe('translate(0px, 0px) scale(1)')
+    expect(overlay.style.transform).toBe('translate(0px) scale(1)')
   })
 })
