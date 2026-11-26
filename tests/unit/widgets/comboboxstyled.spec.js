@@ -31,6 +31,25 @@ describe('ComboboxStyled', () => {
     expect(wrapper.find('.selected-line').text()).toBe('Version 1')
   })
 
+  // the zoom levels of a schedule
+  it('takes a number as its value', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const numbered = shallowMountWithI18n(ComboboxStyled, {
+      props: {
+        options: [
+          { label: 'Weeks', value: 0 },
+          { label: 'Days', value: 1 }
+        ],
+        modelValue: 1
+      },
+      global: { plugins: [router] }
+    })
+
+    expect(numbered.find('.selected-line').text()).toBe('Days')
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+
   it('does not show the dropdown list initially', () => {
     expect(wrapper.find('.select-input').exists()).toBe(false)
   })
