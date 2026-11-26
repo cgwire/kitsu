@@ -49,10 +49,11 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
       fakeContext
     )
-    // jsdom implements neither play() nor pause() on media elements; without
-    // these it logs "Not implemented" on every unmount (pause) and play.
+    // jsdom implements none of play(), pause() and load() on media elements;
+    // without these it logs "Not implemented" on every play and unmount.
     vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {})
+    vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {})
     fakeContext.drawImage.mockClear()
     installRvfcMock()
   })
@@ -482,5 +483,23 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
     // The handle cancelled must be the most recently scheduled one.
     expect(rvfcCancelled).toContain(rvfcCallbacks.length)
+  })
+
+  it('stops the movie download on unmount', () => {
+    const wrapper = mountViewer()
+    const video = wrapper.find('video').element
+    expect(video.hasAttribute('src')).toBe(true)
+    const load = HTMLMediaElement.prototype.load
+    // Only the calls of the unmount count.
+    load.mockClear()
+    let srcAtLoad
+    load.mockImplementation(() => {
+      srcAtLoad = video.getAttribute('src')
+    })
+    wrapper.unmount()
+    expect(load.mock.contexts).toHaveLength(1)
+    expect(load.mock.contexts[0]).toBe(video)
+    // load() with the source still set would fetch the movie again.
+    expect(srcAtLoad).toBeNull()
   })
 })
