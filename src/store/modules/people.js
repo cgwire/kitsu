@@ -1069,8 +1069,12 @@ const mutations = {
     state.timesheet = timesheet
   },
 
+  // A save answered once the timesheet shows another day or person belongs
+  // to the one left.
   [SET_TIME_SPENT](state, timeSpent) {
-    if (state.person?.id === timeSpent.person_id) {
+    if (
+      state.personTimeSpentKey === `${timeSpent.person_id}/${timeSpent.date}`
+    ) {
       state.personTimeSpentMap[timeSpent.task_id] = timeSpent
     }
     state.personTimeSpentTotal =

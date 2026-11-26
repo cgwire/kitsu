@@ -100,12 +100,40 @@ describe('People store', () => {
 
     test('SET_TIME_SPENT stores the entry for the displayed person', () => {
       state.person = { id: 'person-1' }
+      state.personTimeSpentKey = 'person-1/2026-11-02'
       state.personTimeSpentMap = {}
       store.mutations.SET_TIME_SPENT(state, {
         task_id: 'task-1',
         person_id: 'person-1',
+        date: '2026-11-02',
         duration: 120
       })
+      expect(state.personTimeSpentMap['task-1'].duration).toEqual(120)
+      expect(state.personTimeSpentTotal).toEqual(2)
+    })
+
+    // A save answered once the timesheet shows another day belongs to the
+    // day left.
+    test('SET_TIME_SPENT leaves out the time of another day or person', () => {
+      state.person = { id: 'person-1' }
+      state.personTimeSpentKey = 'person-1/2026-11-03'
+      state.personTimeSpentMap = {}
+      const save = (personId, date) =>
+        store.mutations.SET_TIME_SPENT(state, {
+          task_id: 'task-1',
+          person_id: personId,
+          date,
+          duration: 120
+        })
+
+      save('person-1', '2026-11-02')
+      save('person-2', '2026-11-03')
+
+      expect(state.personTimeSpentMap).toEqual({})
+      expect(state.personTimeSpentTotal).toEqual(0)
+
+      save('person-1', '2026-11-03')
+
       expect(state.personTimeSpentMap['task-1'].duration).toEqual(120)
       expect(state.personTimeSpentTotal).toEqual(2)
     })

@@ -566,6 +566,34 @@ describe('User store', () => {
       expect(state.timeSpentTotal).toBe(1.5)
     })
 
+    // A save answered once the timesheet shows another day belongs to the
+    // day left.
+    test('SET_TIME_SPENT leaves out the time of another day', () => {
+      const state = {
+        timeSpentDate: '2026-08-05',
+        timeSpentMap: {},
+        timeSpentTotal: 0,
+        user: { id: 'person-1' }
+      }
+      const save = date =>
+        store.mutations.SET_TIME_SPENT(state, {
+          date,
+          duration: 120,
+          person_id: 'person-1',
+          task_id: 'task-1'
+        })
+
+      save('2026-08-04')
+
+      expect(state.timeSpentMap).toEqual({})
+      expect(state.timeSpentTotal).toBe(0)
+
+      save('2026-08-05')
+
+      expect(state.timeSpentMap['task-1'].duration).toBe(120)
+      expect(state.timeSpentTotal).toBe(2)
+    })
+
     // Zou picks the next preferred method in the same order
     // (TWO_FACTOR_FALLBACKS), so the page matches it until a reload.
     describe('preferred 2FA method once one is turned off', () => {

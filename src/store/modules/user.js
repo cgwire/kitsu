@@ -1039,8 +1039,13 @@ const mutations = {
     })
   },
 
+  // A save answered once the timesheet shows another day belongs to the day
+  // left.
   [SET_TIME_SPENT](state, timeSpent) {
-    if (state.user.id === timeSpent.person_id) {
+    if (
+      state.user.id === timeSpent.person_id &&
+      timeSpent.date === state.timeSpentDate
+    ) {
       state.timeSpentMap[timeSpent.task_id] = timeSpent
     }
     state.timeSpentTotal =
