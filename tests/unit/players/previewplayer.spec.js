@@ -188,6 +188,7 @@ const mountPlayer = ({
   })
 }
 
+// Finger 1 lands first, so it is the primary one.
 const pointer = (target, type, { id, x, y }) => {
   const event = new MouseEvent(type, {
     bubbles: true,
@@ -197,7 +198,8 @@ const pointer = (target, type, { id, x, y }) => {
   })
   Object.defineProperties(event, {
     pointerId: { value: id },
-    pointerType: { value: 'touch' }
+    pointerType: { value: 'touch' },
+    isPrimary: { value: id === 1 }
   })
   target.dispatchEvent(event)
 }

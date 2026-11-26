@@ -273,6 +273,7 @@ const drawing = (time, id) => ({
   }
 })
 
+// Finger 1 lands first, so it is the primary one.
 const pointer = (target, type, { id, x, y }) =>
   target.dispatchEvent(
     new PointerEvent(type, {
@@ -282,7 +283,7 @@ const pointer = (target, type, { id, x, y }) =>
       clientY: y,
       pointerId: id,
       pointerType: 'touch',
-      isPrimary: true
+      isPrimary: id === 1
     })
   )
 
