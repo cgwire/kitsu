@@ -44,6 +44,17 @@ describe('FiltersToggle', () => {
     expect(toggle.attributes('aria-expanded')).toBe('true')
   })
 
+  it('keeps the icon a page gives it, folded or not', () => {
+    const iconOf = modelValue =>
+      buttonOf(
+        mountToggle({ icon: 'funnel', modelValue }),
+        'filters-toggle'
+      ).props('icon')
+
+    expect(iconOf(false)).toBe('funnel')
+    expect(iconOf(true)).toBe('funnel')
+  })
+
   it('toggles its model', async () => {
     const wrapper = mountToggle({ modelValue: false })
 

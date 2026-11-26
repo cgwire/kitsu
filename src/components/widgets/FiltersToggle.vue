@@ -9,7 +9,7 @@
     />
     <button-simple
       class="filters-toggle"
-      :icon="isOpen ? 'minus' : 'plus'"
+      :icon="icon || (isOpen ? 'minus' : 'plus')"
       :aria-expanded="`${isOpen}`"
       :is-on="isOpen"
       :text="count ? `${count}` : ''"
@@ -31,6 +31,8 @@ const isOpen = defineModel({ type: Boolean, default: false })
 
 defineProps({
   count: { type: Number, default: 0 },
+  // the icon of the toggle, in place of the plus and minus
+  icon: { type: String, default: '' },
   resettable: { type: Boolean, default: false }
 })
 
