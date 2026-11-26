@@ -364,7 +364,8 @@ describe('SearchQueryList, additions', () => {
         .findComponent(EditSearchFilterGroupModal)
         .props('groups')
         .map(({ id }) => id)
-    ).toEqual(['group-1', 'group-2'])
+    // the shared one first, as the list shows them
+    ).toEqual(['group-2', 'group-1'])
   })
 
   test('saves a search with the entity type of its list', async () => {
@@ -1346,5 +1347,209 @@ describe('SearchQueryList, a request ending after its modal closed', () => {
 
     expect(modal().props('groupToEdit')).toBe(shown)
     expect(shown.name).toBe('Other')
+  })
+})
+
+describe('SearchQueryList, order', () => {
+  const named = (row, id, extra = {}) => ({ ...row, id, name: id, ...extra })
+  const searchTags = wrapper =>
+    wrapper.findAll('.search-queries > .tag:not(.folder):not(.group)')
+  const groupTags = wrapper => wrapper.findAll('.tag.group')
+  const labels = tags => tags.map(tag => tag.find('.filter-label').text())
+  const edit = wrapper =>
+    wrapper.find('.tag.folder[title="main.edit_mode_on"]').trigger('click')
+  // jsdom lays nothing out: every tag starts at 0 and has no width
+  const before = { clientX: -1, clientY: -1 }
+  const after = { clientX: 1, clientY: 1 }
+  const drag = async (tag, target, side) => {
+    await tag.trigger('dragstart', { dataTransfer: { setData: () => {} } })
+    await target.trigger('dragover', side)
+    await target.trigger('drop')
+  }
+  const mountOrdered = async (options = {}) => {
+    const saveSearchPositions = vi.fn(() => Promise.resolve())
+    const wrapper = await mountList({
+      actions: { saveSearchPositions },
+      queries: ['a', 'b', 'c'].map(id => named(search, id)),
+      ...options
+    })
+    await edit(wrapper)
+    const saved = () =>
+      saveSearchPositions.mock.calls.map(([, { rows, isGroup }]) => ({
+        rows: rows.map(row => row.id),
+        isGroup
+      }))
+    return { saved, wrapper }
+  }
+
+  test('lists the placed rows first, then the others by name', async () => {
+    const wrapper = await mountList({
+      queries: [
+        named(search, 'a'),
+        named(search, 'b', { position: 1 }),
+        named(search, 'c', { position: 0 }),
+        named(sharedSearch, 'shared')
+      ],
+      groups: [
+        named(group, 'mine'),
+        named(group, 'placed', { position: 0 }),
+        named(sharedGroup, 'team')
+      ]
+    })
+
+    // the shared rows lead, as the groups lead the searches
+    expect(labels(searchTags(wrapper))).toEqual(['shared', 'c', 'b', 'a'])
+    expect(labels(groupTags(wrapper))).toEqual(['team', 'placed', 'mine'])
+  })
+
+  test('lets the rows move in the edit mode only', async () => {
+    const wrapper = await mountList({
+      queries: ['a', 'b'].map(id => named(search, id))
+    })
+    const draggable = () =>
+      searchTags(wrapper).map(tag => tag.attributes('draggable'))
+
+    expect(draggable()).toEqual(['false', 'false'])
+    await edit(wrapper)
+
+    expect(draggable()).toEqual(['true', 'true'])
+  })
+
+  // Zou takes a position only from who can change the row, and a move
+  // changes the position of its neighbours.
+  test('keeps in place the rows listed with one of someone else', async () => {
+    const { saved, wrapper } = await mountOrdered({
+      queries: [
+        named(sharedSearch, 'a'),
+        named(sharedSearch, 'b', { person_id: 'other' })
+      ]
+    })
+    const [a, b] = searchTags(wrapper)
+
+    expect(a.attributes('draggable')).toBe('false')
+    await drag(a, b, after)
+    await a.trigger('keydown', { key: 'ArrowRight', shiftKey: true })
+
+    expect(saved()).toEqual([])
+  })
+
+  test.each([
+    ['before', before, ['c', 'a', 'b']],
+    ['after', after, ['a', 'c', 'b']]
+  ])('saves the order of a search dropped %s another', async (_, side, ids) => {
+    const { saved, wrapper } = await mountOrdered()
+    const [a, , c] = searchTags(wrapper)
+
+    await drag(c, a, side)
+
+    expect(saved()).toEqual([{ rows: ids, isGroup: false }])
+  })
+
+  // The dragged tag is the placeholder of the move: it takes the place the
+  // drop would give it.
+  test('shows a dragged search in its new place before the drop', async () => {
+    const { saved, wrapper } = await mountOrdered()
+    const [a, , c] = searchTags(wrapper)
+
+    await c.trigger('dragstart', { dataTransfer: { setData: () => {} } })
+    await a.trigger('dragover', before)
+
+    expect(labels(searchTags(wrapper))).toEqual(['c', 'a', 'b'])
+    expect(searchTags(wrapper).map(tag => tag.classes('dragged'))).toEqual([
+      true,
+      false,
+      false
+    ])
+    expect(saved()).toEqual([])
+
+    // released between two tags: the list takes the drop
+    await wrapper.find('.search-queries').trigger('drop')
+
+    expect(saved()).toEqual([{ rows: ['c', 'a', 'b'], isGroup: false }])
+    expect(searchTags(wrapper).some(tag => tag.classes('dragged'))).toBe(false)
+  })
+
+  test('puts a dragged search back when the drag is given up', async () => {
+    const { saved, wrapper } = await mountOrdered()
+    const [a, , c] = searchTags(wrapper)
+
+    await c.trigger('dragstart', { dataTransfer: { setData: () => {} } })
+    await a.trigger('dragover', before)
+    await c.trigger('dragend')
+
+    expect(labels(searchTags(wrapper))).toEqual(['a', 'b', 'c'])
+    expect(saved()).toEqual([])
+  })
+
+  test('saves nothing for a search dropped where it was', async () => {
+    const { saved, wrapper } = await mountOrdered()
+    const [a, b] = searchTags(wrapper)
+
+    await drag(a, b, before)
+
+    expect(saved()).toEqual([])
+  })
+
+  test('moves a search with Shift and an arrow', async () => {
+    const { saved, wrapper } = await mountOrdered()
+    const [a, b] = searchTags(wrapper)
+
+    await a.trigger('keydown', { key: 'ArrowRight', shiftKey: true })
+    await b.trigger('keydown', { key: 'ArrowLeft', shiftKey: true })
+    // nowhere to go
+    await a.trigger('keydown', { key: 'ArrowLeft', shiftKey: true })
+    // the arrow alone moves nothing
+    await a.trigger('keydown', { key: 'ArrowRight' })
+
+    expect(saved()).toEqual([
+      { rows: ['b', 'a', 'c'], isGroup: false },
+      { rows: ['b', 'a', 'c'], isGroup: false }
+    ])
+  })
+
+  test('keeps a shared search among the shared ones', async () => {
+    const { saved, wrapper } = await mountOrdered({
+      queries: [
+        named(sharedSearch, 'shared-1'),
+        named(sharedSearch, 'shared-2'),
+        named(search, 'mine')
+      ]
+    })
+    const [shared, , mine] = searchTags(wrapper)
+
+    await drag(mine, shared, before)
+    expect(saved()).toEqual([])
+    await shared.trigger('keydown', { key: 'ArrowRight', shiftKey: true })
+
+    expect(saved()).toEqual([{ rows: ['shared-2', 'shared-1'], isGroup: false }])
+  })
+
+  test('saves the order of the groups', async () => {
+    const { saved, wrapper } = await mountOrdered({
+      groups: ['g1', 'g2'].map(id => named(group, id))
+    })
+    const [g1, g2] = groupTags(wrapper)
+
+    await drag(g2, g1, before)
+
+    expect(saved()).toEqual([{ rows: ['g2', 'g1'], isGroup: true }])
+  })
+
+  test('orders the searches of a group among themselves', async () => {
+    const held = { search_filter_group_id: group.id }
+    const { saved, wrapper } = await mountOrdered({
+      queries: [
+        named(search, 'h1', held),
+        named(search, 'h2', held),
+        named(search, 'out')
+      ]
+    })
+    await groupTags(wrapper)[0].trigger('click')
+    const [h1, h2] = wrapper.findAll('.group-list .tag')
+
+    await drag(h2, h1, before)
+
+    // the group that holds them stays where it is
+    expect(saved()).toEqual([{ rows: ['h2', 'h1'], isGroup: false }])
   })
 })

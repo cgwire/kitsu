@@ -1,5 +1,5 @@
 <template>
-  <div class="search-queries">
+  <div class="search-queries" @dragover="onListDragOver" @drop="onListDrop">
     <span
       class="tag folder mr1"
       role="button"
@@ -60,6 +60,7 @@
         @click="onGroupClick(group, $event)"
         @keydown.enter.self.prevent="onGroupKey(group, $event)"
         @keydown.space.self.prevent="onGroupKey(group, $event)"
+        v-bind="moveBindings(group, groupZone(group))"
         v-for="group in userFilterGroups"
       >
         <div class="group-header">
@@ -113,10 +114,12 @@
               :style="{ backgroundColor: `${group.color}23` }"
               :title="getSearchQueryTitle(searchQuery)"
               @click="navigateToSearchQuery(searchQuery)"
+              v-bind="moveBindings(searchQuery, filterZone(searchQuery))"
               v-for="searchQuery in group.queries"
             >
               <router-link
                 class="flexrow filter-name"
+                draggable="false"
                 :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
               >
                 <span class="filter-label">{{ searchQuery.name }}</span>
@@ -156,10 +159,12 @@
       :key="searchQuery.id"
       :title="getSearchQueryTitle(searchQuery)"
       @click="navigateToSearchQuery(searchQuery)"
+      v-bind="moveBindings(searchQuery, filterZone(searchQuery))"
       v-for="searchQuery in userFilters"
     >
       <router-link
         class="flexrow filter-name"
+        draggable="false"
         :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
       >
         <span
@@ -327,6 +332,10 @@ const props = defineProps({
 
 // State
 // --------------------------------------------------------------------------
+// the row a drag moves, with the order of its zone when the drag started,
+// and the place of each row of that zone if it were dropped now
+const dragged = ref(null)
+const draggedPlaces = ref(null)
 const groupToEdit = ref({})
 const groupToRemove = ref({})
 const isEditing = ref(false)
@@ -373,34 +382,41 @@ const sortedFilters = computed(() => {
   const queries = props.queries.filter(
     query => !isCurrentUserClient.value || !query.is_shared
   )
-  return sortByName(queries)
+  return sortRows(queries)
 })
 
-const userFilters = computed(() => {
-  return sortedFilters.value
-    .filter(query => !query.search_filter_group_id)
-    .sort((a, b) => {
-      if (a.is_shared && !b.is_shared) {
-        return -1
-      } else if (!a.is_shared && b.is_shared) {
-        return 1
-      } else {
-        return 0
-      }
-    })
-})
+const userFilters = computed(() =>
+  sharedFirst(
+    sortedFilters.value.filter(query => !query.search_filter_group_id)
+  )
+)
 
 const userFilterGroups = computed(() => {
   const groups = props.groups.filter(
     group => !isCurrentUserClient.value || !group.is_shared
   )
-  return sortByName(groups).map(group => ({
+  return sharedFirst(sortRows(groups)).map(group => ({
     ...group,
     queries: sortedFilters.value.filter(
       query => query.search_filter_group_id === group.id
     )
   }))
 })
+
+// The rows that are ordered together, by zone: a shared row stays among the
+// shared ones, and a search stays in its group.
+const zones = computed(() =>
+  [
+    ...userFilterGroups.value.map(group => [groupZone(group), group]),
+    ...sortedFilters.value.map(query => [filterZone(query), query])
+  ].reduce(
+    (rowsByZone, [zone, row]) => ({
+      ...rowsByZone,
+      [zone]: [...(rowsByZone[zone] || []), row]
+    }),
+    {}
+  )
+)
 
 const hasChangeableRow = computed(() =>
   [
@@ -468,6 +484,18 @@ const pickQueryKeys = isKept =>
 const isActiveSearch = searchQuery =>
   props.withRouteQuery &&
   toSortedQueryString(searchQuery.search_query) === sortedPageQuery.value
+
+// The rows their owner placed come first, in that order, then the others by
+// name. A drag shows its zone as the drop would leave it.
+const sortRows = rows => sortByName(rows).sort((a, b) => rank(a) - rank(b))
+
+const rank = row =>
+  draggedPlaces.value?.[row.id] ?? row.position ?? Number.MAX_SAFE_INTEGER
+
+const sharedFirst = rows => [
+  ...rows.filter(row => row.is_shared),
+  ...rows.filter(row => !row.is_shared)
+]
 
 const setQueryPaths = () => {
   props.queries.forEach(query => {
@@ -643,6 +671,118 @@ const onGroupKey = (group, event) => {
   if (!event.repeat) toggleFilterGroup(group)
 }
 
+// Functions (order)
+// --------------------------------------------------------------------------
+const groupZone = group => `groups:${group.is_shared}`
+
+const filterZone = query =>
+  query.search_filter_group_id
+    ? `held:${query.search_filter_group_id}`
+    : `filters:${query.is_shared}`
+
+// A move changes the position of the neighbours of the row too: Zou takes
+// them only from who can change every row of the zone.
+const canReorder = zone =>
+  isEditing.value &&
+  zones.value[zone].length > 1 &&
+  zones.value[zone].every(canChange)
+
+// A group holds the tags of its searches: their events reach it too.
+const isOwnEvent = event => event.target.closest('.tag') === event.currentTarget
+
+const placeRow = (rows, id, targetId, isAfter) => {
+  const others = rows.filter(row => row.id !== id)
+  const index = others.findIndex(row => row.id === targetId) + (isAfter ? 1 : 0)
+  return [
+    ...others.slice(0, index),
+    rows.find(row => row.id === id),
+    ...others.slice(index)
+  ]
+}
+
+const saveOrder = (zone, rows) =>
+  store
+    .dispatch('saveSearchPositions', {
+      rows,
+      isGroup: zone.startsWith('groups')
+    })
+    .catch(console.error)
+
+const resetDrag = () => {
+  dragged.value = null
+  draggedPlaces.value = null
+}
+
+const onDragStart = (event, row, zone) => {
+  if (!isOwnEvent(event) || !canReorder(zone)) return
+  dragged.value = {
+    id: row.id,
+    zone,
+    ids: zones.value[zone].map(({ id }) => id)
+  }
+  event.dataTransfer.effectAllowed = 'move'
+  // Firefox starts no drag without data
+  event.dataTransfer.setData('text/plain', row.name)
+}
+
+// The dragged tag takes the place it would get, and marks it.
+const onDragOver = (event, row, zone) => {
+  if (dragged.value?.zone !== zone || dragged.value.id === row.id) return
+  const tag = event.currentTarget.getBoundingClientRect()
+  // the searches of a group are listed in a column
+  const isAfter = zone.startsWith('held')
+    ? event.clientY > tag.top + tag.height / 2
+    : event.clientX > tag.left + tag.width / 2
+  const rows = placeRow(zones.value[zone], dragged.value.id, row.id, isAfter)
+  draggedPlaces.value = Object.fromEntries(
+    rows.map(({ id }, index) => [id, index])
+  )
+}
+
+// The list takes the drop: the tags leave gaps between them, and the dragged
+// one is often under the pointer.
+const onListDragOver = event => {
+  if (dragged.value) event.preventDefault()
+}
+
+const onListDrop = event => {
+  if (!dragged.value) return
+  event.preventDefault()
+  const { ids, zone } = dragged.value
+  const rows = zones.value[zone]
+  // the store places the rows before the drag forgets where they were shown
+  if (rows.some((row, index) => row.id !== ids[index])) saveOrder(zone, rows)
+  resetDrag()
+}
+
+const onMoveKey = (event, row, zone) => {
+  const step = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 }[
+    event.key
+  ]
+  if (!step || !event.shiftKey || !isOwnEvent(event) || !canReorder(zone)) {
+    return
+  }
+  event.preventDefault()
+  const rows = zones.value[zone]
+  const target = rows[rows.findIndex(({ id }) => id === row.id) + step]
+  if (!target) return
+  // the tag moves in the page and loses the focus
+  const focused = document.activeElement
+  saveOrder(zone, placeRow(rows, row.id, target.id, step > 0))
+  nextTick(() => focused?.focus())
+}
+
+// What lets a row move among the rows of its zone, by a drag or by Shift and
+// an arrow.
+const moveBindings = (row, zone) => ({
+  class: { dragged: dragged.value?.id === row.id },
+  draggable: `${canReorder(zone)}`,
+  onDragstart: event => onDragStart(event, row, zone),
+  onDragover: event => onDragOver(event, row, zone),
+  onDragend: resetDrag,
+  onKeydown: event => onMoveKey(event, row, zone)
+})
+
 const getSearchQueryTitle = searchQuery => {
   if (!searchQuery.is_shared) {
     return searchQuery.name
@@ -803,6 +943,10 @@ defineExpose({ addSearch })
   border: 1px solid $blue;
 }
 
+.search-queries .tag[draggable='true'] {
+  cursor: grab;
+}
+
 .dot {
   display: inline-block;
   border: 4px solid;
@@ -834,6 +978,10 @@ defineExpose({ addSearch })
   // green, where the blue of a shared tag made a private search look shared
   border: 2px solid $green;
   box-shadow: none;
+}
+
+.search-queries .tag.active:not(.folder),
+.search-queries .tag.dragged:not(.folder) {
   // the padding gives up the width of the border, so that the tags after it
   // stay in place
   padding-left: calc(0.75em - 2px);
@@ -843,6 +991,18 @@ defineExpose({ addSearch })
   &.is-shared {
     padding-left: calc(0.75em - 1px);
     padding-right: calc(0.75em - 1px);
+  }
+}
+
+// the place a dragged row would take: its outline alone
+.search-queries .tag.dragged:not(.folder) {
+  // a group sets its color on the tag
+  background-color: transparent !important;
+  border: 2px dashed var(--text);
+  box-shadow: none;
+
+  > :not(.group-list) {
+    opacity: 0.4;
   }
 }
 </style>
