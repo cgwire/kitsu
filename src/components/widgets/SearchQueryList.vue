@@ -834,16 +834,13 @@ defineExpose({ addSearch })
 // box-shadow ring smears over two rows there, where a border keeps the same
 // width on every side.
 .search-queries .tag.active:not(.folder) {
-  border: 2px solid $purple-strong;
+  // green, where the blue of a shared tag made a private search look shared
+  border: 2px solid $green;
   box-shadow: none;
   // the padding gives up the width of the border, so that the tags after it
   // stay in place
   padding-left: calc(0.75em - 2px);
   padding-right: calc(0.75em - 2px);
-
-  .dark & {
-    border-color: $blue;
-  }
 
   // a shared tag already has a 1px border
   &.is-shared {
