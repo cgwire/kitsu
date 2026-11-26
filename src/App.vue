@@ -103,6 +103,7 @@ const previewFileIdsToBrowse = computed(
 )
 const productionMap = computed(() => store.getters.productionMap)
 const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
+const assetsLoadingKey = computed(() => store.getters.assetsLoadingKey)
 const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
 const isEditsLoading = computed(() => store.getters.isEditsLoading)
 const isShotsLoading = computed(() => store.getters.isShotsLoading)
@@ -526,10 +527,14 @@ const socketEvents = {
     }
   },
 
+  // Nothing to insert into while no asset list is loaded: the store would
+  // drop the fetched asset. The event carries no episode, so the store
+  // checks the scope once the asset is fetched.
   'asset:new': eventData => {
     if (
       !assetMap.get(eventData.asset_id) &&
-      currentProduction.value?.id === eventData.project_id
+      currentProduction.value?.id === eventData.project_id &&
+      assetsLoadingKey.value
     ) {
       setTimeout(() => {
         store
