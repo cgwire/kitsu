@@ -1158,10 +1158,9 @@ const updateActiveTab = () => {
 }
 
 const getRoute = section => {
-  const routeTaskTypeId = route.params.task_type_id
-  const taskTypeId = currentTaskType.value
-    ? currentTaskType.value.id
-    : routeTaskTypeId
+  // A task type missing from the map is an empty object: only the route
+  // knows its id.
+  const taskTypeId = currentTaskType.value?.id || route.params.task_type_id
   const sectionRoute = {
     name: section,
     params: {

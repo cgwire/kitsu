@@ -2764,6 +2764,20 @@ describe('TaskType page', () => {
         const base = '/productions/production-1/episodes/task-types/task-type-1'
         expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
       })
+
+      // An undefined id reaches the same path only because the router keeps
+      // the current one, which newer vue-router releases warn about.
+      it('links them with the id of the route', async () => {
+        await mountTabs({ currentTaskType: () => ({}) })
+        const ids = wrapper
+          .findAll('.tabs li')
+          .map(
+            tab =>
+              tab.findComponent({ name: 'RouterLink' }).props('to').params
+                .task_type_id
+          )
+        expect(ids).toEqual(['task-type-1', 'task-type-1', 'task-type-1'])
+      })
     })
   })
 
