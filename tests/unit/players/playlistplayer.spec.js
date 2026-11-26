@@ -67,6 +67,47 @@ const withMethods = (names, values = {}) => ({
   }
 })
 
+// The mount hooks drive the viewers through their template refs; the
+// default stubs have none of their methods.
+const movieViewerStub = {
+  ...withMethods(
+    [
+      'clear',
+      'goNextFrame',
+      'goPreviousFrame',
+      'loadEntity',
+      'pause',
+      'play',
+      'playNext',
+      'reloadCurrentEntity',
+      'resetHeight',
+      'resetPanZoom',
+      'resumePanZoom',
+      'setCurrentFrame',
+      'setCurrentTimeRaw',
+      'setPanZoom',
+      'setSpeed',
+      'setVolume'
+    ],
+    {
+      getCurrentFrame: () => 0,
+      getCurrentTime: () => 0,
+      getCurrentTimeRaw: () => 0,
+      getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
+      getVideoRatio: () => 1
+    }
+  ),
+  props: { entities: Array }
+}
+
+const pictureViewerStub = {
+  ...withMethods(['resetPanZoom', 'resumePanZoom', 'setPanZoom'], {
+    getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
+    getPictureElement: () => null
+  }),
+  props: { previews: Array }
+}
+
 // The task type button lives in the extra-controls slot of the bar, which
 // the default stub does not render.
 const PlaybackBarWithSlot = {
@@ -135,46 +176,9 @@ const mountPlayer = ({
     props: { playlist: playlistProp, entities, ...props },
     global: {
       plugins: [store],
-      // The mount hooks drive the viewers through their template refs; the
-      // default stubs have none of their methods.
       stubs: {
-        MultiVideoViewer: {
-          ...withMethods(
-            [
-              'clear',
-              'goNextFrame',
-              'goPreviousFrame',
-              'loadEntity',
-              'pause',
-              'play',
-              'playNext',
-              'reloadCurrentEntity',
-              'resetHeight',
-              'resetPanZoom',
-              'resumePanZoom',
-              'setCurrentFrame',
-              'setCurrentTimeRaw',
-              'setPanZoom',
-              'setSpeed',
-              'setVolume'
-            ],
-            {
-              getCurrentFrame: () => 0,
-              getCurrentTime: () => 0,
-              getCurrentTimeRaw: () => 0,
-              getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
-              getVideoRatio: () => 1
-            }
-          ),
-          props: { entities: Array }
-        },
-        MultiPictureViewer: {
-          ...withMethods(['resetPanZoom', 'resumePanZoom', 'setPanZoom'], {
-            getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
-            getPictureElement: () => null
-          }),
-          props: { previews: Array }
-        },
+        MultiVideoViewer: movieViewerStub,
+        MultiPictureViewer: pictureViewerStub,
         ObjectViewer: withMethods(['pause', 'play'], {
           getAnimations: () => []
         }),
@@ -4001,8 +4005,80 @@ describe('PlaylistPlayer.vue', () => {
   })
 
   describe('finger gestures', () => {
+    // panzoom moves the media; the bands around a picture belong to its
+    // viewer.
+    const movieViewer = panBy => ({
+      ...movieViewerStub,
+      template: '<div><canvas /></div>',
+      methods: {
+        ...movieViewerStub.methods,
+        getDisplaySurface() {
+          return this.$el.querySelector('canvas')
+        },
+        panBy
+      }
+    })
+    const pictureViewer = zoomAt => ({
+      ...pictureViewerStub,
+      template: `
+        <div class="multi-picture-player">
+          <div class="picture-subwrapper">
+            <div><img /></div>
+          </div>
+        </div>
+      `,
+      methods: {
+        ...pictureViewerStub.methods,
+        getPictureElement() {
+          return this.$el.querySelector('img')
+        },
+        panBy: () => {},
+        zoomAt
+      }
+    })
+
     afterEach(() => {
       vi.useRealTimers()
+    })
+
+    it('pans a movie with one finger', async () => {
+      const panBy = vi.fn()
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'mp4' }],
+        stubs: { MultiVideoViewer: movieViewer(panBy) }
+      })
+      await flushPromises()
+      const movie = wrapper
+        .findComponent({ ref: 'raw-player' })
+        .find('canvas').element
+
+      pointer(movie, 'pointerdown', { id: 1, x: 100, y: 100 })
+      pointer(movie, 'pointermove', { id: 1, x: 110, y: 95 })
+
+      expect(panBy).toHaveBeenCalledWith(10, -5)
+    })
+
+    // A finger in the black band above or below a picture was left out of
+    // the pinch, which panned instead.
+    it('pinches a picture from a finger in the band around it', async () => {
+      const zoomAt = vi.fn()
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'png' }],
+        stubs: { MultiPictureViewer: pictureViewer(zoomAt) }
+      })
+      await flushPromises()
+      const viewer = wrapper.findComponent({ ref: 'picture-player' })
+      const band = viewer.find('.picture-subwrapper').element
+
+      pointer(viewer.find('img').element, 'pointerdown', {
+        id: 1,
+        x: 100,
+        y: 100
+      })
+      pointer(band, 'pointerdown', { id: 2, x: 200, y: 100 })
+      pointer(band, 'pointermove', { id: 2, x: 300, y: 100 })
+
+      expect(zoomAt).toHaveBeenCalledWith(200, 100, 2)
     })
 
     it.each([

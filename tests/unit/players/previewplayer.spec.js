@@ -243,6 +243,71 @@ describe('PreviewPlayer.vue', () => {
   })
 
   describe('finger navigation', () => {
+    // panzoom moves the media; the bands around a picture belong to the
+    // viewer.
+    const viewerWith = media => ({
+      name: 'PreviewViewer',
+      template: `
+        <div>
+          <div class="picture-subwrapper">
+            <div>${media}</div>
+          </div>
+        </div>
+      `,
+      computed: {
+        container() {
+          return this.$el
+        },
+        currentMediaElement() {
+          return this.$el.querySelector('img, canvas')
+        }
+      },
+      methods: viewer
+    })
+
+    it('pans a movie with one finger', async () => {
+      wrapper = mountPlayer({
+        props: { previews: [moviePreview] },
+        stubs: { PreviewViewer: viewerWith('<canvas />') }
+      })
+      await nextTick()
+      const movie = wrapper
+        .findComponent({ ref: 'preview-viewer' })
+        .find('canvas').element
+
+      pointer(movie, 'pointerdown', { id: 1, x: 100, y: 100 })
+      pointer(movie, 'pointermove', { id: 1, x: 110, y: 95 })
+
+      expect(viewer.panBy.mock.calls).toEqual([[10, -5]])
+      expect(viewer.panBy.mock.contexts.map(vm => vm.$attrs.name)).toEqual([
+        'main'
+      ])
+    })
+
+    // A finger in the black band above or below a picture was left out of
+    // the pinch, which panned instead.
+    it('pinches a picture from a finger in the band around it', async () => {
+      wrapper = mountPlayer({
+        stubs: { PreviewViewer: viewerWith('<img />') }
+      })
+      await nextTick()
+      const main = wrapper.findComponent({ ref: 'preview-viewer' })
+      const band = main.find('.picture-subwrapper').element
+
+      pointer(main.find('img').element, 'pointerdown', {
+        id: 1,
+        x: 100,
+        y: 100
+      })
+      pointer(band, 'pointerdown', { id: 2, x: 200, y: 100 })
+      pointer(band, 'pointermove', { id: 2, x: 300, y: 100 })
+
+      expect(viewer.zoomAt.mock.calls).toEqual([[200, 100, 2]])
+      expect(viewer.zoomAt.mock.contexts.map(vm => vm.$attrs.name)).toEqual([
+        'main'
+      ])
+    })
+
     // Fingers on the annotations move the media of the main viewer: the
     // comparison viewer only mirrors it.
     it('zooms the main viewer with a pinch on the annotations', async () => {

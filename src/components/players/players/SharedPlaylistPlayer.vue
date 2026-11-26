@@ -788,8 +788,6 @@ const getMainViewer = () => {
   return null
 }
 
-// The whole viewer is a surface: panzoom hears only the parent of what it
-// moves, and the bands around a picture lie outside it.
 useTouchNavigation({
   container: videoContainer,
   surfaces: () => [annotationOverlay.value?.overlay, getMainViewer()?.$el],

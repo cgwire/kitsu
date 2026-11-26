@@ -2126,10 +2126,7 @@ const getMainViewer = () => {
 
 useTouchNavigation({
   container: videoContainer,
-  surfaces: () => [
-    mainAnnotationCanvas.value?.overlay,
-    mainMediaElement.value?.parentElement
-  ],
+  surfaces: () => [mainAnnotationCanvas.value?.overlay, getMainViewer()?.$el],
   overlay: () => mainAnnotationCanvas.value?.overlay,
   isAnnotating: isAnnotationToolOn,
   isEnabled: isTouchNavigationEnabled,
@@ -5963,10 +5960,17 @@ const playerProxy = {
   // and drop any unsaved comment — issue #1700.
   overscroll-behavior-x: contain;
 
-  // The fingers navigate the media there: the page must not scroll or
-  // zoom under them.
+  // The fingers navigate the media there: the page must not scroll or zoom
+  // under them, and iOS must not select, open its menu, or start a drag
+  // under a held finger.
   &.touch-navigation {
     touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+
+    :deep(img) {
+      -webkit-user-drag: none;
+    }
   }
 }
 
