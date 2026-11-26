@@ -4038,6 +4038,39 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // A new playlist has no entry: Previous wrapped around to index -1, which
+  // the viewer read as an entity, and a shot added next was not selected.
+  describe('entity buttons of an empty playlist', () => {
+    it.each(['previous_shot', 'next_shot'])(
+      'keeps the first entry for %s',
+      async action => {
+        const entities = reactive([])
+        wrapper = mountPlayer({ entities })
+        await flushPromises()
+        const loadEntity = vi.fn()
+        wrapper.findComponent({ ref: 'raw-player' }).vm.loadEntity = loadEntity
+
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .find(
+            button =>
+              button.attributes('title') === `playlists.actions.${action}`
+          )
+          .vm.$emit('click')
+        await flushPromises()
+
+        expect(loadEntity).not.toHaveBeenCalled()
+
+        entities.push({ ...entity, preview_file_extension: 'mp4' })
+        await flushPromises()
+
+        expect(
+          wrapper.find('[title="playlists.actions.entity_index"]').text()
+        ).toBe('1')
+      }
+    )
+  })
+
   // On a phone the keyboard resizes the player as it opens: the canvas
   // reset ended the typing of the note at once.
   // The right arrow wipes the canvas, then the frame the movie steps to

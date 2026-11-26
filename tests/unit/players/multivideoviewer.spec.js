@@ -248,6 +248,19 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  // The Previous button of an empty playlist asked for index -1.
+  it.each([
+    ['an empty playlist', { entities: [] }],
+    ['a playlist of two movies', {}]
+  ])('loads nothing for an index before the first entity of %s', (_, props) => {
+    const wrapper = mountViewer(props)
+
+    expect(() => wrapper.vm.loadEntity(-1)).not.toThrow()
+    expect(wrapper.emitted('entity-change')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
   it('pre-seeks the preloaded decoder to the next entity handle-in (#1019)', async () => {
     const wrapper = mountViewer({ nextHandleIn: 100 })
 
