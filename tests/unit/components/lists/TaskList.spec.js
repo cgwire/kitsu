@@ -576,6 +576,11 @@ describe('lists/TaskList', () => {
       done_date: null
     }
     const realDateCells = ['real-start-date', 'real-end-date', 'done-date']
+    const taskStatuses = [
+      { id: 'task-status-1', is_done: true },
+      { id: 'status-wip' },
+      { id: 'status-feedback', is_feedback_request: true }
+    ]
 
     const mountDatedList = ({
       canEditRealDates = true,
@@ -586,7 +591,9 @@ describe('lists/TaskList', () => {
         getters: {
           canEditRealDates: () => canEditRealDates,
           isCurrentUserProductionManager: () => true,
-          taskMap: () => new Map(tasks.map(entry => [entry.id, entry]))
+          taskMap: () => new Map(tasks.map(entry => [entry.id, entry])),
+          taskStatusMap: () =>
+            new Map(taskStatuses.map(status => [status.id, status]))
         },
         actions: { updateTask },
         props: { disabledDates: {}, tasks }
@@ -627,7 +634,9 @@ describe('lists/TaskList', () => {
     // As the import of Zou: a mistyped year would spread the task over
     // decades of quota days.
     test('offers the days from 2000 to 2100 only', async () => {
-      const wrapper = mountDatedList()
+      const wrapper = mountDatedList({
+        tasks: [{ ...datedTask, real_start_date: null, end_date: null }]
+      })
       await wrapper.find('tbody td.name').trigger('click')
 
       realDateCells.forEach(cell => {
@@ -638,6 +647,86 @@ describe('lists/TaskList', () => {
           new Date(2100, 11, 31)
         )
       })
+
+      wrapper.unmount()
+    })
+
+    // As the import of Zou: the WIP date comes first, then the Feedback
+    // date, then the Approval date.
+    test('bounds each date field by the other real dates', async () => {
+      const wrapper = mountDatedList()
+      await wrapper.find('tbody td.name').trigger('click')
+
+      const bounds = cell => [
+        dateField(wrapper, cell).props('minDate'),
+        dateField(wrapper, cell).props('maxDate')
+      ]
+      expect(bounds('real-start-date')).toEqual([
+        new Date(2000, 0, 1),
+        new Date(2026, 10, 10)
+      ])
+      expect(bounds('real-end-date')).toEqual([
+        new Date(2026, 10, 2),
+        new Date(2100, 11, 31)
+      ])
+      expect(bounds('done-date')).toEqual([
+        new Date(2026, 10, 10),
+        new Date(2100, 11, 31)
+      ])
+
+      wrapper.unmount()
+    })
+
+    // As the import of Zou: a Feedback date needs a feedback or done status,
+    // an Approval date a done status.
+    test.each([
+      ['status-wip', ['real-start-date']],
+      ['status-feedback', ['real-start-date', 'real-end-date']],
+      ['task-status-1', realDateCells]
+    ])(
+      'gives a task of status %s the date fields it allows',
+      async (statusId, editable) => {
+        const wrapper = mountDatedList({
+          tasks: [{ ...datedTask, task_status_id: statusId }]
+        })
+        await wrapper.find('tbody td.name').trigger('click')
+
+        expect(
+          realDateCells.filter(cell => dateField(wrapper, cell).exists())
+        ).toEqual(editable)
+
+        wrapper.unmount()
+      }
+    )
+
+    test('skips the selected tasks whose status or dates refuse the day', async () => {
+      const wip = {
+        ...datedTask,
+        id: 'task-2',
+        entity: { id: 'asset-2' },
+        task_status_id: 'status-wip',
+        end_date: null
+      }
+      const updateTask = vi.fn()
+      const wrapper = mountDatedList({ tasks: [datedTask, wip], updateTask })
+      const names = wrapper.findAll('tbody td.name')
+      await names[0].trigger('click')
+      await names[1].trigger('click', { ctrlKey: true })
+
+      dateField(wrapper, 'done-date').vm.$emit(
+        'update:model-value',
+        new Date(2026, 10, 12)
+      )
+      // after the Feedback date of task-1, which task-2 has not
+      dateField(wrapper, 'real-start-date').vm.$emit(
+        'update:model-value',
+        new Date(2026, 10, 20)
+      )
+
+      expect(payloads(updateTask)).toEqual([
+        { taskId: 'task-1', data: { done_date: '2026-11-12T10:00:00' } },
+        { taskId: 'task-2', data: { real_start_date: '2026-11-20T10:00:00' } }
+      ])
 
       wrapper.unmount()
     })
