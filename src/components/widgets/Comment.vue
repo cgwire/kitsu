@@ -39,7 +39,8 @@
             ref="menuWrapper"
             class="flexrow-item menu-wrapper"
             v-if="
-              isPinnable || isEditable || canToggleForClient || canMoveComment
+              !isPending &&
+              (isPinnable || isEditable || canToggleForClient || canMoveComment)
             "
           >
             <button
@@ -135,7 +136,7 @@
               class="checklist"
               :checklist="checklistItems"
               :disabled="true"
-              :is-editable="isCheckable"
+              :is-editable="isCheckable && !isPending"
               @remove-task="removeTask"
               @emit-change="onChecklistChanged"
               @time-code-clicked="onChecklistTimecodeClicked"
@@ -399,7 +400,7 @@
                 }"
                 type="button"
                 @click="acknowledgeComment(comment)"
-                v-if="isAcknowledgeable"
+                v-if="isAcknowledgeable && !isPending"
               >
                 <thumbs-up-icon class="icon-1x" />
                 <span>{{ comment.acknowledgements.length }}</span>
@@ -412,7 +413,7 @@
                 @click="showReplyWidget"
                 @keydown.enter.prevent="showReplyWidget"
                 @keydown.space.prevent="showReplyWidget"
-                v-if="!showReply && isReplyable"
+                v-if="!showReply && isReplyable && !isPending"
               >
                 {{ $t('main.reply') }}
               </span>
@@ -512,7 +513,7 @@
         <div
           ref="menuWrapper"
           class="flexrow-item menu-wrapper"
-          v-if="isPinnable || isEditable"
+          v-if="!isPending && (isPinnable || isEditable)"
         >
           <button
             type="button"
@@ -809,6 +810,10 @@ const isPreviewBound = computed(() => {
 })
 
 const canMoveComment = computed(() => props.canMove && !isPreviewBound.value)
+
+// Shown before Zou saved it, under an id Zou does not know: its actions wait
+// for the comment Zou sends back.
+const isPending = computed(() => Boolean(props.comment.isPending))
 
 const isEmpty = computed(() => {
   return (

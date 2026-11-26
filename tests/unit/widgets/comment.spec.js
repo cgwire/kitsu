@@ -97,9 +97,11 @@ const mountComment = ({
   comment = makeComment(),
   isAcknowledgeable,
   isActionError = false,
+  isCheckable,
   isDuplicable,
   isEditable = true,
   isMovie,
+  isPinnable,
   isReplyable,
   storeOptions,
   stubs = {},
@@ -113,9 +115,11 @@ const mountComment = ({
       comment,
       isAcknowledgeable,
       isActionError,
+      isCheckable,
       isDuplicable,
       isEditable,
       isMovie,
+      isPinnable,
       isReplyable,
       task,
       taskTypes: [],
@@ -238,6 +242,49 @@ describe('Comment', () => {
 
       expect(first.find('comment-menu-stub').exists()).toBe(false)
       expect(second.find('comment-menu-stub').exists()).toBe(true)
+    })
+  })
+
+  // The store shows a comment at once, under an id of its own, while Zou
+  // saves it: any action on it would send that id to Zou.
+  describe('comment Zou has not saved yet', () => {
+    const mountPending = (overrides = {}) =>
+      mountComment({
+        comment: makeComment({
+          id: 'pending-1',
+          isPending: true,
+          checklist: [{ text: 'Fix the hands', checked: false }],
+          ...overrides
+        }),
+        isAcknowledgeable: true,
+        isCheckable: true,
+        isEditable: true,
+        isPinnable: true,
+        isReplyable: true
+      })
+
+    test('offers no menu', () => {
+      const wrapper = mountPending()
+      expect(wrapper.find('.menu-icon-button').exists()).toBe(false)
+    })
+
+    test('offers no menu when it holds only a status change', () => {
+      const wrapper = mountPending({ text: '', checklist: [] })
+      expect(wrapper.find('.empty-comment').exists()).toBe(true)
+      expect(wrapper.find('.menu-icon-button').exists()).toBe(false)
+    })
+
+    test('can be neither acknowledged nor answered', () => {
+      const wrapper = mountPending()
+      expect(wrapper.find('.like-button').exists()).toBe(false)
+      expect(wrapper.find('span.reply-button').exists()).toBe(false)
+    })
+
+    test('keeps its checklist read only', async () => {
+      const wrapper = mountPending()
+      await wrapper.vm.$nextTick()
+      const checklist = wrapper.findComponent({ name: 'Checklist' })
+      expect(checklist.props('isEditable')).toBe(false)
     })
   })
 
