@@ -5,6 +5,7 @@ import { flushPromises } from '@vue/test-utils'
 import EpisodeList from '@/components/lists/EpisodeList.vue'
 
 import {
+  columnCounts,
   descriptor,
   filledColumns,
   mountEntityList,
@@ -122,6 +123,31 @@ describe('lists/EpisodeList sticky columns', () => {
   test('places the sticky columns right after the episode names', async () => {
     const wrapper = await mountList()
 
+    expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('200px')
+    expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('320px')
+
+    wrapper.unmount()
+  })
+
+  test('keeps the sticky metadata columns while the infos are hidden', async () => {
+    const wrapper = await mountEntityList(EpisodeList, {
+      getters: {
+        currentProduction: production,
+        displayedEpisodesLength: 1,
+        episodeFilledColumns: filledColumns,
+        episodeMetadataDescriptors: [descriptor]
+      },
+      props: {
+        displaySettings: { showInfos: false },
+        displayedEpisodes: [{ id: 'episode-1', name: 'E01', data: {} }]
+      }
+    })
+
+    const cells = wrapper.findAll('tbody td.metadata-descriptor')
+    expect(cells).toHaveLength(1)
+    const { header, row } = columnCounts(wrapper)
+    expect(row).toBe(header)
+    expect(cells[0].element.style.left).toBe('200px')
     expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('200px')
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('320px')
 

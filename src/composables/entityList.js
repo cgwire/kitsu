@@ -102,10 +102,7 @@ export const showHeaderMenuAt = (
  * Left offset of each sticky column: the full width of the columns before
  * it, from the template refs of the headers.
  */
-export const getStickyOffsets = (
-  refs,
-  { showInfos, metadataCount, validationCount }
-) => {
+export const getStickyOffsets = (refs, { metadataCount, validationCount }) => {
   const nameWidth = refs['th-name'] ? getWidth(refs['th-name']) : 0
   let offset = nameWidth
   if (refs['th-episode']) offset += getWidth(refs['th-episode'])
@@ -117,7 +114,7 @@ export const getStickyOffsets = (
       offset += getWidth(refs[key][0].$el)
     })
   }
-  if (showInfos) place('editor', metadataCount)
+  place('editor', metadataCount)
   place('validation', validationCount)
   return { nameWidth, offsets }
 }
@@ -403,7 +400,6 @@ export const useEntityList = ({
     if (props.isLoading) return
     nextTick(() => {
       const sticky = getStickyOffsets(instance.refs, {
-        showInfos: props.displaySettings.showInfos,
         metadataCount: stickedVisibleMetadataDescriptors.value.length,
         validationCount: stickedDisplayedValidationColumns.value.length
       })
@@ -686,20 +682,10 @@ export const useEntityList = ({
     if (validationInfo.isShiftKey) {
       const anchor = getLastSelection()
       if (anchor) {
-        let startX = anchor.x
-        let endX = validationInfo.x
-        let startY = anchor.y
-        if (!sticked) startY += columnOffset
-        let endY = validationInfo.y
-        if (validationInfo.x < anchor.x) {
-          startX = validationInfo.x
-          endX = anchor.x
-        }
-        if (validationInfo.y < anchor.y) {
-          startY = validationInfo.y
-          endY = anchor.y
-          if (!sticked) endY += columnOffset
-        }
+        const startX = Math.min(anchor.x, validationInfo.x)
+        const endX = Math.max(anchor.x, validationInfo.x)
+        const startY = Math.min(anchor.y, validationInfo.y)
+        const endY = Math.max(anchor.y, validationInfo.y)
 
         for (let i = startX; i <= endX; i++) {
           for (let j = startY; j <= endY; j++) {
@@ -711,9 +697,7 @@ export const useEntityList = ({
                 column: validationCell.column,
                 task: validationCell.task,
                 x: validationCell.rowX,
-                y: sticked
-                  ? validationCell.columnY
-                  : validationCell.columnY + columnOffset
+                y: j
               })
             }
           }
@@ -731,8 +715,9 @@ export const useEntityList = ({
     updateTaskInQuery()
 
     if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
-      const x = validationInfo.x
-      const y = sticked ? validationInfo.y : validationInfo.y - columnOffset
+      // Kept in grid columns, the stuck ones first: a range may end in the
+      // other group.
+      const { x, y } = validationInfo
       lastSelection = { x, y, entityId: validationInfo.entity?.id }
       const validationCell = getValidationCell(x, y)
       nextTick(() => {
@@ -975,7 +960,7 @@ export const useEntityList = ({
   watch(stickedColumns, updateOffsets)
   watch(() => props.isLoading, updateOffsets)
   watch(() => props.displaySettings.bigThumbnails, updateOffsets)
-  // The infos add or remove sticky columns (metadata, TV show episodes).
+  // The infos add or remove the sticky episode column of the assets.
   watch(() => props.displaySettings.showInfos, updateOffsets)
   watch(() => props.validationColumns, initHiddenColumns, { deep: true })
 

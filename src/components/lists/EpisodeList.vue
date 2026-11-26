@@ -69,21 +69,19 @@
               </sortable-field-header>
             </th>
 
-            <template v-if="displaySettings.showInfos">
-              <metadata-header
-                :ref="`editor-${j}`"
-                :key="descriptor.id"
-                :descriptor="descriptor"
-                :left="
-                  offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
-                "
-                is-stick
-                @show-metadata-header-menu="
-                  event => showMetadataHeaderMenu(descriptor.id, event)
-                "
-                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-              />
-            </template>
+            <metadata-header
+              :ref="`editor-${j}`"
+              :key="descriptor.id"
+              :descriptor="descriptor"
+              :left="
+                offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
+              "
+              is-stick
+              @show-metadata-header-menu="
+                event => showMetadataHeaderMenu(descriptor.id, event)
+              "
+              v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+            />
             <template v-if="!isLoading">
               <validation-header
                 :ref="`validation-${columnIndexInGrid}`"
@@ -271,28 +269,26 @@
               </th>
 
               <!-- Metadata stick -->
-              <template v-if="displaySettings.showInfos">
-                <td
-                  class="metadata-descriptor datatable-row-header"
-                  @keyup.ctrl="onInputKeyUp"
-                  :title="getOwnValue(episode.data, descriptor.field_name)"
-                  :style="{
-                    'z-index': 1000 - i, // Need for combo to be above the next cell
-                    left: offsets['editor-' + j]
-                      ? `${offsets['editor-' + j]}px`
-                      : '0'
-                  }"
-                  :key="episode.id + '-' + descriptor.id"
-                  v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-                >
-                  <metadata-input
-                    :entity="episode"
-                    :descriptor="descriptor"
-                    :indexes="{ i, j }"
-                    @metadata-changed="$emit('metadata-changed', $event)"
-                  />
-                </td>
-              </template>
+              <td
+                class="metadata-descriptor datatable-row-header"
+                @keyup.ctrl="onInputKeyUp"
+                :title="getOwnValue(episode.data, descriptor.field_name)"
+                :style="{
+                  'z-index': 1000 - i, // Need for combo to be above the next cell
+                  left: offsets['editor-' + j]
+                    ? `${offsets['editor-' + j]}px`
+                    : '0'
+                }"
+                :key="episode.id + '-' + descriptor.id"
+                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+              >
+                <metadata-input
+                  :entity="episode"
+                  :descriptor="descriptor"
+                  :indexes="{ i, j }"
+                  @metadata-changed="$emit('metadata-changed', $event)"
+                />
+              </td>
 
               <template v-if="!isLoading">
                 <validation-cell
