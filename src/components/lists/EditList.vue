@@ -44,7 +44,7 @@
               data-column-key="name"
               ref="th-name"
             >
-              <div class="flexrow">
+              <div class="flexrow field-header">
                 <span class="flexrow-item">
                   {{ $t('edits.fields.name') }}
                 </span>

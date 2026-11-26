@@ -51,6 +51,24 @@ describe('lists/EditList', () => {
       expect(await showsEmptyState({ isError: true })).toBe(false)
     })
   })
+
+  // App.vue gives the label of a field header the room left, as on the
+  // sortable headers of the other lists: the "+" ends the cell.
+  test('pushes the "+" of the name header to the right', async () => {
+    const wrapper = await mountEntityList(EditList, {
+      getters: {
+        currentProduction: production,
+        isCurrentUserProductionManager: true
+      },
+      props: { displayedEdits: [] }
+    })
+    const header = wrapper.find('th.name .field-header')
+
+    expect(header.exists()).toBe(true)
+    expect(header.element.firstElementChild.className).toBe('flexrow-item')
+    expect(header.find('button-simple-stub').attributes('icon')).toBe('plus')
+    wrapper.unmount()
+  })
 })
 
 describe('lists/EditList sticky columns', () => {

@@ -464,6 +464,22 @@ describe('lists/ProductionList', () => {
     wrapper.unmount()
   })
 
+  // App.vue gives the label of a field header the room left, as on the
+  // sortable headers of the entity lists: the "+" ends the cell.
+  test('pushes the "+" of the name header to the right', () => {
+    const { wrapper } = mountList({
+      productions: [production(1, 'Alpha')],
+      getters: { isCurrentUserManager: () => true }
+    })
+    const header = wrapper.find('th.name .field-header')
+
+    expect(header.exists()).toBe(true)
+    expect(header.element.firstElementChild.textContent.trim()).toBe('Name')
+    expect(header.element.firstElementChild.className).toBe('flexrow-item')
+    expect(header.find('button-simple-stub').attributes('icon')).toBe('plus')
+    wrapper.unmount()
+  })
+
   describe('visible columns menu', () => {
     const findMenu = getters => {
       const { wrapper } = mountList({

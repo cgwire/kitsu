@@ -22,7 +22,7 @@
               data-column-key="name"
               scope="col"
             >
-              <div class="flexrow">
+              <div class="flexrow field-header">
                 <span class="flexrow-item">
                   {{ $t('productions.fields.name') }}
                 </span>
