@@ -99,6 +99,8 @@ const mountPage = async ({
         }
       ],
       stubs: {
+        // The layout holds the page in its slots.
+        PanelLayout: false,
         Schedule: { template: '<div />' },
         SearchField: {
           template: '<div />',
