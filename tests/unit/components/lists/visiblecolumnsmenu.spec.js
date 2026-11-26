@@ -14,8 +14,8 @@ import {
   production
 } from '../../fixtures/entity-list'
 
-// The edit, episode, and sequence lists show the menu toggle once they have
-// a metadata column.
+// The edit, episode, and sequence lists show the menu toggle to an artist
+// once they have a metadata column.
 const lists = [
   { name: 'AssetList', component: AssetList },
   {
@@ -99,3 +99,40 @@ describe.each(lists)('$name, visible columns menu', list => {
     expect(toggle.attributes('aria-expanded')).toBe('true')
   })
 })
+
+// Before their first metadata column, the toggle of these lists shows to the
+// people who may add one: the menu then offers it.
+describe.each(lists.filter(list => list.getters))(
+  '$name, visible columns toggle without a metadata column',
+  list => {
+    const findToggle = async ({ getters = {}, props = {} } = {}) => {
+      const wrapper = await mountEntityList(list.component, {
+        getters: { currentProduction: production, ...getters },
+        props: { ...list.props, ...props }
+      })
+      onTestFinished(() => wrapper.unmount())
+      return wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('title') === 'main.column_visibility')
+    }
+
+    test.each([
+      ['a manager', { isCurrentUserProductionManager: true }, true],
+      ['a supervisor', { isCurrentUserProductionSupervisor: true }, true],
+      ['an artist', {}, false]
+    ])('shows to %s', async (_, getters, isShown) => {
+      const toggle = await findToggle({ getters })
+
+      expect(Boolean(toggle)).toBe(isShown)
+    })
+
+    test('shows to a manager once the list has loaded', async () => {
+      const toggle = await findToggle({
+        getters: { isCurrentUserProductionManager: true },
+        props: { isLoading: true }
+      })
+
+      expect(toggle).toBeUndefined()
+    })
+  }
+)

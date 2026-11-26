@@ -223,7 +223,8 @@
                 icon="down"
                 @click="toggleColumnSelector"
                 v-if="
-                  episodeMetadataDescriptors.length > 0 &&
+                  (episodeMetadataDescriptors.length > 0 ||
+                    isMetadataAddAllowed) &&
                   displaySettings.showInfos
                 "
               />

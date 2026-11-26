@@ -207,7 +207,8 @@
                 icon="down"
                 @click="toggleColumnSelector"
                 v-if="
-                  sequenceMetadataDescriptors.length > 0 &&
+                  (sequenceMetadataDescriptors.length > 0 ||
+                    isMetadataAddAllowed) &&
                   displaySettings.showInfos
                 "
               />

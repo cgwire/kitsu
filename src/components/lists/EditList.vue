@@ -196,7 +196,8 @@
                 icon="down"
                 @click="toggleColumnSelector"
                 v-if="
-                  editMetadataDescriptors.length > 0 &&
+                  (editMetadataDescriptors.length > 0 ||
+                    isMetadataAddAllowed) &&
                   displaySettings.showInfos
                 "
               />
