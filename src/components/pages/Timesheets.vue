@@ -41,7 +41,7 @@
         />
         <div class="filler"></div>
         <button-simple
-          class="flexrow-item chart-button"
+          class="flexrow-item"
           icon="chart-column"
           :active="showChart"
           :title="$t('timesheets.chart')"
@@ -99,7 +99,7 @@
       <search-query-list
         class="query-list"
         :groups="timesheetsSearchFilterGroups"
-        :is-group-enabled="true"
+        is-group-enabled
         :queries="timesheetsSearchQueries"
         type="timesheets"
         with-route-query
@@ -536,8 +536,6 @@ watch([() => route.path, productionId, studioId], () => {
   if (showInfo.value) loadAggregate()
 })
 
-// Lifecycle
-// --------------------------------------------------------------------------
 // the salary scale is only needed, and only readable, for the salary unit
 watch(
   unit,
@@ -549,6 +547,8 @@ watch(
   { immediate: true }
 )
 
+// Lifecycle
+// --------------------------------------------------------------------------
 onMounted(async () => {
   isLoading.value = true
   store.dispatch('loadProductions')

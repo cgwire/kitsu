@@ -148,11 +148,7 @@ defineProps({
 // of the comboboxes beside it.
 .page-panel :deep(.search-field-wrapper),
 .paneled-side .side-column :deep(.search-field-wrapper) {
-  background: var(--background);
-
-  .dark & {
-    background: $dark-grey-light;
-  }
+  background: var(--background-input);
 }
 
 // the side panel is its own surface: the column only frames it, level with

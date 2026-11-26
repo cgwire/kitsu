@@ -993,6 +993,31 @@ describe('SearchQueryList, edits', () => {
     })
   })
 
+  test('leaves the forms of its modals as they came', async () => {
+    const updateSearchFilter = vi.fn(() => Promise.resolve())
+    const updateSearchFilterGroup = vi.fn(() => Promise.resolve())
+    const wrapper = await mountList({
+      actions: { updateSearchFilter, updateSearchFilterGroup },
+      productionId: 'production-2'
+    })
+    const groupForm = { id: group.id, name: 'renamed' }
+    const searchForm = { id: search.id, name: 'renamed' }
+
+    await wrapper.find('.tag.group button.edit').trigger('click')
+    wrapper
+      .findComponent(EditSearchFilterGroupModal)
+      .vm.$emit('confirm', groupForm)
+    await wrapper
+      .find('.tag:not(.folder):not(.group) button.edit')
+      .trigger('click')
+    wrapper.findComponent(EditSearchFilterModal).vm.$emit('confirm', searchForm)
+    await flushPromises()
+
+    expect(updateSearchFilter.mock.calls[0][1].project_id).toBe('production-2')
+    expect(groupForm).toEqual({ id: group.id, name: 'renamed' })
+    expect(searchForm).toEqual({ id: search.id, name: 'renamed' })
+  })
+
   test('opens a search without the error of a failed save', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     const wrapper = await mountList({

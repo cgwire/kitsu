@@ -141,8 +141,7 @@
             :title="$t('main.csv.import_file')"
             @click="showImportModal"
             v-if="
-              !isActiveTab('schedule') &&
-              !isActiveTab('estimation') &&
+              isActiveTab('tasks') &&
               isSupervisorInDepartment &&
               !isEstimationsImportHidden
             "
@@ -152,7 +151,7 @@
             icon="export"
             :title="$t('main.csv.export_file')"
             @click="onExportClick"
-            v-if="!isActiveTab('schedule') && !isActiveTab('estimation')"
+            v-if="isActiveTab('tasks')"
           />
         </div>
       </div>
@@ -318,7 +317,7 @@
           :hierarchy="schedule.scheduleItems"
           :zoom-level="schedule.zoomLevel"
           :is-loading="loading.entities"
-          :is-estimation-linked="true"
+          is-estimation-linked
           :with-estimations="dataDisplay.estimations"
           :with-ghosts="dataDisplay.beforeAfterTasks"
           :with-statuses="dataDisplay.statuses"
@@ -369,9 +368,9 @@
       :columns="[...dataMatchers, ...optionalColumns]"
       :data-matchers="dataMatchers"
       :required-values="dataMatchers"
-      :block-missing-columns="true"
+      block-missing-columns
       :database="{}"
-      :disable-update="true"
+      disable-update
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
@@ -415,6 +414,7 @@
 
 <script setup>
 // Imports
+// --------------------------------------------------------------------------
 import { useHead } from '@unhead/vue'
 import { CornerLeftUpIcon } from 'lucide-vue-next'
 import moment from 'moment'
@@ -481,19 +481,20 @@ import DeleteModal from '@/components/modals/DeleteModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
+// ESLint reads the lowercase <schedule> tag as a native element.
+// eslint-disable-next-line no-unused-vars
+import Schedule from '@/components/schedule/Schedule.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
-import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
+import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
 import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
-// eslint-disable-next-line no-unused-vars
-import Schedule from '@/components/schedule/Schedule.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TaskListNumbers from '@/components/widgets/TaskListNumbers.vue'
@@ -548,6 +549,7 @@ const filters = {
 }
 
 // Composables
+// --------------------------------------------------------------------------
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -565,6 +567,7 @@ const instance = getCurrentInstance()
 const socket = instance.appContext.config.globalProperties.$socket
 
 // State
+// --------------------------------------------------------------------------
 const activeTab = ref('tasks')
 const currentScheduleItem = ref(null)
 const currentSort = ref('entity_name')
@@ -748,6 +751,7 @@ const searchFieldRef = useTemplateRef('task-search-field')
 const taskListRef = useTemplateRef('task-list')
 
 // Computed
+// --------------------------------------------------------------------------
 const currentEpisode = computed(() => store.getters.currentEpisode)
 // Shown above the list, whose row holds the schedule beside the rows.
 const taskListSaveErrorText = computed(
@@ -1048,6 +1052,7 @@ const dataDisplayOptions = computed(() => [
 const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
 // Functions
+// --------------------------------------------------------------------------
 const initData = force => {
   resetTasks()
   focusSearchField({ preventScroll: true })
@@ -1137,8 +1142,8 @@ const setCurrentScheduleItem = () => {
     })
 }
 
-// Tabs
-
+// Functions (tabs)
+// --------------------------------------------------------------------------
 const isActiveTab = tab => activeTab.value === tab
 
 const updateActiveTab = () => {
@@ -1217,8 +1222,8 @@ const pushQuery = query => {
   })
 }
 
-// Search
-
+// Functions (search)
+// --------------------------------------------------------------------------
 const focusSearchField = options => {
   searchFieldRef.value?.focus(options)
 }
@@ -1334,20 +1339,23 @@ const updateUrlParams = () => {
 
 // The fields take the filters of a view, and their watcher applies them:
 // true when one of them changed.
-const setFilters = view =>
-  Object.entries(filterFields).filter(([name, field]) => {
-    const isChanged = `${field.value}` !== `${view[name]}`
-    if (isChanged) field.value = view[name]
-    return isChanged
-  }).length > 0
+const setFilters = view => {
+  const changed = Object.entries(filterFields).filter(
+    ([name, field]) => `${field.value}` !== `${view[name]}`
+  )
+  changed.forEach(([name, field]) => {
+    field.value = view[name]
+  })
+  return changed.length > 0
+}
 
 const resetFilters = () => {
   searchFieldRef.value.setValue('')
   if (!setFilters(readQueryView({}))) applyTaskFilters()
 }
 
-// Tasks
-
+// Functions (tasks)
+// --------------------------------------------------------------------------
 // onSearchChange leaves tasks sorted on every path, no extra sort needed.
 const applyTaskFilters = () => {
   onSearchChange(searchFieldRef.value.getValue())
@@ -1537,8 +1545,8 @@ const onEstimationCellChanged = ({ taskId, ...change }) => {
   if (task) saveCell(task, () => saveEstimation(task, change))
 }
 
-// Schedule
-
+// Functions (schedule)
+// --------------------------------------------------------------------------
 const onDataDisplayChange = item => {
   if (item.key === 'timesheets' && item.value) {
     resetScheduleItems()
@@ -2025,8 +2033,8 @@ const expandPersonElement = personElement => {
   personElement.expanded = !personElement.expanded
 }
 
-// Import
-
+// Functions (import)
+// --------------------------------------------------------------------------
 // Close leaves the error of the last save: opening drops it.
 const onAddMetadataClicked = () => {
   errors.addMetadata = false
@@ -2290,6 +2298,7 @@ if (!currentProduction.value) {
 }
 
 // Watchers
+// --------------------------------------------------------------------------
 watch(
   () => route.fullPath,
   () => {
@@ -2444,6 +2453,7 @@ watch(
 )
 
 // Lifecycle
+// --------------------------------------------------------------------------
 onMounted(() => {
   if (!currentTaskType.value?.id) {
     router.push({ name: 'not-found' })
@@ -2493,6 +2503,7 @@ onBeforeUnmount(() => {
 })
 
 // Head
+// --------------------------------------------------------------------------
 useHead({ title: computed(() => `${title.value} - Kitsu`) })
 </script>
 

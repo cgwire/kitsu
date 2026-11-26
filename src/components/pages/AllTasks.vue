@@ -81,7 +81,7 @@
       <search-query-list
         class="query-list"
         :groups="allTasksSearchFilterGroups"
-        :is-group-enabled="true"
+        is-group-enabled
         :queries="allTasksSearchQueries"
         type="allTasks"
         with-route-query
@@ -125,6 +125,7 @@
 
 <script setup>
 // Imports
+// --------------------------------------------------------------------------
 import { useHead } from '@unhead/vue'
 import {
   computed,
@@ -161,6 +162,7 @@ import StatusStats from '@/components/widgets/StatusStats.vue'
 import TasksStatsLine from '@/components/widgets/TasksStatsLine.vue'
 
 // Composables
+// --------------------------------------------------------------------------
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()

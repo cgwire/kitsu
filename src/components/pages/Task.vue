@@ -52,7 +52,7 @@
               :empty-width="100"
               :empty-height="60"
               :width="100"
-              :with-link="true"
+              with-link
             />
           </span>
 
@@ -75,8 +75,7 @@
             <validation-tag
               class="is-medium flexrow-item"
               :task="task"
-              :is-static="true"
-              v-if="task"
+              is-static
             />
             <span
               class="flexrow-item"
@@ -100,7 +99,7 @@
             </template>
             <subscribe-button
               class="flexrow-item action-button"
-              :subscribed="isAssigned || task.is_subscribed"
+              :subscribed="task.is_subscribed"
               @click="toggleSubscribe"
               v-if="!isAssigned"
             />
@@ -211,7 +210,7 @@
                 ref="preview-player"
                 :can-comment="isCommentingAllowed"
                 :entity-preview-files="taskEntityPreviews"
-                :extra-wide="true"
+                extra-wide
                 :fps="currentFps"
                 :last-preview-files="taskPreviews || []"
                 :link="currentPreviewComment?.links?.[0]"
@@ -435,11 +434,7 @@
       :is-error="errors.addPreview"
       :fps="currentFps"
       :expected-frames="entityFrames"
-      :title="
-        task
-          ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
-          : ''
-      "
+      :title="previewModalTitle"
       @cancel="closeAddPreviewModal"
       @confirm="confirmAddPreviewModal"
     />
@@ -454,11 +449,7 @@
         :is-error="errors.addExtraPreview"
         message=""
         :upload-progress="uploadProgress"
-        :title="
-          task
-            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
-            : ''
-        "
+        :title="previewModalTitle"
         @cancel="hideExtraPreviewModal"
         @confirm="createExtraPreview"
       />
@@ -502,6 +493,15 @@
 </template>
 
 <script setup>
+import { useHead } from '@unhead/vue'
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+  CornerLeftUpIcon,
+  ImageIcon
+} from 'lucide-vue-next'
 import {
   computed,
   defineAsyncComponent,
@@ -515,18 +515,9 @@ import {
   useTemplateRef,
   watch
 } from 'vue'
-import { useHead } from '@unhead/vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-  CornerLeftUpIcon,
-  ImageIcon
-} from 'lucide-vue-next'
 
 import { isListOfPageLoaded } from '@/composables/entity'
 import { useFullScreenTarget } from '@/composables/fullScreen'
@@ -559,25 +550,23 @@ import episodesStore from '@/store/modules/episodes'
 import sequencesStore from '@/store/modules/sequences'
 import shotsStore from '@/store/modules/shots'
 
-/* eslint-disable no-unused-vars */
-import AddComment from '@/components/widgets/AddComment.vue'
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
-import Comment from '@/components/widgets/Comment.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import EntityLoadError from '@/components/pages/entities/EntityLoadError.vue'
+import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+import AddComment from '@/components/widgets/AddComment.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import Comment from '@/components/widgets/Comment.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
-import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
-/* eslint-enable no-unused-vars */
 
 const ViewPlaylistModal = defineAsyncComponent(
   () => import('@/components/modals/ViewPlaylistModal.vue')
@@ -777,6 +766,10 @@ const taskTabs = computed(() => [
 ])
 
 const taskType = computed(() => taskTypeMap.value.get(task.value?.task_type_id))
+
+const previewModalTitle = computed(() =>
+  task.value ? `${task.value.entity_name} / ${taskType.value?.name || ''}` : ''
+)
 
 // Ported from taskMixin: an entity can override the production fps via
 // data.fps; use it so the player builds its frame model on the rate the video
@@ -1101,44 +1094,26 @@ const currentTeam = computed(() =>
   )
 )
 
-// get current task types for this project filtered by current task entity type (Shot or Asset)
+// The task types of the production the entity of the task has a task for,
+// each with the path to that task.
 const currentTaskTypes = computed(() => {
-  if (!task.value || !currentProduction.value) return []
-
-  // task types for this project
-  const task_types = currentProduction.value.task_types
-
-  // get the current task entity type eg. 'Shot' or 'Asset'
-  const current_task_type = taskTypeMap.value.get(task.value.task_type_id)
-  if (!current_task_type) return []
-  const task_type_entity = current_task_type.for_entity
-  const task_type_entity_slug = task_type_entity.toLowerCase() + 's'
-
-  // lets get a map of all tasks that are the same entity
-  // where the key is the task type id
-  const entity_tasks = {}
-  for (const keyValue of taskMap.value) {
-    const entityTask = keyValue[1]
-    if (entityTask.entity_id === task.value.entity_id)
-      entity_tasks[entityTask.task_type_id] = entityTask
-  }
-
-  return (
-    task_types
-      // get all task type objects
-      .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
-
-      // filter down to just those that match this task entity type Shot, Asset etc.
-      .filter(item => item?.for_entity === task_type_entity)
-
-      // filter to tasks that exist
-      .filter(item => entity_tasks[item.id])
-
-      // add a url that points to the task
-      .map(item =>
-        getTaskTypeWithUrl(item, entity_tasks[item.id], task_type_entity_slug)
-      )
+  if (!task.value || !currentProduction.value || !taskType.value) return []
+  const forEntity = taskType.value.for_entity
+  const entityTasks = Object.fromEntries(
+    [...taskMap.value.values()]
+      .filter(entityTask => entityTask.entity_id === task.value.entity_id)
+      .map(entityTask => [entityTask.task_type_id, entityTask])
   )
+  return currentProduction.value.task_types
+    .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+    .filter(item => item?.for_entity === forEntity && entityTasks[item.id])
+    .map(item =>
+      getTaskTypeWithUrl(
+        item,
+        entityTasks[item.id],
+        `${forEntity.toLowerCase()}s`
+      )
+    )
 })
 
 // Functions (formatting)
@@ -1174,13 +1149,16 @@ const linkForDescriptor = descriptor =>
 
 // Functions (routing)
 // --------------------------------------------------------------------------
-function taskPath(targetTask, section = 'task') {
-  if (!targetTask) {
-    targetTask = task.value
-  } else {
-    targetTask.project_id = task.value.project_id
-    targetTask.episode_id = task.value.episode_id
-  }
+const taskPath = (targetTask, section = 'task') => {
+  // A task of the lists comes as its id alone, in the production and the
+  // episode of the task shown.
+  targetTask = targetTask
+    ? {
+        ...targetTask,
+        project_id: task.value.project_id,
+        episode_id: task.value.episode_id
+      }
+    : task.value
 
   let target = { name: 'open-productions' }
   if (targetTask) {
@@ -1753,7 +1731,7 @@ const showRemoveExtraPreviewModal = preview => {
 const onRemoveExtraPreviewClicked = preview =>
   showRemoveExtraPreviewModal(preview)
 
-function hideRemoveExtraPreviewModal() {
+const hideRemoveExtraPreviewModal = () => {
   modals.value.deleteExtraPreview = false
 }
 
@@ -2183,15 +2161,6 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.dark .task-information,
-.dark .add-comment,
-.dark .comment,
-.dark .no-comment {
-  background: #46494f;
-  border-color: $dark-grey;
-  box-shadow: 0 0 6px #333;
-}
-
 // The controls of the bar are as tall as the combobox of the revisions,
 // which carries a top margin the buttons lack. Its chevron keeps a margin on
 // its right: the revision gets as much room on its left.
@@ -2235,12 +2204,6 @@ useHead({
   }
 }
 
-h2.subtitle {
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-
 // The header runs over the two columns, in the place of the tabs of a page:
 // it holds too much for the width of the preview alone.
 .page-header {
@@ -2250,57 +2213,22 @@ h2.subtitle {
   padding: 14px;
 }
 
-.navigation-buttons {
-  font-size: 1em;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-}
-
-.navigation-buttons .arrow {
-  font-size: 1.2em;
-  font-weight: bold;
-}
-
-.navigation-buttons a {
-  color: $grey;
-}
-
-.selected {
-  border: 0;
-}
-
-.source {
-  color: #aaa;
-  font-size: 0.8em;
-}
-
-video {
-  width: 100%;
-}
-
-.validation-buttons button {
-  width: 100%;
-  margin-bottom: 0.3em;
-  border-width: 2px;
-  font-weight: bold;
+// .comments-column outweighs the colors the comment box gives itself
+.comments-column .add-comment,
+.no-comment {
+  background: var(--background-block);
+  border-color: var(--border);
+  box-shadow: 0 0 6px var(--box-shadow);
 }
 
 .add-comment {
   margin-bottom: 1em;
   padding: 1em;
-  box-shadow: 0 0 6px #e0e0e0;
 }
 
 .no-comment {
-  background: white;
-  box-shadow: 0 0 6px #e0e0e0;
   padding: 1em;
   border-radius: 5px;
-}
-
-.comment {
-  box-shadow: 0 0 6px #e0e0e0;
-  margin-top: 0.3em;
 }
 
 // the comments take a third of the page, and no less than a task panel
@@ -2333,23 +2261,10 @@ video {
   padding: 14px;
 }
 
-.preview-list {
-  display: flex;
-  flex-wrap: wrap;
-}
-
 .page-header .tag {
   border-radius: 0;
   font-weight: bold;
   margin-right: 0.5em;
-}
-
-.assignees {
-  display: flex;
-}
-
-.assignees span {
-  margin-right: 0.2em;
 }
 
 .avatar-wrapper {
@@ -2358,6 +2273,7 @@ video {
 
 .entity-thumbnail {
   margin-right: 0.3em;
+  margin-top: 5px;
 }
 
 .pull-right {
@@ -2370,10 +2286,6 @@ video {
 
 .back-link {
   padding-top: 6px;
-}
-
-.entity-thumbnail {
-  margin-top: 5px;
 }
 
 .field-label {
@@ -2443,7 +2355,6 @@ video {
 
   .title {
     font-size: 1.3em;
-    line-height: 1.5em;
   }
 
   .header-title {
