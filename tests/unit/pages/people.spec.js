@@ -32,11 +32,16 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EditPersonModal from '@/components/modals/EditPersonModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import People from '@/components/pages/People.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 
-import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
+import {
+  BrokenFileReader,
+  GoneFileReader,
+  TextFileReader
+} from '../fixtures/file-reader'
 import { buildSearchQueryListStub } from '../fixtures/search-query-list'
 
 const currentUser = { id: 'person-1', role: 'admin' }
@@ -57,7 +62,8 @@ const mountPage = async ({
     loadGuests: resolved(),
     loadPeople: resolved(),
     newPerson: resolved(),
-    setPeopleSearch: vi.fn()
+    setPeopleSearch: vi.fn(),
+    uploadPersonFile: resolved()
   }
   const store = createStore({
     getters: {
@@ -69,7 +75,6 @@ const mountPage = async ({
       isGuestsLoading: () => false,
       isGuestsLoadingError: () => false,
       isImportPeopleLoading: () => false,
-      isImportPeopleLoadingError: () => false,
       isPeopleLoading: () => false,
       isPeopleLoadingError: () => false,
       mainConfig: () => ({ is_self_hosted: true }),
@@ -80,7 +85,8 @@ const mountPage = async ({
       userLimit: () => 10,
       ...getters
     },
-    actions
+    actions,
+    mutations: { PERSON_CSV_FILE_SELECTED: () => {} }
   })
   const wrapper = shallowMount(People, {
     global: {
@@ -417,14 +423,34 @@ describe('People page', () => {
       return formData
     }
 
-    const openImportModal = async options => {
-      const { wrapper } = await mountPage(options)
-      await wrapper
+    const clickImport = wrapper =>
+      wrapper
         .findAllComponents(ButtonSimple)
         .find(button => button.props('icon') === 'import')
         .vm.$emit('click')
-      return { wrapper, importModal: () => wrapper.findComponent(ImportModal) }
+
+    const openImportModal = async options => {
+      const { wrapper, actions } = await mountPage(options)
+      await clickImport(wrapper)
+      return {
+        wrapper,
+        actions,
+        importModal: () => wrapper.findComponent(ImportModal)
+      }
     }
+
+    // The import modal reads the file, then gives way to its preview.
+    const previewFile = async (wrapper, importModal) => {
+      vi.stubGlobal('FileReader', TextFileReader)
+      await importModal().vm.$emit('confirm', buildFormData(), 'file')
+      await flushPromises()
+      return wrapper.findComponent(ImportRenderModal)
+    }
+
+    const entries = [
+      ['First Name', 'Last Name'],
+      ['Ada', 'Lovelace']
+    ]
 
     it('keeps the import modal open on an error when the CSV cannot be read', async () => {
       vi.stubGlobal('FileReader', GoneFileReader)
@@ -438,14 +464,56 @@ describe('People page', () => {
       expect(importModal().props('isError')).toBe(true)
     })
 
-    // The preview shows the error of a failed upload: the import modal says
-    // that the file could not be read.
-    it('opens the import without the error of a failed upload', async () => {
-      const { importModal } = await openImportModal({
-        getters: { isImportPeopleLoadingError: () => true }
-      })
+    it('shows the error of a failed upload in its preview', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { wrapper, actions, importModal } = await openImportModal()
+      const error = new Error('Bad Request')
+      actions.uploadPersonFile.mockRejectedValueOnce(error)
+      const preview = await previewFile(wrapper, importModal)
 
+      await preview.vm.$emit('confirm', entries, false)
+      await flushPromises()
+
+      expect(preview.props()).toMatchObject({
+        isError: true,
+        importError: error
+      })
+      expect(consoleError).toHaveBeenCalledWith(error)
+    })
+
+    // Regression: the preview of the next file showed the error of the
+    // last failed upload, one failing after Cancel included. The import
+    // modal only says that a file could not be read.
+    it('opens the next preview without the error of an upload failed after Cancel', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { wrapper, actions, importModal } = await openImportModal()
+      let fail
+      actions.uploadPersonFile.mockImplementationOnce(
+        () =>
+          new Promise((resolve, reject) => {
+            fail = reject
+          })
+      )
+      const preview = await previewFile(wrapper, importModal)
+      await preview.vm.$emit('confirm', entries, false)
+      await preview.vm.$emit('cancel')
+      const error = new Error('Bad Request')
+      fail(error)
+      await flushPromises()
+      expect(consoleError).toHaveBeenCalledWith(error)
+
+      await clickImport(wrapper)
       expect(importModal().props('isError')).toBe(false)
+      const nextPreview = await previewFile(wrapper, importModal)
+
+      expect(nextPreview.props()).toMatchObject({
+        isError: false,
+        importError: null
+      })
     })
 
     it('shows the error of a bug, left to the error handler', async () => {

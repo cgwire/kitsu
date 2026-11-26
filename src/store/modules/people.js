@@ -169,7 +169,6 @@ const initialState = {
   isGuestsLoaded: false,
 
   isImportPeopleLoading: false,
-  isImportPeopleLoadingError: false,
 
   isEditModalShown: false,
   isEditLoading: false,
@@ -261,7 +260,6 @@ const getters = {
   isGuestsLoaded: state => state.isGuestsLoaded,
 
   isImportPeopleLoading: state => state.isImportPeopleLoading,
-  isImportPeopleLoadingError: state => state.isImportPeopleLoadingError,
 
   isDeleteModalShown: state => state.isDeleteModalShown,
   isDeleteLoading: state => state.isDeleteLoading,
@@ -879,17 +877,14 @@ const mutations = {
 
   [IMPORT_PEOPLE_START](state) {
     state.isImportPeopleLoading = true
-    state.isImportPeopleLoadingError = false
   },
 
   [IMPORT_PEOPLE_END](state) {
     state.isImportPeopleLoading = false
-    state.isImportPeopleLoadingError = false
   },
 
   [IMPORT_PEOPLE_ERROR](state) {
     state.isImportPeopleLoading = false
-    state.isImportPeopleLoadingError = true
   },
 
   [PERSON_CSV_FILE_SELECTED](state, formData) {
