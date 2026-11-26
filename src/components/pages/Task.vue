@@ -334,7 +334,7 @@
         class="block load-error"
         :error="loadError"
         @reload="loadPage()"
-        v-else
+        v-if="loadError"
       />
     </template>
 

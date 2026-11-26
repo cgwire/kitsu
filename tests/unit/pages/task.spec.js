@@ -770,6 +770,7 @@ describe('Task.vue task that fails to load', () => {
 
     expect(wrapper.findComponent(RouteSectionTabs).exists()).toBe(false)
     expect(wrapper.find('.preview-column').attributes('style')).toBeUndefined()
+    expect(wrapper.find('.load-error').exists()).toBe(false)
   })
 
   it('marks the editing a phone hides', async () => {
