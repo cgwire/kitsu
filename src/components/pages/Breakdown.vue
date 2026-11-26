@@ -96,6 +96,16 @@
       </div>
     </template>
     <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="breakdownFiltersSearchFilterGroups"
+        is-group-enabled
+        :kept-query-keys="KEPT_QUERY_KEYS"
+        :production-id="currentProduction?.id"
+        :queries="breakdownFiltersSearchQueries"
+        type="breakdownFilters"
+        with-route-query
+      />
       <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
 
       <spinner class="mt1" v-if="isLoading" />
@@ -491,6 +501,15 @@ const ASSET_DISPLAY_HEADERS = {
 
 const optionalCsvColumns = ['Label']
 
+// the search of the asset picker has its own saved searches
+const KEPT_QUERY_KEYS = ['search']
+
+// The line filters a query holds: a link, or a saved search, sets them.
+const readLineFilters = query => ({
+  asset: query.asset || '',
+  lines: ['empty', 'standby'].includes(query.lines) ? query.lines : 'all'
+})
+
 const CASTING_LOAD_DELAY = 300
 const MAX_ENTITY_CASTING_LOADS = 5
 const MAX_UNDO_STEPS = 20
@@ -516,7 +535,7 @@ const searchQueryListRef = useTemplateRef('search-query-list')
 
 const assetToEdit = ref({})
 const assetTypeId = ref('')
-const castedAssetSearch = ref('')
+const castedAssetSearch = ref(readLineFilters(route.query).asset)
 const castingType = ref('shot')
 const columnSelectorDisplayed = ref(false)
 const columnWidth = ref({})
@@ -527,7 +546,7 @@ const isBigMode = ref(false)
 const isOnlyCurrentEpisode = ref(false)
 const isTextMode = ref(false)
 const libraryDisplayed = ref(false)
-const lineFilter = ref('all')
+const lineFilter = ref(readLineFilters(route.query).lines)
 // Part of the key of each line, to draw it again.
 const lineRedraws = ref({})
 const metadataDisplayHeaders = ref({ ...SHOT_DISPLAY_HEADERS })
@@ -583,6 +602,12 @@ const assetMetadataDescriptors = computed(
 )
 const assetTypeMap = computed(() => store.getters.assetTypeMap)
 const assetsByType = computed(() => store.getters.assetsByType)
+const breakdownFiltersSearchFilterGroups = computed(
+  () => store.getters.breakdownFiltersSearchFilterGroups
+)
+const breakdownFiltersSearchQueries = computed(
+  () => store.getters.breakdownFiltersSearchQueries
+)
 const breakdownSearchFilterGroups = computed(
   () => store.getters.breakdownSearchFilterGroups
 )
@@ -1170,18 +1195,19 @@ const updateUrl = () => {
   const scopeRoute = getScopeRoute()
   if (scopeRoute) {
     const routeEpisodeId = route.params.episode_id || currentEpisode.value?.id
-    router.push(
-      routeEpisodeId
-        ? {
-            name: `episode-${scopeRoute.name}`,
-            params: {
-              ...scopeRoute.params,
-              episode_id: routeEpisodeId,
-              ...(routeEpisodeId === 'all' ? { sequence_id: 'all' } : {})
-            }
-          }
-        : scopeRoute
-    )
+    // the filters of the page outlive its scope
+    router.push({
+      ...scopeRoute,
+      ...(routeEpisodeId && {
+        name: `episode-${scopeRoute.name}`,
+        params: {
+          ...scopeRoute.params,
+          episode_id: routeEpisodeId,
+          ...(routeEpisodeId === 'all' ? { sequence_id: 'all' } : {})
+        }
+      }),
+      query: route.query
+    })
   }
 }
 
@@ -1646,6 +1672,27 @@ watch(readyTaskTypeId, () => {
 
 watch(displayedSequences, () => {
   store.commit('CASTING_SET_SEQUENCES', displayedSequences.value)
+})
+
+// The URL holds the line filters that are set, for the searches saved from
+// it. It replaces its entry of the history: a push would stack one per letter
+// typed.
+watch([lineFilter, castedAssetSearch], () => {
+  router.replace({
+    query: {
+      ...route.query,
+      asset: castedAssetSearch.value.trim() || undefined,
+      lines: lineFilter.value === 'all' ? undefined : lineFilter.value
+    }
+  })
+})
+
+// A saved search, or the back button, sets them from outside. The URL holds
+// the asset trimmed: the field keeps the space being typed.
+watch([() => route.query.lines, () => route.query.asset], () => {
+  const { asset, lines } = readLineFilters(route.query)
+  lineFilter.value = lines
+  if (asset !== castedAssetSearch.value.trim()) castedAssetSearch.value = asset
 })
 
 // Searches coming from elsewhere (saved queries, back button). The page

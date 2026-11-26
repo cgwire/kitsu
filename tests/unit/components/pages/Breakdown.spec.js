@@ -18,12 +18,16 @@ vi.mock('vue-i18n', () => ({
 const routeHolder = vi.hoisted(() => ({ route: null }))
 vi.mock('vue-router', () => ({
   useRoute: () => routeHolder.route,
-  useRouter: () => ({
-    push: location => {
-      if (location.query) routeHolder.route.query = location.query
+  useRouter: () => {
+    // A named route without a query drops the one of the page.
+    const go = location => {
+      if (location.query || location.name) {
+        routeHolder.route.query = location.query ?? {}
+      }
       return Promise.resolve()
     }
-  })
+    return { push: go, replace: go }
+  }
 }))
 vi.mock('@/lib/preferences', () => ({
   default: {
@@ -997,6 +1001,85 @@ describe('Breakdown page, saved searches', () => {
     wrapper.findComponent({ name: 'SearchField' }).vm.$emit('save', 'hero')
 
     expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('hero')
+  })
+})
+
+describe('Breakdown page, saved line filters', () => {
+  test('lists the searches of its line filters above the casting', async () => {
+    const queries = [
+      { id: 'search-1', name: 'Empty', search_query: 'lines=empty' }
+    ]
+    const { wrapper } = mountPage({
+      getters: { breakdownFiltersSearchQueries: () => queries }
+    })
+    await flushPromises()
+
+    const list = wrapper
+      .find('.list-panel')
+      .findComponent({ name: 'SearchQueryList' })
+    expect(list.props()).toMatchObject({
+      // the search of the asset picker has its own list
+      keptQueryKeys: ['search'],
+      productionId: 'p1',
+      queries,
+      type: 'breakdownFilters',
+      withRouteQuery: true
+    })
+    wrapper.unmount()
+  })
+
+  test('writes its line filters in the URL, and nothing at their default', async () => {
+    // the search of the URL is the one of the asset picker, which applies it
+    const { wrapper } = mountPage({ actions: { setAssetSearch: vi.fn() } })
+    await flushPromises()
+    routeHolder.route.query = { search: 'hero' }
+
+    wrapper.vm.lineFilter = 'empty'
+    wrapper.vm.castedAssetSearch = 'vill'
+    await nextTick()
+
+    expect(routeHolder.route.query).toEqual({
+      search: 'hero',
+      lines: 'empty',
+      asset: 'vill'
+    })
+
+    wrapper.vm.lineFilter = 'all'
+    wrapper.vm.castedAssetSearch = ''
+    await nextTick()
+
+    expect(routeHolder.route.query).toEqual({ search: 'hero' })
+    wrapper.unmount()
+  })
+
+  test('keeps its line filters in the URL when the sequence changes', async () => {
+    routeHolder.route.query = { lines: 'empty' }
+    const { wrapper } = mountPage({
+      getters: { displayedSequences: () => [{ id: 'seq-1' }, { id: 'seq-2' }] }
+    })
+    await flushPromises()
+
+    wrapper.vm.sequenceId = 'seq-2'
+    await nextTick()
+
+    expect(routeHolder.route.query).toEqual({ lines: 'empty' })
+    wrapper.unmount()
+  })
+
+  test('takes the line filters of the URL, at first and when a search sets them', async () => {
+    routeHolder.route.query = { lines: 'standby', asset: 'hero' }
+    const { wrapper } = mountPage()
+    await flushPromises()
+
+    expect(wrapper.vm.lineFilter).toBe('standby')
+    expect(wrapper.vm.castedAssetSearch).toBe('hero')
+
+    routeHolder.route.query = { lines: 'empty' }
+    await nextTick()
+
+    expect(wrapper.vm.lineFilter).toBe('empty')
+    expect(wrapper.vm.castedAssetSearch).toBe('')
+    wrapper.unmount()
   })
 })
 

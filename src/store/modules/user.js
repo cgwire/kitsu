@@ -253,6 +253,11 @@ const PAGE_SEARCHES = [
   { type: 'loginLogs', listType: 'loginlogs' },
   { type: 'assetLibrary', listType: 'assetlibrary' },
   { type: 'concepts', listType: 'concepts', isInProduction: true },
+  {
+    type: 'breakdownFilters',
+    listType: 'breakdownfilters',
+    isInProduction: true
+  },
   { type: 'assetTypeStats', listType: 'assettypestats', isInProduction: true },
   { type: 'sequenceStats', listType: 'sequencestats', isInProduction: true },
   { type: 'episodeStats', listType: 'episodestats', isInProduction: true },

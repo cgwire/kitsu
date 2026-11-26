@@ -778,6 +778,12 @@ describe('User store', () => {
       productionId: 'production-1'
     },
     {
+      page: 'Breakdown',
+      type: 'BreakdownFilters',
+      listType: 'breakdownfilters',
+      productionId: 'production-1'
+    },
+    {
       page: 'Asset Type Stats',
       type: 'AssetTypeStats',
       listType: 'assettypestats',
