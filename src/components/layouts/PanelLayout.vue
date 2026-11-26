@@ -128,8 +128,9 @@ defineProps({
   background-color: var(--background-panel-tag);
 }
 
-// the dropdown of a group takes the same color, lifted off the panel
-.list-panel :deep(.search-queries .group-list) {
+// the dropdown of a group takes the same color, lifted off the panel (.group
+// outweighs the color the list gives it, whichever style loads last)
+.list-panel :deep(.search-queries .group .group-list) {
   background-color: var(--background-panel-tag);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
