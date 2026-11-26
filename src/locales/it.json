@@ -152,6 +152,7 @@
       "max_retakes_error": "Non puoi più aggiungere retake su questo task.",
       "revision_taken_error": "La revisione {revision} esiste già. Scegli un altro numero.",
       "unknown_status_error": "Lo stato del task selezionato non è più disponibile. Ricarica la pagina e riprova.",
+      "unreadable_picture_error": "Impossibile leggere \"{name}\" come immagine.",
       "previews": "File di anteprima da pubblicare come nuova revisione",
       "selected_files": "File selezionati",
       "no_attachments": "Non ci sono allegati per questo commento.",

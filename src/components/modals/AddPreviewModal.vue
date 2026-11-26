@@ -49,6 +49,13 @@
               : $t('tasks.add_preview_error')
           }}
         </p>
+        <p class="error" v-if="unreadablePictureName">
+          {{
+            $t('comments.unreadable_picture_error', {
+              name: unreadablePictureName
+            })
+          }}
+        </p>
 
         <h3 class="subtitle has-text-centered" v-if="forms.length > 0">
           {{ $t('comments.selected_files') }}
@@ -165,6 +172,7 @@ const props = defineProps({
   isMultiple: { type: Boolean, default: true },
   message: { type: String, default: 'tasks.revision_preview_file' },
   title: { type: String, default: '' },
+  unreadablePictureName: { type: String, default: '' },
   // By file name, for the uploads no other part of the page shows.
   uploadProgress: { type: Object, default: null }
 })

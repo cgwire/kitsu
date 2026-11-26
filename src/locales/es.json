@@ -152,6 +152,7 @@
       "max_retakes_error": "Ya no puede añadir más retomas en esta tarea.",
       "revision_taken_error": "La revisión {revision} ya existe. Elija otro número.",
       "unknown_status_error": "El estado de tarea seleccionado ya no está disponible. Por favor, recargue la página e inténtelo de nuevo.",
+      "unreadable_picture_error": "No se ha podido leer \"{name}\" como imagen.",
       "previews": "Archivos de vista previa para publicar como nueva revisión",
       "selected_files": "Archivos seleccionados",
       "no_attachments": "No hay archivos adjuntos para este comentario.",

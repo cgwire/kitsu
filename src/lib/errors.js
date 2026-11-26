@@ -25,6 +25,12 @@ export const isNotFound = err => err?.status === 404
 // malformed id from a broken link (400).
 export const isMissingEntity = err => [400, 403, 404].includes(err?.status)
 
+// A file named as a picture that Zou cannot read, such as an empty export or
+// another format under a .png or .jpg name.
+export const isUnreadablePicture = err =>
+  err?.status === 400 &&
+  (err.body?.message?.includes('not a readable picture') ?? false)
+
 const errors = {
   backToLogin() {
     if (window.location.pathname !== '/login') {

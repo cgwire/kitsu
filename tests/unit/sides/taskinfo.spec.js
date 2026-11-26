@@ -1722,6 +1722,185 @@ describe('TaskInfo.vue', () => {
       expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
     })
 
+    // Zou names no file in its refusal: the store tells which one it was.
+    describe('refused by Zou', () => {
+      const refusal = (status, message) =>
+        Object.assign(new Error(`${status}`), {
+          status,
+          body: { message },
+          uploadFileName: 'sh010.png'
+        })
+      const unreadable = () =>
+        refusal(400, 'Uploaded file is not a readable picture.')
+      const failOn = (store, action, err) =>
+        store.dispatch.mockImplementation(type =>
+          type === action ? Promise.reject(err) : Promise.resolve()
+        )
+
+      let consoleError = null
+
+      afterEach(() => {
+        consoleError?.mockRestore()
+        consoleError = null
+      })
+
+      it('names the file it cannot read as a picture', async () => {
+        const { wrapper, store } = await mountCommentingPanel()
+        const err = unreadable()
+        failOn(store, 'commentTaskWithPreview', err)
+        consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+
+        commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.png')])
+        await publish(wrapper)
+
+        expect(consoleError).toHaveBeenCalledWith(err)
+        expect(commentBox(wrapper).vm.$attrs).toMatchObject({
+          'is-error': false,
+          'unreadable-picture-name': 'sh010.png'
+        })
+      })
+
+      it('keeps the general message for another refusal', async () => {
+        const { wrapper, store } = await mountCommentingPanel()
+        failOn(store, 'commentTaskWithPreview', refusal(413, ''))
+        consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+
+        commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.png')])
+        await publish(wrapper)
+
+        expect(commentBox(wrapper).vm.$attrs).toMatchObject({
+          'is-error': true,
+          'unreadable-picture-name': ''
+        })
+      })
+
+      it('names the extra file it cannot read as a picture', async () => {
+        const { wrapper, store } = await mountCommentingPanel()
+        failOn(store, 'addCommentExtraPreview', unreadable())
+        consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const extraModal = wrapper.findComponent({
+          ref: 'add-extra-preview-modal'
+        })
+
+        extraModal.vm.$emit('confirm', [previewForm('sh010.png')])
+        await flushPromises()
+
+        expect(extraModal.vm.$attrs).toMatchObject({
+          'is-error': false,
+          'unreadable-picture-name': 'sh010.png'
+        })
+      })
+
+      it.each([
+        ['a picture it cannot read', unreadable],
+        ['another refusal', () => refusal(413, '')]
+      ])(
+        'opens the window of the "+" without %s refused after it closed',
+        async (_, failure) => {
+          const previews = [
+            { id: 'preview-1', revision: 1, extension: 'mp4', previews: [] }
+          ]
+          const { wrapper, store } = await mountCommentingPanel({ previews })
+          let fail = null
+          store.dispatch.mockImplementation(type =>
+            type === 'addCommentExtraPreview'
+              ? new Promise((resolve, reject) => {
+                  fail = reject
+                })
+              : Promise.resolve()
+          )
+          consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+          const open = () =>
+            wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+          const extraModal = () =>
+            wrapper.findComponent({ ref: 'add-extra-preview-modal' })
+          open()
+          await flushPromises()
+          extraModal().vm.$emit('confirm', [previewForm('sh010.png')])
+          await flushPromises()
+          extraModal().vm.$emit('cancel')
+          await flushPromises()
+
+          fail(failure())
+          await flushPromises()
+          open()
+          await flushPromises()
+
+          expect(extraModal().vm.$attrs).toMatchObject({
+            active: true,
+            'is-error': false,
+            'unreadable-picture-name': ''
+          })
+        }
+      )
+
+      // The comment box of the next task holds none of the files refused.
+      it.each([
+        ['a picture it cannot read', unreadable],
+        ['the retake limit', () => refusal(400, 'No more retakes allowed')],
+        ['another refusal', () => refusal(413, '')]
+      ])(
+        'leaves the error of %s behind when the panel shows another task',
+        async (_, failure) => {
+          const { wrapper, store } = await mountCommentingPanel()
+          failOn(store, 'commentTaskWithPreview', failure())
+          consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+          commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.png')])
+          await publish(wrapper)
+
+          await wrapper.setProps({ task: buildTask({ id: 'task-2' }) })
+          await flushPromises()
+
+          expect(commentBox(wrapper).vm.$attrs).toMatchObject({
+            'is-error': false,
+            'is-max-retakes-error': false,
+            'unreadable-picture-name': ''
+          })
+        }
+      )
+
+      // A publication that fails after the move has no other place to show
+      // its error.
+      it('shows the error of a publication that fails once the panel shows another task', async () => {
+        const { wrapper, store } = await mountCommentingPanel()
+        let fail = null
+        store.dispatch.mockImplementation(type =>
+          type === 'commentTaskWithPreview'
+            ? new Promise((resolve, reject) => {
+                fail = reject
+              })
+            : Promise.resolve()
+        )
+        consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.png')])
+        await publish(wrapper)
+
+        await wrapper.setProps({ task: buildTask({ id: 'task-2' }) })
+        await flushPromises()
+        const err = unreadable()
+        fail(err)
+        await flushPromises()
+
+        expect(consoleError).toHaveBeenCalledWith(err)
+        expect(commentBox(wrapper).vm.$attrs).toMatchObject({
+          'is-error': false,
+          'unreadable-picture-name': 'sh010.png'
+        })
+      })
+    })
+
     // The extra preview modal uploads its own files: the comment box keeps
     // what it holds, and a refused file never lands in it.
     describe('beside an extra preview', () => {

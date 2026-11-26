@@ -377,6 +377,15 @@
         <div class="error pull-right" v-if="isMaxRetakesError">
           <em>{{ $t('comments.max_retakes_error') }}</em>
         </div>
+        <div class="error pull-right" v-if="unreadablePictureName">
+          <em>
+            {{
+              $t('comments.unreadable_picture_error', {
+                name: unreadablePictureName
+              })
+            }}
+          </em>
+        </div>
         <div class="error pull-right" v-if="isRevisionTaken">
           <em>
             {{
@@ -533,6 +542,10 @@ const props = defineProps({
   previewForms: {
     type: Array,
     default: () => []
+  },
+  unreadablePictureName: {
+    type: String,
+    default: ''
   }
 })
 

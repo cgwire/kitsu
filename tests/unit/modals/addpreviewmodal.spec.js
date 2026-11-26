@@ -5,6 +5,8 @@ vi.mock('@/composables/modal', () => ({ useModal: () => {} }))
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import FileUploadZone from '@/components/widgets/FileUploadZone.vue'
 
+import { shallowMountWithI18n } from '../fixtures/i18n'
+
 const mountModal = (props = {}) =>
   shallowMount(AddPreviewModal, { props: { active: true, ...props } })
 
@@ -68,6 +70,17 @@ describe('modals/AddPreviewModal', () => {
     await selectFile(wrapper)
 
     expect(wrapper.find('h3').text()).toBe('comments.selected_files')
+  })
+
+  // Zou names no file in its refusal: the page hands the name over.
+  it('names the file Zou cannot read as a picture', () => {
+    const wrapper = shallowMountWithI18n(AddPreviewModal, {
+      props: { active: true, unreadablePictureName: 'sh010-alt.png' }
+    })
+
+    expect(wrapper.find('.error').text()).toBe(
+      '"sh010-alt.png" could not be read as a picture.'
+    )
   })
 
   // The extra preview modal is the only place showing its uploads.

@@ -346,6 +346,7 @@
               :frame="currentFrame"
               :is-error="errors.addComment"
               :is-max-retakes-error="errors.addCommentMaxRetakes"
+              :unreadable-picture-name="errors.addCommentUnreadablePicture"
               :is-loading="loading.addComment"
               :is-movie="isMovie"
               :is-picture="isPicture"
@@ -448,6 +449,7 @@
         :is-loading="loading.addExtraPreview"
         :is-error="errors.addExtraPreview"
         message=""
+        :unreadable-picture-name="errors.addExtraPreviewUnreadablePicture"
         :upload-progress="uploadProgress"
         :title="previewModalTitle"
         @cancel="hideExtraPreviewModal"
@@ -526,6 +528,7 @@ import drafts from '@/lib/drafts'
 import {
   isMissingEntity,
   isRequestFailure,
+  isUnreadablePicture,
   logRequestFailure
 } from '@/lib/errors'
 import func from '@/lib/func'
@@ -642,11 +645,14 @@ const loading = ref({
   editComment: false
 })
 
+// The unreadable picture errors hold the name of the file Zou could not read.
 const errors = ref({
   addComment: false,
   addCommentMaxRetakes: false,
+  addCommentUnreadablePicture: '',
   addPreview: false,
   addExtraPreview: false,
+  addExtraPreviewUnreadablePicture: '',
   setPreview: false,
   deleteComment: false,
   editComment: false
@@ -1415,6 +1421,7 @@ const postComment = (
   loading.value.addComment = true
   errors.value.addComment = false
   errors.value.addCommentMaxRetakes = false
+  errors.value.addCommentUnreadablePicture = ''
   store
     .dispatch(action, params)
     .then(() => {
@@ -1431,7 +1438,11 @@ const postComment = (
       console.error(err)
       loading.value.addComment = false
       const isRetakeError = err.body?.message?.includes('retake') ?? false
-      errors.value.addComment = !isRetakeError
+      errors.value.addCommentUnreadablePicture = isUnreadablePicture(err)
+        ? err.uploadFileName
+        : ''
+      errors.value.addComment =
+        !isRetakeError && !errors.value.addCommentUnreadablePicture
       errors.value.addCommentMaxRetakes = isRetakeError
     })
 }
@@ -1592,6 +1603,7 @@ const isTaskOfPage = taskId =>
 
 const createExtraPreview = forms => {
   errors.value.addExtraPreview = false
+  errors.value.addExtraPreviewUnreadablePicture = ''
   loading.value.addExtraPreview = true
   const { previewId, taskId } = extraFileRevision.value ?? getShownRevision()
   const comment = getTaskComments
@@ -1621,7 +1633,11 @@ const createExtraPreview = forms => {
     })
     .catch(err => {
       console.error(err)
-      errors.value.addExtraPreview = true
+      errors.value.addExtraPreviewUnreadablePicture = isUnreadablePicture(err)
+        ? err.uploadFileName
+        : ''
+      errors.value.addExtraPreview =
+        !errors.value.addExtraPreviewUnreadablePicture
       loading.value.addExtraPreview = false
     })
 }
@@ -1718,6 +1734,7 @@ const onPreviewAdded = eventData => {
 const onAddExtraPreviewClicked = () => {
   extraFileRevision.value = getShownRevision()
   errors.value.addExtraPreview = false
+  errors.value.addExtraPreviewUnreadablePicture = ''
   modals.value.addExtraPreview = true
 }
 
@@ -2092,6 +2109,9 @@ const socketEvents = {
 watch(route, () => {
   if (route.params.task_id !== pageTaskId) {
     failedActionCommentId.value = null
+    errors.value.addComment = false
+    errors.value.addCommentMaxRetakes = false
+    errors.value.addCommentUnreadablePicture = ''
     loadPage()
   }
   if (route.params.preview_id !== selectedPreviewId.value) {

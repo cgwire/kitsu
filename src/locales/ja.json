@@ -152,6 +152,7 @@
       "max_retakes_error": "このタスクにはこれ以上リテイクを追加できません。",
       "revision_taken_error": "リビジョン {revision} は既に存在します。別の番号を選択してください。",
       "unknown_status_error": "選択したタスクステータスは利用できなくなりました。ページを再読み込みしてもう一度お試しください。",
+      "unreadable_picture_error": "「{name}」を画像として読み込めませんでした。",
       "previews": "新しいリビジョンとして公開するファイル",
       "selected_files": "選択したファイル",
       "no_attachments": "このコメントには添付ファイルがありません。",

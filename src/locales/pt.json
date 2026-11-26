@@ -152,6 +152,7 @@
       "max_retakes_error": "Você não pode mais adicionar retakes nessa tarefa.",
       "revision_taken_error": "A revisão {revision} já existe. Escolha outro número.",
       "unknown_status_error": "O status de tarefa selecionado não está mais disponível. Recarregue a página e tente novamente.",
+      "unreadable_picture_error": "Não foi possível ler \"{name}\" como imagem.",
       "previews": "Arquivos de visualização para publicar como uma nova revisão",
       "selected_files": "Arquivos selecionados",
       "no_attachments": "Não há anexos para este comentário.",

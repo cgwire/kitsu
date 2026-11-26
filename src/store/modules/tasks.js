@@ -250,6 +250,12 @@ const helpers = {
     return err?.status ? err.status <= 500 : err?.isBodySent === false
   },
 
+  // Zou names no file in its refusal, and a publication may hold several.
+  nameUploadFailure(err, form) {
+    err.uploadFileName = form.get('file').name
+    return err
+  },
+
   // Zou deletes the files of a comment along with it, and so their revision.
   // An entry keeps the id of its first file, which the trash may have taken
   // and a reload dropped: the files it still holds name it too. The player
@@ -901,7 +907,9 @@ const actions = {
               name: mainForm.get('file').name
             })
           })
-          return promise
+          return promise.catch(err => {
+            throw helpers.nameUploadFailure(err, mainForm)
+          })
         })
         .then(preview => {
           commit(ADD_PREVIEW_END, {
@@ -930,7 +938,9 @@ const actions = {
                       name: form.get('file').name
                     })
                   })
-                  return promise
+                  return promise.catch(err => {
+                    throw helpers.nameUploadFailure(err, form)
+                  })
                 })
                 .then(preview => {
                   commit(ADD_PREVIEW_END, {
@@ -1005,7 +1015,7 @@ const actions = {
                 .deletePreview(taskId, commentId, preview.id)
                 .catch(errors.logRequestFailure)
             }
-            throw err
+            throw helpers.nameUploadFailure(err, form)
           })
         })
         .then(preview => {
