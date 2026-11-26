@@ -286,5 +286,53 @@ describe('Settings pages', () => {
 
       expect(modal.props()).toMatchObject({ active: true, isError: false })
     })
+
+    // The removal runs from the page, out of the modal: its error shows
+    // under its link.
+    describe('logo removal', () => {
+      const removalError = wrapper => wrapper.find('[role="alert"]')
+
+      const removeLogo = async wrapper => {
+        await wrapper.find('button.link-button.muted').trigger('click')
+        await flushPromises()
+      }
+
+      test('says that the logo could not be removed', async () => {
+        const error = new Error('Bad Request')
+        const wrapper = await mountSettings(() => Promise.reject(error))
+
+        await removeLogo(wrapper)
+
+        expect(console.error).toHaveBeenCalledWith(error)
+        expect(removalError(wrapper).text()).toBe('settings.remove_logo_error')
+      })
+
+      test('drops the error when the removal is tried again', async () => {
+        const answers = [
+          () => Promise.reject(new Error('Bad Request')),
+          () => new Promise(() => {})
+        ]
+        const wrapper = await mountSettings(() => answers.shift()())
+        await removeLogo(wrapper)
+        expect(removalError(wrapper).exists()).toBe(true)
+
+        await removeLogo(wrapper)
+
+        expect(removalError(wrapper).exists()).toBe(false)
+      })
+
+      // A new logo replaces the one that could not be removed.
+      test('drops the error when the logo modal opens', async () => {
+        const wrapper = await mountSettings(() =>
+          Promise.reject(new Error('Bad Request'))
+        )
+        await removeLogo(wrapper)
+        expect(removalError(wrapper).exists()).toBe(true)
+
+        await openLogoModal(wrapper)
+
+        expect(removalError(wrapper).exists()).toBe(false)
+      })
+    })
   })
 })

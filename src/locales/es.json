@@ -1450,6 +1450,7 @@
       },
       "webhook_error": "Se ha producido un error al publicar el webhook",
       "remove_logo": "Eliminar el logotipo del estudio",
+      "remove_logo_error": "No se ha podido eliminar el logotipo del estudio. Por favor, inténtelo de nuevo.",
       "available_items": "Artículos disponibles",
       "import_from_production": "Importar desde otra producción",
       "no_more_available_items": "No hay más artículos disponibles para añadir.",

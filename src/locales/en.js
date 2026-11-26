@@ -1908,6 +1908,7 @@ export default {
     preferences_title: 'Preferences',
     no_more_available_items: 'There are no more items available to add.',
     remove_logo: 'Remove studio logo',
+    remove_logo_error: 'Could not remove the studio logo. Please try again.',
     set_logo: 'Set studio logo',
     title: 'Settings',
     webhook_error: 'An error occurred while posting webhook',

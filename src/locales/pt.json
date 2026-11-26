@@ -1450,6 +1450,7 @@
       },
       "webhook_error": "Ocorreu um erro ao postar o webhook",
       "remove_logo": "Remover o logotipo do estúdio",
+      "remove_logo_error": "Não foi possível remover o logotipo do estúdio. Tente novamente.",
       "available_items": "Itens disponíveis",
       "import_from_production": "Importar de outra produção",
       "no_more_available_items": "Não há mais itens disponíveis para adicionar.",

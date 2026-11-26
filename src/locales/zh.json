@@ -1450,6 +1450,7 @@
       },
       "webhook_error": "发送 webhook 时出错",
       "remove_logo": "移除工作室徽标",
+      "remove_logo_error": "无法移除工作室徽标。请重试。",
       "available_items": "现有项目",
       "import_from_production": "从其他制作导入",
       "no_more_available_items": "没有更多项目可添加了。",

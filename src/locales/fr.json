@@ -1451,6 +1451,7 @@
       },
       "webhook_error": "Une erreur est survenue lors de l'envoi du webhook.",
       "remove_logo": "Supprimer le logo du studio",
+      "remove_logo_error": "Impossible de supprimer le logo du studio. Veuillez réessayer.",
       "available_items": "Éléments disponibles",
       "import_from_production": "Importer depuis une autre production",
       "no_more_available_items": "Il n'y a plus d'éléments disponibles à ajouter."

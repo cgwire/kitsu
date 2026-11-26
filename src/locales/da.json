@@ -1450,6 +1450,7 @@
       },
       "webhook_error": "Der opstod en fejl under afsendelse af webhook",
       "remove_logo": "Fjern studio-logo",
+      "remove_logo_error": "Studio-logoet kunne ikke fjernes. Prøv venligst igen.",
       "available_items": "Tilgængelige elementer",
       "import_from_production": "Importer fra en anden produktion",
       "no_more_available_items": "Der er ikke flere elementer tilgængelige til tilføjelse.",

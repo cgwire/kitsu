@@ -1450,6 +1450,7 @@
       },
       "webhook_error": "Beim Veröffentlichen des Webhooks ist ein Fehler aufgetreten",
       "remove_logo": "Studio-Logo entfernen",
+      "remove_logo_error": "Das Studio-Logo konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
       "available_items": "Verfügbare Elemente",
       "import_from_production": "Import aus einer anderen Produktion",
       "no_more_available_items": "Es sind keine weiteren Elemente zum Hinzufügen verfügbar.",

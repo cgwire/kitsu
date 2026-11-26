@@ -1450,6 +1450,7 @@
       },
       "webhook_error": "webhook への送信中にエラーが発生しました。",
       "remove_logo": "スタジオロゴを削除",
+      "remove_logo_error": "スタジオロゴを削除できませんでした。もう一度お試しください。",
       "available_items": "追加できる項目",
       "import_from_production": "別のプロダクションからインポート",
       "no_more_available_items": "これ以上追加できる項目はありません。",

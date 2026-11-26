@@ -30,6 +30,9 @@
             </button>
           </template>
         </div>
+        <p class="error logo-error" role="alert" v-if="errors.removeAvatar">
+          {{ $t('settings.remove_logo_error') }}
+        </p>
       </header>
 
       <div class="cards">
@@ -173,6 +176,7 @@ const errors = reactive({
   studio: false,
   preferences: false,
   integrations: false,
+  removeAvatar: false,
   saveAvatar: false,
   webhook_error: false
 })
@@ -209,9 +213,10 @@ const hideAvatarModal = () => {
   modals.avatar = false
 }
 
-// The upload and the removal of the logo share this error, which only the
-// modal shows: each opening clears it.
+// An upload can still fail after Cancel: its error is cleared on opening,
+// not on closing. A new logo also makes the failed removal moot.
 const showAvatarModal = () => {
+  errors.removeAvatar = false
   errors.saveAvatar = false
   modals.avatar = true
 }
@@ -250,12 +255,12 @@ const uploadAvatarFile = formData => {
 
 const removeAvatar = () => {
   loading.saveAvatar = true
-  errors.saveAvatar = false
+  errors.removeAvatar = false
   store
     .dispatch('deleteOrganisationLogo')
     .catch(err => {
       console.error(err)
-      errors.saveAvatar = true
+      errors.removeAvatar = true
     })
     .finally(() => {
       loading.saveAvatar = false
@@ -364,6 +369,11 @@ useHead({ title: computed(() => `${t('settings.title')} - Kitsu`) })
 
 .dot {
   color: var(--text-alt);
+}
+
+.logo-error {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
 }
 
 .link-button {

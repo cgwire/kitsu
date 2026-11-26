@@ -1832,6 +1832,7 @@
       "preferences_title": "Preferencje",
       "no_more_available_items": "Nie ma już więcej elementów do dodania.",
       "remove_logo": "Usuń logo studia",
+      "remove_logo_error": "Nie udało się usunąć logo studia. Spróbuj ponownie.",
       "set_logo": "Ustaw logo studia",
       "title": "Ustawienia",
       "webhook_error": "Wystąpił błąd podczas wysyłania webhooka",

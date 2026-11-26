@@ -1450,6 +1450,7 @@
       },
       "webhook_error": "Er is een fout opgetreden bij het posten van webhook",
       "remove_logo": "Studiologo verwijderen",
+      "remove_logo_error": "Kon het studiologo niet verwijderen. Probeer het opnieuw.",
       "available_items": "Beschikbare items",
       "import_from_production": "Importeren uit een andere productie",
       "no_more_available_items": "Er zijn geen items meer beschikbaar om toe te voegen.",
