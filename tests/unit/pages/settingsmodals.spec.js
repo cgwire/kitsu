@@ -125,6 +125,8 @@ const mountPage = async (page, failAction) => {
     global: {
       plugins: [store, router],
       stubs: {
+        // the Bots keep their list in a slot of the layout
+        PanelLayout: false,
         SearchField: { template: '<input />', methods: { getValue: () => '' } }
       }
     }
