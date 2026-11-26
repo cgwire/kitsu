@@ -1010,7 +1010,9 @@ const actions = {
           })
           return promise.catch(async err => {
             // Left without its file, the preview shows as processing for good.
-            if (helpers.hasFailedForGood(err)) {
+            // Zou deletes it on its own when it refuses the file (400). Zou
+            // 1.1.7 and older keep the preview of a picture they cannot read.
+            if (helpers.hasFailedForGood(err) && err.status !== 400) {
               await tasksApi
                 .deletePreview(taskId, commentId, preview.id)
                 .catch(errors.logRequestFailure)

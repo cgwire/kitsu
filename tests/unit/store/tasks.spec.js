@@ -1569,7 +1569,7 @@ describe('Tasks store, rolled back preview publications', () => {
         { taskId: 'task-1', commentId: 'comment-1', previewId: 'preview-1', forms }
       )
 
-    test('removes the preview whose file Zou refused, not the comment', async () => {
+    test('removes the preview whose file the proxy refused, not the comment', async () => {
       const err = refusal(413)
       tasksApi.addExtraPreview
         .mockResolvedValueOnce({ id: 'preview-2' })
@@ -1587,6 +1587,16 @@ describe('Tasks store, rolled back preview publications', () => {
 
     test('keeps the preview when Zou may still process its file', async () => {
       const err = cut(true)
+      tasksApi.addExtraPreview.mockResolvedValueOnce({ id: 'preview-2' })
+      tasksApi.uploadPreview.mockImplementationOnce(failedUpload(err))
+
+      await expect(addExtras([form('b.png')])).rejects.toBe(err)
+      expect(tasksApi.deletePreview).not.toHaveBeenCalled()
+    })
+
+    // A second deletion would answer 404.
+    test('leaves to Zou the preview of a file it refuses', async () => {
+      const err = refusal(400)
       tasksApi.addExtraPreview.mockResolvedValueOnce({ id: 'preview-2' })
       tasksApi.uploadPreview.mockImplementationOnce(failedUpload(err))
 
