@@ -3,6 +3,7 @@
     class="columns fixed-page panel-layout"
     :class="{
       'paneled-side': !plainSide,
+      'side-beside-tabs': sideBesideTabs,
       'side-focused': sideFocused,
       'with-side': side,
       'with-tabs': $slots.tabs
@@ -43,6 +44,8 @@ defineProps({
   // the side keeps the look it has on the other pages: a full-height column
   plainSide: { type: Boolean, default: false },
   side: { type: Boolean, default: false },
+  // the tabs keep to the main column, and the side panel runs beside them
+  sideBesideTabs: { type: Boolean, default: false },
   // on phones the side panel shows in place of the list, never beside it
   sideFocused: { type: Boolean, default: false }
 })
@@ -191,6 +194,33 @@ defineProps({
 
   .page-tabs {
     grid-column: 1 / -1;
+  }
+
+  // The tabs of the main column alone leave the side one its two rows, from
+  // the topbar down, and the gutter between the columns.
+  // (the main column names its cell: with no side column it took the free
+  // one beside the tabs)
+  .side-beside-tabs .page-tabs,
+  .with-tabs.side-beside-tabs .main-column {
+    grid-column: 1;
+  }
+
+  .with-tabs.side-beside-tabs .main-column {
+    grid-row: 2;
+  }
+
+  .side-beside-tabs.with-side .page-tabs {
+    padding-right: 0;
+  }
+
+  .with-tabs.side-beside-tabs .side-column {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    margin-top: 60px;
+  }
+
+  .with-tabs.side-beside-tabs.paneled-side .side-column {
+    padding-top: 1em;
   }
 
   // the gutter before the side panel belongs to its column
