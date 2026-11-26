@@ -58,10 +58,11 @@ export const isAltLetter = (event, code, key) => {
 /**
  * Classify a Ctrl/Cmd + Z / Y press as the browser's undo or redo command.
  *
- * Both must be swallowed wherever a player owns the keyboard: left alone,
- * Chromium replays the last edit made in a text field of the page (its undo
- * stack belongs to the frame, not to the focused element), which rewrites a
- * list search field or a comment draft behind the user's back.
+ * Both must be swallowed wherever a player, or a menu over the page, owns the
+ * keyboard: left alone, Chromium replays the last edit made in a text field of
+ * the page (its undo stack belongs to the frame, not to the focused element),
+ * which rewrites a list search field or a comment draft behind the user's
+ * back.
  *
  * Shift uppercases event.key, and Windows binds redo to Ctrl+Y as well; both
  * are reported as redo so callers can swallow them without acting, redo living
@@ -71,8 +72,8 @@ export const isAltLetter = (event, code, key) => {
  * BÉPO), event.code only when event.key is not a plain a-z letter, which is
  * the non-Latin case where the physical position is the sole usable signal.
  *
- * Exported so both keydown handlers (usePreviewShortcuts and
- * SharedPlaylistPlayer) match alike.
+ * Exported so the keydown handlers that swallow them (usePreviewShortcuts,
+ * SharedPlaylistPlayer, and the visible columns menu) match alike.
  *
  * @param {KeyboardEvent} event
  * @returns {'undo'|'redo'|null}

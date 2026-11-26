@@ -3,66 +3,25 @@
   <teleport to="#theme-popups">
     <template v-if="isOpen">
       <div class="column-menu__mask" aria-hidden="true" @click="closeMenu" />
-      <div class="column-menu" :style="menuStyle">
-        <h2 class="column-menu__title">{{ $t('main.column_visibility') }}</h2>
-        <ul>
-          <li
-            class="immutable-column"
-            :key="descriptor.field_name"
-            v-for="descriptor in filteredFixedColumns"
-          >
-            <label class="checkbox">
-              <input
-                type="checkbox"
-                :checked="isColumnVisible(descriptor.field_name)"
-                @change="
-                  setMetadataDisplayValue(
-                    descriptor.field_name,
-                    $event.target.checked
-                  )
-                "
-              />
-              {{ descriptor.name }}
-            </label>
-          </li>
-
-          <draggable
-            v-if="isCurrentUserManager"
-            v-model="sortedMetadataDescriptors"
-            item-key="field_name"
-            handle=".drag-handle"
-            @choose="onRowHeld"
-            @end="onDragEnd"
-            @start="onRowDragged"
-            @unchoose="onRowReleased"
-          >
-            <template #item="{ element: descriptor }">
-              <li>
-                <div class="flexrow">
-                  <span class="drag-handle">
-                    <grip-vertical-icon />
-                  </span>
-                  <label class="checkbox">
-                    <input
-                      type="checkbox"
-                      :checked="isColumnVisible(descriptor.field_name)"
-                      @change="
-                        setMetadataDisplayValue(
-                          descriptor.field_name,
-                          $event.target.checked
-                        )
-                      "
-                    />
-                    {{ descriptor.name }}
-                  </label>
-                </div>
-              </li>
-            </template>
-          </draggable>
-          <template v-else>
+      <div
+        ref="menuRef"
+        class="column-menu"
+        :aria-labelledby="titleId"
+        aria-modal="true"
+        role="dialog"
+        :style="menuStyle"
+        tabindex="-1"
+        @keydown="onMenuKeyDown"
+      >
+        <div class="column-menu__columns" tabindex="-1">
+          <h2 class="column-menu__title" :id="titleId">
+            {{ $t('main.column_visibility') }}
+          </h2>
+          <ul>
             <li
+              class="immutable-column"
               :key="descriptor.field_name"
-              v-for="descriptor in filteredMetadataDescriptors"
+              v-for="descriptor in filteredFixedColumns"
             >
               <label class="checkbox">
                 <input
@@ -78,8 +37,62 @@
                 {{ descriptor.name }}
               </label>
             </li>
-          </template>
-        </ul>
+
+            <draggable
+              v-if="isCurrentUserManager"
+              v-model="sortedMetadataDescriptors"
+              item-key="field_name"
+              handle=".drag-handle"
+              @choose="onRowHeld"
+              @end="onDragEnd"
+              @start="onRowDragged"
+              @unchoose="onRowReleased"
+            >
+              <template #item="{ element: descriptor }">
+                <li>
+                  <div class="flexrow">
+                    <span class="drag-handle">
+                      <grip-vertical-icon />
+                    </span>
+                    <label class="checkbox">
+                      <input
+                        type="checkbox"
+                        :checked="isColumnVisible(descriptor.field_name)"
+                        @change="
+                          setMetadataDisplayValue(
+                            descriptor.field_name,
+                            $event.target.checked
+                          )
+                        "
+                      />
+                      {{ descriptor.name }}
+                    </label>
+                  </div>
+                </li>
+              </template>
+            </draggable>
+            <template v-else>
+              <li
+                :key="descriptor.field_name"
+                v-for="descriptor in filteredMetadataDescriptors"
+              >
+                <label class="checkbox">
+                  <input
+                    type="checkbox"
+                    :checked="isColumnVisible(descriptor.field_name)"
+                    @change="
+                      setMetadataDisplayValue(
+                        descriptor.field_name,
+                        $event.target.checked
+                      )
+                    "
+                  />
+                  {{ descriptor.name }}
+                </label>
+              </li>
+            </template>
+          </ul>
+        </div>
         <button
           class="column-menu__add"
           type="button"
@@ -96,14 +109,24 @@
 
 <script setup>
 import { GripVerticalIcon, PlusIcon } from 'lucide-vue-next'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useId,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import draggable from 'vuedraggable'
 
 import { useDraggableRebuild } from '@/composables/draggableRebuild'
+import { undoRedoCommand } from '@/composables/players/previewShortcuts'
 import { getOwnValue } from '@/lib/models'
 
+const MODIFIER_KEYS = ['Alt', 'Control', 'Meta', 'Shift']
 const SIDE_PAD = 8
 const MENU_MAX_HEIGHT = 400
 const MENU_WIDTH = 200
@@ -137,7 +160,11 @@ const emit = defineEmits([
 // State
 
 const hostRef = ref(null)
+const menuRef = ref(null)
 const menuStyle = ref({})
+const titleId = useId()
+// Where the focus was when the menu opened, given back when it closes.
+let opener = null
 const sortedMetadataDescriptors = ref([])
 
 // Computed
@@ -216,8 +243,8 @@ const positionMenu = () => {
     Math.max(SIDE_PAD, rect.top + topOffset),
     window.innerHeight - SIDE_PAD - 64
   )
-  // The menu is its own scroll box: past the window bottom, its last entries
-  // could never be scrolled into view.
+  // The menu scrolls its columns within this height: past the window bottom,
+  // its last entries could never be scrolled into view.
   const maxHeightPx = Math.min(
     MENU_MAX_HEIGHT,
     window.innerHeight - SIDE_PAD - topPx
@@ -231,7 +258,56 @@ const positionMenu = () => {
 
 const closeMenu = () => emit('update:is-open', false)
 
+const getEntries = () =>
+  Array.from(menuRef.value?.querySelectorAll('input, button') ?? [])
+
+const giveFocusBack = () => {
+  if (opener?.isConnected) opener.focus()
+}
+
+// The menu moves the focus round its entries itself, from anywhere in the
+// page while it is open: Safari leaves checkboxes out of Tab by default, the
+// menu comes last in the page, before the browser bar, and the player of the
+// side panel would take Shift+Tab to its comment box. A click between the
+// entries, or a Tab from the browser bar, leaves the focus off them: Tab then
+// goes to the first one and Shift+Tab to the last one.
+const onKeyTab = event => {
+  if (event.key === 'Tab' && props.isOpen) {
+    const entries = getEntries()
+    const index = entries.indexOf(document.activeElement)
+    const next = event.shiftKey
+      ? (entries[index - 1] ?? entries[entries.length - 1])
+      : (entries[index + 1] ?? entries[0])
+    if (next) {
+      event.preventDefault()
+      event.stopPropagation()
+      next.focus()
+    }
+  }
+}
+
+// The page under the mask keeps out of the keys of the menu, but for a
+// modifier alone, which the list follows for its Shift range selection: the
+// player of the side panel takes Space and the left and right arrows, and the
+// list Alt+arrows. The menu keeps from the browser what they kept from it:
+// Alt+Left and Alt+Right go back or forward in the history, and undo and
+// redo, whose Chromium stack belongs to the page, would edit a text field
+// under the mask. Its own Escape and Tab listeners, on the window, run first.
+const onMenuKeyDown = event => {
+  if (!MODIFIER_KEYS.includes(event.key)) {
+    event.stopPropagation()
+    const isHistoryMove =
+      event.altKey && ['ArrowLeft', 'ArrowRight'].includes(event.key)
+    if (isHistoryMove || undoRedoCommand(event)) {
+      event.preventDefault()
+    }
+  }
+}
+
 const onAddClicked = () => {
+  // The modal gives the focus back to where it was when it opened, and this
+  // button goes with the menu.
+  giveFocusBack()
   closeMenu()
   emit('add-metadata')
 }
@@ -327,10 +403,19 @@ watch(filteredMetadataDescriptors, (descriptors, previousDescriptors) => {
 watch(
   () => props.isOpen,
   isOpen => {
-    if (isOpen) nextTick(positionMenu)
-    // An Escape can close the menu during a press: its list then goes without
-    // reporting the release.
-    else onRowReleased()
+    if (isOpen) {
+      opener = document.activeElement
+      nextTick(() => {
+        positionMenu()
+        getEntries()[0]?.focus()
+      })
+    } else {
+      // A click out of the menu leaves the focus where it went.
+      if (menuRef.value?.contains(document.activeElement)) giveFocusBack()
+      // An Escape can close the menu during a press: its list then goes
+      // without reporting the release.
+      onRowReleased()
+    }
   }
 )
 
@@ -341,12 +426,14 @@ onMounted(() => {
   window.addEventListener('resize', positionMenu)
   window.addEventListener('scroll', positionMenu, true)
   window.addEventListener('keydown', onKeyEscape, true)
+  window.addEventListener('keydown', onKeyTab, true)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', positionMenu)
   window.removeEventListener('scroll', positionMenu, true)
   window.removeEventListener('keydown', onKeyEscape, true)
+  window.removeEventListener('keydown', onKeyTab, true)
 })
 </script>
 
@@ -357,11 +444,20 @@ onBeforeUnmount(() => {
   border-bottom-right-radius: 10px;
   box-shadow: 0 2px 6px var(--box-shadow);
   color: var(--text);
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   position: fixed;
   text-align: left;
   width: 200px;
   z-index: 9999;
+
+  // A click between its entries focuses the menu or the box of its columns,
+  // a key never does.
+  &:focus,
+  .column-menu__columns:focus {
+    outline: none;
+  }
 
   .checkbox {
     color: var(--text);
@@ -431,14 +527,13 @@ onBeforeUnmount(() => {
   background: var(--background);
   border: 0;
   border-top: 1px solid var(--border);
-  bottom: 0;
   color: var(--text);
   cursor: pointer;
   display: flex;
+  flex-shrink: 0;
   font: inherit;
   gap: 0.6em;
   padding: 0.8em;
-  position: sticky;
   text-align: left;
   width: 100%;
 
@@ -455,6 +550,13 @@ onBeforeUnmount(() => {
 .column-menu__add-icon {
   flex-shrink: 0;
   opacity: 0.7;
+}
+
+// The new column button stays under the columns, out of their scroll. The box
+// takes the focus of a click on its title, so that the keys scroll it.
+.column-menu__columns {
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .column-menu__mask {

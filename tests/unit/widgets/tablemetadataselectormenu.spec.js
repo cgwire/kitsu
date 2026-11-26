@@ -55,9 +55,14 @@ describe('TableMetadataSelectorMenu', () => {
     })
   }
 
-  const openMenu = async ({ namespace = 'shots', hostTop, props = {} }) => {
+  const openMenu = async ({
+    namespace = 'shots',
+    hostTop,
+    isManager = false,
+    props = {}
+  }) => {
     const store = createStore({
-      getters: { isCurrentUserManager: () => false }
+      getters: { isCurrentUserManager: () => isManager }
     })
     wrapper = mountWithI18n(TableMetadataSelectorMenu, {
       props: { descriptors, modelValue: {}, namespace, ...props },
@@ -213,6 +218,304 @@ describe('TableMetadataSelectorMenu', () => {
 
       expect(menu()).not.toBeNull()
       expect(addButton()).toBeNull()
+    })
+  })
+
+  // The menu sits at the end of the page, after every control of the list.
+  describe('keyboard', () => {
+    // the toggle of the list
+    let opener
+
+    beforeEach(() => {
+      opener = document.createElement('button')
+      document.body.appendChild(opener)
+      opener.focus()
+    })
+
+    afterEach(() => {
+      opener.remove()
+    })
+
+    const entries = () => [...menu().querySelectorAll('input, button')]
+
+    const pressKey = (target, init) => {
+      const event = new KeyboardEvent('keydown', {
+        ...init,
+        bubbles: true,
+        cancelable: true
+      })
+      target.dispatchEvent(event)
+      return event
+    }
+
+    const pressTab = (target, shiftKey = false) =>
+      pressKey(target, { key: 'Tab', shiftKey })
+
+    // jsdom moves no focus on a click: a browser focuses the closest
+    // focusable ancestor of a spot that takes none, else the page.
+    const clickOn = element => {
+      const focusable = element.closest('[tabindex]')
+      if (focusable) focusable.focus()
+      else document.activeElement.blur()
+    }
+
+    const title = () => menu().querySelector('.column-menu__title')
+
+    test('is a modal dialog named after its title', async () => {
+      await openMenu({ hostTop: 219 })
+
+      const titleId = menu().getAttribute('aria-labelledby')
+      expect(menu().getAttribute('role')).toBe('dialog')
+      expect(menu().getAttribute('aria-modal')).toBe('true')
+      expect(document.getElementById(titleId).textContent).toBe(
+        'Visible columns'
+      )
+    })
+
+    // A manager gets the columns in a list that drags.
+    test.each([
+      ['an artist', false],
+      ['a manager', true]
+    ])(
+      'takes the focus to the first column of %s when it opens',
+      async (_, isManager) => {
+        await openMenu({
+          hostTop: 219,
+          isManager,
+          props: { isAddAllowed: true }
+        })
+
+        // the 12 columns, then the new column button
+        expect(entries()).toHaveLength(13)
+        expect(document.activeElement).toBe(entries()[0])
+      }
+    )
+
+    test.each([
+      ['an artist', false],
+      ['a manager', true]
+    ])('keeps Tab among the entries of %s', async (_, isManager) => {
+      await openMenu({
+        hostTop: 219,
+        isManager,
+        props: { isAddAllowed: true }
+      })
+      const first = entries()[0]
+      const last = entries()[entries().length - 1]
+
+      last.focus()
+      expect(pressTab(last).defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(first)
+
+      expect(pressTab(first, true).defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(last)
+    })
+
+    const columnsBox = () => menu().querySelector('.column-menu__columns')
+
+    // Its columns scroll in that box, where a column the focus reaches
+    // scrolls into view: the button below never covers it.
+    test('holds its columns in a box apart from the new column button', async () => {
+      await openMenu({ hostTop: 219, props: { isAddAllowed: true } })
+
+      expect(columnsBox().querySelectorAll('input')).toHaveLength(12)
+      expect(columnsBox().querySelector('.column-menu__add')).toBeNull()
+    })
+
+    // The keys then scroll that box.
+    test('keeps the focus of a click on its title in the box of its columns', async () => {
+      await openMenu({ hostTop: 219, props: { isAddAllowed: true } })
+
+      clickOn(title())
+
+      expect(document.activeElement).toBe(columnsBox())
+    })
+
+    test('sends Tab and Shift+Tab from a click on its title to its entries', async () => {
+      await openMenu({ hostTop: 219, props: { isAddAllowed: true } })
+      const first = entries()[0]
+      const last = entries()[entries().length - 1]
+
+      clickOn(title())
+      expect(pressTab(document.activeElement, true).defaultPrevented).toBe(
+        true
+      )
+      expect(document.activeElement).toBe(last)
+
+      clickOn(title())
+      expect(pressTab(document.activeElement).defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(first)
+    })
+
+    test('gives the focus back to its toggle when Escape follows a click on its title', async () => {
+      await openMenu({ hostTop: 219 })
+      clickOn(title())
+
+      pressEscape()
+      await wrapper.setProps({ isOpen: false })
+
+      expect(document.activeElement).toBe(opener)
+    })
+
+    // Safari leaves checkboxes out of Tab by default: its own move would
+    // leave the menu.
+    test('moves the focus itself between two entries', async () => {
+      await openMenu({ hostTop: 219, props: { isAddAllowed: true } })
+
+      expect(pressTab(entries()[0]).defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(entries()[1])
+
+      expect(pressTab(entries()[1], true).defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(entries()[0])
+    })
+
+    // As after a click on the browser bar: its Tab gives the focus to the
+    // page, and the page hears only the next one.
+    test('brings back a Tab pressed on the page under it', async () => {
+      await openMenu({ hostTop: 219, props: { isAddAllowed: true } })
+      const outside = document.createElement('input')
+      document.body.appendChild(outside)
+      onTestFinished(() => outside.remove())
+
+      outside.focus()
+      expect(pressTab(outside).defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(entries()[0])
+
+      outside.focus()
+      expect(pressTab(outside, true).defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(entries()[entries().length - 1])
+    })
+
+    // The player of the side panel takes Shift+Tab to its comment box.
+    test('keeps its Tab from the listeners of the page', async () => {
+      await openMenu({ hostTop: 219 })
+      const pageListener = vi.fn()
+      document.addEventListener('keydown', pageListener, true)
+      onTestFinished(() =>
+        document.removeEventListener('keydown', pageListener, true)
+      )
+
+      pressTab(entries()[0], true)
+
+      expect(pageListener).not.toHaveBeenCalled()
+      expect(document.activeElement).toBe(entries()[entries().length - 1])
+    })
+
+    // The player of the side panel takes Space and the arrows on the window,
+    // and the list Alt+arrows: they would act under the mask.
+    test('keeps its keys from the shortcuts of the page', async () => {
+      await openMenu({ hostTop: 219, props: { isAddAllowed: true } })
+      const pageShortcuts = vi.fn()
+      window.addEventListener('keydown', pageShortcuts)
+      onTestFinished(() => window.removeEventListener('keydown', pageShortcuts))
+      const addButton = menu().querySelector('.column-menu__add')
+
+      // Space still makes the button open the new column modal.
+      expect(pressKey(addButton, { key: ' ' }).defaultPrevented).toBe(false)
+      pressKey(entries()[0], { key: 'ArrowDown', altKey: true })
+      expect(pressKey(addButton, { key: 'Escape' }).defaultPrevented).toBe(true)
+
+      expect(pageShortcuts).not.toHaveBeenCalled()
+      expect(wrapper.emitted('update:is-open')).toEqual([[false]])
+    })
+
+    // The list follows Shift for the range selection of its rows.
+    test('lets a modifier alone reach the page', async () => {
+      await openMenu({ hostTop: 219 })
+      const pageListener = vi.fn()
+      window.addEventListener('keydown', pageListener)
+      onTestFinished(() => window.removeEventListener('keydown', pageListener))
+
+      pressKey(entries()[0], { key: 'Shift', shiftKey: true })
+
+      expect(pageListener).toHaveBeenCalledTimes(1)
+    })
+
+    // The list kept them from going back or forward in the browser history.
+    test('keeps Alt+Left and Alt+Right from the browser', async () => {
+      await openMenu({ hostTop: 219, props: { isAddAllowed: true } })
+      const addButton = menu().querySelector('.column-menu__add')
+
+      expect(
+        pressKey(entries()[0], { key: 'ArrowLeft', altKey: true })
+          .defaultPrevented
+      ).toBe(true)
+      expect(
+        pressKey(addButton, { key: 'ArrowRight', altKey: true }).defaultPrevented
+      ).toBe(true)
+      expect(pressKey(entries()[0], { key: 'ArrowLeft' }).defaultPrevented).toBe(
+        false
+      )
+    })
+
+    // In Chromium, their stack belongs to the page: they would edit a text
+    // field under the mask, such as a comment draft. The player of the side
+    // panel kept them from it.
+    test('keeps undo and redo from the text fields of the page', async () => {
+      await openMenu({ hostTop: 219, props: { isAddAllowed: true } })
+      const addButton = menu().querySelector('.column-menu__add')
+
+      expect(
+        pressKey(entries()[0], { key: 'z', ctrlKey: true }).defaultPrevented
+      ).toBe(true)
+      expect(
+        pressKey(entries()[0], { key: 'Z', metaKey: true, shiftKey: true })
+          .defaultPrevented
+      ).toBe(true)
+      expect(
+        pressKey(addButton, { key: 'y', ctrlKey: true }).defaultPrevented
+      ).toBe(true)
+    })
+
+    test('leaves Tab to the page once closed', async () => {
+      await openMenu({ hostTop: 219 })
+      await wrapper.setProps({ isOpen: false })
+
+      expect(pressTab(opener).defaultPrevented).toBe(false)
+      expect(document.activeElement).toBe(opener)
+    })
+
+    test('gives the focus back to its toggle when Escape closes it', async () => {
+      await openMenu({ hostTop: 219 })
+      entries()[1].focus()
+
+      pressEscape()
+      await wrapper.setProps({ isOpen: false })
+
+      expect(document.activeElement).toBe(opener)
+    })
+
+    // The modal gives the focus back to where it was when it opened: the
+    // button of the menu would be gone by then.
+    test('gives the focus back to its toggle before asking for a column', async () => {
+      let focused = null
+      await openMenu({
+        hostTop: 219,
+        props: {
+          isAddAllowed: true,
+          onAddMetadata: () => {
+            focused = document.activeElement
+          }
+        }
+      })
+
+      const addButton = document.querySelector('.column-menu__add')
+      addButton.focus()
+      addButton.click()
+
+      expect(focused).toBe(opener)
+    })
+
+    test('leaves the focus alone when a click outside closes it', async () => {
+      await openMenu({ hostTop: 219 })
+      const outside = document.createElement('input')
+      document.body.appendChild(outside)
+      outside.focus()
+
+      await wrapper.setProps({ isOpen: false })
+
+      expect(document.activeElement).toBe(outside)
+      outside.remove()
     })
   })
 

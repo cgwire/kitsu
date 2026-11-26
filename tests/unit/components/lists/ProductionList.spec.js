@@ -9,6 +9,7 @@ import resizableColumn from '@/directives/resizable-column'
 import peopleStore from '@/store/modules/people'
 
 import ProductionList from '@/components/lists/ProductionList.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
 
 import { shallowMountWithI18n } from '../../fixtures/i18n'
@@ -498,6 +499,21 @@ describe('lists/ProductionList', () => {
       const { menu } = findMenu(getters)
 
       expect(menu.props('isAddAllowed')).toBe(isAllowed)
+    })
+
+    test('tells whether the menu of its toggle is open', async () => {
+      const { menu, wrapper } = findMenu({})
+      const toggle = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('title') === 'Visible columns')
+
+      expect(toggle.attributes('aria-haspopup')).toBe('dialog')
+      expect(toggle.attributes('aria-expanded')).toBe('false')
+
+      await toggle.vm.$emit('click')
+
+      expect(menu.props('isOpen')).toBe(true)
+      expect(toggle.attributes('aria-expanded')).toBe('true')
     })
 
     test('passes the menu request on to the page', async () => {

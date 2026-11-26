@@ -125,6 +125,8 @@
               <button-simple
                 class="is-small"
                 :title="$t('main.column_visibility')"
+                :aria-expanded="columnSelectorDisplayed"
+                aria-haspopup="dialog"
                 icon="down"
                 @click="toggleColumnSelector"
               />

@@ -46,7 +46,9 @@ import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Breakdown from '@/components/pages/Breakdown.vue'
 import ShotLine from '@/components/pages/breakdown/ShotLine.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
 
 import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
 import { buildRefusal } from '../../fixtures/refusal'
@@ -221,6 +223,27 @@ describe('Breakdown page, loading', () => {
     })
 
     expect(preferences.getPreference).toHaveBeenCalled()
+  })
+})
+
+describe('Breakdown page, visible columns toggle', () => {
+  test('tells whether its menu is open', async () => {
+    const { wrapper } = mountPage({
+      getters: { isShowInfosBreakdown: () => true }
+    })
+    const toggle = wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('title') === 'main.column_visibility')
+
+    expect(toggle.attributes('aria-haspopup')).toBe('dialog')
+    expect(toggle.attributes('aria-expanded')).toBe('false')
+
+    await toggle.vm.$emit('click')
+
+    expect(
+      wrapper.findComponent(TableMetadataSelectorMenu).props('isOpen')
+    ).toBe(true)
+    expect(toggle.attributes('aria-expanded')).toBe('true')
   })
 })
 

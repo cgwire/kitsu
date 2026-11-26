@@ -131,6 +131,8 @@
         <button-simple
           class="is-small mr05"
           :title="$t('main.column_visibility')"
+          :aria-expanded="columnSelectorDisplayed"
+          aria-haspopup="dialog"
           icon="down"
           @click="toggleColumnSelector"
           v-if="isShowInfosBreakdown"

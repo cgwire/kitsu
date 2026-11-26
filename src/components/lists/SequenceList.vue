@@ -202,6 +202,8 @@
               <button-simple
                 class="is-small is-pulled-right mr05"
                 :title="$t('main.column_visibility')"
+                :aria-expanded="columnSelectorDisplayed"
+                aria-haspopup="dialog"
                 icon="down"
                 @click="toggleColumnSelector"
                 v-if="
