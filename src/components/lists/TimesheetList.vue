@@ -34,6 +34,8 @@
         {{ $t('timesheets.week_total', { hours: weekTimeSpentTotal }) }}
       </div>
       <button-simple
+        class="day-off-button"
+        icon="briefcase"
         :text="$t('timesheets.day_off')"
         :active="personIsDayOff"
         @click="toggleDayOff"
@@ -698,6 +700,11 @@ onBeforeUnmount(() => clearInterval(clock))
   // the Day off button takes the place of the week total
   .day-off-info,
   .week-time-spent-total {
+    display: none;
+  }
+
+  // ButtonSimple sets an icon against its text on a phone: the text goes alone
+  .day-off-button :deep(.icon) {
     display: none;
   }
 

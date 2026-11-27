@@ -86,6 +86,15 @@ describe('lists/TimesheetList', () => {
     })
   })
 
+  it('marks the day off button with the briefcase of the schedules', () => {
+    const wrapper = mountList({ initialDate: '2026-08-04' })
+
+    const dayOffButton = wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('text') === 'timesheets.day_off')
+    expect(dayOffButton.props('icon')).toBe('briefcase')
+  })
+
   describe('day steps', () => {
     // Midday in Tokyo, the profile zone of these tests
     const now = new Date('2026-08-05T12:00:00+09:00')
