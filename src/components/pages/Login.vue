@@ -77,6 +77,7 @@
         </form>
         <two-factor-authentication
           v-if="isMissingOTP || isWrongOTP"
+          :key="twoFAStepCount"
           :preferred-two-fa="preferredTwoFA"
           :two-fas-enabled="twoFAsEnabled"
           :is-loading="isLoginLoading"
@@ -162,6 +163,7 @@ const isTooMuchLoginFailedAttemps = ref(false)
 const isWrongOTP = ref(false)
 const preferredTwoFA = ref('')
 const twoFAsEnabled = ref([])
+const twoFAStepCount = ref(0)
 
 // Computed
 // --------------------------------------------------------------------------
@@ -208,7 +210,10 @@ const confirmLogIn = async twoFactorPayload => {
   isInactiveUserError.value = false
   isTooMuchLoginFailedAttemps.value = false
   isWrongOTP.value = false
-  isMissingOTP.value = false
+  // A code keeps the 2FA step on screen while it is checked and after a
+  // refusal: mounted again, the step went back to the preferred method and
+  // mailed a new code.
+  if (!twoFactorPayload) isMissingOTP.value = false
   isServerError.value = false
   try {
     await store.dispatch('logIn', twoFactorPayload)
@@ -230,6 +235,9 @@ const confirmLogIn = async twoFactorPayload => {
       isMissingOTP.value = true
       preferredTwoFA.value = err.preferred_two_factor_authentication
       twoFAsEnabled.value = err.two_factor_authentication_enabled
+      // The method of the code sent was disabled meanwhile: the step starts
+      // again on the one Zou names.
+      if (twoFactorPayload) twoFAStepCount.value += 1
     } else if (err.two_factor_authentication_required) {
       router.push({ name: 'login-2fa' })
     } else if (err.unactive) {
@@ -237,6 +245,9 @@ const confirmLogIn = async twoFactorPayload => {
     } else if (err.server_error) {
       isServerError.value = true
     } else {
+      // A refusal of the login itself, not of the code (most often the
+      // password): its form shows the error.
+      isMissingOTP.value = false
       console.error(err)
     }
   }
