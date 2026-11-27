@@ -148,7 +148,8 @@ const lists = [
         entity_type: 'Shot'
       }),
     remove: (store, query) => store.dispatch('removeTaskSearch', query),
-    load: loadShots
+    // read from the user store: no load refreshes them
+    load: () => {}
   },
   {
     name: 'People',
@@ -359,9 +360,30 @@ describe.each(lists)(
   }
 )
 
+// A task type of sequences, episodes or edits loads no asset and no shot.
+test('lists the task type searches of the current production only', () => {
+  userStore.state.userFilters = {
+    task: {
+      p1: [{ id: 'f1', name: 'wip', project_id: 'p1' }],
+      p2: [{ id: 'f2', name: 'done', project_id: 'p2' }]
+    }
+  }
+  const store = createStore({
+    modules: { tasks: tasksStore, user: userStore },
+    state: { production },
+    getters: { currentProduction: state => state.production }
+  })
+  expect(names(store.getters.taskSearchQueries)).toEqual(['wip'])
+
+  store.state.production = { id: 'p2' }
+  expect(names(store.getters.taskSearchQueries)).toEqual(['done'])
+
+  store.state.production = { id: 'p3' }
+  expect(store.getters.taskSearchQueries).toEqual([])
+})
+
 test('saves a search of a task type with its entity type', async () => {
   const store = buildStore({ tasks: tasksStore })
-  loadShots(store)
   client.ppost.mockResolvedValueOnce({ id: 'f1', name: 'wip' })
 
   await store.dispatch('saveTaskSearch', {

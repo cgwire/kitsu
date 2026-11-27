@@ -31,8 +31,6 @@ import taskTypeStore from '@/store/modules/tasktypes'
 import taskStatusStore from '@/store/modules/taskstatus'
 
 import {
-  LOAD_ASSETS_END,
-  LOAD_SHOTS_END,
   CLEAR_SHOTS,
   CLEAR_ASSETS,
   LOAD_TASK_END,
@@ -199,7 +197,6 @@ const initialState = {
   taskEntityPreviews: {},
   selectedTasks: new Map(),
   selectedValidations: new Map(),
-  taskSearchQueries: [],
 
   nbSelectedTasks: 0,
   nbSelectedValidations: 0,
@@ -309,7 +306,10 @@ const getters = {
   selectedValidations: state => state.selectedValidations,
   nbSelectedTasks: state => state.nbSelectedTasks,
   nbSelectedValidations: state => state.nbSelectedValidations,
-  taskSearchQueries: state => state.taskSearchQueries,
+  // Read from the user store: a copy taken when the assets or the shots load
+  // stays on the last production for a task type that loads neither.
+  taskSearchQueries: (state, getters, rootState, rootGetters) =>
+    rootGetters.userFilters.task?.[rootGetters.currentProduction?.id] || [],
   isBigThumbnails: state => state.isBigThumbnails,
   isShowAssignations: state => state.isShowAssignations,
   isShowInfos: state => state.isShowInfos,
@@ -1413,22 +1413,6 @@ const actions = {
 }
 
 const mutations = {
-  [LOAD_ASSETS_END](state, { production, userFilters }) {
-    if (userFilters.task && userFilters.task[production.id]) {
-      state.taskSearchQueries = userFilters.task[production.id]
-    } else {
-      state.taskSearchQueries = []
-    }
-  },
-
-  [LOAD_SHOTS_END](state, { production, userFilters }) {
-    if (userFilters.task && userFilters.task[production.id]) {
-      state.taskSearchQueries = userFilters.task[production.id]
-    } else {
-      state.taskSearchQueries = []
-    }
-  },
-
   [LOAD_TASK_END](state, task) {
     // A row of the task list (reloadTasks) has neither project nor entity
     // to name the task after: the held one keeps its names.
@@ -1987,22 +1971,6 @@ const mutations = {
       populateTask(task)
       state.taskMap.set(task.id, task)
     })
-  },
-
-  [SAVE_TASK_SEARCH_END](state, { searchQuery }) {
-    if (!state.taskSearchQueries.includes(searchQuery)) {
-      state.taskSearchQueries.push(searchQuery)
-      state.taskSearchQueries = sortByName(state.taskSearchQueries)
-    }
-  },
-
-  [REMOVE_TASK_SEARCH_END](state, { searchQuery }) {
-    const queryIndex = state.taskSearchQueries.findIndex(
-      query => query.id === searchQuery.id
-    )
-    if (queryIndex >= 0) {
-      state.taskSearchQueries.splice(queryIndex, 1)
-    }
   },
 
   [PIN_COMMENT](state, comment) {
