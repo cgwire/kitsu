@@ -581,6 +581,8 @@
       "search_query_add_error": "Er is een fout opgetreden bij het opslaan van dit zoekfilter.",
       "search_query_edit": "Bewerk zoekfilter",
       "search_query_edit_error": "Er is een fout opgetreden bij het bijwerken van dit zoekfilter.",
+      "search_query_move_hint": "Sleep om de volgorde te wijzigen, of druk op Shift en een pijltoets",
+      "search_query_moved": "{name} verplaatst naar positie {position} van {count}",
       "search_query_too_long": "Deze zoekopdracht is te lang. De limiet is {count} teken. | Deze zoekopdracht is te lang. De limiet is {count} tekens.",
       "to": "Tot",
       "workspace": "Werkruimte",

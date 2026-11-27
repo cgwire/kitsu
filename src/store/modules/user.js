@@ -46,6 +46,7 @@ import {
   LOAD_USER_FILTER_GROUPS_END,
   LOAD_USER_FILTER_GROUPS_ERROR,
   UPDATE_USER_FILTER_GROUP,
+  SET_SEARCH_POSITIONS,
   SAVE_TODO_SEARCH_END,
   REMOVE_TODO_SEARCH_END,
   SAVE_PAGE_SEARCH_END,
@@ -688,6 +689,34 @@ const actions = {
     commit(UPDATE_USER_FILTER, { ...searchFilter, ...saved })
   },
 
+  // The filters, or the groups, a list orders together, in their new order.
+  async saveSearchPositions({ commit }, { rows, isGroup = false }) {
+    const moved = rows
+      .map(({ id, position: former }, position) => ({ id, former, position }))
+      .filter(({ former, position }) => former !== position)
+    const place = (placed, key) =>
+      commit(SET_SEARCH_POSITIONS, {
+        isGroup,
+        positions: Object.fromEntries(placed.map(row => [row.id, row[key]]))
+      })
+    const update = isGroup
+      ? peopleApi.updateFilterGroup
+      : peopleApi.updateFilter
+    // shown at once
+    place(moved, 'position')
+    const results = await Promise.allSettled(
+      moved.map(({ id, position }) => update({ id, position }))
+    )
+    const refused = moved.filter(
+      (row, index) => results[index].status === 'rejected'
+    )
+    if (refused.length) {
+      // the others are saved: the list shows what Zou holds
+      place(refused, 'former')
+      throw results.find(({ status }) => status === 'rejected').reason
+    }
+  },
+
   async loadUserSearchFilters({ commit }) {
     try {
       const searchFilters = await peopleApi.getUserSearchFilters()
@@ -1106,6 +1135,17 @@ const mutations = {
         }
       })
     })
+  },
+
+  [SET_SEARCH_POSITIONS](state, { positions, isGroup }) {
+    const lists = isGroup ? state.userFilterGroups : state.userFilters
+    Object.values(lists)
+      .flatMap(projectLists => Object.values(projectLists))
+      .flat()
+      .filter(row => row.id in positions)
+      .forEach(row => {
+        row.position = positions[row.id]
+      })
   },
 
   [LOAD_USER_FILTER_GROUPS_ERROR](state) {},

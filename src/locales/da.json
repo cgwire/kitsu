@@ -581,6 +581,8 @@
       "search_query_add_error": "Der opstod en fejl under gemning af søgefilteret.",
       "search_query_edit": "Rediger søgefilter",
       "search_query_edit_error": "Der opstod en fejl under opdatering af søgefilteret.",
+      "search_query_move_hint": "Træk for at ændre rækkefølgen, eller tryk på Shift og en piletast",
+      "search_query_moved": "{name} flyttet til position {position} af {count}",
       "search_query_too_long": "Denne søgeforespørgsel er for lang. Grænsen er {count} tegn. | Denne søgeforespørgsel er for lang. Grænsen er {count} tegn.",
       "to": "Til",
       "workspace": "Arbejdsområde",

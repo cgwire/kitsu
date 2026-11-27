@@ -22,6 +22,8 @@ vi.mock('@/store/api/people', () => ({
     removeFilterGroup: vi.fn(),
     sendEmailOTP: vi.fn(),
     unregisterFIDO: vi.fn(),
+    updateFilter: vi.fn(),
+    updateFilterGroup: vi.fn(),
     updatePerson: vi.fn(),
     updatePersonLocale: vi.fn()
   }
@@ -1042,6 +1044,108 @@ describe('User store', () => {
   describe('Actions', () => {
     afterEach(() => {
       vi.clearAllMocks()
+    })
+
+    describe('saveSearchPositions', () => {
+      const row = (id, position) => ({ id, name: id, position })
+      // a list of three rows, the second one already placed
+      const context = list => {
+        const rows = [row('a', null), row('b', 1), row('c', null)]
+        const state = {
+          userFilters: {},
+          userFilterGroups: {},
+          [list]: { shot: { 'production-1': rows } }
+        }
+        const commit = (type, payload) => store.mutations[type](state, payload)
+        const positions = () => rows.map(({ id, position }) => [id, position])
+        return { commit, positions, rows }
+      }
+
+      test('places the rows at once and saves the moved ones', async () => {
+        let save
+        peopleApi.updateFilter.mockReturnValue(
+          new Promise(resolve => {
+            save = resolve
+          })
+        )
+        const { commit, positions, rows } = context('userFilters')
+        const [a, b, c] = rows
+
+        const saving = store.actions.saveSearchPositions(
+          { commit },
+          { rows: [c, b, a] }
+        )
+
+        expect(positions()).toEqual([
+          ['a', 2],
+          ['b', 1],
+          ['c', 0]
+        ])
+        save()
+        await saving
+        // the position alone: a whole row would run the checks of an edit
+        expect(peopleApi.updateFilter.mock.calls).toEqual([
+          [{ id: 'c', position: 0 }],
+          [{ id: 'a', position: 2 }]
+        ])
+        expect(peopleApi.updateFilterGroup).not.toHaveBeenCalled()
+      })
+
+      test('saves the groups as groups', async () => {
+        peopleApi.updateFilterGroup.mockResolvedValue({})
+        const { commit, positions, rows } = context('userFilterGroups')
+        const [a, b, c] = rows
+
+        await store.actions.saveSearchPositions(
+          { commit },
+          { rows: [b, a, c], isGroup: true }
+        )
+
+        expect(positions()).toEqual([
+          ['a', 1],
+          ['b', 0],
+          ['c', 2]
+        ])
+        expect(peopleApi.updateFilterGroup).toHaveBeenCalledTimes(3)
+        expect(peopleApi.updateFilter).not.toHaveBeenCalled()
+      })
+
+      test('puts the rows back when Zou refuses', async () => {
+        const failure = new Error('Forbidden')
+        peopleApi.updateFilter.mockRejectedValue(failure)
+        const { commit, positions, rows } = context('userFilters')
+        const [a, b, c] = rows
+
+        await expect(
+          store.actions.saveSearchPositions({ commit }, { rows: [c, b, a] })
+        ).rejects.toBe(failure)
+
+        expect(positions()).toEqual([
+          ['a', null],
+          ['b', 1],
+          ['c', null]
+        ])
+      })
+
+      // What the list shows is what Zou holds.
+      test('puts back only the rows Zou refused', async () => {
+        const failure = new Error('Forbidden')
+        peopleApi.updateFilter.mockImplementation(({ id }) =>
+          id === 'a' ? Promise.reject(failure) : Promise.resolve({})
+        )
+        const { commit, positions, rows } = context('userFilters')
+        const [a, b, c] = rows
+
+        await expect(
+          store.actions.saveSearchPositions({ commit }, { rows: [c, b, a] })
+        ).rejects.toBe(failure)
+
+        expect(positions()).toEqual([
+          ['a', null],
+          ['b', 1],
+          ['c', 0]
+        ])
+      })
     })
 
     describe('saveUserLocale', () => {

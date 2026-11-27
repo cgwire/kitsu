@@ -581,6 +581,8 @@
       "search_query_add_error": "Se ha producido un error al guardar este filtro de búsqueda.",
       "search_query_edit": "Modificar filtro de búsqueda",
       "search_query_edit_error": "Se ha producido un error al actualizar este filtro de búsqueda.",
+      "search_query_move_hint": "Arrastra para reordenar, o pulsa Mayús y una tecla de flecha",
+      "search_query_moved": "{name} movido a la posición {position} de {count}",
       "search_query_too_long": "Esta consulta de búsqueda es demasiado larga. El límite es de {count} carácter. | Esta consulta de búsqueda es demasiado larga. El límite es de {count} caracteres.",
       "to": "Hasta",
       "workspace": "Espacio de trabajo",

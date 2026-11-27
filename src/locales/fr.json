@@ -583,6 +583,8 @@
       "search_query_add_error": "Une erreur s'est produite lors de l'enregistrement du filtre de recherche.",
       "search_query_edit": "Modifier le filtre",
       "search_query_edit_error": "Une erreur s'est produite lors de la mise à jour du filtre de recherche.",
+      "search_query_move_hint": "Glissez pour réordonner, ou appuyez sur Maj et une flèche",
+      "search_query_moved": "{name} déplacé en position {position} sur {count}",
       "search_query_too_long": "Cette recherche est trop longue. La limite est de {count} caractère. | Cette recherche est trop longue. La limite est de {count} caractères.",
       "to": "Jusqu'à",
       "workspace": "Espace de travail",

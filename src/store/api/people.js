@@ -298,7 +298,8 @@ export default {
       color: filterGroup.color,
       is_shared: filterGroup.is_shared,
       project_id: filterGroup.project_id,
-      department_id: filterGroup.department_id
+      department_id: filterGroup.department_id,
+      position: filterGroup.position
     }
     return client.pput(`/api/data/user/filter-groups/${filterGroup.id}`, data)
   },
@@ -318,7 +319,8 @@ export default {
       search_filter_group_id: searchFilter.search_filter_group_id,
       is_shared: searchFilter.is_shared,
       project_id: searchFilter.project_id,
-      department_id: searchFilter.department_id
+      department_id: searchFilter.department_id,
+      position: searchFilter.position
     }
     return client.pput(`/api/data/user/filters/${searchFilter.id}`, data)
   },

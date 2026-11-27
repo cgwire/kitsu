@@ -45,6 +45,24 @@ describe('store/api endpoints', () => {
     })
   })
 
+  describe('saved searches', () => {
+    test('sends the position of a search alone', () => {
+      peopleApi.updateFilter({ id: 'search-1', position: 2 })
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/user/filters/search-1',
+        { position: 2 }
+      )
+    })
+
+    test('sends the position of a group alone', () => {
+      peopleApi.updateFilterGroup({ id: 'group-1', position: 0 })
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/user/filter-groups/group-1',
+        { position: 0 }
+      )
+    })
+  })
+
   describe('person quotas', () => {
     test('asks for the quotas of a person in a production', () => {
       shotsApi.getPersonQuotas('p1', 'u1', 'weighted')

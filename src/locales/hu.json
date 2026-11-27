@@ -581,6 +581,8 @@
       "search_query_add_error": "Hiba történt a keresési szűrő mentésekor.",
       "search_query_edit": "Keresési szűrő szerkesztése",
       "search_query_edit_error": "Hiba történt a keresési szűrő frissítésekor.",
+      "search_query_move_hint": "Húzza az átrendezéshez, vagy nyomja meg a Shift és egy nyílbillentyűt",
+      "search_query_moved": "{name} áthelyezve: {position}. hely, összesen {count}",
       "search_query_too_long": "Ez a keresőkifejezés túl hosszú. A korlát {count} karakter. | Ez a keresőkifejezés túl hosszú. A korlát {count} karakter.",
       "to": "Eddig",
       "workspace": "Munkaterület",
