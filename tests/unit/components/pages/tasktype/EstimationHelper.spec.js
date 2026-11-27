@@ -132,6 +132,26 @@ describe('EstimationHelper', () => {
     wrapper.unmount()
   })
 
+  // Each of two unassigned tasks was sorted before the other, and the
+  // browser listed them backward. Estimated at 1 to 5 days, in list order.
+  it('keeps the list order of the unassigned tasks after the assigned ones', () => {
+    const assignees = [null, 'person-2', null, 'person-1', null]
+    const tasks = assignees.map((personId, index) => ({
+      ...task,
+      id: `task-${index + 1}`,
+      estimation: (index + 1) * 8 * 60,
+      assignees: personId ? [personId] : []
+    }))
+    const wrapper = mountHelper(false, { tasks })
+
+    const estimations = wrapper
+      .findAll('.task-list td.estimation input')
+      .map(input => input.element.value)
+
+    expect(estimations).toEqual(['4', '2', '1', '3', '5'])
+    wrapper.unmount()
+  })
+
   // A search that hid Ann left the Shift+click start on the row number of
   // Bob, now the one of Cid.
   it('extends a Shift+click from its row after a search', async () => {
