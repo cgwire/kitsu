@@ -259,6 +259,9 @@ const changeTwoFA = (twoFA, isOpening = false) => {
   removeErrors()
   emailSendingStatus.value = ''
   chosenTwoFA.value = twoFA
+  // Validate would send the code typed for the method left, under its name.
+  OTPValue.value = ''
+  twoFactorPayload.value = {}
   if (chosenTwoFA.value === 'email_otp') {
     requestSendEmailOTP({ isOpening })
   } else if (chosenTwoFA.value === 'fido') {

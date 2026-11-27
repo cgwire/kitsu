@@ -342,6 +342,29 @@ describe('widgets/TwoFactorAuthentication', () => {
     })
   })
 
+  // After "Use a recovery code", the refused TOTP code went again under its
+  // own name, and the profile then blamed a recovery code.
+  it('empties the code typed for the method left', async () => {
+    const wrapper = mountWidget()
+    await wrapper.find('input').setValue('123456')
+
+    await wrapper
+      .findAll('a')
+      .find(link => link.text() === 'login.choose_recovery_code')
+      .trigger('click')
+    await wrapper.find('button').trigger('click')
+
+    expect(wrapper.find('input').element.value).toBe('')
+    expect(wrapper.emitted('validate')).toBeUndefined()
+
+    await wrapper.find('input').setValue('K7PZ2QW9AB')
+    await wrapper.find('button').trigger('click')
+
+    expect(wrapper.emitted('validate')).toEqual([
+      [{ recovery_code: 'K7PZ2QW9AB' }]
+    ])
+  })
+
   // The code step of the login page sits under the language list.
   describe('validation label', () => {
     let wrapper = null
@@ -402,6 +425,25 @@ describe('widgets/TwoFactorAuthentication', () => {
         { getFIDOChallenge: () => ({ challenge: 'abc' }) }
       )
       await flushPromises()
+
+      expect(wrapper.emitted('validate')).toEqual([
+        [{ fido_authentication_response: response }]
+      ])
+    })
+
+    // A code method chosen next sent that response again on Verify.
+    it('drops the device response when a code method is chosen', async () => {
+      const wrapper = mountWidget(
+        { preferredTwoFa: 'fido', twoFasEnabled: ['fido', 'totp'] },
+        { getFIDOChallenge: () => ({ challenge: 'abc' }) }
+      )
+      await flushPromises()
+
+      await wrapper
+        .findAll('a')
+        .find(link => link.text() === 'login.choose_totp')
+        .trigger('click')
+      await wrapper.find('button').trigger('click')
 
       expect(wrapper.emitted('validate')).toEqual([
         [{ fido_authentication_response: response }]
