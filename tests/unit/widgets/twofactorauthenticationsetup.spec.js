@@ -859,4 +859,44 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
       Array.from(field.element.labels, item => item.textContent.trim())
     ).toEqual([label('recovery_codes.title')])
   })
+
+  // Only Escape closed these code prompts, and every other 2FA action stayed
+  // disabled until then.
+  it.each([
+    {
+      name: 'a TOTP removal',
+      user: { totp_enabled: true },
+      open: wrapper =>
+        findButton(wrapper, label('totp.button_disable')).trigger('click')
+    },
+    {
+      name: 'an email OTP removal',
+      user: { email_otp_enabled: true },
+      open: wrapper =>
+        findButton(wrapper, label('email_otp.button_disable')).trigger('click')
+    },
+    {
+      name: 'a FIDO key removal',
+      user: { fido_enabled: true, fido_devices: ['Yubikey'] },
+      open: wrapper => wrapper.find('ul li .action-icon').trigger('click')
+    },
+    {
+      name: 'new recovery codes',
+      user: { totp_enabled: true },
+      open: wrapper =>
+        findButton(wrapper, label('recovery_codes.button_new')).trigger('click')
+    }
+  ])('closes the code prompt of $name on Cancel', async ({ user, open }) => {
+    const wrapper = mountSetup(user)
+    const actionsBefore = actionStates(wrapper)
+    await open(wrapper)
+    expect(findCodeCheck(wrapper).exists()).toBe(true)
+
+    const cancel = findButton(wrapper, 'main.cancel')
+    expect(cancel).toBeDefined()
+    await cancel.trigger('click')
+
+    expect(findCodeCheck(wrapper).exists()).toBe(false)
+    expect(actionStates(wrapper)).toEqual(actionsBefore)
+  })
 })

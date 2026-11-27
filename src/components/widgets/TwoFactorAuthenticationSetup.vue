@@ -54,19 +54,28 @@
       </p>
     </div>
 
-    <two-factor-authentication
-      v-if="twoFA.newRecoveryCodesNeedTwoFA"
-      :preferred-two-fa="user.preferred_two_factor_authentication"
-      :two-fas-enabled="twoFAsEnabled"
-      :is-loading="twoFA.loadingAction === 'newRecoveryCodes'"
-      :email="user.email"
-      :text-validate-button="textValidateTwoFA"
-      :is-disable-button="validateTwoFAIsDisable"
-      :is-wrong-otp="twoFA.error.isWrongOTP"
-      :is-profile="true"
-      @validate="nextWithPayload"
-      @changed-two-fa="changedTwoFA"
-    />
+    <template v-if="twoFA.newRecoveryCodesNeedTwoFA">
+      <two-factor-authentication
+        :preferred-two-fa="user.preferred_two_factor_authentication"
+        :two-fas-enabled="twoFAsEnabled"
+        :is-loading="twoFA.loadingAction === 'newRecoveryCodes'"
+        :email="user.email"
+        :text-validate-button="textValidateTwoFA"
+        :is-disable-button="validateTwoFAIsDisable"
+        :is-wrong-otp="twoFA.error.isWrongOTP"
+        :is-profile="true"
+        @validate="nextWithPayload"
+        @changed-two-fa="changedTwoFA"
+      />
+      <div class="two-fa-flow-actions new-recovery-codes-actions">
+        <button
+          class="button cancel-flow-button"
+          @click="cancelCurrentTwoFactorAuthAction"
+        >
+          {{ $t('main.cancel') }}
+        </button>
+      </div>
+    </template>
 
     <div class="two-fa-methods">
       <div class="two-fa-card">
@@ -161,19 +170,28 @@
           </div>
         </div>
 
-        <two-factor-authentication
-          v-else-if="twoFA.TOTPNeedTwoFA"
-          :preferred-two-fa="user.preferred_two_factor_authentication"
-          :two-fas-enabled="twoFAsEnabled"
-          :is-loading="twoFA.loadingAction === 'disableTOTP'"
-          :email="user.email"
-          :text-validate-button="textValidateTwoFA"
-          :is-disable-button="validateTwoFAIsDisable"
-          :is-wrong-otp="twoFA.error.isWrongOTP"
-          :is-profile="true"
-          @validate="nextWithPayload"
-          @changed-two-fa="changedTwoFA"
-        />
+        <template v-else-if="twoFA.TOTPNeedTwoFA">
+          <two-factor-authentication
+            :preferred-two-fa="user.preferred_two_factor_authentication"
+            :two-fas-enabled="twoFAsEnabled"
+            :is-loading="twoFA.loadingAction === 'disableTOTP'"
+            :email="user.email"
+            :text-validate-button="textValidateTwoFA"
+            :is-disable-button="validateTwoFAIsDisable"
+            :is-wrong-otp="twoFA.error.isWrongOTP"
+            :is-profile="true"
+            @validate="nextWithPayload"
+            @changed-two-fa="changedTwoFA"
+          />
+          <div class="two-fa-flow-actions">
+            <button
+              class="button cancel-flow-button"
+              @click="cancelCurrentTwoFactorAuthAction"
+            >
+              {{ $t('main.cancel') }}
+            </button>
+          </div>
+        </template>
 
         <div v-else class="two-fa-card-actions">
           <button
@@ -289,19 +307,28 @@
           </div>
         </div>
 
-        <two-factor-authentication
-          v-else-if="twoFA.emailOTPNeedTwoFA"
-          :preferred-two-fa="user.preferred_two_factor_authentication"
-          :two-fas-enabled="twoFAsEnabled"
-          :is-loading="twoFA.loadingAction === 'disableEmailOTP'"
-          :email="user.email"
-          :text-validate-button="textValidateTwoFA"
-          :is-disable-button="validateTwoFAIsDisable"
-          :is-wrong-otp="twoFA.error.isWrongOTP"
-          :is-profile="true"
-          @validate="nextWithPayload"
-          @changed-two-fa="changedTwoFA"
-        />
+        <template v-else-if="twoFA.emailOTPNeedTwoFA">
+          <two-factor-authentication
+            :preferred-two-fa="user.preferred_two_factor_authentication"
+            :two-fas-enabled="twoFAsEnabled"
+            :is-loading="twoFA.loadingAction === 'disableEmailOTP'"
+            :email="user.email"
+            :text-validate-button="textValidateTwoFA"
+            :is-disable-button="validateTwoFAIsDisable"
+            :is-wrong-otp="twoFA.error.isWrongOTP"
+            :is-profile="true"
+            @validate="nextWithPayload"
+            @changed-two-fa="changedTwoFA"
+          />
+          <div class="two-fa-flow-actions">
+            <button
+              class="button cancel-flow-button"
+              @click="cancelCurrentTwoFactorAuthAction"
+            >
+              {{ $t('main.cancel') }}
+            </button>
+          </div>
+        </template>
 
         <div v-else class="two-fa-card-actions">
           <button
@@ -466,19 +493,28 @@
       </li>
     </ul>
 
-    <two-factor-authentication
-      v-if="twoFA.FIDOUnregisterDeviceName"
-      :preferred-two-fa="user.preferred_two_factor_authentication"
-      :two-fas-enabled="twoFAsEnabled"
-      :is-loading="twoFA.loadingAction === 'unregisterFIDO'"
-      :email="user.email"
-      :text-validate-button="textValidateTwoFA"
-      :is-disable-button="validateTwoFAIsDisable"
-      :is-wrong-otp="twoFA.error.isWrongOTP"
-      :is-profile="true"
-      @validate="nextWithPayload"
-      @changed-two-fa="changedTwoFA"
-    />
+    <template v-if="twoFA.FIDOUnregisterDeviceName">
+      <two-factor-authentication
+        :preferred-two-fa="user.preferred_two_factor_authentication"
+        :two-fas-enabled="twoFAsEnabled"
+        :is-loading="twoFA.loadingAction === 'unregisterFIDO'"
+        :email="user.email"
+        :text-validate-button="textValidateTwoFA"
+        :is-disable-button="validateTwoFAIsDisable"
+        :is-wrong-otp="twoFA.error.isWrongOTP"
+        :is-profile="true"
+        @validate="nextWithPayload"
+        @changed-two-fa="changedTwoFA"
+      />
+      <div class="two-fa-flow-actions">
+        <button
+          class="button cancel-flow-button"
+          @click="cancelCurrentTwoFactorAuthAction"
+        >
+          {{ $t('main.cancel') }}
+        </button>
+      </div>
+    </template>
 
     <p
       class="show-message-2fa error"
@@ -1062,7 +1098,8 @@ onUnmounted(() => {
   float: left;
 }
 
-.recovery-codes-panel {
+.recovery-codes-panel,
+.new-recovery-codes-actions {
   margin-bottom: 1.5em;
 }
 
