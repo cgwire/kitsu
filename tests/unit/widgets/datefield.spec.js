@@ -195,4 +195,270 @@ describe('DateField', () => {
       ])
     })
   })
+
+  // The picker clears its value when Tab leaves its empty input, and a list
+  // applies a clear to all its selected rows, the ones holding a date too.
+  describe('clear', () => {
+    it.each([
+      ['a day', {}],
+      ['a range', { range: true }]
+    ])('sends none when Tab leaves an empty field of %s', async (_, props) => {
+      const wrapper = mount(DateField, {
+        props: { ...props, modelValue: null },
+        global: {
+          plugins: [
+            createStore({
+              getters: {
+                isDarkTheme: () => false,
+                user: () => ({ locale: 'en_US' })
+              }
+            })
+          ]
+        }
+      })
+      await flushPromises()
+
+      await wrapper.find('input').trigger('keydown', { key: 'Tab' })
+
+      expect(wrapper.emitted('update:model-value')).toBeUndefined()
+      expect(wrapper.emitted('change')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    it.each([
+      ['a day', { modelValue: new Date(2026, 7, 5) }],
+      [
+        'a range',
+        {
+          range: true,
+          modelValue: [new Date(2026, 7, 4), new Date(2026, 7, 6)]
+        }
+      ]
+    ])('sends the clear of %s', (_, props) => {
+      const wrapper = mountField(props)
+
+      pick(wrapper, null)
+
+      expect(wrapper.emitted('update:model-value')).toEqual([[null]])
+      expect(wrapper.emitted('change')).toEqual([[null]])
+    })
+  })
+
+  // A list can show a date field on each of a thousand selected rows: a
+  // lazy one shows the input alone, and loads its calendar when used.
+  describe('lazy', () => {
+    let container = null
+    let onPageEvent = null
+    let wrapper = null
+
+    const mountInPage = (props, { locale = 'en_US' } = {}) => {
+      wrapper = mount(DateField, {
+        props,
+        attachTo: container,
+        global: {
+          plugins: [
+            createStore({
+              getters: {
+                isDarkTheme: () => false,
+                user: () => ({ locale })
+              }
+            })
+          ]
+        }
+      })
+      return wrapper
+    }
+    const findInput = () => wrapper.find('input')
+    const menu = () => document.querySelector('.dp--menu-wrapper')
+
+    // The elements of the field and what the styles can address in them.
+    // Vue and the picker mark their elements for themselves, data-dp-mobile
+    // shapes the calendar only, and an input keeps its text in a property.
+    const outline = element => ({
+      tag: element.tagName,
+      attributes: Object.fromEntries(
+        [...element.attributes]
+          .filter(
+            ({ name }) => !/^data-(v-|test-id|datepicker|dp-mobile)/.test(name)
+          )
+          .map(({ name, value }) => [
+            name,
+            name === 'class' ? value.split(' ').sort() : value
+          ])
+      ),
+      children: [...element.children].map(outline)
+    })
+    // The picker fills its input once mounted.
+    const looks = async (props, locale) => {
+      mountInPage(props, { locale })
+      await flushPromises()
+      const element = wrapper.find('.datepicker').element
+      const look = {
+        elements: outline(element),
+        text: element.querySelector('input').value
+      }
+      wrapper.unmount()
+      wrapper = null
+      return look
+    }
+
+    beforeEach(() => {
+      container = document.body.appendChild(document.createElement('div'))
+      onPageEvent = vi.fn()
+      container.addEventListener('click', onPageEvent)
+      container.addEventListener('keydown', onPageEvent)
+    })
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      container.remove()
+    })
+
+    it('shows the date with no calendar loaded', () => {
+      mountInPage({ lazy: true, modelValue: new Date(2026, 7, 5) })
+
+      expect(findPicker(wrapper).exists()).toBe(false)
+      expect(findInput().element.value).toBe('2026-08-05')
+    })
+
+    it.each([
+      ['a click', input => input.trigger('click')],
+      ['Enter', input => input.trigger('keydown', { key: 'Enter' })]
+    ])('opens its calendar on %s', async (_, use) => {
+      mountInPage({ lazy: true, modelValue: new Date(2026, 7, 5) })
+
+      await use(findInput())
+      await flushPromises()
+
+      expect(findPicker(wrapper).exists()).toBe(true)
+      expect(menu()).not.toBe(null)
+      expect(findInput().attributes('aria-expanded')).toBe('true')
+      expect(document.activeElement).toBe(findInput().element)
+      // as the picker, which keeps its clicks and keys away from the row
+      expect(onPageEvent).not.toHaveBeenCalled()
+    })
+
+    it('leaves the other keys out of its input', () => {
+      mountInPage({ lazy: true, modelValue: new Date(2026, 7, 5) })
+      const digit = new KeyboardEvent('keydown', {
+        key: '1',
+        code: 'Digit1',
+        cancelable: true
+      })
+      const tab = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        code: 'Tab',
+        cancelable: true
+      })
+
+      findInput().element.dispatchEvent(digit)
+      findInput().element.dispatchEvent(tab)
+
+      expect(digit.defaultPrevented).toBe(true)
+      expect(tab.defaultPrevented).toBe(false)
+      expect(findPicker(wrapper).exists()).toBe(false)
+    })
+
+    it.each([
+      ['a click', button => button.trigger('click')],
+      ['Enter', button => button.trigger('keydown', { key: 'Enter' })],
+      ['Space', button => button.trigger('keydown', { key: ' ' })]
+    ])('clears the date on %s without loading its calendar', async (_, use) => {
+      mountInPage({ lazy: true, modelValue: new Date(2026, 7, 5) })
+
+      await use(wrapper.find('.dp--clear-btn'))
+
+      expect(wrapper.emitted('update:model-value')).toEqual([[null]])
+      expect(wrapper.emitted('change')).toEqual([[null]])
+      expect(findPicker(wrapper).exists()).toBe(false)
+      expect(onPageEvent).not.toHaveBeenCalled()
+    })
+
+    // Cut or Delete from the context menu, or a drop, change the text with
+    // no key: the picker takes an emptied input for a clear.
+    it.each([
+      ['the picker', false],
+      ['a lazy field', true]
+    ])('clears the date of %s emptied with no key', async (_, lazy) => {
+      mountInPage({ lazy, modelValue: new Date(2026, 7, 5) })
+      await flushPromises()
+
+      await findInput().setValue('')
+
+      expect(wrapper.emitted('update:model-value')).toEqual([[null]])
+      expect(wrapper.emitted('change')).toEqual([[null]])
+    })
+
+    it.each([
+      ['the picker', false],
+      ['a lazy field', true]
+    ])('reads a date given to %s with no key', async (_, lazy) => {
+      mountInPage({ lazy, modelValue: new Date(2026, 7, 5) })
+      await flushPromises()
+
+      await findInput().setValue('2026-08-09')
+      await flushPromises()
+
+      expect(wrapper.emitted('update:model-value')).toEqual([
+        [new Date(2026, 7, 9)]
+      ])
+      expect(findInput().attributes('aria-expanded')).toBe('true')
+    })
+
+    // A click on a disabled input reaches no listener: the one around it
+    // must open nothing either.
+    it('opens nothing when disabled', async () => {
+      mountInPage({
+        lazy: true,
+        disabled: true,
+        modelValue: new Date(2026, 7, 5)
+      })
+
+      await wrapper.find('.dp--input-wrap').trigger('click')
+      await flushPromises()
+
+      expect(findPicker(wrapper).exists()).toBe(false)
+    })
+
+    // Its look comes from the classes of the picker, which the styles of the
+    // app address: an upgrade of the picker that changes its markup must
+    // change this one too.
+    it.each([
+      ['a date', { modelValue: new Date(2026, 7, 5) }],
+      ['no date', { modelValue: null, placeholder: 'Due date' }],
+      ['a date it cannot clear', { canDelete: false, modelValue: new Date() }],
+      ['a disabled date', { disabled: true, modelValue: new Date(2026, 7, 5) }],
+      ['the dark theme', { isDark: true, modelValue: new Date(2026, 7, 5) }],
+      ['a utc day', { utc: true, modelValue: '2026-08-05' }],
+      ['a date string', { modelValue: '2026-08-05T09:30:00' }],
+      ['a model type', { modelType: 'dd/MM/yyyy', modelValue: '05/08/2026' }],
+      [
+        'a range',
+        {
+          range: true,
+          modelValue: [new Date(2026, 7, 3), new Date(2026, 7, 7)]
+        }
+      ],
+      [
+        'a range of one day',
+        {
+          range: true,
+          modelValue: [new Date(2026, 7, 3), new Date(2026, 7, 3)]
+        }
+      ],
+      [
+        'a localized format',
+        { format: 'd MMM yyyy', modelValue: new Date(2026, 7, 5) },
+        'fr_FR'
+      ],
+      ['a date it cannot read', { modelValue: new Date(NaN) }],
+      ['a model value it cannot read', { modelType: 'yyyy-MM-dd', modelValue: 'soon' }],
+      ['an empty range', { range: true, modelValue: [] }]
+    ])('looks like the picker with %s', async (_, props, locale) => {
+      const picker = await looks(props, locale)
+
+      expect(await looks({ ...props, lazy: true }, locale)).toEqual(picker)
+    })
+  })
 })

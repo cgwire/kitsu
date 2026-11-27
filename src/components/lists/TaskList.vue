@@ -314,6 +314,7 @@
             >
               <date-field
                 class="flexrow-item"
+                lazy
                 :with-margin="false"
                 :min-date="disabledDates.to"
                 :model-value="getDate(task.start_date)"
@@ -330,6 +331,7 @@
             >
               <date-field
                 class="flexrow-item"
+                lazy
                 :with-margin="false"
                 :model-value="getDate(task.due_date)"
                 :max-date="disabledDates.from"
@@ -346,6 +348,7 @@
             >
               <date-field
                 class="flexrow-item"
+                lazy
                 :with-margin="false"
                 :min-date="getRealDateBounds(task, 'real_start_date').min"
                 :max-date="getRealDateBounds(task, 'real_start_date').max"
@@ -365,6 +368,7 @@
             >
               <date-field
                 class="flexrow-item"
+                lazy
                 :with-margin="false"
                 :min-date="getRealDateBounds(task, 'end_date').min"
                 :max-date="getRealDateBounds(task, 'end_date').max"
@@ -382,6 +386,7 @@
             >
               <date-field
                 class="flexrow-item"
+                lazy
                 :with-margin="false"
                 :min-date="getRealDateBounds(task, 'done_date').min"
                 :max-date="getRealDateBounds(task, 'done_date').max"
