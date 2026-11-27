@@ -867,12 +867,20 @@ const mutations = {
     }
   },
 
+  // Written through the state for Vue to see it: the rows of the People page
+  // are copies that a write on the cached person alone leaves stale.
   [DISABLE_TWO_FACTOR_AUTHENTICATION_END](state, personId) {
-    const person = cache.personMap.get(personId)
-    person.totp_enabled = false
-    person.email_otp_enabled = false
-    person.fido_enabled = false
-    person.preferred_two_factor_authentication = null
+    const person =
+      state.displayedPeople.find(({ id }) => id === personId) ||
+      cache.personMap.get(personId)
+    if (!person) return
+    Object.assign(person, {
+      totp_enabled: false,
+      email_otp_enabled: false,
+      fido_enabled: false,
+      preferred_two_factor_authentication: null
+    })
+    state.personMapVersion++
   },
 
   [IMPORT_PEOPLE_START](state) {
