@@ -1334,10 +1334,12 @@ describe('entity list column selection', () => {
     return committed(wrapper, 'ADD_SELECTED_TASKS')[0]
   }
 
-  test('selects the cells of the column for the shots left uncanceled', async () => {
+  // The list shows the canceled rows, which the sequences and the episodes do
+  // not sort last.
+  test('selects the cells of the uncanceled shots at their rows', async () => {
     expect(await selectColumn()).toEqual([
       { entity: shots[0], column, task: { id: 'task-a' }, x: 0, y: 0 },
-      { entity: shots[2], column, task: { id: 'task-c' }, x: 1, y: 0 }
+      { entity: shots[2], column, task: { id: 'task-c' }, x: 2, y: 0 }
     ])
   })
 
@@ -1345,7 +1347,7 @@ describe('entity list column selection', () => {
     const selection = await selectColumn({
       isCellSelectable: entity => entity.id !== 'a'
     })
-    expect(selection.map(({ entity, x }) => [entity.id, x])).toEqual([['c', 1]])
+    expect(selection.map(({ entity, x }) => [entity.id, x])).toEqual([['c', 2]])
   })
 
   // An episode or a sequence received live comes without its tasks: the list

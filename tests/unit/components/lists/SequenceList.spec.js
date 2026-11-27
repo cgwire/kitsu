@@ -1,8 +1,14 @@
 vi.mock('@/store', () => ({ default: {} }))
 
 import { flushPromises } from '@vue/test-utils'
+import { nextTick } from 'vue'
 
+import sequenceStore from '@/store/modules/sequences'
+
+import ValidationCell from '@/components/cells/ValidationCell.vue'
+import ValidationHeader from '@/components/cells/ValidationHeader.vue'
 import SequenceList from '@/components/lists/SequenceList.vue'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
 
 import {
   columnCounts,
@@ -147,6 +153,51 @@ describe('lists/SequenceList task panel', () => {
       'REMOVE_SELECTED_TASK',
       { task, x: 1, y: 0 }
     )
+
+    wrapper.unmount()
+  })
+})
+
+describe('lists/SequenceList column selection', () => {
+  afterEach(() => {
+    sequenceStore.cache.result = []
+  })
+
+  // The sequences keep their name order, a canceled one included.
+  test('selects the cells below a canceled sequence at their rows', async () => {
+    const sequences = ['SQ01', 'SQ02', 'SQ03'].map((name, i) => ({
+      id: `sequence-${i + 1}`,
+      name,
+      canceled: i === 0,
+      data: {},
+      validations: new Map([[taskTypeId, `task-${i + 1}`]])
+    }))
+    sequenceStore.cache.result = sequences
+    const wrapper = await mountEntityList(SequenceList, {
+      getters: {
+        currentProduction: production,
+        displayedSequencesLength: sequences.length,
+        sequenceFilledColumns: filledColumns
+      },
+      props: { displayedSequences: sequences }
+    })
+
+    wrapper.findComponent(ValidationHeader).vm.$emit('show-header-menu')
+    wrapper.findComponent(TableHeaderMenu).vm.$emit('select-column')
+    await nextTick()
+
+    const [selection] = wrapper.vm.$store.commit.mock.calls
+      .filter(([name]) => name === 'ADD_SELECTED_TASKS')
+      .map(([, payload]) => payload)
+    const rowX = entity =>
+      wrapper
+        .findAllComponents(ValidationCell)
+        .find(cell => cell.props('entity').id === entity.id)
+        .props('rowX')
+    expect(selection.map(({ entity, x }) => [entity.name, x])).toEqual([
+      ['SQ02', rowX(sequences[1])],
+      ['SQ03', rowX(sequences[2])]
+    ])
 
     wrapper.unmount()
   })

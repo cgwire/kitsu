@@ -622,12 +622,10 @@ export const useEntityList = ({
     return nonStickedIndex + stickedDisplayedValidationColumns.value.length
   }
 
-  // Rows that Select column numbers in the grid, the rows not loaded yet
-  // included.
+  // Rows of the list, the rows not loaded yet included, which Select column
+  // numbers in the grid.
   const getColumnRows = () =>
-    ENTITY_STORES[type].cache.result.filter(
-      entity => !entity.canceled && isEntityShown(entity)
-    )
+    ENTITY_STORES[type].cache.result.filter(entity => isEntityShown(entity))
 
   // Row of an entity in the selection grid, -1 when it is not displayed: a
   // row not loaded yet keeps the number Select column gave it.
@@ -769,11 +767,13 @@ export const useEntityList = ({
   const onSelectColumn = () => {
     const taskTypeId = lastHeaderMenuDisplayed.value
     const y = getColumnIndexInGrid(taskTypeId)
-    // The rows are numbered before the grayed cells leave: the next rows
-    // keep their place in the grid.
+    // The rows are numbered before the canceled rows and the grayed cells
+    // leave: the next rows keep their place in the grid.
     const selection = getColumnRows()
       .map((entity, x) => ({ entity, x }))
-      .filter(({ entity }) => isCellSelectable(entity, taskTypeId))
+      .filter(
+        ({ entity }) => !entity.canceled && isCellSelectable(entity, taskTypeId)
+      )
       .map(({ entity, x }) => ({
         entity,
         column: taskTypeMap.value.get(taskTypeId),
