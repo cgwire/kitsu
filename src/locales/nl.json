@@ -1841,6 +1841,7 @@
       "feedback": "feedback",
       "hide_infos": "Aanvullende informatie verbergen",
       "my_tasks": "Mijn taken",
+      "nb_by_status": "{name} - {count} taak | {name} - {count} taken",
       "next": "Volgende taak",
       "no_comment": "Er zijn momenteel geen opmerkingen bij deze taak.",
       "no_preview": "Er is momenteel geen preview voor deze taak.",

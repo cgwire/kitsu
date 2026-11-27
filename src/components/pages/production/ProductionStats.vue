@@ -55,7 +55,12 @@
           width: `${(statsByStatus[statusId] / stats.amount) * 100}%`
         }"
         :key="statusId"
-        :title="`${taskStatusMap.get(statusId)?.name} - ${statsByStatus[statusId]} tasks`"
+        :title="
+          $t('tasks.nb_by_status', {
+            name: taskStatusMap.get(statusId)?.name,
+            count: statsByStatus[statusId]
+          })
+        "
         v-for="statusId in statusIds"
       ></div>
     </div>
@@ -129,7 +134,12 @@
                 width: `${(statusStats.amount / taskTypeStatsMap[taskType.id].amount) * 100}%`
               }"
               :key="taskType.id + statusStats.task_status_id"
-              :title="`${taskStatusMap.get(statusStats.task_status_id)?.name} - ${statusStats.amount} tasks`"
+              :title="
+                $t('tasks.nb_by_status', {
+                  name: taskStatusMap.get(statusStats.task_status_id)?.name,
+                  count: statusStats.amount
+                })
+              "
               v-for="statusStats in sortStatuses(
                 taskTypeStatsMap[taskType.id].task_statuses
               )"

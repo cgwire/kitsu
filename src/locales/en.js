@@ -2471,6 +2471,7 @@ export default {
     late: 'Late status',
     my_checks: 'My Checks',
     my_tasks: 'My Tasks',
+    nb_by_status: '{name} - {count} task | {name} - {count} tasks',
     new_revision_number: 'New revision number',
     next: 'Next task',
     no_comment: 'There are currently no comments for this task.',

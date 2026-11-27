@@ -2372,6 +2372,7 @@
       "late": "Status opóźnienia",
       "my_checks": "Moje sprawdzenia",
       "my_tasks": "Moje zadania",
+      "nb_by_status": "{name} - {count} zadanie | {name} - zadania: {count}",
       "new_revision_number": "Nowy numer wersji",
       "next": "Następne zadanie",
       "no_comment": "Obecnie nie ma komentarzy do tego zadania.",

@@ -1841,6 +1841,7 @@
       "feedback": "フィードバック",
       "hide_infos": "追加情報を非表示",
       "my_tasks": "マイタスク",
+      "nb_by_status": "{name} - タスク {count} 件 | {name} - タスク {count} 件",
       "next": "次のタスク",
       "no_comment": "このタスクにコメントはありません。",
       "no_preview": "このタスクにプレビューはありません。",

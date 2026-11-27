@@ -1841,6 +1841,7 @@
       "feedback": "feedback",
       "hide_infos": "Skjul yderligere information",
       "my_tasks": "Mine opgaver",
+      "nb_by_status": "{name} - {count} opgave | {name} - {count} opgaver",
       "next": "Næste opgave",
       "no_comment": "Der er i øjeblikket ingen kommentarer til denne opgave.",
       "no_preview": "Der er i øjeblikket ingen previews for denne opgave.",

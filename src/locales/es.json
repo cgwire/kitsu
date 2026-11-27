@@ -1841,6 +1841,7 @@
       "feedback": "comentarios",
       "hide_infos": "Ocultar información adicional",
       "my_tasks": "Mis tareas",
+      "nb_by_status": "{name} - {count} tarea | {name} - {count} tareas",
       "next": "Tarea siguiente",
       "no_comment": "Actualmente no hay ningún comentario para esta tarea.",
       "no_preview": "Actualmente no hay ninguna vista previa para esta tarea.",

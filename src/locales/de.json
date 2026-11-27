@@ -1841,6 +1841,7 @@
       "feedback": "Feedback",
       "hide_infos": "Zusätzliche Informationen ausblenden",
       "my_tasks": "Meine Aufgaben",
+      "nb_by_status": "{name} - {count} Aufgabe | {name} - {count} Aufgaben",
       "next": "Nächste Aufgabe",
       "no_comment": "Zu dieser Aufgabe gibt es derzeit keinen Kommentar.",
       "no_preview": "Für diese Aufgabe gibt es derzeit keine Vorschau.",

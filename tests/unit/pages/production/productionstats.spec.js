@@ -79,6 +79,14 @@ const stats = {
   ]
 }
 
+// One task of a status, two of another
+const fewTasks = {
+  ...stats,
+  amount: 3,
+  amount_done: 2,
+  task_types: [{ ...stat('modeling', 'wip'), amount: 1 }, stat('modeling', 'done')]
+}
+
 // The real status and task type modules: their maps are caches Vue does not
 // watch.
 const mountStats = (production, productionStats = stats) => {
@@ -120,6 +128,9 @@ const mountStats = (production, productionStats = stats) => {
 // The status names in the titles of the parts of a bar
 const barStatuses = bar =>
   bar.findAll('.stat').map(part => part.attributes('title').split(' - ')[0])
+// The tooltips of the parts of a bar
+const barTitles = bar =>
+  bar.findAll('.stat').map(part => part.attributes('title'))
 const mainBar = wrapper =>
   barStatuses(wrapper.find('.project-stats > .color-wrapper'))
 const taskTypeBars = wrapper =>
@@ -333,6 +344,36 @@ describe('ProductionStats', () => {
     expect(
       await titlesOf({ id: 'production-2', production_style: 'video-game' })
     ).toEqual(['Assets', 'Plans', 'Séquences', 'Épisodes', 'Montages'])
+  })
+
+  // A part of a bar names its status and counts its tasks, with the plural
+  // of the count.
+  it('counts the tasks of each status in the tooltips of its bars', async () => {
+    const { wrapper } = mountStats({ id: 'production-1' }, fewTasks)
+    await wrapper.trigger('click')
+
+    expect(
+      barTitles(wrapper.find('.project-stats > .color-wrapper'))
+    ).toEqual(['WIP - 1 task', 'Done - 2 tasks'])
+    expect(
+      wrapper.findAll('.task-type-stat .color-wrapper').map(barTitles)
+    ).toEqual([['WIP - 1 task', 'Done - 2 tasks']])
+    wrapper.unmount()
+  })
+
+  it('counts the tasks of its tooltips in the language of the user', async () => {
+    await loadLocaleMessages('fr')
+    i18n.global.locale.value = 'fr'
+    const { wrapper } = mountStats({ id: 'production-1' }, fewTasks)
+    await wrapper.trigger('click')
+
+    expect(
+      barTitles(wrapper.find('.project-stats > .color-wrapper'))
+    ).toEqual(['WIP - 1 tâche', 'Done - 2 tâches'])
+    expect(
+      wrapper.findAll('.task-type-stat .color-wrapper').map(barTitles)
+    ).toEqual([['WIP - 1 tâche', 'Done - 2 tâches']])
+    wrapper.unmount()
   })
 
   // A task type with no entity counts as an asset one, the entity Zou gives
