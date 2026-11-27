@@ -33,6 +33,9 @@
       v-if="isEdit"
     />
     <modal-footer
+      :confirm-label="
+        isEdit ? $t('main.save_changes') : $t('schedule.milestone.add')
+      "
       :error-text="$t('schedule.milestone.error')"
       :is-error="isError"
       :is-loading="isLoading"

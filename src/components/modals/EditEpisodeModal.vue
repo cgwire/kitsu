@@ -44,6 +44,9 @@
     </form>
 
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('episodes.create')
+      "
       :error-text="
         isDeleted && episodeToEdit?.id
           ? $t('main.edit_deleted_error', { name: episodeToEdit.name })

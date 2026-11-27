@@ -66,7 +66,7 @@
         @keydown.space.prevent="confirmAndStayClicked"
         v-if="!assetToEdit?.id"
       >
-        {{ $t('main.confirmation_and_stay') }}
+        {{ $t('main.create_and_add_another') }}
       </a>
       <a
         :class="{
@@ -80,7 +80,7 @@
         @keydown.enter.prevent="confirmClicked"
         @keydown.space.prevent="confirmClicked"
       >
-        {{ $t('main.confirmation') }}
+        {{ isEditing ? $t('main.save_changes') : $t('assets.create') }}
       </a>
       <button class="button is-link" @click="$emit('cancel')">
         {{ $t('main.close') }}

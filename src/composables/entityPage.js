@@ -273,15 +273,22 @@ export const useEntityPage = ({
     return entity ? t(`${type}s.restore_text`, { name: entity.name }) : ''
   })
 
+  // Deleting an entity that has tasks archives it
+  const isDeleteArchiving = computed(() => {
+    const entity = entityToDelete.value
+    return Boolean(canCancel && !entity?.canceled && entity?.tasks?.length > 0)
+  })
+
   const deleteText = computed(() => {
     const entity = entityToDelete.value
     if (!entity?.name) return ''
-    const isCanceled =
-      canCancel && !entity.canceled && entity.tasks && entity.tasks.length > 0
-    return t(`${type}s.${isCanceled ? 'cancel_text' : 'delete_text'}`, {
-      name: entity.name
-    })
+    const key = isDeleteArchiving.value ? 'cancel_text' : 'delete_text'
+    return t(`${type}s.${key}`, { name: entity.name })
   })
+
+  const deleteButtonText = computed(() =>
+    t(isDeleteArchiving.value ? 'row_actions.archive' : 'main.delete')
+  )
 
   // The CSV columns of the pages of ENTITY_CSV
   const isCsvEpisode = computed(
@@ -1002,6 +1009,7 @@ export const useEntityPage = ({
 
     cellSaveErrorText,
     deleteAllTasksText,
+    deleteButtonText,
     deleteText,
     importDatabase,
     importRequiredValues,

@@ -66,18 +66,18 @@ const findButton = (wrapper, label) =>
   wrapper.findAll('a.button').find(button => button.text() === label)
 
 const confirmButtons = [
-  { name: 'Confirm', label: 'main.confirmation' },
-  { name: 'Confirm and stay', label: 'main.confirmation_and_stay' }
+  { name: 'Create the tasks', label: 'tasks.create_tasks_confirm' },
+  { name: 'Create and stay', label: 'main.create_and_stay' }
 ]
 
 describe('modals/CreateTasksModal', () => {
   it('creates the tasks from the keyboard', async () => {
     const wrapper = mountModal()
 
-    await findButton(wrapper, 'main.confirmation').trigger('keydown', {
+    await findButton(wrapper, 'tasks.create_tasks_confirm').trigger('keydown', {
       key: 'Enter'
     })
-    await findButton(wrapper, 'main.confirmation_and_stay').trigger(
+    await findButton(wrapper, 'main.create_and_stay').trigger(
       'keydown',
       { key: 'Enter' }
     )
@@ -95,10 +95,10 @@ describe('modals/CreateTasksModal', () => {
   })
 
   it.each([
-    { name: 'Confirm', label: 'main.confirmation', loading: 'isLoading' },
+    { name: 'Create the tasks', label: 'tasks.create_tasks_confirm', loading: 'isLoading' },
     {
-      name: 'Confirm and stay',
-      label: 'main.confirmation_and_stay',
+      name: 'Create and stay',
+      label: 'main.create_and_stay',
       loading: 'isLoadingStay'
     },
     {
@@ -185,7 +185,7 @@ describe('modals/CreateTasksModal', () => {
 
     store.commit('setShotTaskTypes', shotTaskTypes)
     await nextTick()
-    await findButton(wrapper, 'main.confirmation').trigger('click')
+    await findButton(wrapper, 'tasks.create_tasks_confirm').trigger('click')
 
     expect(wrapper.emitted('confirm')).toEqual([
       [{ form: { task_type_id: 'tt-anim' }, selectionOnly: true }]
@@ -198,7 +198,7 @@ describe('modals/CreateTasksModal', () => {
 
     store.commit('setShotTaskTypes', [])
     await nextTick()
-    await findButton(wrapper, 'main.confirmation').trigger('click')
+    await findButton(wrapper, 'tasks.create_tasks_confirm').trigger('click')
 
     expect(wrapper.emitted('confirm')).toBeUndefined()
   })
@@ -209,7 +209,7 @@ describe('modals/CreateTasksModal', () => {
 
     store.commit('setShotTaskTypes', [{ id: 'tt-layout', name: 'Layout' }])
     await nextTick()
-    await findButton(wrapper, 'main.confirmation').trigger('click')
+    await findButton(wrapper, 'tasks.create_tasks_confirm').trigger('click')
 
     expect(wrapper.emitted('confirm')).toEqual([
       [{ form: { task_type_id: 'tt-layout' }, selectionOnly: true }]
@@ -225,7 +225,7 @@ describe('modals/CreateTasksModal', () => {
       .vm.$emit('update:model-value', 'tt-comp')
     store.commit('setShotTaskTypes', [...shotTaskTypes])
     await nextTick()
-    await findButton(wrapper, 'main.confirmation').trigger('click')
+    await findButton(wrapper, 'tasks.create_tasks_confirm').trigger('click')
 
     expect(wrapper.emitted('confirm')).toEqual([
       [{ form: { task_type_id: 'tt-comp' }, selectionOnly: true }]

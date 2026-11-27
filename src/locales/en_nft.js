@@ -129,6 +129,7 @@ export default {
 
   shots: {
     casting: 'NFT casting',
+    create: 'Create an NFT',
     creation_explanation: 'To add NFTs, you first need to create an episode and a sequence. Type an episode name at the bottom of the left column, then click "Add" to create a new episode. Select this episode and repeat the same operation for the sequence. Finally, select a sequence and type an NFT name in the field at the bottom of the right column. Click the "Add" button below. Your first NFT is now created. You can add many more! If it\'s not a TV show, you can directly create a sequence.',
     delete_for_selection: 'Delete the selected NFT | Delete the {nbSelectedShots} selected NFTs',
     delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected NFTs? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',

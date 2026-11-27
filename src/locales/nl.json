@@ -11,6 +11,7 @@
       "warning": "Autoriseer alleen als je dit inloggen zelf vanuit de applicatie hebt gestart. De applicatie krijgt toegang tot Kitsu met jouw rechten."
     },
     "assets": {
+      "create": "Asset maken",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze asset. Mogelijk zijn er gegevens aan gekoppeld. Weet je zeker dat er geen taak aan deze asset is gekoppeld?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "edit_fail": "Opslaan mislukt, dit kan komen omdat een asset met dezelfde naam reeds bestaat.",
@@ -52,6 +53,7 @@
     "asset_types": {
       "all_asset_types": "Alle assettypes",
       "all_hidden": "Alle assettypes zijn verborgen.",
+      "create": "Assettype maken",
       "create_error": "Er is een fout opgetreden bij het opslaan van dit assettype. Weet je zeker dat er geen assettype bestaat met dezelfde naam?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van dit assettype. Mogelijk zijn er gegevens aan gekoppeld. Weet je zeker dat er geen assets aan dit assettype gekoppeld zijn?",
@@ -75,6 +77,7 @@
     },
     "breakdown": {
       "link_assets": "Assets koppelen",
+      "change_label": "Label aanpassen",
       "copy_casting": "Deze casting kopiëren (ctrl + V plakt deze op de geselecteerde regels)",
       "edit_label": "Assetlabel aanpassen",
       "empty": "Lege casting",
@@ -169,9 +172,11 @@
         "intro": "Kies een taak van dezelfde entiteit om deze opmerking naartoe te verplaatsen. Op de doeltaak worden meldingen verstuurd zoals voor een nieuwe opmerking.",
         "no_target": "Er is geen andere taak beschikbaar op deze entiteit.",
         "target_label": "Doeltaak",
+        "confirm": "Opmerking verplaatsen",
         "title": "Opmerking naar een andere taak verplaatsen"
       },
       "move_to_task": "Verplaats naar",
+      "save": "Opmerking opslaan",
       "title": "Opmerkingen",
       "toggle_for_client": "Zichtbaarheid voor klant",
       "player": {
@@ -187,6 +192,7 @@
       }
     },
     "custom_actions": {
+      "create": "Aangepaste actie maken",
       "create_error": "Er is een fout opgetreden bij het opslaan van de aangepaste actie. Weet je zeker dat er geen andere actie is met dezelfde naam?",
       "delete_text": "Weet je zeker dat je de aangepaste actie {name} wilt verwijderen uit de database?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van de aangepaste actie.",
@@ -212,6 +218,7 @@
     },
     "entities": {
       "build_filter": {
+        "apply": "Filter toepassen",
         "asset_type": "Assettype",
         "add_descriptor_filter": "Metadatafilter toevoegen",
         "add_status_filter": "Taakstatusfilter toevoegen",
@@ -255,6 +262,7 @@
         "undefined": "Ongedefinieerd",
         "undefined_pattern": "Ongedefinieerd",
         "upload": "Voeg thumbnails toe",
+        "confirm": "Thumbnails toevoegen",
         "edits_pattern": "\"MontageNaam\" bijv. Trailer.",
         "edits_tvshow_pattern": "\"AfleveringNaam MontageNaam\" bijv. E01_Trailer.",
         "explanation": "Om een thumbnail toe te voegen, moet je een nieuwe preview instellen. Om meerdere thumbnails tegelijk in te stellen, moet je eerst een taaktype kiezen om de nieuwe previews te maken. De thumbnails worden ingesteld op basis van deze nieuwe previews.",
@@ -299,6 +307,7 @@
     "episodes": {
       "all_episodes": "Alle afleveringen",
       "all_hidden": "Alle afleveringen zijn verborgen.",
+      "create": "Aflevering maken",
       "edit_error": "Er is een fout opgetreden tijdens het opslaan van de aflevering. Weet je zeker dat er geen aflevering bestaat met een vergelijkbare naam?",
       "delete_error": "Er is een fout opgetreden tijdens het verwijderen van deze aflevering. Mogelijk is er nog data aan gekoppeld. Weet je zeker dat er geen sequentie aan deze aflevering is gekoppeld?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen? Alle gerelateerde opnamen en previews worden ook verwijderd. Bevestig door hieronder de afleveringsnaam te typen.",
@@ -442,6 +451,9 @@
       "changelog": "Wijzigingslogboek",
       "next_entity": "Volgende entiteit",
       "previous_entity": "Vorige entiteit",
+      "save_changes": "Wijzigingen opslaan",
+      "save_picture": "Afbeelding opslaan",
+      "search_query_create": "Zoekfilter maken",
       "select_section": "Selecteer een sectie",
       "technical_details": "Technische details:",
       "about": "Over",
@@ -457,8 +469,6 @@
       "click_to_add": "Klik om toe te voegen",
       "click_to_remove": "Klik om te verwijderen",
       "close": "Sluiten",
-      "confirmation": "Bevestigen",
-      "confirmation_and_stay": "Bevestigen en blijven",
       "date": "Datum",
       "dark_theme": "Donker thema",
       "days_spent": "dag besteed | dagen besteed",
@@ -513,6 +523,7 @@
         "choose": "Kies",
         "error_empty": "Het bestand is leeg.",
         "error_imported_rows": "{count} regel is geïmporteerd vóór de fout. | {count} regels zijn geïmporteerd vóór de fout.",
+        "import_data": "Data importeren",
         "import_success": "{count} regel is geïmporteerd. | {count} regels zijn geïmporteerd.",
         "error_line": "Regel {line}",
         "error_read": "Kon het bestand niet lezen. Selecteer het opnieuw.",
@@ -647,9 +658,12 @@
       "no_results": "Geen resultaten",
       "link": "Link",
       "list": "Lijst",
+      "filter_group_create": "Filtergroep maken",
       "hours_spent": "uur besteed | uren besteed",
       "hours_expected": "verwacht uur | verwachte uren",
       "hours_estimated": "uur geschat | uren geschat",
+      "create_and_add_another": "Maken en nog een toevoegen",
+      "create_and_stay": "Maken en blijven",
       "created_by": "Gemaakt door",
       "day": "Dag",
       "hour": "Uur",
@@ -679,7 +693,9 @@
       "expand": "Uitklappen",
       "expand_all": "Alles uitklappen",
       "hours": "uur | uren",
+      "remove_search_filter_group_button": "Groep verwijderen",
       "remove_search_query": "Weet je zeker dat je de zoekopdracht \"{name}\" wilt verwijderen?",
+      "remove_search_query_button": "Filter verwijderen",
       "remove_search_query_error": "Er is een fout opgetreden bij het verwijderen van deze zoekopdracht.",
       "remove_search_filter_group": "Weet je zeker dat je de zoekfiltergroep \"{name}\" wilt verwijderen?",
       "remove_search_filter_group_error": "Er is een fout opgetreden bij het verwijderen van deze zoekfiltergroep.",
@@ -823,6 +839,7 @@
       "persons": "gebruiker | gebruikers",
       "project_role": "Projectrol",
       "select_person": "Kies een gebruiker...",
+      "self_role_downgrade_button": "Mijn rol verlagen",
       "team": "Team",
       "title": "Mensen",
       "unactive": "Inactief",
@@ -870,6 +887,7 @@
         "supervisor": "Supervisor",
         "all": "Alle rollen"
       },
+      "archive_guest_button": "Gast archiveren",
       "confirm_edit": "Gebruikerswijzigingen opslaan",
       "create": "Gebruiker aanmaken",
       "user_limit_error": "Je hebt je gebruikerslimiet bereikt. Neem contact op met ons team om je abonnement te upgraden.",
@@ -1096,6 +1114,7 @@
         "copy": "Kopiëren",
         "create": "Voorbeeldaccount aanmaken",
         "delete": "Verwijderen",
+        "delete_button": "Account verwijderen",
         "delete_confirm": "Het voorbeeldaccount van deze productie verwijderen?",
         "description": "Zie Kitsu precies zoals een klant, alleen-lezen en zonder een licentie te bezetten.",
         "error": "Er is een fout opgetreden bij het bijwerken van het voorbeeldaccount.",
@@ -1205,6 +1224,7 @@
         "number": "Getal",
         "string": "Tekst",
         "tags": "Lijst met tags",
+        "add_column": "Kolom toevoegen",
         "applies_to_all_projects": "Deze kolom wordt toegevoegd aan elke open productie. Elke productie kan een eigen waarde hebben in de lijstweergave.",
         "delete_list_column_text": "Hiermee wordt de kolom “{name}” uit alle open producties verwijderd, inclusief opgeslagen waarden. Doorgaan?",
         "date": "Datum",
@@ -1462,6 +1482,7 @@
       "preferences_title": "Voorkeuren"
     },
     "task_status": {
+      "create": "Taakstatus maken",
       "create_error": "Er is een fout opgetreden bij het opslaan van deze taakstatus. Weet je zeker dat er geen taakstatus is met een vergelijkbare naam?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze taakstatus. Mogelijk zijn er gegevens aan gekoppeld. Weet je zeker dat er geen taak aan deze taakstatus is gekoppeld?",
@@ -1494,6 +1515,7 @@
       "remove_status": "Status {name} verwijderen"
     },
     "task_types": {
+      "create": "Taaktype maken",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van dit taaktype. Mogelijk zijn er gegevens aan gekoppeld. Weet je zeker dat er geen taak aan dit taaktype is gekoppeld?",
       "delete_blocked_by_automations": "Er zijn nog statusautomatiseringen die dit taaktype gebruiken, ook gearchiveerde. Pas ze aan of verwijder ze eerst.",
@@ -1532,6 +1554,7 @@
     "sequences": {
       "all_hidden": "Alle sequenties zijn verborgen.",
       "all_sequences": "Alle sequenties",
+      "create": "Sequentie maken",
       "edit_error": "Er is een fout opgetreden bij het opslaan van deze sequentie. Weet je zeker dat er geen sequentie is met een vergelijkbare naam?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen? Alle gerelateerde opnamen en previews worden verwijderd. Bevestig door de naam van de sequentie hieronder te typen.",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze sequentie. Mogelijk zijn er gegevens aan gekoppeld. Weet je zeker dat er geen opname aan deze sequentie is gekoppeld?",
@@ -1556,6 +1579,7 @@
     "schedule": {
       "already_assigned": "Al toegewezen",
       "apply_to_prod": "Toepassen op productie",
+      "apply_to_prod_button": "Toepassen op productie",
       "apply_to_prod_confirm": "Weet je zeker dat je deze planningsversie wilt toepassen op de huidige productie? Dit overschrijft de huidige taakwaarden.",
       "apply_to_prod_error": "Er is een fout opgetreden tijdens het toepassen van de versie van de planning op de huidige productie.",
       "assign": "Toewijzen aan:",
@@ -1599,6 +1623,7 @@
       "hours": "u",
       "md": "md",
       "milestone": {
+        "add": "Mijlpaal toevoegen",
         "add_milestone": "Mijlpaal toevoegen voor",
         "edit_milestone": "Bewerk mijlpaal voor",
         "name": "Naam",
@@ -1617,6 +1642,7 @@
       "mode": "Weergavemodus",
       "mode_prev": "Prognose",
       "mode_real": "Werkelijk",
+      "move_children_button": "Verplaatsen met subitems",
       "nb_tasks_out_of_range": "{count} taak buiten de getoonde datums | {count} taken buiten de getoonde datums",
       "nb_undated_tasks": "{count} taak zonder datums | {count} taken zonder datums",
       "new_version": "Nieuwe versie",
@@ -1716,6 +1742,7 @@
       "restore_text": "Weet je zeker dat je {name} uit je archief wilt herstellen?",
       "restore_error": "Er is een fout opgetreden bij het herstellen van deze opname.",
       "sequences": "Sequenties",
+      "set_frames": "Framenummers instellen",
       "single_tab": "Enkel",
       "tasks": "Opnametaken",
       "title": "Opnamen",
@@ -1742,6 +1769,7 @@
       "cancel_text": "Weet je zeker dat je {name} wilt archiveren?",
       "delete_for_selection": "Verwijder de geselecteerde opname | Verwijder {nbSelectedShots} geselecteerde opnamen",
       "multiple_delete_error": "Er is een fout opgetreden bij het verwijderen van een opname. Mogelijk zijn er gegevens aan gekoppeld. Weet je zeker dat er geen taak is gekoppeld aan een geselecteerde opname?",
+      "create": "Opname maken",
       "creation_explanation": "Om opnamen toe te voegen, moet je eerst een aflevering en een sequentie maken. Typ een afleveringsnaam onder in de linkerkolom en klik op \"Toevoegen\" om een nieuwe aflevering te maken. Selecteer deze aflevering en herhaal dezelfde handeling voor de sequentie. Selecteer tot slot een sequentie en typ een opnamenaam in het veld onder aan de rechterkolom. Klik op de knop \"Toevoegen\" onderaan. Je eerste opname is nu gemaakt. Je kunt er nog veel meer toevoegen! Als het geen tv-serie is, kun je direct een sequentie maken.",
       "get_frames_from_previews": "Framenummers van previews instellen",
       "get_frames_from_previews_description": "Selecteer een taaktype om de framenummers uit de laatst gepubliceerde filmpreviews te halen.",
@@ -1894,6 +1922,7 @@
         "my_departments": "Mijn afdelingen"
       },
       "add_revision_confirm": "Voeg te publiceren bestanden toe",
+      "change_status_button": "Status wijzigen",
       "confirm_attachments": "Voeg bestanden toe als bijlagen",
       "change_status": "Opmerking plaatsen",
       "publish": "Revisie publiceren",
@@ -1904,6 +1933,7 @@
       "change_task_status_error": "Er is een fout opgetreden bij het bijwerken van de geselecteerde taak. | Er is een fout opgetreden bij het bijwerken van de {count} geselecteerde taken: sommige zijn mogelijk al gewijzigd. Controleer ze voordat je het opnieuw probeert.",
       "confirm_change_task_status": "Status van de geselecteerde taak wijzigen naar {status}? | Status van de {count} geselecteerde taken wijzigen naar {status}?",
       "confirm_post_comment": "Opmerking plaatsen bij de geselecteerde taak? | Opmerking plaatsen bij de {count} geselecteerde taken?",
+      "post_comment_button": "Opmerking plaatsen",
       "post_comment_on_tasks": "Opmerking plaatsen bij de geselecteerde taak | Opmerking plaatsen bij de {count} geselecteerde taken",
       "select_status": "Kies een status",
       "due_date": "Status einddatum",
@@ -1931,6 +1961,7 @@
       "my_checks": "Mijn controles",
       "new_revision_number": "Nieuw revisienummer",
       "post": "Plaatsen",
+      "publish_files": "Bestanden publiceren",
       "publish_revision": "Revisie publiceren",
       "revision_preview_file": "Als een van je geselecteerde bestanden een revisienummer in de naam heeft (bijv. 'preview-v3.png'), dan wordt dit bij de volgende stap voorgesteld als een nieuwe revisienaam (bijv. 'revisie 3').",
       "selected_entities": "Geselecteerde entiteiten",
@@ -1951,6 +1982,7 @@
         "very_hard": "Zeer moeilijk"
       },
       "assignation_disclaimer": "Als er mensen ontbreken in de lijst, betekent dit dat ze niet in het team zitten.",
+      "create_tasks_confirm": "Taken maken",
       "create_tasks_disclaimer": "Als je taaktype ontbreekt, controleer dan of het voorkomt in het gedeelte Taaktypes van de productie-instellingen.",
       "data_display": "Gegevensweergave",
       "delete_for_selection_error": "Er is een fout opgetreden bij het verwijderen van de geselecteerde taken.",
@@ -2033,6 +2065,7 @@
       }
     },
     "departments": {
+      "create": "Afdeling maken",
       "create_error": "Er is een fout opgetreden bij het opslaan van deze afdeling. Weet je zeker dat er geen afdeling is met dezelfde naam?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze afdeling.",
@@ -2057,6 +2090,7 @@
     },
     "edits": {
       "all_edits": "Alle montages",
+      "create": "Montage maken",
       "creation_explanation": "Upload een montagebestand om een nieuwe montage te creëren",
       "edit_error": "Er is een fout opgetreden bij het opslaan van deze montage. Weet je zeker dat er geen montage met een soortgelijke naam is?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
@@ -2090,6 +2124,7 @@
     "status_automations": {
       "change_ready_for": "verandert 'klaar voor' in",
       "change_status": "verandert de status van de taak",
+      "create": "Automatisering maken",
       "create_error": "Opslaan mislukt. Probeer het opnieuw.",
       "delete_text": "Weet je zeker dat je deze statusautomatisering uit je database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze statusautomatisering. Ze is misschien gekoppeld aan een productie of een productiesjabloon. In dat geval moet je ze eerst uit alle producties en sjablonen verwijderen.",
@@ -2248,6 +2283,7 @@
       },
       "add_concept": "Bestanden toevoegen voor nieuwe concepten",
       "add_concept_error": "Er is een fout opgetreden tijdens het toevoegen van concepten.",
+      "add_confirm": "Concepten toevoegen",
       "add_links": "Koppelingen naar assets toevoegen",
       "add_new_concept": "Nieuwe concepten toevoegen",
       "delete_for_selection": "Verwijder het geselecteerde concept | Verwijder de {nbSelectedConcepts} geselecteerde concepten",
@@ -2265,6 +2301,7 @@
         "updated_at": "Bijwerkdatum"
       },
       "folders": {
+        "create": "Map maken",
         "delete": "Map verwijderen",
         "delete_error": "Er is een fout opgetreden bij het verwijderen van deze map.",
         "delete_text": "Weet je zeker dat je de map {name} wilt verwijderen? De concepten blijven behouden en gaan terug naar de hoofdmap.",
@@ -2297,6 +2334,7 @@
       "processing": "Deze preview wordt verwerkt..."
     },
     "studios": {
+      "create": "Studio maken",
       "create_error": "Er is een fout opgetreden tijdens het opslaan van deze studio. Weet je zeker dat er geen studio is met een vergelijkbare naam?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden tijdens het verwijderen van deze studio.",
@@ -2427,6 +2465,7 @@
       "delete_for_selection_hard_lock_text": "WISSEN"
     },
     "hardware_items": {
+      "create": "Hardware-item maken",
       "create_error": "Er is een fout opgetreden tijdens het opslaan van het hardware-item.",
       "delete_error": "Er is een fout opgetreden tijdens het verwijderen van het hardware-item.",
       "delete_text": "Weet je zeker dat je dit hardware-item wilt verwijderen?",
@@ -2443,6 +2482,7 @@
       }
     },
     "software_licenses": {
+      "create": "Softwarelicentie maken",
       "create_error": "Er is een fout opgetreden tijdens het opslaan van de softwarelicentie.",
       "delete_error": "Er is een fout opgetreden tijdens het verwijderen van de softwarelicentie.",
       "delete_text": "Weet je zeker dat je deze softwarelicentie wilt verwijderen?",
@@ -2498,6 +2538,7 @@
         "task_statuses": "Taakstatussen",
         "task_types": "Taaktypes"
       },
+      "create": "Productiesjabloon maken",
       "title": "Sjablonen",
       "metadata_explanation": "Metadatakolommen die worden toegevoegd aan producties die met deze sjabloon zijn gemaakt.",
       "settings_menu": {

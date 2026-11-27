@@ -21,6 +21,7 @@
     </form>
 
     <modal-footer
+      :confirm-label="$t('comments.move_modal.confirm')"
       :error-text="$t('comments.move_modal.error')"
       :is-disabled="!targetTaskTypeId"
       :is-error="isError"

@@ -162,6 +162,7 @@
 
     <delete-modal
       :active="modals.isDeleteDisplayed"
+      :delete-button-text="deleteButtonText"
       :is-loading="loading.del"
       :is-error="errors.del"
       :text="deleteText"
@@ -170,8 +171,9 @@
       @confirm="confirmDeleteShot"
     />
 
-    <delete-modal
+    <confirm-modal
       :active="modals.isRestoreDisplayed"
+      :confirm-button-text="$t('row_actions.restore')"
       :is-loading="loading.restore"
       :is-error="errors.restore"
       :text="restoreText"
@@ -328,6 +330,7 @@ import ShotList from '@/components/lists/ShotList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditShotModal from '@/components/modals/EditShotModal.vue'
@@ -470,6 +473,7 @@ const {
   csvLabel,
   deleteAllTasksLockText,
   deleteAllTasksText,
+  deleteButtonText,
   deleteText,
   departmentFilter,
   descriptorToEdit,

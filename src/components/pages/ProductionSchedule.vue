@@ -530,6 +530,7 @@
 
   <confirm-modal
     active
+    :confirm-button-text="$t('schedule.apply_to_prod_button')"
     :text="$t('schedule.apply_to_prod_confirm')"
     :error-text="$t('schedule.apply_to_prod_error')"
     :is-loading="loading.applyScheduleVersion"
@@ -556,6 +557,7 @@
   />
   <confirm-modal
     active
+    :confirm-button-text="$t('schedule.move_children_button')"
     :text="
       $t('schedule.confirm_move_children', {
         count: pendingParentChange ? pendingParentChange.affected.length : 0

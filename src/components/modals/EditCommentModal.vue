@@ -175,6 +175,7 @@
           />
         </div>
         <modal-footer
+          :confirm-label="$t('comments.save')"
           :error-text="$t('comments.edit_error')"
           :is-disabled="!isValidForm"
           :is-error="isError"

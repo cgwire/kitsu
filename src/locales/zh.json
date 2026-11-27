@@ -11,6 +11,7 @@
       "warning": "仅当您亲自从应用程序发起此登录时才授权。该应用程序将以您的权限访问 Kitsu。"
     },
     "assets": {
+      "create": "创建资产",
       "delete_error": "删除此资产时出现错误。可能存在链接至此的数据。您确定没有任务链接至此资产吗？",
       "delete_text": "您确定要从您的数据库移除 {name} 吗？",
       "edit_fail": "保存失败。可能已存在名称相似的资产。",
@@ -52,6 +53,7 @@
     "asset_types": {
       "all_asset_types": "所有资产类型",
       "all_hidden": "所有资产类型均已隐藏。",
+      "create": "创建资产类型",
       "create_error": "保存此资产类型时出错。您确定没有相同名称的资产类型吗？",
       "delete_text": "您确定要从您的数据库移除 {name} 吗？",
       "delete_error": "删除此资产类型时出现错误。很可能存在有链接至此的数据。您确定没有资产链接至此资产类型吗？",
@@ -75,6 +77,7 @@
     },
     "breakdown": {
       "link_assets": "链接资产",
+      "change_label": "更改标签",
       "copy_casting": "复制此选角（ctrl + V 粘贴到所选行）",
       "edit_label": "更改资产的标签",
       "empty": "空的选角",
@@ -169,9 +172,11 @@
         "intro": "选择同一实体下的一个任务，将此评论移动到该任务。系统会在目标任务上发送通知，如同发布新评论一样。",
         "no_target": "该实体没有其他可用任务。",
         "target_label": "目标任务",
+        "confirm": "移动评论",
         "title": "将评论移动到另一个任务"
       },
       "move_to_task": "移动到",
+      "save": "保存评论",
       "title": "评论",
       "toggle_for_client": "客户可见性",
       "player": {
@@ -187,6 +192,7 @@
       }
     },
     "custom_actions": {
+      "create": "创建自定义操作",
       "create_error": "保存此自定义操作时发生错误。您确定没有其他同名操作吗？",
       "delete_text": "您确定要从您的数据库移除自定义操作 {name} 吗？",
       "delete_error": "删除此自定义操作时出现错误。",
@@ -212,6 +218,7 @@
     },
     "entities": {
       "build_filter": {
+        "apply": "应用过滤器",
         "asset_type": "资产类型",
         "add_descriptor_filter": "添加元数据过滤器",
         "add_status_filter": "添加任务状态过滤器",
@@ -255,6 +262,7 @@
         "undefined": "未定义",
         "undefined_pattern": "未定义",
         "upload": "添加缩略图",
+        "confirm": "添加缩略图",
         "edits_pattern": "“剪辑名称”，例如：Trailer。",
         "edits_tvshow_pattern": "“剧集名称 剪辑名称”，例如：E01_Trailer。",
         "explanation": "添加缩略图需要设置新的预览。要同时设置多个缩略图，必须先选择一个任务类型来创建新预览。将根据这些新预览设置缩略图。",
@@ -299,6 +307,7 @@
     "episodes": {
       "all_episodes": "所有",
       "all_hidden": "所有剧集均已隐藏。",
+      "create": "创建剧集",
       "edit_error": "保存此剧集时发生错误。您确定没有名称相似的剧集吗？",
       "delete_error": "删除此剧集时出现错误。很可能存在有链接至此的数据。您确定没有序列链接至此剧集吗？",
       "delete_text": "您确定要从数据库中移除 {name} 吗？所有相关的镜头和预览也将被删除。请在下方输入剧集名称以确认。",
@@ -442,6 +451,9 @@
       "changelog": "更新日志",
       "next_entity": "下一个实体",
       "previous_entity": "上一个实体",
+      "save_changes": "保存更改",
+      "save_picture": "保存图片",
+      "search_query_create": "创建搜索过滤器",
       "select_section": "选择部分",
       "technical_details": "技术详情：",
       "about": "关于",
@@ -457,8 +469,6 @@
       "click_to_add": "点击添加",
       "click_to_remove": "点击移除",
       "close": "关闭",
-      "confirmation": "确认",
-      "confirmation_and_stay": "确认并停留",
       "date": "日期",
       "dark_theme": "深色主题",
       "days_spent": "天已用 | 天已用",
@@ -513,6 +523,7 @@
         "choose": "选择",
         "error_empty": "文件为空。",
         "error_imported_rows": "错误发生前已导入 {count} 行。 | 错误发生前已导入 {count} 行。",
+        "import_data": "导入数据",
         "import_success": "已导入 {count} 行。 | 已导入 {count} 行。",
         "error_line": "第 {line} 行",
         "error_read": "无法读取文件。请重新选择。",
@@ -647,9 +658,12 @@
       "no_results": "无结果",
       "link": "链接",
       "list": "列表",
+      "filter_group_create": "创建过滤器组",
       "hours_spent": "小时已用 | 小时已用",
       "hours_expected": "小时预期 | 小时预期",
       "hours_estimated": "小时预估 | 小时预估",
+      "create_and_add_another": "创建并继续添加",
+      "create_and_stay": "创建并停留",
       "created_by": "创建者",
       "day": "日",
       "hour": "小时",
@@ -679,7 +693,9 @@
       "expand": "展开",
       "expand_all": "全部展开",
       "hours": "小时 | 小时",
+      "remove_search_filter_group_button": "删除组",
       "remove_search_query": "您确定要删除搜索查询“{name}”吗？",
+      "remove_search_query_button": "删除过滤器",
       "remove_search_query_error": "删除此搜索查询时发生错误。",
       "remove_search_filter_group": "您确定要删除搜索过滤器组“{name}”吗？",
       "remove_search_filter_group_error": "删除此搜索过滤器组时发生错误。",
@@ -823,6 +839,7 @@
       "persons": "用户 | 用户",
       "project_role": "项目角色",
       "select_person": "选择用户...",
+      "self_role_downgrade_button": "降低我的角色",
       "team": "团队",
       "title": "人员",
       "unactive": "非活跃",
@@ -870,6 +887,7 @@
         "supervisor": "主管",
         "all": "所有角色"
       },
+      "archive_guest_button": "归档访客",
       "confirm_edit": "保存更改",
       "create": "创建用户",
       "user_limit_error": "您已达到用户数量上限。请联系我们的团队升级您的套餐。",
@@ -1096,6 +1114,7 @@
         "copy": "复制",
         "create": "创建预览账户",
         "delete": "删除",
+        "delete_button": "删除账户",
         "delete_confirm": "删除此制作的预览账户？",
         "description": "以客户的视角查看 Kitsu，只读且不占用席位。",
         "error": "更新预览账户时出错。",
@@ -1205,6 +1224,7 @@
         "number": "数字",
         "string": "文本",
         "tags": "标签列表",
+        "add_column": "添加列",
         "applies_to_all_projects": "此列将添加到每个开启的制作。每个制作在列表视图中都可以有自己的值。",
         "delete_list_column_text": "这将从所有开启的制作中移除列“{name}”，包括已存储的值。是否继续？",
         "date": "日期",
@@ -1462,6 +1482,7 @@
       "preferences_title": "偏好设置"
     },
     "task_status": {
+      "create": "创建任务状态",
       "create_error": "保存此任务状态时发生错误。您确定没有名称相似的任务状态吗？",
       "delete_text": "您确定要从您的数据库移除 {name} 吗？",
       "delete_error": "删除此任务状态时出现错误。很可能存在有链接至此的数据。您确定没有任务链接至此任务状态吗？",
@@ -1494,6 +1515,7 @@
       "remove_status": "移除状态 {name}"
     },
     "task_types": {
+      "create": "创建任务类型",
       "delete_text": "您确定要从您的数据库移除 {name} 吗？",
       "delete_error": "删除此任务类型时出现错误。很可能存在有链接至此的数据。您确定没有任务链接至此任务类型吗？",
       "delete_blocked_by_automations": "仍有状态自动化（包括已归档的）在使用此任务类型。请先编辑或删除这些自动化。",
@@ -1532,6 +1554,7 @@
     "sequences": {
       "all_hidden": "所有序列均已隐藏。",
       "all_sequences": "所有序列",
+      "create": "创建序列",
       "edit_error": "保存此序列时发生错误。您确定没有相似名称的序列吗？",
       "delete_text": "您确定要从您的数据库移除 {name} 吗？所有相关的镜头和预览也将被删除。请在下方输入序列名称以确认。",
       "delete_error": "删除此序列时出现错误。很可能存在有链接至此的数据。您确定没有镜头链接至此序列吗？",
@@ -1556,6 +1579,7 @@
     "schedule": {
       "already_assigned": "已分配",
       "apply_to_prod": "应用于制作",
+      "apply_to_prod_button": "应用于制作",
       "apply_to_prod_confirm": "您确定要将此日程计划版本应用到当前制作中吗？这将覆盖当前任务值。",
       "apply_to_prod_error": "将日程计划版本应用到当前制作时发生错误。",
       "assign": "分配给：",
@@ -1599,6 +1623,7 @@
       "hours": "小时",
       "md": "人天",
       "milestone": {
+        "add": "添加里程碑",
         "add_milestone": "添加里程碑",
         "edit_milestone": "编辑里程碑",
         "name": "名称",
@@ -1617,6 +1642,7 @@
       "mode": "查看模式",
       "mode_prev": "预测",
       "mode_real": "实际",
+      "move_children_button": "连同子项一起移动",
       "nb_tasks_out_of_range": "{count} 个任务在显示的日期之外 | {count} 个任务在显示的日期之外",
       "nb_undated_tasks": "{count} 个任务没有日期 | {count} 个任务没有日期",
       "new_version": "新版本",
@@ -1716,6 +1742,7 @@
       "restore_text": "您确定要从存档中恢复 {name} 吗？",
       "restore_error": "恢复此镜头时出现错误。",
       "sequences": "序列",
+      "set_frames": "设置帧号",
       "single_tab": "单个",
       "tasks": "镜头任务",
       "title": "镜头",
@@ -1742,6 +1769,7 @@
       "cancel_text": "您确定要归档 {name} 吗？",
       "delete_for_selection": "删除选定的镜头 | 删除 {nbSelectedShots} 个选定的镜头",
       "multiple_delete_error": "删除镜头时出错。可能有一些数据与镜头相关联。您确定没有与所选镜头相关联的任务吗？",
+      "create": "创建镜头",
       "creation_explanation": "要添加镜头，首先需要创建一集和一个序列。在左栏底部键入一集名称，然后点击“添加”创建新的一集。选择这一剧集，然后对序列重复同样的操作。最后，选择一个序列，并在右栏底部的字段中输入镜头名称。点击下方的“添加”按钮。第一个镜头就创建好了。您还可以添加更多镜头！如果不是电视节目，可以直接创建序列。",
       "get_frames_from_previews": "从预览中设置帧号",
       "get_frames_from_previews_description": "选择任务类型，从最新发布的视频预览中提取帧号。",
@@ -1894,6 +1922,7 @@
         "my_departments": "我的部门"
       },
       "add_revision_confirm": "添加要发布的文件",
+      "change_status_button": "更改状态",
       "confirm_attachments": "添加要附加的文件",
       "change_status": "发布评论",
       "publish": "发布版本",
@@ -1904,6 +1933,7 @@
       "change_task_status_error": "更新所选任务时出错。 | 更新所选 {count} 个任务时出错：部分任务可能已更改。请先检查，然后重试。",
       "confirm_change_task_status": "要将所选任务的状态更改为 {status} 吗？ | 要将所选 {count} 个任务的状态更改为 {status} 吗？",
       "confirm_post_comment": "要在所选任务上发布评论吗？ | 要在所选 {count} 个任务上发布评论吗？",
+      "post_comment_button": "发布评论",
       "post_comment_on_tasks": "在所选任务上发布评论 | 在所选 {count} 个任务上发布评论",
       "select_status": "选择状态",
       "due_date": "截止日期的状态",
@@ -1931,6 +1961,7 @@
       "my_checks": "我的检查",
       "new_revision_number": "新修订编号",
       "post": "提交",
+      "publish_files": "发布文件",
       "publish_revision": "发布修订版",
       "revision_preview_file": "如果所选文件的名称中包含修订版编号（如“preview-v3.png”），那么下一步将建议使用新的修订版名称（如“修订版 3”）。",
       "selected_entities": "选定实体",
@@ -1951,6 +1982,7 @@
         "very_hard": "非常困难"
       },
       "assignation_disclaimer": "如果列表中缺少人员，则表示他们未被列入团队。",
+      "create_tasks_confirm": "创建任务",
       "create_tasks_disclaimer": "如果缺少您的任务类型，请确认它已列在制作设置的“任务类型”部分中。",
       "data_display": "数据显示",
       "delete_for_selection_error": "删除所选任务时发生错误。",
@@ -2033,6 +2065,7 @@
       }
     },
     "departments": {
+      "create": "创建部门",
       "create_error": "保存该部门时出错。您确定没有名称相似的部门吗？",
       "delete_text": "您确定要从数据库中删除 {name} 吗？",
       "delete_error": "删除此部门时出错。",
@@ -2057,6 +2090,7 @@
     },
     "edits": {
       "all_edits": "所有剪辑",
+      "create": "创建剪辑",
       "creation_explanation": "上传一个剪辑文件以创建新的剪辑",
       "edit_error": "保存此剪辑时发生错误。您确定没有名称相似的剪辑吗？",
       "delete_text": "您确定要从您的数据库移除 {name} 吗？",
@@ -2090,6 +2124,7 @@
     "status_automations": {
       "change_ready_for": "将“就绪环节”更改为",
       "change_status": "更改任务状态：",
+      "create": "创建自动化",
       "create_error": "无法保存。请重试。",
       "delete_text": "您确定要从数据库中删除此状态自动化吗？",
       "delete_error": "删除此状态自动化时出错。它可能与某个制作或制作模板相关联。如果是这样，您必须先将其从每个制作和模板中移除。",
@@ -2248,6 +2283,7 @@
       },
       "add_concept": "为新概念添加文件",
       "add_concept_error": "添加概念时发生错误。",
+      "add_confirm": "添加概念",
       "add_links": "添加资产链接",
       "add_new_concept": "添加新概念",
       "delete_for_selection": "删除所选概念 | 删除 {nbSelectedConcepts} 个所选概念",
@@ -2265,6 +2301,7 @@
         "updated_at": "更新日期"
       },
       "folders": {
+        "create": "创建文件夹",
         "delete": "删除文件夹",
         "delete_error": "删除此文件夹时出错。",
         "delete_text": "确定要删除文件夹 {name} 吗？其中的概念将保留并回到根目录。",
@@ -2297,6 +2334,7 @@
       "processing": "这个预览正在处理中..."
     },
     "studios": {
+      "create": "创建工作室",
       "create_error": "保存此工作室时发生错误。您确定没有名称相似的工作室吗？",
       "delete_text": "您确定要从数据库中删除 {name}？",
       "delete_error": "删除此工作室时发生错误。",
@@ -2427,6 +2465,7 @@
       "delete_for_selection_hard_lock_text": "删除"
     },
     "hardware_items": {
+      "create": "创建硬件项目",
       "create_error": "保存硬件项目时发生错误。",
       "delete_error": "删除硬件项目时发生错误。",
       "delete_text": "您确定要删除此硬件项目吗？",
@@ -2443,6 +2482,7 @@
       }
     },
     "software_licenses": {
+      "create": "创建软件许可证",
       "create_error": "保存软件许可证时发生错误。",
       "delete_error": "删除软件许可证时发生错误。",
       "delete_text": "您确定要删除该软件许可证吗？",
@@ -2498,6 +2538,7 @@
         "task_statuses": "任务状态",
         "task_types": "任务类型"
       },
+      "create": "创建制作模板",
       "title": "模板",
       "metadata_explanation": "添加到基于此模板创建的制作中的元数据列。",
       "settings_menu": {

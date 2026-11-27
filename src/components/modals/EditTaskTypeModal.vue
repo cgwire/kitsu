@@ -52,6 +52,9 @@
     </form>
 
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('task_types.create')
+      "
       :error-text="$t('task_types.create_error')"
       :is-disabled="isNameTaken"
       :is-loading="isLoading"

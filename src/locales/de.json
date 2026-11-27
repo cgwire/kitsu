@@ -11,6 +11,7 @@
       "warning": "Autorisieren Sie nur, wenn Sie diese Anmeldung selbst in der Anwendung gestartet haben. Sie greift mit Ihren Berechtigungen auf Kitsu zu."
     },
     "assets": {
+      "create": "Asset erstellen",
       "delete_error": "Beim Löschen dieses Assets ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten damit verknüpft. Sind Sie sicher, dass mit diesem Asset keine Aufgabe verknüpft ist?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "edit_fail": "Speichern fehlgeschlagen. Ein Asset mit einem ähnlichen Namen existiert möglicherweise bereits.",
@@ -52,6 +53,7 @@
     "asset_types": {
       "all_asset_types": "Alle Asset-Typen",
       "all_hidden": "Alle Asset-Typen sind ausgeblendet.",
+      "create": "Asset-Typ erstellen",
       "create_error": "Beim Speichern dieses Asset-Typs ist ein Fehler aufgetreten. Sind Sie sicher, dass es keinen Asset-Typ mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Asset-Typs ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten damit verknüpft. Sind Sie sicher, dass mit diesem Asset-Typ kein Asset verknüpft ist?",
@@ -75,6 +77,7 @@
     },
     "breakdown": {
       "link_assets": "Assets verknüpfen",
+      "change_label": "Etikett ändern",
       "copy_casting": "Dieses Casting kopieren (Strg + V fügt es in die ausgewählten Zeilen ein)",
       "edit_label": "Etikett bearbeiten",
       "empty": "Leeres Casting",
@@ -169,9 +172,11 @@
         "intro": "Wählen Sie eine Aufgabe derselben Entität, um diesen Kommentar dorthin zu verschieben. Auf der Zielaufgabe werden Benachrichtigungen wie für einen neuen Kommentar versendet.",
         "no_target": "Für diese Entität ist keine andere Aufgabe verfügbar.",
         "target_label": "Zielaufgabe",
+        "confirm": "Kommentar verschieben",
         "title": "Kommentar auf eine andere Aufgabe verschieben"
       },
       "move_to_task": "Verschieben nach",
+      "save": "Kommentar speichern",
       "title": "Kommentare",
       "toggle_for_client": "Sichtbarkeit für Kunden",
       "player": {
@@ -187,6 +192,7 @@
       }
     },
     "custom_actions": {
+      "create": "Benutzerdefinierte Aktion erstellen",
       "create_error": "Beim Speichern dieser benutzerdefinierten Aktion ist ein Fehler aufgetreten. Sind Sie sicher, dass es keine andere Aktion mit demselben Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie die benutzerdefinierte Aktion {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieser benutzerdefinierten Aktion ist ein Fehler aufgetreten.",
@@ -212,6 +218,7 @@
     },
     "entities": {
       "build_filter": {
+        "apply": "Filter anwenden",
         "asset_type": "Asset-Typ",
         "add_descriptor_filter": "Metadatenfilter hinzufügen",
         "add_status_filter": "Filter für Aufgabenstatus hinzufügen",
@@ -255,6 +262,7 @@
         "undefined": "Unbestimmt",
         "undefined_pattern": "Undefiniert",
         "upload": "Miniaturansichten hinzufügen",
+        "confirm": "Miniaturansichten hinzufügen",
         "edits_pattern": "\"EditName\" z. B. Trailer.",
         "edits_tvshow_pattern": "\"EpisodeName EditName\" z. B. E01_Trailer.",
         "explanation": "Um eine Miniaturansicht hinzuzufügen, muss eine neue Vorschau festgelegt werden. Um mehrere Miniaturansichten gleichzeitig festzulegen, müssen Sie zunächst einen Aufgabentyp auswählen, um die neuen Vorschauen zu erstellen. Die Miniaturansichten werden aus diesen neuen Vorschauen erstellt.",
@@ -299,6 +307,7 @@
     "episodes": {
       "all_episodes": "Alle Episoden",
       "all_hidden": "Alle Episoden sind ausgeblendet.",
+      "create": "Episode erstellen",
       "edit_error": "Beim Speichern dieser Episode ist ein Fehler aufgetreten. Sind Sie sicher, dass keine Episode mit ähnlichem Namen vorhanden ist?",
       "delete_error": "Beim Löschen dieser Episode ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten damit verknüpft. Sind Sie sicher, dass mit dieser Episode keine Sequenz verknüpft ist?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten? Alle zugehörigen Shots und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten den Episodennamen eingeben.",
@@ -442,6 +451,9 @@
       "changelog": "Änderungsprotokoll",
       "next_entity": "Nächste Entität",
       "previous_entity": "Vorherige Entität",
+      "save_changes": "Änderungen speichern",
+      "save_picture": "Bild speichern",
+      "search_query_create": "Suchfilter erstellen",
       "select_section": "Wählen Sie einen Bereich",
       "technical_details": "Technische Details:",
       "about": "Info",
@@ -457,8 +469,6 @@
       "click_to_add": "Klicken, um hinzuzufügen",
       "click_to_remove": "Klicken, um zu entfernen",
       "close": "Schließen",
-      "confirmation": "Bestätigen",
-      "confirmation_and_stay": "Bestätigen und bleiben",
       "date": "Datum",
       "dark_theme": "Dunkles Design",
       "days_spent": "Tag verbracht | Tage verbracht",
@@ -513,6 +523,7 @@
         "choose": "Auswählen",
         "error_empty": "Die Datei ist leer.",
         "error_imported_rows": "{count} Zeile wurde vor dem Fehler importiert. | {count} Zeilen wurden vor dem Fehler importiert.",
+        "import_data": "Daten importieren",
         "import_success": "{count} Zeile wurde importiert. | {count} Zeilen wurden importiert.",
         "error_line": "Zeile {line}",
         "error_read": "Die Datei konnte nicht gelesen werden. Bitte wählen Sie sie erneut aus.",
@@ -647,9 +658,12 @@
       "no_results": "Keine Ergebnisse",
       "link": "Link",
       "list": "Liste",
+      "filter_group_create": "Filtergruppe erstellen",
       "hours_spent": "verbrachte Stunde | verbrachte Stunden",
       "hours_expected": "erwartete Stunde | erwartete Stunden",
       "hours_estimated": "Stunde geschätzt | Stunden geschätzt",
+      "create_and_add_another": "Erstellen und weiteres hinzufügen",
+      "create_and_stay": "Erstellen und bleiben",
       "created_by": "Erstellt von",
       "day": "Tag",
       "hour": "Stunde",
@@ -679,7 +693,9 @@
       "expand": "Aufklappen",
       "expand_all": "Alle aufklappen",
       "hours": "Stunde | Stunden",
+      "remove_search_filter_group_button": "Gruppe entfernen",
       "remove_search_query": "Sind Sie sicher, dass Sie die Suchanfrage „{name}“ entfernen möchten?",
+      "remove_search_query_button": "Filter entfernen",
       "remove_search_query_error": "Beim Entfernen dieser Suchanfrage ist ein Fehler aufgetreten.",
       "remove_search_filter_group": "Sind Sie sicher, dass Sie die Suchfiltergruppe „{name}“ entfernen möchten?",
       "remove_search_filter_group_error": "Beim Entfernen dieser Suchfiltergruppe ist ein Fehler aufgetreten.",
@@ -823,6 +839,7 @@
       "persons": "Person | Personen",
       "project_role": "Projektrolle",
       "select_person": "Eine Person auswählen...",
+      "self_role_downgrade_button": "Meine Rolle herabstufen",
       "team": "Team",
       "title": "Personen",
       "unactive": "Inaktiv",
@@ -870,6 +887,7 @@
         "supervisor": "Supervisor",
         "all": "Alle Rollen"
       },
+      "archive_guest_button": "Gast archivieren",
       "confirm_edit": "Benutzeränderungen speichern",
       "create": "Benutzer erstellen",
       "user_limit_error": "Sie haben Ihr Benutzerlimit erreicht. Bitte kontaktieren Sie unser Team, um Ihren Tarif zu erweitern.",
@@ -1096,6 +1114,7 @@
         "copy": "Kopieren",
         "create": "Vorschau-Konto erstellen",
         "delete": "Löschen",
+        "delete_button": "Konto löschen",
         "delete_confirm": "Das Vorschau-Konto dieser Produktion löschen?",
         "description": "Sehen Sie Kitsu genau wie ein Kunde, schreibgeschützt und ohne einen Platz zu belegen.",
         "error": "Beim Aktualisieren des Vorschau-Kontos ist ein Fehler aufgetreten.",
@@ -1205,6 +1224,7 @@
         "number": "Zahl",
         "string": "Text",
         "tags": "Liste der Tags",
+        "add_column": "Spalte hinzufügen",
         "applies_to_all_projects": "Diese Spalte wird jeder offenen Produktion hinzugefügt. Jede Produktion kann in der Listenansicht ihren eigenen Wert haben.",
         "delete_list_column_text": "Dadurch wird die Spalte „{name}“ aus allen offenen Produktionen entfernt, einschließlich der gespeicherten Werte. Fortfahren?",
         "date": "Datum",
@@ -1462,6 +1482,7 @@
       "preferences_title": "Einstellungen"
     },
     "task_status": {
+      "create": "Aufgabenstatus erstellen",
       "create_error": "Beim Speichern dieses Aufgabenstatus ist ein Fehler aufgetreten. Sind Sie sicher, dass es keinen Aufgabenstatus mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Aufgabenstatus ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten damit verknüpft. Sind Sie sicher, dass mit diesem Aufgabenstatus keine Aufgabe verknüpft ist?",
@@ -1494,6 +1515,7 @@
       "remove_status": "Status {name} entfernen"
     },
     "task_types": {
+      "create": "Aufgabentyp erstellen",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Aufgabentyps ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten damit verknüpft. Sind Sie sicher, dass mit diesem Aufgabentyp keine Aufgabe verknüpft ist?",
       "delete_blocked_by_automations": "Es gibt noch Statusautomatisierungen mit diesem Aufgabentyp, auch archivierte. Bearbeiten oder löschen Sie sie zuerst.",
@@ -1532,6 +1554,7 @@
     "sequences": {
       "all_hidden": "Alle Sequenzen sind ausgeblendet.",
       "all_sequences": "Alle Sequenzen",
+      "create": "Sequenz erstellen",
       "edit_error": "Beim Speichern dieser Sequenz ist ein Fehler aufgetreten. Sind Sie sicher, dass es keine Sequenz mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten? Alle zugehörigen Shots und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten den Sequenznamen eingeben.",
       "delete_error": "Beim Löschen dieser Sequenz ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten damit verknüpft. Sind Sie sicher, dass mit dieser Sequenz kein Shot verknüpft ist?",
@@ -1556,6 +1579,7 @@
     "schedule": {
       "already_assigned": "Bereits zugewiesen",
       "apply_to_prod": "Auf die Produktion anwenden",
+      "apply_to_prod_button": "Auf die Produktion anwenden",
       "apply_to_prod_confirm": "Sind Sie sicher, dass Sie diese Zeitplanversion auf die aktuelle Produktion anwenden wollen? Dadurch werden die aktuellen Aufgabenwerte außer Kraft gesetzt.",
       "apply_to_prod_error": "Bei der Anwendung der Zeitplanversion auf die aktuelle Produktion ist ein Fehler aufgetreten.",
       "assign": "Zuweisen an:",
@@ -1599,6 +1623,7 @@
       "hours": "Std.",
       "md": "PT",
       "milestone": {
+        "add": "Meilenstein hinzufügen",
         "add_milestone": "Meilenstein hinzufügen für",
         "edit_milestone": "Meilenstein bearbeiten für",
         "name": "Name",
@@ -1617,6 +1642,7 @@
       "mode": "Ansichtsmodus",
       "mode_prev": "Prognose",
       "mode_real": "Tatsächlich",
+      "move_children_button": "Mit Unterelementen verschieben",
       "nb_tasks_out_of_range": "{count} Aufgabe außerhalb des angezeigten Zeitraums | {count} Aufgaben außerhalb des angezeigten Zeitraums",
       "nb_undated_tasks": "{count} Aufgabe ohne Termine | {count} Aufgaben ohne Termine",
       "new_version": "Neue Version",
@@ -1716,6 +1742,7 @@
       "restore_text": "Sind Sie sicher, dass Sie {name} aus Ihrem Archiv wiederherstellen möchten?",
       "restore_error": "Bei der Wiederherstellung des Shots ist ein Fehler aufgetreten.",
       "sequences": "Sequenzen",
+      "set_frames": "Frame-Anzahl festlegen",
       "single_tab": "Einzeln",
       "tasks": "Shot-Aufgaben",
       "title": "Shots",
@@ -1742,6 +1769,7 @@
       "cancel_text": "Sind Sie sicher, dass Sie {name} archivieren möchten?",
       "delete_for_selection": "Den ausgewählten Shot löschen | Die {nbSelectedShots} ausgewählten Shots löschen",
       "multiple_delete_error": "Beim Löschen eines Shots ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten mit dem Shot verknüpft. Sind Sie sicher, dass keine Aufgabe mit einem ausgewählten Shot verknüpft ist?",
+      "create": "Shot erstellen",
       "creation_explanation": "Um Shots hinzuzufügen, müssen Sie zunächst eine Episode und eine Sequenz erstellen. Geben Sie unten in der linken Spalte einen Episodennamen ein und klicken Sie dann auf „Hinzufügen“, um eine neue Episode zu erstellen. Wählen Sie diese Episode aus und wiederholen Sie den gleichen Vorgang für die Sequenz. Wählen Sie schließlich eine Sequenz aus und geben Sie einen Shot-Namen in das Feld unten in der rechten Spalte ein. Klicken Sie unten auf die Schaltfläche „Hinzufügen“. Ihr erster Shot ist nun erstellt. Sie können viele weitere hinzufügen! Wenn es sich nicht um eine TV-Serie handelt, können Sie direkt eine Sequenz erstellen.",
       "get_frames_from_previews": "Frame-Anzahl aus Vorschauen festlegen",
       "get_frames_from_previews_description": "Wählen Sie einen Aufgabentyp, um die Frame-Anzahl aus den zuletzt veröffentlichten Filmvorschauen zu extrahieren.",
@@ -1894,6 +1922,7 @@
         "my_departments": "Meine Abteilungen"
       },
       "add_revision_confirm": "Dateien zur Veröffentlichung hinzufügen",
+      "change_status_button": "Status ändern",
       "confirm_attachments": "Dateien als Anhänge hinzufügen",
       "change_status": "Kommentar posten",
       "publish": "Veröffentlichen",
@@ -1904,6 +1933,7 @@
       "change_task_status_error": "Beim Aktualisieren der ausgewählten Aufgabe ist ein Fehler aufgetreten. | Beim Aktualisieren der {count} ausgewählten Aufgaben ist ein Fehler aufgetreten: Einige wurden möglicherweise bereits geändert. Prüfen Sie diese, bevor Sie es erneut versuchen.",
       "confirm_change_task_status": "Status der ausgewählten Aufgabe in {status} ändern? | Status der {count} ausgewählten Aufgaben in {status} ändern?",
       "confirm_post_comment": "Kommentar zur ausgewählten Aufgabe posten? | Kommentar zu den {count} ausgewählten Aufgaben posten?",
+      "post_comment_button": "Kommentar posten",
       "post_comment_on_tasks": "Kommentar zur ausgewählten Aufgabe posten | Kommentar zu den {count} ausgewählten Aufgaben posten",
       "select_status": "Status auswählen",
       "due_date": "Fälligkeitsstatus",
@@ -1931,6 +1961,7 @@
       "my_checks": "Meine Reviews",
       "new_revision_number": "Neue Revisionsnummer",
       "post": "Posten",
+      "publish_files": "Dateien veröffentlichen",
       "publish_revision": "Revision veröffentlichen",
       "revision_preview_file": "Wenn eine Ihrer ausgewählten Dateien eine Revisionsnummer in ihrem Namen enthält (z. B. „preview-v3.png“), wird sie im nächsten Schritt als neuer Revisionsname vorgeschlagen (z. B. „Revision 3“).",
       "selected_entities": "Ausgewählte Entitäten",
@@ -1951,6 +1982,7 @@
         "very_hard": "Sehr schwer"
       },
       "assignation_disclaimer": "Wenn Personen in der Liste fehlen, bedeutet dies, dass sie nicht im Team aufgeführt sind.",
+      "create_tasks_confirm": "Aufgaben erstellen",
       "create_tasks_disclaimer": "Wenn Ihr Aufgabentyp fehlt, überprüfen Sie, ob er im Abschnitt Aufgabentypen der Produktionseinstellungen aufgeführt ist.",
       "data_display": "Anzeige der Daten",
       "delete_for_selection_error": "Beim Löschen der ausgewählten Aufgaben ist ein Fehler aufgetreten.",
@@ -2033,6 +2065,7 @@
       }
     },
     "departments": {
+      "create": "Abteilung erstellen",
       "create_error": "Beim Speichern dieser Abteilung ist ein Fehler aufgetreten. Sind Sie sicher, dass es keine Abteilung mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieser Abteilung ist ein Fehler aufgetreten.",
@@ -2057,6 +2090,7 @@
     },
     "edits": {
       "all_edits": "Alle Montagen",
+      "create": "Montage erstellen",
       "creation_explanation": "Laden Sie eine Montagedatei hoch, um eine neue Montage zu erstellen",
       "edit_error": "Beim Speichern dieser Montage ist ein Fehler aufgetreten. Sind Sie sicher, dass es keine Montage mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
@@ -2090,6 +2124,7 @@
     "status_automations": {
       "change_ready_for": "ändert „bereit für“ in",
       "change_status": "ändert den Status der Aufgabe",
+      "create": "Automatisierung erstellen",
       "create_error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "delete_text": "Sind Sie sicher, dass Sie diese Statusautomatisierung aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieser Statusautomatisierung ist ein Fehler aufgetreten. Sie ist möglicherweise mit einer Produktion oder einer Produktionsvorlage verknüpft. In diesem Fall müssen Sie sie zuerst aus jeder Produktion und jeder Vorlage entfernen.",
@@ -2248,6 +2283,7 @@
       },
       "add_concept": "Dateien für neue Konzepte hinzufügen",
       "add_concept_error": "Beim Hinzufügen von Konzepten ist ein Fehler aufgetreten.",
+      "add_confirm": "Konzepte hinzufügen",
       "add_links": "Links zu Assets hinzufügen",
       "add_new_concept": "Neue Konzepte hinzufügen",
       "delete_for_selection": "Das ausgewählte Konzept löschen | Die {nbSelectedConcepts} ausgewählten Konzepte löschen",
@@ -2265,6 +2301,7 @@
         "updated_at": "Datum der Aktualisierung"
       },
       "folders": {
+        "create": "Ordner erstellen",
         "delete": "Ordner löschen",
         "delete_error": "Beim Löschen dieses Ordners ist ein Fehler aufgetreten.",
         "delete_text": "Möchten Sie den Ordner {name} wirklich löschen? Seine Konzepte bleiben erhalten und kehren auf die oberste Ebene zurück.",
@@ -2297,6 +2334,7 @@
       "processing": "Diese Vorschau wird verarbeitet..."
     },
     "studios": {
+      "create": "Studio erstellen",
       "create_error": "Beim Speichern dieses Studios ist ein Fehler aufgetreten. Sind Sie sicher, dass es kein Studio mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Studios ist ein Fehler aufgetreten.",
@@ -2427,6 +2465,7 @@
       "delete_for_selection_hard_lock_text": "LÖSCHEN"
     },
     "hardware_items": {
+      "create": "Hardware-Element erstellen",
       "create_error": "Beim Speichern des Hardware-Elements ist ein Fehler aufgetreten.",
       "delete_error": "Beim Löschen des Hardware-Elements ist ein Fehler aufgetreten.",
       "delete_text": "Sind Sie sicher, dass Sie dieses Hardware-Element löschen möchten?",
@@ -2443,6 +2482,7 @@
       }
     },
     "software_licenses": {
+      "create": "Software-Lizenz erstellen",
       "create_error": "Beim Speichern der Software-Lizenz ist ein Fehler aufgetreten.",
       "delete_error": "Beim Löschen der Software-Lizenz ist ein Fehler aufgetreten.",
       "delete_text": "Sind Sie sicher, dass Sie diese Software-Lizenz löschen möchten?",
@@ -2498,6 +2538,7 @@
         "task_statuses": "Aufgabenstatus",
         "task_types": "Aufgabentypen"
       },
+      "create": "Produktionsvorlage erstellen",
       "title": "Vorlagen",
       "metadata_explanation": "Metadatenspalten, die den aus dieser Vorlage erstellten Produktionen hinzugefügt werden.",
       "settings_menu": {

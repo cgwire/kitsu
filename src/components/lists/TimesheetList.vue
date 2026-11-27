@@ -229,6 +229,7 @@
 
     <delete-modal
       :active="modals.unsetDayOff"
+      :delete-button-text="$t('main.remove')"
       :text="
         $t('days_off.confirm_unset_day_offs', {
           start: personDayOff?.date,

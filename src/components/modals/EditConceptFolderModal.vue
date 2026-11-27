@@ -16,6 +16,11 @@
       />
     </form>
     <modal-footer
+      :confirm-label="
+        folderToEdit
+          ? $t('concepts.folders.rename')
+          : $t('concepts.folders.create')
+      "
       :error-text="$t('concepts.folders.edit_error')"
       :is-disabled="!name"
       :is-error="isError"

@@ -191,6 +191,11 @@
     <confirm-modal
       active
       is-danger
+      :confirm-button-text="
+        searchQueryToRemove.id
+          ? $t('main.remove_search_query_button')
+          : $t('main.remove_search_filter_group_button')
+      "
       :is-loading="loading.remove"
       :is-error="errors.remove"
       :error-text="removeErrorText"

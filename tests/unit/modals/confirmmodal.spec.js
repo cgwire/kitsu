@@ -5,12 +5,21 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 
 const mountModal = (props = {}) =>
   mount(ConfirmModal, {
-    props: { active: true, text: 'Are you sure?', ...props }
+    props: {
+      active: true,
+      confirmButtonText: 'Archive the guest',
+      text: 'Are you sure?',
+      ...props
+    }
   })
 
 const confirmButton = wrapper => wrapper.get('.box a.button')
 
 describe('ConfirmModal', () => {
+  it('names the action on its button', () => {
+    expect(confirmButton(mountModal()).text()).toEqual('Archive the guest')
+  })
+
   it('paints the confirm button green by default', () => {
     const button = confirmButton(mountModal())
     expect(button.classes()).toContain('is-primary')

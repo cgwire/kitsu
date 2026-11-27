@@ -14,6 +14,7 @@
       />
 
       <modal-footer
+        :confirm-label="$t('breakdown.change_label')"
         :is-error="isError"
         :is-loading="isLoading"
         @confirm="confirm"

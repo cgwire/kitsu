@@ -46,6 +46,9 @@
       />
     </form>
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('project_templates.create')
+      "
       :error-text="$t('project_templates.create_error')"
       :is-error="isError"
       :is-loading="isLoading"

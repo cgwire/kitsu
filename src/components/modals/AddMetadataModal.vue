@@ -150,6 +150,11 @@
         />
 
         <modal-footer
+          :confirm-label="
+            isEditing
+              ? $t('main.save_changes')
+              : $t('productions.metadata.add_column')
+          "
           :error-text="$t('productions.metadata.error')"
           :is-error="isError"
           :is-loading="isLoading"

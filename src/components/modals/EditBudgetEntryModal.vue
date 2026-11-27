@@ -88,6 +88,9 @@
     </form>
 
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('budget.add_entry')
+      "
       :error-text="$t('budget.create_budget_error')"
       :is-error="isError"
       :is-loading="isLoading"

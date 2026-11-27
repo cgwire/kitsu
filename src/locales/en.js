@@ -14,6 +14,7 @@ export default {
   assets: {
     casted_in_shots: 'Cast in {count} shot | Cast in {count} shots',
     cancel_text: 'Are you sure you want to archive {name}?',
+    create: 'Create an asset',
     delete_error: 'An error occurred while deleting this asset. There may be existing data currently linked to it. Are you sure this asset has no task linked to it?',
     delete_for_selection: 'Delete the selected asset | Delete the {nbSelectedAssets} selected assets',
     delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected assets? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',
@@ -56,6 +57,7 @@ export default {
     add_asset_type_to_library: 'Add an asset type to the library',
     all_asset_types: 'All asset types',
     all_hidden: 'All asset types are hidden.',
+    create: 'Create an asset type',
     create_error: 'An error occurred while saving this asset type. Are you sure there is no asset type with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this asset type. There may be existing data currently linked to it. Are you sure this asset type has no asset linked to it?',
@@ -128,6 +130,7 @@ export default {
   },
 
   breakdown: {
+    change_label: 'Change the label',
     copy_casting: 'Copy this casting (ctrl + V pastes it on the selected lines)',
     edit_label: 'Change the asset\'s label',
     empty: 'Empty casting',
@@ -259,6 +262,7 @@ export default {
   },
 
   comments: {
+    save: 'Save the comment',
     title: 'Comments',
     add_attachment: 'Add attachment',
     add_attachment_to_reply: 'Add attachment to reply',
@@ -317,6 +321,7 @@ export default {
     validated: 'Validated!',
     move_to_task: 'Move to',
     move_modal: {
+      confirm: 'Move the comment',
       title: 'Move Comment to Another Task',
       intro: 'Pick a task of the same entity to move this comment to. Notifications will be sent on the destination task as for a new comment.',
       target_label: 'Destination task',
@@ -343,6 +348,7 @@ export default {
     },
     add_concept: 'Add files for new concepts',
     add_concept_error: 'An error occurred while adding concepts.',
+    add_confirm: 'Add the concepts',
     add_links: 'Add links to assets',
     add_new_concept: 'Add new concepts',
     delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
@@ -360,6 +366,7 @@ export default {
       updated_at: 'Update date'
     },
     folders: {
+      create: 'Create a folder',
       delete: 'Delete folder',
       delete_error: 'An error occurred while deleting this folder.',
       delete_text: 'Are you sure you want to delete the folder {name}? Its concepts are kept and go back to the root.',
@@ -378,6 +385,7 @@ export default {
   },
 
   custom_actions: {
+    create: 'Create a custom action',
     create_error: 'An error occurred while saving this custom action. Are you sure that there is no other action with the same name?',
     delete_text: 'Are you sure you want to remove custom action {name} from your database?',
     delete_error: 'An error occurred while deleting this custom action.',
@@ -407,6 +415,7 @@ export default {
     add_status_automation_placeholder: '+ Add Status Automation',
     change_ready_for: 'changes "ready for" to',
     change_status: 'changes the status of',
+    create: 'Create an automation',
     create_error: 'Could not save. Please try again.',
     delete_text: 'Are you sure you want to remove this status automation from your database?',
     delete_error: 'An error occurred while deleting this status automation. It may be linked to a production or a production template. If so, you must remove it from every production and template first.',
@@ -477,6 +486,7 @@ export default {
   departments: {
     all_departments: 'All departments',
     available_items: 'Available Items',
+    create: 'Create a department',
     create_error: 'An error occurred while saving this department. Are you sure there is no department with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this department.',
@@ -500,6 +510,7 @@ export default {
 
   studios: {
     all_studios: 'All studios',
+    create: 'Create a studio',
     create_error: 'An error occurred while saving this studio. Are you sure there is no studio with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this studio.',
@@ -515,6 +526,7 @@ export default {
   },
 
   project_templates: {
+    create: 'Create a production template',
     title: 'Templates',
     new_project_template: 'Add a production template',
     edit_title: 'Edit production template',
@@ -562,6 +574,7 @@ export default {
       add_status_filter: 'Add a task status filter',
       add_value: 'Add a value',
       all_types: 'All asset types',
+      apply: 'Apply the filter',
       asset_type: 'Asset type',
       assets_ready: 'Ready',
       assets_not_ready: 'Not ready',
@@ -626,6 +639,7 @@ export default {
 
     thumbnails: {
       assets_pattern: '"AssetType AssetName" e.g. Environment_Forest.',
+      confirm: 'Add the thumbnails',
       edits_pattern: '"EditName" e.g. Trailer.',
       edits_tvshow_pattern: '"EpisodeName EditName" e.g. E01_Trailer.',
       error: 'An error occurred while uploading thumbnails',
@@ -656,6 +670,7 @@ export default {
   episodes: {
     all_episodes: 'All',
     all_hidden: 'All episodes are hidden.',
+    create: 'Create an episode',
     edit_error: 'An error occurred while saving this episode. Are you sure there is no episode with a similar name?',
     delete_error: 'An error occurred while deleting this episode. There may be existing data currently linked to it. Are you sure this episode has no sequence linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database? All related shots and previews will also be deleted. Please confirm by typing the episode name below.',
@@ -690,6 +705,7 @@ export default {
   },
 
   hardware_items: {
+    create: 'Create a hardware item',
     create_error: 'An error occurred while saving the hardware item.',
     delete_error: 'An error occurred while deleting the hardware item.',
     delete_text: 'Are you sure you want to delete this hardware item?',
@@ -910,9 +926,9 @@ export default {
     collapse: 'Collapse',
     column_options: 'Column options',
     column_visibility: 'Visible columns',
-    confirmation: 'Confirm',
-    confirmation_and_stay: 'Confirm and stay',
     continue: 'Continue',
+    create_and_add_another: 'Create and add another',
+    create_and_stay: 'Create and stay',
     created_by: 'Created by',
     date: 'Date',
     dark_theme: 'Dark Theme',
@@ -921,6 +937,7 @@ export default {
     days_spent: 'day spent | days spent',
     days_estimated: 'day estimated | days estimated',
     days_expected: 'day expected | days expected',
+    filter_group_create: 'Create a filter group',
     hours_spent: 'hour spent | hours spent',
     hours_estimated: 'hour estimated | hours estimated',
     hours_expected: 'hour expected | hours expected',
@@ -1034,13 +1051,18 @@ export default {
       not_supported: 'Recording is not supported in this browser.'
     },
     remove: 'Remove',
+    remove_search_filter_group_button: 'Remove the group',
     remove_search_query: 'Are you sure you want to remove the search query "{name}"?',
+    remove_search_query_button: 'Remove the filter',
     remove_search_query_error: 'An error occurred while removing this search query.',
     remove_search_filter_group: 'Are you sure you want to remove the search filter group "{name}"?',
     remove_search_filter_group_error: 'An error occurred while removing this search filter group.',
     reload: 'Reload',
     remaining: 'Remaining',
     reply: 'Reply',
+    save_changes: 'Save changes',
+    save_picture: 'Save the picture',
+    search_query_create: 'Create a search filter',
     select_section: 'Select a section',
     shared_by: 'Shared by {name}',
     save: 'Save',
@@ -1092,6 +1114,7 @@ export default {
       choose: 'Choose',
       error_empty: 'The file is empty.',
       error_imported_rows: '{count} row was imported before the error. | {count} rows were imported before the error.',
+      import_data: 'Import the data',
       import_success: '{count} row was imported. | {count} rows were imported.',
       error_line: 'Line {line}',
       error_read: 'Could not read the file. Please select it again.',
@@ -1249,6 +1272,7 @@ export default {
   people: {
     active: 'Active',
     add_member_to_team: 'Add a member to the team',
+    archive_guest_button: 'Archive the guest',
     confirm_edit: 'Save user changes',
     create: 'Create user',
     create_invite: 'Create user and send invitation',
@@ -1279,6 +1303,7 @@ export default {
     project_role: 'Project role',
     seats_remaining: 'no seats remaining | {count} seat remaining | {count} seats remaining',
     select_person: 'Select a user...',
+    self_role_downgrade_button: 'Lower my role',
     team: 'Team',
     title: 'People',
     unactive: 'Inactive',
@@ -1567,6 +1592,7 @@ export default {
       copy: 'Copy',
       create: 'Create preview account',
       delete: 'Delete',
+      delete_button: 'Delete the account',
       delete_confirm: 'Delete the preview account of this production?',
       description:
         'See Kitsu exactly as a client, read-only, not counted as a seat.',
@@ -1694,6 +1720,7 @@ export default {
     },
 
     metadata: {
+      add_column: 'Add the column',
       applies_to_all_projects:
         'This column is added to every open production. Each production can have its own value in the list view.',
       add_new_values: 'There are currently no available values.',
@@ -1969,6 +1996,7 @@ export default {
   task_status: {
     add_task_status_placeholder: '+ Add Task Status',
     add_task_status_to_library: 'Add a task status to the library',
+    create: 'Create a task status',
     create_error: 'An error occurred while saving this task status. Are you sure there is no task status with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this task status. There may be existing data currently linked to it. Are you sure this task status has no task linked to it?',
@@ -2002,6 +2030,7 @@ export default {
   task_types: {
     add_task_type_placeholder: '+ Add Task Type',
     add_task_type_to_library: 'Add a task type to the library',
+    create: 'Create a task type',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this task type. There may be existing data currently linked to it. Are you sure this task type has no task linked to it?',
     delete_blocked_by_automations: 'Status automations still use this task type, archived ones included. Edit or delete them first.',
@@ -2042,6 +2071,7 @@ export default {
   sequences: {
     all_hidden: 'All sequences are hidden.',
     all_sequences: 'All sequences',
+    create: 'Create a sequence',
     edit_error: 'An error occurred while saving this sequence. Are you sure there is no sequence with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database? All related shots and previews will also be deleted. Please confirm by typing the sequence name below.',
     delete_error: 'An error occurred while deleting this sequence. There may be existing data currently linked to it. Are you sure this sequence has no shot linked to it?',
@@ -2067,6 +2097,7 @@ export default {
   edits: {
     all_edits: 'All edits',
     cancel_text: 'Are you sure you want to archive {name}?',
+    create: 'Create an edit',
     creation_explanation: 'Upload an edit file to create a new edit',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this edit. There may be existing data currently linked to it.',
@@ -2100,6 +2131,7 @@ export default {
   schedule: {
     already_assigned: 'Already assigned',
     apply_to_prod: 'Apply to production',
+    apply_to_prod_button: 'Apply to the production',
     apply_to_prod_confirm: 'Are you sure you want to apply this schedule version to the current production? This will override the current task values.',
     apply_to_prod_error: 'An error occurred while applying the schedule version to the current production.',
     assign: 'Assign to:',
@@ -2148,6 +2180,7 @@ export default {
     hours: 'h',
     md: 'md',
     milestone: {
+      add: 'Add a milestone',
       add_milestone: 'Add milestone for',
       delete_milestone: 'Delete milestone',
       edit_milestone: 'Edit milestone for',
@@ -2166,6 +2199,7 @@ export default {
     mode: 'View Mode',
     mode_prev: 'Forecast',
     mode_real: 'Real',
+    move_children_button: 'Move with the sub-items',
     nb_tasks_out_of_range:
       '{count} task outside the dates shown | {count} tasks outside the dates shown',
     nb_undated_tasks: '{count} task without dates | {count} tasks without dates',
@@ -2260,6 +2294,7 @@ export default {
   shots: {
     casting: 'Shot casting',
     cancel_text: 'Are you sure you want to archive {name}?',
+    create: 'Create a shot',
     creation_explanation: 'To add shots, you first need to create an episode and a sequence. Type an episode name at the bottom of the left column, then click "Add" to create a new episode. Select this episode and repeat the same operation for the sequence. Finally, select a sequence and type a shot name in the field at the bottom of the right column. Click the "Add" button below. Your first shot is now created. You can add many more! If it\'s not a TV show, you can directly create a sequence.',
     delete_for_selection: 'Delete the selected shot | Delete the {nbSelectedShots} selected shots',
     delete_text: 'Are you sure you want to remove {name} from your database?',
@@ -2283,6 +2318,7 @@ export default {
     number: 'shot | shots',
     new_success: 'Shot {name} successfully created.',
     numbering_step: 'Numbering Step',
+    set_frames: 'Set the frame numbers',
     single_tab: 'Single',
     bulk_tab: 'Bulk',
     bulk_error: 'The bulk creation failed. Please try again.',
@@ -2357,6 +2393,7 @@ export default {
     big_thumbnails: 'Show big thumbnails',
     build_playlist: 'Build playlist from list',
     calendar: 'Calendar',
+    change_status_button: 'Change the status',
     confirm_attachments: 'Add files as attachments',
     change_status: 'Post comment',
     change_preview: 'Change preview',
@@ -2377,6 +2414,7 @@ export default {
     create_tasks: 'Add tasks',
     create_tasks_all_missing: 'Add all missing ({count})',
     create_tasks_all_missing_empty: 'Add all missing',
+    create_tasks_confirm: 'Create the tasks',
     create_tasks_disclaimer: 'If your task type is missing, verify it is listed in the Task Types section of the production settings.',
     create_tasks_shot: 'Add tasks for current shots',
     create_tasks_shot_explanation: 'You are about to create a new task for each shot of the current production for the given task type. Do you want to continue?',
@@ -2440,8 +2478,10 @@ export default {
     open_page: 'Open the task page',
     pending: 'Pending',
     post: 'Post',
+    post_comment_button: 'Post the comment',
     post_comment_on_tasks: 'Post the comment on the selected task | Post the comment on the {count} selected tasks',
     publish: 'Publish',
+    publish_files: 'Publish the files',
     publish_revision: 'Publish revision',
     preview: 'Previews',
     previous: 'Previous task',
@@ -2543,6 +2583,7 @@ export default {
   },
 
   software_licenses: {
+    create: 'Create a software license',
     create_error: 'An error occurred while saving the software license.',
     delete_error: 'An error occurred while deleting the software license.',
     delete_text: 'Are you sure you want to delete this software license?',

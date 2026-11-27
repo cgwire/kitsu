@@ -228,9 +228,24 @@ Formatting that follows the user and organization settings: dates, durations and
 ```vue
 <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
   <!-- form content goes in the slot -->
-  <modal-footer @confirm="onConfirm" @cancel="$emit('cancel')" />
+  <modal-footer
+    :confirm-label="isEditing ? $t('main.save_changes') : $t('shots.create')"
+    @confirm="onConfirm"
+    @cancel="$emit('cancel')"
+  />
 </base-modal>
 ```
+
+### Confirm buttons name the action
+
+The button that validates a modal says what it does, verb then object, never "Confirm", "OK" or "Yes":
+
+- **Creation**: "Create a shot" for a new entity, "Add a milestone" for an item added to an existing set. The key lives in the entity namespace (`shots.create`).
+- **Edit**: `main.save_changes`, one label for every form.
+- **Deletion**: `DeleteModal` and `HardDeleteModal` say "Delete" by default. Pass `delete-button-text` when the action is something else ("Remove", "Archive").
+- **Any other confirmation**: name the action of the question asked ("Archive the guest", "Apply to the production"). A non-destructive one goes in `ConfirmModal`, not in the red `DeleteModal`.
+
+`confirm-label` on `ModalFooter` and `confirm-button-text` on `ConfirmModal` are required props: there is no generic fallback.
 
 ## i18n
 

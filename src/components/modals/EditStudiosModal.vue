@@ -25,6 +25,9 @@
       />
     </form>
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('studios.create')
+      "
       :error-text="$t('studios.create_error')"
       :is-error="isError"
       :is-loading="isLoading"

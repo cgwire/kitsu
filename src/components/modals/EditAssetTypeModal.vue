@@ -58,6 +58,9 @@
     </form>
 
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('asset_types.create')
+      "
       :error-text="$t('asset_types.create_error')"
       :is-error="isError"
       :is-loading="isLoading"

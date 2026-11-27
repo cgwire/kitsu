@@ -11,6 +11,7 @@
       "warning": "僅當您親自從應用程式發起此登入時才授權。該應用程式將以您的權限存取 Kitsu。"
     },
     "assets": {
+      "create": "建立資產",
       "delete_error": "刪除此資產時發生錯誤。目前可能有資料連結至此資產。您確定沒有任務連結至此資產嗎？",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "edit_fail": "儲存失敗，可能是因為已存在類似名稱的資產。",
@@ -52,6 +53,7 @@
     "asset_types": {
       "all_asset_types": "所有資產類型",
       "all_hidden": "所有資產類型皆已隱藏。",
+      "create": "建立資產類型",
       "create_error": "儲存此資產類型時出錯。您確定沒有相同名稱的資產類型嗎？",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "delete_error": "刪除此資產類型時出現錯誤。可能已存在連結至此的資料。您確定沒有資產連結至此資產類型嗎？",
@@ -75,6 +77,7 @@
     },
     "breakdown": {
       "link_assets": "連結資產",
+      "change_label": "更改標籤",
       "copy_casting": "複製此選角（ctrl + V 貼到所選列）",
       "edit_label": "更改資產的標籤",
       "empty": "選角為空",
@@ -169,9 +172,11 @@
         "intro": "選擇同一實體的任務以將此評論移至該處。系統會在目標任務上發送通知，如同新評論一般。",
         "no_target": "此實體上沒有其他可用的任務。",
         "target_label": "目標任務",
+        "confirm": "移動評論",
         "title": "將評論移至另一個任務"
       },
       "move_to_task": "移至",
+      "save": "儲存評論",
       "title": "評論",
       "toggle_for_client": "客戶可見性",
       "player": {
@@ -187,6 +192,7 @@
       }
     },
     "custom_actions": {
+      "create": "建立自訂操作",
       "create_error": "儲存此自訂操作時發生錯誤。您確定沒有其他同名操作嗎？",
       "delete_text": "您確定要從您的資料庫移除自訂操作{name}嗎？",
       "delete_error": "刪除此自訂操作時出現錯誤。",
@@ -212,6 +218,7 @@
     },
     "entities": {
       "build_filter": {
+        "apply": "套用篩選器",
         "asset_type": "資產類型",
         "add_descriptor_filter": "新增中繼資料篩選器",
         "add_status_filter": "新增任務狀態篩選器",
@@ -255,6 +262,7 @@
         "undefined": "未定義",
         "undefined_pattern": "未定義",
         "upload": "新增縮圖",
+        "confirm": "新增縮圖",
         "edits_pattern": "\"剪輯名稱\" 例如：Trailer。",
         "edits_tvshow_pattern": "\"集數名稱 剪輯名稱\" 例如：E01_Trailer。",
         "explanation": "新增縮圖需要設定新的預覽。若要同時設定多個縮圖，您必須先選擇一個任務類型來建立新的預覽。縮圖將從這些新預覽設定。",
@@ -299,6 +307,7 @@
     "episodes": {
       "all_episodes": "所有",
       "all_hidden": "所有集數皆已隱藏。",
+      "create": "建立集數",
       "edit_error": "儲存此集數時發生錯誤。您確定沒有名稱相似的集數嗎？",
       "delete_error": "刪除此集數時發生錯誤。目前可能有資料連結至此集數。您確定沒有序列連結至此集數嗎？",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？所有相關的鏡頭和預覽也將被刪除。請在下方輸入集數名稱以確認。",
@@ -442,6 +451,9 @@
       "changelog": "更新日誌",
       "next_entity": "下一個實體",
       "previous_entity": "上一個實體",
+      "save_changes": "儲存變更",
+      "save_picture": "儲存圖片",
+      "search_query_create": "建立搜尋篩選器",
       "select_section": "選擇區塊",
       "technical_details": "技術詳情：",
       "about": "關於",
@@ -457,8 +469,6 @@
       "click_to_add": "按一下以新增",
       "click_to_remove": "按一下以移除",
       "close": "關閉",
-      "confirmation": "確認",
-      "confirmation_and_stay": "確認並留在此頁",
       "date": "日期",
       "dark_theme": "深色主題",
       "days_spent": "天已花費 | 天已花費",
@@ -513,6 +523,7 @@
         "choose": "選擇",
         "error_empty": "檔案為空。",
         "error_imported_rows": "錯誤發生前已匯入 {count} 行。 | 錯誤發生前已匯入 {count} 行。",
+        "import_data": "匯入資料",
         "import_success": "已匯入 {count} 行。 | 已匯入 {count} 行。",
         "error_line": "第 {line} 行",
         "error_read": "無法讀取檔案。請重新選擇。",
@@ -647,9 +658,12 @@
       "no_results": "沒有結果",
       "link": "連結",
       "list": "列表",
+      "filter_group_create": "建立篩選群組",
       "hours_spent": "小時已花費 | 小時已花費",
       "hours_expected": "小時預期 | 小時預期",
       "hours_estimated": "小時預估 | 小時預估",
+      "create_and_add_another": "建立並繼續新增",
+      "create_and_stay": "建立並留在此頁",
       "created_by": "建立者",
       "day": "日",
       "hour": "小時",
@@ -679,7 +693,9 @@
       "expand": "展開",
       "expand_all": "全部展開",
       "hours": "小時 | 小時",
+      "remove_search_filter_group_button": "移除群組",
       "remove_search_query": "您確定要移除搜尋查詢「{name}」嗎？",
+      "remove_search_query_button": "移除篩選器",
       "remove_search_query_error": "移除此搜尋查詢時發生錯誤。",
       "remove_search_filter_group": "您確定要移除搜尋篩選器群組「{name}」嗎？",
       "remove_search_filter_group_error": "移除此搜尋篩選器群組時發生錯誤。",
@@ -823,6 +839,7 @@
       "persons": "使用者 | 使用者",
       "project_role": "製作項目角色",
       "select_person": "選擇使用者...",
+      "self_role_downgrade_button": "降低我的角色",
       "team": "團隊",
       "title": "人員",
       "unactive": "未啟用",
@@ -870,6 +887,7 @@
         "supervisor": "主管",
         "all": "所有角色"
       },
+      "archive_guest_button": "封存來賓",
       "confirm_edit": "儲存使用者變更",
       "create": "建立使用者",
       "user_limit_error": "您已達到使用者上限。請聯絡我們的團隊升級您的方案。",
@@ -1096,6 +1114,7 @@
         "copy": "複製",
         "create": "建立預覽帳號",
         "delete": "刪除",
+        "delete_button": "刪除帳號",
         "delete_confirm": "刪除此製作的預覽帳號？",
         "description": "以客戶的視角檢視 Kitsu，唯讀且不佔用席位。",
         "error": "更新預覽帳號時發生錯誤。",
@@ -1205,6 +1224,7 @@
         "number": "數字",
         "string": "文字",
         "tags": "標籤清單",
+        "add_column": "新增欄位",
         "applies_to_all_projects": "此欄會新增至每個已開啟的製作項目。每個製作項目可在清單檢視中擁有自己的值。",
         "delete_list_column_text": "這將從所有已開啟的製作項目中移除「{name}」欄，包括已儲存的值。要繼續嗎？",
         "date": "日期",
@@ -1462,6 +1482,7 @@
       "preferences_title": "偏好設定"
     },
     "task_status": {
+      "create": "建立任務狀態",
       "create_error": "儲存此任務狀態時發生錯誤。您確定沒有名稱相似的任務狀態嗎？",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "delete_error": "刪除此任務狀態時發生錯誤。目前可能有資料連結至此任務狀態。您確定沒有任務連結至此任務狀態嗎？",
@@ -1494,6 +1515,7 @@
       "remove_status": "移除狀態 {name}"
     },
     "task_types": {
+      "create": "建立任務類型",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "delete_error": "刪除此任務類型時發生錯誤。目前可能有資料連結至此任務類型。您確定沒有任務連結至此任務類型嗎？",
       "delete_blocked_by_automations": "仍有狀態自動化（包括已封存的）在使用此任務類型。請先編輯或刪除這些自動化。",
@@ -1532,6 +1554,7 @@
     "sequences": {
       "all_hidden": "所有序列皆已隱藏。",
       "all_sequences": "所有序列",
+      "create": "建立序列",
       "edit_error": "儲存此序列時發生錯誤。您確定沒有相似名稱的序列嗎？",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？所有相關的鏡頭和預覽也將被刪除。請在下方輸入序列名稱以確認。",
       "delete_error": "刪除此序列時發生錯誤。目前可能有資料連結至此序列。您確定沒有鏡頭連結至此序列嗎？",
@@ -1556,6 +1579,7 @@
     "schedule": {
       "already_assigned": "已指派",
       "apply_to_prod": "套用至製作項目",
+      "apply_to_prod_button": "套用至製作項目",
       "apply_to_prod_confirm": "您確定要將此排程版本套用至目前的製作項目嗎？這將會覆寫目前的任務值。",
       "apply_to_prod_error": "將排程版本套用至目前製作項目時發生錯誤。",
       "assign": "指派給：",
@@ -1599,6 +1623,7 @@
       "hours": "小時",
       "md": "人日",
       "milestone": {
+        "add": "新增里程碑",
         "add_milestone": "新增里程碑",
         "edit_milestone": "編輯里程碑",
         "name": "名稱",
@@ -1617,6 +1642,7 @@
       "mode": "檢視模式",
       "mode_prev": "預測",
       "mode_real": "實際",
+      "move_children_button": "連同子項目一起移動",
       "nb_tasks_out_of_range": "{count} 個任務在顯示的日期之外 | {count} 個任務在顯示的日期之外",
       "nb_undated_tasks": "{count} 個任務沒有日期 | {count} 個任務沒有日期",
       "new_version": "新版本",
@@ -1716,6 +1742,7 @@
       "restore_text": "您確定要從封存還原 {name} 嗎？",
       "restore_error": "還原此鏡頭時發生錯誤。",
       "sequences": "序列",
+      "set_frames": "設定影格數",
       "single_tab": "單一",
       "tasks": "鏡頭任務",
       "title": "鏡頭",
@@ -1742,6 +1769,7 @@
       "cancel_text": "您確定要將 {name} 封存嗎？",
       "delete_for_selection": "刪除選取的鏡頭 | 刪除選取的 {nbSelectedShots} 個鏡頭",
       "multiple_delete_error": "刪除鏡頭時發生錯誤。目前可能有現有資料與此鏡頭相連。您確定沒有任務連結到選取的鏡頭嗎？",
+      "create": "建立鏡頭",
       "creation_explanation": "若要新增鏡頭，您首先需要建立一集和序列。在左欄底部輸入一集名稱，然後按一下「新增」建立新的一集。選取此集數，然後重複相同的操作來建立序列。最後，選取序列，並在右欄底部的欄位中輸入鏡頭名稱。按一下下方的「新增」按鈕。您的第一個鏡頭已經建立。您可以新增更多鏡頭！如果不是影集，您可以直接建立序列。",
       "get_frames_from_previews": "從預覽設定影格數",
       "get_frames_from_previews_description": "選取任務類型，從最新發佈的影片預覽中擷取影格數。",
@@ -1894,6 +1922,7 @@
         "my_departments": "我的部門"
       },
       "add_revision_confirm": "新增要發佈的檔案",
+      "change_status_button": "變更狀態",
       "confirm_attachments": "將檔案新增為附件",
       "change_status": "發表評論",
       "publish": "發佈",
@@ -1904,6 +1933,7 @@
       "change_task_status_error": "更新選取的任務時發生錯誤。 | 更新選取的 {count} 個任務時發生錯誤：部分任務可能已變更。請先檢查再重試。",
       "confirm_change_task_status": "要將選取任務的狀態變更為 {status} 嗎？ | 要將選取的 {count} 個任務的狀態變更為 {status} 嗎？",
       "confirm_post_comment": "要在選取的任務上發表評論嗎？ | 要在選取的 {count} 個任務上發表評論嗎？",
+      "post_comment_button": "發表評論",
       "post_comment_on_tasks": "在選取的任務上發表評論 | 在選取的 {count} 個任務上發表評論",
       "select_status": "選擇狀態",
       "due_date": "到期日狀態",
@@ -1931,6 +1961,7 @@
       "my_checks": "我的檢查",
       "new_revision_number": "新修訂編號",
       "post": "發表",
+      "publish_files": "發佈檔案",
       "publish_revision": "發佈修訂",
       "revision_preview_file": "如果您選取的其中一個檔案在名稱中包含修訂版編號 (例如「preview-v3.png」)，則下一步會建議使用新的修訂版名稱 (例如「修訂版 3」)。",
       "selected_entities": "選定實體",
@@ -1951,6 +1982,7 @@
         "very_hard": "非常困難"
       },
       "assignation_disclaimer": "如果清單中少了人，表示他們未列在團隊中。",
+      "create_tasks_confirm": "建立任務",
       "create_tasks_disclaimer": "如果缺少您的任務類型，請確認它是否列在製作項目設定的任務類型區中。",
       "data_display": "資料顯示",
       "delete_for_selection_error": "刪除選取的任務時發生錯誤。",
@@ -2033,6 +2065,7 @@
       }
     },
     "departments": {
+      "create": "建立部門",
       "create_error": "儲存此部門時發生錯誤。您確定沒有名稱相似的部門嗎？",
       "delete_text": "您確定要將 {name} 從資料庫中移除嗎？",
       "delete_error": "刪除此部門時發生錯誤。",
@@ -2057,6 +2090,7 @@
     },
     "edits": {
       "all_edits": "所有剪輯",
+      "create": "建立剪輯",
       "creation_explanation": "上傳剪輯檔案以建立新剪輯",
       "edit_error": "儲存此剪輯時發生錯誤。您確定沒有名稱相似的剪輯嗎？",
       "delete_text": "您確定要將 {name} 從資料庫中移除嗎？",
@@ -2090,6 +2124,7 @@
     "status_automations": {
       "change_ready_for": "將「可用於」改為",
       "change_status": "變更任務狀態：",
+      "create": "建立自動化",
       "create_error": "無法儲存。請再試一次。",
       "delete_text": "您確定要從資料庫中移除此狀態自動化嗎？",
       "delete_error": "刪除此狀態自動化時發生錯誤。它可能與某個製作項目或製作項目範本連結。如果是的話，您必須先從每個製作項目和範本中移除它。",
@@ -2248,6 +2283,7 @@
       },
       "add_concept": "為新概念新增檔案",
       "add_concept_error": "新增概念時發生錯誤。",
+      "add_confirm": "新增概念",
       "add_links": "新增連結至資產",
       "add_new_concept": "新增概念",
       "delete_for_selection": "刪除選取的概念 | 刪除選取的 {nbSelectedConcepts} 個概念",
@@ -2265,6 +2301,7 @@
         "updated_at": "更新日期"
       },
       "folders": {
+        "create": "建立資料夾",
         "delete": "刪除資料夾",
         "delete_error": "刪除此資料夾時發生錯誤。",
         "delete_text": "確定要刪除資料夾 {name} 嗎？其中的概念將保留並回到根目錄。",
@@ -2297,6 +2334,7 @@
       "processing": "此預覽正在處理中..."
     },
     "studios": {
+      "create": "建立工作室",
       "create_error": "儲存此工作室時發生錯誤。您確定沒有名稱相似的工作室嗎？",
       "delete_text": "您確定要將 {name} 從資料庫中移除嗎？",
       "delete_error": "刪除此工作室時發生錯誤。",
@@ -2427,6 +2465,7 @@
       "delete_for_selection_hard_lock_text": "刪除"
     },
     "hardware_items": {
+      "create": "建立硬體項目",
       "create_error": "儲存硬體項目時發生錯誤。",
       "delete_error": "刪除硬體項目時發生錯誤。",
       "delete_text": "您確定要刪除此硬體項目？",
@@ -2443,6 +2482,7 @@
       }
     },
     "software_licenses": {
+      "create": "建立軟體授權",
       "create_error": "儲存軟體授權時發生錯誤。",
       "delete_error": "刪除軟體授權時發生錯誤。",
       "delete_text": "您確定要刪除此軟體授權？",
@@ -2498,6 +2538,7 @@
         "task_statuses": "任務狀態",
         "task_types": "任務類型"
       },
+      "create": "建立製作項目範本",
       "title": "範本",
       "metadata_explanation": "新增至以此範本建立之製作的中繼資料欄位。",
       "settings_menu": {

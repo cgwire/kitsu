@@ -77,6 +77,7 @@
     </form>
 
     <modal-footer
+      :confirm-label="isEditing ? $t('main.save_changes') : $t('shots.create')"
       :error-text="
         isDeleted && shotToEdit?.id
           ? $t('main.edit_deleted_error', { name: shotToEdit.name })

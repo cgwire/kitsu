@@ -30,7 +30,7 @@
             @keydown.enter.prevent="$emit('confirm')"
             @keydown.space.prevent="$emit('confirm')"
           >
-            {{ deleteButtonText || $t('main.confirmation') }}
+            {{ deleteButtonText || $t('main.delete') }}
           </a>
           <button class="button is-link" @click="$emit('cancel')">
             {{ $t('main.cancel') }}

@@ -937,6 +937,11 @@
 
     <confirm-modal
       :active="modals.statusChange"
+      :confirm-button-text="
+        taskStatusId
+          ? $t('tasks.change_status_button')
+          : $t('tasks.post_comment_button')
+      "
       :error-text="
         $t('tasks.change_task_status_error', { count: nbSelectedTasks })
       "

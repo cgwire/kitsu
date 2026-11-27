@@ -90,6 +90,9 @@
     </form>
 
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('task_status.create')
+      "
       :error-text="$t('task_status.create_error')"
       :is-error="isError"
       :is-loading="isLoading"

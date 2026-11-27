@@ -16,6 +16,7 @@
     />
 
     <modal-footer
+      :confirm-label="$t('shots.set_frames')"
       :error-text="$t('shots.get_frames_from_previews_error')"
       :is-error="isError"
       :is-loading="isLoading"

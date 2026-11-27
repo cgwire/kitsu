@@ -17,6 +17,10 @@ const mountModal = (props = {}) =>
 const getConfirmButton = wrapper => wrapper.get('a.button.is-danger')
 
 describe('HardDeleteModal', () => {
+  it('names the action on its button', () => {
+    expect(getConfirmButton(mountModal()).text()).toEqual('Delete')
+  })
+
   // The disabled look only stops the mouse: Tab then Enter on the button
   // deleted a production whose name was never typed.
   it('does not confirm while the name is not typed', async () => {

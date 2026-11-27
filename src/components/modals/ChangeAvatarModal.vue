@@ -13,6 +13,7 @@
     </p>
 
     <modal-footer
+      :confirm-label="$t('main.save_picture')"
       :error-text="$t('productions.metadata.error')"
       :is-loading="isLoading"
       :is-disabled="!hasFile"
