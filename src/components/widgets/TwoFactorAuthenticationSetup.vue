@@ -70,6 +70,7 @@
       <div class="two-fa-flow-actions new-recovery-codes-actions">
         <button
           class="button cancel-flow-button"
+          :disabled="isRequestRunning"
           @click="cancelCurrentTwoFactorAuthAction"
         >
           {{ $t('main.cancel') }}
@@ -154,6 +155,7 @@
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
+              :disabled="isRequestRunning"
               @click="cancelCurrentTwoFactorAuthAction"
             >
               {{ $t('main.cancel') }}
@@ -186,6 +188,7 @@
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
+              :disabled="isRequestRunning"
               @click="cancelCurrentTwoFactorAuthAction"
             >
               {{ $t('main.cancel') }}
@@ -198,7 +201,7 @@
             v-if="!user.totp_enabled"
             class="button two-fa-action enable-action"
             :class="{ 'is-loading': twoFA.loadingAction === 'preEnableTOTP' }"
-            :disabled="twoFAButtonsDisabled"
+            :disabled="isActionDisabled('preEnableTOTP')"
             @click="preEnableTOTPRequested()"
           >
             {{ $t('profile.two_factor_authentication.totp.button_enable') }}
@@ -289,6 +292,7 @@
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
+              :disabled="isRequestRunning"
               @click="cancelCurrentTwoFactorAuthAction"
             >
               {{ $t('main.cancel') }}
@@ -323,6 +327,7 @@
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
+              :disabled="isRequestRunning"
               @click="cancelCurrentTwoFactorAuthAction"
             >
               {{ $t('main.cancel') }}
@@ -337,7 +342,7 @@
             :class="{
               'is-loading': twoFA.loadingAction === 'preEnableEmailOTP'
             }"
-            :disabled="twoFAButtonsDisabled"
+            :disabled="isActionDisabled('preEnableEmailOTP')"
             @click="preEnableEmailOTPRequested()"
           >
             {{
@@ -422,6 +427,7 @@
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
+              :disabled="isRequestRunning"
               @click="cancelCurrentTwoFactorAuthAction"
             >
               {{ $t('main.cancel') }}
@@ -509,6 +515,7 @@
       <div class="two-fa-flow-actions">
         <button
           class="button cancel-flow-button"
+          :disabled="isRequestRunning"
           @click="cancelCurrentTwoFactorAuthAction"
         >
           {{ $t('main.cancel') }}
@@ -606,8 +613,12 @@ const twoFAEnabled = computed(
     user.value.fido_enabled
 )
 
+// The answer of a request canceled midway landed on the next action.
+const isRequestRunning = computed(() => twoFA.loadingAction !== null)
+
 const twoFAButtonsDisabled = computed(
   () =>
+    isRequestRunning.value ||
     twoFA.TOTPPreEnabled ||
     twoFA.TOTPNeedTwoFA ||
     twoFA.emailOTPPreEnabled ||
@@ -670,6 +681,11 @@ const isNewEmailCodeSent = computed(
 )
 
 // Methods
+
+// Disabled, the button that started a request lost the keyboard focus, and a
+// failed request never gave it back. Its handler ignores a second press.
+const isActionDisabled = action =>
+  twoFAButtonsDisabled.value && twoFA.loadingAction !== action
 
 const removeTwoFactorErrors = () => {
   twoFA.error.isWrongOTP = false
@@ -951,8 +967,6 @@ const nextEnable = () => {
 }
 
 const nextWithPayload = payload => {
-  // A setup can open next to a removal, when its request was still running:
-  // only the factor asked by a setup sends the code to that setup.
   if (twoFA.enableNeedTwoFA) {
     if (twoFA.TOTPPreEnabled) enableTOTPRequested(payload)
     else if (twoFA.emailOTPPreEnabled) enableEmailOTPRequested(payload)
@@ -984,6 +998,7 @@ const changedTwoFA = () => {
 }
 
 const cancelCurrentTwoFactorAuthAction = () => {
+  if (isRequestRunning.value) return
   twoFA.TOTPPreEnabled = false
   twoFA.TOTPNeedTwoFA = false
   twoFA.emailOTPPreEnabled = false
@@ -993,7 +1008,6 @@ const cancelCurrentTwoFactorAuthAction = () => {
   twoFA.FIDOPreRegistered = false
   twoFA.FIDONewDeviceName = ''
   twoFA.FIDOUnregisterDeviceName = ''
-  twoFA.loadingAction = null
   twoFA.validationOTP = ''
   twoFA.error.isWrongOTP = false
   twoFA.error.isWrongEnabledFactor = false

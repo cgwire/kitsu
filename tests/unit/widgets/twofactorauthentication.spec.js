@@ -151,6 +151,23 @@ describe('widgets/TwoFactorAuthentication', () => {
       expect(helpLine(wrapper).text()).toBe(notice)
     })
 
+    // Zou keeps only the code of the latest email.
+    it('sends no new email while a code is checked', async () => {
+      const wrapper = mountWidget({ ...emailProps, isLoading: true })
+      await flushPromises()
+      const link = wrapper
+        .findAll('a')
+        .find(item => item.text() === 'login.send_email_otp')
+
+      await link.trigger('click')
+      await link.trigger('keydown', { key: 'Enter' })
+      await link.trigger('keydown', { key: ' ' })
+      await flushPromises()
+
+      expect(link.attributes('aria-disabled')).toBe('true')
+      expect(peopleApi.sendEmailOTP).toHaveBeenCalledTimes(1)
+    })
+
     // Cancel and Escape close the step of the 2FA settings, and the login
     // page mounts its step again after a refused code: each opening sends a
     // new code, and the count started over.
@@ -365,6 +382,24 @@ describe('widgets/TwoFactorAuthentication', () => {
     ])
   })
 
+  // A refusal arriving after a switch read as one for the method chosen.
+  it('keeps its method while the code is checked', async () => {
+    const wrapper = mountWidget({ isLoading: true })
+    const link = wrapper
+      .findAll('a')
+      .find(item => item.text() === 'login.choose_recovery_code')
+
+    await link.trigger('click')
+    await link.trigger('keydown', { key: 'Enter' })
+    await link.trigger('keydown', { key: ' ' })
+
+    expect(link.attributes('aria-disabled')).toBe('true')
+    expect(wrapper.find('input').attributes('placeholder')).toBe(
+      'login.fields.totp'
+    )
+    expect(wrapper.emitted('changed-two-fa')).toBeUndefined()
+  })
+
   // The code step of the login page sits under the language list.
   describe('validation label', () => {
     let wrapper = null
@@ -429,6 +464,26 @@ describe('widgets/TwoFactorAuthentication', () => {
       expect(wrapper.emitted('validate')).toEqual([
         [{ fido_authentication_response: response }]
       ])
+    })
+
+    it('asks the device nothing more while its response is checked', async () => {
+      const getFIDOChallenge = vi.fn(() => ({ challenge: 'abc' }))
+      const wrapper = mountWidget(
+        { preferredTwoFa: 'fido', twoFasEnabled: ['fido'], isLoading: true },
+        { getFIDOChallenge }
+      )
+      await flushPromises()
+      const link = wrapper
+        .findAll('a')
+        .find(item => item.text() === 'login.retry_fido_challenge')
+
+      await link.trigger('click')
+      await link.trigger('keydown', { key: 'Enter' })
+      await link.trigger('keydown', { key: ' ' })
+      await flushPromises()
+
+      expect(link.attributes('aria-disabled')).toBe('true')
+      expect(getFIDOChallenge).toHaveBeenCalledTimes(1)
     })
 
     // A code method chosen next sent that response again on Verify.

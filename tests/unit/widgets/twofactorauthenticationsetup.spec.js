@@ -361,6 +361,130 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
 
       expect(request).toHaveBeenCalledTimes(1)
     })
+
+    // A removal opened while a setup started: the end of the first request
+    // let Escape close the removal while its code was checked. The button
+    // that starts the setup stays enabled: disabled, it lost the keyboard
+    // focus, which a failed start never gave back.
+    it.each([
+      {
+        name: 'TOTP',
+        user: { email_otp_enabled: true },
+        start: 'totp.button_enable',
+        action: 'preEnableTOTP',
+        states: [
+          ['totp.button_enable', false],
+          ['email_otp.button_disable', true]
+        ]
+      },
+      {
+        name: 'OTP via email',
+        user: { totp_enabled: true },
+        start: 'email_otp.button_enable',
+        action: 'preEnableEmailOTP',
+        states: [
+          ['totp.button_disable', true],
+          ['email_otp.button_enable', false]
+        ]
+      }
+    ])(
+      'disables the other 2FA actions while the $name setup starts',
+      async ({ user, start, action, states }) => {
+        const wrapper = mountSetup(
+          { ...user, fido_enabled: true, fido_devices: ['Yubikey'] },
+          { [action]: vi.fn(pending) }
+        )
+
+        await findButton(wrapper, label(start)).trigger('click')
+
+        expect(actionStates(wrapper)).toEqual([
+          ...states.map(([text, disabled]) => [label(text), disabled]),
+          [label('fido.button_register'), true],
+          [label('recovery_codes.button_new'), true]
+        ])
+        expect(
+          wrapper.find('ul li .action-icon').attributes('aria-disabled')
+        ).toBe('true')
+      }
+    )
+
+    const emitCode = wrapper =>
+      findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+    const typeAndSave = (value, button) => async wrapper => {
+      await wrapper.find('.otp-input').setValue(value)
+      await findButton(wrapper, label(button)).trigger('click')
+    }
+    const clickButton = text => wrapper =>
+      findButton(wrapper, label(text)).trigger('click')
+
+    it.each([
+      {
+        name: 'TOTP removal',
+        user: { totp_enabled: true },
+        action: 'disableTOTP',
+        open: clickButton('totp.button_disable'),
+        send: emitCode
+      },
+      {
+        name: 'email OTP removal',
+        user: { email_otp_enabled: true },
+        action: 'disableEmailOTP',
+        open: clickButton('email_otp.button_disable'),
+        send: emitCode
+      },
+      {
+        name: 'FIDO key removal',
+        user: { fido_enabled: true, fido_devices: ['Yubikey'] },
+        action: 'unregisterFIDO',
+        open: wrapper => wrapper.find('ul li .action-icon').trigger('click'),
+        send: emitCode
+      },
+      {
+        name: 'new recovery codes prompt',
+        user: { totp_enabled: true },
+        action: 'newRecoveryCodes',
+        open: clickButton('recovery_codes.button_new'),
+        send: emitCode
+      },
+      {
+        name: 'TOTP setup',
+        user: {},
+        action: 'enableTOTP',
+        open: clickButton('totp.button_enable'),
+        send: typeAndSave('123456', 'totp.button_validate')
+      },
+      {
+        name: 'email OTP setup',
+        user: {},
+        action: 'enableEmailOTP',
+        open: clickButton('email_otp.button_enable'),
+        send: typeAndSave('123456', 'email_otp.button_validate')
+      },
+      {
+        name: 'FIDO registration',
+        user: {},
+        action: 'preRegisterFIDO',
+        open: clickButton('fido.button_register'),
+        send: typeAndSave('Yubikey', 'fido.button_register')
+      }
+    ])(
+      'keeps the $name until its request answers',
+      async ({ user, action, open, send }) => {
+        const wrapper = mountSetup(user, {
+          preEnableEmailOTP: () => {},
+          [action]: vi.fn(pending)
+        })
+        await open(wrapper)
+        await flushPromises()
+        await send(wrapper)
+        await flushPromises()
+
+        expect(findButton(wrapper, 'main.cancel').element.disabled).toBe(true)
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+        await flushPromises()
+        expect(findButton(wrapper, 'main.cancel')).toBeDefined()
+      }
+    )
   })
 
   // Zou asks for a factor already enabled before it adds a method.
@@ -480,32 +604,27 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
       expect(wrapper.find('.otp-input').element.value).toBe('Yubikey')
     })
 
-    // The setup that loads opens next to the removal: the code typed for
-    // the removal must not enable the method being set up.
-    it('removes a method while the setup of another one loads', async () => {
+    // A removal clicked while a setup loaded opened beside that setup, which
+    // then had to be kept from the code typed for the removal.
+    it('opens no removal while the setup of another one loads', async () => {
       let openSetup = null
       const preEnableTOTP = () =>
         new Promise(resolve => {
           openSetup = resolve
         })
-      const enableTOTP = vi.fn()
-      const disableEmailOTP = vi.fn()
-      const wrapper = mountSetup(
-        { email_otp_enabled: true },
-        { preEnableTOTP, enableTOTP, disableEmailOTP }
-      )
+      const wrapper = mountSetup({ email_otp_enabled: true }, { preEnableTOTP })
       await findButton(wrapper, label('totp.button_enable')).trigger('click')
       await findButton(wrapper, label('email_otp.button_disable')).trigger(
         'click'
       )
+
+      expect(findCodeCheck(wrapper).exists()).toBe(false)
+
       openSetup({ totp_provisionning_uri: 'otpauth://x', otp_secret: 'ABC' })
       await flushPromises()
 
-      findCodeCheck(wrapper).vm.$emit('validate', twoFactorPayload)
-      await flushPromises()
-
-      expect(enableTOTP).not.toHaveBeenCalled()
-      expect(disableEmailOTP.mock.calls[0][1]).toEqual(twoFactorPayload)
+      expect(wrapper.find('.otp-input').exists()).toBe(true)
+      expect(findCodeCheck(wrapper).exists()).toBe(false)
     })
   })
 
@@ -898,5 +1017,35 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
 
     expect(findCodeCheck(wrapper).exists()).toBe(false)
     expect(actionStates(wrapper)).toEqual(actionsBefore)
+  })
+
+  // A late answer went to the next action: a refusal showed as a wrong code
+  // in the next prompt before anything was typed.
+  it('keeps a code prompt until Zou answers its code', async () => {
+    let refuse = null
+    const wrapper = mountSetup(
+      { totp_enabled: true },
+      {
+        disableTOTP: () =>
+          new Promise((resolve, reject) => {
+            refuse = () => reject({ body: { wrong_OTP: true } })
+          })
+      }
+    )
+    await findButton(wrapper, label('totp.button_disable')).trigger('click')
+    findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+    await flushPromises()
+
+    const cancel = findButton(wrapper, 'main.cancel')
+    expect(cancel.element.disabled).toBe(true)
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await flushPromises()
+    expect(findCodeCheck(wrapper).exists()).toBe(true)
+
+    refuse()
+    await flushPromises()
+
+    expect(findCodeCheck(wrapper).props('isWrongOtp')).toBe(true)
+    expect(cancel.element.disabled).toBe(false)
   })
 })

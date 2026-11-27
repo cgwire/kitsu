@@ -50,9 +50,10 @@
         <a
           role="button"
           tabindex="0"
-          @click="requestSendEmailOTP()"
-          @keydown.enter.prevent="requestSendEmailOTP()"
-          @keydown.space.prevent="requestSendEmailOTP()"
+          :aria-disabled="isLoading"
+          @click="resendEmailOTP"
+          @keydown.enter.prevent="resendEmailOTP"
+          @keydown.space.prevent="resendEmailOTP"
         >
           {{ $t('login.send_email_otp') }}
         </a>
@@ -62,9 +63,10 @@
         <a
           role="button"
           tabindex="0"
-          @click="requestGetFIDOChallenge"
-          @keydown.enter.prevent="requestGetFIDOChallenge"
-          @keydown.space.prevent="requestGetFIDOChallenge"
+          :aria-disabled="isLoading"
+          @click="retryFIDOChallenge"
+          @keydown.enter.prevent="retryFIDOChallenge"
+          @keydown.space.prevent="retryFIDOChallenge"
         >
           {{ $t('login.retry_fido_challenge') }}
         </a>
@@ -83,9 +85,10 @@
             <a
               role="button"
               tabindex="0"
-              @click="changeTwoFA(twoFA)"
-              @keydown.enter.prevent="changeTwoFA(twoFA)"
-              @keydown.space.prevent="changeTwoFA(twoFA)"
+              :aria-disabled="isLoading"
+              @click="chooseTwoFA(twoFA)"
+              @keydown.enter.prevent="chooseTwoFA(twoFA)"
+              @keydown.space.prevent="chooseTwoFA(twoFA)"
             >
               {{ changeTwoFAText(twoFA) }}
             </a>
@@ -270,6 +273,11 @@ const changeTwoFA = (twoFA, isOpening = false) => {
   if (!isOpening) emit('changed-two-fa', chosenTwoFA.value)
 }
 
+// The answer to the code being checked would read as one for the new method.
+const chooseTwoFA = twoFA => {
+  if (!props.isLoading) changeTwoFA(twoFA)
+}
+
 // A status region speaks only when its text changes: emptied first, it reads
 // the help line once a resend or a method switch has sent a code, and the
 // error of a failed sending. The field takes the focus at the opening, before
@@ -316,6 +324,16 @@ const requestGetFIDOChallenge = () => {
     })
 }
 
+// A new email can void the code being checked, and a new challenge opens a
+// second prompt of the security key while its first response is checked.
+const resendEmailOTP = () => {
+  if (!props.isLoading) requestSendEmailOTP()
+}
+
+const retryFIDOChallenge = () => {
+  if (!props.isLoading) requestGetFIDOChallenge()
+}
+
 onMounted(() => {
   changeTwoFA(props.preferredTwoFa, true)
 })
@@ -349,5 +367,10 @@ onMounted(() => {
   .icon {
     padding: 0.25em;
   }
+}
+
+a[aria-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
 }
 </style>
