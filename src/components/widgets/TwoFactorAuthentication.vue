@@ -12,6 +12,7 @@
           type="text"
           :autocomplete="isDigitCode ? 'one-time-code' : 'off'"
           :inputmode="isDigitCode ? 'numeric' : null"
+          autocapitalize="characters"
           :aria-describedby="informationId"
           :placeholder="placeholderInputText"
           @input="updatePayload"

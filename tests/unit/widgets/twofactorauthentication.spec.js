@@ -167,6 +167,22 @@ describe('widgets/TwoFactorAuthentication', () => {
     expect(input.attributes('autocomplete')).toBe('off')
   })
 
+  // Recovery codes are capital letters and digits, and a phone keyboard
+  // capitalized only the first letter typed.
+  it('types a recovery code in capital letters', async () => {
+    const wrapper = mountWidget()
+    await flushPromises()
+
+    await wrapper
+      .findAll('a')
+      .find(link => link.text() === 'login.choose_recovery_code')
+      .trigger('click')
+
+    expect(wrapper.find('input').attributes('autocapitalize')).toBe(
+      'characters'
+    )
+  })
+
   // Each email makes Zou refuse the codes of the earlier ones: after a click
   // on "Resend OTP by email", the code of the first email was refused with
   // nothing to say why.
