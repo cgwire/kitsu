@@ -148,7 +148,8 @@ const lists = [
         entity_type: 'Shot'
       }),
     remove: (store, query) => store.dispatch('removeTaskSearch', query),
-    load: loadShots
+    // read from the user store: no load refreshes them
+    load: () => {}
   },
   {
     name: 'People',
@@ -372,7 +373,6 @@ test('lists the task type searches of the current production only', () => {
     state: { production },
     getters: { currentProduction: state => state.production }
   })
-  loadShots(store)
   expect(names(store.getters.taskSearchQueries)).toEqual(['wip'])
 
   store.state.production = { id: 'p2' }
@@ -384,7 +384,6 @@ test('lists the task type searches of the current production only', () => {
 
 test('saves a search of a task type with its entity type', async () => {
   const store = buildStore({ tasks: tasksStore })
-  loadShots(store)
   client.ppost.mockResolvedValueOnce({ id: 'f1', name: 'wip' })
 
   await store.dispatch('saveTaskSearch', {
