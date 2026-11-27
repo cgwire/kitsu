@@ -100,7 +100,7 @@
         "text": "Se rimuovi questo asset dall'episodio selezionato, verrà rimosso anche da tutti gli shot sottostanti. Sei sicuro di volerlo rimuovere?"
       },
       "fields": {
-        "standby": "In attesa"
+        "standby": "Attesa"
       },
       "save_error": "Errore durante il salvataggio del casting",
       "show_library": "Mostra la libreria",
@@ -233,9 +233,9 @@
         "title": "Filtra per...",
         "union_and": "Soddisfa tutti i filtri seguenti",
         "union_or": "Soddisfa uno dei filtri seguenti",
-        "with_task": "Con attività",
+        "with_task": "Con un task",
         "with_thumbnail": "Con miniatura",
-        "without_task": "Senza attività",
+        "without_task": "Senza task",
         "without_thumbnail": "Senza miniatura",
         "is_assets_ready": "Gli asset sono pronti",
         "assets_ready": "Pronti",
@@ -705,7 +705,7 @@
         "start": "Avvia",
         "stop": "Interrompi",
         "cancel": "Annulla",
-        "recording": "Registrazione in corso...",
+        "recording": "Registrazione in corso",
         "permission_denied": "Autorizzazione negata. Consenti l'accesso al microfono e alla videocamera e riprova.",
         "no_device": "Nessun microfono o videocamera rilevato.",
         "not_supported": "La registrazione non è supportata da questo browser."
@@ -727,7 +727,7 @@
       "set_thumbnails": "Imposta le miniature dall'ultima anteprima",
       "subscribe": "Iscriviti alle notifiche",
       "delete_concepts": "Elimina concept",
-      "edit_concepts": "Modifica i collegamenti del concept"
+      "edit_concepts": "Modifica i link del concept"
     },
     "news": {
       "all": "Tutti",
@@ -909,7 +909,7 @@
       "archive_guest_error": "Impossibile archiviare questo ospite. Riprova.",
       "archived_guests": "Ospiti archiviati",
       "guests": "ospite | ospiti",
-      "seats_remaining": "nessun posto rimanente | {count} posto rimanente | {count} posti rimanenti"
+      "seats_remaining": "nessuna licenza rimanente | {count} licenza rimanente | {count} licenze rimanenti"
     },
     "playlists": {
       "add_assets": "Aggiungi asset",
@@ -1561,10 +1561,10 @@
       "assign": "Assegna a:",
       "assign_done": "{count} task pianificato. | {count} task pianificati.",
       "assign_error": "Impossibile assegnare i task. Riprova.",
-      "assign_help_entity_group": "Scegli una sequenza, un tipo di asset o un episodio: le sue entità da pianificare sono elencate sotto, rimuovi quelle da escludere. Il pulsante accanto al tipo di attività elenca anche le entità già assegnate.",
+      "assign_help_entity_group": "Scegli una sequenza, un tipo di asset o un episodio: le sue entità da pianificare sono elencate sotto, rimuovi quelle da escludere. Il pulsante accanto al tipo di task elenca anche le entità già assegnate.",
       "assign_help_form": "Il task di ogni entità è pianificato per una delle persone assegnate entro il periodo.",
-      "assign_help_task": "Modifica la data di inizio, la stima e le persone assegnate all'attività. La data di fine è ricavata dalla data di inizio e dalla stima.",
-      "assign_help_task_type": "Scegli un tipo di attività per elencare le sequenze, le inquadrature o gli asset con un'attività di quel tipo non ancora assegnata a nessuno.",
+      "assign_help_task": "Modifica la data di inizio, la stima e le persone assegnate al task. La data di fine è ricavata dalla data di inizio e dalla stima.",
+      "assign_help_task_type": "Scegli un tipo di task per elencare le sequenze, gli shot o gli asset con un task di quel tipo non ancora assegnato a nessuno.",
       "assign_no_fit": "{count} task non è rientrato nell'intervallo di date. | {count} task non sono rientrati nell'intervallo di date.",
       "batch_schedule": "Pianifica task in blocco",
       "confirm_move_children": "Spostare questa barra cambia anche le date di {count} sottoelemento. Continuare? | Spostare questa barra cambia anche le date di {count} sottoelementi. Continuare?",
@@ -1595,7 +1595,7 @@
         "locked": "Versione bloccata"
       },
       "force_unassign": "Sovrascrivi le assegnazioni precedenti",
-      "force_unassign_help": "Rimuove le persone attualmente assegnate a queste attività prima di assegnare le persone elencate sopra.",
+      "force_unassign_help": "Rimuove le persone attualmente assegnate a questi task prima di assegnare le persone elencate sopra.",
       "hours": "h",
       "md": "gp",
       "milestone": {
@@ -1821,7 +1821,7 @@
       "previous": "Task precedente",
       "unsubscribe_notifications": "Annulla iscrizione alle notifiche",
       "set_preview": "Usa l'anteprima corrente come miniatura",
-      "set_preview_error": "Si è verificato un errore durante l'impostazione dell'anteprima come miniatura.",
+      "set_preview_error": "Si è verificato un errore durante l'impostazione dell'anteprima come miniatura",
       "select_preview_file": "Seleziona i file (immagini, video, ecc.) dal tuo disco da usare come nuova revisione dell'anteprima per il task corrente:",
       "show_assignations": "Mostra le assegnazioni",
       "show_infos": "Mostra informazioni aggiuntive",
@@ -1908,11 +1908,11 @@
       "select_status": "Seleziona uno stato",
       "due_date": "Stato della scadenza",
       "due_after_today": "In scadenza dopo oggi",
-      "due_before_today": "In scadenza prima di oggi",
+      "due_before_today": "Con scadenza prima di oggi",
       "due_next_week": "In scadenza la prossima settimana",
       "due_next_month": "In scadenza il prossimo mese",
-      "due_previous_week": "In scadenza la settimana scorsa",
-      "due_previous_month": "In scadenza il mese scorso",
+      "due_previous_week": "Con scadenza la settimana scorsa",
+      "due_previous_month": "Con scadenza il mese scorso",
       "due_this_month": "In scadenza questo mese",
       "estimation_over": "Durata superiore alla stima",
       "estimation_approval_late": "Scadenza superata (feedback)",
@@ -2243,7 +2243,7 @@
     "concepts": {
       "actions": {
         "empty": "Nessun link",
-        "remove_link": "Rimuovi il collegamento",
+        "remove_link": "Rimuovi il link",
         "title": "Link ai concept"
       },
       "add_concept": "Aggiungi file per i nuovi concept",
