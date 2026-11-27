@@ -55,18 +55,29 @@
             v-if="isEmailChanged"
           />
         </div>
-        <two-factor-authentication
-          v-if="emailNeedTwoFA"
-          :preferred-two-fa="user.preferred_two_factor_authentication"
-          :two-fas-enabled="twoFAsEnabled"
-          :is-loading="loading.info"
-          :email="user.email"
-          :text-validate-button="$t('profile.save.button')"
-          :is-wrong-otp="isWrongOTP"
-          :is-profile="true"
-          @validate="saveInfo"
-          @changed-two-fa="isWrongOTP = false"
-        />
+        <template v-if="emailNeedTwoFA">
+          <two-factor-authentication
+            :preferred-two-fa="user.preferred_two_factor_authentication"
+            :two-fas-enabled="twoFAsEnabled"
+            :is-loading="loading.info"
+            :email="user.email"
+            :text-validate-button="$t('profile.save.button')"
+            :is-wrong-otp="isWrongOTP"
+            :is-profile="true"
+            @validate="saveInfo"
+            @changed-two-fa="isWrongOTP = false"
+          />
+          <div class="two-fa-actions">
+            <button
+              class="button cancel-button"
+              type="button"
+              :disabled="loading.info"
+              @click="closeEmailTwoFA"
+            >
+              {{ $t('main.cancel') }}
+            </button>
+          </div>
+        </template>
         <div class="grid-two">
           <combobox
             :label="$t('profile.timezone')"
@@ -377,6 +388,11 @@ const saveSection = async (section, twoFactorPayload) => {
 const saveInfo = twoFactorPayload => saveSection('info', twoFactorPayload)
 const saveNotifications = () => saveSection('notifications')
 
+const closeEmailTwoFA = () => {
+  emailNeedTwoFA.value = false
+  isWrongOTP.value = false
+}
+
 const localeChanged = value => {
   form.value.locale = value
   lang.applyLocale(value)
@@ -426,6 +442,14 @@ const removeAvatar = () => {
 
 // Filled before the first render: an empty form reads as an edited email.
 watch(user, syncFormFromUser, { immediate: true })
+
+// The saved email needs no 2FA code, once Zou answered the one in flight.
+watch(
+  () => !isEmailChanged.value && !loading.info,
+  isSavedEmail => {
+    if (isSavedEmail) closeEmailTwoFA()
+  }
+)
 
 // Head
 
@@ -499,6 +523,24 @@ useHead({ title: computed(() => `${t('profile.title')} - Kitsu`) })
 
   &.muted {
     color: var(--text-alt);
+  }
+}
+
+// Same look as the Cancel button of the 2FA settings.
+.two-fa-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5em;
+
+  .cancel-button {
+    background: transparent;
+    border-color: var(--border);
+    border-radius: 8px;
+    color: var(--text);
+
+    &:hover:not([disabled]) {
+      background: var(--background-hover);
+    }
   }
 }
 

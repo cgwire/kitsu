@@ -206,6 +206,83 @@ describe('pages/Profile', () => {
       )
     })
 
+    // Only a code accepted by Zou closed the 2FA prompt of an email change.
+    describe('its 2FA prompt', () => {
+      const findCancel = wrapper =>
+        wrapper
+          .findAll('button')
+          .find(button => button.text() === i18n.global.t('main.cancel'))
+
+      const openPrompt = async saveProfile => {
+        const page = mountPage({ totp_enabled: true }, saveProfile)
+        await type(page.wrapper, EMAIL, 'new@example.com')
+        await save(page.wrapper, INFO_CARD)
+        return page
+      }
+
+      test('closes on Cancel and saves nothing', async () => {
+        const { wrapper, saveProfile } = await openPrompt()
+
+        await findCancel(wrapper).trigger('click')
+
+        expect(wrapper.findComponent(TwoFactorAuthentication).exists()).toBe(
+          false
+        )
+        expect(saveProfile).not.toHaveBeenCalled()
+      })
+
+      test('closes once the saved email is put back', async () => {
+        const { wrapper } = await openPrompt()
+
+        await type(wrapper, EMAIL, 'ada@example.com')
+        await flushPromises()
+
+        expect(wrapper.findComponent(TwoFactorAuthentication).exists()).toBe(
+          false
+        )
+      })
+
+      test('stays open while its code is checked', async () => {
+        const { wrapper } = await openPrompt(() => new Promise(() => {}))
+
+        wrapper
+          .findComponent(TwoFactorAuthentication)
+          .vm.$emit('validate', { totp: '123456' })
+        await flushPromises()
+        // Closed now, it would show Zou's late answer at its next opening.
+        await type(wrapper, EMAIL, 'ada@example.com')
+        await flushPromises()
+
+        expect(findCancel(wrapper).element.disabled).toBe(true)
+        expect(wrapper.findComponent(TwoFactorAuthentication).exists()).toBe(
+          true
+        )
+      })
+
+      test('closes after a refused code once the saved email is back', async () => {
+        let refuse = null
+        const { wrapper } = await openPrompt(
+          () =>
+            new Promise((resolve, reject) => {
+              refuse = () => reject({ body: { data: { wrong_OTP: true } } })
+            })
+        )
+        wrapper
+          .findComponent(TwoFactorAuthentication)
+          .vm.$emit('validate', { totp: '123456' })
+        await flushPromises()
+        await type(wrapper, EMAIL, 'ada@example.com')
+        await flushPromises()
+
+        refuse()
+        await flushPromises()
+
+        expect(wrapper.findComponent(TwoFactorAuthentication).exists()).toBe(
+          false
+        )
+      })
+    })
+
     test('tells when the email is refused', async () => {
       vi.spyOn(console, 'error').mockImplementation(() => {})
       const refused = vi.fn(() => Promise.reject({ body: {} }))
