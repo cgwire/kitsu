@@ -69,18 +69,26 @@
       <span
         :key="`annotation-${index}`"
         class="annotation-mark"
-        :style="{
-          left: getAnnotationPosition(annotation) + 'px',
-          width: Math.max(effectiveFrameSize - 1, 5) + 'px'
+        :class="{
+          dragged: markerDrag?.annotation === annotation,
+          [`gesture-${markerGesture}`]: markerGesture && isOwnMarker(annotation)
         }"
-        @mouseenter="isFrameNumberVisible = true"
-        @mouseleave="isFrameNumberVisible = false"
-        @mousedown="startProgressDrag"
+        :style="getMarkerStyle(annotation)"
+        @mouseenter="onMarkerEnter(annotation)"
+        @mousemove="onMarkerHover"
+        @mouseleave="onMarkerLeave"
+        @mousedown="onMarkerMouseDown($event, annotation)"
         @touchstart="isFrameNumberVisible = true"
         @touchend="isFrameNumberVisible = false"
         @touchcancel="isFrameNumberVisible = false"
-        @click="emitProgressEvent($event, annotation)"
+        @click="onMarkerClicked($event, annotation)"
         v-for="(annotation, index) in annotations"
+      >
+      </span>
+      <span
+        class="annotation-mark ghost-mark"
+        :style="ghostMarkerStyle"
+        v-if="markerDrag"
       >
       </span>
       <span
@@ -114,6 +122,9 @@
           class="frame-tile"
           :style="getFrameBackgroundStyle(hoverFrame)"
         ></span>
+        <span class="annotation-authors" v-if="markerLabel">
+          {{ markerLabel }}
+        </span>
       </span>
     </div>
   </div>
@@ -122,6 +133,11 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 
+import {
+  getAnnotationFrame,
+  getAnnotationHoldEnd,
+  hasOwnObjects
+} from '@/lib/players/annotationMarkers'
 import {
   getTileCellIndex,
   getTileGeometry,
@@ -142,6 +158,16 @@ const props = defineProps({
     default: () => [],
     type: Array
   },
+  currentUserId: {
+    default: '',
+    type: String
+  },
+  // Ctrl/Cmd+drag moves a marker, Shift+drag holds its drawing over the
+  // next frames. Both act on the current user's objects only.
+  editableMarkers: {
+    default: false,
+    type: Boolean
+  },
   empty: {
     default: false,
     type: Boolean
@@ -153,6 +179,11 @@ const props = defineProps({
   frameStart: {
     default: undefined,
     type: Number
+  },
+  // (annotation) => label listing who drew on the marker frame.
+  getAnnotationLabel: {
+    default: null,
+    type: Function
   },
   handleIn: {
     default: 3,
@@ -193,6 +224,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
+  'annotation-hold-changed',
+  'annotation-moved',
   'end-scrub',
   'handle-in-changed',
   'handle-out-changed',
@@ -205,6 +238,10 @@ const handleInDragging = ref(false)
 const handleOutDragging = ref(false)
 const hoverFrame = ref(0)
 const isFrameNumberVisible = ref(false)
+// { annotation, mode: 'move' | 'hold', startFrame, endFrame, frame }
+const markerDrag = ref(null)
+const markerGesture = ref(null)
+const markerLabel = ref('')
 const progress = ref(null)
 const progressDragging = ref(false)
 // undefined while the sprite loads, null when there is none.
@@ -213,6 +250,8 @@ const width = ref(0)
 
 // Mouse scratch state; not reactive — written from event handlers, never read by template
 let currentMouseFrame = {}
+let markerGrabFrame = 0
+let isMarkerClickSuppressed = false
 
 const getClientX = event =>
   event.touches?.[0]?.clientX ??
@@ -407,10 +446,139 @@ watch(
   { immediate: true }
 )
 
+const MARKER_COLOR = '#ee2750'
+const MARKER_HOLD_COLOR = 'rgba(238, 39, 80, 0.5)'
+
 const getAnnotationPosition = annotation => {
   if (props.nbFrames === 0) return 0
-  const frameNumber = Math.round(annotation.time / props.frameDuration)
-  return frameToX(frameNumber)
+  return frameToX(getAnnotationFrame(annotation, props.frameDuration))
+}
+
+const getSpanWidth = (startFrame, endFrame) =>
+  Math.max((endFrame - startFrame + 1) * effectiveFrameSize.value - 1, 5) + 'px'
+
+// The held frames are drawn lighter than the annotated one.
+const getMarkerStyle = annotation => {
+  const startFrame = getAnnotationFrame(annotation, props.frameDuration)
+  const endFrame = getAnnotationHoldEnd(annotation, props.frameDuration)
+  const style = {
+    left: getAnnotationPosition(annotation) + 'px',
+    width: getSpanWidth(startFrame, endFrame)
+  }
+  if (endFrame > startFrame) {
+    const head = Math.max(effectiveFrameSize.value, 5)
+    style.background =
+      `linear-gradient(to right, ${MARKER_COLOR} ${head}px, ` +
+      `${MARKER_HOLD_COLOR} ${head}px)`
+  }
+  return style
+}
+
+const ghostMarkerStyle = computed(() => {
+  const drag = markerDrag.value
+  if (!drag) return {}
+  const startFrame = drag.mode === 'move' ? drag.frame : drag.startFrame
+  const endFrame =
+    drag.mode === 'move'
+      ? drag.frame + drag.endFrame - drag.startFrame
+      : drag.frame
+  return {
+    left: frameToX(startFrame) + 'px',
+    width: getSpanWidth(startFrame, endFrame)
+  }
+})
+
+const isOwnMarker = annotation =>
+  props.editableMarkers && hasOwnObjects(annotation, props.currentUserId)
+
+const getGesture = event => {
+  if (event.ctrlKey || event.metaKey) return 'move'
+  if (event.shiftKey) return 'hold'
+  return null
+}
+
+const onMarkerEnter = annotation => {
+  isFrameNumberVisible.value = true
+  markerLabel.value = props.getAnnotationLabel?.(annotation) || ''
+}
+
+const onMarkerHover = event => {
+  markerGesture.value = props.editableMarkers ? getGesture(event) : null
+}
+
+const onMarkerLeave = () => {
+  isFrameNumberVisible.value = false
+  markerGesture.value = null
+  markerLabel.value = ''
+}
+
+const onMarkerMouseDown = (event, annotation) => {
+  const mode = getGesture(event)
+  if (!mode || !isOwnMarker(annotation)) {
+    startProgressDrag()
+    return
+  }
+  event.preventDefault()
+  event.stopPropagation()
+  const startFrame = getAnnotationFrame(annotation, props.frameDuration)
+  const endFrame = getAnnotationHoldEnd(annotation, props.frameDuration)
+  markerGrabFrame = getMouseFrame(event).frameNumber
+  markerDrag.value = {
+    annotation,
+    mode,
+    startFrame,
+    endFrame,
+    frame: mode === 'move' ? startFrame : endFrame
+  }
+}
+
+const doMarkerDrag = event => {
+  const drag = markerDrag.value
+  const { frameNumber } = getMouseFrame(event)
+  const lastFrame = props.nbFrames - 1
+  if (drag.mode === 'move') {
+    const span = drag.endFrame - drag.startFrame
+    const frame = drag.startFrame + frameNumber - markerGrabFrame
+    drag.frame = Math.min(Math.max(frame, 0), Math.max(lastFrame - span, 0))
+  } else {
+    drag.frame = Math.min(Math.max(frameNumber, drag.startFrame), lastFrame)
+  }
+  hoverFrame.value = drag.frame + 1
+  frameNumberLeftPosition.value = frameToX(drag.frame)
+}
+
+const stopMarkerDrag = () => {
+  const drag = markerDrag.value
+  if (!drag) return
+  markerDrag.value = null
+  // The click that ends the gesture must not seek on top of it.
+  isMarkerClickSuppressed = true
+  setTimeout(() => {
+    isMarkerClickSuppressed = false
+  })
+  const { annotation, mode, startFrame, endFrame, frame } = drag
+  if (mode === 'move' && frame !== startFrame) {
+    emit('annotation-moved', { annotation, frame })
+  } else if (mode === 'hold' && frame !== endFrame) {
+    emit('annotation-hold-changed', {
+      annotation,
+      holdFrames: frame - startFrame
+    })
+  }
+}
+
+const onMarkerClicked = (event, annotation) => {
+  if (isMarkerClickSuppressed) {
+    isMarkerClickSuppressed = false
+    return
+  }
+  // The held part of the marker seeks like the bar, to the frame clicked;
+  // only its first frame lands on the annotation.
+  const clickedFrame = getMouseFrame(event).frameNumber
+  const isOnHeldFrame =
+    clickedFrame > getAnnotationFrame(annotation, props.frameDuration) &&
+    clickedFrame <= getAnnotationHoldEnd(annotation, props.frameDuration)
+  emitProgressEvent(event, isOnHeldFrame ? null : annotation)
 }
 
 // Remember the last frame pushed by the parent so the fill can be
@@ -495,6 +663,10 @@ const doProgressDrag = event => {
   // firing after a preview switch hides it (v-show) or drops its frame
   // count. Without geometry every position maps to NaN.
   if (!width.value || !props.nbFrames) return
+  if (markerDrag.value) {
+    doMarkerDrag(event)
+    return
+  }
   if (
     progressDragging.value ||
     handleInDragging.value ||
@@ -564,6 +736,7 @@ const getFrameBackgroundStyle = frame => {
 // window, and keeps sending the moves: only a released button ends a drag.
 const onDocumentLeave = event => {
   if (event.buttons) return
+  stopMarkerDrag()
   stopProgressDrag()
   stopHandleInDrag()
   stopHandleOutDrag()
@@ -573,6 +746,7 @@ const domEvents = [
   ['mousemove', doProgressDrag],
   ['touchmove', doProgressDrag],
   ['mouseup', stopProgressDrag],
+  ['mouseup', stopMarkerDrag],
   ['mouseleave', onDocumentLeave],
   ['touchend', stopProgressDrag],
   ['touchcancel', stopProgressDrag],
@@ -644,6 +818,36 @@ defineExpose({ updateProgressBar })
   &.comparison-mark {
     opacity: 0.5;
   }
+
+  &.gesture-move {
+    cursor: move;
+  }
+
+  &.gesture-hold {
+    cursor: ew-resize;
+  }
+
+  &.dragged {
+    opacity: 0.35;
+  }
+
+  &.ghost-mark {
+    outline: 1px solid $white;
+    pointer-events: none;
+  }
+}
+
+// Above the frame thumbnail, whose box has a fixed height.
+.annotation-authors {
+  background: $black;
+  border-radius: 5px;
+  bottom: calc(100% + 4px);
+  font-size: 0.85em;
+  left: 0;
+  overflow-wrap: anywhere;
+  padding: 0.3em;
+  position: absolute;
+  right: 0;
 }
 
 .timeline-minimap {

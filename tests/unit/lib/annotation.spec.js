@@ -113,6 +113,14 @@ describe('lib/annotation', () => {
       expect(result.createdBy).toBe('user-1')
     })
 
+    it('keeps the timeline hold, and drops a cleared one', () => {
+      const obj = { holdFrames: 6, toJSON: () => ({ type: 'path' }) }
+      addSerialization(obj)
+      expect(obj.serialize().holdFrames).toBe(6)
+      obj.holdFrames = 0
+      expect(obj.serialize()).not.toHaveProperty('holdFrames')
+    })
+
     it('returns the object so it can be chained', () => {
       const obj = { toJSON: () => ({}) }
       expect(addSerialization(obj)).toBe(obj)
