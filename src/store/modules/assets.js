@@ -1486,17 +1486,6 @@ const mutations = {
   },
 
   [REMOVE_SELECTED_TASK](state, validationInfo) {
-    if (
-      validationInfo.x === undefined &&
-      validationInfo.task?.column &&
-      cache.assetMap.get(validationInfo.task.entity.id)
-    ) {
-      const entity = validationInfo.task.entity
-      const taskType = validationInfo.task.column
-      const list = state.displayedAssets.flat()
-      validationInfo.x = list.findIndex(e => e.id === entity.id)
-      validationInfo.y = state.assetValidationColumns.indexOf(taskType.id)
-    }
     state.assetSelectionGrid.delete(`${validationInfo.x}-${validationInfo.y}`)
   },
 

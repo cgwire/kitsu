@@ -848,7 +848,8 @@ const {
   stickedColumns,
   stickedDisplayedValidationColumns,
   stickedVisibleMetadataDescriptors,
-  toggleColumnSelector
+  toggleColumnSelector,
+  unselectTask
 } = useEntityList({
   type: 'asset',
   props,
@@ -948,7 +949,7 @@ const assetPath = assetId => {
 }
 
 // The pages drive the list through a ref.
-defineExpose({ selectTaskFromQuery, setScrollPosition })
+defineExpose({ selectTaskFromQuery, setScrollPosition, unselectTask })
 </script>
 
 <style lang="scss" scoped>

@@ -174,3 +174,12 @@ export const mountEntityList = async (
   await flushPromises()
   return wrapper
 }
+
+// A page calls its list through a template ref, which reaches only what the
+// list exposes, where wrapper.vm reads its other setup bindings too: the list
+// mounts under a parent holding that ref.
+export const mountEntityListInPage = (list, options) =>
+  mountEntityList(
+    { components: { list }, template: '<list ref="list" />' },
+    { ...options, stubs: { [list.__name]: false, ...options.stubs } }
+  )

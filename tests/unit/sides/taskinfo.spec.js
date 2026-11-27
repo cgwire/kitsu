@@ -305,6 +305,39 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  describe('selected tasks', () => {
+    // The page unselects the cell of the task in its list.
+    it('removes a task from the selection and hands it to the page', async () => {
+      const other = buildTask({
+        id: 'task-2',
+        entity_id: 'entity-2',
+        entity_name: 'SH02'
+      })
+      const { wrapper, store } = await mountPanel({
+        props: { withActions: true },
+        getterOverrides: {
+          nbSelectedTasks: () => 2,
+          selectedTasks: () =>
+            new Map([
+              [TASK_ID, buildTask()],
+              [other.id, other]
+            ])
+        }
+      })
+      store.dispatch.mockClear()
+      const line = wrapper
+        .findAll('.selected-task-line')
+        .find(row => row.text().includes('SH02'))
+
+      await line.find('[role="button"]').trigger('click')
+
+      expect(store.dispatch.mock.calls).toEqual([
+        ['removeSelectedTask', { task: other }]
+      ])
+      expect(wrapper.emitted('task-removed')).toEqual([[other]])
+    })
+  })
+
   describe('action panel', () => {
     it('shows the actions of a task selection', async () => {
       const { wrapper } = await mountPanel({

@@ -1629,13 +1629,9 @@ const refreshPreviewPlay = () => {
   previewPlayerRef.value?.resize()
 }
 
+// An entity page unselects the cell of the task in its list. The task lists
+// follow the store selection on their own.
 const removeTaskFromSelection = task => {
-  const data = {
-    column: { id: task.task_type_id },
-    entity: { id: task.entity_id },
-    task
-  }
-  store.dispatch('removeSelectedTask', { task: data }) // remove list selection
   store.dispatch('removeSelectedTask', { task })
   emit('task-removed', task)
 }

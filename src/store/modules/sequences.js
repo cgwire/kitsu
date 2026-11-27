@@ -1037,17 +1037,6 @@ const mutations = {
   },
 
   [REMOVE_SELECTED_TASK](state, validationInfo) {
-    if (
-      validationInfo.x === undefined &&
-      validationInfo.task?.column &&
-      cache.sequenceMap.get(validationInfo.task.entity.id)
-    ) {
-      const entity = validationInfo.task.entity
-      const taskType = validationInfo.task.column
-      const list = state.displayedSequences.flat()
-      validationInfo.x = list.findIndex(e => e.id === entity.id)
-      validationInfo.y = state.sequenceValidationColumns.indexOf(taskType.id)
-    }
     state.sequenceSelectionGrid.delete(
       `${validationInfo.x}-${validationInfo.y}`
     )

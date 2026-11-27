@@ -11,6 +11,7 @@ import {
   descriptor,
   filledColumns,
   mountEntityList,
+  mountEntityListInPage,
   production,
   setHeaderWidth,
   stickColumns,
@@ -255,6 +256,32 @@ describe('lists/ShotList selection', () => {
     expect(
       wrapper.findAll('td.validation').map(cell => cell.classes('selected'))
     ).toEqual([false, false, true])
+
+    wrapper.unmount()
+  })
+
+  test('unselects the cell of a task the task panel removes', async () => {
+    const wrapper = await mountEntityListInPage(ShotList, {
+      getters: {
+        currentProduction: production,
+        shotFilledColumns: filledColumns
+      },
+      props: {
+        displayedShots: [[shot('shot-1'), shot('shot-2')], [shot('shot-3')]]
+      }
+    })
+    const task = {
+      id: 'task-shot-3',
+      entity_id: 'shot-3',
+      task_type_id: taskTypeId
+    }
+
+    wrapper.vm.$refs.list.unselectTask(task)
+
+    expect(wrapper.vm.$store.commit).toHaveBeenCalledWith(
+      'REMOVE_SELECTED_TASK',
+      { task, x: 2, y: 0 }
+    )
 
     wrapper.unmount()
   })

@@ -9,10 +9,12 @@ import {
   descriptor,
   filledColumns,
   mountEntityList,
+  mountEntityListInPage,
   production,
   stickColumns,
   stickyLeft,
-  stubHeaderWidths
+  stubHeaderWidths,
+  taskTypeId
 } from '../../fixtures/entity-list'
 
 const mountList = props =>
@@ -116,6 +118,35 @@ describe('lists/SequenceList sticky columns', () => {
 
     expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('200px')
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('320px')
+
+    wrapper.unmount()
+  })
+})
+
+describe('lists/SequenceList task panel', () => {
+  test('unselects the cell of a task the task panel removes', async () => {
+    const wrapper = await mountEntityListInPage(SequenceList, {
+      getters: {
+        currentProduction: production,
+        displayedSequencesLength: 2,
+        sequenceFilledColumns: filledColumns
+      },
+      props: {
+        displayedSequences: ['sequence-1', 'sequence-2'].map(id => ({ id, name: id, data: {} }))
+      }
+    })
+    const task = {
+      id: 'task-sequence-2',
+      entity_id: 'sequence-2',
+      task_type_id: taskTypeId
+    }
+
+    wrapper.vm.$refs.list.unselectTask(task)
+
+    expect(wrapper.vm.$store.commit).toHaveBeenCalledWith(
+      'REMOVE_SELECTED_TASK',
+      { task, x: 1, y: 0 }
+    )
 
     wrapper.unmount()
   })

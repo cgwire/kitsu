@@ -2782,9 +2782,7 @@ describe('Shots store, through a store', () => {
       ])
       expect(store.getters.selectedShots.size).toBe(0)
 
-      store.commit(REMOVE_SELECTED_TASK, {
-        task: { entity: { id: 's1' }, column: { id: 'tt-anim' } }
-      })
+      store.commit(REMOVE_SELECTED_TASK, { x: 0, y: 0 })
       expect([...store.getters.shotSelectionGrid]).toEqual(['0-1', '1-0'])
     })
 

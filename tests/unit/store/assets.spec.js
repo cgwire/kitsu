@@ -2840,22 +2840,13 @@ describe('Assets store, list workflow', () => {
       ])
     })
 
-    test('unselects a task cell from its asset and task type', () => {
+    test('unselects the task cell of its row and column', () => {
       const store = buildStore()
-      load(store, [
-        buildAsset('a1', 'Rock', { tasks: [buildTask('t1', 'tt-model')] }),
-        buildAsset('a2', 'Tree', { tasks: [buildTask('t2', 'tt-model')] })
-      ])
       store.state.assets.assetSelectionGrid.add('0-0')
       store.state.assets.assetSelectionGrid.add('1-0')
 
-      store.commit('REMOVE_SELECTED_TASK', {
-        task: { column: { id: 'tt-model' }, entity: { id: 'a2' } }
-      })
+      store.commit('REMOVE_SELECTED_TASK', { x: 1, y: 0 })
       expect([...store.getters.assetSelectionGrid]).toEqual(['0-0'])
-
-      store.commit('REMOVE_SELECTED_TASK', { x: 0, y: 0 })
-      expect(store.getters.assetSelectionGrid.size).toBe(0)
     })
   })
 

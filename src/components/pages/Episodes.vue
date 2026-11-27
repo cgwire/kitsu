@@ -107,6 +107,7 @@
         :task="selectedTasks.values().next().value"
         entity-type="Episode"
         with-actions
+        @task-removed="onTaskRemoved"
       />
     </div>
 
@@ -388,6 +389,7 @@ const {
   onKeepTaskPanelOpenChanged,
   onMetadataChanged,
   onSearchChange,
+  onTaskRemoved,
   openEditModal: onEditClicked,
   optionalColumns,
   parsedCSV,

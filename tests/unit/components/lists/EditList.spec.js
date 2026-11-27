@@ -9,6 +9,7 @@ import {
   descriptor,
   filledColumns,
   mountEntityList,
+  mountEntityListInPage,
   production,
   setHeaderWidth,
   stickColumns,
@@ -110,6 +111,34 @@ describe('lists/EditList sticky columns', () => {
 
     expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('250px')
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('370px')
+
+    wrapper.unmount()
+  })
+})
+
+describe('lists/EditList task panel', () => {
+  test('unselects the cell of a task the task panel removes', async () => {
+    const wrapper = await mountEntityListInPage(EditList, {
+      getters: {
+        currentProduction: production,
+        editFilledColumns: filledColumns
+      },
+      props: {
+        displayedEdits: ['edit-1', 'edit-2'].map(id => ({ id, name: id, data: {} }))
+      }
+    })
+    const task = {
+      id: 'task-edit-2',
+      entity_id: 'edit-2',
+      task_type_id: taskTypeId
+    }
+
+    wrapper.vm.$refs.list.unselectTask(task)
+
+    expect(wrapper.vm.$store.commit).toHaveBeenCalledWith(
+      'REMOVE_SELECTED_TASK',
+      { task, x: 1, y: 0 }
+    )
 
     wrapper.unmount()
   })

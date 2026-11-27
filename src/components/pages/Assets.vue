@@ -119,6 +119,7 @@
         :task="selectedTasks.values().next().value"
         entity-type="Asset"
         with-actions
+        @task-removed="onTaskRemoved"
       />
     </div>
 
@@ -448,6 +449,7 @@ const {
   onMetadataChanged,
   onRestoreClicked,
   onSearchChange,
+  onTaskRemoved,
   openEditModal: onEditClicked,
   parsedCSV,
   renderColumns,
