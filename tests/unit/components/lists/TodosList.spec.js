@@ -307,6 +307,30 @@ describe('lists/TodosList', () => {
       wrapper.unmount()
     })
 
+    // The x of the task panel only left the store selection: the row stayed
+    // highlighted. My Tasks shows no field in its rows.
+    test('unhighlights a row the task panel removes', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = await mountSelectableList({ selection })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+      await cells[2].trigger('click', { ctrlKey: true })
+
+      await wrapper.vm.$store.dispatch('removeSelectedTask', {
+        task: tasks[1]
+      })
+      await nextTick()
+
+      expect(
+        wrapper
+          .findAll('tbody tr.datatable-row')
+          .map(row => row.classes('selected'))
+      ).toEqual([true, false, true])
+
+      wrapper.unmount()
+    })
+
     test('selects a row of a multi-selection alone on a click', async () => {
       const selection = trackTaskSelection()
       const wrapper = await mountSelectableList({ selection })

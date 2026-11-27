@@ -50,6 +50,16 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
     lastSelection.value = index >= 0 ? index : null
   }
 
+  // The store selection can lose tasks the list did not unselect, as through
+  // the x of the task panel: their rows leave the grid, which the fields typed
+  // in a row apply to.
+  const dropUnselectedRows = () => {
+    const selectedTasks = store.getters.selectedTasks
+    Object.keys(selectionGrid.value).forEach(taskId => {
+      if (!selectedTasks.has(taskId)) delete selectionGrid.value[taskId]
+    })
+  }
+
   const addRow = (index, task) => {
     store.dispatch('addSelectedTask', { task })
     emit('task-selected', task)
@@ -149,8 +159,12 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
   // --------------------------------------------------------------------------
   watch(tasks, followTasks)
 
-  watch(nbSelectedTasks, () => {
-    if (nbSelectedTasks.value === 0) resetSelection()
+  watch(nbSelectedTasks, (count, previousCount) => {
+    if (count === 0) {
+      resetSelection()
+    } else if (count < previousCount) {
+      dropUnselectedRows()
+    }
   })
 
   // Lifecycle
