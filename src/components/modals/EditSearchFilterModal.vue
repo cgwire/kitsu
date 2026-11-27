@@ -58,6 +58,11 @@
     </div>
 
     <modal-footer
+      :confirm-label="
+        searchQueryToEdit?.id
+          ? $t('main.save_changes')
+          : $t('main.search_query_create')
+      "
       :error-text="
         searchQueryToEdit?.id
           ? $t('main.search_query_edit_error')

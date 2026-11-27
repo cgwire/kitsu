@@ -163,6 +163,7 @@
 
     <confirm-modal
       :active="isDeleteModalActive"
+      :confirm-button-text="$t('productions.clients.delete_button')"
       :is-danger="true"
       :is-error="hasError"
       :error-text="$t('productions.clients.error')"

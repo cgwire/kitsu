@@ -4,6 +4,7 @@ import { reactive } from 'vue'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
@@ -109,8 +110,8 @@ describe('Assets page, restore', () => {
     await wrapper
       .findComponent({ name: 'AssetList' })
       .vm.$emit('restore-clicked', { id: 'asset-1', name: 'Tree' })
-    const modal = () =>
-      wrapper.findAllComponents(DeleteModal).find(modal => modal.props('active'))
+    const modal = () => wrapper.findComponent(ConfirmModal)
+    expect(modal().props('confirmButtonText')).toBe('row_actions.restore')
 
     await modal().vm.$emit('confirm')
     await flushPromises()

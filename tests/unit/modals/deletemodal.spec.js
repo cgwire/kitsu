@@ -9,6 +9,13 @@ const mountModal = (props = {}) =>
   })
 
 describe('DeleteModal', () => {
+  it('names the action on its button', () => {
+    expect(mountModal().get('a.button').text()).toEqual('main.delete')
+    expect(
+      mountModal({ deleteButtonText: 'Remove' }).get('a.button').text()
+    ).toEqual('Remove')
+  })
+
   // The server explanation is technical and stays in English, so it is
   // shown apart from the translated error instead of blended into it.
   it('shows the technical details apart from the error text', () => {

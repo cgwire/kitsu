@@ -11,6 +11,7 @@
       "warning": "Autorize apenas se você mesmo iniciou este login a partir do aplicativo. Ele acessará o Kitsu com as suas permissões."
     },
     "assets": {
+      "create": "Criar um asset",
       "delete_error": "Ocorreu um erro ao excluir este asset. Pode haver dados vinculados a ele. Tem certeza de que este asset não possui nenhuma tarefa vinculada a ele?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "edit_fail": "Falha ao salvar, pode ser devido ao fato de que já existe um asset com um nome semelhante.",
@@ -52,6 +53,7 @@
     "asset_types": {
       "all_asset_types": "Todos os tipos de assets",
       "all_hidden": "Todos os tipos de assets estão ocultos.",
+      "create": "Criar um tipo de asset",
       "create_error": "Ocorreu um erro ao salvar este tipo de asset. Tem certeza de que não há nenhum tipo de asset com nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este tipo de asset. Pode haver dados vinculados a ele. Tem certeza de que este tipo de asset não possui nenhum asset vinculado a ele?",
@@ -75,6 +77,7 @@
     },
     "breakdown": {
       "link_assets": "Vincular assets",
+      "change_label": "Alterar o rótulo",
       "copy_casting": "Copiar este casting (ctrl + V cola-o nas linhas selecionadas)",
       "edit_label": "Alterar o rótulo do asset",
       "empty": "Casting vazio",
@@ -169,9 +172,11 @@
         "intro": "Escolha uma tarefa da mesma entidade para mover este comentário. Notificações serão enviadas na tarefa de destino, como para um novo comentário.",
         "no_target": "Não há nenhuma outra tarefa disponível nesta entidade.",
         "target_label": "Tarefa de destino",
+        "confirm": "Mover o comentário",
         "title": "Mover comentário para outra tarefa"
       },
       "move_to_task": "Mover para",
+      "save": "Salvar o comentário",
       "title": "Comentários",
       "toggle_for_client": "Visibilidade para o cliente",
       "player": {
@@ -187,6 +192,7 @@
       }
     },
     "custom_actions": {
+      "create": "Criar uma ação personalizada",
       "create_error": "Ocorreu um erro ao salvar esta ação personalizada. Tem certeza de que não há outra ação com o mesmo nome?",
       "delete_text": "Tem certeza de que deseja remover a ação personalizada {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir esta ação personalizada.",
@@ -212,6 +218,7 @@
     },
     "entities": {
       "build_filter": {
+        "apply": "Aplicar o filtro",
         "asset_type": "Tipo de Asset",
         "add_descriptor_filter": "Adicionar um filtro de metadados",
         "add_status_filter": "Adicionar um filtro de status da tarefa",
@@ -255,6 +262,7 @@
         "undefined": "Não definido",
         "undefined_pattern": "Não definido",
         "upload": "Adicionar miniaturas",
+        "confirm": "Adicionar as miniaturas",
         "edits_pattern": "\"NomeDaMontagem\", por exemplo, Trailer.",
         "edits_tvshow_pattern": "\"NomeDoEpisódio NomeDaMontagem\", por exemplo, E01_Trailer.",
         "explanation": "A adição de uma miniatura requer a definição de uma nova visualização. Para definir várias miniaturas ao mesmo tempo, você deve primeiro escolher um tipo de tarefa para criar as novas visualizações. As miniaturas serão definidas a partir dessas novas visualizações.",
@@ -299,6 +307,7 @@
     "episodes": {
       "all_episodes": "Todos os episódios",
       "all_hidden": "Todos os episódios estão ocultos.",
+      "create": "Criar um episódio",
       "edit_error": "Ocorreu um erro ao salvar este episódio. Tem certeza de que não há episódio com nome semelhante?",
       "delete_error": "Ocorreu um erro ao excluir este episódio. Pode haver dados vinculados a ele. Tem certeza que este episódio não tem nenhuma sequência ligada a ele?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados? Todos os shots e visualizações relacionados serão excluídos. Por favor, confirme digitando o nome do episódio abaixo.",
@@ -442,6 +451,9 @@
       "changelog": "Registro de alterações",
       "next_entity": "Próxima entidade",
       "previous_entity": "Entidade anterior",
+      "save_changes": "Salvar alterações",
+      "save_picture": "Salvar a imagem",
+      "search_query_create": "Criar um filtro de pesquisa",
       "select_section": "Selecione uma seção",
       "technical_details": "Detalhes técnicos:",
       "about": "Sobre",
@@ -457,8 +469,6 @@
       "click_to_add": "Clique para adicionar",
       "click_to_remove": "Clique para remover",
       "close": "Fechar",
-      "confirmation": "Confirmar",
-      "confirmation_and_stay": "Confirmar e permanecer",
       "date": "Data",
       "dark_theme": "Tema Escuro",
       "days_spent": "dia gasto | dias gastos",
@@ -513,6 +523,7 @@
         "choose": "Escolher",
         "error_empty": "O arquivo está vazio.",
         "error_imported_rows": "{count} linha foi importada antes do erro. | {count} linhas foram importadas antes do erro.",
+        "import_data": "Importar os dados",
         "import_success": "{count} linha foi importada. | {count} linhas foram importadas.",
         "error_line": "Linha {line}",
         "error_read": "Não foi possível ler o arquivo. Selecione-o novamente.",
@@ -647,9 +658,12 @@
       "no_results": "Nenhum resultado",
       "link": "Link",
       "list": "Lista",
+      "filter_group_create": "Criar um grupo de filtros",
       "hours_spent": "hora gasta | horas gastas",
       "hours_expected": "hora prevista | horas previstas",
       "hours_estimated": "hora estimada | horas estimadas",
+      "create_and_add_another": "Criar e adicionar outro",
+      "create_and_stay": "Criar e permanecer",
       "created_by": "Criado por",
       "day": "Dia",
       "hour": "Hora",
@@ -679,7 +693,9 @@
       "expand": "Expandir",
       "expand_all": "Expandir tudo",
       "hours": "hora | horas",
+      "remove_search_filter_group_button": "Remover o grupo",
       "remove_search_query": "Tem certeza de que deseja remover a consulta de pesquisa \"{name}\"?",
+      "remove_search_query_button": "Remover o filtro",
       "remove_search_query_error": "Ocorreu um erro ao remover essa consulta de pesquisa.",
       "remove_search_filter_group": "Tem certeza de que deseja remover o grupo de filtros de pesquisa \"{name}\"?",
       "remove_search_filter_group_error": "Ocorreu um erro ao remover esse grupo de filtros de pesquisa.",
@@ -823,6 +839,7 @@
       "persons": "usuário | usuários",
       "project_role": "Papel do projeto",
       "select_person": "Selecione um usuário...",
+      "self_role_downgrade_button": "Rebaixar meu papel",
       "team": "Equipe",
       "title": "Pessoas",
       "unactive": "Inativo",
@@ -870,6 +887,7 @@
         "supervisor": "Supervisor",
         "all": "Todos os papéis"
       },
+      "archive_guest_button": "Arquivar o convidado",
       "confirm_edit": "Salvar alterações do usuário",
       "create": "Criar usuário",
       "user_limit_error": "Você atingiu seu limite de usuários. Entre em contato com nossa equipe para fazer upgrade do seu plano.",
@@ -1096,6 +1114,7 @@
         "copy": "Copiar",
         "create": "Criar conta de pré-visualização",
         "delete": "Excluir",
+        "delete_button": "Excluir a conta",
         "delete_confirm": "Excluir a conta de pré-visualização desta produção?",
         "description": "Veja o Kitsu exatamente como um cliente, somente leitura e sem ocupar uma licença.",
         "error": "Ocorreu um erro ao atualizar a conta de pré-visualização.",
@@ -1205,6 +1224,7 @@
         "number": "Número",
         "string": "Texto",
         "tags": "Lista de tags",
+        "add_column": "Adicionar a coluna",
         "applies_to_all_projects": "Esta coluna é adicionada a todas as produções abertas. Cada produção pode ter seu próprio valor na visualização em lista.",
         "delete_list_column_text": "Isso removerá a coluna “{name}” de todas as produções abertas, incluindo os valores armazenados. Continuar?",
         "date": "Data",
@@ -1462,6 +1482,7 @@
       "preferences_title": "Preferências"
     },
     "task_status": {
+      "create": "Criar um status de tarefa",
       "create_error": "Ocorreu um erro ao salvar este status de tarefa. Tem certeza de que não há status de tarefa com nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este status de tarefa. Pode haver dados vinculados a ele. Tem certeza de que este status de tarefa não tem nenhuma tarefa vinculada a ele?",
@@ -1494,6 +1515,7 @@
       "remove_status": "Remover o status {name}"
     },
     "task_types": {
+      "create": "Criar um tipo de tarefa",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este tipo de tarefa. Pode haver dados vinculados a ele. Tem certeza de que este tipo de tarefa não possui nenhuma tarefa vinculada a ele?",
       "delete_blocked_by_automations": "Ainda há automações de status que usam este tipo de tarefa, incluindo as arquivadas. Edite-as ou exclua-as primeiro.",
@@ -1532,6 +1554,7 @@
     "sequences": {
       "all_hidden": "Todas as sequências estão ocultas.",
       "all_sequences": "Todas as sequências",
+      "create": "Criar uma sequência",
       "edit_error": "Ocorreu um erro ao salvar esta sequência. Tem certeza de que não há nenhuma sequência com nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados? Todos os shots e visualizações relacionados serão excluídos. Confirme digitando o nome da sequência abaixo.",
       "delete_error": "Ocorreu um erro ao excluir esta sequência. Pode haver dados vinculados a ela. Tem certeza de que esta sequência não tem nenhum shot vinculado a ela?",
@@ -1556,6 +1579,7 @@
     "schedule": {
       "already_assigned": "Já atribuído",
       "apply_to_prod": "Aplicar à produção",
+      "apply_to_prod_button": "Aplicar à produção",
       "apply_to_prod_confirm": "Tem certeza de que deseja aplicar essa versão do cronograma à produção atual? Isso substituirá os valores atuais da tarefa.",
       "apply_to_prod_error": "Ocorreu um erro ao aplicar a versão do cronograma à produção atual.",
       "assign": "Atribuir a:",
@@ -1599,6 +1623,7 @@
       "hours": "h",
       "md": "md",
       "milestone": {
+        "add": "Adicionar um marco",
         "add_milestone": "Adicionar marco para",
         "edit_milestone": "Editar marco para",
         "name": "Nome",
@@ -1617,6 +1642,7 @@
       "mode": "Modo de exibição",
       "mode_prev": "Previsão",
       "mode_real": "Real",
+      "move_children_button": "Mover com os subitens",
       "nb_tasks_out_of_range": "{count} tarefa fora das datas exibidas | {count} tarefas fora das datas exibidas",
       "nb_undated_tasks": "{count} tarefa sem datas | {count} tarefas sem datas",
       "new_version": "Nova versão",
@@ -1716,6 +1742,7 @@
       "restore_text": "Tem certeza de que deseja restaurar {name} de seu arquivo?",
       "restore_error": "Ocorreu um erro ao restaurar este shot.",
       "sequences": "Sequências",
+      "set_frames": "Definir os números de quadros",
       "single_tab": "Individual",
       "tasks": "Tarefas do shot",
       "title": "Shots",
@@ -1742,6 +1769,7 @@
       "cancel_text": "Tem certeza de que deseja arquivar {name}?",
       "delete_for_selection": "Excluir o shot selecionado | Excluir os {nbSelectedShots} shots selecionados",
       "multiple_delete_error": "Ocorreu um erro ao excluir um shot. Pode haver dados existentes atualmente vinculados ao shot. Tem certeza de que não há nenhuma tarefa vinculada a um shot selecionado?",
+      "create": "Criar um shot",
       "creation_explanation": "Para adicionar shots, primeiro você precisa criar um episódio e uma sequência. Digite um nome de episódio na parte inferior da coluna da esquerda e clique em \"Adicionar\" para criar um novo episódio. Selecione esse episódio e repita a mesma operação para a sequência. Por fim, selecione uma sequência e digite o nome de um shot no campo na parte inferior da coluna da direita. Clique no botão \"Adicionar\" abaixo. Seu primeiro shot foi criado. Você pode adicionar muitos outros! Se não for uma série de TV, você poderá criar uma sequência diretamente.",
       "get_frames_from_previews": "Definir números de quadros a partir de visualizações",
       "get_frames_from_previews_description": "Selecione um tipo de tarefa para extrair os números de quadros das últimas visualizações de filmes publicadas.",
@@ -1894,6 +1922,7 @@
         "my_departments": "Meus departamentos"
       },
       "add_revision_confirm": "Adicionar arquivos para publicação",
+      "change_status_button": "Alterar o status",
       "confirm_attachments": "Adicionar arquivos como anexos",
       "change_status": "Postar comentário",
       "publish": "Publicar",
@@ -1904,6 +1933,7 @@
       "change_task_status_error": "Ocorreu um erro ao atualizar a tarefa selecionada. | Ocorreu um erro ao atualizar as {count} tarefas selecionadas: algumas podem ter mudado. Verifique-as antes de tentar novamente.",
       "confirm_change_task_status": "Alterar o status da tarefa selecionada para {status}? | Alterar o status das {count} tarefas selecionadas para {status}?",
       "confirm_post_comment": "Postar o comentário na tarefa selecionada? | Postar o comentário nas {count} tarefas selecionadas?",
+      "post_comment_button": "Postar o comentário",
       "post_comment_on_tasks": "Postar o comentário na tarefa selecionada | Postar o comentário nas {count} tarefas selecionadas",
       "select_status": "Selecione um status",
       "due_date": "Status da data de vencimento",
@@ -1931,6 +1961,7 @@
       "my_checks": "Minhas verificações",
       "new_revision_number": "Novo número de revisão",
       "post": "Postar",
+      "publish_files": "Publicar os arquivos",
       "publish_revision": "Publicar revisão",
       "revision_preview_file": "Se um dos arquivos selecionados contiver um número de revisão em seu nome (por exemplo, \"preview-v3.png\"), ele será sugerido como um novo nome de revisão (por exemplo, \"revisão 3\") na próxima etapa.",
       "selected_entities": "Entidades selecionadas",
@@ -1951,6 +1982,7 @@
         "very_hard": "Muito difícil"
       },
       "assignation_disclaimer": "Se faltarem pessoas na lista, isso significa que elas não estão listadas na equipe.",
+      "create_tasks_confirm": "Criar as tarefas",
       "create_tasks_disclaimer": "Se o seu tipo de tarefa estiver ausente, verifique se ele está listado na seção Tipos de tarefa das configurações de produção.",
       "data_display": "Exibição de dados",
       "delete_for_selection_error": "Ocorreu um erro ao excluir as tarefas selecionadas.",
@@ -2033,6 +2065,7 @@
       }
     },
     "departments": {
+      "create": "Criar um departamento",
       "create_error": "Ocorreu um erro ao salvar este departamento. Tem certeza de que não há nenhum departamento com um nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir esse departamento.",
@@ -2057,6 +2090,7 @@
     },
     "edits": {
       "all_edits": "Todas as montagens",
+      "create": "Criar uma montagem",
       "creation_explanation": "Faça upload de um arquivo de montagem para criar uma nova montagem",
       "edit_error": "Ocorreu um erro ao salvar esta montagem. Tem certeza de que não há nenhuma montagem com um nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
@@ -2090,6 +2124,7 @@
     "status_automations": {
       "change_ready_for": "altera \"pronto para\" para",
       "change_status": "altera o status da tarefa",
+      "create": "Criar uma automação",
       "create_error": "Não foi possível salvar. Tente novamente.",
       "delete_text": "Tem certeza de que deseja remover essa automação de status do seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir essa automação de status. Ela pode estar vinculada a uma produção ou a um template de produção. Se for o caso, você deve removê-la de cada produção e de cada template primeiro.",
@@ -2248,6 +2283,7 @@
       },
       "add_concept": "Adicionar arquivos para novos conceitos",
       "add_concept_error": "Ocorreu um erro ao adicionar conceitos.",
+      "add_confirm": "Adicionar os conceitos",
       "add_links": "Adicionar links aos assets",
       "add_new_concept": "Adicionar novos conceitos",
       "delete_for_selection": "Excluir o conceito selecionado | Excluir os {nbSelectedConcepts} conceitos selecionados",
@@ -2265,6 +2301,7 @@
         "updated_at": "Data de atualização"
       },
       "folders": {
+        "create": "Criar uma pasta",
         "delete": "Excluir pasta",
         "delete_error": "Ocorreu um erro ao excluir esta pasta.",
         "delete_text": "Tem certeza de que deseja excluir a pasta {name}? Seus conceitos são mantidos e voltam para a raiz.",
@@ -2297,6 +2334,7 @@
       "processing": "Esta visualização está sendo processada..."
     },
     "studios": {
+      "create": "Criar um estúdio",
       "create_error": "Ocorreu um erro ao salvar este estúdio. Tem certeza de que não há nenhum estúdio com um nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir esse estúdio.",
@@ -2427,6 +2465,7 @@
       "delete_for_selection_hard_lock_text": "EXCLUIR"
     },
     "hardware_items": {
+      "create": "Criar um item de hardware",
       "create_error": "Ocorreu um erro ao salvar o item de hardware.",
       "delete_error": "Ocorreu um erro ao excluir o item de hardware.",
       "delete_text": "Tem certeza de que deseja excluir esse item de hardware?",
@@ -2443,6 +2482,7 @@
       }
     },
     "software_licenses": {
+      "create": "Criar uma licença de software",
       "create_error": "Ocorreu um erro ao salvar a licença do software.",
       "delete_error": "Ocorreu um erro ao excluir a licença do software.",
       "delete_text": "Tem certeza de que deseja excluir essa licença de software?",
@@ -2498,6 +2538,7 @@
         "task_statuses": "Status de Tarefa",
         "task_types": "Tipos de Tarefa"
       },
+      "create": "Criar um template de produção",
       "title": "Templates",
       "metadata_explanation": "Colunas de metadados adicionadas às produções criadas a partir deste template.",
       "settings_menu": {

@@ -34,6 +34,9 @@
     </form>
 
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('sequences.create')
+      "
       :error-text="
         isDeleted && sequenceToEdit?.id
           ? $t('main.edit_deleted_error', { name: sequenceToEdit.name })

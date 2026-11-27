@@ -126,7 +126,7 @@
               confirmLabel?.length
                 ? confirmLabel
                 : isConcept
-                  ? $t('main.confirmation')
+                  ? $t('concepts.add_confirm')
                   : $t('tasks.add_revision_confirm')
             }}
           </a>

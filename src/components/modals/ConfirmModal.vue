@@ -21,7 +21,7 @@
         @keydown.enter.prevent="confirm"
         @keydown.space.prevent="confirm"
       >
-        {{ confirmButtonText || $t('main.confirmation') }}
+        {{ confirmButtonText }}
       </a>
       <button class="button is-link" @click="$emit('cancel')">
         {{ $t('main.cancel') }}
@@ -36,7 +36,7 @@ import ProgressBar from '@/components/widgets/ProgressBar.vue'
 
 const props = defineProps({
   active: { type: Boolean, default: false },
-  confirmButtonText: { type: String, default: '' },
+  confirmButtonText: { type: String, required: true },
   errorText: { type: String, default: '' },
   isDanger: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },

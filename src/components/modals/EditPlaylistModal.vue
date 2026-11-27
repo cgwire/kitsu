@@ -29,6 +29,9 @@
     </form>
 
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('playlists.create_title')
+      "
       v-if="!isSuccess"
       :error-text="$t('playlists.edit_error')"
       :is-error="isError"

@@ -34,6 +34,9 @@
     </form>
 
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('backgrounds.new_background')
+      "
       :error-text="$t('backgrounds.create_error')"
       :is-error="isError"
       :is-loading="isLoading"

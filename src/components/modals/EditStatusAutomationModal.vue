@@ -176,6 +176,9 @@
     </form>
 
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('status_automations.create')
+      "
       :error-details="errorDetails"
       :error-text="errorText"
       :is-disabled="!isValid"

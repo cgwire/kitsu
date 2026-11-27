@@ -35,6 +35,11 @@
     </div>
 
     <modal-footer
+      :confirm-label="
+        groupToEdit?.id
+          ? $t('main.save_changes')
+          : $t('main.filter_group_create')
+      "
       :error-text="$t('main.filter_group_error')"
       :is-disabled="isNameTaken"
       :is-error="isError"

@@ -13,6 +13,7 @@
     "assets": {
       "casted_in_shots": "Występuje w {count} ujęciu | Występuje w {count} ujęciach",
       "cancel_text": "Czy na pewno chcesz zarchiwizować {name}?",
+      "create": "Utwórz asset",
       "delete_error": "Wystąpił błąd podczas usuwania tego assetu. Mogą istnieć dane, które są z nim powiązane. Czy na pewno żadne zadanie nie jest powiązane z tym assetem?",
       "delete_for_selection": "Usuń wybrany asset | Usuń wybrane assety ({nbSelectedAssets})",
       "delete_for_selection_hard_text": "Czy na pewno chcesz trwale usunąć wybrane assety? Wszystkie powiązane zadania, komentarze i podglądy również zostaną usunięte. Potwierdź, wpisując poniżej „DELETE”.",
@@ -54,6 +55,7 @@
       "add_asset_type_to_library": "Dodaj typ assetu do biblioteki",
       "all_asset_types": "Wszystkie typy assetów",
       "all_hidden": "Wszystkie typy assetów są ukryte.",
+      "create": "Utwórz typ assetu",
       "create_error": "Wystąpił błąd podczas zapisywania tego typu assetu. Czy na pewno nie istnieje już typ assetu o podobnej nazwie?",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tego typu assetu. Mogą istnieć dane, które są z nim powiązane. Czy na pewno żaden asset nie jest powiązany z tym typem assetu?",
@@ -123,6 +125,7 @@
     },
     "breakdown": {
       "link_assets": "Powiąż assety",
+      "change_label": "Zmień etykietę",
       "copy_casting": "Skopiuj ten casting (ctrl + V wkleja go do zaznaczonych wierszy)",
       "edit_label": "Zmień etykietę assetu",
       "empty": "Pusty casting",
@@ -249,6 +252,7 @@
       "send_error": "Wystąpił błąd podczas wysyłania wiadomości."
     },
     "comments": {
+      "save": "Zapisz komentarz",
       "title": "Komentarze",
       "add_attachment": "Dodaj załącznik",
       "add_attachment_to_reply": "Dodaj załącznik do odpowiedzi",
@@ -305,6 +309,7 @@
       "validated": "Zatwierdzono!",
       "move_to_task": "Przenieś do",
       "move_modal": {
+        "confirm": "Przenieś komentarz",
         "title": "Przenieś komentarz do innego zadania",
         "intro": "Wybierz zadanie tego samego obiektu, do którego chcesz przenieść ten komentarz. Powiadomienia dla zadania docelowego zostaną wysłane tak jak w przypadku nowego komentarza.",
         "target_label": "Zadanie docelowe",
@@ -330,6 +335,7 @@
       },
       "add_concept": "Dodaj pliki nowych konceptów",
       "add_concept_error": "Wystąpił błąd podczas dodawania konceptów.",
+      "add_confirm": "Dodaj koncepty",
       "add_links": "Dodaj powiązania z assetami",
       "add_new_concept": "Dodaj nowe koncepty",
       "delete_for_selection": "Usuń wybrany koncept | Usuń wybrane koncepty ({nbSelectedConcepts})",
@@ -347,6 +353,7 @@
         "updated_at": "Data aktualizacji"
       },
       "folders": {
+        "create": "Utwórz folder",
         "delete": "Usuń folder",
         "delete_error": "Wystąpił błąd podczas usuwania tego folderu.",
         "delete_text": "Czy na pewno chcesz usunąć folder {name}? Jego koncepty zostaną zachowane i wrócą do katalogu głównego.",
@@ -364,6 +371,7 @@
       "uploading": "Przesyłanie konceptów"
     },
     "custom_actions": {
+      "create": "Utwórz akcję niestandardową",
       "create_error": "Wystąpił błąd podczas zapisywania tej akcji niestandardowej. Czy na pewno nie istnieje inna akcja o tej samej nazwie?",
       "delete_text": "Czy na pewno chcesz usunąć akcję niestandardową {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tej akcji niestandardowej.",
@@ -391,6 +399,7 @@
       "add_status_automation_placeholder": "+ Dodaj automatyzację statusu",
       "change_ready_for": "zmienia „gotowe do” na",
       "change_status": "zmienia status zadania",
+      "create": "Utwórz automatyzację",
       "create_error": "Nie udało się zapisać. Spróbuj ponownie.",
       "delete_text": "Czy na pewno chcesz usunąć tę automatyzację statusu z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tej automatyzacji statusu. Może być powiązana z produkcją lub szablonem produkcji. W takim przypadku musisz najpierw usunąć ją z każdej produkcji i każdego szablonu.",
@@ -461,6 +470,7 @@
     "departments": {
       "all_departments": "Wszystkie działy",
       "available_items": "Dostępne elementy",
+      "create": "Utwórz dział",
       "create_error": "Wystąpił błąd podczas zapisywania tego działu. Czy na pewno nie istnieje dział o podobnej nazwie?",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tego działu.",
@@ -483,6 +493,7 @@
     },
     "studios": {
       "all_studios": "Wszystkie studia",
+      "create": "Utwórz studio",
       "create_error": "Wystąpił błąd podczas zapisywania tego studia. Czy na pewno nie istnieje studio o podobnej nazwie?",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tego studia.",
@@ -497,6 +508,7 @@
       }
     },
     "project_templates": {
+      "create": "Utwórz szablon produkcji",
       "title": "Szablony",
       "new_project_template": "Dodaj szablon produkcji",
       "edit_title": "Edytuj szablon produkcji",
@@ -543,6 +555,7 @@
         "add_status_filter": "Dodaj filtr statusu zadania",
         "add_value": "Dodaj wartość",
         "all_types": "Wszystkie typy assetów",
+        "apply": "Zastosuj filtr",
         "asset_type": "Typ assetu",
         "assets_ready": "Gotowe",
         "assets_not_ready": "Niegotowe",
@@ -603,6 +616,7 @@
       "title": "Obiekty",
       "thumbnails": {
         "assets_pattern": "\"TypAssetu NazwaAssetu\" np. Environment_Forest.",
+        "confirm": "Dodaj miniatury",
         "edits_pattern": "\"NazwaMontażu\" np. Trailer.",
         "edits_tvshow_pattern": "\"NazwaOdcinka NazwaMontażu\" np. E01_Trailer.",
         "error": "Wystąpił błąd podczas przesyłania miniatur",
@@ -626,6 +640,7 @@
     "episodes": {
       "all_episodes": "Wszystkie",
       "all_hidden": "Wszystkie odcinki są ukryte.",
+      "create": "Utwórz odcinek",
       "edit_error": "Wystąpił błąd podczas zapisywania tego odcinka. Czy na pewno nie istnieje już odcinek o podobnej nazwie?",
       "delete_error": "Wystąpił błąd podczas usuwania tego odcinka. Mogą istnieć dane, które są z nim powiązane. Czy na pewno z tym odcinkiem nie jest powiązana żadna sekwencja?",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych? Wszystkie powiązane ujęcia i podglądy również zostaną usunięte. Potwierdź, wpisując poniżej nazwę odcinka.",
@@ -658,6 +673,7 @@
       "delete_for_selection_hard_lock_text": "DELETE"
     },
     "hardware_items": {
+      "create": "Dodaj sprzęt",
       "create_error": "Wystąpił błąd podczas zapisywania sprzętu.",
       "delete_error": "Wystąpił błąd podczas usuwania sprzętu.",
       "delete_text": "Czy na pewno chcesz usunąć ten sprzęt?",
@@ -838,6 +854,9 @@
       "changelog": "Dziennik zmian",
       "next_entity": "Następny obiekt",
       "previous_entity": "Poprzedni obiekt",
+      "save_changes": "Zapisz zmiany",
+      "save_picture": "Zapisz obraz",
+      "search_query_create": "Utwórz filtr wyszukiwania",
       "select_section": "Wybierz sekcję",
       "technical_details": "Szczegóły techniczne:",
       "about": "O programie",
@@ -874,9 +893,9 @@
       "collapse": "Zwiń",
       "column_options": "Opcje kolumny",
       "column_visibility": "Widoczne kolumny",
-      "confirmation": "Potwierdź",
-      "confirmation_and_stay": "Potwierdź i pozostań",
       "continue": "Kontynuuj",
+      "create_and_add_another": "Utwórz i dodaj kolejny",
+      "create_and_stay": "Utwórz i pozostań",
       "created_by": "Utworzone przez",
       "date": "Data",
       "dark_theme": "Ciemny motyw",
@@ -885,6 +904,7 @@
       "days_spent": "dzień pracy | dni pracy",
       "days_expected": "dzień do przepracowania | dni do przepracowania",
       "days_estimated": "dzień wg estymacji | dni wg estymacji",
+      "filter_group_create": "Utwórz grupę filtrów",
       "hours_spent": "godzina pracy | godz. pracy",
       "hours_expected": "godzina do przepracowania | godz. do przepracowania",
       "hours_estimated": "godzina wg estymacji | godz. wg estymacji",
@@ -993,7 +1013,9 @@
         "not_supported": "Nagrywanie nie jest obsługiwane w tej przeglądarce."
       },
       "remove": "Usuń",
+      "remove_search_filter_group_button": "Usuń grupę",
       "remove_search_query": "Czy na pewno chcesz usunąć zapytanie wyszukiwania „{name}”?",
+      "remove_search_query_button": "Usuń filtr",
       "remove_search_query_error": "Wystąpił błąd podczas usuwania tego zapytania wyszukiwania.",
       "remove_search_filter_group": "Czy na pewno chcesz usunąć grupę filtrów wyszukiwania „{name}”?",
       "remove_search_filter_group_error": "Wystąpił błąd podczas usuwania tej grupy filtrów wyszukiwania.",
@@ -1051,6 +1073,7 @@
         "choose": "Wybierz",
         "error_empty": "Plik jest pusty.",
         "error_imported_rows": "Przed błędem zaimportowano {count} wiersz. | Liczba wierszy zaimportowanych przed błędem: {count}.",
+        "import_data": "Importuj dane",
         "import_success": "Zaimportowano {count} wiersz. | Liczba zaimportowanych wierszy: {count}.",
         "error_line": "Wiersz {line}",
         "error_read": "Nie udało się odczytać pliku. Wybierz go ponownie.",
@@ -1201,6 +1224,7 @@
     "people": {
       "active": "Aktywni",
       "add_member_to_team": "Dodaj członka do zespołu",
+      "archive_guest_button": "Zarchiwizuj gościa",
       "confirm_edit": "Zapisz zmiany użytkownika",
       "create": "Utwórz użytkownika",
       "create_invite": "Utwórz użytkownika i wyślij zaproszenie",
@@ -1231,6 +1255,7 @@
       "project_role": "Rola w produkcji",
       "seats_remaining": "brak wolnych miejsc | pozostało {count} miejsce | pozostało miejsc: {count}",
       "select_person": "Wybierz użytkownika...",
+      "self_role_downgrade_button": "Obniż moją rolę",
       "team": "Zespół",
       "title": "Osoby",
       "unactive": "Nieaktywni",
@@ -1500,6 +1525,7 @@
         "copy": "Kopiuj",
         "create": "Utwórz konto podglądu",
         "delete": "Usuń",
+        "delete_button": "Usuń konto",
         "delete_confirm": "Usunąć konto podglądu tej produkcji?",
         "description": "Zobacz Kitsu dokładnie tak jak klient, tylko do odczytu i bez zajmowania licencji.",
         "error": "Wystąpił błąd podczas aktualizacji konta podglądu.",
@@ -1637,6 +1663,7 @@
         "welcome_title": "Witamy w studiu {studio}"
       },
       "metadata": {
+        "add_column": "Dodaj kolumnę",
         "applies_to_all_projects": "Ta kolumna zostanie dodana do każdej otwartej produkcji. Każda produkcja może mieć własną wartość w widoku listy.",
         "add_new_values": "Obecnie brak dostępnych wartości.",
         "available_values": "Dostępne wartości",
@@ -1888,6 +1915,7 @@
     "task_status": {
       "add_task_status_placeholder": "+ Dodaj status zadania",
       "add_task_status_to_library": "Dodaj status zadania do biblioteki",
+      "create": "Utwórz status zadania",
       "create_error": "Wystąpił błąd podczas zapisywania tego statusu zadania. Czy na pewno nie istnieje już status zadania o podobnej nazwie?",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tego statusu zadania. Mogą istnieć dane, które są obecnie z nim powiązane. Czy na pewno żadne zadanie nie jest powiązane z tym statusem?",
@@ -1920,6 +1948,7 @@
     "task_types": {
       "add_task_type_placeholder": "+ Dodaj typ zadania",
       "add_task_type_to_library": "Dodaj typ zadania do biblioteki",
+      "create": "Utwórz typ zadania",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tego typu zadania. Mogą istnieć dane, które są obecnie z nim powiązane. Czy na pewno żadne zadanie nie jest powiązane z tym typem zadania?",
       "delete_blocked_by_automations": "Nadal istnieją automatyzacje statusu używające tego typu zadania, w tym zarchiwizowane. Najpierw je edytuj lub usuń.",
@@ -1956,6 +1985,7 @@
     "sequences": {
       "all_hidden": "Wszystkie sekwencje są ukryte.",
       "all_sequences": "Wszystkie sekwencje",
+      "create": "Utwórz sekwencję",
       "edit_error": "Wystąpił błąd podczas zapisywania tej sekwencji. Czy na pewno nie istnieje już sekwencja o podobnej nazwie?",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych? Wszystkie powiązane ujęcia i podglądy również zostaną usunięte. Potwierdź, wpisując poniżej nazwę sekwencji.",
       "delete_error": "Wystąpił błąd podczas usuwania tej sekwencji. Mogą istnieć dane, które są z nią obecnie powiązane. Czy na pewno żadne ujęcie nie jest powiązane z tą sekwencją?",
@@ -1980,6 +2010,7 @@
     "edits": {
       "all_edits": "Wszystkie montaże",
       "cancel_text": "Czy na pewno chcesz zarchiwizować {name}?",
+      "create": "Utwórz montaż",
       "creation_explanation": "Prześlij plik montażu, aby utworzyć nowy montaż",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tego montażu. Mogą istnieć dane, które są z nim obecnie powiązane.",
@@ -2012,6 +2043,7 @@
     "schedule": {
       "already_assigned": "Już przypisane",
       "apply_to_prod": "Zastosuj do produkcji",
+      "apply_to_prod_button": "Zastosuj do produkcji",
       "apply_to_prod_confirm": "Czy na pewno chcesz zastosować tę wersję harmonogramu do bieżącej produkcji? Spowoduje to nadpisanie bieżących wartości zadań.",
       "apply_to_prod_error": "Wystąpił błąd podczas stosowania wersji harmonogramu do bieżącej produkcji.",
       "assign": "Przypisz do:",
@@ -2055,6 +2087,7 @@
       "hours": "godz.",
       "md": "osobodni",
       "milestone": {
+        "add": "Dodaj kamień milowy",
         "add_milestone": "Dodaj kamień milowy na",
         "delete_milestone": "Usuń kamień milowy",
         "edit_milestone": "Edytuj kamień milowy na",
@@ -2073,6 +2106,7 @@
       "mode": "Tryb widoku",
       "mode_prev": "Prognoza",
       "mode_real": "Rzeczywisty",
+      "move_children_button": "Przesuń z podelementami",
       "nb_tasks_out_of_range": "{count} zadanie poza wyświetlanymi datami | Zadania poza wyświetlanymi datami: {count}",
       "nb_undated_tasks": "{count} zadanie bez dat | Zadania bez dat: {count}",
       "new_version": "Nowa wersja",
@@ -2164,6 +2198,7 @@
       "bulk_tab": "Zbiorczo",
       "casting": "Casting ujęcia",
       "cancel_text": "Czy na pewno chcesz zarchiwizować {name}?",
+      "create": "Utwórz ujęcie",
       "creation_explanation": "Aby dodać ujęcia, musisz najpierw utworzyć odcinek i sekwencję. Wpisz nazwę odcinka na dole lewej kolumny, a następnie kliknij „Dodaj”, aby utworzyć nowy odcinek. Wybierz ten odcinek i powtórz tę samą operację dla sekwencji. Na koniec wybierz sekwencję i wpisz nazwę ujęcia w polu na dole prawej kolumny. Kliknij przycisk „Dodaj” poniżej. Twoje pierwsze ujęcie zostało utworzone. Możesz dodać ich znacznie więcej! Jeśli to nie serial telewizyjny, możesz od razu utworzyć sekwencję.",
       "delete_for_selection": "Usuń wybrane ujęcie | Usuń wybrane ujęcia ({nbSelectedShots})",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
@@ -2191,6 +2226,7 @@
       "restore_error": "Wystąpił błąd podczas przywracania tego ujęcia.",
       "sequences": "Sekwencje",
       "show_timecode": "Pokaż klatki początkowe i końcowe jako timecode",
+      "set_frames": "Ustaw liczbę klatek",
       "single_tab": "Pojedynczo",
       "tasks": "Zadania ujęcia",
       "title": "Ujęcia",
@@ -2254,6 +2290,7 @@
       "big_thumbnails": "Pokaż duże miniatury",
       "build_playlist": "Utwórz playlistę z listy",
       "calendar": "Kalendarz",
+      "change_status_button": "Zmień status",
       "confirm_attachments": "Dodaj pliki jako załączniki",
       "change_status": "Dodaj komentarz",
       "change_preview": "Zmień podgląd",
@@ -2264,6 +2301,7 @@
       "confirm_change_task_status": "Zmienić status wybranego zadania na {status}? | Zmienić status wybranych zadań ({count}) na {status}?",
       "confirm_post_comment": "Dodać komentarz do wybranego zadania? | Dodać komentarz do wybranych zadań ({count})?",
       "open_page": "Otwórz stronę zadania",
+      "post_comment_button": "Dodaj komentarz",
       "post_comment_on_tasks": "Dodaj komentarz do wybranego zadania | Dodaj komentarz do wybranych zadań ({count})",
       "select_status": "Wybierz status",
       "clear_all_assignations": "usuń wszystkie przypisania",
@@ -2277,6 +2315,7 @@
       "create_tasks": "Dodaj zadania",
       "create_tasks_all_missing": "Dodaj wszystkie brakujące ({count})",
       "create_tasks_all_missing_empty": "Dodaj wszystkie brakujące",
+      "create_tasks_confirm": "Utwórz zadania",
       "create_tasks_disclaimer": "Jeśli brakuje typu zadania, sprawdź, czy jest on wymieniony w sekcji Typy zadań w ustawieniach produkcji.",
       "create_tasks_shot": "Dodaj zadania dla bieżących ujęć",
       "create_tasks_shot_explanation": "Za chwilę utworzysz nowe zadanie wybranego typu dla każdego ujęcia bieżącej produkcji. Czy chcesz kontynuować?",
@@ -2340,6 +2379,7 @@
       "pending": "Oczekujące",
       "post": "Dodaj",
       "publish": "Opublikuj",
+      "publish_files": "Opublikuj pliki",
       "publish_revision": "Opublikuj wersję",
       "preview": "Podglądy",
       "previous": "Poprzednie zadanie",
@@ -2437,6 +2477,7 @@
       "title": "Wyszukiwanie obiektów"
     },
     "software_licenses": {
+      "create": "Utwórz licencję na oprogramowanie",
       "create_error": "Wystąpił błąd podczas zapisywania licencji na oprogramowanie.",
       "delete_error": "Wystąpił błąd podczas usuwania licencji na oprogramowanie.",
       "delete_text": "Czy na pewno chcesz usunąć tę licencję na oprogramowanie?",

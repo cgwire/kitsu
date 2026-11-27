@@ -14,8 +14,14 @@ const activate = async wrapper => {
 }
 
 describe('modals/ModalFooter', () => {
+  it('names the action on its button', () => {
+    const wrapper = mount(ModalFooter, { props: { confirmLabel: 'Create a shot' } })
+
+    expect(confirmButton(wrapper).text()).toEqual('Create a shot')
+  })
+
   it('confirms on a click, Enter, or Space', async () => {
-    const wrapper = mount(ModalFooter)
+    const wrapper = mount(ModalFooter, { props: { confirmLabel: 'Create a shot' } })
 
     await activate(wrapper)
 
@@ -26,7 +32,8 @@ describe('modals/ModalFooter', () => {
   // The disabled look only blocks the mouse (pointer-events: none): the
   // keyboard still reaches the button.
   it('does not confirm while disabled', async () => {
-    const wrapper = mount(ModalFooter, { props: { isDisabled: true } })
+    const wrapper = mount(ModalFooter, {
+      props: { confirmLabel: 'Create a shot', isDisabled: true } })
 
     await activate(wrapper)
 
@@ -36,7 +43,8 @@ describe('modals/ModalFooter', () => {
   })
 
   it('does not confirm again while loading', async () => {
-    const wrapper = mount(ModalFooter, { props: { isLoading: true } })
+    const wrapper = mount(ModalFooter, {
+      props: { confirmLabel: 'Create a shot', isLoading: true } })
 
     await activate(wrapper)
 
@@ -45,7 +53,11 @@ describe('modals/ModalFooter', () => {
 
   it('shows the details of an error under its text', async () => {
     const wrapper = mountWithI18n(ModalFooter, {
-      props: { errorText: 'Could not save.', errorDetails: 'Bad value.' }
+      props: {
+        confirmLabel: 'Create a shot',
+        errorText: 'Could not save.',
+        errorDetails: 'Bad value.'
+      }
     })
     expect(wrapper.find('.error-details').exists()).toBe(false)
 
@@ -62,7 +74,11 @@ describe('modals/ModalFooter', () => {
   // A screen reader reads an alert as it shows up.
   it('announces an error with its details', async () => {
     const wrapper = mountWithI18n(ModalFooter, {
-      props: { errorText: 'Could not save.', errorDetails: 'Bad value.' }
+      props: {
+        confirmLabel: 'Create a shot',
+        errorText: 'Could not save.',
+        errorDetails: 'Bad value.'
+      }
     })
     expect(wrapper.find('[role="alert"]').exists()).toBe(false)
 

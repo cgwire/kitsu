@@ -20,6 +20,9 @@
       />
     </form>
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('departments.create')
+      "
       :error-text="$t('departments.create_error')"
       :is-error="isError"
       :is-loading="isLoading"

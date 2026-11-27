@@ -4,6 +4,7 @@ import { nextTick, ref } from 'vue'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
@@ -361,7 +362,7 @@ describe('Edits page, past confirmation errors', () => {
   const edit = { id: 'edit-1', name: 'E01' }
   const taskType = { id: 'task-type-1', name: 'Compositing' }
 
-  // The three delete modals of the page differ by their error text.
+  // The two delete modals of the page differ by their error text.
   const deleteModal = errorText => wrapper =>
     wrapper
       .findAllComponents(DeleteModal)
@@ -379,7 +380,7 @@ describe('Edits page, past confirmation errors', () => {
       modal: 'the restore modal',
       action: 'restoreEdit',
       event: ['restore-clicked', edit],
-      find: deleteModal('edits.restore_error'),
+      find: wrapper => wrapper.findComponent(ConfirmModal),
       confirm: []
     },
     {

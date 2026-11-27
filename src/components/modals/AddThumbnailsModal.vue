@@ -77,6 +77,7 @@
     </div>
 
     <modal-footer
+      :confirm-label="$t('entities.thumbnails.confirm')"
       :error-text="$t('entities.thumbnails.error')"
       :is-error="isError"
       :is-loading="isLoading"

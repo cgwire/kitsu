@@ -11,6 +11,7 @@
       "warning": "N'autorisez que si vous avez lancé vous-même cette connexion depuis l'application. Elle accédera à Kitsu avec vos droits."
     },
     "assets": {
+      "create": "Créer un asset",
       "delete_error": "Une erreur s'est produite lors de la suppression de cet asset. Il se peut que des données existantes y soient actuellement liées. Êtes-vous sûr que cet asset n'est associé à aucune tâche ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
       "edit_fail": "L'enregistrement a échoué. Il se peut qu'un asset portant un nom similaire existe déjà.",
@@ -52,6 +53,7 @@
     "asset_types": {
       "all_asset_types": "Tous les types d'assets",
       "all_hidden": "Tous les types d'assets sont masqués.",
+      "create": "Créer un type d'asset",
       "create_error": "Une erreur est survenue en enregistrant ce type d'asset. Êtes-vous sûr qu'il n'existe pas un type d'asset avec un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de ce type d'asset. Il se peut que des données existantes soient actuellement liées à ce type d'asset. Êtes-vous sûr qu'aucun asset n'est lié à ce type d'asset ?",
@@ -75,6 +77,7 @@
     },
     "breakdown": {
       "link_assets": "Lier des assets",
+      "change_label": "Changer le label",
       "copy_casting": "Copier ce casting (ctrl + V le colle sur les lignes sélectionnées)",
       "edit_label": "Changer le label de l'asset",
       "empty": "Casting vide",
@@ -169,9 +172,11 @@
         "intro": "Choisissez une tâche de la même entité vers laquelle déplacer ce commentaire. Des notifications seront envoyées sur la tâche de destination comme pour un nouveau commentaire.",
         "no_target": "Aucune autre tâche n'est disponible sur cette entité.",
         "target_label": "Tâche de destination",
+        "confirm": "Déplacer le commentaire",
         "title": "Déplacer le commentaire vers une autre tâche"
       },
       "move_to_task": "Déplacer vers",
+      "save": "Enregistrer le commentaire",
       "title": "Commentaires",
       "toggle_for_client": "Visibilité client",
       "player": {
@@ -187,6 +192,7 @@
       }
     },
     "custom_actions": {
+      "create": "Créer une action personnalisée",
       "create_error": "Une erreur est survenue en enregistrant cette action personnalisée. Êtes-vous sûr qu'aucune autre action n'a un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer l'action personnalisée {name} de la base de données ?",
       "delete_error": "Une erreur est survenue en supprimant l'action personnalisée.",
@@ -212,6 +218,7 @@
     },
     "entities": {
       "build_filter": {
+        "apply": "Appliquer le filtre",
         "asset_type": "Type d'asset",
         "add_descriptor_filter": "Ajouter un filtre de métadonnée",
         "add_status_filter": "Ajouter un filtre de statut de tâche",
@@ -255,6 +262,7 @@
         "undefined": "Non défini",
         "undefined_pattern": "Non défini",
         "upload": "Ajouter des vignettes",
+        "confirm": "Ajouter les vignettes",
         "edits_pattern": "\"EditName\" ex. Trailer.",
         "edits_tvshow_pattern": "\"EpisodeName EditName\" ex. E01_Trailer.",
         "explanation": "L'ajout d'une vignette nécessite la création d'une nouvelle preview. Pour définir plusieurs vignettes en même temps, vous devez d'abord choisir un type de tâche pour créer les nouvelles previews. Les vignettes seront définies à partir de ces nouvelles previews.",
@@ -299,6 +307,7 @@
     "episodes": {
       "all_episodes": "Tous les épisodes",
       "all_hidden": "Tous les épisodes sont masqués.",
+      "create": "Créer un épisode",
       "edit_error": "Une erreur est survenue en enregistrant l'épisode. Êtes-vous sûr qu'aucun épisode n'existe avec un nom similaire ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de cet épisode. Il se peut que des données existantes soient actuellement liées à cet épisode. Êtes-vous sûr que cet épisode n'est pas lié à une séquence ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de votre base de données ? Tous les plans et previews associés seront également supprimés. Veuillez confirmer en tapant le nom de l'épisode ci-dessous.",
@@ -442,6 +451,9 @@
       "changelog": "Journal des modifications",
       "next_entity": "Entité suivante",
       "previous_entity": "Entité précédente",
+      "save_changes": "Enregistrer les modifications",
+      "save_picture": "Enregistrer l'image",
+      "search_query_create": "Créer un filtre",
       "select_section": "Sélectionner une section",
       "technical_details": "Détails techniques :",
       "about": "À propos",
@@ -457,8 +469,6 @@
       "click_to_add": "Cliquez pour ajouter",
       "click_to_remove": "Cliquez pour enlever",
       "close": "Fermer",
-      "confirmation": "Confirmer",
-      "confirmation_and_stay": "Confirmer et rester",
       "date": "Date",
       "dark_theme": "Thème sombre",
       "days_spent": "jour passé | jours passés",
@@ -515,6 +525,7 @@
         "choose": "Choisir",
         "error_empty": "Le fichier est vide.",
         "error_imported_rows": "{count} ligne a été importée avant l'erreur. | {count} lignes ont été importées avant l'erreur.",
+        "import_data": "Importer les données",
         "import_success": "{count} ligne a été importée. | {count} lignes ont été importées.",
         "error_line": "Ligne {line}",
         "error_read": "Impossible de lire le fichier. Veuillez le sélectionner à nouveau.",
@@ -650,9 +661,12 @@
       "no_results": "Pas de résultats",
       "link": "Lien",
       "list": "Liste",
+      "filter_group_create": "Créer un groupe de filtres",
       "hours_spent": "heure passée | heures passées",
       "hours_expected": "heure attendue | heures attendues",
       "hours_estimated": "heure estimée | heures estimées",
+      "create_and_add_another": "Créer et en ajouter un autre",
+      "create_and_stay": "Créer et rester",
       "created_by": "Créé par",
       "day": "Jour",
       "hour": "Heure",
@@ -682,7 +696,9 @@
       "expand": "Développer",
       "expand_all": "Tout développer",
       "hours": "heure | heures",
+      "remove_search_filter_group_button": "Supprimer le groupe",
       "remove_search_query": "Êtes-vous sûr de vouloir supprimer la requête de recherche \"{name}\" ?",
+      "remove_search_query_button": "Supprimer le filtre",
       "remove_search_query_error": "Une erreur s'est produite lors de la suppression de cette requête de recherche.",
       "remove_search_filter_group": "Êtes-vous sûr de vouloir supprimer le groupe de filtres de recherche \"{name}\" ?",
       "remove_search_filter_group_error": "Une erreur s'est produite lors de la suppression de ce groupe de filtres de recherche.",
@@ -823,6 +839,7 @@
       "persons": "utilisateur | utilisateurs",
       "project_role": "Rôle projet",
       "select_person": "Sélectionner un utilisateur...",
+      "self_role_downgrade_button": "Abaisser mon rôle",
       "team": "Équipe",
       "title": "Personnes",
       "unactive": "Inactif",
@@ -870,6 +887,7 @@
         "supervisor": "Superviseur",
         "all": "Tous les rôles"
       },
+      "archive_guest_button": "Archiver l'invité",
       "confirm_edit": "Enregistrer les changements pour cet utilisateur",
       "create": "Créer l'utilisateur",
       "user_limit_error": "Vous avez atteint votre limite d'utilisateurs. Contactez notre équipe pour passer à une offre supérieure.",
@@ -1096,6 +1114,7 @@
         "copy": "Copier",
         "create": "Créer un compte de prévisualisation",
         "delete": "Supprimer",
+        "delete_button": "Supprimer le compte",
         "delete_confirm": "Supprimer le compte de prévisualisation de cette production ?",
         "description": "Voyez Kitsu exactement comme un client, en lecture seule, sans occuper de siège.",
         "error": "Une erreur est survenue lors de la mise à jour du compte de prévisualisation.",
@@ -1211,6 +1230,7 @@
         "textarea": "Texte long",
         "person": "Personne",
         "tags": "Liste des étiquettes",
+        "add_column": "Ajouter la colonne",
         "applies_to_all_projects": "Cette colonne est ajoutée à toutes les productions ouvertes. Chaque production peut avoir sa propre valeur dans la vue en liste."
       },
       "status": {
@@ -1462,6 +1482,7 @@
       "no_more_available_items": "Il n'y a plus d'éléments disponibles à ajouter."
     },
     "task_status": {
+      "create": "Créer un statut de tâche",
       "create_error": "Une erreur est survenue en créant le statut. Êtes-vous sûr qu'il n'y a pas un statut avec un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de ce statut de tâche. Il se peut que des données existantes y soient actuellement liées. Êtes-vous sûr qu'aucune tâche n'est liée à ce statut de tâche ?",
@@ -1494,6 +1515,7 @@
       "remove_status": "Retirer le statut {name}"
     },
     "task_types": {
+      "create": "Créer un type de tâche",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de ce type de tâche. Il se peut que des données existantes soient actuellement liées à ce type de tâche. Êtes-vous sûr qu'aucune tâche n'est liée à ce type de tâche ?",
       "delete_blocked_by_automations": "Des automatisations utilisent encore ce type de tâche, archivées comprises. Modifiez-les ou supprimez-les d'abord.",
@@ -1532,6 +1554,7 @@
     "sequences": {
       "all_hidden": "Toutes les séquences sont masquées.",
       "all_sequences": "Toutes les séquences",
+      "create": "Créer une séquence",
       "edit_error": "Une erreur est survenue en enregistrant la séquence. Êtes-vous sûr qu'aucune séquence n'existe avec un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de votre base de données ? Tous les plans et previews associés seront également supprimés. Veuillez confirmer en tapant le nom de la séquence ci-dessous.",
       "delete_error": "Une erreur s'est produite lors de la suppression de cette séquence. Il se peut que des données existantes soient actuellement liées à cette séquence. Êtes-vous sûr que cette séquence n'est pas liée à un plan ?",
@@ -1556,6 +1579,7 @@
     "schedule": {
       "already_assigned": "Déjà assigné",
       "apply_to_prod": "Appliquer à la production",
+      "apply_to_prod_button": "Appliquer à la production",
       "apply_to_prod_confirm": "Êtes-vous sûr de vouloir appliquer cette version du planning à la production actuelle ? Cela remplacera les valeurs actuelles des tâches.",
       "apply_to_prod_error": "Une erreur s'est produite lors de l'application de la version du planning à la production en cours.",
       "assign": "Assigner à :",
@@ -1599,6 +1623,7 @@
       "hours": "h",
       "md": "jh",
       "milestone": {
+        "add": "Ajouter un jalon",
         "add_milestone": "Ajouter un jalon",
         "edit_milestone": "Modifier le jalon",
         "name": "Nom",
@@ -1617,6 +1642,7 @@
       "mode": "Mode d'affichage",
       "mode_prev": "Prévisions",
       "mode_real": "Réel",
+      "move_children_button": "Déplacer avec les sous-éléments",
       "nb_tasks_out_of_range": "{count} tâche hors des dates affichées | {count} tâches hors des dates affichées",
       "nb_undated_tasks": "{count} tâche sans dates | {count} tâches sans dates",
       "new_version": "Nouvelle version",
@@ -1716,6 +1742,7 @@
       "restore_text": "Êtes-vous sûr de vouloir restaurer {name} depuis vos archives ?",
       "restore_error": "Une erreur est survenue en restaurant le plan.",
       "sequences": "Séquences",
+      "set_frames": "Définir les durées en frames",
       "single_tab": "Unitaire",
       "tasks": "Tâches Plans",
       "title": "Plans",
@@ -1742,6 +1769,7 @@
       "cancel_text": "Êtes-vous sûr de vouloir archiver {name} ?",
       "delete_for_selection": "Supprimer le plan sélectionné | Supprimer les {nbSelectedShots} plans sélectionnés",
       "multiple_delete_error": "Une erreur s'est produite lors de la suppression d'un plan. Il se peut que des données existantes soient actuellement liées au plan. Êtes-vous sûr qu'aucune tâche n'est liée à un plan sélectionné ?",
+      "create": "Créer un plan",
       "creation_explanation": "Pour ajouter des plans, vous devez d'abord créer un épisode et une séquence. Tapez un nom d'épisode en bas de la colonne de gauche, puis cliquez sur \"Ajouter\" pour créer un nouvel épisode. Sélectionnez cet épisode et répétez la même opération pour la séquence. Enfin, sélectionnez une séquence et tapez un nom de plan dans le champ situé en bas de la colonne de droite. Cliquez sur le bouton \"Ajouter\" ci-dessous. Votre premier plan est maintenant créé. Vous pouvez en ajouter beaucoup d'autres ! S'il ne s'agit pas d'une série télé, vous pouvez directement créer une séquence.",
       "get_frames_from_previews": "Définir les durées en frames à partir des previews",
       "get_frames_from_previews_description": "Sélectionnez un type de tâche pour extraire les durées en frames des dernières previews vidéo publiées.",
@@ -1894,6 +1922,7 @@
         "my_departments": "Mes départements"
       },
       "add_revision_confirm": "Ajouter des fichiers à publier",
+      "change_status_button": "Changer le statut",
       "confirm_attachments": "Ajouter des fichiers en pièces jointes",
       "change_status": "Envoyer un commentaire",
       "publish": "Publier",
@@ -1904,6 +1933,7 @@
       "change_task_status_error": "Une erreur est survenue pendant la mise à jour de la tâche sélectionnée. | Une erreur est survenue pendant la mise à jour des {count} tâches sélectionnées : certaines ont peut-être changé. Vérifiez-les avant de réessayer.",
       "confirm_change_task_status": "Changer le statut de la tâche sélectionnée en {status} ? | Changer le statut des {count} tâches sélectionnées en {status} ?",
       "confirm_post_comment": "Envoyer le commentaire sur la tâche sélectionnée ? | Envoyer le commentaire sur les {count} tâches sélectionnées ?",
+      "post_comment_button": "Envoyer le commentaire",
       "post_comment_on_tasks": "Envoyer le commentaire sur la tâche sélectionnée | Envoyer le commentaire sur les {count} tâches sélectionnées",
       "select_status": "Choisir un statut",
       "due_date": "État de la date de livraison",
@@ -1931,6 +1961,7 @@
       "my_checks": "Mes validations",
       "new_revision_number": "Nouveau numéro de révision",
       "post": "Envoyer",
+      "publish_files": "Publier les fichiers",
       "publish_revision": "Publier la révision",
       "revision_preview_file": "Si un de vos fichiers sélectionnés contient un numéro de révision dans son nom (ex. \"preview-v3.png\"), alors il sera suggéré comme nouveau nom de révision (ex. \"révision 3\") à l'étape suivante.",
       "selected_entities": "Entités sélectionnées",
@@ -1951,6 +1982,7 @@
         "very_hard": "Très difficile"
       },
       "assignation_disclaimer": "Si des personnes sont absentes de la liste, cela signifie qu'elles ne font pas partie de l'équipe.",
+      "create_tasks_confirm": "Créer les tâches",
       "create_tasks_disclaimer": "Si votre type de tâche est manquant, vérifiez qu'il figure dans la section Types de tâches des paramètres de production.",
       "data_display": "Affichage des données",
       "delete_for_selection_error": "Une erreur s'est produite lors de la suppression des tâches sélectionnées.",
@@ -2033,6 +2065,7 @@
       }
     },
     "departments": {
+      "create": "Créer un département",
       "create_error": "Une erreur est survenue en enregistrant le département. Êtes-vous sûr qu'il n'y a pas un département avec un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
       "delete_error": "Une erreur est survenue en supprimant ce département.",
@@ -2057,6 +2090,7 @@
     },
     "edits": {
       "all_edits": "Tous les montages",
+      "create": "Créer un montage",
       "creation_explanation": "Envoyer un fichier de montage pour créer un nouveau montage",
       "edit_error": "Une erreur est survenue en enregistrant ce montage. Êtes-vous sûr qu'il n'y a aucun montage avec un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
@@ -2090,6 +2124,7 @@
     "status_automations": {
       "change_ready_for": "change \"prêt pour\" en",
       "change_status": "positionne le statut de la tâche",
+      "create": "Créer une automatisation",
       "create_error": "Impossible d'enregistrer. Veuillez réessayer.",
       "delete_text": "Êtes-vous sûr de vouloir supprimer cette automatisation de votre base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de cette automatisation. Il est possible qu'elle soit liée à une production ou à un modèle de production. Si c'est le cas, vous devez d'abord la retirer de chaque production et de chaque modèle.",
@@ -2248,6 +2283,7 @@
       },
       "add_concept": "Ajouter des fichiers pour les nouveaux concepts",
       "add_concept_error": "Une erreur s'est produite lors de l'ajout de concepts.",
+      "add_confirm": "Ajouter les concepts",
       "add_links": "Ajouter des liens vers les assets",
       "add_new_concept": "Ajouter de nouveaux concepts",
       "delete_for_selection": "Supprimer le concept sélectionné | Supprimer les {nbSelectedConcepts} concepts sélectionnés",
@@ -2265,6 +2301,7 @@
         "updated_at": "Date de mise à jour"
       },
       "folders": {
+        "create": "Créer un dossier",
         "delete": "Supprimer le dossier",
         "delete_error": "Une erreur est survenue lors de la suppression de ce dossier.",
         "delete_text": "Êtes-vous sûr de vouloir supprimer le dossier {name} ? Ses concepts sont conservés et reviennent à la racine.",
@@ -2297,6 +2334,7 @@
       "processing": "Cette preview est en cours de traitement..."
     },
     "studios": {
+      "create": "Créer un studio",
       "create_error": "Une erreur s'est produite lors de l'enregistrement de ce studio. Êtes-vous sûr qu'il n'existe pas de studio portant un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de ce studio.",
@@ -2427,6 +2465,7 @@
       "delete_for_selection_hard_lock_text": "SUPPRIMER"
     },
     "hardware_items": {
+      "create": "Créer un matériel",
       "create_error": "Une erreur s'est produite lors de l'enregistrement de l'élément matériel.",
       "delete_error": "Une erreur s'est produite lors de la suppression de l'élément matériel.",
       "delete_text": "Êtes-vous sûr de vouloir supprimer cet élément matériel ?",
@@ -2443,6 +2482,7 @@
       }
     },
     "software_licenses": {
+      "create": "Créer une licence de logiciel",
       "create_error": "Une erreur s'est produite lors de l'enregistrement de la licence du logiciel.",
       "delete_error": "Une erreur s'est produite lors de la suppression de la licence du logiciel.",
       "delete_text": "Êtes-vous sûr de vouloir supprimer cette licence de logiciel ?",
@@ -2498,6 +2538,7 @@
         "task_statuses": "Statuts de tâche",
         "task_types": "Types de tâches"
       },
+      "create": "Créer un modèle de production",
       "title": "Modèles",
       "metadata_explanation": "Colonnes de métadonnées ajoutées aux productions créées à partir de ce modèle.",
       "settings_menu": {

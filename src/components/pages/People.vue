@@ -173,6 +173,7 @@
 
     <confirm-modal
       active
+      :confirm-button-text="$t('people.self_role_downgrade_button')"
       :text="selfRoleDowngradeText"
       @cancel="cancelSelfRoleDowngrade"
       @confirm="confirmSelfRoleDowngrade"
@@ -181,6 +182,7 @@
 
     <confirm-modal
       active
+      :confirm-button-text="$t('people.archive_guest_button')"
       :error-text="$t('people.archive_guest_error')"
       :is-error="errors.archiveGuest"
       :is-loading="loading.archiveGuest"

@@ -62,6 +62,7 @@ export default {
 
   episodes: {
     all_hidden: 'All chapters are hidden.',
+    create: 'Create a chapter',
     edit_error: 'An error occurred while saving this chapter. Are you sure there is no chapter with a similar name?',
     delete_error: 'An error occurred while deleting this chapter. There may be existing data currently linked to it. Are you sure this chapter has no level linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database? All related maps and previews will also be deleted. Please confirm by typing the chapter name below.',
@@ -161,6 +162,7 @@ export default {
   sequences: {
     all_hidden: 'All levels are hidden.',
     all_sequences: 'All levels',
+    create: 'Create a level',
     edit_error: 'An error occurred while saving this level. Are you sure there is no level with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database? All related maps and previews will also be deleted. Please confirm by typing the level name below.',
     delete_error: 'An error occurred while deleting this level. There may be existing data currently linked to it. Are you sure this level has no map linked to it?',
@@ -199,6 +201,7 @@ export default {
 
   shots: {
     casting: 'Map casting',
+    create: 'Create a map',
     creation_explanation: 'To add maps, you first need to create a chapter and a level. Type a chapter name at the bottom of the left column, then click "Add" to create a new chapter. Select this chapter and repeat the same operation for the level. Finally, select a level and type a map name in the field at the bottom of the right column. Click the "Add" button below. Your first map is now created. You can add many more! If it\'s not a TV show, you can directly create a level.',
     delete_for_selection: 'Delete the selected map | Delete the {nbSelectedShots} selected maps',
     delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected maps? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',

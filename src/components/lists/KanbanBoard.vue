@@ -134,7 +134,7 @@
     <table-info :is-loading="isLoading" :is-error="isError" variant="kanban" />
     <add-preview-modal
       :active="modals.addPreview"
-      :confirm-label="$t('main.confirmation')"
+      :confirm-label="$t('tasks.publish_files')"
       :is-loading="loading.addPreview"
       :is-error="errors.addPreview"
       :title="

@@ -51,6 +51,9 @@
     </form>
 
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('software_licenses.create')
+      "
       :error-text="$t('software_licenses.create_error')"
       :is-error="isError"
       :is-loading="isLoading"

@@ -81,7 +81,7 @@
             @keydown.enter.prevent="confirmAndStayClicked"
             @keydown.space.prevent="confirmAndStayClicked"
           >
-            {{ $t('main.confirmation_and_stay') }}
+            {{ $t('main.create_and_stay') }}
           </a>
           <a
             :class="{
@@ -98,7 +98,7 @@
             @keydown.enter.prevent="confirmClicked"
             @keydown.space.prevent="confirmClicked"
           >
-            {{ $t('main.confirmation') }}
+            {{ $t('tasks.create_tasks_confirm') }}
           </a>
           <button @click="$emit('cancel')" class="button is-link">
             {{ $t('main.cancel') }}

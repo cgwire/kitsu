@@ -43,6 +43,7 @@
     </div>
 
     <modal-footer
+      :confirm-label="$t('playlists.notify_clients')"
       :error-text="$t('playlists.notify_clients_error')"
       :is-error="isError"
       :is-loading="isLoading"

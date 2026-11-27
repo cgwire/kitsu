@@ -344,6 +344,7 @@
         </div>
 
         <modal-footer
+          :confirm-label="$t('entities.build_filter.apply')"
           :error-text="$t('entities.thumbnails.error')"
           @confirm="applyFilter"
           @cancel="$emit('cancel')"

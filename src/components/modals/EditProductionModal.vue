@@ -84,6 +84,7 @@
         </form>
 
         <modal-footer
+          :confirm-label="$t('main.save_changes')"
           :error-text="$t('productions.edit_error')"
           :is-error="isError"
           :is-loading="isLoading"

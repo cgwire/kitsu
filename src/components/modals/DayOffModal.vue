@@ -46,7 +46,7 @@
       </p>
       <p class="has-text-right mt2">
         <button type="submit" class="button is-primary">
-          {{ $t('main.confirmation') }}
+          {{ isEditing ? $t('main.save_changes') : $t('days_off.add') }}
         </button>
         <button type="button" class="button is-link" @click="$emit('cancel')">
           {{ $t('main.cancel') }}

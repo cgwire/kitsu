@@ -15,7 +15,7 @@
         @keydown.enter.prevent="confirm"
         @keydown.space.prevent="confirm"
       >
-        {{ confirmLabel || $t('main.confirmation') }}
+        {{ confirmLabel }}
       </a>
       <button @click="$emit('cancel')" class="button is-link">
         {{ cancelLabel || $t('main.cancel') }}
@@ -38,7 +38,7 @@
 <script setup>
 const props = defineProps({
   cancelLabel: { type: String, default: '' },
-  confirmLabel: { type: String, default: '' },
+  confirmLabel: { type: String, required: true },
   errorDetails: { type: String, default: '' },
   errorText: { type: String, default: '' },
   isDisabled: { type: Boolean, default: false },

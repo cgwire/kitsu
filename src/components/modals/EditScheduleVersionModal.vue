@@ -25,6 +25,9 @@
       />
     </form>
     <modal-footer
+      :confirm-label="
+        isEditing ? $t('main.save_changes') : $t('schedule.create_version')
+      "
       :error-text="$t('schedule.edit_version_error')"
       :is-error="isError"
       :is-loading="isLoading"

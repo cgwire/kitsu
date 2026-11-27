@@ -277,6 +277,18 @@ describe('useEntityPage', () => {
       consoleError.mockRestore()
     })
 
+    it('names the delete button after what the confirmation does', async () => {
+      const { page } = await mountPage({ options: { canCancel: true } })
+
+      page.onDeleteClicked({ id: 'shot-1', name: 'SH01', tasks: ['task-1'] })
+      expect(page.deleteText.value).toEqual('shots.cancel_text')
+      expect(page.deleteButtonText.value).toEqual('row_actions.archive')
+
+      page.onDeleteClicked({ id: 'shot-2', name: 'SH02', tasks: [] })
+      expect(page.deleteText.value).toEqual('shots.delete_text')
+      expect(page.deleteButtonText.value).toEqual('main.delete')
+    })
+
     it('restores the entity of the restore modal', async () => {
       const { page, store } = await mountPage()
       const shot = { id: 'shot-1', name: 'SH01', canceled: true }

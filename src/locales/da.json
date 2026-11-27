@@ -11,6 +11,7 @@
       "warning": "Godkend kun, hvis du selv har startet dette login fra programmet. Det får adgang til Kitsu med dine rettigheder."
     },
     "assets": {
+      "create": "Opret en asset",
       "delete_error": "Der opstod en fejl under sletning af denne asset. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne asset ikke har nogen opgave knyttet til den?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "edit_fail": "Gemning mislykkedes. En asset med et lignende navn findes muligvis allerede.",
@@ -52,6 +53,7 @@
     "asset_types": {
       "all_asset_types": "Alle asset-typer",
       "all_hidden": "Alle asset-typer er skjult.",
+      "create": "Opret en asset-type",
       "create_error": "Der opstod en fejl under gemning af denne asset-type. Er du sikker på, at der ikke er en asset-type med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletningen af denne asset-type. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne asset-type ikke har nogen asset knyttet til den?",
@@ -75,6 +77,7 @@
     },
     "breakdown": {
       "link_assets": "Tilknyt assets",
+      "change_label": "Skift label",
       "copy_casting": "Kopiér denne casting (ctrl + V indsætter den på de valgte linjer)",
       "edit_label": "Rediger assettens label",
       "empty": "Tom casting",
@@ -169,9 +172,11 @@
         "intro": "Vælg en opgave på samme enhed, som denne kommentar skal flyttes til. Der vil blive sendt notifikationer på destinationsopgaven, som ved en ny kommentar.",
         "no_target": "Der er ingen anden opgave tilgængelig på denne enhed.",
         "target_label": "Destinationsopgave",
+        "confirm": "Flyt kommentaren",
         "title": "Flyt kommentar til en anden opgave"
       },
       "move_to_task": "Flyt til",
+      "save": "Gem kommentaren",
       "title": "Kommentarer",
       "toggle_for_client": "Klientsynlighed",
       "player": {
@@ -187,6 +192,7 @@
       }
     },
     "custom_actions": {
+      "create": "Opret en brugerdefineret handling",
       "create_error": "Der opstod en fejl under gemning af denne brugerdefinerede handling. Er du sikker på, at der ikke findes en anden handling med samme navn?",
       "delete_text": "Er du sikker på, at du vil fjerne den brugerdefinerede handling {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletningen af denne brugerdefinerede handling.",
@@ -212,6 +218,7 @@
     },
     "entities": {
       "build_filter": {
+        "apply": "Anvend filteret",
         "asset_type": "Asset-type",
         "add_descriptor_filter": "Tilføj et metadatafilter",
         "add_status_filter": "Tilføj et filter på opgavestatus",
@@ -255,6 +262,7 @@
         "undefined": "Udefineret",
         "undefined_pattern": "Udefineret",
         "upload": "Tilføj thumbnails",
+        "confirm": "Tilføj thumbnails",
         "edits_pattern": "\"MontageNavn\" fx Trailer.",
         "edits_tvshow_pattern": "\"EpisodeNavn MontageNavn\" fx E01_Trailer.",
         "explanation": "For at tilføje en thumbnail skal der angives et nyt preview. For at angive flere thumbnails på samme tid skal du først vælge en opgavetype for at oprette de nye previews. Thumbnails vil blive angivet ud fra disse nye previews.",
@@ -299,6 +307,7 @@
     "episodes": {
       "all_episodes": "Alle",
       "all_hidden": "Alle episoder er skjult.",
+      "create": "Opret en episode",
       "edit_error": "Der er opstået en fejl under gemning af denne episode. Er du sikker på, at der ikke er en episode med et lignende navn?",
       "delete_error": "Der er opstået en fejl under sletningen af denne episode. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne episode ikke har nogen sequence knyttet til den?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database? Alle relaterede shots og previews vil blive slettet. Bekræft venligst ved at skrive episodens navn nedenfor.",
@@ -442,6 +451,9 @@
       "changelog": "Ændringslog",
       "next_entity": "Næste enhed",
       "previous_entity": "Forrige enhed",
+      "save_changes": "Gem ændringer",
+      "save_picture": "Gem billedet",
+      "search_query_create": "Opret et søgefilter",
       "select_section": "Vælg en sektion",
       "technical_details": "Tekniske detaljer:",
       "about": "Om",
@@ -457,8 +469,6 @@
       "click_to_add": "Klik for at tilføje",
       "click_to_remove": "Klik for at fjerne",
       "close": "Luk",
-      "confirmation": "Bekræft",
-      "confirmation_and_stay": "Bekræft og forbliv",
       "date": "Dato",
       "dark_theme": "Mørkt tema",
       "days_spent": "dag brugt | dage brugt",
@@ -513,6 +523,7 @@
         "choose": "Vælg",
         "error_empty": "Filen er tom.",
         "error_imported_rows": "{count} linje blev importeret før fejlen. | {count} linjer blev importeret før fejlen.",
+        "import_data": "Importer dataene",
         "import_success": "{count} linje blev importeret. | {count} linjer blev importeret.",
         "error_line": "Linje {line}",
         "error_read": "Filen kunne ikke læses. Vælg den venligst igen.",
@@ -647,9 +658,12 @@
       "no_results": "Ingen resultater",
       "link": "Link",
       "list": "Liste",
+      "filter_group_create": "Opret en filtergruppe",
       "hours_spent": "time brugt | timer brugt",
       "hours_expected": "forventet time | forventede timer",
       "hours_estimated": "time estimeret | timer estimeret",
+      "create_and_add_another": "Opret og tilføj en mere",
+      "create_and_stay": "Opret og forbliv",
       "created_by": "Oprettet af",
       "day": "Dag",
       "hour": "Time",
@@ -679,7 +693,9 @@
       "expand": "Udvid",
       "expand_all": "Udvid alle",
       "hours": "time | timer",
+      "remove_search_filter_group_button": "Fjern gruppen",
       "remove_search_query": "Er du sikker på, at du vil fjerne søgeforespørgslen \"{name}\"?",
+      "remove_search_query_button": "Fjern filteret",
       "remove_search_query_error": "Der opstod en fejl under fjernelse af denne søgeforespørgsel.",
       "remove_search_filter_group": "Er du sikker på, at du vil fjerne søgefiltergruppen \"{name}\"?",
       "remove_search_filter_group_error": "Der opstod en fejl under fjernelse af denne søgefiltergruppe.",
@@ -823,6 +839,7 @@
       "persons": "bruger | brugere",
       "project_role": "Projektrolle",
       "select_person": "Vælg en bruger...",
+      "self_role_downgrade_button": "Sænk min rolle",
       "team": "Team",
       "title": "Personer",
       "unactive": "Inaktiv",
@@ -870,6 +887,7 @@
         "supervisor": "Supervisor",
         "all": "Alle roller"
       },
+      "archive_guest_button": "Arkivér gæsten",
       "confirm_edit": "Gem brugerændringer",
       "create": "Opret bruger",
       "user_limit_error": "Du har nået din brugergrænse. Kontakt venligst vores team for at opgradere din plan.",
@@ -1096,6 +1114,7 @@
         "copy": "Kopiér",
         "create": "Opret forhåndsvisningskonto",
         "delete": "Slet",
+        "delete_button": "Slet kontoen",
         "delete_confirm": "Slet forhåndsvisningskontoen for denne produktion?",
         "description": "Se Kitsu præcis som en klient, skrivebeskyttet og uden at optage en plads.",
         "error": "Der opstod en fejl under opdatering af forhåndsvisningskontoen.",
@@ -1205,6 +1224,7 @@
         "number": "Tal",
         "string": "Tekst",
         "tags": "Liste over tags",
+        "add_column": "Tilføj kolonnen",
         "applies_to_all_projects": "Denne kolonne føjes til alle åbne produktioner. Hver produktion kan have sin egen værdi i listevisningen.",
         "delete_list_column_text": "Dette vil fjerne kolonnen “{name}” fra alle åbne produktioner, inklusive gemte værdier. Fortsæt?",
         "date": "Dato",
@@ -1462,6 +1482,7 @@
       "preferences_title": "Præferencer"
     },
     "task_status": {
+      "create": "Opret en opgavestatus",
       "create_error": "Der opstod en fejl under gemning af denne opgavestatus. Er du sikker på, at der ikke allerede findes en opgavestatus med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletning af denne opgavestatus. Der kan være eksisterende data knyttet til den. Er du sikker på, at denne opgavestatus ikke har nogen opgave knyttet til sig?",
@@ -1494,6 +1515,7 @@
       "remove_status": "Fjern status {name}"
     },
     "task_types": {
+      "create": "Opret en opgavetype",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletning af denne opgavetype. Der kan være eksisterende data knyttet til den. Er du sikker på, at denne opgavetype ikke har nogen opgave knyttet til sig?",
       "delete_blocked_by_automations": "Der er stadig statusautomatiseringer, der bruger denne opgavetype, også arkiverede. Rediger eller slet dem først.",
@@ -1532,6 +1554,7 @@
     "sequences": {
       "all_hidden": "Alle sequences er skjult.",
       "all_sequences": "Alle sequences",
+      "create": "Opret en sequence",
       "edit_error": "Der opstod en fejl under gemning af denne sequence. Er du sikker på, at der ikke allerede findes en sequence med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database? Alle relaterede shots og previews vil også blive slettet. Bekræft venligst ved at skrive sequence-navnet nedenfor.",
       "delete_error": "Der opstod en fejl under sletning af denne sequence. Der kan være eksisterende data knyttet til den. Er du sikker på, at denne sequence ikke har noget shot knyttet til sig?",
@@ -1556,6 +1579,7 @@
     "schedule": {
       "already_assigned": "Allerede tildelt",
       "apply_to_prod": "Anvend på produktionen",
+      "apply_to_prod_button": "Anvend på produktionen",
       "apply_to_prod_confirm": "Er du sikker på, at du vil anvende denne version af tidsplanen på den aktuelle produktion? Dette vil tilsidesætte de aktuelle opgaveværdier.",
       "apply_to_prod_error": "Der opstod en fejl under anvendelse af versionen af tidsplanen på den aktuelle produktion.",
       "assign": "Tildel til:",
@@ -1599,6 +1623,7 @@
       "hours": "t",
       "md": "pd",
       "milestone": {
+        "add": "Tilføj en milepæl",
         "add_milestone": "Tilføj milepæl for",
         "edit_milestone": "Rediger milepæl for",
         "name": "Navn",
@@ -1617,6 +1642,7 @@
       "mode": "Visningstilstand",
       "mode_prev": "Prognose",
       "mode_real": "Faktisk",
+      "move_children_button": "Flyt med underelementerne",
       "nb_tasks_out_of_range": "{count} opgave uden for de viste datoer | {count} opgaver uden for de viste datoer",
       "nb_undated_tasks": "{count} opgave uden datoer | {count} opgaver uden datoer",
       "new_version": "Ny version",
@@ -1716,6 +1742,7 @@
       "restore_text": "Er du sikker på, at du vil gendanne {name} fra dit arkiv?",
       "restore_error": "Der opstod en fejl under gendannelse af dette shot.",
       "sequences": "Sequences",
+      "set_frames": "Angiv frame-numrene",
       "single_tab": "Enkelt",
       "tasks": "Shot-opgaver",
       "title": "Shots",
@@ -1742,6 +1769,7 @@
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",
       "delete_for_selection": "Slet det valgte shot | Slet de {nbSelectedShots} valgte shots",
       "multiple_delete_error": "Der opstod en fejl under sletning af et shot. Der kan være eksisterende data knyttet til shottet. Er du sikker på, at der ikke er nogen opgave knyttet til et valgt shot?",
+      "create": "Opret et shot",
       "creation_explanation": "For at tilføje shots skal du først oprette en episode og en sequence. Indtast et episodenavn nederst i venstre kolonne, og klik derefter på \"Tilføj\" for at oprette en ny episode. Vælg denne episode, og gentag den samme proces for at oprette en sequence. Til sidst skal du vælge en sequence og indtaste et shot-navn i feltet nederst i højre kolonne. Klik på \"Tilføj\"-knappen nedenfor. Dit første shot er nu oprettet. Du kan tilføje mange flere! Hvis det ikke er en tv-serie, kan du oprette en sequence direkte.",
       "get_frames_from_previews": "Angiv frame-numre fra previews",
       "get_frames_from_previews_description": "Vælg en opgavetype for at udtrække frame-numre fra de senest publicerede film-previews.",
@@ -1894,6 +1922,7 @@
         "my_departments": "Mine afdelinger"
       },
       "add_revision_confirm": "Tilføj filer til publicering",
+      "change_status_button": "Skift status",
       "confirm_attachments": "Tilføj filer som vedhæftninger",
       "change_status": "Send kommentar",
       "publish": "Publicer",
@@ -1904,6 +1933,7 @@
       "change_task_status_error": "Der opstod en fejl under opdateringen af den valgte opgave. | Der opstod en fejl under opdateringen af de {count} valgte opgaver: nogle af dem kan være ændret. Kontrollér dem, før du prøver igen.",
       "confirm_change_task_status": "Skift status for den valgte opgave til {status}? | Skift status for de {count} valgte opgaver til {status}?",
       "confirm_post_comment": "Send kommentaren til den valgte opgave? | Send kommentaren til de {count} valgte opgaver?",
+      "post_comment_button": "Send kommentaren",
       "post_comment_on_tasks": "Send kommentaren til den valgte opgave | Send kommentaren til de {count} valgte opgaver",
       "select_status": "Vælg en status",
       "due_date": "Status for forfaldsdato",
@@ -1931,6 +1961,7 @@
       "my_checks": "Mine kontroller",
       "new_revision_number": "Nyt revisionsnummer",
       "post": "Send",
+      "publish_files": "Publicér filerne",
       "publish_revision": "Publicér revision",
       "revision_preview_file": "Hvis en af de valgte filer indeholder et revisionsnummer i sit navn (fx \"preview-v3.png\"), vil det blive foreslået som et nyt revisionsnavn (fx \"revision 3\") i det næste trin.",
       "selected_entities": "Valgte enheder",
@@ -1951,6 +1982,7 @@
         "very_hard": "Meget svær"
       },
       "assignation_disclaimer": "Hvis der mangler personer på listen, betyder det, at de ikke er med i teamet.",
+      "create_tasks_confirm": "Opret opgaverne",
       "create_tasks_disclaimer": "Hvis din opgavetype mangler, skal du kontrollere, at den er anført i afsnittet Opgavetyper i produktionsindstillingerne.",
       "data_display": "Visning af data",
       "delete_for_selection_error": "Der opstod en fejl under sletning af de valgte opgaver.",
@@ -2033,6 +2065,7 @@
       }
     },
     "departments": {
+      "create": "Opret en afdeling",
       "create_error": "Der opstod en fejl under gemning af denne afdeling. Er du sikker på, at der ikke allerede findes en afdeling med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletning af afdelingen.",
@@ -2057,6 +2090,7 @@
     },
     "edits": {
       "all_edits": "Alle montager",
+      "create": "Opret en montage",
       "creation_explanation": "Upload en montagefil for at oprette en ny montage",
       "edit_error": "Der opstod en fejl under gemning af denne montage. Er du sikker på, at der ikke allerede findes en montage med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
@@ -2090,6 +2124,7 @@
     "status_automations": {
       "change_ready_for": "skifter \"klar til\" til",
       "change_status": "skifter status for",
+      "create": "Opret en automatisering",
       "create_error": "Kunne ikke gemme. Prøv venligst igen.",
       "delete_text": "Er du sikker på, at du vil fjerne denne statusautomatisering fra din database?",
       "delete_error": "Der opstod en fejl under sletning af denne statusautomatisering. Den kan være knyttet til en produktion eller en produktionsskabelon. Hvis det er tilfældet, skal du først fjerne den fra alle produktioner og skabeloner.",
@@ -2248,6 +2283,7 @@
       },
       "add_concept": "Tilføj filer til nye koncepter",
       "add_concept_error": "Der opstod en fejl under tilføjelse af koncepter.",
+      "add_confirm": "Tilføj koncepterne",
       "add_links": "Tilføj links til assets",
       "add_new_concept": "Tilføj nye koncepter",
       "delete_for_selection": "Slet det valgte koncept | Slet de {nbSelectedConcepts} valgte koncepter",
@@ -2265,6 +2301,7 @@
         "updated_at": "Opdateringsdato"
       },
       "folders": {
+        "create": "Opret en mappe",
         "delete": "Slet mappe",
         "delete_error": "Der opstod en fejl under sletning af denne mappe.",
         "delete_text": "Er du sikker på, at du vil slette mappen {name}? Dens koncepter bevares og flyttes tilbage til roden.",
@@ -2297,6 +2334,7 @@
       "processing": "Dette preview er ved at blive behandlet..."
     },
     "studios": {
+      "create": "Opret et studio",
       "create_error": "Der opstod en fejl under gemning af dette studio. Er du sikker på, at der ikke allerede findes et studio med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletning af dette studio.",
@@ -2427,6 +2465,7 @@
       "delete_for_selection_hard_lock_text": "SLET"
     },
     "hardware_items": {
+      "create": "Opret et hardware-element",
       "create_error": "Der opstod en fejl under lagring af hardware-elementet.",
       "delete_error": "Der opstod en fejl under sletning af hardware-elementet.",
       "delete_text": "Er du sikker på, at du vil slette dette hardware-element?",
@@ -2443,6 +2482,7 @@
       }
     },
     "software_licenses": {
+      "create": "Opret en softwarelicens",
       "create_error": "Der opstod en fejl under lagring af softwarelicensen.",
       "delete_error": "Der opstod en fejl under sletning af softwarelicensen.",
       "delete_text": "Er du sikker på, at du vil slette denne softwarelicens?",
@@ -2498,6 +2538,7 @@
         "task_statuses": "Opgavestatusser",
         "task_types": "Opgavetyper"
       },
+      "create": "Opret en produktionsskabelon",
       "title": "Skabeloner",
       "metadata_explanation": "Metadatakolonner, der tilføjes til produktioner oprettet ud fra denne skabelon.",
       "settings_menu": {

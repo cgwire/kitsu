@@ -175,6 +175,7 @@
         @click="$emit('reupload')"
       />
       <modal-footer
+        :confirm-label="$t('main.csv.import_data')"
         :is-loading="isLoading"
         :is-disabled="isConfirmDisabled"
         @confirm="$emit('confirm', parsedCsv, updateData)"
