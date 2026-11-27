@@ -1351,7 +1351,14 @@ describe('SearchQueryList, a request ending after its modal closed', () => {
 })
 
 describe('SearchQueryList, order', () => {
-  const named = (row, id, extra = {}) => ({ ...row, id, name: id, ...extra })
+  // Zou lists a row it never placed with an empty position.
+  const named = (row, id, extra = {}) => ({
+    position: null,
+    ...row,
+    id,
+    name: id,
+    ...extra
+  })
   const searchTags = wrapper =>
     wrapper.findAll('.search-queries > .tag:not(.folder):not(.group)')
   const groupTags = wrapper => wrapper.findAll('.tag.group')
@@ -1551,5 +1558,134 @@ describe('SearchQueryList, order', () => {
 
     // the group that holds them stays where it is
     expect(saved()).toEqual([{ rows: ['h2', 'h1'], isGroup: false }])
+  })
+
+  // Its PUT drops a position it does not know, and before its 1.0.27 takes
+  // a search out of its group.
+  test('keeps in place the rows of a Zou that lists no position', async () => {
+    const { saved, wrapper } = await mountOrdered({
+      queries: ['a', 'b'].map(id => ({ ...search, id, name: id }))
+    })
+    const [a, b] = searchTags(wrapper)
+
+    expect(a.attributes('draggable')).toBe('false')
+    await drag(a, b, after)
+    await a.trigger('keydown', { key: 'ArrowRight', shiftKey: true })
+
+    expect(saved()).toEqual([])
+  })
+
+  test('saves one order at a time', async () => {
+    let endSave
+    const saveSearchPositions = vi.fn(
+      () =>
+        new Promise(resolve => {
+          endSave = resolve
+        })
+    )
+    const { wrapper } = await mountOrdered({ actions: { saveSearchPositions } })
+    const [a, , c] = searchTags(wrapper)
+    const move = (tag, key, options) =>
+      tag.trigger('keydown', { key, shiftKey: true, ...options })
+
+    await move(a, 'ArrowRight')
+    await move(c, 'ArrowLeft')
+    await drag(c, a, before)
+    expect(saveSearchPositions).toHaveBeenCalledTimes(1)
+
+    endSave()
+    await flushPromises()
+    // a held key repeats its keydown
+    await move(c, 'ArrowLeft', { repeat: true })
+    expect(saveSearchPositions).toHaveBeenCalledTimes(1)
+    await move(c, 'ArrowLeft')
+
+    expect(saveSearchPositions).toHaveBeenCalledTimes(2)
+  })
+
+  // In a tag that moves, the link would be dragged in its place.
+  test('lets the link of a search drag out of the edit mode', async () => {
+    const wrapper = await mountList({
+      queries: ['a', 'b'].map(id => named(search, id))
+    })
+    const links = () =>
+      searchTags(wrapper).map(tag => tag.find('a').attributes('draggable'))
+
+    expect(links()).toEqual([undefined, undefined])
+    await edit(wrapper)
+
+    expect(links()).toEqual(['false', 'false'])
+  })
+
+  test('starts a drag that drops no text in a field', async () => {
+    const { wrapper } = await mountOrdered()
+    const setData = vi.fn()
+
+    await searchTags(wrapper)[0].trigger('dragstart', {
+      dataTransfer: { setData }
+    })
+
+    expect(setData.mock.calls).toEqual([['application/x-kitsu-search', 'a']])
+  })
+
+  test('tells how to move a row, and where a move put it', async () => {
+    const wrapper = await mountList({
+      actions: { saveSearchPositions: () => Promise.resolve() },
+      queries: ['a', 'b'].map(id => named(search, id))
+    })
+    const tag = () => searchTags(wrapper)[0]
+    const status = wrapper.find('[aria-live="polite"]')
+
+    expect(tag().attributes('title')).toBe('a')
+    expect(tag().attributes('aria-keyshortcuts')).toBeUndefined()
+    await edit(wrapper)
+
+    expect(tag().attributes('title')).toBe('main.search_query_move_hint')
+    expect(tag().attributes('aria-keyshortcuts')).toBe(
+      'Shift+ArrowLeft Shift+ArrowRight'
+    )
+    expect(status.text()).toBe('')
+    await tag().trigger('keydown', { key: 'ArrowRight', shiftKey: true })
+
+    expect(status.text()).toBe('main.search_query_moved')
+  })
+
+  // Its rank counted among the rows it leaves.
+  test.each([
+    ['joins a group', { search_filter_group_id: group.id }, null],
+    ['gets shared', { is_shared: true }, null],
+    ['keeps its place', { name: 'renamed' }, undefined]
+  ])('saves the rank of a search that %s', async (_, change, position) => {
+    const updateSearchFilter = vi.fn()
+    const wrapper = await mountList({
+      actions: { updateSearchFilter },
+      queries: [named(search, 'a', { position: 2 })]
+    })
+
+    await wrapper
+      .find('.tag:not(.folder):not(.group) button.edit')
+      .trigger('click')
+    wrapper
+      .findComponent(EditSearchFilterModal)
+      .vm.$emit('confirm', { id: 'a', ...change })
+    await flushPromises()
+
+    expect(updateSearchFilter.mock.calls[0][1].position).toBe(position)
+  })
+
+  test('gives up the rank of a group that gets shared', async () => {
+    const updateSearchFilterGroup = vi.fn()
+    const wrapper = await mountList({
+      actions: { updateSearchFilterGroup },
+      groups: [named(group, 'g1', { position: 2 })]
+    })
+
+    await wrapper.find('.tag.group button.edit').trigger('click')
+    wrapper
+      .findComponent(EditSearchFilterGroupModal)
+      .vm.$emit('confirm', { id: 'g1', is_shared: true })
+    await flushPromises()
+
+    expect(updateSearchFilterGroup.mock.calls[0][1].position).toBeNull()
   })
 })

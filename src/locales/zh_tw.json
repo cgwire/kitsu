@@ -581,6 +581,8 @@
       "search_query_add_error": "儲存搜尋篩選器時發生錯誤。",
       "search_query_edit": "編輯搜尋篩選器",
       "search_query_edit_error": "更新搜尋篩選器時發生錯誤。",
+      "search_query_move_hint": "拖曳以重新排序，或按 Shift 和方向鍵",
+      "search_query_moved": "{name} 已移至第 {position} 位，共 {count} 位",
       "search_query_too_long": "此搜尋查詢過長。上限為 {count} 個字元。 | 此搜尋查詢過長。上限為 {count} 個字元。",
       "to": "至",
       "workspace": "工作空間",

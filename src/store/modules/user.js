@@ -694,23 +694,26 @@ const actions = {
     const moved = rows
       .map(({ id, position: former }, position) => ({ id, former, position }))
       .filter(({ former, position }) => former !== position)
-    const place = key =>
+    const place = (placed, key) =>
       commit(SET_SEARCH_POSITIONS, {
         isGroup,
-        positions: Object.fromEntries(moved.map(row => [row.id, row[key]]))
+        positions: Object.fromEntries(placed.map(row => [row.id, row[key]]))
       })
     const update = isGroup
       ? peopleApi.updateFilterGroup
       : peopleApi.updateFilter
-    // shown at once, and put back when Zou refuses
-    place('position')
-    try {
-      await Promise.all(
-        moved.map(({ id, position }) => update({ id, position }))
-      )
-    } catch (err) {
-      place('former')
-      throw err
+    // shown at once
+    place(moved, 'position')
+    const results = await Promise.allSettled(
+      moved.map(({ id, position }) => update({ id, position }))
+    )
+    const refused = moved.filter(
+      (row, index) => results[index].status === 'rejected'
+    )
+    if (refused.length) {
+      // the others are saved: the list shows what Zou holds
+      place(refused, 'former')
+      throw results.find(({ status }) => status === 'rejected').reason
     }
   },
 

@@ -581,6 +581,8 @@
       "search_query_add_error": "保存此搜索过滤器时发生错误。",
       "search_query_edit": "编辑搜索过滤器",
       "search_query_edit_error": "更新此搜索过滤器时出错。",
+      "search_query_move_hint": "拖动以重新排序，或按 Shift 和方向键",
+      "search_query_moved": "{name} 已移至第 {position} 位，共 {count} 位",
       "search_query_too_long": "此搜索查询过长。上限为 {count} 个字符。 | 此搜索查询过长。上限为 {count} 个字符。",
       "to": "至",
       "workspace": "工作区",

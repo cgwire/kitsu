@@ -119,7 +119,7 @@
             >
               <router-link
                 class="flexrow filter-name"
-                draggable="false"
+                :draggable="linkDraggable(filterZone(searchQuery))"
                 :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
               >
                 <span class="filter-label">{{ searchQuery.name }}</span>
@@ -164,7 +164,7 @@
     >
       <router-link
         class="flexrow filter-name"
-        draggable="false"
+        :draggable="linkDraggable(filterZone(searchQuery))"
         :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
       >
         <span
@@ -192,6 +192,8 @@
         <trash2-icon :size="8" />
       </button>
     </span>
+
+    <span class="visuallyhidden" aria-live="polite">{{ moveStatus }}</span>
 
     <confirm-modal
       active
@@ -336,6 +338,8 @@ const props = defineProps({
 // and the place of each row of that zone if it were dropped now
 const dragged = ref(null)
 const draggedPlaces = ref(null)
+const isSavingOrder = ref(false)
+const moveStatus = ref('')
 const groupToEdit = ref({})
 const groupToRemove = ref({})
 const isEditing = ref(false)
@@ -570,7 +574,10 @@ const confirmEditFilterGroup = filterGroup =>
   runInModal(
     'group',
     () => {
-      const group = { ...filterGroup, project_id: props.productionId }
+      const group = {
+        ...leaveRank(filterGroup, props.groups, groupZone),
+        project_id: props.productionId
+      }
       return store.dispatch(
         group.id
           ? 'updateSearchFilterGroup'
@@ -593,7 +600,7 @@ const confirmEditSearch = searchFilter =>
     () => {
       if (searchFilter.id) {
         return store.dispatch('updateSearchFilter', {
-          ...searchFilter,
+          ...leaveRank(searchFilter, props.queries, filterZone),
           project_id: props.productionId
         })
       }
@@ -682,10 +689,24 @@ const filterZone = query =>
 
 // A move changes the position of the neighbours of the row too: Zou takes
 // them only from who can change every row of the zone.
+// A row that changes zone joins the rows nobody placed there: its rank
+// counted among the rows it leaves.
+const leaveRank = (form, rows, zoneOf) => {
+  const saved = rows.find(({ id }) => id === form.id)
+  return saved && zoneOf({ ...saved, ...form }) !== zoneOf(saved)
+    ? { ...form, position: null }
+    : form
+}
+
+// An older Zou lists no position: it would drop the order, and before its
+// 1.0.27 take a search moved in a group out of it.
 const canReorder = zone =>
   isEditing.value &&
   zones.value[zone].length > 1 &&
-  zones.value[zone].every(canChange)
+  zones.value[zone].every(row => row.position !== undefined && canChange(row))
+
+// A link is dragged in the place of the tag that holds it.
+const linkDraggable = zone => (canReorder(zone) ? 'false' : null)
 
 // A group holds the tags of its searches: their events reach it too.
 const isOwnEvent = event => event.target.closest('.tag') === event.currentTarget
@@ -700,13 +721,25 @@ const placeRow = (rows, id, targetId, isAfter) => {
   ]
 }
 
-const saveOrder = (zone, rows) =>
+// One order at a time: a move saved over another one could reach Zou first,
+// or be put back by the failure of the other.
+const saveOrder = (zone, rows, row) => {
+  isSavingOrder.value = true
+  moveStatus.value = t('main.search_query_moved', {
+    name: row.name,
+    position: rows.indexOf(row) + 1,
+    count: rows.length
+  })
   store
     .dispatch('saveSearchPositions', {
       rows,
       isGroup: zone.startsWith('groups')
     })
     .catch(console.error)
+    .finally(() => {
+      isSavingOrder.value = false
+    })
+}
 
 const resetDrag = () => {
   dragged.value = null
@@ -714,15 +747,15 @@ const resetDrag = () => {
 }
 
 const onDragStart = (event, row, zone) => {
-  if (!isOwnEvent(event) || !canReorder(zone)) return
+  if (!isOwnEvent(event) || !canReorder(zone) || isSavingOrder.value) return
   dragged.value = {
     id: row.id,
     zone,
     ids: zones.value[zone].map(({ id }) => id)
   }
   event.dataTransfer.effectAllowed = 'move'
-  // Firefox starts no drag without data
-  event.dataTransfer.setData('text/plain', row.name)
+  // Firefox starts no drag without data, and text would drop in a field
+  event.dataTransfer.setData('application/x-kitsu-search', row.id)
 }
 
 // The dragged tag takes the place it would get, and marks it.
@@ -748,10 +781,16 @@ const onListDragOver = event => {
 const onListDrop = event => {
   if (!dragged.value) return
   event.preventDefault()
-  const { ids, zone } = dragged.value
+  const { id, ids, zone } = dragged.value
   const rows = zones.value[zone]
   // the store places the rows before the drag forgets where they were shown
-  if (rows.some((row, index) => row.id !== ids[index])) saveOrder(zone, rows)
+  if (rows.some((row, index) => row.id !== ids[index])) {
+    saveOrder(
+      zone,
+      rows,
+      rows.find(row => row.id === id)
+    )
+  }
   resetDrag()
 }
 
@@ -765,10 +804,10 @@ const onMoveKey = (event, row, zone) => {
   event.preventDefault()
   const rows = zones.value[zone]
   const target = rows[rows.findIndex(({ id }) => id === row.id) + step]
-  if (!target) return
+  if (!target || event.repeat || isSavingOrder.value) return
   // the tag moves in the page and loses the focus
   const focused = document.activeElement
-  saveOrder(zone, placeRow(rows, row.id, target.id, step > 0))
+  saveOrder(zone, placeRow(rows, row.id, target.id, step > 0), row)
   nextTick(() => focused?.focus())
 }
 
@@ -777,6 +816,14 @@ const onMoveKey = (event, row, zone) => {
 const moveBindings = (row, zone) => ({
   class: { dragged: dragged.value?.id === row.id },
   draggable: `${canReorder(zone)}`,
+  ...(canReorder(zone)
+    ? {
+        'aria-keyshortcuts': zone.startsWith('held')
+          ? 'Shift+ArrowUp Shift+ArrowDown'
+          : 'Shift+ArrowLeft Shift+ArrowRight',
+        title: t('main.search_query_move_hint')
+      }
+    : {}),
   onDragstart: event => onDragStart(event, row, zone),
   onDragover: event => onDragOver(event, row, zone),
   onDragend: resetDrag,

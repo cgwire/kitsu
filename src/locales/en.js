@@ -1072,6 +1072,8 @@ export default {
     search_query_add_error: 'An error occurred while saving the search filter.',
     search_query_edit: 'Edit search filter',
     search_query_edit_error: 'An error occurred while updating the search filter.',
+    search_query_move_hint: 'Drag to reorder, or press Shift and an arrow key',
+    search_query_moved: '{name} moved to position {position} of {count}',
     search_query_too_long: 'This search query is too long. The limit is {count} character. | This search query is too long. The limit is {count} characters.',
     select_column: 'Select column',
     select_file: 'Select files from your hard drive',

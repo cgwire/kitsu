@@ -1126,6 +1126,26 @@ describe('User store', () => {
           ['c', null]
         ])
       })
+
+      // What the list shows is what Zou holds.
+      test('puts back only the rows Zou refused', async () => {
+        const failure = new Error('Forbidden')
+        peopleApi.updateFilter.mockImplementation(({ id }) =>
+          id === 'a' ? Promise.reject(failure) : Promise.resolve({})
+        )
+        const { commit, positions, rows } = context('userFilters')
+        const [a, b, c] = rows
+
+        await expect(
+          store.actions.saveSearchPositions({ commit }, { rows: [c, b, a] })
+        ).rejects.toBe(failure)
+
+        expect(positions()).toEqual([
+          ['a', null],
+          ['b', 1],
+          ['c', 0]
+        ])
+      })
     })
 
     describe('saveUserLocale', () => {

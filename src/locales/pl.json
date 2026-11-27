@@ -1030,6 +1030,8 @@
       "search_query_add_error": "Wystąpił błąd podczas zapisywania filtra wyszukiwania.",
       "search_query_edit": "Edytuj filtr wyszukiwania",
       "search_query_edit_error": "Wystąpił błąd podczas aktualizacji filtra wyszukiwania.",
+      "search_query_move_hint": "Przeciągnij, aby zmienić kolejność, lub naciśnij Shift i klawisz strzałki",
+      "search_query_moved": "{name} przeniesiono na pozycję {position} z {count}",
       "search_query_too_long": "To zapytanie wyszukiwania jest zbyt długie. Limit znaków: {count} | To zapytanie wyszukiwania jest zbyt długie. Limit znaków: {count}",
       "select_column": "Wybierz kolumnę",
       "select_file": "Wybierz pliki z dysku twardego",
