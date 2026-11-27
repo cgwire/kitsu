@@ -373,6 +373,79 @@ describe('players/SharedPlaylistPlayer', () => {
     })
   })
 
+  // The guest may move to another file or shot while the save runs. The
+  // entities given here are not reactive: a file is read again once shown.
+  describe('annotations saved by the guest', () => {
+    const saved = [
+      {
+        time: 0,
+        width: 1920,
+        height: 1080,
+        drawing: { objects: [{ id: 'stroke-1' }] }
+      }
+    ]
+    const overlay = wrapper =>
+      wrapper.findComponent({ name: 'SharedAnnotationOverlay' })
+    const shownIds = wrapper =>
+      overlay(wrapper)
+        .props('annotations')
+        .flatMap(({ drawing }) => drawing.objects.map(({ id }) => id))
+
+    it('go to the file of the revision they were saved on', async () => {
+      const wrapper = mountPlayer({
+        entities: [
+          {
+            ...entity,
+            preview_file_annotations: [],
+            preview_file_previews: [
+              { id: 'preview-1b', extension: 'mp4', annotations: [] }
+            ]
+          }
+        ]
+      })
+      const bar = wrapper.findComponent(SharedPlaylistButtonBar)
+      await nextTick()
+      bar.vm.$emit('next-preview')
+      await nextTick()
+      expect(overlay(wrapper).props('previewFileId')).toBe('preview-1b')
+      overlay(wrapper).vm.$emit('saved', saved, 'preview-1b')
+
+      bar.vm.$emit('next-preview')
+      await nextTick()
+      expect(overlay(wrapper).props('previewFileId')).toBe('preview-1')
+      expect(shownIds(wrapper)).toEqual([])
+
+      bar.vm.$emit('next-preview')
+      await nextTick()
+      expect(shownIds(wrapper)).toEqual(['stroke-1'])
+      wrapper.unmount()
+    })
+
+    it('go to the shot saved when the guest moved on meanwhile', async () => {
+      const wrapper = mountPlayer({
+        entities: [
+          { ...entity, preview_file_annotations: [] },
+          { ...shot, preview_file_annotations: [] }
+        ]
+      })
+      await nextTick()
+      const strip = wrapper.findAllComponents({ name: 'PlaylistedEntity' })
+      strip[1].vm.$emit('play-click', 1)
+      await nextTick()
+      expect(overlay(wrapper).props('previewFileId')).toBe('preview-v2')
+      overlay(wrapper).vm.$emit('saved', saved, 'preview-1')
+
+      strip[0].vm.$emit('play-click', 0)
+      await nextTick()
+      expect(shownIds(wrapper)).toEqual(['stroke-1'])
+
+      strip[1].vm.$emit('play-click', 1)
+      await nextTick()
+      expect(shownIds(wrapper)).toEqual([])
+      wrapper.unmount()
+    })
+  })
+
   // Like a picture, it keeps its slot on the strip, 4 s here, then the
   // playlist moves on, or stops at its end.
   describe('movie that cannot be read', () => {
