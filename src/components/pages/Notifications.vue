@@ -1,101 +1,122 @@
 <template>
-  <div class="columns fixed-page">
-    <div class="column main-column">
-      <div ref="body" class="notifications page" @scroll.passive="onBodyScroll">
-        <div
-          :class="{
-            'desktop-banner': true,
-            blocked: isDesktopNotificationsBlocked
-          }"
-          v-if="shouldShowDesktopBanner"
-        >
-          <div class="desktop-banner-message">
-            <bell-off-icon
-              class="desktop-banner-icon"
-              :size="22"
-              :stroke-width="1.75"
-              aria-hidden="true"
-              v-if="isDesktopNotificationsBlocked"
-            />
-            <bell-ring-icon
-              class="desktop-banner-icon"
-              :size="22"
-              :stroke-width="1.75"
-              aria-hidden="true"
-              v-else
-            />
-            <span class="desktop-banner-text">
-              {{
-                isDesktopNotificationsBlocked
-                  ? $t('notifications.desktop.banner_blocked_text')
-                  : $t('notifications.desktop.banner_text')
-              }}
-            </span>
-          </div>
-          <div class="desktop-banner-actions">
-            <button-simple
-              class="desktop-banner-action"
-              :text="$t('notifications.desktop.banner_enable')"
-              @click="enableDesktopNotifications"
-              v-if="!isDesktopNotificationsBlocked"
-            />
-            <button-simple
-              class="desktop-banner-action ghost"
-              :text="$t('notifications.desktop.banner_dismiss')"
-              @click="dismissDesktopBanner"
-            />
-          </div>
+  <panel-layout
+    class="notifications-page"
+    :class="{ collapsed: !showFilters }"
+    side
+  >
+    <template #filters>
+      <div class="filters flexrow">
+        <combobox-task-type
+          class="flexrow-item task-type-filter"
+          :label="$t('news.task_type')"
+          :task-type-list="taskTypeList"
+          v-model="parameters.taskTypeId"
+        />
+        <combobox-status
+          class="flexrow-item collapsible"
+          :label="$t('news.task_status')"
+          :task-status-list="taskStatusList"
+          v-model="parameters.taskStatusId"
+        />
+        <div class="actions flexrow">
+          <button-simple
+            class="flexrow-item"
+            :text="$t('notifications.show_comments')"
+            :active="parameters.showComments"
+            @click="parameters.showComments = !parameters.showComments"
+          />
+          <button-simple
+            class="flexrow-item"
+            :is-loading="loading.markAll"
+            :text="$t('notifications.mark_all_as_read')"
+            @click="markAllNotificationsRead"
+            v-if="canMarkAllAsRead"
+          />
         </div>
-        <div class="filter-bar">
-          <div class="filter-bar-row flexrow">
-            <combobox-task-type
-              class="flexrow-item selector"
-              :label="$t('news.task_type')"
-              :task-type-list="taskTypeList"
-              v-model="parameters.taskTypeId"
-            />
-            <combobox-status
-              class="flexrow-item selector"
-              :label="$t('news.task_status')"
-              :task-status-list="taskStatusList"
-              v-model="parameters.taskStatusId"
-            />
-            <combobox-styled
-              class="flexrow-item selector field"
-              :label="$t('main.type')"
-              :options="typeOptions"
-              v-model="parameters.typeMode"
-            />
-            <combobox-styled
-              class="flexrow-item selector field"
-              :label="$t('main.status')"
-              :options="statusOptions"
-              v-model="parameters.statusMode"
-            />
-            <combobox-styled
-              class="flexrow-item selector field"
-              :label="$t('notifications.watching')"
-              :options="watchingOptions"
-              v-model="parameters.watchingMode"
-            />
-          </div>
-          <div class="filter-bar-row flexrow">
-            <button-simple
-              class="flexrow-item"
-              :text="$t('notifications.show_comments')"
-              :active="parameters.showComments"
-              @click="parameters.showComments = !parameters.showComments"
-            />
-            <span class="filler"></span>
-            <button-simple
-              class="flexrow-item"
-              :is-loading="loading.markAll"
-              :text="$t('notifications.mark_all_as_read')"
-              @click="markAllNotificationsRead"
-              v-if="canMarkAllAsRead"
-            />
-          </div>
+        <filters-toggle
+          class="flexrow-item"
+          :count="foldedFilterCount"
+          :resettable="hasFilters"
+          v-model="showFilters"
+          @reset="resetFilters"
+        />
+      </div>
+      <div class="filters flexrow collapsible">
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('main.type')"
+          :options="typeOptions"
+          v-model="parameters.typeMode"
+        />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('main.status')"
+          :options="statusOptions"
+          v-model="parameters.statusMode"
+        />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('notifications.watching')"
+          :options="watchingOptions"
+          v-model="parameters.watchingMode"
+        />
+      </div>
+    </template>
+
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="notificationsSearchFilterGroups"
+        is-group-enabled
+        :queries="notificationsSearchQueries"
+        type="notifications"
+        with-route-query
+      />
+      <div
+        :class="{
+          'desktop-banner': true,
+          blocked: isDesktopNotificationsBlocked
+        }"
+        v-if="shouldShowDesktopBanner"
+      >
+        <div class="desktop-banner-message">
+          <bell-off-icon
+            class="desktop-banner-icon"
+            :size="22"
+            :stroke-width="1.75"
+            aria-hidden="true"
+            v-if="isDesktopNotificationsBlocked"
+          />
+          <bell-ring-icon
+            class="desktop-banner-icon"
+            :size="22"
+            :stroke-width="1.75"
+            aria-hidden="true"
+            v-else
+          />
+          <span class="desktop-banner-text">
+            {{
+              isDesktopNotificationsBlocked
+                ? $t('notifications.desktop.banner_blocked_text')
+                : $t('notifications.desktop.banner_text')
+            }}
+          </span>
         </div>
+        <div class="desktop-banner-actions">
+          <button-simple
+            class="desktop-banner-action"
+            :text="$t('notifications.desktop.banner_enable')"
+            @click="enableDesktopNotifications"
+            v-if="!isDesktopNotificationsBlocked"
+          />
+          <button-simple
+            class="desktop-banner-action ghost"
+            :text="$t('notifications.desktop.banner_dismiss')"
+            @click="dismissDesktopBanner"
+          />
+        </div>
+      </div>
+      <div ref="body" class="notifications" @scroll.passive="onBodyScroll">
         <div
           class="empty-state"
           v-if="
@@ -366,12 +387,12 @@
           </div>
         </div>
       </div>
-    </div>
+    </template>
 
-    <div class="column side-column is-hidden-mobile hide-small-screen">
+    <template #side>
       <task-info :task="currentTask" />
-    </div>
-  </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -417,6 +438,7 @@ import {
 import preferences from '@/lib/preferences'
 import { renderComment } from '@/lib/render'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import BooleanField from '@/components/widgets/BooleanField.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -424,19 +446,23 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 const PARAMETER_NAMESPACE = 'notifications'
-const FILTER_KEYS = [
-  'taskTypeId',
-  'taskStatusId',
-  'typeMode',
-  'statusMode',
-  'watchingMode'
-]
+const FILTER_DEFAULTS = {
+  taskTypeId: '',
+  taskStatusId: '',
+  typeMode: '',
+  statusMode: null,
+  watchingMode: null
+}
+const FILTER_KEYS = Object.keys(FILTER_DEFAULTS)
+const FOLDED_FILTER_KEYS = ['typeMode', 'statusMode', 'watchingMode']
 const SKELETON_ROWS = 6
 
 const { t } = useI18n()
@@ -484,19 +510,22 @@ const loading = reactive({
   notifications: false
 })
 
-const parameters = reactive({
-  taskTypeId: '',
-  taskStatusId: '',
-  typeMode: '',
-  showComments: false,
-  statusMode: null,
-  watchingMode: null
-})
+const parameters = reactive({ ...FILTER_DEFAULTS, showComments: false })
+const showFilters = ref(false)
+// The route watcher sees the query of the next page too, before this one
+// unmounts.
+const pagePath = route.path
 
 // Computed
 
 const departmentMap = computed(() => store.getters.departmentMap)
 const notifications = computed(() => store.getters.notifications)
+const notificationsSearchFilterGroups = computed(
+  () => store.getters.notificationsSearchFilterGroups
+)
+const notificationsSearchQueries = computed(
+  () => store.getters.notificationsSearchQueries
+)
 const organisationLogoPath = computed(() => store.getters.organisationLogoPath)
 const personMap = computed(() => store.getters.personMap)
 const productionMap = computed(() => store.getters.productionMap)
@@ -527,6 +556,13 @@ const canMarkAllAsRead = computed(
     [null, 'unread'].includes(parameters.statusMode) &&
     parameters.watchingMode === null
 )
+
+// The toggle shows how many filters its folded row holds.
+const foldedFilterCount = computed(
+  () => FOLDED_FILTER_KEYS.filter(key => parameters[key]).length
+)
+
+const hasFilters = computed(() => FILTER_KEYS.some(key => parameters[key]))
 
 const statusOptions = computed(() => [
   { label: t('notifications.all_statuses'), value: null },
@@ -562,6 +598,10 @@ const buildLoadParams = () => {
     params.watching = parameters.watchingMode === 'watching'
   }
   return params
+}
+
+const resetFilters = () => {
+  Object.assign(parameters, FILTER_DEFAULTS)
 }
 
 const closeTask = () => {
@@ -759,6 +799,19 @@ watch(parameters, () => {
 
 watch(() => FILTER_KEYS.map(key => parameters[key]), reloadData)
 
+// A saved search, or the back button, sets a query the page did not write:
+// what it does not hold goes back to its default. The query the page wrote
+// changes nothing here.
+watch(
+  () => route.query,
+  query => {
+    if (route.path !== pagePath) return
+    Object.assign(parameters, FILTER_DEFAULTS, query, {
+      showComments: `${query.showComments}` === 'true'
+    })
+  }
+)
+
 // Lifecycle
 
 onMounted(() => {
@@ -808,16 +861,62 @@ a {
   margin-right: 1em;
 }
 
-.filter-bar {
-  background: var(--background);
-  border: 1px solid var(--border);
-  border-radius: 0.75em;
-  margin: 1em 0;
-  padding: 1em 1em 0.75em;
+// One label height and one control height for the whole row, as on the other
+// pages.
+.filters {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  row-gap: 1em;
+
+  // the comboboxes are fields, set 2em apart from what follows them
+  > .flexrow-item,
+  .actions > .flexrow-item,
+  :deep(.field) {
+    margin-bottom: 0;
+  }
+
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  > :last-child {
+    margin-right: 0;
+  }
+
+  // the status combobox carries a 1px margin-top the others lack
+  :deep(.status-combo) {
+    margin-top: 0;
+  }
+
+  // 39px tall against 42px for the others
+  :deep(.combo) {
+    display: inline-flex;
+    flex-direction: column;
+    height: 42px;
+    justify-content: center;
+    margin: 0;
+    vertical-align: top;
+  }
 }
 
-.dark .filter-bar {
-  background: var(--background-alt);
+// the buttons keep to the right, on a line of their own once the row wraps
+.actions {
+  align-self: flex-end;
+  margin-left: auto;
+  // its last button gives its own margin up
+  margin-right: 1rem;
+
+  > .button {
+    // Bulma's near-black button text outweighs the grey of the filter labels
+    color: var(--text);
+    height: 42px;
+    padding: 0 14px;
+  }
+}
+
+.collapsed .filters.collapsible {
+  display: none;
 }
 
 .desktop-banner {
@@ -828,7 +927,7 @@ a {
   box-shadow: 0 0 0 2px rgba($green, 0.3);
   display: flex;
   gap: 2em;
-  margin: 1em auto 2em;
+  margin: 0 auto;
   max-width: 800px;
   padding: 0.75em 1em;
   width: fit-content;
@@ -881,43 +980,6 @@ a {
 
   .desktop-banner-action {
     flex: 1;
-  }
-}
-
-.filter-bar-row {
-  align-items: flex-end;
-
-  // The Combobox / ButtonSimple inside use the global .field rule
-  // (margin-bottom: 2em) which is too loud inside the filter bar.
-  :deep(.field) {
-    margin-bottom: 0;
-  }
-
-  // Match the heights of ComboboxTaskType / ComboboxStatus to
-  // ComboboxStyled so all five filters line up on the same baseline.
-  // The task-type / status widgets have tight internal padding
-  // (0.15em + 0.4em) and end up ~32px tall, while ComboboxStyled's
-  // `.combo` renders ~38px from its 0.5em padding.
-  :deep(.task-type-combo),
-  :deep(.status-combo),
-  :deep(.combo) {
-    align-items: center;
-    box-sizing: border-box;
-    display: flex !important;
-    height: 38px;
-    padding: 0 0.5em;
-  }
-
-  // The click handler in ComboboxTaskType / ComboboxStatus lives on the
-  // inner .flexrow, not the outer .*-combo box. Stretch it so the whole
-  // 38px width is clickable and the chevron is pushed to the right edge.
-  :deep(.task-type-combo) > .flexrow,
-  :deep(.status-combo) > .flexrow {
-    flex: 1;
-  }
-
-  & + .filter-bar-row {
-    margin-top: 0.75em;
   }
 }
 
@@ -1042,6 +1104,9 @@ a {
 
 .notifications {
   --unread-border: #f0c5d1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 .dark .notifications {
   --unread-border: #906571;
@@ -1167,38 +1232,6 @@ a {
   border: 4px solid var(--background-selected);
 }
 
-.columns {
-  display: flex;
-  flex-direction: row;
-}
-
-.column {
-  overflow-y: auto;
-  padding: 0;
-}
-
-.main-column {
-  flex: 1 1 auto;
-  padding-top: 60px;
-  background: var(--background-page);
-  overflow-y: hidden;
-  height: 100%;
-}
-
-.notifications {
-  background: var(--background-page);
-  width: 100%;
-  padding: 1em 1.5em;
-  overflow-y: auto;
-  height: 100%;
-}
-
-.side-column {
-  width: 450px;
-  min-width: 450px;
-  max-width: 450px;
-}
-
 .flexrow-item.mr0 {
   margin-right: 0;
 }
@@ -1224,36 +1257,35 @@ a {
 }
 
 @media screen and (max-width: 768px) {
-  .notifications {
-    padding: 0.5em;
+  .collapsed .collapsible {
+    display: none;
   }
 
-  .filter-bar {
-    padding: 0.75em 0.75em 0.5em;
+  // The task type and the funnel lead the row: the status, then the buttons,
+  // follow them, on the lines they need.
+  .actions {
+    margin: 0;
+    order: 3;
   }
 
-  // Wrap the 5 selectors across multiple lines instead of overflowing
-  // the row on narrow screens.
-  .filter-bar-row {
-    flex-wrap: wrap;
-    gap: 0.5em;
+  .task-type-filter {
+    flex: 1 1 150px;
+    min-width: 0;
 
-    > .flexrow-item {
-      flex: 1 1 calc(50% - 0.5em);
-      margin-right: 0;
-      min-width: 0;
-    }
-
-    // ComboboxTaskType pins itself to 200px (`min-width: 200px;
-    // width: 200px`), and ComboboxStyled caps at 400px — both ignore
-    // the flex layout above. Reset them so the wrapping behaves.
-    :deep(.task-type-combo),
-    :deep(.status-combo),
-    :deep(.combo) {
-      max-width: none;
+    // the combobox pins itself to 200px
+    :deep(.task-type-combo) {
       min-width: 0;
       width: 100%;
     }
+  }
+
+  .filters > .filters-buttons {
+    margin-right: 1rem;
+    order: 1;
+  }
+
+  .filters > .collapsible {
+    order: 2;
   }
 
   // Strip non-essential elements on narrow screens (date, entity
@@ -1274,13 +1306,6 @@ a {
   .notification-header {
     flex-wrap: wrap;
     row-gap: 0.4em;
-  }
-
-  // The fixed-width side column is already hidden via .is-hidden-mobile
-  // on the markup; this keeps the main column from inheriting padding
-  // that assumes the side column is visible.
-  .main-column {
-    padding-top: 50px;
   }
 }
 </style>

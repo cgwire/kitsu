@@ -74,7 +74,7 @@
       "workflow_studio": "Workflow van de studio"
     },
     "breakdown": {
-      "all_assets": "Alle beschikbare assets",
+      "link_assets": "Assets koppelen",
       "copy_casting": "Deze casting kopiëren (ctrl + V plakt deze op de geselecteerde regels)",
       "edit_label": "Assetlabel aanpassen",
       "empty": "Lege casting",
@@ -276,6 +276,9 @@
         "uploader": "Geüpload door",
         "uploaded_at": "Geüpload op"
       },
+      "working_files": {
+        "no_working_files": "Er zijn geen werkbestanden voor deze entiteit."
+      },
       "output_files": {
         "extension": "Extensie",
         "name": "Naam",
@@ -474,7 +477,6 @@
       "for": "Voor",
       "go_productions": "Terug naar productie",
       "history": "geschiedenis",
-      "info": "Informatie",
       "or": "of",
       "next": "Volgende",
       "no": "Nee",
@@ -562,6 +564,7 @@
       "less_filters": "Minder filters",
       "more_filters": "Meer filters",
       "reload": "Herlaad",
+      "search_example": "bijv. {example}",
       "search_query": "Zoekopdracht",
       "search_query_add": "Zoekfilter toevoegen",
       "search_query_add_error": "Er is een fout opgetreden bij het opslaan van dit zoekfilter.",
@@ -617,7 +620,6 @@
         "explanation": "Het is mogelijk om veelgebruikte door OpenTimelineIO ondersteunde bestanden te importeren (otio, fcp_xml, fcpx_xml, edl). Opnamen worden gemaakt of bijgewerkt met het opgegeven framebereik, frame in en frame uit. Frame in begint bij 0."
       },
       "active": "Actief",
-      "activity": "Activiteit",
       "archived": "Gearchiveerd",
       "avatar": {
         "open_page": "Open {personName} pagina",
@@ -655,8 +657,10 @@
         "casting": "Casting",
         "chat": "Chat",
         "concepts": "Concepten",
-        "info": "Info",
+        "metadata": "Metadata",
+        "working_files": "Werkbestanden",
         "output_files": "Uitvoerbestanden",
+        "preview": "Preview",
         "preview_files": "Previewbestanden",
         "schedule": "Planning",
         "timelog": "Tijdlog"
@@ -1119,6 +1123,7 @@
         "title": "Klanten",
         "unavailable": "Voorbeeldaccounts vereisen lokale authenticatie met wachtwoorden. Maak anders een gewoon klantaccount aan."
       },
+      "closed_name": "{name} (gesloten)",
       "current": "Geselecteerde productie",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen? Bevestig door in het tekstveld de naam te typen van de productie die je wilt verwijderen.",
       "delete_error": "Er is een probleem opgetreden tijdens het verwijderen van deze productie. Mogelijk zijn er gegevens aan gekoppeld. Weet je zeker dat de productie geen taken, opnamen of assets gekoppeld heeft? Kitsu staat het verwijderen van producties niet toe. Indien je de productie niet meer wilt zien, kun je deze afsluiten.",

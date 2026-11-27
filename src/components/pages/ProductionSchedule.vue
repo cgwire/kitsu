@@ -1,6 +1,10 @@
 <template>
-  <div class="columns fixed-page">
-    <div class="column main-column">
+  <panel-layout
+    class="production-schedule"
+    :side="isSideShown"
+    :side-focused="isSideShown"
+  >
+    <template #filters>
       <div class="schedule-toolbar">
         <div class="toolbar-row">
           <combobox
@@ -23,20 +27,20 @@
               />
               <template v-if="isCurrentUserManager">
                 <button-simple
-                  class="ml05"
+                  class="ml05 version-action"
                   icon="calendar-plus"
                   :title="$t('schedule.new_version')"
                   @click="openEditScheduleVersion()"
                 />
                 <button-simple
-                  class="ml05"
+                  class="ml05 version-action"
                   :disabled="version === 'ref'"
                   icon="pencil"
                   :title="$t('schedule.edit_version')"
                   @click="openEditScheduleVersion(currentVersion)"
                 />
                 <button-simple
-                  class="ml05"
+                  class="ml05 version-action"
                   :disabled="version === 'ref'"
                   icon="trash"
                   :title="$t('schedule.delete_version')"
@@ -46,14 +50,14 @@
             </div>
           </div>
           <button-simple
-            class="flexrow-item"
+            class="flexrow-item version-action"
             :disabled="loading.expandSchedule"
             icon="export"
             :title="$t('schedule.export')"
             @click="modals.exportSchedule = true"
           />
           <button-simple
-            class="flexrow-item"
+            class="flexrow-item version-action"
             :disabled="version === 'ref'"
             icon="save"
             :text="$t('schedule.apply_to_prod')"
@@ -86,16 +90,11 @@
               @change="onTaskTypeVisibilityChanged"
             />
           </div>
-          <button-simple
-            class="flexrow-item toggle-filters"
-            :active="showMoreFilters"
-            icon="funnel"
-            :title="
-              showMoreFilters
-                ? $t('main.less_filters')
-                : $t('main.more_filters')
-            "
-            @click="showMoreFilters = !showMoreFilters"
+          <filters-toggle
+            class="flexrow-item"
+            :resettable="hasFilters"
+            v-model="showMoreFilters"
+            @reset="resetFilters"
           />
         </div>
         <div class="toolbar-row" v-show="showMoreFilters">
@@ -140,7 +139,18 @@
           />
         </div>
       </div>
+    </template>
 
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="productionScheduleSearchFilterGroups"
+        :is-group-enabled="true"
+        :production-id="currentProduction?.id"
+        :queries="productionScheduleSearchQueries"
+        type="productionSchedule"
+        with-route-query
+      />
       <error-text
         class="has-text-centered"
         :text="scheduleSaveErrorText"
@@ -173,12 +183,9 @@
         @task-unselected="onTaskUnselected"
         @plan-entity="onPlanEntity"
       />
-    </div>
+    </template>
 
-    <div
-      class="column side-column"
-      v-if="isSidePanelOpen && !isLockedSchedule && !isAllEpisodes"
-    >
+    <template #side>
       <div class="side" ref="sidePanel">
         <div class="side-header">
           <h2>
@@ -491,8 +498,8 @@
           </form>
         </div>
       </div>
-    </div>
-  </div>
+    </template>
+  </panel-layout>
 
   <edit-schedule-version-modal
     :schedule-version-to-edit="scheduleVersionToEdit"
@@ -624,6 +631,7 @@ import {
   subItemsOf,
   widenParents
 } from '@/lib/productionSchedule'
+import { toSortedQueryString } from '@/lib/query'
 import {
   sortAssets,
   sortByName,
@@ -650,6 +658,7 @@ import sequenceStore from '@/store/modules/sequences'
 import shotStore from '@/store/modules/shots'
 import taskTypeStore from '@/store/modules/tasktypes'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EditScheduleVersionModal from '@/components/modals/EditScheduleVersionModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
@@ -662,10 +671,12 @@ import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import ProgressBar from '@/components/widgets/ProgressBar.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
@@ -733,6 +744,14 @@ const mode = ref(DEFAULT_MODE)
 const scheduleVersionToEdit = ref({})
 const version = ref(DEFAULT_VERSION)
 const showMoreFilters = ref(false)
+
+// The path the filters were loaded for: the route watcher sees the query of
+// the next production, or of the next page, before this one follows.
+let loadedPath = null
+// The query the page wrote last. Two filters changed in a row each write
+// theirs over the query of before: the URL then lacks the first one, which
+// the page must not read back as unset.
+let writtenQuery = null
 const loading = ref({
   schedule: false,
   deleteScheduleVersion: false,
@@ -775,6 +794,12 @@ const isTVShow = computed(() => store.getters.isTVShow)
 const organisation = computed(() => store.getters.organisation)
 const personMap = computed(() => store.getters.personMap)
 const productionAssetTypes = computed(() => store.getters.productionAssetTypes)
+const productionScheduleSearchFilterGroups = computed(
+  () => store.getters.productionScheduleSearchFilterGroups
+)
+const productionScheduleSearchQueries = computed(
+  () => store.getters.productionScheduleSearchQueries
+)
 const scheduleVersions = computed(() => store.getters.scheduleVersions)
 const user = computed(() => store.getters.user)
 const isCurrentUserManager = computed(
@@ -940,6 +965,10 @@ const isAllEpisodes = computed(() => {
   return isTVShow.value && currentEpisode.value?.id === 'all'
 })
 
+const isSideShown = computed(
+  () => isSidePanelOpen.value && !isLockedSchedule.value && !isAllEpisodes.value
+)
+
 // The 'main' pseudo-episode scopes the planning to the main pack: the
 // assets attached to no episode.
 const isMainPack = computed(() => {
@@ -1056,6 +1085,11 @@ const filteredScheduleItems = computed(() => {
   )
 })
 
+// the mode, the version and the zoom choose a view: they are no filters
+const hasFilters = computed(
+  () => Boolean(entityType.value) || hiddenTaskTypeIds.value.length > 0
+)
+
 // the batch panel plans the task types the schedule shows, named like
 // their rows
 const availableTaskTypes = computed(() =>
@@ -1081,8 +1115,13 @@ const saveFilterPreferences = () => {
   )
 }
 
+// undefined values are dropped, as the router does
+const toQueryKey = query =>
+  toSortedQueryString(JSON.parse(JSON.stringify(query)))
+
 const updateRoute = changes => {
   const change = getScheduleRouteChange(route.query, changes)
+  if (change) writtenQuery = toQueryKey(change.query)
   if (change?.isReplace) {
     router.replace({ query: change.query })
   } else if (change) {
@@ -1203,7 +1242,53 @@ const reset = () => {
   }, 50)
 }
 
+// The mode, the entities and the hidden types a query names: one it leaves
+// out is unset. The zoom is no filter: a query without one keeps it.
+const applyFilters = ({
+  mode: nextMode,
+  type,
+  version: nextVersion,
+  zoom,
+  hiddenTypes
+}) => {
+  const pick = (options, value, fallback) =>
+    options.value.some(option => option.value === value) ? value : fallback
+  mode.value = pick(modeOptions, nextMode, DEFAULT_MODE)
+  entityType.value = pick(entityTypeOptions, type, null)
+  version.value = pick(versionOptions, nextVersion, DEFAULT_VERSION)
+  zoomLevel.value = pick(zoomOptions, Number(zoom), zoomLevel.value)
+  hiddenTaskTypeIds.value = parseHiddenIds(hiddenTypes, taskTypeMap.value)
+}
+
+// A saved search, or the back button, sets a query the page did not write.
+const applyRouteQuery = () => {
+  const scope = `${mode.value}/${version.value}`
+  applyFilters(route.query)
+  saveFilterPreferences()
+  if (scope !== `${mode.value}/${version.value}`) {
+    // the mode and the version both decide what is editable and reload the
+    // rows
+    refreshScheduleItemsEditable()
+    closeSidePanel()
+    refreshSchedule()
+  } else if (
+    selectedTaskType.value &&
+    !filteredScheduleItems.value.includes(selectedTaskType.value)
+  ) {
+    // the side panel would keep planning a task type no longer displayed
+    closeSidePanel()
+  }
+}
+
+// The route watcher shows again what the query no longer filters.
+const resetFilters = () => {
+  router.push({
+    query: { ...route.query, type: undefined, hiddenTypes: undefined }
+  })
+}
+
 const loadSchedule = async () => {
+  const path = route.path
   closeSidePanel()
 
   if (currentProduction.value.start_date) {
@@ -1219,28 +1304,22 @@ const loadSchedule = async () => {
 
   // the query wins over the filters of the last visit
   const stored = key => preferences.getPreference(key) ?? undefined
-  const queryMode = route.query.mode
-  const queryType = route.query.type ?? stored(ENTITY_TYPE_STORAGE_KEY)
-  const queryVersion = route.query.version
-  const queryZoom = Number(route.query.zoom ?? stored(ZOOM_STORAGE_KEY))
-  const queryHiddenTypes =
-    route.query.hiddenTypes ?? stored(hiddenTypesStorageKey())
-
-  mode.value = modeOptions.value.map(o => o.value).includes(queryMode)
-    ? queryMode
-    : DEFAULT_MODE
-  entityType.value = entityTypeOptions.value
-    .map(o => o.value)
-    .includes(queryType)
-    ? queryType
-    : null
-  version.value = versionOptions.value.map(o => o.value).includes(queryVersion)
-    ? queryVersion
-    : DEFAULT_VERSION
-  zoomLevel.value = zoomOptions.value.map(o => o.value).includes(queryZoom)
-    ? queryZoom
-    : DEFAULT_ZOOM
-  hiddenTaskTypeIds.value = parseHiddenIds(queryHiddenTypes, taskTypeMap.value)
+  applyFilters({
+    ...route.query,
+    type: route.query.type ?? stored(ENTITY_TYPE_STORAGE_KEY),
+    zoom: route.query.zoom ?? stored(ZOOM_STORAGE_KEY),
+    hiddenTypes: route.query.hiddenTypes ?? stored(hiddenTypesStorageKey())
+  })
+  // A search is saved from the URL, and the route watcher reads a filter
+  // missing from it as unset: the filters of the last visit go there too.
+  // Not on the page the user left for meanwhile.
+  if (route.path === path) {
+    loadedPath = path
+    updateRoute({
+      type: entityType.value ?? '',
+      hiddenTypes: formatHiddenIds(hiddenTaskTypeIds.value) ?? ''
+    })
+  }
 
   // loadData computed the editable flags with the default mode/version,
   // before the query params were applied
@@ -3210,6 +3289,16 @@ watch(
   }
 )
 
+watch(
+  () => route.query,
+  query => {
+    if (route.path !== loadedPath || toQueryKey(query) === writtenQuery) return
+    // Back and forward land on a query written before: it is read again
+    writtenQuery = null
+    applyRouteQuery()
+  }
+)
+
 watch(currentProduction, value => {
   if (!value) return
   reset()
@@ -3252,11 +3341,6 @@ useHead({
 }
 
 .schedule-toolbar {
-  background: var(--background-panel);
-  border-radius: 12px;
-  margin-bottom: 1em;
-  padding: 0.75em 1em 1em;
-
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
@@ -3320,33 +3404,31 @@ useHead({
   }
 }
 
-.fixed-page {
-  padding: 1em;
-  // the 60px topbar, then the same 1em as the sides
-  padding-top: calc(60px + 1em);
-}
-
-.main-column {
-  display: flex;
-  border: 0;
+// The schedule paints its corner and its month names with the page
+// background and leaves the rest of its headers transparent: on the panel
+// tone they came out as patches.
+.production-schedule .schedule-wrapper {
+  background: var(--background);
+  border-radius: 10px;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
-  flex-direction: column;
 }
 
-.side-column {
-  margin-top: 0;
-  padding: 0 0 0 1em;
+// its names sit 5px from its left edge, made for a page margin beside them
+.production-schedule .schedule-wrapper :deep(.schedule) {
+  padding-left: 10px;
+}
 
-  .side {
-    background: var(--background-panel);
-    border-radius: 12px;
-    height: 100%;
-    overflow-y: auto;
-    padding: 1em;
-    // room to scroll the Apply button above the support chat bubble, fixed
-    // at the bottom right of the screen
-    padding-bottom: 70px;
-  }
+.side {
+  background: var(--background-panel);
+  border-radius: 12px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 14px;
+  // room to scroll the Apply button above the support chat bubble, fixed
+  // at the bottom right of the screen
+  padding-bottom: 70px;
 
   .side-header {
     display: flex;
@@ -3401,9 +3483,13 @@ useHead({
   }
 }
 
-// the page background App.vue gives every side column
-.dark .side-column {
-  background: transparent;
+@media screen and (max-width: 768px) {
+  // Mobile is read-only: no version to make, change, apply or export, and
+  // the filters keep their toggle.
+  .version-action,
+  .schedule-toolbar :deep(.reset-filters) {
+    display: none;
+  }
 }
 
 .assignments {

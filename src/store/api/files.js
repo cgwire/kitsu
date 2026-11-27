@@ -13,6 +13,10 @@ export default {
     return client.pget(`/api/data/entities/${entityId}/output-files`)
   },
 
+  getEntityWorkingFiles(entityId) {
+    return client.pget(`/api/data/entities/${entityId}/working-files`)
+  },
+
   getPreviewFileText(previewFileId, extension, urlPrefix) {
     const base = urlPrefix || '/api'
     return client.getText(

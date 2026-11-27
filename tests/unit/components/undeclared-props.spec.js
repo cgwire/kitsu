@@ -37,7 +37,9 @@ const GLOBAL_ATTRIBUTES = [
   'style',
   'tabindex',
   'title',
-  'translate'
+  'translate',
+  // AnimXYZ reads it on the element of an animated page
+  'xyz'
 ]
 
 // What the root elements of components take on top of those.

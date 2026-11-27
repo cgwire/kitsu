@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { buildQueryString } from '@/lib/query'
+import { buildQueryString, toSortedQueryString } from '@/lib/query'
 
 describe('query', () => {
   describe('Mount', () => {
@@ -26,5 +26,19 @@ describe('query', () => {
       const path = buildQueryString('/data', {})
       expect(path).toEqual('/data?')
     })
+  })
+})
+
+describe('toSortedQueryString', () => {
+  it('gives the same string to a route query and a saved one, in any order', () => {
+    expect(toSortedQueryString({ zoom: '2', hiddenTypes: 'a,b' })).toBe(
+      toSortedQueryString('hiddenTypes=a%2Cb&zoom=2')
+    )
+  })
+
+  it('tells two queries apart', () => {
+    expect(toSortedQueryString({ zoom: '2' })).not.toBe(
+      toSortedQueryString({ zoom: '3' })
+    )
   })
 })

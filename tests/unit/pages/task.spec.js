@@ -27,10 +27,12 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import drafts from '@/lib/drafts'
 import { markRequestFailure } from '@/lib/errors'
 import { DEFAULT_FPS } from '@/lib/video'
+import episodesStore from '@/store/modules/episodes'
 import sequencesStore from '@/store/modules/sequences'
 import shotsStore from '@/store/modules/shots'
 import tasksStore from '@/store/modules/tasks'
@@ -190,6 +192,8 @@ const mountPage = async ({
         // reset() runs on every page reset; the default stub has no such
         // method and the resulting throw would cut the reset short.
         AddPreviewModal: { template: '<div />', methods: { reset: () => {} } },
+        // The layout holds the page in its slots.
+        PanelLayout: false,
         // The default stub swallows its slot, which holds the page title.
         RouterLink: {
           props: ['to'],
@@ -299,7 +303,7 @@ describe('Task.vue', () => {
       const { dispatched } = await mountPage({
         task: buildTask({ entity_type_name: 'Episode' })
       })
-      expect(dispatched).toContain('loadEpisodes')
+      expect(dispatched).toContain('loadEpisodesWithTasks')
     })
 
     it('clears the task selection on mount', async () => {
@@ -699,6 +703,93 @@ describe('Task.vue task that fails to load', () => {
     expect(reloadButton(wrapper)).toBeUndefined()
   })
 
+  it('lays the task out in panels, its comments on the side', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper } = await mountWithActions({})
+
+    expect(wrapper.find('.page-tabs .page-header').exists()).toBe(true)
+    expect(wrapper.find('.list-panel .preview-column').exists()).toBe(true)
+    expect(wrapper.find('.side-column .comments-column').exists()).toBe(true)
+  })
+
+  it('keeps the side panel for a task that shows', async () => {
+    const { wrapper } = await mountWithActions({
+      loadTask: () => Promise.reject(requestFailure(404))
+    })
+
+    expect(wrapper.find('.list-panel .load-error').exists()).toBe(true)
+    expect(wrapper.find('.side-column').exists()).toBe(false)
+  })
+
+  it('shows the metadata of the task in a tab of its own', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper, router } = await mountWithActions({})
+    const tabs = wrapper.findComponent(RouteSectionTabs)
+    const isHidden = selector =>
+      wrapper.find(selector).attributes('style')?.includes('display: none') ??
+      false
+
+    expect(tabs.props('tabs').map(tab => tab.name)).toEqual([
+      'preview',
+      'metadata'
+    ])
+    expect(tabs.props('activeTab')).toBe('preview')
+    expect(isHidden('.preview-column')).toBe(false)
+    expect(isHidden('.info-block')).toBe(true)
+
+    await router.push({
+      name: 'task',
+      params: TASK_ROUTE_PARAMS,
+      query: { section: 'metadata' }
+    })
+    await flushPromises()
+
+    expect(tabs.props('activeTab')).toBe('metadata')
+    expect(isHidden('.preview-column')).toBe(true)
+    expect(isHidden('.info-block')).toBe(false)
+  })
+
+  // A client reads no metadata.
+  it('keeps a client on the preview, without tabs', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper, router } = await mountWithActions(
+      {},
+      {
+        getterOverrides: {
+          isCurrentUserClient: () => true,
+          taskMap: () => taskMap
+        }
+      }
+    )
+    await router.push({
+      name: 'task',
+      params: TASK_ROUTE_PARAMS,
+      query: { section: 'metadata' }
+    })
+    await flushPromises()
+
+    expect(wrapper.findComponent(RouteSectionTabs).exists()).toBe(false)
+    expect(wrapper.find('.preview-column').attributes('style')).toBeUndefined()
+    expect(wrapper.find('.load-error').exists()).toBe(false)
+  })
+
+  it('marks the editing a phone hides', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const { wrapper } = await mountWithActions(
+      {},
+      {
+        getterOverrides: {
+          isCurrentUserProductionManager: () => true,
+          taskMap: () => taskMap
+        },
+        previews: [revision({ ...revisionFile(TASK_ID), extension: 'mp4' })]
+      }
+    )
+
+    expect(wrapper.find('button.set-preview-button').exists()).toBe(true)
+    expect(wrapper.find('label.use-current-frame').exists()).toBe(true)
+  })
+
   // A deleted task, one out of the user's reach, and a malformed id from a
   // broken link.
   it.each([400, 403, 404])('tells the task is missing on a %i', async status => {
@@ -712,7 +803,7 @@ describe('Task.vue task that fails to load', () => {
     expect(wrapper.text()).toContain('not_found.text')
     expect(homeLink(wrapper)).toBeDefined()
     expect(reloadButton(wrapper)).toBeUndefined()
-    expect(wrapper.find('.task-columns').exists()).toBe(false)
+    expect(wrapper.find('.preview-column').exists()).toBe(false)
     expect(dispatched).not.toContain('loadAssets')
     expect(consoleError.mock.calls).toEqual([[failure]])
   })
@@ -751,14 +842,14 @@ describe('Task.vue task that fails to load', () => {
     const { wrapper } = await mountWithActions({ loadTaskComments })
 
     expect(headerTitle(wrapper)).toBe('main.loading_error')
-    expect(wrapper.find('.task-columns').exists()).toBe(false)
+    expect(wrapper.find('.preview-column').exists()).toBe(false)
 
     await reloadButton(wrapper).vm.$emit('click')
     await flushPromises()
 
     expect(loadTaskComments).toHaveBeenCalledTimes(2)
     expect(headerTitle(wrapper)).toContain('SH01')
-    expect(wrapper.find('.task-columns').exists()).toBe(true)
+    expect(wrapper.find('.preview-column').exists()).toBe(true)
     expect(consoleError.mock.calls).toEqual([[failure]])
   })
 
@@ -847,7 +938,7 @@ describe('Task.vue task that fails to load', () => {
     })
 
     expect(rejections).toEqual([])
-    expect(wrapper.find('.task-columns').exists()).toBe(true)
+    expect(wrapper.find('.preview-column').exists()).toBe(true)
     expect(wrapper.find('.load-error').exists()).toBe(false)
     expect(wrapper.findComponent(Spinner).exists()).toBe(false)
     expect(setCurrentEpisode).not.toHaveBeenCalled()
@@ -1537,10 +1628,25 @@ describe('Task.vue task that fails to load', () => {
     taskMap.set(TASK_ID, buildTask())
     window.scrollTo.mockClear()
 
-    const { wrapper } = await mountWithActions({})
+    await mountWithActions({})
 
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
-    expect(wrapper.find('.task-columns').element.scrollTop).toBe(100)
+  })
+
+  // The comment box takes the focus when it shows: a narrow page, which
+  // scrolls as a whole, goes down to it.
+  it('scrolls the page back to its top once the first task shows', async () => {
+    taskMap.set(TASK_ID, buildTask())
+    const listLoad = deferred()
+    const { wrapper } = await mountWithActions({
+      loadShots: () => listLoad.promise
+    })
+    wrapper.element.scrollTop = 400
+
+    listLoad.resolve()
+    await flushPromises()
+
+    expect(wrapper.element.scrollTop).toBe(0)
   })
 
   // The list load puts its own copy of each task in the store, where a
@@ -1747,17 +1853,19 @@ describe('Task.vue task that fails to load', () => {
       entity_type_name: 'Sequence'
     })
     const failure = requestFailure(502)
-    const loadSequences = vi
+    const loadSequencesWithTasks = vi
       .fn()
       .mockRejectedValueOnce(failure)
       .mockResolvedValue()
-    const { wrapper, router } = await mountWithActions({ loadSequences })
+    const { wrapper, router } = await mountWithActions({
+      loadSequencesWithTasks
+    })
     expect(consoleError.mock.calls).toEqual([[failure]])
 
     await goTo(router, OTHER_TASK_ID)
 
     expect(headerTitle(wrapper)).toContain('SH02')
-    expect(loadSequences).toHaveBeenCalledTimes(2)
+    expect(loadSequencesWithTasks).toHaveBeenCalledTimes(2)
   })
 
   // Reading an edit task loads the assets, not the edits.
@@ -1805,23 +1913,29 @@ describe('Task.vue task that fails to load', () => {
     }
   )
 
-  // The other lists reload with the tasks the arrows walk.
-  it('loads the sequences of a sequence task the store holds already', async () => {
-    taskMap.set(TASK_ID, buildTask({ entity_type_name: 'Sequence' }))
-    const loadSequences = vi.fn(() => Promise.resolve())
-    await mountWithActions(
-      { loadSequences },
-      {
-        getterOverrides: {
-          isSequencesLoading: () => false,
-          sequencesLoadingKey: () => 'production-1/',
-          taskMap: () => taskMap
+  // The plain load of the sequences and of the episodes brings no task: a
+  // task opened by its link showed no arrow.
+  it.each(['Sequence', 'Episode'])(
+    'loads the %s list with the tasks the arrows walk',
+    async type => {
+      taskMap.set(TASK_ID, buildTask({ entity_type_name: type }))
+      const loadList = vi.fn(() => Promise.resolve())
+      const loadWithTasks = vi.fn(() => Promise.resolve())
+      await mountWithActions(
+        { [`load${type}s`]: loadList, [`load${type}sWithTasks`]: loadWithTasks },
+        {
+          getterOverrides: {
+            isSequencesLoading: () => false,
+            sequencesLoadingKey: () => 'production-1/',
+            taskMap: () => taskMap
+          }
         }
-      }
-    )
+      )
 
-    expect(loadSequences).toHaveBeenCalledTimes(1)
-  })
+      expect(loadWithTasks).toHaveBeenCalledTimes(1)
+      expect(loadList).not.toHaveBeenCalled()
+    }
+  )
 
   it('leaves the page alone when its list load ends while a newer read runs', async () => {
     taskMap.set(TASK_ID, buildTask())
@@ -4376,8 +4490,28 @@ describe('Task.vue navigation', () => {
       ).toEqual(['episode-1', 'episode-1'])
     })
 
-    // The page reloads them without the tasks the chevrons read.
-    it('keeps walking the sequences the store holds', async () => {
+    it.each([
+      [true, ['task-0-anim', 'task-3-anim']],
+      [false, []]
+    ])('walks the episodes loaded with their tasks (%s)', async (isLoaded, links) => {
+      episodesStore.cache.episodes = [...entities]
+      const { wrapper } = await mountWith({
+        entities: [],
+        currentTask: buildTask({
+          task_type_id: 'tt-anim',
+          entity_type_name: 'Episode'
+        }),
+        getterOverrides: { isEpisodeListLoadedWithTasks: () => isLoaded }
+      })
+      expect(entityLinks(wrapper)).toEqual(links)
+      episodesStore.cache.episodes = []
+    })
+
+    // A list loaded without its tasks, by another page, has none to walk.
+    it.each([
+      ['production-1/', ['task-0-anim', 'task-3-anim']],
+      ['production-1/#partial', []]
+    ])('walks the sequences loaded with their tasks (%s)', async (key, links) => {
       sequencesStore.cache.sequences.push(...entities)
       const { wrapper } = await mountWith({
         entities: [],
@@ -4385,9 +4519,12 @@ describe('Task.vue navigation', () => {
           task_type_id: 'tt-anim',
           entity_type_name: 'Sequence'
         }),
-        getterOverrides: { sequencesLoadingKey: () => 'production-1/#partial' }
+        getterOverrides: {
+          isSequencesLoading: () => false,
+          sequencesLoadingKey: () => key
+        }
       })
-      expect(entityLinks(wrapper)).toEqual(['task-0-anim', 'task-3-anim'])
+      expect(entityLinks(wrapper)).toEqual(links)
     })
   })
 })

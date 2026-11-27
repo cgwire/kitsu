@@ -25,7 +25,10 @@ import notificationsStore from '@/store/modules/notifications'
 import NotificationsPage from '@/components/pages/Notifications.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import BooleanField from '@/components/widgets/BooleanField.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const ButtonSimpleStub = {
@@ -33,8 +36,16 @@ const ButtonSimpleStub = {
   inheritAttrs: true
 }
 
+const savedSearch = {
+  id: 'search-1',
+  name: 'Unread mentions',
+  search_query: 'typeMode=mention&statusMode=unread'
+}
+
 const contextGetters = {
   departmentMap: () => new Map(),
+  notificationsSearchFilterGroups: () => [],
+  notificationsSearchQueries: () => [savedSearch],
   organisation: () => ({ name: 'My Studio' }),
   personMap: () => new Map(),
   productionMap: () => new Map(),
@@ -91,7 +102,7 @@ describe('Notifications.vue', () => {
             }
           }
         ],
-        stubs: { ButtonSimple: ButtonSimpleStub }
+        stubs: { ButtonSimple: ButtonSimpleStub, PanelLayout: false }
       }
     })
   }
@@ -125,6 +136,89 @@ describe('Notifications.vue', () => {
   afterEach(() => {
     wrapper.unmount()
     vi.clearAllMocks()
+  })
+
+  describe('panel layout', () => {
+    const toggle = () => wrapper.findComponent(FiltersToggle)
+
+    it('lays the page out in panels, the task on the side', () => {
+      const filters = wrapper.find('.filters-panel')
+
+      expect(filters.findComponent(ComboboxTaskType).exists()).toBe(true)
+      expect(wrapper.find('.list-panel .notifications').exists()).toBe(true)
+      expect(wrapper.find('.side-column').findComponent(TaskInfo).exists()).toBe(
+        true
+      )
+    })
+
+    it('folds the filters of its second row, closed at first', async () => {
+      const folded = wrapper.find('.filters.collapsible')
+
+      expect(folded.findAllComponents(ComboboxStyled)).toHaveLength(3)
+      expect(wrapper.classes()).toContain('collapsed')
+
+      await toggle().vm.$emit('update:modelValue', true)
+
+      expect(wrapper.classes()).not.toContain('collapsed')
+    })
+
+    it('counts the folded filters that are set, and clears them all', async () => {
+      const taskType = () => wrapper.findComponent(ComboboxTaskType)
+      const type = () => wrapper.findComponent(ComboboxStyled)
+      expect(toggle().props()).toMatchObject({ count: 0, resettable: false })
+
+      taskType().vm.$emit('update:modelValue', 'task-type-1')
+      type().vm.$emit('update:modelValue', 'mention')
+      await flushPromises()
+
+      expect(toggle().props()).toMatchObject({ count: 1, resettable: true })
+
+      toggle().vm.$emit('reset')
+      await flushPromises()
+
+      expect(toggle().props()).toMatchObject({ count: 0, resettable: false })
+      expect(taskType().props('modelValue')).toBe('')
+      expect(type().props('modelValue')).toBe('')
+    })
+  })
+
+  describe('saved searches', () => {
+    const type = () => wrapper.findAllComponents(ComboboxStyled)[0]
+    const status = () => wrapper.findAllComponents(ComboboxStyled)[1]
+
+    it('saves its searches as the query of the page', () => {
+      const list = wrapper.find('.list-panel').findComponent(SearchQueryList)
+
+      expect(list.props()).toMatchObject({
+        isGroupEnabled: true,
+        queries: [savedSearch],
+        type: 'notifications',
+        withRouteQuery: true
+      })
+    })
+
+    it('takes the filters of a search, and clears the others', async () => {
+      type().vm.$emit('update:modelValue', 'comment')
+      wrapper
+        .findComponent(ComboboxTaskType)
+        .vm.$emit('update:modelValue', 'task-type-1')
+      await flushPromises()
+
+      await wrapper.vm.$router.push({
+        query: { typeMode: 'mention', statusMode: 'unread' }
+      })
+      await flushPromises()
+
+      expect(type().props('modelValue')).toBe('mention')
+      expect(status().props('modelValue')).toBe('unread')
+      expect(wrapper.findComponent(ComboboxTaskType).props('modelValue')).toBe(
+        ''
+      )
+      expect(wrapper.vm.$route.query).toEqual({
+        typeMode: 'mention',
+        statusMode: 'unread'
+      })
+    })
   })
 
   describe('task type tag', () => {

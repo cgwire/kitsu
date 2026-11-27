@@ -375,6 +375,50 @@ const snapToWhole = value => {
   return Math.abs(value - whole) < 1e-6 ? whole : value
 }
 
+// The changes an edit of the planning of a task saves: its estimation ties
+// its two dates, so that one moves with the other. Null for a date the task
+// already has.
+export const getTaskStartDateEdit = (organisation, task, date) => {
+  if (!date) return { start_date: null, due_date: task.due_date }
+  const startDate = moment(date)
+  if (task.start_date?.substring(0, 10) === formatSimpleDate(startDate)) {
+    return null
+  }
+  return getDatesFromStartDate(
+    organisation,
+    startDate,
+    task.due_date ? parseSimpleDate(task.due_date) : null,
+    minutesToDays(organisation, task.estimation)
+  )
+}
+
+export const getTaskDueDateEdit = (organisation, task, date) => {
+  if (!date) return { start_date: task.start_date, due_date: null }
+  const dueDate = moment(date)
+  if (task.due_date?.substring(0, 10) === formatSimpleDate(dueDate)) {
+    return null
+  }
+  return getDatesFromEndDate(
+    organisation,
+    task.start_date ? parseSimpleDate(task.start_date) : null,
+    dueDate,
+    minutesToDays(organisation, task.estimation)
+  )
+}
+
+export const getTaskEstimationEdit = (organisation, task, estimation) => {
+  if (!task.start_date) return { estimation }
+  return {
+    ...getDatesFromStartDate(
+      organisation,
+      moment(task.start_date),
+      task.due_date ? moment(task.due_date) : null,
+      minutesToDays(organisation, estimation)
+    ),
+    estimation
+  }
+}
+
 export const daysToMinutes = (organisation, days = 0) => {
   return Math.floor(snapToWhole(days * organisation.hours_by_day * 60))
 }

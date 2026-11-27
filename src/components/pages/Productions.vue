@@ -1,52 +1,55 @@
 <template>
-  <div class="productions page fixed-page">
-    <div class="flexrow page-header">
-      <search-field
-        class="search flexrow-item"
-        placeholder="ex: Big Buck Bunny"
-        @change="searchQuery = $event"
+  <panel-layout class="productions">
+    <template #filters>
+      <div class="flexrow page-header">
+        <search-field
+          class="search flexrow-item"
+          placeholder="ex: Big Buck Bunny"
+          @change="searchQuery = $event"
+        />
+        <combobox
+          class="flexrow-item group-by"
+          :label="$t('main.grouped_by')"
+          :options="groupByOptions"
+          :with-margin="false"
+          v-model="groupBy"
+        />
+        <div class="filler"></div>
+        <button-simple
+          class="flexrow-item"
+          :text="
+            isStatsDisplayed
+              ? $t('productions.hide_stats')
+              : $t('productions.show_stats')
+          "
+          :is-loading="loading.stats"
+          @click="toggleStats"
+        />
+        <button-link
+          class="flexrow-item"
+          :text="$t('productions.new_production')"
+          icon="plus"
+          :path="{ name: 'new-production' }"
+        />
+      </div>
+    </template>
+    <template #list>
+      <production-list
+        v-model:metadata-display-headers="metadataDisplayHeaders"
+        :entries="productions"
+        :production-stats="productionStats"
+        :group-by="groupBy"
+        :search="searchQuery"
+        :is-loading="isProductionsLoading"
+        :is-error="isProductionsLoadingError"
+        @add-metadata="onAddProjectMetadata"
+        @delete-clicked="onDeleteClicked"
+        @delete-metadata="onDeleteProjectMetadataField"
+        @edit-clicked="onEditClicked"
+        @edit-metadata="onEditProjectMetadata"
+        @metadata-changed="onProjectMetadataChanged"
       />
-      <combobox
-        class="flexrow-item group-by"
-        :label="$t('main.grouped_by')"
-        :options="groupByOptions"
-        :with-margin="false"
-        v-model="groupBy"
-      />
-      <div class="filler"></div>
-      <button-simple
-        class="flexrow-item"
-        :text="
-          isStatsDisplayed
-            ? $t('productions.hide_stats')
-            : $t('productions.show_stats')
-        "
-        :is-loading="loading.stats"
-        @click="toggleStats"
-      />
-      <button-link
-        class="flexrow-item"
-        :text="$t('productions.new_production')"
-        icon="plus"
-        :path="{ name: 'new-production' }"
-      />
-    </div>
-
-    <production-list
-      v-model:metadata-display-headers="metadataDisplayHeaders"
-      :entries="productions"
-      :production-stats="productionStats"
-      :group-by="groupBy"
-      :search="searchQuery"
-      :is-loading="isProductionsLoading"
-      :is-error="isProductionsLoadingError"
-      @add-metadata="onAddProjectMetadata"
-      @delete-clicked="onDeleteClicked"
-      @delete-metadata="onDeleteProjectMetadataField"
-      @edit-clicked="onEditClicked"
-      @edit-metadata="onEditProjectMetadata"
-      @metadata-changed="onProjectMetadataChanged"
-    />
+    </template>
 
     <edit-production-modal
       active
@@ -91,7 +94,7 @@
       @cancel="onCancelDeleteProjectMetadata"
       @confirm="confirmDeleteProjectMetadata"
     />
-  </div>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -110,6 +113,7 @@ import { useStore } from 'vuex'
 import { isTakenDescriptorNameError } from '@/lib/descriptors'
 import { logRequestFailure } from '@/lib/errors'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import ProductionList from '@/components/lists/ProductionList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -413,8 +417,11 @@ const toggleStats = async () => {
     return
   }
   loading.stats = true
-  productionStats.value = await store.dispatch('loadProductionStats')
-  loading.stats = false
+  try {
+    productionStats.value = await store.dispatch('loadProductionStats')
+  } finally {
+    loading.stats = false
+  }
 }
 
 // A column created or changed, by this tab too (Zou names no author), marks
@@ -439,6 +446,9 @@ const socketEvents = {
 // Lifecycle
 
 productionsListing = store.dispatch('loadProductions')
+
+// the stats show from the start: the button hides them
+toggleStats().catch(logRequestFailure)
 
 // Zou sends no event again for the changes made while the socket was down.
 // The manager of the socket announces each reconnection, a drop that began
@@ -469,6 +479,8 @@ useHead({ title: computed(() => `${t('productions.title')} - Kitsu`) })
 // only line up on their bottom edge, as in the People search row.
 .page-header {
   align-items: flex-end;
+  // the global margin sets a header apart from a page top: the panel does
+  margin: 0;
 
   // One height for the whole row: buttons, select and the search pill are all
   // sized differently by default.

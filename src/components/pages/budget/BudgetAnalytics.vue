@@ -28,12 +28,16 @@
         :legend="false"
         :data="pieChartData"
         :colors="pieChartColors"
-        height="240px"
+        height="200px"
       ></pie-chart>
       <h4>
         {{ $t('budget.cash_evolution') }}
       </h4>
-      <column-chart :legend="false" :data="columnChartData"></column-chart>
+      <column-chart
+        :legend="false"
+        :data="columnChartData"
+        height="240px"
+      ></column-chart>
     </div>
   </div>
 </template>

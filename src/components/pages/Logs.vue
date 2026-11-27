@@ -1,10 +1,7 @@
 <template>
-  <div class="logs fixed-page">
+  <component :is="TAB_PAGES[activeTab]">
     <route-tabs :active-tab="activeTab" :tabs="tabs" />
-    <event-logs v-if="activeTab === 'events'" />
-    <login-logs v-else-if="activeTab === 'logins'" />
-    <preview-files v-else-if="activeTab === 'preview_files'" />
-  </div>
+  </component>
 </template>
 
 <script setup>
@@ -20,6 +17,13 @@ import RouteTabs from '@/components/widgets/RouteTabs.vue'
 const { t } = useI18n()
 const route = useRoute()
 
+// each tab is a page in panels, which shows the tabs above them
+const TAB_PAGES = {
+  events: EventLogs,
+  logins: LoginLogs,
+  preview_files: PreviewFiles
+}
+
 // Computed
 
 const tabs = computed(() => [
@@ -34,22 +38,3 @@ const activeTab = computed(() => {
   return tabs.value.some(({ name }) => name === tab) ? tab : 'events'
 })
 </script>
-
-<style lang="scss" scoped>
-.fixed-page {
-  color: var(--text);
-  margin-top: 60px;
-  overflow: scroll;
-  padding: 2em;
-}
-
-:deep(.tabs) {
-  overflow: visible;
-}
-
-@media screen and (max-width: 768px) {
-  .fixed-page {
-    padding: 1em;
-  }
-}
-</style>

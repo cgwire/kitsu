@@ -195,6 +195,17 @@ export const replaceTimeWithTimecode = (
   }
 }
 
+// Zou writes the path of a file from the mount point of its production, a
+// folder of the machine it is mounted on: the tree under it is the same for
+// everyone.
+export const renderFilePath = (path, mountpoint) => {
+  if (!path) return ''
+  const mount = (mountpoint || '').replace(/\/+$/, '')
+  return mount && path.startsWith(`${mount}/`)
+    ? path.slice(mount.length).replace(/^\/+/, '')
+    : path
+}
+
 export const renderFileSize = size => {
   if (!size) return ''
   let renderedSize

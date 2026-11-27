@@ -74,7 +74,7 @@
       "workflow_studio": "Workflow du studio"
     },
     "breakdown": {
-      "all_assets": "Tous les assets disponibles",
+      "link_assets": "Lier des assets",
       "copy_casting": "Copier ce casting (ctrl + V le colle sur les lignes sélectionnées)",
       "edit_label": "Changer le label de l'asset",
       "empty": "Casting vide",
@@ -276,6 +276,9 @@
         "uploader": "Envoyée par",
         "uploaded_at": "Envoyée le"
       },
+      "working_files": {
+        "no_working_files": "Il n'y a pas de fichiers de travail pour cette entité."
+      },
       "output_files": {
         "extension": "Extension",
         "name": "Nom",
@@ -476,7 +479,6 @@
       "for": "Pour",
       "go_productions": "Revenir à la production",
       "history": "Historique",
-      "info": "Information",
       "or": "ou",
       "next": "Suivant",
       "no": "Non",
@@ -564,6 +566,7 @@
       "less_filters": "Moins de filtres",
       "more_filters": "Plus de filtres",
       "reload": "Recharger",
+      "search_example": "ex : {example}",
       "search_query": "Recherche",
       "search_query_add": "Ajouter un filtre",
       "search_query_add_error": "Une erreur s'est produite lors de l'enregistrement du filtre de recherche.",
@@ -620,7 +623,6 @@
         "explanation": "Il est possible d'importer des fichiers OpenTimelineIO courants (otio, fcp_xml, fcpx_xml, edl). Les plans seront créés ou mis à jour avec la plage d'images donnée, l'image d'entrée et l'image de sortie. L'image d'entrée commence à 0."
       },
       "active": "Actif",
-      "activity": "Activité",
       "archived": "Archivé",
       "avatar": {
         "open_page": "Ouvrir la page de {personName}",
@@ -658,8 +660,10 @@
         "casting": "Casting",
         "chat": "Chat",
         "concepts": "Concepts",
-        "info": "Info",
+        "metadata": "Métadonnées",
+        "working_files": "Fichiers de travail",
         "output_files": "Fichiers de sortie",
+        "preview": "Preview",
         "preview_files": "Fichiers de preview",
         "schedule": "Planning",
         "timelog": "Temps passé"
@@ -1119,6 +1123,7 @@
         "title": "Clients",
         "unavailable": "Les comptes de prévisualisation nécessitent une authentification locale avec mot de passe. Sinon, créez un compte client classique."
       },
+      "closed_name": "{name} (fermée)",
       "current": "Production sélectionnée",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ? Veuillez confirmer en tapant le nom de la production à supprimer dans le champ.",
       "delete_error": "Une erreur s'est produite lors de la suppression de cette production. Il se peut que des données existantes soient actuellement liées à cette production. Êtes-vous sûr que cette production n'a pas de tâche, de plan ou d'asset lié à elle ? Kitsu ne permet pas de supprimer une production. Si vous ne voulez plus voir la production, vous pouvez la fermer.",

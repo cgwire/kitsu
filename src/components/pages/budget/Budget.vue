@@ -1,93 +1,46 @@
 <template>
-  <page-layout>
-    <template #main>
-      <div class="flexcolumn page">
-        <budget-header
-          :budget-options="budgetOptions"
-          :budget="currentBudget"
-          :is-loading="loading.budgets"
-          :is-error="errors.budgets"
-          :is-error-expenses="errors.expenses"
-          :is-loading-expenses="loading.expenses"
-          :is-showing-expenses="expenses.showing"
-          :is-showing-items="items.showing"
-          @change-budget="onChangeBudget"
-          @delete-budget="onDeleteBudgetClicked"
-          @edit-budget="onEditBudgetClicked"
-          @export-budget="onExportBudgetClicked"
-          @new-version="onNewBudgetVersionClicked"
-          @toggle-expenses="onToggleExpenses"
-          @toggle-items="onToggleItems"
-        />
-
-        <budget-list
-          :budget-departments="budgetDepartments"
-          :converted-expenses="convertedExpenses"
-          :done-previsional="donePrevisional"
-          :extended-budget-departments="extendedBudgetDepartments"
-          :is-error="errors.entries"
-          :is-loading="loading.entries"
-          :is-showing-expenses="expenses.showing"
-          :is-showing-items="items.showing"
-          :hardware-items-costs="hardwareItemsCosts"
-          :software-licenses-costs="softwareLicensesCosts"
-          :months-between-start-and-now="monthsBetweenStartAndNow"
-          :months-between-now-and-end="monthsBetweenNowAndEnd"
-          :months-between-production-dates="monthsBetweenProductionDates"
-          :remaining-previsional="remainingPrevisional"
-          :total-entry="totalEntry"
-          @add-budget-entry="onAddBudgetEntry"
-          @add-person-exception="addPersonException"
-          @delete-budget-entry="deleteBudgetEntry"
-          @edit-budget-entry="editBudgetEntry"
-          v-if="currentBudget.id"
-        />
-
-        <edit-budget-modal
-          :active="modals.createBudget"
-          :budget-to-edit="budgetToEdit"
-          :last-revision="lastRevision"
-          :is-loading="loading.createBudget"
-          :is-error="errors.createBudget"
-          @cancel="modals.createBudget = false"
-          @confirm="createBudget"
-        />
-
-        <edit-budget-entry-modal
-          :active="modals.createBudgetEntry"
-          :budget-entry-to-edit="budgetEntryToEdit"
-          :is-loading="loading.createBudgetEntry || loading.editBudgetEntry"
-          :is-error="errors.createBudgetEntry || errors.editBudgetEntry"
-          :salary-scale="salaryScale"
-          @cancel="modals.createBudgetEntry = false"
-          @confirm="confirmCreateBudgetEntry"
-        />
-
-        <hard-delete-modal
-          :active="modals.deleteBudget"
-          :error-text="$t('budget.delete_budget_error')"
-          :is-loading="loading.deleteBudget"
-          :is-error="errors.deleteBudget"
-          :lock-text="currentBudget?.name"
-          :text="
-            $t('budget.delete_budget_message', {
-              name: currentBudget?.name
-            })
-          "
-          @cancel="modals.deleteBudget = false"
-          @confirm="deleteBudget"
-        />
-
-        <delete-modal
-          :active="modals.deleteBudgetEntry"
-          :error-text="$t('budget.delete_budget_entry_error')"
-          :is-loading="loading.deleteBudgetEntry"
-          :is-error="errors.deleteBudgetEntry"
-          :text="$t('budget.delete_budget_entry_message')"
-          @cancel="modals.deleteBudgetEntry = false"
-          @confirm="confirmDeleteBudgetEntry"
-        />
-      </div>
+  <panel-layout class="budget" side>
+    <template #[headerSlot]>
+      <budget-header
+        :budget-options="budgetOptions"
+        :budget="currentBudget"
+        :is-loading="loading.budgets"
+        :is-error="errors.budgets"
+        :is-error-expenses="errors.expenses"
+        :is-loading-expenses="loading.expenses"
+        :is-showing-expenses="expenses.showing"
+        :is-showing-items="items.showing"
+        @change-budget="onChangeBudget"
+        @delete-budget="onDeleteBudgetClicked"
+        @edit-budget="onEditBudgetClicked"
+        @export-budget="onExportBudgetClicked"
+        @new-version="onNewBudgetVersionClicked"
+        @toggle-expenses="onToggleExpenses"
+        @toggle-items="onToggleItems"
+      />
+    </template>
+    <template #list v-if="isBudgetShown">
+      <budget-list
+        :budget-departments="budgetDepartments"
+        :converted-expenses="convertedExpenses"
+        :done-previsional="donePrevisional"
+        :extended-budget-departments="extendedBudgetDepartments"
+        :is-error="errors.entries"
+        :is-loading="loading.entries"
+        :is-showing-expenses="expenses.showing"
+        :is-showing-items="items.showing"
+        :hardware-items-costs="hardwareItemsCosts"
+        :software-licenses-costs="softwareLicensesCosts"
+        :months-between-start-and-now="monthsBetweenStartAndNow"
+        :months-between-now-and-end="monthsBetweenNowAndEnd"
+        :months-between-production-dates="monthsBetweenProductionDates"
+        :remaining-previsional="remainingPrevisional"
+        :total-entry="totalEntry"
+        @add-budget-entry="onAddBudgetEntry"
+        @add-person-exception="addPersonException"
+        @delete-budget-entry="deleteBudgetEntry"
+        @edit-budget-entry="editBudgetEntry"
+      />
     </template>
 
     <template #side>
@@ -103,7 +56,52 @@
         :column-chart-data="columnChartData"
       />
     </template>
-  </page-layout>
+
+    <edit-budget-modal
+      :active="modals.createBudget"
+      :budget-to-edit="budgetToEdit"
+      :last-revision="lastRevision"
+      :is-loading="loading.createBudget"
+      :is-error="errors.createBudget"
+      @cancel="modals.createBudget = false"
+      @confirm="createBudget"
+    />
+
+    <edit-budget-entry-modal
+      :active="modals.createBudgetEntry"
+      :budget-entry-to-edit="budgetEntryToEdit"
+      :is-loading="loading.createBudgetEntry || loading.editBudgetEntry"
+      :is-error="errors.createBudgetEntry || errors.editBudgetEntry"
+      :salary-scale="salaryScale"
+      @cancel="modals.createBudgetEntry = false"
+      @confirm="confirmCreateBudgetEntry"
+    />
+
+    <hard-delete-modal
+      :active="modals.deleteBudget"
+      :error-text="$t('budget.delete_budget_error')"
+      :is-loading="loading.deleteBudget"
+      :is-error="errors.deleteBudget"
+      :lock-text="currentBudget?.name"
+      :text="
+        $t('budget.delete_budget_message', {
+          name: currentBudget?.name
+        })
+      "
+      @cancel="modals.deleteBudget = false"
+      @confirm="deleteBudget"
+    />
+
+    <delete-modal
+      :active="modals.deleteBudgetEntry"
+      :error-text="$t('budget.delete_budget_entry_error')"
+      :is-loading="loading.deleteBudgetEntry"
+      :is-error="errors.deleteBudgetEntry"
+      :text="$t('budget.delete_budget_entry_message')"
+      @cancel="modals.deleteBudgetEntry = false"
+      @confirm="confirmDeleteBudgetEntry"
+    />
+  </panel-layout>
 </template>
 
 <script setup>
@@ -125,7 +123,7 @@ import { getMonthCost } from '@/lib/budget'
 import csv from '@/lib/csv'
 import { parseSimpleDate } from '@/lib/time'
 
-import PageLayout from '@/components/layouts/PageLayout.vue'
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditBudgetEntryModal from '@/components/modals/EditBudgetEntryModal.vue'
 import EditBudgetModal from '@/components/modals/EditBudgetModal.vue'
@@ -276,6 +274,15 @@ const monthsBetweenNowAndEnd = computed(() =>
     currentProduction.value.end_date
   )
 )
+
+// what the header shows otherwise: a spinner, an error, or no budget yet
+const isBudgetShown = computed(
+  () => !loading.budgets && !errors.budgets && Boolean(currentBudget.value?.id)
+)
+
+// the header is then a message: it takes the list panel, in place of an
+// empty one
+const headerSlot = computed(() => (isBudgetShown.value ? 'filters' : 'list'))
 
 const budgetOptions = computed(() =>
   budgets.value.map(budget => ({
@@ -914,6 +921,20 @@ useHead({
   display: flex;
   flex: 1;
   flex-direction: column;
-  max-height: calc(100vh - 140px);
+  min-height: 0;
+}
+
+// no footer under the table: its margin would add to the panel padding
+.budget :deep(.datatable-wrapper) {
+  margin-bottom: 0;
+}
+
+// the analytics are the side panel: level with the two others, the charts
+// scrolling inside
+.budget .analytics-container {
+  border-radius: 12px;
+  height: 100%;
+  margin: 0;
+  overflow-y: auto;
 }
 </style>

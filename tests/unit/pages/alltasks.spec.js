@@ -15,9 +15,9 @@ import '@/lib/auth'
 import AllTaskList from '@/components/lists/AllTaskList.vue'
 import AllTasks from '@/components/pages/AllTasks.vue'
 import BurndownChart from '@/components/widgets/BurndownChart.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import StatusStats from '@/components/widgets/StatusStats.vue'
@@ -109,9 +109,7 @@ const mountPage = async ({
       // The status stats sit in the side slot of the layout, in the default
       // slot of the task panel.
       stubs: {
-        PageLayout: {
-          template: '<div><slot name="main" /><slot name="side" /></div>'
-        },
+        PanelLayout: false,
         TaskInfo: { template: '<div><slot /></div>' }
       }
     }
@@ -284,17 +282,14 @@ describe('AllTasks page', () => {
     const wrapper = await mountPage({
       url: `/?project_id=production-1&person_id=${ada.id}&due_date=2026-12-01`
     })
-    const toggle = () =>
-      wrapper
-        .findAllComponents(ButtonSimple)
-        .find(button => button.classes('filters-toggle'))
+    const toggle = () => wrapper.findComponent(FiltersToggle)
 
-    expect(toggle().props('text')).toBe('2')
+    expect(toggle().props('count')).toBe(2)
 
     await wrapper.vm.$router.push('/?project_id=production-1')
     await flushPromises()
 
-    expect(toggle().props('text')).toBeFalsy()
+    expect(toggle().props('count')).toBe(0)
     wrapper.unmount()
   })
 
@@ -304,12 +299,10 @@ describe('AllTasks page', () => {
       loadOpenTasks,
       url: `/?project_id=production-1&person_id=${ada.id}&view=burndown`
     })
-    const resetButton = () =>
-      wrapper
-        .findAllComponents(ButtonSimple)
-        .find(button => button.classes('reset-filters'))
+    const toggle = () => wrapper.findComponent(FiltersToggle)
+    expect(toggle().props('resettable')).toBe(true)
 
-    resetButton().vm.$emit('click')
+    toggle().vm.$emit('reset')
     await flushPromises()
 
     expect(wrapper.vm.$router.currentRoute.value.query).toEqual({
@@ -319,7 +312,7 @@ describe('AllTasks page', () => {
       project_id: null,
       person_id: null
     })
-    expect(resetButton()).toBeUndefined()
+    expect(toggle().props('resettable')).toBe(false)
     wrapper.unmount()
   })
 })

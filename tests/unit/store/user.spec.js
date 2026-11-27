@@ -837,9 +837,83 @@ describe('User store', () => {
     })
   })
 
-  // The All Tasks page lists its searches straight from the user filters,
-  // through the getter.
-  describe('All Tasks searches', () => {
+  // These pages list their searches straight from the user filters, through
+  // the getters.
+  describe.each([
+    { page: 'All Tasks', type: 'AllTasks', listType: 'alltasks' },
+    { page: 'Main Schedule', type: 'MainSchedule', listType: 'mainschedule' },
+    { page: 'Team Schedule', type: 'TeamSchedule', listType: 'teamschedule' },
+    { page: 'News Feed', type: 'NewsFeed', listType: 'newsfeed' },
+    { page: 'Timesheets', type: 'Timesheets', listType: 'timesheets' },
+    {
+      page: 'Notifications',
+      type: 'Notifications',
+      listType: 'notifications'
+    },
+    { page: 'Bots', type: 'Bots', listType: 'bots' },
+    { page: 'My Checks', type: 'MyChecks', listType: 'mychecks' },
+    { page: 'Event Logs', type: 'EventLogs', listType: 'eventlogs' },
+    { page: 'Login Logs', type: 'LoginLogs', listType: 'loginlogs' },
+    {
+      page: 'Concepts',
+      type: 'Concepts',
+      listType: 'concepts',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Breakdown',
+      type: 'BreakdownFilters',
+      listType: 'breakdownfilters',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Asset Type Stats',
+      type: 'AssetTypeStats',
+      listType: 'assettypestats',
+      productionId: 'production-1'
+    },
+    { page: 'Asset Library', type: 'AssetLibrary', listType: 'assetlibrary' },
+    {
+      page: 'Sequence Stats',
+      type: 'SequenceStats',
+      listType: 'sequencestats',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Episode Stats',
+      type: 'EpisodeStats',
+      listType: 'episodestats',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Team',
+      type: 'Team',
+      listType: 'team',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Quotas',
+      type: 'Quotas',
+      listType: 'quotas',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Production Schedule',
+      type: 'ProductionSchedule',
+      listType: 'productionschedule',
+      productionId: 'production-1'
+    },
+    {
+      page: 'Production News Feed',
+      type: 'ProductionNewsFeed',
+      listType: 'newsfeed',
+      productionId: 'production-1'
+    }
+  ])('$page searches', ({ type, listType, productionId = null }) => {
+    const prefix = type.charAt(0).toLowerCase() + type.slice(1)
+    // Zou files the searches under its production, if any under "all"
+    const key = productionId || 'all'
+    const rootGetters = { currentProduction: () => ({ id: 'production-1' }) }
     const late = {
       id: 'filter-1',
       name: 'Late',
@@ -847,6 +921,7 @@ describe('User store', () => {
     }
     const mountStore = (userFilters = {}) =>
       createStore({
+        getters: rootGetters,
         modules: {
           user: {
             state: { userFilters },
@@ -863,26 +938,26 @@ describe('User store', () => {
 
     test('lists the searches loaded with the context', () => {
       const realStore = mountStore()
-      const queries = computed(() => realStore.getters.allTasksSearchQueries)
+      const queries = computed(() => realStore.getters[`${prefix}SearchQueries`])
       expect(queries.value).toEqual([])
 
-      realStore.commit('LOAD_USER_FILTERS_END', { alltasks: { all: [late] } })
+      realStore.commit('LOAD_USER_FILTERS_END', { [listType]: { [key]: [late] } })
 
       expect(queries.value).toEqual([late])
     })
 
-    test('saves a search out of any production', async () => {
+    test('saves a search under its production, if any', async () => {
       peopleApi.createFilter.mockResolvedValue(late)
       const realStore = mountStore()
-      const queries = computed(() => realStore.getters.allTasksSearchQueries)
+      const queries = computed(() => realStore.getters[`${prefix}SearchQueries`])
       const searchFilter = { name: 'Late', search_query: late.search_query }
 
-      await realStore.dispatch('saveAllTasksSearch', searchFilter)
+      await realStore.dispatch(`save${type}Search`, searchFilter)
 
       expect(peopleApi.createFilter).toHaveBeenCalledWith(
-        'alltasks',
+        listType,
         searchFilter,
-        null,
+        productionId,
         null
       )
       expect(queries.value).toEqual([late])
@@ -891,19 +966,20 @@ describe('User store', () => {
     test('drops a removed search', async () => {
       peopleApi.removeFilter.mockResolvedValue()
       const kept = { ...late, id: 'filter-2', name: 'Mine' }
-      const realStore = mountStore({ alltasks: { all: [late, kept] } })
-      const queries = computed(() => realStore.getters.allTasksSearchQueries)
+      const realStore = mountStore({ [listType]: { [key]: [late, kept] } })
+      const queries = computed(() => realStore.getters[`${prefix}SearchQueries`])
 
-      await realStore.dispatch('removeAllTasksSearch', late)
+      await realStore.dispatch(`remove${type}Search`, late)
 
       expect(peopleApi.removeFilter).toHaveBeenCalledWith(late)
       expect(queries.value).toEqual([kept])
     })
 
-    test('saves a group out of any production', async () => {
+    test('saves a group under its production, if any', async () => {
       const group = { id: 'group-1', name: 'Mine', color: '#000' }
       peopleApi.createFilterGroup.mockResolvedValue(group)
       const realStore = createStore({
+        getters: rootGetters,
         modules: {
           user: {
             state: { userFilters: {}, userFilterGroups: {} },
@@ -914,21 +990,21 @@ describe('User store', () => {
         }
       })
       const groups = computed(
-        () => realStore.getters.allTasksSearchFilterGroups
+        () => realStore.getters[`${prefix}SearchFilterGroups`]
       )
       expect(groups.value).toEqual([])
 
-      await realStore.dispatch('saveAllTasksSearchFilterGroup', {
+      await realStore.dispatch(`save${type}SearchFilterGroup`, {
         name: 'Mine',
         color: '#000',
         is_shared: false
       })
 
       expect(peopleApi.createFilterGroup).toHaveBeenCalledWith(
-        'alltasks',
+        listType,
         'Mine',
         '#000',
-        null,
+        productionId,
         false,
         undefined
       )
@@ -939,11 +1015,12 @@ describe('User store', () => {
       const group = { id: 'group-1', name: 'Mine' }
       peopleApi.removeFilterGroup.mockResolvedValue()
       const realStore = createStore({
+        getters: rootGetters,
         modules: {
           user: {
             state: {
               userFilters: {},
-              userFilterGroups: { alltasks: { all: [group] } }
+              userFilterGroups: { [listType]: { [key]: [group] } }
             },
             getters: store.getters,
             mutations: store.mutations,
@@ -952,10 +1029,10 @@ describe('User store', () => {
         }
       })
       const groups = computed(
-        () => realStore.getters.allTasksSearchFilterGroups
+        () => realStore.getters[`${prefix}SearchFilterGroups`]
       )
 
-      await realStore.dispatch('removeAllTasksSearchFilterGroup', group)
+      await realStore.dispatch(`remove${type}SearchFilterGroup`, group)
 
       expect(peopleApi.removeFilterGroup).toHaveBeenCalledWith(group)
       expect(groups.value).toEqual([])

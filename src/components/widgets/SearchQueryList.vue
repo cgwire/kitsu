@@ -97,11 +97,7 @@
             <trash2-icon :size="8" />
           </button>
         </div>
-        <div
-          :ref="`group-${group.id}`"
-          class="group-list"
-          v-if="toggleGroupId === group.id"
-        >
+        <div class="group-list" v-if="toggleGroupId === group.id">
           <span class="tag empty" v-if="!group.queries.length">
             <em>{{ $t('main.filter_group_empty') }}</em>
           </span>
@@ -233,10 +229,8 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+// Imports
+// --------------------------------------------------------------------------
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -246,13 +240,18 @@ import {
   PencilIcon,
   Trash2Icon
 } from 'lucide-vue-next'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
+import { toSortedQueryString } from '@/lib/query'
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
-import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
 import EditSearchFilterGroupModal from '@/components/modals/EditSearchFilterGroupModal.vue'
+import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
 
 // The lists whose search saving action is not save<Type>Search.
 const SAVE_SEARCH_ACTIONS = {
@@ -268,11 +267,15 @@ const REMOVE_SEARCH_ACTIONS = {
   taskType: 'removeTaskSearch'
 }
 
+// Composables
+// --------------------------------------------------------------------------
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useStore()
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   queries: {
     type: Array,
@@ -308,9 +311,17 @@ const props = defineProps({
   withRouteQuery: {
     type: Boolean,
     default: false
+  },
+  // The keys of the route query a search neither holds nor changes: what
+  // the page shows beside its filters, as a folder or a selection.
+  keptQueryKeys: {
+    type: Array,
+    default: () => []
   }
 })
 
+// State
+// --------------------------------------------------------------------------
 const groupToEdit = ref({})
 const groupToRemove = ref({})
 const isEditing = ref(false)
@@ -338,6 +349,8 @@ const modals = reactive({
 const sessions = { edit: 0, group: 0, remove: 0 }
 const toggleGroupId = ref(null)
 
+// Computed
+// --------------------------------------------------------------------------
 const departmentMap = computed(() => store.getters.departmentMap)
 const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
@@ -353,9 +366,7 @@ const user = computed(() => store.getters.user)
 
 const sortedFilters = computed(() => {
   const queries = props.queries.filter(
-    query =>
-      !isCurrentUserClient.value ||
-      (isCurrentUserClient.value && !query.is_shared)
+    query => !isCurrentUserClient.value || !query.is_shared
   )
   return sortByName(queries)
 })
@@ -376,9 +387,7 @@ const userFilters = computed(() => {
 
 const userFilterGroups = computed(() => {
   const groups = props.groups.filter(
-    group =>
-      !isCurrentUserClient.value ||
-      (isCurrentUserClient.value && !group.is_shared)
+    group => !isCurrentUserClient.value || !group.is_shared
   )
   return sortByName(groups).map(group => ({
     ...group,
@@ -387,14 +396,6 @@ const userFilterGroups = computed(() => {
     )
   }))
 })
-
-// Zou takes a change only from the owner of a row or an admin. A row can be in
-// the list of someone else: a filter of a shared group that turned private
-// stays there until a reload.
-const canChange = row =>
-  isCurrentUserAdmin.value ||
-  (row.person_id === user.value?.id &&
-    (!row.is_shared || isCurrentUserManager.value))
 
 const hasChangeableRow = computed(() =>
   [
@@ -433,16 +434,31 @@ const removeErrorText = computed(() =>
 )
 
 const pageQuery = computed(() =>
-  props.withRouteQuery ? new URLSearchParams(route.query).toString() : ''
+  props.withRouteQuery
+    ? new URLSearchParams(pickQueryKeys(false)).toString()
+    : ''
 )
 
-const toSortedQueryString = query => {
-  const searchParams = new URLSearchParams(query)
-  searchParams.sort()
-  return searchParams.toString()
-}
+const sortedPageQuery = computed(() =>
+  toSortedQueryString(pickQueryKeys(false))
+)
 
-const sortedPageQuery = computed(() => toSortedQueryString(route.query))
+// Functions
+// --------------------------------------------------------------------------
+// Zou takes a change only from the owner of a row or an admin. A row can be in
+// the list of someone else: a filter of a shared group that turned private
+// stays there until a reload.
+const canChange = row =>
+  isCurrentUserAdmin.value ||
+  (row.person_id === user.value?.id &&
+    (!row.is_shared || isCurrentUserManager.value))
+
+const pickQueryKeys = isKept =>
+  Object.fromEntries(
+    Object.entries(route.query).filter(
+      ([key]) => props.keptQueryKeys.includes(key) === isKept
+    )
+  )
 
 const isActiveSearch = searchQuery =>
   props.withRouteQuery &&
@@ -458,7 +474,10 @@ const queryRoute = searchQuery => {
   return {
     ...route,
     query: props.withRouteQuery
-      ? Object.fromEntries(new URLSearchParams(searchQuery.search_query))
+      ? {
+          ...pickQueryKeys(true),
+          ...Object.fromEntries(new URLSearchParams(searchQuery.search_query))
+        }
       : { ...route.query, search: searchQuery.search_query }
   }
 }
@@ -518,13 +537,12 @@ const confirmEditFilterGroup = filterGroup =>
   runInModal(
     'group',
     () => {
-      filterGroup.project_id = props.productionId
-      if (filterGroup.id) {
-        return store.dispatch('updateSearchFilterGroup', filterGroup)
-      }
+      const group = { ...filterGroup, project_id: props.productionId }
       return store.dispatch(
-        `save${stringHelpers.capitalize(props.type)}SearchFilterGroup`,
-        filterGroup
+        group.id
+          ? 'updateSearchFilterGroup'
+          : `save${stringHelpers.capitalize(props.type)}SearchFilterGroup`,
+        group
       )
     },
     // The modal opened again on this group shows it as saved.
@@ -541,8 +559,10 @@ const confirmEditSearch = searchFilter =>
     'edit',
     () => {
       if (searchFilter.id) {
-        searchFilter.project_id = props.productionId
-        return store.dispatch('updateSearchFilter', searchFilter)
+        return store.dispatch('updateSearchFilter', {
+          ...searchFilter,
+          project_id: props.productionId
+        })
       }
       const type = stringHelpers.capitalize(props.type)
       return store.dispatch(
@@ -631,12 +651,8 @@ const getDepartment = group => {
   return departmentMap.value.get(group.department_id)
 }
 
-onMounted(() => {
-  nextTick(() => {
-    setQueryPaths()
-  })
-})
-
+// Watchers
+// --------------------------------------------------------------------------
 watch(
   () => props.queries.map(query => query.search_query),
   () => {
@@ -656,21 +672,20 @@ watch(hasChangeableRow, isChangeable => {
   if (!isChangeable) isEditing.value = false
 })
 
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  nextTick(() => {
+    setQueryPaths()
+  })
+})
+
 defineExpose({ addSearch })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .search-queries .del,
-  .search-queries .edit {
-    background: $dark-grey-light;
-    color: white;
-  }
-}
-
 .tag {
   border-radius: 1em;
-  margin-left: 0;
   cursor: pointer;
 }
 
@@ -747,13 +762,9 @@ defineExpose({ addSearch })
   transform: none;
 }
 
-.search-queries .del {
-  display: none;
-}
-
 .search-queries .edit,
 .search-queries .del {
-  background: $light-grey;
+  background: var(--background-tag-action);
   border-radius: 50%;
   color: white;
   cursor: pointer;
@@ -808,27 +819,20 @@ defineExpose({ addSearch })
 }
 
 .search-queries .tag.active {
-  box-shadow: inset 0 0 4px 2px #ddd;
-
-  .dark & {
-    box-shadow: inset 0 0 4px 2px #444;
-  }
+  box-shadow: inset 0 0 4px 2px var(--box-shadow);
 }
 
 // the search the page runs. The tags sit between two pixels (em sizes): a
 // box-shadow ring smears over two rows there, where a border keeps the same
 // width on every side.
 .search-queries .tag.active:not(.folder) {
-  border: 2px solid $purple-strong;
+  // green, where the blue of a shared tag made a private search look shared
+  border: 2px solid $green;
   box-shadow: none;
   // the padding gives up the width of the border, so that the tags after it
   // stay in place
   padding-left: calc(0.75em - 2px);
   padding-right: calc(0.75em - 2px);
-
-  .dark & {
-    border-color: $blue;
-  }
 
   // a shared tag already has a 1px border
   &.is-shared {

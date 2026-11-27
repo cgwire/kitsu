@@ -21,3 +21,16 @@ export const buildQueryString = (path, params) => {
   })
   return result + pairs.join('&')
 }
+
+/**
+ * A query as one string, whatever the order of its keys: two queries with the
+ * same filters give the same string.
+ *
+ * @param {Object|string} query - A route query, or the string of a saved one.
+ * @returns {string} The query string, its keys sorted.
+ */
+export const toSortedQueryString = query => {
+  const searchParams = new URLSearchParams(query)
+  searchParams.sort()
+  return searchParams.toString()
+}

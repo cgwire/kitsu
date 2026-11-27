@@ -51,7 +51,7 @@ const mountTeam = (query = {}, { actions = {}, getters = {} } = {}) =>
     },
     stubs: {
       TransferListItem: false,
-      PageLayout: false,
+      PanelLayout: false,
       ProductionTeamList: {
         name: 'ProductionTeamList',
         props: ['entries', 'roleRedraws'],
@@ -130,6 +130,73 @@ describe('Team page', () => {
       ['addPersonToTeam', dan],
       ['addPersonToTeam', dan]
     ])
+  })
+
+  describe('panel layout', () => {
+    test('lays its filters and its list out in the two panels', async () => {
+      const { wrapper } = await mountTeam()
+      const filters = wrapper.find('.filters-panel')
+      const list = wrapper.find('.list-panel')
+
+      expect(filters.findComponent({ name: 'ComboboxStyled' }).exists()).toBe(
+        true
+      )
+      expect(list.findComponent({ name: 'SearchQueryList' }).exists()).toBe(
+        true
+      )
+      expect(teamList(list).exists()).toBe(true)
+    })
+
+    test('keeps the import panel for the production managers', async () => {
+      const { wrapper } = await mountTeam()
+      expect(wrapper.find('.side-column').exists()).toBe(false)
+
+      const { wrapper: managed } = await mountTeam(
+        {},
+        { getters: { isCurrentUserProductionManager: true } }
+      )
+      expect(managed.find('.side-column .importers').exists()).toBe(true)
+    })
+  })
+
+  test('saves the filters of the URL, by production', async () => {
+    const { wrapper } = await mountTeam()
+
+    expect(
+      wrapper.findComponent({ name: 'SearchQueryList' }).props()
+    ).toMatchObject({
+      productionId: 'production-1',
+      type: 'team',
+      withRouteQuery: true
+    })
+  })
+
+  describe('filters reset', () => {
+    const resetButton = wrapper =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.props('icon') === 'remove')
+
+    test('shows only when a filter is set', async () => {
+      const { wrapper } = await mountTeam()
+      expect(resetButton(wrapper)).toBeUndefined()
+
+      const { wrapper: filtered } = await mountTeam({ role: 'user' })
+      expect(resetButton(filtered).exists()).toBe(true)
+    })
+
+    test('clears the filters of the URL', async () => {
+      const { wrapper, router } = await mountTeam({
+        department: 'comp',
+        role: 'user'
+      })
+
+      await resetButton(wrapper).vm.$emit('click')
+      await flushPromises()
+
+      expect(router.currentRoute.value.query).toEqual({})
+      expect(listedNames(wrapper)).toEqual(['Ann', 'Bob', 'Cat'])
+    })
   })
 
   // The store has put the team back: the page tells it.

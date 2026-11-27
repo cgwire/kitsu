@@ -179,8 +179,13 @@ const mountPage = async (
     global: {
       plugins: [store],
       mocks: { $route: routeHolder.route, $t },
-      // The reason an entity is not shown renders with the page.
-      stubs: { EntityLoadError: false, RouterLink: RouterLinkStub }
+      // The reason an entity is not shown renders with the page, and a page
+      // in panels through the slots of its layout.
+      stubs: {
+        EntityLoadError: false,
+        PanelLayout: false,
+        RouterLink: RouterLinkStub
+      }
     }
   })
   await flushPromises()
@@ -1486,6 +1491,94 @@ describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name
     })
   }
 )
+
+describe.each(
+  [
+    ['Asset', ['chat', 'concepts', 'casting', 'schedule', 'time-logs', 'preview-files', 'working-files', 'output-files']],
+    ['Edit', ['chat', 'schedule', 'time-logs', 'preview-files', 'working-files', 'output-files']],
+    ['Episode', ['chat', 'casting', 'schedule', 'time-logs', 'preview-files']],
+    ['Sequence', ['chat', 'casting', 'schedule', 'time-logs', 'preview-files']],
+    ['Shot', ['chat', 'casting', 'schedule', 'time-logs', 'preview-files', 'working-files', 'output-files']]
+  ].map(([name, sections]) => ({
+    ...pages.find(page => page.name === name),
+    sections
+  }))
+)('$name page, panel layout', ({ entityMap, entityParam, name, page, sections }) => {
+  const mountSection = section => {
+    entityMap.set('entity-1', { id: 'entity-1', name: 'E01', tasks: [] })
+    return mountPage(page, entityParam, production, {}, {}, { section })
+  }
+
+  afterEach(() => {
+    entityMap.clear()
+  })
+
+  test('lays its header, its sections and its task panel out', async () => {
+    const { wrapper } = await mountSection()
+
+    expect(wrapper.find('.filters-panel .entity-title').exists()).toBe(true)
+    const list = wrapper.find('.list-panel')
+    expect(list.findComponent(RouteSectionTabs).exists()).toBe(true)
+    expect(list.findComponent(EntityTaskList).exists()).toBe(true)
+    const side = wrapper.find('.side-column')
+    expect(side.findComponent({ name: 'TaskInfo' }).props('entityType')).toBe(
+      name
+    )
+  })
+
+  test('opens on the tasks, the metadata in the tab after', async () => {
+    const { wrapper } = await mountSection('information')
+
+    const tabs = wrapper.findComponent(RouteSectionTabs).props('tabs')
+    expect(tabs.slice(0, 2)).toEqual([
+      { label: 'main.tasks', name: 'infos' },
+      { label: 'main.label.metadata', name: 'information' }
+    ])
+    expect(tabs.slice(2).map(tab => tab.name)).toEqual(sections)
+    expect(wrapper.find('.infos .metadata-infos').exists()).toBe(false)
+    expect(wrapper.find('.information .metadata-infos').exists()).toBe(true)
+    expect(wrapper.find('.side-column').exists()).toBe(false)
+  })
+
+  test('keeps the side panel for the sections that have one', async () => {
+    const { wrapper } = await mountSection('chat')
+
+    expect(wrapper.find('.side-column').exists()).toBe(false)
+    expect(wrapper.find('.drawer-backdrop').exists()).toBe(false)
+  })
+
+  if (sections.includes('working-files')) {
+    test('lists the working files of its entity on their section', async () => {
+      const { wrapper } = await mountSection('working-files')
+
+      expect(
+        wrapper.findComponent({ name: 'EntityWorkingFiles' }).props('entity')
+      ).toMatchObject({ id: 'entity-1' })
+    })
+  }
+})
+
+describe('Asset page, panel of the concepts', () => {
+  afterEach(() => {
+    assetStore.cache.assetMap.clear()
+  })
+
+  test('shows the panel of the concepts on their section', async () => {
+    assetStore.cache.assetMap.set('entity-1', {
+      id: 'entity-1',
+      name: 'Tree',
+      tasks: []
+    })
+    const { wrapper } = await mountPage(Asset, 'asset_id', production, {}, {}, {
+      section: 'concepts'
+    })
+
+    const panels = wrapper
+      .find('.side-column')
+      .findAllComponents({ name: 'TaskInfo' })
+    expect(panels.map(panel => panel.props('entityType'))).toEqual(['Concept'])
+  })
+})
 
 describe('Asset page, concepts', () => {
   afterEach(() => {

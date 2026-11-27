@@ -1,51 +1,67 @@
 <template>
-  <page-layout>
-    <template #main>
-      <div class="people flexcolumn">
-        <div class="flexrow mt2 add-people">
-          <template v-if="isCurrentUserProductionManager">
-            <people-field
-              ref="peopleFieldRef"
-              class="flexrow-item add-people-field"
-              :people="unlistedPeople"
-              :placeholder="$t('people.add_member_to_team')"
-              v-model="person"
-            />
-            <button
-              class="button flexrow-item"
-              @click="addPerson"
-              :disabled="!person"
-            >
-              {{ $t('main.add') }}
-            </button>
-          </template>
-          <div class="filler"></div>
-          <combobox-department
-            class="flexrow-item"
-            all-departments-label
-            :label="$t('main.department')"
-            v-model="departmentId"
+  <panel-layout class="team" :side="isCurrentUserProductionManager">
+    <template #filters>
+      <div class="flexrow filters">
+        <template v-if="isCurrentUserProductionManager">
+          <people-field
+            ref="peopleFieldRef"
+            class="flexrow-item add-people-field"
+            :people="unlistedPeople"
+            :placeholder="$t('people.add_member_to_team')"
+            v-model="person"
           />
-          <combobox-styled
-            class="flexrow-item"
-            :label="$t('people.fields.role')"
-            locale-key-prefix="people.role."
-            open-left
-            :options="roleOptions"
-            v-model="role"
-          />
-        </div>
-        <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
-        <production-team-list
-          :entries="filteredTeam"
-          :project-roles="projectRoles"
-          :role-redraws="roleRedraws"
-          @remove-person="removePerson"
-          @update-role="updateRole"
+          <button
+            class="button flexrow-item add-person"
+            @click="addPerson"
+            :disabled="!person"
+          >
+            {{ $t('main.add') }}
+          </button>
+        </template>
+        <div class="filler"></div>
+        <combobox-department
+          class="flexrow-item"
+          all-departments-label
+          :label="$t('main.department')"
+          v-model="departmentId"
+        />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('people.fields.role')"
+          locale-key-prefix="people.role."
+          open-left
+          :options="roleOptions"
+          v-model="role"
+        />
+        <button-simple
+          class="flexrow-item reset-filters"
+          icon="remove"
+          :title="$t('main.clear_filters')"
+          @click="resetFilters"
+          v-if="hasFilters"
         />
       </div>
     </template>
-    <template #side v-if="isCurrentUserProductionManager">
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="teamSearchFilterGroups"
+        :is-group-enabled="true"
+        :production-id="currentProduction?.id"
+        :queries="teamSearchQueries"
+        type="team"
+        with-route-query
+      />
+      <error-text :text="cellSaveErrorText" v-if="cellSaveErrorText" />
+      <production-team-list
+        :entries="filteredTeam"
+        :project-roles="projectRoles"
+        :role-redraws="roleRedraws"
+        @remove-person="removePerson"
+        @update-role="updateRole"
+      />
+    </template>
+    <template #side>
       <div class="importers flexcolumn">
         <div
           class="project-import flexcolumn"
@@ -108,7 +124,7 @@
         </div>
       </div>
     </template>
-  </page-layout>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -124,7 +140,7 @@ import { filterPeople, roleOptions } from '@/lib/people'
 import { sortPeople } from '@/lib/sorting'
 
 /* eslint-disable no-unused-vars */
-import PageLayout from '@/components/layouts/PageLayout.vue'
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import ProductionTeamList from '@/components/lists/ProductionTeamList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
@@ -134,6 +150,7 @@ import ErrorText from '@/components/widgets/ErrorText.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TransferListItem from '@/components/widgets/TransferListItem.vue'
 /* eslint-enable no-unused-vars */
 
@@ -164,6 +181,10 @@ const openProductions = computed(() => store.getters.openProductions)
 const personMap = computed(() => store.getters.personMap)
 const productionMap = computed(() => store.getters.productionMap)
 const projectRoles = computed(() => store.getters.productionTeamRoles)
+const teamSearchFilterGroups = computed(
+  () => store.getters.teamSearchFilterGroups
+)
+const teamSearchQueries = computed(() => store.getters.teamSearchQueries)
 
 const availableProductions = computed(() =>
   openProductions.value.filter(
@@ -191,6 +212,9 @@ const role = computed({
   set: value => pushQuery('role', value === 'all' ? '' : value)
 })
 
+// both filters, and nothing else, live in the query
+const hasFilters = computed(() => Object.keys(route.query).length > 0)
+
 const filteredTeam = computed(() =>
   filterPeople(teamPersons.value, {
     departmentId: departmentId.value,
@@ -208,6 +232,10 @@ const unlistedPeople = computed(() =>
 // Functions
 const pushQuery = (key, value) =>
   router.push({ query: { ...route.query, [key]: value || undefined } })
+
+const resetFilters = () => {
+  router.push({ query: {} })
+}
 
 // The store puts back a change Zou refuses: the page tells it.
 const addPersonToTeam = personToAdd =>
@@ -281,8 +309,38 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.people {
-  max-height: 100%;
+// One label height and one control height for the whole row, as on the
+// People page.
+.filters {
+  align-items: flex-end;
+  flex-wrap: wrap;
+  row-gap: 1em;
+
+  > :last-child {
+    margin-right: 0;
+  }
+
+  .button {
+    height: 42px;
+  }
+
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  :deep(.department-combo),
+  :deep(.combo) {
+    display: flex;
+    flex-direction: column;
+    height: 42px;
+    justify-content: center;
+  }
+}
+
+.reset-filters {
+  color: var(--text);
+  padding: 0 14px;
 }
 
 .label {
@@ -294,15 +352,11 @@ useHead({
 }
 
 .importers {
-  border-left: 1px solid var(--border);
+  background: var(--background-panel);
+  border-radius: 12px;
   height: 100%;
   max-height: 100%;
-  padding: 1em;
-}
-
-.people {
-  padding: 1em;
-  padding-top: 60px;
+  padding: 14px;
 }
 
 .import-list {
@@ -319,6 +373,17 @@ useHead({
 .person-to-add:focus-visible {
   :deep(.person-name) {
     color: var(--text-strong);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  // Mobile is read-only: nobody joins the team from a phone. The filler
+  // would push the two filters left alone off the left edge.
+  .add-people-field,
+  .add-person,
+  .filler,
+  .reset-filters {
+    display: none;
   }
 }
 </style>

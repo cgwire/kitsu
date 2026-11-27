@@ -53,6 +53,13 @@ export const useStatsPage = ({
     () => displayedRows.value.length < rows.value.length
   )
 
+  // every filter of a statistics page lives in the query of its URL
+  const hasFilters = computed(() => Object.keys(route.query).length > 0)
+
+  const resetFilters = () => {
+    router.push({ query: {} })
+  }
+
   const columnIds = computed(() =>
     allColumnIds.value.filter(store.getters.clientAccess.isTaskTypeVisible)
   )
@@ -114,9 +121,11 @@ export const useStatsPage = ({
     displayedColumns,
     displayedRows,
     getDisplayedStats,
+    hasFilters,
     hiddenColumnIds,
     hiddenRowIds,
     isFiltered,
+    resetFilters,
     rowOptions
   }
 }

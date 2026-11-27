@@ -126,7 +126,7 @@ const props = defineProps({
   },
   modelValue: {
     default: '',
-    type: [String, Object]
+    type: [Number, String, Object]
   },
   localeKeyPrefix: {
     default: '',

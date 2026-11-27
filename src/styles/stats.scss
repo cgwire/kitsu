@@ -1,23 +1,49 @@
 // Styles shared by the statistics pages and by their lists.
 
-// Header of a statistics page. The filters carry a label above them, so the
-// row is aligned on its bottom. Its controls differ in height (select 42px,
-// option combos 40px, buttons 32px): the bottom margins centre them all on
-// the select.
+// Filters row of a statistics page, in the filters panel. The filters carry
+// a label above them, so the row is aligned on its bottom, with one height
+// for every control. It wraps when its controls do not fit on one line.
 @mixin page-header($with-search: false) {
   align-items: flex-end;
+  flex-wrap: wrap;
+  row-gap: 1em;
 
-  .options-filter {
-    margin-bottom: 1px;
+  > :last-child {
+    margin-right: 0;
   }
 
   .button {
+    height: 42px;
+  }
+
+  // measured: the option combos stop at 39px and pad their label 1px more
+  // than the selects
+  :deep(.label) {
     margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  .options-filter :deep(.combo) {
+    display: flex;
+    flex-direction: column;
+    height: 42px;
+    justify-content: center;
+  }
+
+  .reset-filters {
+    color: var(--text);
+    padding: 0 14px;
+  }
+
+  @if $with-search {
+    // The search field gives its width up before the row wraps.
+    .search-field {
+      flex: 1 1 200px;
+      max-width: 420px;
+    }
   }
 
   @media screen and (max-width: 768px) {
-    flex-wrap: wrap;
-    margin-top: 1em;
     row-gap: 0.5em;
 
     .flexrow-item {
@@ -27,8 +53,9 @@
     @if $with-search {
       // The search field takes the first line: detach it from the filters.
       .search-field {
-        margin-bottom: 0.5em;
+        flex-basis: 100%;
         margin-right: 0;
+        max-width: none;
       }
 
       // The two option filters share a line, the comboboxes wrap after them.
@@ -41,6 +68,10 @@
     .button {
       margin-left: auto;
       margin-right: 0;
+    }
+
+    .reset-filters {
+      display: none;
     }
   }
 }

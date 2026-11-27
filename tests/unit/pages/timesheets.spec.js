@@ -14,9 +14,16 @@ import { downloadBlob } from '@/lib/download'
 import Timesheets from '@/components/pages/Timesheets.vue'
 import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 
 const alice = { id: 'person-1', full_name: 'Alice', active: true }
 const bob = { id: 'person-2', full_name: 'Bob', active: true }
+
+const savedSearch = {
+  id: 'search-1',
+  name: 'Studio one, in days',
+  search_query: 'studioId=studio-1&unit=day'
+}
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -52,6 +59,8 @@ const mountPage = async (path, { actions = {}, getters = {} } = {}) => {
       personMap: () => new Map([[alice.id, alice]]),
       productions: () => [],
       timesheet: () => ({ 1: { [alice.id]: 120 } }),
+      timesheetsSearchFilterGroups: () => [],
+      timesheetsSearchQueries: () => [savedSearch],
       ...getters
     }
   })
@@ -61,7 +70,7 @@ const mountPage = async (path, { actions = {}, getters = {} } = {}) => {
   await router.push(path)
   await router.isReady()
   wrapper = shallowMount(Timesheets, {
-    global: { plugins: [store, router] }
+    global: { plugins: [store, router], stubs: { PanelLayout: false } }
   })
   await flushPromises()
 }
@@ -86,6 +95,21 @@ describe('Timesheets', () => {
     wrapper?.unmount()
     vi.useRealTimers()
     vi.clearAllMocks()
+  })
+
+  test('names a closed production through its message', async () => {
+    await mountPage('/timesheets/day/2026/11', {
+      getters: {
+        productions: () => [
+          { id: 'production-1', name: 'Old', project_status_name: 'Closed' }
+        ]
+      }
+    })
+
+    const [, closed] = wrapper
+      .findComponent(ComboboxProduction)
+      .props('productionList')
+    expect(closed.name).toBe('productions.closed_name')
   })
 
   describe('export', () => {
@@ -123,6 +147,69 @@ describe('Timesheets', () => {
 
       // 2025 has 52 ISO weeks, 2026 has 53.
       expect(headers.split(';')).toHaveLength(53)
+    })
+  })
+
+  describe('filters', () => {
+    const toggleOf = () => wrapper.findComponent({ name: 'FiltersToggle' })
+
+    test('keeps its second filter row folded and counts its filters', async () => {
+      await mountPage(
+        `/timesheets/day/2026/10?productionId=production-1&personId=${alice.id}`
+      )
+
+      expect(wrapper.find('.timesheets').classes()).toContain('collapsed')
+      expect(toggleOf().props('count')).toBe(2)
+    })
+
+    test('unfolds its second filter row from its toggle', async () => {
+      await mountPage('/timesheets/day/2026/10')
+
+      await toggleOf().vm.$emit('update:modelValue', true)
+
+      expect(wrapper.find('.timesheets').classes()).not.toContain(
+        'collapsed'
+      )
+    })
+
+    // the unit and the chart are how the page shows the time, not filters
+    test('counts no filter and offers no reset on a bare view', async () => {
+      await mountPage('/timesheets/day/2026/10?unit=day&view=chart')
+
+      expect(toggleOf().props('count')).toBe(0)
+      expect(toggleOf().props('resettable')).toBe(false)
+    })
+
+    test('clears its filters and keeps its period and its view', async () => {
+      await mountPage(
+        '/timesheets/day/2026/10?productionId=production-1&studioId=studio-1' +
+          `&departmentId=department-1&personId=${alice.id}&people=all` +
+          '&unit=day&view=chart'
+      )
+
+      toggleOf().vm.$emit('reset')
+      await flushPromises()
+
+      expect(router.currentRoute.value.path).toBe('/timesheets/day/2026/10')
+      expect(router.currentRoute.value.query).toEqual({
+        unit: 'day',
+        view: 'chart'
+      })
+      expect(toggleOf().props('resettable')).toBe(false)
+    })
+
+    test('lists its saved searches, which hold its whole URL query', async () => {
+      await mountPage('/timesheets/day/2026/10')
+
+      expect(
+        wrapper.findComponent({ name: 'SearchQueryList' }).props()
+      ).toMatchObject({
+        groups: [],
+        isGroupEnabled: true,
+        queries: [savedSearch],
+        type: 'timesheets',
+        withRouteQuery: true
+      })
     })
   })
 

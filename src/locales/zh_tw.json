@@ -74,7 +74,7 @@
       "workflow_studio": "工作室工作流程"
     },
     "breakdown": {
-      "all_assets": "所有可用資產",
+      "link_assets": "連結資產",
       "copy_casting": "複製此選角（ctrl + V 貼到所選列）",
       "edit_label": "更改資產的標籤",
       "empty": "選角為空",
@@ -276,6 +276,9 @@
         "uploader": "上傳者",
         "uploaded_at": "上傳於"
       },
+      "working_files": {
+        "no_working_files": "此實體沒有工作檔案。"
+      },
       "output_files": {
         "extension": "副檔名",
         "name": "名稱",
@@ -474,7 +477,6 @@
       "for": "給",
       "go_productions": "返回製作項目",
       "history": "歷史",
-      "info": "資訊",
       "or": "或",
       "next": "下一個",
       "no": "否",
@@ -562,6 +564,7 @@
       "less_filters": "較少篩選條件",
       "more_filters": "更多篩選條件",
       "reload": "重新載入",
+      "search_example": "例如：{example}",
       "search_query": "搜尋查詢",
       "search_query_add": "新增搜尋篩選器",
       "search_query_add_error": "儲存搜尋篩選器時發生錯誤。",
@@ -617,7 +620,6 @@
         "explanation": "可以匯入常見的 OpenTimelineIO 支援檔案 (otio、fcp_xml、fcpx_xml、edl)。鏡頭會依指定的影格範圍、入點影格和出點影格建立或更新。入點影格從 0 開始。"
       },
       "active": "活躍",
-      "activity": "活動",
       "archived": "已封存",
       "avatar": {
         "open_page": "開啟 {personName} 頁面",
@@ -655,8 +657,10 @@
         "casting": "選角",
         "chat": "聊天",
         "concepts": "概念",
-        "info": "資訊",
+        "metadata": "中繼資料",
+        "working_files": "工作檔案",
         "output_files": "輸出檔案",
+        "preview": "預覽",
         "preview_files": "預覽檔案",
         "schedule": "時間表",
         "timelog": "時間記錄"
@@ -1119,6 +1123,7 @@
         "title": "客戶",
         "unavailable": "預覽帳號需要使用密碼的本機驗證。否則，請建立一般客戶帳號。"
       },
+      "closed_name": "{name}（已關閉）",
       "current": "所選製作項目",
       "delete_text": "您確定要從資料庫中刪除{name}嗎？請在文字欄位中輸入要刪除的製作項目名稱，以進行確認。",
       "delete_error": "刪除此製作項目時發生錯誤。目前可能有資料連結至此。您確定沒有任務、鏡頭或資產連結至此製作項目嗎？Kitsu 不允許刪除製作項目。如果您不想再看到此製作項目，可以改為將它關閉。",

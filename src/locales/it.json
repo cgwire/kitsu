@@ -74,7 +74,7 @@
       "workflow_studio": "Flusso di lavoro dello studio"
     },
     "breakdown": {
-      "all_assets": "Tutti gli asset disponibili",
+      "link_assets": "Collega asset",
       "copy_casting": "Copia questo casting (ctrl + V lo incolla nelle righe selezionate)",
       "edit_label": "Cambia l'etichetta dell'asset",
       "empty": "Casting vuoto",
@@ -276,6 +276,9 @@
         "uploader": "Caricato da",
         "uploaded_at": "Caricato il"
       },
+      "working_files": {
+        "no_working_files": "Non ci sono file di lavoro per questa entità."
+      },
       "output_files": {
         "extension": "Estensione",
         "name": "Nome",
@@ -476,7 +479,6 @@
       "for": "Per",
       "go_productions": "Torna alla produzione",
       "history": "cronologia",
-      "info": "Informazioni",
       "or": "o",
       "next": "Successivo",
       "no": "No",
@@ -564,6 +566,7 @@
       "less_filters": "Meno filtri",
       "more_filters": "Più filtri",
       "reload": "Ricarica",
+      "search_example": "es.: {example}",
       "search_query": "Ricerca",
       "search_query_add": "Aggiungi un filtro di ricerca",
       "search_query_add_error": "Si è verificato un errore durante il salvataggio del filtro di ricerca.",
@@ -620,7 +623,6 @@
         "explanation": "È possibile importare i formati OpenTimelineIO più comuni (otio, fcp_xml, fcpx_xml, edl). Gli shot verranno creati o aggiornati con l'intervallo di fotogrammi, il fotogramma in e il fotogramma out indicati. Il fotogramma in parte da 0."
       },
       "active": "Attivo",
-      "activity": "Attività",
       "archived": "Archiviato",
       "avatar": {
         "open_page": "Apri la pagina di {personName}",
@@ -658,8 +660,10 @@
         "casting": "Casting",
         "chat": "Chat",
         "concepts": "Concept",
-        "info": "Info",
+        "metadata": "Metadati",
+        "working_files": "File di lavoro",
         "output_files": "File di output",
+        "preview": "Anteprima",
         "preview_files": "File di anteprima",
         "schedule": "Pianificazione",
         "timelog": "Registro ore"
@@ -1119,6 +1123,7 @@
         "title": "Clienti",
         "unavailable": "Gli account di anteprima richiedono l'autenticazione locale con password. Altrimenti, crea un normale account cliente."
       },
+      "closed_name": "{name} (chiusa)",
       "current": "Produzione selezionata",
       "delete_text": "Sei sicuro di voler rimuovere {name} dal database? Conferma digitando nel campo di testo il nome della produzione da eliminare.",
       "delete_error": "Si è verificato un errore durante l'eliminazione di questa produzione. Potrebbero esserci dati esistenti attualmente collegati a essa. Sei sicuro che questa produzione non abbia task, shot o asset collegati? Kitsu non consente di eliminare le produzioni. Se non vuoi più vedere la produzione, puoi invece chiuderla.",

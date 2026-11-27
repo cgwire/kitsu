@@ -74,7 +74,7 @@
       "workflow_studio": "A stúdió munkafolyamata"
     },
     "breakdown": {
-      "all_assets": "Minden rendelkezésre álló asset",
+      "link_assets": "Assetek összekapcsolása",
       "copy_casting": "Szereposztás másolása (a ctrl + V beilleszti a kijelölt sorokba)",
       "edit_label": "Asset címkéjének megváltoztatása",
       "empty": "Üres szereposztás",
@@ -264,6 +264,9 @@
       "display_options": "Megjelenítési beállítások",
       "logs": {
         "no_logs": "Nincs munkaidő-napló ehhez az elemhez."
+      },
+      "working_files": {
+        "no_working_files": "Nincs munkafájl ehhez az elemhez."
       },
       "output_files": {
         "extension": "Kiterjesztés",
@@ -474,7 +477,6 @@
       "for": "Ennek:",
       "go_productions": "Vissza a produkcióhoz",
       "history": "előzmények",
-      "info": "Információ",
       "or": "vagy",
       "next": "Következő",
       "no": "Nem",
@@ -562,6 +564,7 @@
       "less_filters": "Kevesebb szűrő",
       "more_filters": "Több szűrő",
       "reload": "Újratöltés",
+      "search_example": "pl. {example}",
       "search_query": "Keresőkifejezés",
       "search_query_add": "Keresési szűrő hozzáadása",
       "search_query_add_error": "Hiba történt a keresési szűrő mentésekor.",
@@ -584,7 +587,6 @@
       "timeSpent": "Eltöltött idő",
       "unstick": "Rögzítés feloldása",
       "active": "Aktív",
-      "activity": "Tevékenység",
       "all_edits": "Minden vágás",
       "all_episodes": "Minden epizód",
       "all_shots": "Minden shot",
@@ -652,8 +654,10 @@
         "casting": "Szereposztás",
         "chat": "Chat",
         "concepts": "Koncepciók",
-        "info": "Információ",
+        "metadata": "Metaadat",
+        "working_files": "Munkafájlok",
         "output_files": "Kimeneti fájlok",
+        "preview": "Előnézet",
         "preview_files": "Előnézeti fájlok",
         "schedule": "Időbeosztás",
         "timelog": "Munkaidő-napló"
@@ -1119,6 +1123,7 @@
         "title": "Ügyfelek",
         "unavailable": "Az előnézeti fiókokhoz jelszavas helyi hitelesítés szükséges. Egyébként hozz létre szokásos ügyfélfiókot."
       },
+      "closed_name": "{name} (lezárva)",
       "current": "Kiválasztott produkció",
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból? Kérlek erősítsd meg a törölni kívánt produkció nevének begépelésével.",
       "delete_error": "Hiba történt a produkció törlésekor. Valószínűleg adat hivatkozik rá. Biztos vagy benne, hogy nem hivatkozik rá feladat, shot vagy asset? A Kitsu nem engedi a produkciók törlését. Ha nem akarod többé látni a produkciót, inkább zárd le.",

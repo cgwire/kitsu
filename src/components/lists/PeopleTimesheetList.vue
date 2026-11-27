@@ -212,13 +212,13 @@
           </tr>
         </tbody>
       </table>
+
+      <p class="empty" v-if="!isLoading && !isError && !people.length">
+        {{ $t('timesheets.empty') }}
+      </p>
     </div>
 
     <table-info :is-loading="isLoading" :is-error="isError" variant="grid" />
-
-    <p class="empty" v-if="!isLoading && !isError && !people.length">
-      {{ $t('timesheets.empty') }}
-    </p>
 
     <p class="has-text-centered footer-info" v-if="!isLoading && people.length">
       {{ people.length }} {{ $t('people.persons', { count: people.length }) }},
@@ -464,8 +464,15 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+// the sheet takes the height of its panel, empty or not: only the footer
+// sets it apart from the panel edge
 .datatable-wrapper {
-  margin-bottom: 2em;
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.footer-info {
+  margin-top: 2em;
 }
 
 .datatable {
@@ -559,13 +566,15 @@ th.actions {
   padding-top: 1em;
 }
 
-// the admin lists' empty row, kept out of the table so the text stays
-// centered in the viewport when the grid is wider than it
+// the admin lists' empty row, kept out of the table and held on the left so
+// the text stays centered in the viewport when the grid is wider than it
 .empty {
   color: var(--text);
   font-size: 1.2rem;
   font-style: italic;
+  left: 0;
   padding-top: 30px;
+  position: sticky;
   text-align: center;
 }
 

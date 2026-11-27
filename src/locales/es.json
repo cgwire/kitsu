@@ -74,7 +74,7 @@
       "workflow_studio": "Flujo de trabajo del estudio"
     },
     "breakdown": {
-      "all_assets": "Todos los recursos disponibles",
+      "link_assets": "Vincular recursos",
       "copy_casting": "Copiar este casting (ctrl + V lo pega en las líneas seleccionadas)",
       "edit_label": "Cambiar la etiqueta del recurso",
       "empty": "Casting vacío",
@@ -276,6 +276,9 @@
         "uploader": "Subido por",
         "uploaded_at": "Fecha de subida"
       },
+      "working_files": {
+        "no_working_files": "No hay archivos de trabajo para esta entidad."
+      },
       "output_files": {
         "extension": "Extensión",
         "name": "Nombre",
@@ -474,7 +477,6 @@
       "for": "Para",
       "go_productions": "Volver a la producción",
       "history": "historial",
-      "info": "Información",
       "or": "o",
       "next": "Siguiente",
       "no": "No",
@@ -562,6 +564,7 @@
       "less_filters": "Menos filtros",
       "more_filters": "Más filtros",
       "reload": "Actualizar",
+      "search_example": "ej.: {example}",
       "search_query": "Consulta de búsqueda",
       "search_query_add": "Añadir filtro de búsqueda",
       "search_query_add_error": "Se ha producido un error al guardar este filtro de búsqueda.",
@@ -617,7 +620,6 @@
         "explanation": "Es posible importar archivos comunes soportados por OpenTimelineIO (otio, fcp_xml, fcpx_xml, edl). Las tomas se crearán o actualizarán con el rango de fotogramas, el fotograma de entrada y el fotograma de salida dados. El fotograma de entrada empieza en 0."
       },
       "active": "Activo",
-      "activity": "Actividad",
       "archived": "Archivado",
       "avatar": {
         "open_page": "Abrir la página de {personName}",
@@ -655,8 +657,10 @@
         "casting": "Casting",
         "chat": "Chat",
         "concepts": "Conceptos",
-        "info": "Información",
+        "metadata": "Metadatos",
+        "working_files": "Archivos de trabajo",
         "output_files": "Archivos de salida",
+        "preview": "Vista previa",
         "preview_files": "Archivos de vista previa",
         "schedule": "Calendario",
         "timelog": "Registro de tiempo"
@@ -1119,6 +1123,7 @@
         "title": "Clientes",
         "unavailable": "Las cuentas de vista previa requieren autenticación local con contraseñas. De lo contrario, cree una cuenta de cliente normal."
       },
+      "closed_name": "{name} (cerrada)",
       "current": "Producción seleccionada",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos? Confirme escribiendo a continuación el nombre de la producción que desea eliminar.",
       "delete_error": "Se ha producido un error al eliminar esta producción. Es probable que haya datos asociados. ¿Está seguro de que esta producción no tiene ninguna tarea, toma o recurso asociado? Kitsu no permite la eliminación de producciones. Si no desea verla más, puede cerrarla.",

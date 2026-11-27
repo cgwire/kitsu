@@ -1,114 +1,139 @@
 <template>
-  <div class="mt1">
-    <div class="flexrow filters">
-      <date-field
-        class="date-range flexrow-item"
-        :can-delete="false"
-        :label="$t('logs.date_range_label')"
-        :max-date="today"
-        :placeholder="$t('logs.date_range_placeholder')"
-        range
-        v-model="dateRange"
-        @change="onDateRangeChange"
-      />
-      <people-field
-        class="field flexrow-item people-filter"
-        multiple
-        search-email
-        :label="$t('logs.people_label')"
-        :people="people"
-        :placeholder="$t('logs.people_placeholder')"
-        v-model="selectedPeople"
-        @select="onPeopleSelect"
-      />
-      <div class="filler"></div>
-      <button-simple
-        class="flexrow-item small mt2"
-        icon="refresh"
-        :is-loading="loading.logs"
-        :title="$t('main.reload')"
-        @click="loadLogs"
-      />
-    </div>
-
-    <div class="has-text-centered" v-if="loading.logs">
-      <spinner />
-    </div>
-    <div class="mt2 empty" v-else-if="!logs.length">
-      {{ $t('logs.empty_list') }}
-    </div>
-    <div class="data-list" v-else>
-      <div class="datatable-wrapper">
-        <table class="datatable datatable--cards">
-          <thead class="datatable-head">
-            <tr>
-              <th scope="col" class="date">{{ $t('main.date') }}</th>
-              <th scope="col" class="person">{{ $t('logs.logins.user') }}</th>
-              <th scope="col" class="email">
-                {{ $t('people.fields.email') }}
-              </th>
-              <th scope="col" class="ip-address">
-                {{ $t('logs.logins.ip_address') }}
-              </th>
-              <th scope="col" class="origin">{{ $t('logs.logins.origin') }}</th>
-            </tr>
-          </thead>
-          <tbody class="datatable-body">
-            <tr class="datatable-row" :key="log.id" v-for="log in logs">
-              <td class="date" :data-label="$t('main.date')">
-                {{ log.date }}
-              </td>
-              <td class="person card-head">
-                <span class="flexrow" v-if="log.person">
-                  <people-avatar
-                    class="flexrow-item"
-                    :size="20"
-                    :font-size="10"
-                    :person="log.person"
-                  />
-                  <people-name
-                    class="flexrow-item"
-                    :person="log.person"
-                    with-link
-                  />
-                </span>
-              </td>
-              <td
-                class="email"
-                :data-label="
-                  log.person?.email ? $t('people.fields.email') : null
-                "
-              >
-                {{ log.person?.email }}
-              </td>
-              <td
-                class="ip-address"
-                :data-label="
-                  log.ip_address ? $t('logs.logins.ip_address') : null
-                "
-              >
-                {{ log.ip_address }}
-              </td>
-              <td
-                class="origin"
-                :data-label="log.origin ? $t('logs.logins.origin') : null"
-              >
-                {{ log.origin }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="has-text-centered load-more" v-if="hasMoreLogs">
+  <panel-layout class="login-logs">
+    <template #tabs>
+      <slot />
+    </template>
+    <template #filters>
+      <div class="flexrow filters">
+        <date-field
+          class="date-range flexrow-item"
+          :can-delete="false"
+          :label="$t('logs.date_range_label')"
+          :max-date="today"
+          :placeholder="$t('logs.date_range_placeholder')"
+          range
+          v-model="dateRange"
+          @change="onDateRangeChange"
+        />
+        <people-field
+          class="field flexrow-item people-filter"
+          multiple
+          search-email
+          :label="$t('logs.people_label')"
+          :people="people"
+          :placeholder="$t('logs.people_placeholder')"
+          v-model="selectedPeople"
+          @select="onPeopleSelect"
+        />
+        <div class="filler"></div>
         <button-simple
-          class="mt2"
-          :is-loading="loading.moreLogs"
-          :text="$t('main.load_more')"
-          @click="loadMoreLogs"
+          class="flexrow-item"
+          icon="refresh"
+          :is-loading="loading.logs"
+          :title="$t('main.reload')"
+          @click="loadLogs"
+        />
+        <button-simple
+          class="flexrow-item reset-filters"
+          icon="remove"
+          :title="$t('main.clear_filters')"
+          @click="resetFilters"
+          v-if="hasFilters"
         />
       </div>
-    </div>
-  </div>
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="loginLogsSearchFilterGroups"
+        :is-group-enabled="true"
+        :kept-query-keys="KEPT_QUERY_KEYS"
+        :queries="loginLogsSearchQueries"
+        type="loginLogs"
+        with-route-query
+      />
+
+      <div class="has-text-centered" v-if="loading.logs">
+        <spinner />
+      </div>
+      <div class="empty" v-else-if="!logs.length">
+        {{ $t('logs.empty_list') }}
+      </div>
+      <div class="data-list" v-else>
+        <div class="datatable-wrapper">
+          <table class="datatable datatable--cards">
+            <thead class="datatable-head">
+              <tr>
+                <th scope="col" class="date">{{ $t('main.date') }}</th>
+                <th scope="col" class="person">{{ $t('logs.logins.user') }}</th>
+                <th scope="col" class="email">
+                  {{ $t('people.fields.email') }}
+                </th>
+                <th scope="col" class="ip-address">
+                  {{ $t('logs.logins.ip_address') }}
+                </th>
+                <th scope="col" class="origin">
+                  {{ $t('logs.logins.origin') }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="datatable-body">
+              <tr class="datatable-row" :key="log.id" v-for="log in logs">
+                <td class="date" :data-label="$t('main.date')">
+                  {{ log.date }}
+                </td>
+                <td class="person card-head">
+                  <span class="flexrow" v-if="log.person">
+                    <people-avatar
+                      class="flexrow-item"
+                      :size="20"
+                      :font-size="10"
+                      :person="log.person"
+                    />
+                    <people-name
+                      class="flexrow-item"
+                      :person="log.person"
+                      with-link
+                    />
+                  </span>
+                </td>
+                <td
+                  class="email"
+                  :data-label="
+                    log.person?.email ? $t('people.fields.email') : null
+                  "
+                >
+                  {{ log.person?.email }}
+                </td>
+                <td
+                  class="ip-address"
+                  :data-label="
+                    log.ip_address ? $t('logs.logins.ip_address') : null
+                  "
+                >
+                  {{ log.ip_address }}
+                </td>
+                <td
+                  class="origin"
+                  :data-label="log.origin ? $t('logs.logins.origin') : null"
+                >
+                  {{ log.origin }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="has-text-centered load-more" v-if="hasMoreLogs">
+          <button-simple
+            class="mt2"
+            :is-loading="loading.moreLogs"
+            :text="$t('main.load_more')"
+            @click="loadMoreLogs"
+          />
+        </div>
+      </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -126,12 +151,17 @@ import {
   parseSimpleDate
 } from '@/lib/time'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+
+// the tab is where the logs are read, not one of their filters
+const KEPT_QUERY_KEYS = ['tab']
 
 const PAGE_SIZE = 100
 
@@ -156,8 +186,18 @@ const asArray = value => {
   return Array.isArray(value) ? value : [value]
 }
 
+const loginLogsSearchFilterGroups = computed(
+  () => store.getters.loginLogsSearchFilterGroups
+)
+const loginLogsSearchQueries = computed(
+  () => store.getters.loginLogsSearchQueries
+)
 const people = computed(() => store.getters.people)
 const personMap = computed(() => store.getters.personMap)
+
+const hasFilters = computed(() =>
+  Object.keys(route.query).some(key => !KEPT_QUERY_KEYS.includes(key))
+)
 
 // Read from the route rather than from the widget model: the person map may
 // still be loading, and an unresolved id must not silently drop the filter
@@ -194,6 +234,10 @@ const pushQuery = changes => {
     }
   })
   router.push({ query })
+}
+
+const resetFilters = () => {
+  router.push({ query: { tab: route.query.tab } })
 }
 
 const onDateRangeChange = value => {
@@ -297,10 +341,36 @@ useHead({ title: computed(() => `${t('logs.logins.title')} - Kitsu`) })
 .filters {
   align-items: flex-start;
   flex-wrap: wrap;
+  row-gap: 1em;
+
+  > .flexrow-item {
+    margin-bottom: 0;
+  }
+
+  > :last-child {
+    margin-right: 0;
+  }
+
+  > .button {
+    align-self: flex-end;
+    height: 42px;
+  }
+
+  // one label height and one control height for the whole row
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  // App.vue sizes the date input under #app
+  :deep(.datepicker input) {
+    height: 42px !important;
+  }
 }
 
-.data-list {
-  margin-bottom: 2em;
+.reset-filters {
+  color: var(--text);
+  padding: 0 14px;
 }
 
 .date {
@@ -314,17 +384,9 @@ useHead({ title: computed(() => `${t('logs.logins.title')} - Kitsu`) })
     align-items: flex-end;
     row-gap: 0.5em;
 
-    .filler {
+    .filler,
+    .reset-filters {
       display: none;
-    }
-
-    // measured: 32px buttons against the 40px date input
-    .button {
-      height: 40px;
-    }
-
-    .mt2 {
-      margin-top: 0;
     }
   }
 

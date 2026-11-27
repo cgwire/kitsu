@@ -19,8 +19,6 @@ import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
-import { buildSearchQueryListStub } from '../../fixtures/search-query-list'
-
 const status = (count, frames) => ({
   done: { name: 'done', color: '#22d160', count, frames, drawings: 0 }
 })
@@ -34,6 +32,10 @@ const sq02 = { id: 'sq02', name: 'SQ02' }
 const taskTypes = [
   { id: 'layout', name: 'Layout' },
   { id: 'anim', name: 'Animation' }
+]
+
+const savedSearches = [
+  { id: 'search-1', name: 'No SQ02', search_query: 'hiddenSequences=sq02' }
 ]
 
 const router = createRouter({
@@ -68,7 +70,8 @@ const mountPage = async ({
       isTVShow: () => false,
       searchSequenceFilters: () => ({}),
       sequenceMap: () => new Map([sq01, sq02].map(s => [s.id, s])),
-      sequenceSearchQueries: () => [],
+      sequenceStatsSearchFilterGroups: () => [],
+      sequenceStatsSearchQueries: () => savedSearches,
       sequenceSearchText: () => '',
       sequenceShotCounts: () => ({ sq01: 12, sq02: 3 }),
       sequenceStats: () => sequenceStats,
@@ -86,7 +89,7 @@ const mountPage = async ({
   wrapper = shallowMount(SequenceStats, {
     global: {
       plugins: [store, router],
-      stubs: { SearchField: false, ...stubs }
+      stubs: { PanelLayout: false, SearchField: false, ...stubs }
     }
   })
   await flushPromises()
@@ -111,13 +114,54 @@ describe('SequenceStats page', () => {
       wrapper = null
     })
 
-    test('opens the search filter modal on Save', async () => {
-      const SearchQueryListStub = buildSearchQueryListStub()
-      await mountPage({ stubs: { SearchQueryList: SearchQueryListStub } })
+    test('saves the filters of the URL, by production', async () => {
+      await mountPage()
 
-      wrapper.findComponent(SearchField).vm.$emit('save', 's01')
+      expect(
+        wrapper.find('.list-panel').findComponent(SearchQueryList).props()
+      ).toMatchObject({
+        productionId: 'production-1',
+        queries: savedSearches,
+        type: 'sequenceStats',
+        withRouteQuery: true
+      })
+    })
 
-      expect(SearchQueryListStub.methods.addSearch).toHaveBeenCalledWith('s01')
+    test('lays its filters and its list out in the two panels', async () => {
+      await mountPage()
+
+      expect(
+        wrapper.find('.filters-panel').findComponent(SearchField).exists()
+      ).toBe(true)
+      expect(
+        wrapper.find('.list-panel').findComponent(SequenceStatsList).exists()
+      ).toBe(true)
+    })
+
+    test('offers the reset only when the URL holds a filter', async () => {
+      await mountPage()
+      expect(findButton('remove')).toBeUndefined()
+
+      await router.push({ query: { hiddenSequences: 'sq02' } })
+      await flushPromises()
+
+      expect(findButton('remove').exists()).toBe(true)
+    })
+
+    test('shows everything again on reset', async () => {
+      const { store } = await mountPage({
+        query: { search: 'sq01', hiddenTaskTypes: 'anim' }
+      })
+
+      await findButton('remove').vm.$emit('click')
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query).toEqual({})
+      expect(store.dispatch).toHaveBeenLastCalledWith(
+        'setSequenceStatsSearch',
+        undefined
+      )
+      expect(listProps().validationColumns).toEqual(['layout', 'anim'])
     })
   })
 

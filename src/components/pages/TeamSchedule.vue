@@ -1,6 +1,10 @@
 <template>
-  <div class="columns fixed-page">
-    <div class="column main-column">
+  <panel-layout
+    class="team-schedule"
+    :side="isTaskSidePanelOpen"
+    :side-focused="isTaskSidePanelOpen"
+  >
+    <template #filters>
       <div class="schedule-toolbar">
         <div class="toolbar-row">
           <div class="flexrow-item">
@@ -39,16 +43,12 @@
             :text="$t('tasks.unassigned_tasks')"
             @click="toggleTaskSidePanel"
           />
-          <button-simple
-            class="flexrow-item toggle-filters"
-            :active="showMoreFilters"
-            icon="funnel"
-            :title="
-              showMoreFilters
-                ? $t('main.less_filters')
-                : $t('main.more_filters')
-            "
-            @click="showMoreFilters = !showMoreFilters"
+          <filters-toggle
+            class="flexrow-item"
+            :count="activeFilterCount"
+            :resettable="Boolean(activeFilterCount)"
+            v-model="showMoreFilters"
+            @reset="resetFilters"
           />
         </div>
         <div class="toolbar-row" v-show="showMoreFilters">
@@ -86,13 +86,21 @@
           </div>
         </div>
       </div>
-
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="teamScheduleSearchFilterGroups"
+        :is-group-enabled="true"
+        :queries="teamScheduleSearchQueries"
+        type="teamSchedule"
+        with-route-query
+      />
       <error-text
         class="has-text-centered"
         :text="scheduleSaveErrorText"
         v-if="scheduleSaveErrorText"
       />
-
       <div class="empty-schedule schedule-error" v-if="errors.schedule">
         <table-info is-error />
         <button-simple :text="$t('main.reload')" @click="init" />
@@ -121,9 +129,8 @@
         <user-search-icon :size="40" />
         <p>{{ $t('team_schedule.empty') }}</p>
       </div>
-    </div>
-
-    <div class="column side-column" v-if="isTaskSidePanelOpen">
+    </template>
+    <template #side>
       <task-info>
         <a
           class="close-button"
@@ -264,8 +271,8 @@
           <em>{{ $t('main.no_results') }}</em>
         </div>
       </task-info>
-    </div>
-  </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -279,6 +286,7 @@ import { firstBy } from 'thenby'
 import {
   computed,
   getCurrentInstance,
+  nextTick,
   onBeforeUnmount,
   onMounted,
   reactive,
@@ -303,6 +311,7 @@ import {
   parseSimpleDate
 } from '@/lib/time'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import Schedule from '@/components/schedule/Schedule.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -315,7 +324,9 @@ import DateField from '@/components/widgets/DateField.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
@@ -383,6 +394,14 @@ const emptyDragImage = new Image()
 emptyDragImage.src =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
+// The route watcher sees the query of the next page too, before this one
+// unmounts.
+const pagePath = route.path
+
+// A query the page reads is not written back: a default it adds would
+// unmark the saved search just run.
+let isReadingRoute = false
+
 const peopleFieldRef = useTemplateRef('people-field')
 const scheduleRef = useTemplateRef('schedule')
 
@@ -400,6 +419,12 @@ const getProductionTaskTypes = computed(
 const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const openProductions = computed(() => store.getters.openProductions)
+const teamScheduleSearchFilterGroups = computed(
+  () => store.getters.teamScheduleSearchFilterGroups
+)
+const teamScheduleSearchQueries = computed(
+  () => store.getters.teamScheduleSearchQueries
+)
 const organisation = computed(() => store.getters.organisation)
 const productionMap = computed(() => store.getters.productionMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -417,6 +442,22 @@ const daysOffByPerson = computed(() =>
 // departments only browses those.
 const isSupervisorWithDepartments = computed(() =>
   Boolean(scopedDepartments(selectedProduction.value)?.length)
+)
+
+// "My departments" is the widest scope of a supervisor attached to
+// departments: any other choice counts as a filter.
+const defaultDepartment = computed(() =>
+  isSupervisorWithDepartments.value ? 'MY_DEPARTMENTS' : 'ALL'
+)
+
+const activeFilterCount = computed(
+  () =>
+    [
+      selectedStudio.value,
+      selectedProduction.value,
+      selectedDepartment.value !== defaultDepartment.value,
+      selectedPerson.value
+    ].filter(Boolean).length
 )
 
 // The unassigned panel is scoped the same way by its own production
@@ -1027,14 +1068,37 @@ const syncDepartmentFilter = () => {
   }
 }
 
-// "My departments" is the widest scope of a supervisor attached to
-// departments: any other choice counts as a filter.
-const hasFilters = () =>
-  Boolean(selectedStudio.value || selectedProduction.value) ||
-  selectedDepartment.value !==
-    (isSupervisorWithDepartments.value ? 'MY_DEPARTMENTS' : 'ALL')
+const resetFilters = () => {
+  if (selectedPerson.value) peopleFieldRef.value.clear()
+  // the values of the "All" entries: undefined would leave the URL as it is
+  selectedStudio.value = null
+  selectedProduction.value = ''
+  selectedDepartment.value = defaultDepartment.value
+}
+
+const applyRouteQuery = () => {
+  selectedStudio.value = route.query.studio || undefined
+  // the combobox lists the open productions only: a closed or deleted
+  // production of a link is dropped. It stays in the URL (undefined, not
+  // ''), so a link with nothing else to rewrite opens without a navigation.
+  const production = route.query.production
+  selectedProduction.value = openProductions.value.some(
+    ({ id }) => id === production
+  )
+    ? production
+    : undefined
+  // Supervisors land on their own departments (issue #1579), a bookmarked
+  // department outside them included.
+  selectedDepartment.value = route.query.department || defaultDepartment.value
+  syncDepartmentFilter()
+  const zoom = Number(route.query.zoom)
+  zoomLevel.value = zoomOptions.value.some(option => option.value === zoom)
+    ? zoom
+    : DEFAULT_ZOOM
+}
 
 const updateRoute = ({ department, production, studio, zoom }) => {
+  if (isReadingRoute) return
   const currentQuery = pendingQuery || route.query
   const query = { ...currentQuery }
 
@@ -1106,6 +1170,20 @@ watch(zoomLevel, value => {
   updateRoute({ zoom: value })
 })
 
+// A saved search, or the back button, sets a query the page did not write.
+watch(
+  () => route.query,
+  async () => {
+    if (route.path === pagePath) {
+      isReadingRoute = true
+      applyRouteQuery()
+      // the filter watchers run before the next tick
+      await nextTick()
+      isReadingRoute = false
+    }
+  }
+)
+
 watch(isTaskSidePanelOpen, open => {
   if (open) {
     loadUnassignedTasks()
@@ -1115,31 +1193,7 @@ watch(isTaskSidePanelOpen, open => {
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
-  selectedStudio.value = route.query.studio || undefined
-  // the combobox lists the open productions only: a closed or deleted
-  // production of a link is dropped. It stays in the URL (undefined, not
-  // ''), so a link with nothing else to rewrite opens without a navigation.
-  const production = route.query.production
-  selectedProduction.value = openProductions.value.some(
-    ({ id }) => id === production
-  )
-    ? production
-    : undefined
-  // Supervisors land on their own departments (issue #1579), a bookmarked
-  // department outside them included.
-  const department = route.query.department
-  if (department) {
-    selectedDepartment.value = department
-  } else if (isSupervisorWithDepartments.value) {
-    selectedDepartment.value = 'MY_DEPARTMENTS'
-  }
-  syncDepartmentFilter()
-  // a link or a reload brings the filters back: keep them in sight
-  showMoreFilters.value = hasFilters()
-  const zoom = Number(route.query.zoom)
-  zoomLevel.value = zoomOptions.value.some(option => option.value === zoom)
-    ? zoom
-    : DEFAULT_ZOOM
+  applyRouteQuery()
 
   socket.on('preview-file:set-main', onPreviewFileSetMain)
 
@@ -1163,11 +1217,6 @@ useHead({
 }
 
 .schedule-toolbar {
-  background: var(--background-panel);
-  border-radius: 12px;
-  margin-bottom: 1em;
-  padding: 0.75em 1em 1em;
-
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
@@ -1230,17 +1279,20 @@ useHead({
   }
 }
 
-.fixed-page {
-  padding: 1em;
-  // the 60px topbar, then the same 1em as the sides
-  padding-top: calc(60px + 1em);
+// The schedule paints its corner and its month names with the page
+// background and leaves the rest of its headers transparent: on the panel
+// tone they came out as patches.
+.team-schedule .schedule-wrapper {
+  background: var(--background);
+  border-radius: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.main-column {
-  display: flex;
-  border: 0;
-  overflow: hidden;
-  flex-direction: column;
+// its names sit 5px from its left edge, made for a page margin beside them
+.team-schedule .schedule-wrapper :deep(.schedule) {
+  padding-left: 10px;
 }
 
 .people-filter {
@@ -1266,110 +1318,100 @@ useHead({
   }
 }
 
-.side-column {
+// the close button hangs in the corner of the task panel
+.team-schedule :deep(.side.task-info) {
   position: relative;
-  margin-top: 0;
-  padding: 0 0 0 1em;
+}
 
-  :deep(.side) {
-    background: var(--background-panel);
-    border-radius: 12px;
-  }
+// Hide the task selection counter
+.team-schedule :deep(.task-info.empty) {
+  padding-top: 0;
 
-  // Hide the task selection counter
-  :deep(.task-info.empty) {
-    padding-top: 0;
-    > *:not(.empty-section) {
-      display: none;
-    }
-  }
-
-  .close-button {
-    color: var(--text);
-    opacity: 0.6;
-    position: absolute;
-    right: 1em;
-    top: 1em;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
-
-  .task-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75em;
-
-    .task-item {
-      position: relative;
-      cursor: grab;
-
-      .ui-droppable {
-        padding: 0.5em;
-        // borderless in light: the crisp shadows carry the edge, dark
-        // mode restores a faint solid border (same recipe as the board
-        // cards)
-        border: 1px solid transparent;
-        border-radius: 10px;
-        background-color: var(--background-alt-2);
-        box-shadow:
-          0 1px 2px rgba(0, 0, 0, 0.12),
-          0 2px 8px rgba(0, 0, 0, 0.06);
-        transition:
-          transform 150ms ease-out,
-          box-shadow 150ms ease-out;
-
-        .production-name {
-          margin-bottom: 0;
-          margin-top: 0.3em;
-          font-size: 0.8em;
-          text-transform: uppercase;
-        }
-
-        .dark & {
-          border-color: #55585d;
-        }
-      }
-
-      &:hover .ui-droppable {
-        box-shadow:
-          0 2px 6px rgba(0, 0, 0, 0.14),
-          0 6px 16px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
-      }
-
-      &.selected .ui-droppable {
-        box-shadow:
-          0 0 0 3px var(--background-selected),
-          0 2px 8px rgba(0, 0, 0, 0.06);
-      }
-
-      &.dragging {
-        cursor: grabbing;
-        opacity: 0.4;
-      }
-
-      .task-thumbnail {
-        border-radius: 6px;
-        margin-right: 1em;
-        overflow: hidden;
-      }
-
-      .task-department {
-        position: absolute;
-        top: 8px;
-        right: 0.5em;
-      }
-    }
+  > *:not(.empty-section) {
+    display: none;
   }
 }
 
-// the page background App.vue gives every side column
-.dark .side-column {
-  background: transparent;
+.close-button {
+  color: var(--text);
+  opacity: 0.6;
+  position: absolute;
+  right: 1em;
+  top: 1em;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+
+  .task-item {
+    position: relative;
+    cursor: grab;
+
+    .ui-droppable {
+      padding: 0.5em;
+      // borderless in light: the crisp shadows carry the edge, dark
+      // mode restores a faint solid border (same recipe as the board
+      // cards)
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background-color: var(--background-alt-2);
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+      transition:
+        transform 150ms ease-out,
+        box-shadow 150ms ease-out;
+
+      .production-name {
+        margin-bottom: 0;
+        margin-top: 0.3em;
+        font-size: 0.8em;
+        text-transform: uppercase;
+      }
+
+      .dark & {
+        border-color: #55585d;
+      }
+    }
+
+    &:hover .ui-droppable {
+      box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.14),
+        0 6px 16px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    &.selected .ui-droppable {
+      box-shadow:
+        0 0 0 3px var(--background-selected),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    &.dragging {
+      cursor: grabbing;
+      opacity: 0.4;
+    }
+
+    .task-thumbnail {
+      border-radius: 6px;
+      margin-right: 1em;
+      overflow: hidden;
+    }
+
+    .task-department {
+      position: absolute;
+      top: 8px;
+      right: 0.5em;
+    }
+  }
 }
 </style>

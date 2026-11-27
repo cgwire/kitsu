@@ -1,14 +1,5 @@
 <template>
   <div>
-    <div class="has-text-right filler filter-button">
-      <button-simple
-        icon="filter"
-        :active="isFiltersDisplayed"
-        :title="$t('main.more_filters')"
-        @click="toggleFilters"
-      />
-    </div>
-
     <div class="filters flexrow">
       <combobox
         class="flexrow-item selector filter-episode"
@@ -39,6 +30,14 @@
           v-model="person"
         />
       </div>
+      <div class="filler"></div>
+      <filters-toggle
+        class="flexrow-item"
+        :count="secondRowFilterCount"
+        :resettable="hasFilters"
+        v-model="isFiltersDisplayed"
+        @reset="resetFilters"
+      />
     </div>
 
     <div class="filters flexrow mt1" v-if="isFiltersDisplayed">
@@ -74,11 +73,11 @@ import { useStore } from 'vuex'
 import { useTime } from '@/composables/time'
 import { sortByName, sortPeople } from '@/lib/sorting'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 
 const { t } = useI18n()
@@ -116,6 +115,21 @@ const productionTaskStatuses = computed(
 const productionTaskTypes = computed(() => store.getters.productionTaskTypes)
 const runningEpisodes = computed(() => store.getters.runningEpisodes)
 
+const secondRowFilterCount = computed(
+  () =>
+    [after.value, before.value, previewMode.value !== 'comments'].filter(
+      Boolean
+    ).length
+)
+
+// an episode filter is either unset or on its "all" entry
+const hasFilters = computed(
+  () =>
+    secondRowFilterCount.value > 0 ||
+    Boolean(taskStatusId.value || taskTypeId.value || person.value) ||
+    !['', 'all'].includes(episodeId.value)
+)
+
 const previewOptions = computed(() => [
   { label: t('news.only_comments'), value: 'comments' },
   { label: t('news.only_previews'), value: 'previews' }
@@ -149,8 +163,14 @@ const team = computed(() =>
 
 // Functions
 
-const toggleFilters = () => {
-  isFiltersDisplayed.value = !isFiltersDisplayed.value
+const resetFilters = () => {
+  after.value = null
+  before.value = null
+  episodeId.value = ''
+  person.value = null
+  previewMode.value = 'comments'
+  taskStatusId.value = ''
+  taskTypeId.value = ''
 }
 </script>
 
@@ -165,17 +185,14 @@ const toggleFilters = () => {
   margin-bottom: 4px;
 }
 
-.filter-button {
-  color: $grey;
-  cursor: pointer;
-  float: right;
-  text-transform: lowercase;
+.filters > :last-child {
+  margin-right: 0;
 }
 
 // Mobile: keep only task-status + task-type filters, drop the advanced
 // filter toggle and the episode/person fields to fit the narrow width.
 @media screen and (max-width: 768px) {
-  .filter-button,
+  :deep(.filters-toggle),
   .filter-episode,
   .filter-person {
     display: none;

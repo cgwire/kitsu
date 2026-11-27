@@ -1,84 +1,105 @@
 <template>
-  <div class="episodes page fixed-page">
-    <div class="episode-list-header page-header flexrow">
-      <search-field
-        class="flexrow-item search-field"
-        ref="episode-search-field"
-        placeholder="ex: e01"
-        @change="onSearchChange"
+  <panel-layout class="episode-stats">
+    <template #filters>
+      <div class="episode-list-header flexrow">
+        <search-field
+          class="flexrow-item search-field"
+          ref="episode-search-field"
+          placeholder="ex: e01"
+          @change="onSearchChange"
+          v-if="!isCurrentUserClient"
+        />
+        <combobox-visible-options
+          class="flexrow-item options-filter"
+          :label="$t('episodes.title')"
+          :options="episodeOptions"
+          v-model:hidden="hiddenEpisodeIds"
+        />
+        <combobox-task-type-options
+          class="flexrow-item options-filter"
+          :label="$t('task_types.title')"
+          :task-types="columnTaskTypes"
+          v-model:hidden="hiddenTaskTypeIds"
+        />
+        <combobox
+          class="mb0 flexrow-item"
+          locale-key-prefix="statistics."
+          :label="$t('statistics.data_mode')"
+          :options="dataModeOptions"
+          v-model="dataMode"
+          v-if="!isCurrentUserClient"
+        />
+        <combobox
+          class="mb0 flexrow-item"
+          locale-key-prefix="statistics."
+          :label="$t('statistics.display_mode')"
+          :options="STATS_DISPLAY_MODE_OPTIONS"
+          v-model="displayMode"
+        />
+        <combobox
+          class="mb0 flexrow-item"
+          :label="$t('statistics.count_mode')"
+          locale-key-prefix="statistics."
+          :options="countModeOptions"
+          v-model="countMode"
+        />
+        <combobox
+          class="mb0 flexrow-item"
+          :label="$t('statistics.episode_status')"
+          locale-key-prefix="statistics."
+          :options="statusModeOptions"
+          v-model="statusMode"
+        />
+
+        <span class="filler"></span>
+        <button-simple
+          class="flexrow-item"
+          icon="refresh"
+          :title="$t('main.reload')"
+          @click="reset"
+        />
+        <button-simple
+          class="flexrow-item export-button"
+          :disabled="isLoading"
+          icon="download"
+          :title="$t('main.csv.export_file')"
+          @click="exportStatisticsToCsv"
+        />
+        <button-simple
+          class="flexrow-item reset-filters"
+          icon="remove"
+          :title="$t('main.clear_filters')"
+          @click="resetFilters"
+          v-if="hasFilters"
+        />
+      </div>
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="episodeStatsSearchFilterGroups"
+        :is-group-enabled="true"
+        :production-id="currentProduction?.id"
+        :queries="episodeStatsSearchQueries"
+        type="episodeStats"
+        with-route-query
         v-if="!isCurrentUserClient"
       />
-      <combobox-visible-options
-        class="flexrow-item options-filter"
-        :label="$t('episodes.title')"
-        :options="episodeOptions"
-        v-model:hidden="hiddenEpisodeIds"
-      />
-      <combobox-task-type-options
-        class="flexrow-item options-filter"
-        :label="$t('task_types.title')"
-        :task-types="columnTaskTypes"
-        v-model:hidden="hiddenTaskTypeIds"
-      />
-      <combobox
-        class="mb0 flexrow-item"
-        locale-key-prefix="statistics."
-        :label="$t('statistics.data_mode')"
-        :options="dataModeOptions"
-        v-model="dataMode"
-        v-if="!isCurrentUserClient"
-      />
-      <combobox
-        class="mb0 flexrow-item"
-        locale-key-prefix="statistics."
-        :label="$t('statistics.display_mode')"
-        :options="STATS_DISPLAY_MODE_OPTIONS"
-        v-model="displayMode"
-      />
-      <combobox
-        class="mb0 flexrow-item"
-        :label="$t('statistics.count_mode')"
-        locale-key-prefix="statistics."
-        :options="countModeOptions"
-        v-model="countMode"
-      />
-      <combobox
-        class="mb0 flexrow-item"
-        :label="$t('statistics.episode_status')"
-        locale-key-prefix="statistics."
-        :options="statusModeOptions"
-        v-model="statusMode"
-      />
 
-      <span class="filler"></span>
-      <button-simple
-        class="flexrow-item"
-        icon="refresh"
-        :title="$t('main.reload')"
-        @click="reset"
+      <episode-stats-list
+        :count-mode="countMode"
+        :data-mode="displayedDataMode"
+        :display-mode="displayMode"
+        :entries="displayedEpisodeEntries"
+        :episode-retake-stats="displayedRetakeStats"
+        :episode-stats="displayedStats"
+        :is-loading="isLoading"
+        :is-error="isLoadingError"
+        :is-filtered="isFiltered"
+        :validation-columns="displayedColumns"
       />
-      <button-simple
-        class="flexrow-item export-button"
-        :disabled="isLoading"
-        icon="download"
-        :title="$t('main.csv.export_file')"
-        @click="exportStatisticsToCsv"
-      />
-    </div>
-
-    <episode-stats-list
-      :count-mode="countMode"
-      :data-mode="displayedDataMode"
-      :display-mode="displayMode"
-      :entries="displayedEpisodeEntries"
-      :episode-retake-stats="displayedRetakeStats"
-      :episode-stats="displayedStats"
-      :is-loading="isLoading"
-      :is-error="isLoadingError"
-      :is-filtered="isFiltered"
-      :validation-columns="displayedColumns"
-    />
-  </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -101,12 +122,14 @@ import { sortByName } from '@/lib/sorting'
 import { aggregateRetakeStats, omitRetakeStatsColumns } from '@/lib/stats'
 import stringHelpers from '@/lib/string'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOptions.vue'
 import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -143,6 +166,12 @@ const displayedEpisodes = computed(() => store.getters.displayedEpisodes)
 const episodeMap = computed(() => store.getters.episodeMap)
 const episodeRetakeStats = computed(() => store.getters.episodeRetakeStats)
 const episodeStats = computed(() => store.getters.episodeStats)
+const episodeStatsSearchFilterGroups = computed(
+  () => store.getters.episodeStatsSearchFilterGroups
+)
+const episodeStatsSearchQueries = computed(
+  () => store.getters.episodeStatsSearchQueries
+)
 const episodeStatColumns = computed(() => store.getters.episodeStatColumns)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isPaperProduction = computed(() => store.getters.isPaperProduction)
@@ -180,9 +209,11 @@ const {
   displayedColumns,
   displayedRows: displayedEpisodeEntries,
   getDisplayedStats,
+  hasFilters,
   hiddenColumnIds: hiddenTaskTypeIds,
   hiddenRowIds: hiddenEpisodeIds,
   isFiltered,
+  resetFilters,
   rowOptions: episodeOptions
 } = useStatsPage({
   preferenceKey: 'stats:episode-display-mode',
@@ -264,6 +295,15 @@ watch(currentProduction, () => {
   reset()
 })
 
+// A saved search, or the back button, sets a search the page did not write.
+watch(
+  () => route.query.search,
+  search => {
+    searchFieldRef.value?.setValue(search)
+    onSearchChange()
+  }
+)
+
 watch(dataMode, () => {
   preferences.setPreference(DATA_MODE_PREFERENCE, dataMode.value)
 })
@@ -296,10 +336,6 @@ useHead({
 @use '@/styles/stats.scss' as stats;
 
 .episode-list-header {
-  // Nine controls do not fit on one line below a wide desktop.
-  flex-wrap: wrap;
-  row-gap: 0.5em;
-
   @include stats.page-header($with-search: true);
 }
 

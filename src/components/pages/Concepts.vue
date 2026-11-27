@@ -1,216 +1,228 @@
 <template>
-  <div class="fixed-page columns">
-    <div class="column main-column">
-      <div class="concepts page" @dragover="onFileDragover">
-        <div class="page-header">
-          <div class="filters" :class="{ folded: !showExtraFilters }">
-            <combobox-status
-              :label="$t('main.status')"
-              :task-status-list="taskStatusList"
-              v-model="filters.taskStatusId"
-            />
-            <span class="field">
-              <label class="label">
-                {{ $t('concepts.fields.publisher') }}
-              </label>
-              <people-field
-                small
-                :people="publishers"
-                v-model="filters.publisher"
-              />
-            </span>
-            <combobox
-              class="extra-filter"
-              :label="$t('concepts.fields.asset_type')"
-              :options="assetTypeOptions"
-              v-model="filters.assetTypeId"
-            />
-            <span class="field extra-filter">
-              <label class="label">
-                {{ $t('concepts.fields.asset') }}
-              </label>
-              <multiselect
-                class="asset-filter"
-                label="name"
-                track-by="id"
-                :allow-empty="false"
-                :model-value="selectedAssetOption"
-                :options="assetOptions"
-                :show-labels="false"
-                @update:model-value="filters.assetId = $event.id"
-              >
-                <template #noResult></template>
-              </multiselect>
-            </span>
-            <combobox
-              class="extra-filter"
-              :label="$t('main.sorted_by')"
-              locale-key-prefix="concepts.fields."
-              :options="sortByOptions"
-              v-model="filters.sortBy"
-            />
-            <button-simple
-              class="filters-toggle"
-              icon="funnel"
-              :active="showExtraFilters"
-              :title="$t('main.more_filters')"
-              @click="showExtraFilters = !showExtraFilters"
-            />
-          </div>
-        </div>
-        <table-info
-          :is-loading="loading.loadingConcepts"
-          :is-error="errors.loadingConcepts"
-          v-if="loading.loadingConcepts || errors.loadingConcepts"
+  <panel-layout
+    class="concepts"
+    :class="{ 'drawer-open': isDrawerOpen }"
+    plain-side
+    side
+    @dragover="onFileDragover"
+  >
+    <template #filters>
+      <div class="filters" :class="{ folded: !showExtraFilters }">
+        <combobox-status
+          :label="$t('main.status')"
+          :task-status-list="taskStatusList"
+          v-model="filters.taskStatusId"
         />
-        <div class="concept-panel" v-else>
-          <div
-            class="drop-mask"
-            @drop="onFileDrop"
-            @dragover="onFileDragover"
-            @dragleave="onFileDragLeave"
-            v-if="isDraggingFile"
+        <span class="field">
+          <label class="label">
+            {{ $t('concepts.fields.publisher') }}
+          </label>
+          <people-field
+            small
+            :people="publishers"
+            v-model="filters.publisher"
+          />
+        </span>
+        <combobox
+          class="extra-filter"
+          :label="$t('concepts.fields.asset_type')"
+          :options="assetTypeOptions"
+          v-model="filters.assetTypeId"
+        />
+        <span class="field extra-filter">
+          <label class="label">
+            {{ $t('concepts.fields.asset') }}
+          </label>
+          <multiselect
+            class="asset-filter"
+            label="name"
+            track-by="id"
+            :allow-empty="false"
+            :model-value="selectedAssetOption"
+            :options="assetOptions"
+            :show-labels="false"
+            @update:model-value="filters.assetId = $event.id"
           >
-            {{ $t('concepts.drop_new_concepts') }}
-          </div>
-          <div class="folder-bar">
-            <nav class="folder-path">
-              <router-link
-                :class="{ 'drop-target': dropTargetId === ROOT }"
-                :to="{ query: folderQuery(null) }"
-                @dragover="onFolderDragOver(null, $event)"
-                @dragleave="onFolderDragLeave"
-                @drop="onFolderDrop(null, $event)"
-              >
-                {{ $t('concepts.title') }}
-              </router-link>
-              <span>/</span>
-              <span class="current-folder" v-if="currentFolder">
-                {{ currentFolder.name }}
-              </span>
-            </nav>
-            <span class="filler"></span>
-            <button-simple
-              class="new-folder"
-              icon="plus"
-              :text="$t('concepts.folders.new')"
-              @click="openFolderModal(null)"
-              v-if="isFolderManager && !currentFolder"
-            />
-            <template v-if="isFolderManager && currentFolder">
-              <button-simple
-                class="rename-folder"
-                icon="edit"
-                :title="$t('concepts.folders.rename')"
-                @click="openFolderModal(currentFolder)"
-              />
-              <button-simple
-                class="delete-folder"
-                icon="trash"
-                :title="$t('concepts.folders.delete')"
-                @click="openDeleteFolderModal"
-              />
-            </template>
-            <button-simple
-              class="add-concepts"
-              icon="image"
-              :disabled="isUploading"
-              :text="$t('concepts.add_new_concept')"
-              @click="openAddConceptModal"
-            />
-          </div>
-          <div
-            class="upload-status"
-            :class="{ 'is-error': upload.isError }"
-            role="status"
-            v-if="upload.total"
-          >
-            <span>
-              {{
-                upload.isError
-                  ? $t('concepts.add_concept_error')
-                  : $t('concepts.uploading')
-              }}
+            <template #noResult></template>
+          </multiselect>
+        </span>
+        <combobox
+          class="extra-filter"
+          :label="$t('main.sorted_by')"
+          locale-key-prefix="concepts.fields."
+          :options="sortByOptions"
+          v-model="filters.sortBy"
+        />
+        <filters-toggle
+          :count="extraFilterCount"
+          :resettable="hasFilters"
+          v-model="showExtraFilters"
+          @reset="resetFilters"
+        />
+      </div>
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="conceptsSearchFilterGroups"
+        :is-group-enabled="true"
+        :kept-query-keys="FOLDER_PARAMS"
+        :queries="conceptsSearchQueries"
+        type="concepts"
+        with-route-query
+      />
+      <table-info
+        :is-loading="loading.loadingConcepts"
+        :is-error="errors.loadingConcepts"
+        v-if="loading.loadingConcepts || errors.loadingConcepts"
+      />
+      <div class="concept-panel" v-else>
+        <div
+          class="drop-mask"
+          @drop="onFileDrop"
+          @dragover="onFileDragover"
+          @dragleave="onFileDragLeave"
+          v-if="isDraggingFile"
+        >
+          {{ $t('concepts.drop_new_concepts') }}
+        </div>
+        <div class="folder-bar">
+          <nav class="folder-path">
+            <router-link
+              :class="{ 'drop-target': dropTargetId === ROOT }"
+              :to="{ query: folderQuery(null) }"
+              @dragover="onFolderDragOver(null, $event)"
+              @dragleave="onFolderDragLeave"
+              @drop="onFolderDrop(null, $event)"
+            >
+              {{ $t('concepts.title') }}
+            </router-link>
+            <span>/</span>
+            <span class="current-folder" v-if="currentFolder">
+              {{ currentFolder.name }}
             </span>
-            <span class="upload-file" :title="upload.fileName">
-              {{ upload.fileName }}
-            </span>
-            <div class="upload-bar">
-              <div class="fill" :style="{ width: `${uploadPercent}%` }"></div>
-            </div>
-            <span class="upload-count">
-              {{ upload.done }} / {{ upload.total }}
-            </span>
+          </nav>
+          <span class="filler"></span>
+          <button-simple
+            class="new-folder"
+            icon="plus"
+            :text="$t('concepts.folders.new')"
+            @click="openFolderModal(null)"
+            v-if="isFolderManager && !currentFolder"
+          />
+          <template v-if="isFolderManager && currentFolder">
             <button-simple
-              class="dismiss-upload"
-              icon="remove"
-              is-thin
-              :title="$t('main.close')"
-              @click="upload.total = 0"
-              v-if="upload.isError"
+              class="rename-folder"
+              icon="edit"
+              :title="$t('concepts.folders.rename')"
+              @click="openFolderModal(currentFolder)"
             />
-          </div>
-          <div
-            class="concept-list pb1"
-            v-if="filteredConcepts.length || shownFolders.length"
-          >
-            <ul class="folders" v-if="shownFolders.length">
-              <li
-                :key="folder.id"
-                @dragover="onFolderDragOver(folder.id, $event)"
-                @dragleave="onFolderDragLeave"
-                @drop="onFolderDrop(folder.id, $event)"
-                v-for="folder in shownFolders"
-              >
-                <router-link :to="{ query: folderQuery(folder.id) }">
-                  <concept-folder-tile
-                    :count="nbConceptsByFolder.get(folder.id) ?? 0"
-                    :highlighted="dropTargetId === folder.id"
-                    :name="folder.name"
-                  />
-                </router-link>
-              </li>
-            </ul>
-            <ul class="items" v-if="filteredConcepts.length">
-              <li
-                class="item"
-                :draggable="isFolderManager"
-                :key="concept.id"
-                @dragstart="onConceptDragStart(concept, $event)"
-                @dragend="onConceptDragEnd"
-                v-for="concept in filteredConcepts"
-              >
-                <concept-card
-                  :concept="concept"
-                  :selected="isSelected(concept)"
-                  @click="
-                    onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
-                  "
-                />
-              </li>
-            </ul>
-          </div>
-          <div
-            class="empty-concepts"
-            role="button"
-            tabindex="0"
+            <button-simple
+              class="delete-folder"
+              icon="trash"
+              :title="$t('concepts.folders.delete')"
+              @click="openDeleteFolderModal"
+            />
+          </template>
+          <button-simple
+            class="add-concepts"
+            icon="image"
+            :disabled="isUploading"
+            :text="$t('concepts.add_new_concept')"
             @click="openAddConceptModal"
-            @keydown.enter.prevent="openAddConceptModal"
-            v-else
-          >
-            <image-icon :size="48" />
-            <strong>
-              {{
-                currentFolder
-                  ? $t('concepts.folders.empty')
-                  : $t('concepts.empty')
-              }}
-            </strong>
-            <span>{{ $t('concepts.drop_new_concepts') }}</span>
+          />
+        </div>
+        <div
+          class="upload-status"
+          :class="{ 'is-error': upload.isError }"
+          role="status"
+          v-if="upload.total"
+        >
+          <span>
+            {{
+              upload.isError
+                ? $t('concepts.add_concept_error')
+                : $t('concepts.uploading')
+            }}
+          </span>
+          <span class="upload-file" :title="upload.fileName">
+            {{ upload.fileName }}
+          </span>
+          <div class="upload-bar">
+            <div class="fill" :style="{ width: `${uploadPercent}%` }"></div>
           </div>
+          <span class="upload-count">
+            {{ upload.done }} / {{ upload.total }}
+          </span>
+          <button-simple
+            class="dismiss-upload"
+            icon="remove"
+            is-thin
+            :title="$t('main.close')"
+            @click="upload.total = 0"
+            v-if="upload.isError"
+          />
+        </div>
+        <div
+          class="concept-list pb1"
+          v-if="filteredConcepts.length || shownFolders.length"
+        >
+          <ul class="folders" v-if="shownFolders.length">
+            <li
+              :key="folder.id"
+              @dragover="onFolderDragOver(folder.id, $event)"
+              @dragleave="onFolderDragLeave"
+              @drop="onFolderDrop(folder.id, $event)"
+              v-for="folder in shownFolders"
+            >
+              <router-link :to="{ query: folderQuery(folder.id) }">
+                <concept-folder-tile
+                  :count="nbConceptsByFolder.get(folder.id) ?? 0"
+                  :highlighted="dropTargetId === folder.id"
+                  :name="folder.name"
+                />
+              </router-link>
+            </li>
+          </ul>
+          <ul class="items" v-if="filteredConcepts.length">
+            <li
+              class="item"
+              :draggable="isFolderManager"
+              :key="concept.id"
+              @dragstart="onConceptDragStart(concept, $event)"
+              @dragend="onConceptDragEnd"
+              v-for="concept in filteredConcepts"
+            >
+              <concept-card
+                :concept="concept"
+                :selected="isSelected(concept)"
+                @click="
+                  onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
+                "
+              />
+            </li>
+          </ul>
+        </div>
+        <div
+          class="empty-concepts"
+          role="button"
+          tabindex="0"
+          @click="openAddConceptModal"
+          @keydown.enter.prevent="openAddConceptModal"
+          v-else
+        >
+          <image-icon :size="48" />
+          <strong>
+            {{
+              currentFolder
+                ? $t('concepts.folders.empty')
+                : $t('concepts.empty')
+            }}
+          </strong>
+          <span>{{ $t('concepts.drop_new_concepts') }}</span>
         </div>
       </div>
-    </div>
+    </template>
 
     <add-preview-modal
       ref="add-preview-modal"
@@ -246,7 +258,8 @@
       :class="{ 'is-open': isDrawerOpen }"
       @click="clearSelection"
     ></div>
-    <div class="column side-column" :class="{ 'is-open': isDrawerOpen }">
+
+    <template #side>
       <task-info entity-type="Concept" :task="currentTask" with-actions>
         <template #selection>
           <ul class="selected-concepts">
@@ -260,8 +273,8 @@
           </ul>
         </template>
       </task-info>
-    </div>
-  </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -295,9 +308,11 @@ import {
   isPreviewFileStatus,
   latestPreviewFileStatus
 } from '@/lib/preview'
+import { toSortedQueryString } from '@/lib/query'
 import { sortAssets, sortByName, sortPeople } from '@/lib/sorting'
 import assetsStore from '@/store/modules/assets'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditConceptFolderModal from '@/components/modals/EditConceptFolderModal.vue'
@@ -307,7 +322,9 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
 import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 const { t } = useI18n()
@@ -335,6 +352,8 @@ const addPreviewModalRef = useTemplateRef('add-preview-modal')
 // Query updates wait for each other: two of them in the same tick would
 // both start from the same query and the last one would drop the first.
 let queryUpdates = Promise.resolve()
+// the query the page wrote last, as one string
+let writtenQuery = null
 
 // The concepts of a card drag, read on the folder the drag ends on: the
 // drag data is not readable before the drop.
@@ -350,13 +369,15 @@ const errors = reactive({
   loadingConcepts: false
 })
 // The query carries the filters, so a link opens the page as it was shared.
-const filters = reactive({
-  assetId: route.query.asset ?? '',
-  assetTypeId: route.query['asset-type'] ?? '',
-  publisher: store.getters.personMap.get(route.query.publisher) ?? null,
-  sortBy: route.query.sort ?? DEFAULT_SORT,
-  taskStatusId: route.query.status ?? null
+// A filter missing from it is unset: a saved search replaces them all.
+const filtersFromQuery = query => ({
+  assetId: query.asset ?? '',
+  assetTypeId: query['asset-type'] ?? '',
+  publisher: store.getters.personMap.get(query.publisher) ?? null,
+  sortBy: query.sort ?? DEFAULT_SORT,
+  taskStatusId: query.status ?? null
 })
+const filters = reactive(filtersFromQuery(route.query))
 const loading = reactive({
   deletingFolder: false,
   editingFolder: false,
@@ -495,6 +516,24 @@ const publishers = computed(() => {
 })
 
 const isDrawerOpen = computed(() => selectedConcepts.value.size > 0)
+
+const conceptsSearchFilterGroups = computed(
+  () => store.getters.conceptsSearchFilterGroups
+)
+const conceptsSearchQueries = computed(
+  () => store.getters.conceptsSearchQueries
+)
+
+// the filters the narrow layouts fold: the sort is not one
+const extraFilterCount = computed(
+  () => [filters.assetTypeId, filters.assetId].filter(Boolean).length
+)
+
+const hasFilters = computed(
+  () =>
+    extraFilterCount.value > 0 ||
+    Boolean(filters.publisher || filters.taskStatusId)
+)
 const isUploading = computed(
   () => upload.done < upload.total && !upload.isError
 )
@@ -575,9 +614,19 @@ const setQuery = patch => {
           ([, value]) => value
         )
       )
+      writtenQuery = toSortedQueryString(query)
       return router.replace({ query })
     })
     .catch(console.error)
+}
+
+const resetFilters = () => {
+  Object.assign(filters, {
+    assetId: '',
+    assetTypeId: '',
+    publisher: null,
+    taskStatusId: null
+  })
 }
 
 // Changing folder leaves the concept behind, not the filters.
@@ -868,6 +917,22 @@ watch(
   { deep: true }
 )
 
+// A saved search, or the back button, sets a query the page did not write.
+// Its own writes land late, behind its filters: reading them back would undo
+// the changes made since. The watcher also sees the query of the next page,
+// before this one unmounts.
+watch(
+  () => route.query,
+  query => {
+    if (
+      route.name === 'concepts' &&
+      toSortedQueryString(query) !== writtenQuery
+    ) {
+      Object.assign(filters, filtersFromQuery(query))
+    }
+  }
+)
+
 // Declared after the folder watcher: opening the folder of a linked concept
 // clears the selection first, then selects the concept.
 watch(
@@ -959,34 +1024,30 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.concepts {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  // the global .page gutter (2em) is wide for a panel layout
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
 .filters {
   display: flex;
   align-items: flex-end;
-  background: var(--background-panel);
-  border-radius: 12px;
-  gap: 0 20px;
-  padding: 6px 14px 0;
+  // beside the task panel the row is too long for a laptop screen
+  flex-wrap: wrap;
+  gap: 1em 20px;
 
+  // the gap and the panel padding space the fields
   .field {
-    margin-bottom: 1em;
+    margin-bottom: 0;
+  }
 
-    .label {
-      padding-top: 5px;
-    }
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  .filters-buttons {
+    margin-left: auto;
   }
 
   // every filter fits on one row on desktop: the toggle only serves the
   // wrapping layouts below
-  .filters-toggle {
+  :deep(.filters-toggle) {
     display: none;
   }
 
@@ -1018,23 +1079,21 @@ useHead({
 }
 
 .concept-panel {
-  background: var(--background-panel);
-  border-radius: 12px;
   display: flex;
   flex: 1;
   flex-direction: column;
-  // closes the page with the same gap as the top
-  margin: 10px 0 10px;
   min-height: 0;
   position: relative;
 }
 
 .concept-list {
   flex: 1;
+  // The lists below keep 4px of ring room: pulled back by as much, the
+  // cards and the folders line up on the panel padding with the path above.
+  // On the right the list runs to the panel edge, where its scrollbar goes.
+  margin: 0 -14px 0 -4px;
   overflow-y: auto;
-  // 10px here plus the 4px ring room of the lists below: the cards and the
-  // folders line up on the 14px gutter of the path above
-  padding: 0 10px;
+  padding-right: 10px;
 }
 
 .items {
@@ -1051,7 +1110,7 @@ useHead({
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding-bottom: 10px;
 }
 
 .folder-path {
@@ -1089,7 +1148,7 @@ useHead({
   color: var(--text);
   display: flex;
   gap: 12px;
-  margin: 0 14px 10px;
+  margin-bottom: 10px;
   padding: 8px 12px;
 
   // same bar as the previews of the comment form
@@ -1150,11 +1209,6 @@ useHead({
   padding: 4px;
 }
 
-.page-header {
-  margin-top: 0;
-  padding: 10px 0 0;
-}
-
 .drop-mask {
   // the mask paints over the panels, so a plain page color + opacity
   // keeps the layout readable underneath
@@ -1165,10 +1219,11 @@ useHead({
   font-size: 1.5em;
   font-weight: 600;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  // out to the edges of the panel, whose padding the list sits in
+  top: -6px;
+  left: -14px;
+  right: -14px;
+  bottom: -14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1186,7 +1241,6 @@ useHead({
   flex-direction: column;
   gap: 0.5em;
   justify-content: center;
-  margin: 0 14px 14px;
   outline: none;
   padding: 2em;
   text-align: center;
@@ -1213,13 +1267,10 @@ useHead({
 
 @media (max-width: 1000px) {
   .filters {
-    flex-wrap: wrap;
-    gap: 0 12px;
+    gap: 1em 12px;
 
-    .filters-toggle {
+    :deep(.filters-toggle) {
       display: inline-flex;
-      margin-bottom: 1em;
-      margin-left: auto;
     }
 
     &.folded .extra-filter {
@@ -1229,10 +1280,9 @@ useHead({
 
   // Under 1000px the side panel slides in from the right over the page,
   // like the Asset page drawers. The backdrop catches outside taps.
-  .side-column {
+  .concepts.panel-layout :deep(.side-column) {
     background: var(--background);
     bottom: 0;
-    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     margin-top: 0 !important;
@@ -1247,10 +1297,12 @@ useHead({
     transition: transform 0.25s ease;
     width: min(100vw, 420px) !important;
     z-index: 250;
+  }
 
-    &.is-open {
-      transform: translateX(0);
-    }
+  // shut, the drawer would cast its shadow over the edge of the page
+  .concepts.panel-layout.drawer-open :deep(.side-column) {
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
+    transform: translateX(0);
   }
 
   .drawer-backdrop {
@@ -1275,19 +1327,6 @@ useHead({
 
 // Mobile is read-only: no upload, no folder management, no drag.
 @media (max-width: 768px) {
-  .concepts {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  .filters {
-    padding: 6px 10px 0;
-  }
-
-  .folder-bar {
-    padding: 10px;
-  }
-
   .add-concepts,
   .new-folder,
   .rename-folder,
@@ -1300,9 +1339,14 @@ useHead({
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 
+  // no scrollbar lane to reach on a phone
+  .concept-list {
+    margin: 0 -4px;
+    padding-right: 0;
+  }
+
   .empty-concepts {
     cursor: default;
-    margin: 0 10px 10px;
     pointer-events: none;
 
     span {
@@ -1312,7 +1356,7 @@ useHead({
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .side-column,
+  .concepts :deep(.side-column),
   .drawer-backdrop {
     transition: none;
   }

@@ -74,7 +74,7 @@
       "workflow_studio": "스튜디오 워크플로"
     },
     "breakdown": {
-      "all_assets": "사용 가능한 모든 어셋",
+      "link_assets": "어셋 연결",
       "copy_casting": "이 캐스팅 복사 (ctrl + V로 선택한 줄에 붙여넣기)",
       "edit_label": "어셋 레이블 변경",
       "empty": "캐스팅 없음",
@@ -276,6 +276,9 @@
         "uploader": "업로드한 사람",
         "uploaded_at": "업로드 일시"
       },
+      "working_files": {
+        "no_working_files": "이 엔티티에 대한 작업 파일이 없습니다."
+      },
       "output_files": {
         "extension": "확장자",
         "name": "이름",
@@ -474,7 +477,6 @@
       "for": "다음에 대하여:",
       "go_productions": "프로덕션으로 돌아가기",
       "history": "기록",
-      "info": "정보",
       "or": "또는",
       "next": "다음",
       "no": "아니요",
@@ -562,6 +564,7 @@
       "less_filters": "더 적은 필터",
       "more_filters": "더 많은 필터",
       "reload": "다시 불러오기",
+      "search_example": "예: {example}",
       "search_query": "검색 쿼리",
       "search_query_add": "검색 필터 추가",
       "search_query_add_error": "이 검색 필터를 저장하는 동안 오류가 발생했습니다.",
@@ -617,7 +620,6 @@
         "explanation": "일반적인 OpenTimelineIO 지원 파일(otio, fcp_xml, fcpx_xml, edl)을 가져올 수 있습니다. 지정된 프레임 범위, 프레임 인 및 프레임 아웃으로 샷이 생성되거나 업데이트됩니다. 프레임 인은 0에서 시작합니다."
       },
       "active": "활성",
-      "activity": "활동",
       "archived": "아카이브",
       "avatar": {
         "open_page": "{personName} 페이지 열기",
@@ -655,8 +657,10 @@
         "casting": "캐스팅",
         "chat": "채팅",
         "concepts": "컨셉",
-        "info": "정보",
+        "metadata": "메타데이터",
+        "working_files": "작업 파일",
         "output_files": "출력 파일",
+        "preview": "미리 보기",
         "preview_files": "미리 보기 파일",
         "schedule": "일정",
         "timelog": "타임로그"
@@ -1119,6 +1123,7 @@
         "title": "클라이언트",
         "unavailable": "미리보기 계정에는 비밀번호를 사용하는 로컬 인증이 필요합니다. 그렇지 않으면 일반 클라이언트 계정을 만드세요."
       },
+      "closed_name": "{name} (닫힘)",
       "current": "선택된 프로덕션",
       "delete_text": "데이터베이스에서 {name}을(를) 제거하시겠습니까? 텍스트 필드에 삭제할 프로덕션의 이름을 입력하여 확인하십시오.",
       "delete_error": "이 프로덕션을 삭제하는 도중에 오류가 발생했습니다. 현재 연결된 데이터가 있을 수 있습니다. 이 프로덕션에 작업, 샷 또는 어셋이 연결되어 있지 않은 것이 확실합니까? Kitsu는 프로덕션 삭제를 허용하지 않습니다. 더 이상 프로덕션을 보고 싶지 않다면 대신 닫을 수 있습니다.",

@@ -33,6 +33,10 @@ const taskTypes = [
   { id: 'rigging', name: 'Rigging' }
 ]
 
+const savedSearches = [
+  { id: 'search-1', name: 'No props', search_query: 'hiddenAssetTypes=props' }
+]
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -52,6 +56,8 @@ const mountPage = async (getters = {}, query = {}) => {
       assetTypeAssetCounts: () => ({ chars: 12, props: 3 }),
       assetTypeMap: () => new Map([chars, props].map(t => [t.id, t])),
       assetTypeStats: () => assetTypeStats,
+      assetTypeStatsSearchFilterGroups: () => [],
+      assetTypeStatsSearchQueries: () => savedSearches,
       assetValidationColumns: () => ['modeling', 'rigging'],
       clientAccess: () => ({ isTaskTypeVisible: () => true }),
       currentEpisode: () => null,
@@ -72,7 +78,8 @@ const mountPage = async (getters = {}, query = {}) => {
   const replace = vi.spyOn(router, 'replace')
   wrapper = shallowMount(ProductionAssetTypes, {
     global: {
-      plugins: [store, router]
+      plugins: [store, router],
+      stubs: { PanelLayout: false }
     }
   })
   await flushPromises()
@@ -100,6 +107,57 @@ describe('ProductionAssetTypes', () => {
     wrapper?.unmount()
     wrapper = null
     vi.restoreAllMocks()
+  })
+
+  it('lays its filters and its list out in the two panels', async () => {
+    await mountPage()
+
+    expect(
+      wrapper
+        .find('.filters-panel')
+        .findComponent(ComboboxVisibleOptions)
+        .exists()
+    ).toBe(true)
+    expect(
+      wrapper
+        .find('.list-panel')
+        .findComponent(ProductionAssetTypeList)
+        .exists()
+    ).toBe(true)
+  })
+
+  it('saves the filters of the URL, by production', async () => {
+    await mountPage()
+
+    expect(
+      wrapper.findComponent({ name: 'SearchQueryList' }).props()
+    ).toMatchObject({
+      productionId: 'production-1',
+      queries: savedSearches,
+      type: 'assetTypeStats',
+      withRouteQuery: true
+    })
+  })
+
+  it('offers the reset only when the URL holds a filter', async () => {
+    await mountPage()
+    expect(findButton('remove')).toBeUndefined()
+
+    await router.push({ query: { hiddenTaskTypes: 'rigging' } })
+    await flushPromises()
+
+    expect(findButton('remove').exists()).toBe(true)
+  })
+
+  it('shows everything again on reset', async () => {
+    await mountPage({}, { hiddenAssetTypes: 'props', hiddenTaskTypes: 'rigging' })
+
+    await findButton('remove').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.vm.$route.query).toEqual({})
+    expect(listProps().entries).toEqual([chars, props])
+    expect(listProps().validationColumns).toEqual(['modeling', 'rigging'])
   })
 
   it('loads the assets as soon as it is mounted', async () => {

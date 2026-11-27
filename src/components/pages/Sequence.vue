@@ -1,10 +1,12 @@
 <template>
-  <div
-    class="columns fixed-page sequence xyz-in"
+  <panel-layout
+    class="sequence entity-page xyz-in"
     xyz="fade"
+    :class="{ 'drawer-open': isDrawerOpen }"
+    :side="hasSidePanel"
     v-if="currentProduction"
   >
-    <div class="page column main-column">
+    <template #filters>
       <div class="page-header flexrow">
         <router-link
           class="flexrow-item has-text-centered back-link ml1"
@@ -44,8 +46,10 @@
           <chevron-right-icon />
         </router-link>
       </div>
+    </template>
 
-      <div class="sequence-data block" v-if="!loadError">
+    <template #list>
+      <div class="entity-data" v-if="!loadError">
         <route-section-tabs
           class="section-tabs"
           :active-tab="currentSection"
@@ -82,7 +86,6 @@
         </div>
 
         <div class="flexcolumn infos" v-show="currentSection === 'infos'">
-          <page-subtitle :text="$t('main.tasks')" />
           <entity-task-list
             class="task-list"
             :entries="currentTasks"
@@ -91,19 +94,19 @@
             :selected-task-id="currentTask?.id"
             @task-selected="onTaskSelected"
           />
-          <div class="flexrow">
-            <page-subtitle :text="$t('main.info')" />
-            <div class="filler"></div>
-            <div class="flexrow-item has-text-right">
-              <button-simple
-                icon="edit"
-                :title="$t('sequences.edit_title')"
-                @click="showEditModal"
-                v-if="isCurrentUserManager"
-              />
-            </div>
-          </div>
+        </div>
 
+        <div
+          class="flexcolumn information"
+          v-show="currentSection === 'information'"
+        >
+          <button-simple
+            class="edit-button"
+            icon="edit"
+            :title="$t('sequences.edit_title')"
+            @click="showEditModal"
+            v-if="isCurrentUserManager"
+          />
           <div class="table-body metadata-infos">
             <table class="datatable no-header" v-if="currentSequence">
               <tbody class="datatable-body">
@@ -137,7 +140,7 @@
           v-if="currentSection === 'chat'"
         />
 
-        <div class="sequence-casting" v-show="currentSection === 'casting'">
+        <div class="entity-casting" v-show="currentSection === 'casting'">
           <template v-if="currentSequence">
             <div v-if="currentSequence.castingAssetsByType?.[0]?.length > 0">
               <div class="casting-title flexrow">
@@ -302,28 +305,25 @@
         />
       </div>
       <entity-load-error
-        class="sequence-data block"
+        class="entity-data"
         :error="loadError"
         @reload="init()"
         v-else
       />
-    </div>
+    </template>
 
-    <div
-      class="drawer-backdrop"
-      :class="{ 'is-open': isTaskDrawerOpen }"
-      @click="closeTask"
-      v-show="currentSection === 'infos'"
-    ></div>
-    <div
-      class="column side-column"
-      :class="{ 'is-open': isTaskDrawerOpen }"
-      v-show="currentSection === 'infos'"
-    >
+    <template #side>
       <task-info :task="currentTask" entity-type="Sequence" with-actions>
         <entity-news class="news-column" :entity="currentSequence" />
       </task-info>
-    </div>
+    </template>
+
+    <div
+      class="drawer-backdrop"
+      :class="{ 'is-open': isDrawerOpen }"
+      @click="closeTask"
+      v-if="hasSidePanel"
+    ></div>
 
     <view-playlist-modal
       active
@@ -342,7 +342,7 @@
       @cancel="modals.edit = false"
       @confirm="confirmEditSequence"
     />
-  </div>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -375,6 +375,7 @@ import { episodifyRoute, getEntitiesPath } from '@/lib/path'
 import sequenceStore from '@/store/modules/sequences'
 
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditSequenceModal from '@/components/modals/EditSequenceModal.vue'
@@ -463,15 +464,19 @@ const sequencesPath = computed(() => ({
 }))
 
 const sequenceTabs = computed(() => [
-  { label: t('main.label.info'), name: 'infos' },
+  // the section of the tasks keeps its name: links and the default use it
+  { label: t('main.tasks'), name: 'infos' },
+  { label: t('main.label.metadata'), name: 'information' },
   { label: t('main.label.chat'), name: 'chat' },
   { label: t('main.label.casting'), name: 'casting' },
   { label: t('main.label.schedule'), name: 'schedule' },
-  { label: t('main.label.preview_files'), name: 'preview-files' },
-  { label: t('main.label.timelog'), name: 'time-logs' }
+  { label: t('main.label.timelog'), name: 'time-logs' },
+  { label: t('main.label.preview_files'), name: 'preview-files' }
 ])
 
-const isTaskDrawerOpen = computed(() => Boolean(currentTask.value))
+// the task panel belongs to the section of the tasks
+const hasSidePanel = computed(() => currentSection.value === 'infos')
+const isDrawerOpen = computed(() => Boolean(currentTask.value))
 
 // Functions
 // --------------------------------------------------------------------------
@@ -624,371 +629,8 @@ useHead({ title: computed(() => `${title.value} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .table-body {
-    border: 1px solid var(--border);
-  }
+@use '@/styles/entity-page.scss' as entity;
 
-  .wrapper {
-    background: var(--background);
-  }
-}
-
-.main-column {
-  display: flex;
-  flex-direction: column;
-  background: var(--background-page);
-  padding-bottom: 1em;
-}
-
-h2.subtitle {
-  border-bottom: 0;
-  margin-top: 0;
-  margin-bottom: 0.5em;
-  font-size: 1.5em;
-}
-
-.page-header {
-  align-items: center;
-  margin-top: calc(50px + 2em);
-  margin-bottom: 0.8em;
-  margin-left: 1em;
-  margin-right: 1em;
-
-  .entity-title {
-    font-weight: 500;
-  }
-}
-
-.sequence-data {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  margin: 0 1em 0 1em;
-  max-height: 100%;
-  overflow: hidden;
-}
-
-.sequence-casting {
-  overflow-y: auto;
-}
-
-.casting-title {
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-.casting-group {
-  margin-bottom: 2em;
-}
-
-.casting-group-header {
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1em;
-  padding-bottom: 0.3em;
-
-  .group-name {
-    color: var(--text);
-    font-size: 1.3em;
-    font-weight: 500;
-  }
-
-  .tag {
-    background: var(--background-tag);
-    color: var(--text);
-  }
-}
-
-.casting-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 200px);
-  gap: 20px;
-}
-
-.casting-card {
-  background: var(--background);
-  border-radius: 1em;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-  color: var(--text-strong);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-
-  .dark & {
-    background: var(--background-alt);
-  }
-
-  &.shared {
-    box-shadow: 0 0 3px 2px var(--shared-color);
-  }
-
-  .ready-for .no-link {
-    cursor: inherit;
-  }
-
-  &:hover {
-    background: var(--background-hover);
-  }
-
-  .card-preview {
-    position: relative;
-  }
-
-  .nb-occurences {
-    background: rgba(160, 160, 180, 0.8);
-    border-radius: 2px;
-    bottom: 4px;
-    color: white;
-    font-size: 0.8em;
-    padding: 2px 4px;
-    position: absolute;
-    right: 4px;
-  }
-
-  .card-description {
-    padding: 0.5em 1em;
-  }
-
-  .card-name {
-    font-weight: bold;
-  }
-
-  .asset-label {
-    background: $dark-green;
-    border-radius: 4px;
-    color: $white;
-    font-size: 0.7em;
-    font-weight: 500;
-    padding: 2px 6px;
-
-    &[label='fixed'] {
-      background: $orange-carrot;
-    }
-  }
-
-  .ready-for {
-    color: var(--text-alt);
-    font-size: 0.9em;
-    font-weight: normal;
-    margin-top: 0.4em;
-  }
-
-  .remove-button {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 28px;
-    height: 28px;
-    min-height: 0;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.55);
-    color: $white;
-    opacity: 0;
-    transition:
-      opacity 0.15s,
-      background 0.15s;
-
-    :deep(.icon) {
-      width: 16px;
-      height: 16px;
-    }
-
-    &:hover {
-      background: $red;
-      color: $white;
-    }
-  }
-
-  &:hover .remove-button,
-  .remove-button:focus-visible {
-    opacity: 1;
-  }
-}
-
-.field-label {
-  font-weight: bold;
-  width: 140px;
-}
-
-.back-link {
-  padding-top: 3px;
-}
-
-.task-list {
-  flex: 1;
-  margin-bottom: 3em;
-  min-height: 150px;
-  min-width: 100%;
-  overflow: hidden;
-}
-
-.datatable-row {
-  user-select: text;
-}
-
-.schedule {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-
-  .wrapper {
-    height: 100%;
-    border-radius: 10px;
-  }
-}
-
-.entity-thumbnail {
-  margin-bottom: 0.5em;
-  border-radius: 10px;
-}
-
-@media screen and (max-width: 768px) {
-  .sequence {
-    overflow: visible;
-  }
-
-  .main-column {
-    flex: 1;
-    margin: 0;
-    max-width: 100%;
-    min-height: 0;
-    overflow-y: auto;
-    width: 100%;
-  }
-
-  .column:first-child {
-    margin-right: 0;
-  }
-
-  .page-header {
-    margin: calc(60px + 1em) 0.5em 0.5em;
-  }
-
-  .entity-title {
-    font-size: 1.3em;
-    line-height: 1.5em;
-  }
-
-  .sequence-data {
-    margin: 0 0.5em;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .infos,
-  .sequence-casting,
-  .schedule {
-    height: auto;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .infos .button {
-    display: none;
-  }
-
-  .task-list {
-    min-height: 0;
-    overflow: visible;
-  }
-
-  .schedule {
-    height: 60vh;
-    overflow-x: auto;
-
-    .wrapper {
-      min-width: 520px;
-    }
-  }
-
-  .news-column {
-    max-height: none;
-  }
-}
-
-.tag-standby {
-  background: $red;
-  color: $white;
-  margin-left: 1em;
-  cursor: default;
-  text-transform: uppercase;
-}
-
-.dark .tag-standby {
-  background: $dark-red;
-}
-
-.section-tabs {
-  min-height: 36px;
-  margin-bottom: 0;
-}
-
-.infos {
-  height: 100%;
-  margin-top: 1em;
-  margin-bottom: 1em;
-  max-height: 100%;
-  overflow-y: auto;
-
-  .metadata-infos {
-    flex: unset;
-    min-height: 100px;
-    overflow: auto;
-  }
-}
-
-.news-column {
-  max-height: 85%;
-}
-
-.drawer-backdrop {
-  display: none;
-}
-
-@media (max-width: 1024px) {
-  .sequence {
-    animation-fill-mode: none;
-  }
-
-  .side-column {
-    background: var(--background);
-    bottom: 0;
-    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    margin-top: 0 !important;
-    max-width: min(100vw, 420px) !important;
-    min-width: 0 !important;
-    overflow-y: auto;
-    position: fixed;
-    right: 0;
-    top: 60px;
-    transform: translateX(100%);
-    transition: transform 0.25s ease;
-    width: min(100vw, 420px) !important;
-    z-index: 250;
-
-    &.is-open {
-      transform: translateX(0);
-    }
-  }
-
-  .drawer-backdrop {
-    background: rgba(0, 0, 0, 0.4);
-    display: block;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    position: fixed;
-    transition: opacity 0.25s ease;
-    z-index: 249;
-
-    &.is-open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-  }
-}
+@include entity.page;
+@include entity.casting;
 </style>

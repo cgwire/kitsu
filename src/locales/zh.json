@@ -74,7 +74,7 @@
       "workflow_studio": "工作室工作流程"
     },
     "breakdown": {
-      "all_assets": "所有可用资产",
+      "link_assets": "链接资产",
       "copy_casting": "复制此选角（ctrl + V 粘贴到所选行）",
       "edit_label": "更改资产的标签",
       "empty": "空的选角",
@@ -276,6 +276,9 @@
         "uploader": "上传者",
         "uploaded_at": "上传于"
       },
+      "working_files": {
+        "no_working_files": "该实体没有工作文件。"
+      },
       "output_files": {
         "extension": "扩展名",
         "name": "名称",
@@ -474,7 +477,6 @@
       "for": "给",
       "go_productions": "返回制作",
       "history": "历史",
-      "info": "信息",
       "or": "或",
       "next": "下一个",
       "no": "否",
@@ -562,6 +564,7 @@
       "less_filters": "更少的过滤器",
       "more_filters": "更多过滤器",
       "reload": "重新加载",
+      "search_example": "例如：{example}",
       "search_query": "搜索查询",
       "search_query_add": "添加搜索过滤器",
       "search_query_add_error": "保存此搜索过滤器时发生错误。",
@@ -617,7 +620,6 @@
         "explanation": "可以导入常见的 OpenTimelineIO 支持文件（otio、fcp_xml、fcpx_xml、edl）。将根据给定的帧范围、帧入和帧出创建或更新镜头。帧入从 0 开始。"
       },
       "active": "活跃",
-      "activity": "活动",
       "archived": "已归档",
       "avatar": {
         "open_page": "打开 {personName} 页面",
@@ -655,8 +657,10 @@
         "casting": "选角",
         "chat": "聊天",
         "concepts": "概念",
-        "info": "信息",
+        "metadata": "元数据",
+        "working_files": "工作文件",
         "output_files": "输出文件",
+        "preview": "预览",
         "preview_files": "预览文件",
         "schedule": "时间安排",
         "timelog": "时间日志"
@@ -1119,6 +1123,7 @@
         "title": "客户",
         "unavailable": "预览账户需要使用密码的本地认证。否则，请创建普通客户账户。"
       },
+      "closed_name": "{name}（已关闭）",
       "current": "所选制作",
       "delete_text": "您确定要从数据库中删除{name}吗？请在文本字段中输入要删除的制作的名称，以进行确认。",
       "delete_error": "删除此制作时出现错误。可能存在与之关联的数据。您确定此制作没有关联的任务、镜头或资产吗？Kitsu 不允许删除制作。如果您不想再看到该制作，可以将其关闭。",

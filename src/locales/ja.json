@@ -74,7 +74,7 @@
       "workflow_studio": "スタジオのワークフロー"
     },
     "breakdown": {
-      "all_assets": "利用可能なすべてのアセット",
+      "link_assets": "アセットをリンク",
       "copy_casting": "このキャスティングをコピー（ctrl + V で選択した行に貼り付け）",
       "edit_label": "アセットのラベルを変更",
       "empty": "キャスティングなし",
@@ -276,6 +276,9 @@
         "uploader": "アップロード者",
         "uploaded_at": "アップロード日時"
       },
+      "working_files": {
+        "no_working_files": "このエンティティの作業ファイルはありません。"
+      },
       "output_files": {
         "extension": "拡張子",
         "name": "名前",
@@ -474,7 +477,6 @@
       "for": "対象",
       "go_productions": "プロダクションに戻る",
       "history": "履歴",
-      "info": "情報",
       "or": "または",
       "next": "次へ",
       "no": "いいえ",
@@ -562,6 +564,7 @@
       "less_filters": "フィルターを減らす",
       "more_filters": "フィルターを追加",
       "reload": "再読み込み",
+      "search_example": "例: {example}",
       "search_query": "検索クエリ",
       "search_query_add": "検索フィルターを追加",
       "search_query_add_error": "検索フィルターの保存中にエラーが発生しました。",
@@ -617,7 +620,6 @@
         "explanation": "OpenTimelineIO 対応の一般的なファイル（otio、fcp_xml、fcpx_xml、edl）をインポートできます。記載されたフレーム範囲・開始フレーム・最終フレームに従ってショットが作成または更新されます。開始フレームは 0 起点です。"
       },
       "active": "アクティブ",
-      "activity": "アクティビティ",
       "archived": "アーカイブ",
       "avatar": {
         "open_page": "{personName} のページを開く",
@@ -655,8 +657,10 @@
         "casting": "キャスティング",
         "chat": "チャット",
         "concepts": "コンセプト",
-        "info": "情報",
+        "metadata": "メタデータ",
+        "working_files": "作業ファイル",
         "output_files": "出力ファイル",
+        "preview": "プレビュー",
         "preview_files": "プレビューファイル",
         "schedule": "スケジュール",
         "timelog": "タイムログ"
@@ -1119,6 +1123,7 @@
         "title": "クライアント",
         "unavailable": "プレビューアカウントには、パスワードによるローカル認証が必要です。それ以外の場合は、通常のクライアントアカウントを作成してください。"
       },
+      "closed_name": "{name}（終了）",
       "current": "選択中のプロダクション",
       "delete_text": "{name} をデータベースから削除してもよろしいですか？確認のため、下にプロダクション名を入力してください。",
       "delete_error": "プロダクションの削除中にエラーが発生しました。関連データが存在する可能性があります。このプロダクションにリンクされたタスク、ショット、アセットがないことを確認してください。Kitsu ではプロダクションの削除は許可されていません。プロダクションを表示したくない場合は、代わりに閉じることができます。",

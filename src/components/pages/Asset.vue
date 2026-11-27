@@ -1,10 +1,12 @@
 <template>
-  <div
-    class="columns fixed-page asset xyz-in"
+  <panel-layout
+    class="asset entity-page xyz-in"
     xyz="fade"
+    :class="{ 'drawer-open': isDrawerOpen }"
+    :side="hasSidePanel"
     v-if="currentProduction"
   >
-    <div class="page column main-column">
+    <template #filters>
       <div class="page-header flexrow">
         <router-link
           class="flexrow-item has-text-centered back-link ml1"
@@ -60,8 +62,10 @@
           <chevron-right-icon />
         </router-link>
       </div>
+    </template>
 
-      <div class="asset-data block" v-if="!loadError">
+    <template #list>
+      <div class="entity-data" v-if="!loadError">
         <route-section-tabs
           class="section-tabs"
           :active-tab="currentSection"
@@ -92,7 +96,6 @@
         </div>
 
         <div class="flexcolumn infos" v-show="currentSection === 'infos'">
-          <page-subtitle :text="$t('main.tasks')" />
           <entity-task-list
             class="task-list"
             :entries="localTasks"
@@ -101,19 +104,19 @@
             :is-error="false"
             @task-selected="onTaskSelected"
           />
-          <div class="flexrow">
-            <page-subtitle :text="$t('main.info')" />
-            <div class="filler"></div>
-            <div class="flexrow-item has-text-right">
-              <button-simple
-                icon="edit"
-                :title="$t('assets.edit_title')"
-                @click="showEditModal"
-                v-if="isCurrentUserManager"
-              />
-            </div>
-          </div>
+        </div>
 
+        <div
+          class="flexcolumn information"
+          v-show="currentSection === 'information'"
+        >
+          <button-simple
+            class="edit-button"
+            icon="edit"
+            :title="$t('assets.edit_title')"
+            @click="showEditModal"
+            v-if="isCurrentUserManager"
+          />
           <div class="table-body metadata-infos">
             <table class="datatable no-header" v-if="currentAsset">
               <tbody class="table-body">
@@ -147,7 +150,7 @@
           v-if="currentSection === 'chat'"
         />
 
-        <div class="asset-casted-in" v-show="currentSection === 'casting'">
+        <div class="entity-casting" v-show="currentSection === 'casting'">
           <template v-if="currentAsset">
             <div v-if="currentAsset.castInShotsBySequence?.[0]?.length > 0">
               <div class="casting-title flexrow">
@@ -447,65 +450,52 @@
           v-if="currentSection === 'time-logs'"
         />
 
+        <entity-working-files
+          :entity="currentAsset"
+          v-if="currentSection === 'working-files'"
+        />
+
         <entity-output-files
           :entity="currentAsset"
           v-if="currentSection === 'output-files'"
         />
       </div>
       <entity-load-error
-        class="asset-data block"
+        class="entity-data"
         :error="loadError"
         @reload="init()"
         v-else
       />
-    </div>
+    </template>
 
-    <div
-      class="drawer-backdrop"
-      :class="{ 'is-open': isTaskDrawerOpen }"
-      @click="closeTask"
-      v-show="currentSection === 'infos'"
-    ></div>
-    <div
-      class="column side-column"
-      :class="{ 'is-open': isTaskDrawerOpen }"
-      v-show="currentSection === 'infos'"
-    >
+    <template #side>
       <task-info
-        v-if="clientAccess.isTaskPanelVisible"
         :task="currentTask"
         entity-type="Asset"
         with-actions
+        v-if="currentSection === 'infos'"
       >
         <entity-news class="news-column" :entity="currentAsset" />
       </task-info>
-    </div>
+      <template v-else>
+        <button
+          class="drawer-close"
+          type="button"
+          :title="$t('main.close')"
+          @click="closeConcept"
+        >
+          <x-icon :size="20" />
+        </button>
+        <task-info entity-type="Concept" :task="currentConceptTask" />
+      </template>
+    </template>
 
     <div
       class="drawer-backdrop"
-      :class="{ 'is-open': isConceptDrawerOpen }"
-      @click="closeConcept"
-      v-show="currentSection === 'concepts'"
+      :class="{ 'is-open': isDrawerOpen }"
+      @click="closeDrawer"
+      v-if="hasSidePanel"
     ></div>
-    <div
-      class="column side-column"
-      :class="{ 'is-open': isConceptDrawerOpen }"
-      v-show="currentSection === 'concepts'"
-    >
-      <button
-        class="drawer-close"
-        type="button"
-        :title="$t('main.close')"
-        @click="closeConcept"
-      >
-        <x-icon :size="20" />
-      </button>
-      <task-info
-        v-if="clientAccess.isTaskPanelVisible"
-        entity-type="Concept"
-        :task="currentConceptTask"
-      />
-    </div>
 
     <view-playlist-modal
       active
@@ -524,7 +514,7 @@
       @cancel="modals.edit = false"
       @confirm="confirmEditAsset"
     />
-  </div>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -559,6 +549,7 @@ import assetStore from '@/store/modules/assets'
 
 /* eslint-disable no-unused-vars */
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
@@ -568,6 +559,7 @@ import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
+import EntityWorkingFiles from '@/components/pages/entities/EntityWorkingFiles.vue'
 import Schedule from '@/components/schedule/Schedule.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -676,13 +668,16 @@ const assetsPath = computed(() => {
 })
 
 const assetTabs = computed(() => [
-  { label: t('main.label.info'), name: 'infos' },
+  // the section of the tasks keeps its name: links and the default use it
+  { label: t('main.tasks'), name: 'infos' },
+  { label: t('main.label.metadata'), name: 'information' },
   { label: t('main.label.chat'), name: 'chat' },
   { label: t('main.label.concepts'), name: 'concepts' },
   { label: t('main.label.casting'), name: 'casting' },
   { label: t('main.label.schedule'), name: 'schedule' },
-  { label: t('main.label.preview_files'), name: 'preview-files' },
   { label: t('main.label.timelog'), name: 'time-logs' },
+  { label: t('main.label.preview_files'), name: 'preview-files' },
+  { label: t('main.label.working_files'), name: 'working-files' },
   { label: t('main.label.output_files'), name: 'output-files' }
 ])
 
@@ -701,8 +696,17 @@ const taskStatusList = computed(() => {
   return [allStatusItem, ...conceptTaskStatusList]
 })
 
-const isConceptDrawerOpen = computed(() => Boolean(currentConcept.value))
-const isTaskDrawerOpen = computed(() => Boolean(currentTask.value))
+// the task of the asset on its infos, the task of a concept on the concepts
+const hasSidePanel = computed(
+  () =>
+    clientAccess.value.isTaskPanelVisible &&
+    ['infos', 'concepts'].includes(currentSection.value)
+)
+const isDrawerOpen = computed(() =>
+  Boolean(
+    currentSection.value === 'infos' ? currentTask.value : currentConcept.value
+  )
+)
 
 const filteredLinkedConcepts = computed(() =>
   currentConceptStatus.value
@@ -818,6 +822,9 @@ const viewPlaylist = (entities, entityType) => {
   }
 }
 
+const closeDrawer = () =>
+  currentSection.value === 'infos' ? closeTask() : closeConcept()
+
 const closeConcept = () => {
   store.dispatch('clearSelectedConcepts')
   currentConcept.value = null
@@ -894,94 +901,23 @@ useHead({ title: computed(() => `${title.value} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .table-body {
-    border: 1px solid var(--border);
-  }
+@use '@/styles/entity-page.scss' as entity;
 
-  .wrapper {
-    background: var(--background);
-  }
-}
+@include entity.page;
+@include entity.casting;
 
 .ready-for {
   margin-top: 0em;
   margin-bottom: 0em;
 }
 
-.main-column {
-  display: flex;
-  flex-direction: column;
-  background: var(--background-page);
-  padding-bottom: 1em;
+.field-label {
+  width: 120px;
 }
 
-h2.subtitle {
-  border-bottom: 0;
-  margin-top: 0;
-  margin-bottom: 0.5em;
-  font-size: 1.5em;
-}
-
-.page-header {
-  align-items: center;
-  margin-top: calc(50px + 2em);
-  margin-bottom: 0.8em;
-  margin-left: 1em;
-  margin-right: 1em;
-  .entity-title {
-    font-weight: 500;
-  }
-}
-
-.asset-data {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  margin: 0 1em 0 1em;
-  max-height: 100%;
-  overflow: hidden;
-}
-
-.asset-casted-in,
 .concepts {
+  flex: 1;
   overflow-y: auto;
-}
-
-.concepts {
-  flex: 1;
-}
-
-.casting-title {
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-.casting-group {
-  margin-bottom: 2em;
-}
-
-.casting-group-header {
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1em;
-  padding-bottom: 0.3em;
-
-  .group-name {
-    color: var(--text);
-    font-size: 1.3em;
-    font-weight: 500;
-  }
-
-  .tag {
-    background: var(--background-tag);
-    color: var(--text);
-  }
-}
-
-.casting-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 200px);
-  gap: 20px;
 }
 
 .concept-list {
@@ -993,284 +929,18 @@ h2.subtitle {
   padding: 4px 4px 1em;
 }
 
-.casting-card {
-  background: var(--background);
-  border-radius: 1em;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-  color: var(--text-strong);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-
-  .dark & {
-    background: var(--background-alt);
-  }
-
-  &:hover {
-    background: var(--background-hover);
-  }
-
-  .card-preview {
-    position: relative;
-  }
-
-  .nb-occurences {
-    background: rgba(160, 160, 180, 0.8);
-    border-radius: 2px;
-    bottom: 4px;
-    color: white;
-    font-size: 0.8em;
-    padding: 2px 4px;
-    position: absolute;
-    right: 4px;
-  }
-
-  .card-description {
-    padding: 0.5em 1em;
-  }
-
-  .card-name {
-    font-weight: bold;
-  }
-
-  .asset-label {
-    background: $dark-green;
-    border-radius: 4px;
-    color: $white;
-    font-size: 0.7em;
-    font-weight: 500;
-    padding: 2px 6px;
-
-    &[label='fixed'] {
-      background: $orange-carrot;
-    }
-  }
-
-  .ready-for {
-    color: var(--text-alt);
-    font-size: 0.9em;
-    font-weight: normal;
-    margin-top: 0.4em;
-  }
-
-  .remove-button {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 28px;
-    height: 28px;
-    min-height: 0;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.55);
-    color: $white;
-    opacity: 0;
-    transition:
-      opacity 0.15s,
-      background 0.15s;
-
-    :deep(.icon) {
-      width: 16px;
-      height: 16px;
-    }
-
-    &:hover {
-      background: $red;
-      color: $white;
-    }
-  }
-
-  &:hover .remove-button,
-  .remove-button:focus-visible {
-    opacity: 1;
-  }
-}
-
-.field-label {
-  font-weight: bold;
-  width: 120px;
-}
-
-.back-link {
-  padding-top: 3px;
-}
-
-.task-list {
-  flex: 1;
-  margin-bottom: 3em;
-  min-height: 150px;
-  min-width: 100%;
-  overflow: hidden;
-}
-
-.datatable-row {
-  user-select: text;
-}
-
-.schedule {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-
-  .wrapper {
-    height: 100%;
-    border-radius: 10px;
-  }
-}
-
-.entity-thumbnail {
-  margin-bottom: 0;
-  border-radius: 10px;
-}
-
-@media screen and (max-width: 768px) {
-  // The main column is the scroller, not the page: a scrolling ancestor
-  // would count the off-screen drawers in its scroll range, and focusing
-  // their content on open would shift the whole page sideways.
-  .asset {
-    overflow: visible;
-  }
-
-  .main-column {
-    flex: 1;
-    margin: 0;
-    max-width: 100%;
-    min-height: 0;
-    overflow-y: auto;
-    width: 100%;
-  }
-
-  .column:first-child {
-    margin-right: 0;
-  }
-
-  .page-header {
-    margin: calc(60px + 1em) 0.5em 0.5em;
-  }
-
-  .entity-title {
-    font-size: 1.3em;
-    line-height: 1.5em;
-  }
-
-  .ready-for {
-    display: none;
-  }
-
-  .asset-data {
-    margin: 0 0.5em;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .infos,
-  .asset-casted-in,
-  .concepts,
-  .schedule {
-    height: auto;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .infos .button {
-    display: none;
-  }
-
-  .task-list {
-    min-height: 0;
-    overflow: visible;
-  }
-
-  .schedule {
-    height: 60vh;
-    overflow-x: auto;
-
-    // The schedule widget keeps a 180px entity column on mobile: give the
-    // timeline room.
-    .wrapper {
-      min-width: 520px;
-    }
-  }
-
-  .news-column {
-    max-height: none;
-  }
-}
-
-.tag-standby {
-  background: $red;
-  color: $white;
-  cursor: default;
-  text-transform: uppercase;
-}
-
-.dark .tag-standby {
-  background: $dark-red;
-}
-
-.section-tabs {
-  min-height: 36px;
-  margin-bottom: 0;
-}
-
-.infos {
-  height: 100%;
-  margin-top: 1em;
-  margin-bottom: 1em;
-  max-height: 100%;
-  overflow-y: auto;
-
-  .metadata-infos {
-    flex: unset;
-    min-height: 100px;
-    overflow: auto;
-  }
-}
-
-.news-column {
-  max-height: 85%;
-}
-
-.drawer-close,
-.drawer-backdrop {
+.drawer-close {
   display: none;
 }
 
-// Under 1024px the side panels slide in from the right over the page, like
-// the news feed drawer. The backdrop catches outside taps to close.
+@media screen and (max-width: 768px) {
+  .ready-for {
+    display: none;
+  }
+}
+
+// the panel of a concept has no close button of its own
 @media (max-width: 1024px) {
-  // The xyz-in entry animation fills forward and leaves an identity
-  // transform on the page, which would turn it into the containing block
-  // and stacking context of the fixed drawers below.
-  .asset {
-    animation-fill-mode: none;
-  }
-
-  .side-column {
-    background: var(--background);
-    bottom: 0;
-    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    margin-top: 0 !important;
-    max-width: min(100vw, 420px) !important;
-    // TaskInfo writes its resizable panel width inline on the side column.
-    min-width: 0 !important;
-    overflow-y: auto;
-    position: fixed;
-    right: 0;
-    top: 60px;
-    transform: translateX(100%);
-    transition: transform 0.25s ease;
-    width: min(100vw, 420px) !important;
-    z-index: 250;
-
-    &.is-open {
-      transform: translateX(0);
-    }
-  }
-
   .drawer-close {
     align-items: center;
     background: var(--background);
@@ -1293,22 +963,6 @@ h2.subtitle {
       background: var(--background-hover);
       border-color: var(--border-strong);
       color: var(--text-strong);
-    }
-  }
-
-  .drawer-backdrop {
-    background: rgba(0, 0, 0, 0.4);
-    display: block;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    position: fixed;
-    transition: opacity 0.25s ease;
-    z-index: 249;
-
-    &.is-open {
-      opacity: 1;
-      pointer-events: auto;
     }
   }
 }

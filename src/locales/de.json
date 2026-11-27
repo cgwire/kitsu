@@ -74,7 +74,7 @@
       "workflow_studio": "Studio-Workflow"
     },
     "breakdown": {
-      "all_assets": "Alle verfügbaren Assets",
+      "link_assets": "Assets verknüpfen",
       "copy_casting": "Dieses Casting kopieren (Strg + V fügt es in die ausgewählten Zeilen ein)",
       "edit_label": "Etikett bearbeiten",
       "empty": "Leeres Casting",
@@ -276,6 +276,9 @@
         "uploader": "Hochgeladen von",
         "uploaded_at": "Hochgeladen am"
       },
+      "working_files": {
+        "no_working_files": "Für diese Entität gibt es keine Arbeitsdateien."
+      },
       "output_files": {
         "extension": "Erweiterung",
         "name": "Name",
@@ -474,7 +477,6 @@
       "for": "Für",
       "go_productions": "Zurück zur Produktion",
       "history": "Historie",
-      "info": "Informationen",
       "or": "oder",
       "next": "Weiter",
       "no": "Nein",
@@ -562,6 +564,7 @@
       "less_filters": "Weniger Filter",
       "more_filters": "Mehr Filter",
       "reload": "Erneut laden",
+      "search_example": "z. B. {example}",
       "search_query": "Suchanfrage",
       "search_query_add": "Suchfilter hinzufügen",
       "search_query_add_error": "Beim Speichern dieses Suchfilters ist ein Fehler aufgetreten.",
@@ -617,7 +620,6 @@
         "explanation": "Es ist möglich, gängige von OpenTimelineIO unterstützte Dateien zu importieren (otio, fcp_xml, fcpx_xml, edl). Shots werden mit dem angegebenen Frame-Bereich, Frame-In und Frame-Out erstellt oder aktualisiert. Frame in beginnt bei 0."
       },
       "active": "Aktiv",
-      "activity": "Aktivität",
       "archived": "Archiviert",
       "avatar": {
         "open_page": "Seite von {personName} öffnen",
@@ -655,8 +657,10 @@
         "casting": "Casting",
         "chat": "Chat",
         "concepts": "Konzepte",
-        "info": "Infos",
+        "metadata": "Metadaten",
+        "working_files": "Arbeitsdateien",
         "output_files": "Ausgabedateien",
+        "preview": "Vorschau",
         "preview_files": "Vorschau-Dateien",
         "schedule": "Zeitplan",
         "timelog": "Zeiterfassung"
@@ -1119,6 +1123,7 @@
         "title": "Kunden",
         "unavailable": "Vorschau-Konten erfordern lokale Authentifizierung mit Passwörtern. Erstellen Sie andernfalls ein reguläres Kundenkonto."
       },
+      "closed_name": "{name} (geschlossen)",
       "current": "Ausgewählte Produktion",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten? Bitte bestätigen Sie, indem Sie den Namen der zu löschenden Produktion in das Textfeld eingeben.",
       "delete_error": "Beim Löschen dieser Produktion ist ein Fehler aufgetreten. Möglicherweise sind noch Daten damit verknüpft. Sind Sie sicher, dass diese Produktion keine Aufgabe, keinen Shot und kein Asset enthält? Kitsu erlaubt das Löschen von Produktionen nicht. Wenn Sie die Produktion nicht mehr sehen möchten, können Sie sie stattdessen schließen.",

@@ -27,6 +27,7 @@ import TaskList from '@/components/lists/TaskList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import TaskType from '@/components/pages/TaskType.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -34,10 +35,10 @@ import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
 import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 
 import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
 import { buildRefusal } from '../fixtures/refusal'
-import { buildSearchQueryListStub } from '../fixtures/search-query-list'
 import { trackTaskSelection } from '../fixtures/task-selection'
 
 const SearchFieldStub = {
@@ -147,7 +148,13 @@ const mountPage = async ({
           }
         }
       ],
-      stubs: { Schedule: ScheduleStub, SearchField: SearchFieldStub, ...stubs }
+      stubs: {
+        // The layout holds the page in its slots.
+        PanelLayout: false,
+        Schedule: ScheduleStub,
+        SearchField: SearchFieldStub,
+        ...stubs
+      }
     }
   })
   await flushPromises()
@@ -201,16 +208,28 @@ describe('TaskType page', () => {
       methods: { resetSelection: () => {} }
     }
 
-    const mountList = async (initTaskType = vi.fn()) => {
+    // The list saves the whole query of the page: the stub shows its props.
+    const SearchQueryList = {
+      name: 'SearchQueryList',
+      props: {
+        entityType: { type: String, default: null },
+        keptQueryKeys: { type: Array, default: () => [] },
+        queries: { type: Array, default: () => [] },
+        withRouteQuery: { type: Boolean, default: false }
+      },
+      template: '<div />'
+    }
+
+    const mountList = async (getters = {}) => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
-      const SearchQueryList = buildSearchQueryListStub()
       const { wrapper } = await mountPage({
         section: 'tasks',
         stubs: { SearchQueryList, TaskList: TaskListStub },
-        actions: { initTaskType, loadScheduleItems: vi.fn(() => []) },
+        actions: { loadScheduleItems: vi.fn(() => []) },
         getters: {
           assetValidationColumns: () => [],
-          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' })
+          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' }),
+          ...getters
         }
       })
       await vi.advanceTimersByTimeAsync(400)
@@ -218,42 +237,74 @@ describe('TaskType page', () => {
       return { SearchQueryList, wrapper }
     }
 
-    // The list that opens the modal shows once the entities are loaded.
-    it('offers the Save button once the tasks are loaded', async () => {
-      let endLoad
-      const { wrapper } = await mountList(
-        () =>
-          new Promise(resolve => {
-            endLoad = resolve
-          })
+    // The search field saved its text alone.
+    it('saves the search and every filter from its list of searches', async () => {
+      const { wrapper } = await mountList()
+      const list = wrapper.findComponent(SearchQueryList)
+
+      expect(list.props('withRouteQuery')).toBe(true)
+      // the task picked is no filter
+      expect(list.props('keptQueryKeys')).toEqual(['task_id'])
+      expect(wrapper.findComponent(SearchFieldStub).props('canSave')).toBe(
+        false
       )
-      const saveButton = () =>
-        wrapper.findComponent(SearchFieldStub).props('canSave')
-
-      expect(saveButton()).toBe(false)
-      endLoad()
-      await flushPromises()
-
-      expect(saveButton()).toBe(true)
       wrapper.unmount()
     })
 
-    // The list holds the modal: it has to be there for the first search.
-    it('opens the search filter modal with no saved search', async () => {
-      const { SearchQueryList, wrapper } = await mountList()
+    it('reads a search saved as a text as the search of the page', async () => {
+      const { wrapper } = await mountList({
+        taskSearchQueries: () => [
+          { id: 'text', entity_type: 'Asset', search_query: 'retake chara' },
+          { id: 'old', entity_type: 'Asset', search_query: 'modeling=wip' },
+          {
+            id: 'query',
+            entity_type: 'Asset',
+            search_query: 'search=chair&priority=2'
+          },
+          { id: 'shot', entity_type: 'Shot', search_query: 'wip' }
+        ]
+      })
 
-      wrapper.findComponent(SearchFieldStub).vm.$emit('save', 'retake')
-
-      expect(SearchQueryList.methods.addSearch).toHaveBeenCalledWith('retake')
+      expect(
+        wrapper
+          .findComponent(SearchQueryList)
+          .props('queries')
+          .map(query => query.search_query)
+      ).toEqual([
+        'search=retake+chara',
+        'search=modeling%3Dwip',
+        'search=chair&priority=2'
+      ])
       wrapper.unmount()
     })
 
-    it('saves its searches under its entity type', async () => {
+    // Zou files a search under a free text, its entity type: the task type
+    // goes there.
+    it('saves its searches under its task type', async () => {
       const { SearchQueryList, wrapper } = await mountList()
 
       expect(wrapper.findComponent(SearchQueryList).props('entityType')).toBe(
-        'Asset'
+        'task-type-1'
       )
+      wrapper.unmount()
+    })
+
+    it('lists the searches of its task type, and those saved for all of them', async () => {
+      const { wrapper } = await mountList({
+        taskSearchQueries: () => [
+          { id: 'own', entity_type: 'task-type-1', search_query: 'priority=2' },
+          { id: 'other', entity_type: 'task-type-2', search_query: 'late=late' },
+          { id: 'all', entity_type: 'Asset', search_query: 'search=chair' },
+          { id: 'shot', entity_type: 'Shot', search_query: 'search=sh01' }
+        ]
+      })
+
+      expect(
+        wrapper
+          .findComponent(SearchQueryList)
+          .props('queries')
+          .map(query => query.id)
+      ).toEqual(['own', 'all'])
       wrapper.unmount()
     })
   })
@@ -628,20 +679,208 @@ describe('TaskType page', () => {
       )
     }
 
-    // The load writes the filters a link leaves out back into the URL, then
-    // selects the task of the link.
+    // The load keeps in the URL the filters that are set, and no other: a
+    // saved search compares its query to that one. Then it selects the task
+    // of the link.
     it.each([
-      ['a link with no filter', '', undefined],
-      ['a link with a filter', '?priority=2', undefined],
-      ['a link to a task', '?task_id=task-10', 'task-10'],
-      ['a link to a task the page cannot find', '?task_id=task-9', undefined]
-    ])('opens %s without a new history entry', async (_, query, taskId) => {
+      ['a link with no filter', '', {}],
+      ['a link with a filter', '?priority=2', { priority: '2' }],
+      ['a link to a task', '?task_id=task-10', { task_id: 'task-10' }],
+      ['a link to a task the page cannot find', '?task_id=task-9', {}]
+    ])('opens %s without a new history entry', async (_, query, landed) => {
       const historyLength = window.history.length
       await mountSelectable(query)
 
-      expect(wrapper.vm.$route.query.duedate).toBe('all')
-      expect(wrapper.vm.$route.query.task_id).toBe(taskId)
+      expect(wrapper.vm.$route.query).toEqual(landed)
       expect(window.history.length).toBe(historyLength)
+    })
+
+    it('lays the page out in panels, the task picked on the side', async () => {
+      await mountSelectable('')
+      const layout = wrapper.findComponent(PanelLayout)
+
+      expect(wrapper.find('.page-tabs .tabs').exists()).toBe(true)
+      // the tabs keep to the list: the task panel runs beside them
+      expect(layout.classes()).toContain('side-beside-tabs')
+      const filters = wrapper.find('.filters-panel')
+      expect(filters.find('.back-link').exists()).toBe(true)
+      expect(
+        filters.findComponent(SearchFieldStub).attributes('placeholder')
+      ).toBe('main.search_example')
+      // the status and the sort fold with the filters
+      const folded = filters.find('.filters.collapsible')
+      expect(
+        folded.findComponent({ name: 'ComboboxStatusMultiple' }).exists()
+      ).toBe(true)
+      expect(
+        folded
+          .findAllComponents({ name: 'ComboboxStyled' })
+          .map(combo => combo.props('label'))
+      ).toContain('main.sorted_by')
+      // the funnel of the filters follows the search, and the schedule
+      // button, an icon alone, leads the buttons
+      const toggle = wrapper.findComponent(FiltersToggle)
+      const scheduleButton = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('title') === 'schedule.title')
+      expect(
+        filters.findComponent(SearchFieldStub).element.nextElementSibling
+      ).toBe(toggle.element)
+      expect(scheduleButton.props('icon')).toBe('calendar')
+      expect(scheduleButton.props('text')).toBeUndefined()
+      expect(scheduleButton.element.nextElementSibling).toBe(
+        wrapper
+          .findAllComponents(ButtonSimple)
+          .find(button => button.props('icon') === 'plus').element
+      )
+      expect(
+        wrapper.find('.list-panel').findComponent(TaskListStub).exists()
+      ).toBe(true)
+      expect(wrapper.find('.side-column').exists()).toBe(false)
+      expect(layout.props('sideFocused')).toBe(false)
+
+      wrapper.findComponent(TaskListStub).vm.selectTask({}, statusTasks[0])
+      await flushPromises()
+
+      const side = wrapper.find('.side-column')
+      expect(side.findComponent({ name: 'TaskInfo' }).exists()).toBe(true)
+      // on a phone the task shows in place of the list, with a way back
+      expect(layout.props('sideFocused')).toBe(true)
+      await side.findComponent('.back-to-list').trigger('click')
+      await flushPromises()
+      expect(wrapper.find('.side-column').exists()).toBe(false)
+    })
+
+    it('offers the display settings of the list on the tasks tab only', async () => {
+      await mountTasks('')
+      const hasDisplaySettings = () =>
+        wrapper.findComponent({ name: 'ComboboxDisplayOptions' }).exists()
+      const base = '/productions/production-1/assets/task-types/task-type-1'
+
+      expect(hasDisplaySettings()).toBe(true)
+
+      await wrapper.vm.$router.push(`${base}/schedule`)
+      await flushPromises()
+      expect(hasDisplaySettings()).toBe(false)
+
+      await wrapper.vm.$router.push(`${base}/estimation`)
+      await flushPromises()
+      expect(hasDisplaySettings()).toBe(false)
+    })
+
+    it('opens the folded filters of the schedule tab on its two dates', async () => {
+      await mountTasks('')
+      await wrapper.vm.$router.push(
+        '/productions/production-1/assets/task-types/task-type-1/schedule'
+      )
+      await flushPromises()
+
+      const folded = wrapper.find('.filters.collapsible').element.children
+      const dates = wrapper.findAllComponents(DateField)
+      expect(dates.map(date => date.props('label'))).toEqual([
+        'main.start_date',
+        'main.end_date'
+      ])
+      expect(dates.map(date => date.element)).toEqual([folded[0], folded[1]])
+      expect(dates.every(date => date.classes('edit-action'))).toBe(true)
+    })
+
+    it('sets the options of the schedule after the display settings', async () => {
+      await mountTasks('')
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('title') === 'schedule.title')
+        .trigger('click')
+      await flushPromises()
+
+      // under its label
+      const dataDisplay = wrapper.findComponent({ name: 'ComboboxOptions' })
+      expect(
+        wrapper.findComponent({ name: 'ComboboxDisplayOptions' }).element
+          .nextElementSibling
+      ).toBe(dataDisplay.element.parentElement)
+    })
+
+    it('picks the zoom of the schedule tab in a styled combobox', async () => {
+      await mountTasks('')
+      await wrapper.vm.$router.push(
+        '/productions/production-1/assets/task-types/task-type-1/schedule'
+      )
+      await flushPromises()
+
+      const zoom = styledCombo('schedule.zoom_level')()
+      expect(zoom.props('options').map(option => option.value)).toEqual([
+        0, 1, 2, 3
+      ])
+      expect(zoom.props('modelValue')).toBe(1)
+    })
+
+    it('marks the editing a phone hides', async () => {
+      await mountTasks('')
+
+      const marked = wrapper
+        .findAllComponents(ButtonSimple)
+        .filter(button => button.classes('edit-action'))
+        .map(button => button.props('icon'))
+      expect(marked).toEqual(['plus', 'import', 'export'])
+    })
+
+    // A saved search, or Back, changes the query from outside the fields.
+    it('follows a query changed from outside its fields', async () => {
+      let typed = ''
+      const getValue = vi
+        .spyOn(SearchFieldStub.methods, 'getValue')
+        .mockImplementation(() => typed)
+      const setValue = vi
+        .spyOn(SearchFieldStub.methods, 'setValue')
+        .mockImplementation(value => {
+          typed = value
+        })
+      try {
+        await mountTasks('')
+        const status = () =>
+          wrapper.findComponent(ComboboxStatusMultiple).props('modelValue')
+
+        await wrapper.vm.$router.push({
+          query: { search: 'chair', task_status_id: 'status-2' }
+        })
+        await flushPromises()
+
+        expect(typed).toBe('chair')
+        expect(status()).toEqual(['status-2'])
+        expect(listedTaskIds()).toEqual(['task-11'])
+        expect(wrapper.vm.$route.query).toEqual({
+          search: 'chair',
+          task_status_id: 'status-2'
+        })
+
+        await wrapper.vm.$router.push({ query: {} })
+        await flushPromises()
+
+        expect(typed).toBe('')
+        expect(status()).toEqual([])
+        expect(listedTaskIds()).toEqual(['task-10', 'task-11', 'task-12'])
+      } finally {
+        getValue.mockRestore()
+        setValue.mockRestore()
+      }
+    })
+
+    it('counts the folded filters set, and clears every filter at once', async () => {
+      await mountTasks('?task_status_id=status-2&difficulty=4&retake_count=none')
+      const toggle = () => wrapper.findComponent(FiltersToggle)
+
+      expect(toggle().props('count')).toBe(3)
+      expect(toggle().props('resettable')).toBe(true)
+      expect(listedTaskIds()).toEqual([])
+
+      toggle().vm.$emit('reset')
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query).toEqual({})
+      expect(listedTaskIds()).toEqual(['task-10', 'task-11', 'task-12'])
+      expect(toggle().props('count')).toBe(0)
+      expect(toggle().props('resettable')).toBe(false)
     })
 
     const styledCombo = label => () =>
@@ -690,7 +929,7 @@ describe('TaskType page', () => {
         widget().vm.$emit('update:modelValue', value)
         await flushPromises()
 
-        expect(wrapper.vm.$route.query[key]).toBe(valueInUrl)
+        expect(wrapper.vm.$route.query).toEqual({ [key]: valueInUrl })
         expect(window.history.length).toBe(historyLength + 1)
       }
     )
@@ -730,14 +969,12 @@ describe('TaskType page', () => {
         ([event]) => event === 'task:update'
       )
       const historyLength = window.history.length
-      expect(wrapper.vm.$route.query.search).toBe('')
 
       onTaskUpdate({ task_id: 'task-10' })
       await vi.advanceTimersByTimeAsync(400)
       await flushPromises()
 
-      // the refresh wrote the URL again, without its empty search
-      expect(wrapper.vm.$route.query).not.toHaveProperty('search')
+      expect(wrapper.vm.$route.query).toEqual({})
       expect(window.history.length).toBe(historyLength)
     })
 
@@ -763,7 +1000,7 @@ describe('TaskType page', () => {
       await mountTasks('', {}, { socket })
       await wrapper
         .findAllComponents(ButtonSimple)
-        .find(button => button.props('text') === 'schedule.title')
+        .find(button => button.props('title') === 'schedule.title')
         .vm.$emit('click')
       await flushPromises()
       const [, onTaskUpdate] = socket.on.mock.calls.find(
@@ -946,7 +1183,7 @@ describe('TaskType page', () => {
         // shown: its rebuild waits for the days off of the range
         await wrapper
           .findAllComponents(ButtonSimple)
-          .find(button => button.props('text') === 'schedule.title')
+          .find(button => button.props('title') === 'schedule.title')
           .vm.$emit('click')
         await flushPromises()
         onTaskUpdate({ task_id: 'task-unknown' })
@@ -1026,7 +1263,7 @@ describe('TaskType page', () => {
       try {
         await wrapper
           .findAllComponents(ButtonSimple)
-          .find(button => button.props('text') === 'schedule.title')
+          .find(button => button.props('title') === 'schedule.title')
           .vm.$emit('click')
         await flushPromises()
         onTaskUpdate({ task_id: 'task-unknown' })
@@ -1092,7 +1329,7 @@ describe('TaskType page', () => {
       const toggleSchedule = async () => {
         await wrapper
           .findAllComponents(ButtonSimple)
-          .find(button => button.props('text') === 'schedule.title')
+          .find(button => button.props('title') === 'schedule.title')
           .vm.$emit('click')
         await flushPromises()
       }
@@ -2449,6 +2686,20 @@ describe('TaskType page', () => {
       expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
       expect(warn).not.toHaveBeenCalled()
       expect(error).not.toHaveBeenCalled()
+    })
+
+    // The filters apply to the three sections: the URL keeps them.
+    it('keeps the query of the page from a section to another', async () => {
+      const base = '/productions/production-1/assets/task-types/task-type-1'
+      const paths = await mountTabs(
+        { currentTaskType: () => ({ ...shotTaskType, for_entity: 'Asset' }) },
+        `${base}?priority=2`
+      )
+      expect(paths).toEqual([
+        `${base}?priority=2`,
+        `${base}/schedule?priority=2`,
+        `${base}/estimation?priority=2`
+      ])
     })
 
     // The page renders once before leaving for the not found page.

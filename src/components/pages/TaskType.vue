@@ -1,449 +1,419 @@
 <template>
-  <div class="task-type columns fixed-page">
-    <div class="column main-column">
-      <div class="task-type page">
-        <div class="task-type-header page-header flexrow-item">
-          <div class="flexcolumn-item flexrow">
-            <router-link
-              class="back-link flexrow-item"
-              :title="$t('main.back')"
-              :to="backPath"
-            >
-              <corner-left-up-icon />
+  <panel-layout
+    class="task-type-page"
+    :class="{ collapsed: !showFilters }"
+    :side="nbSelectedTasks >= 1"
+    side-beside-tabs
+    :side-focused="nbSelectedTasks >= 1"
+  >
+    <template #tabs>
+      <div class="tabs">
+        <ul>
+          <li :class="{ 'is-active': isActiveTab('tasks') }">
+            <router-link :to="tasksPath">
+              {{ $t('tasks.tasks') }}
             </router-link>
-            <div class="flexrow-item"></div>
-            <task-type-name
-              class="flexrow-item"
-              style="font-size: 1.2em"
-              :task-type="currentTaskType"
-            />
-            <div class="filler"></div>
-            <combobox-display-options
-              class="flexrow-item"
-              :has-linked-assets="isTVShow"
-              :is-all-episodes="currentEpisode?.id === 'all'"
-              :type="displayTaskType"
-              v-model="displaySettings"
-            />
-            <div
-              class="flexrow-item"
-              v-if="isActiveTab('tasks') && isSupervisorInDepartment"
-            >
-              <button-simple
-                icon="plus"
-                :title="$t('productions.metadata.title')"
-                @click="onAddMetadataClicked"
-              />
-            </div>
-            <div
-              class="flexrow-item"
-              v-if="
-                !isActiveTab('schedule') &&
-                !isActiveTab('estimation') &&
-                isSupervisorInDepartment &&
-                !isEstimationsImportHidden
-              "
-            >
-              <button-simple
-                icon="import"
-                :title="$t('main.csv.import_file')"
-                @click="showImportModal"
-              />
-            </div>
+          </li>
+          <li :class="{ 'is-active': isActiveTab('schedule') }">
+            <router-link :to="schedulePath">
+              {{ $t('schedule.title') }}
+            </router-link>
+          </li>
+          <li :class="{ 'is-active': isActiveTab('estimation') }">
+            <router-link :to="estimationPath">
+              {{ $t('estimation.title') }}
+            </router-link>
+          </li>
+        </ul>
+      </div>
+    </template>
+
+    <template #filters>
+      <div class="filters flexrow">
+        <router-link
+          class="back-link flexrow-item"
+          :title="$t('main.back')"
+          :to="backPath"
+        >
+          <corner-left-up-icon />
+        </router-link>
+        <task-type-name
+          class="task-type-name flexrow-item"
+          :task-type="currentTaskType"
+        />
+        <search-field
+          ref="task-search-field"
+          class="search-field flexrow-item"
+          :focus-options="{ preventScroll: true }"
+          @change="onSearchChange"
+          :placeholder="$t('main.search_example', { example: 'retake chara' })"
+        />
+        <filters-toggle
+          class="flexrow-item"
+          :count="setFilterNames.length"
+          :resettable="hasFilters"
+          v-model="showFilters"
+          @reset="resetFilters"
+        />
+        <div class="actions flexrow">
+          <combobox-display-options
+            class="flexrow-item"
+            :has-linked-assets="isTVShow"
+            :is-all-episodes="currentEpisode?.id === 'all'"
+            :type="displayTaskType"
+            v-model="displaySettings"
+            v-if="isActiveTab('tasks')"
+          />
+          <template
+            v-if="
+              isActiveTab('schedule') ||
+              (isActiveTab('tasks') && isScheduleVisible)
+            "
+          >
             <div class="flexrow-item">
-              <button-simple
-                icon="export"
-                :title="$t('main.csv.export_file')"
-                @click="onExportClick"
-                v-if="!isActiveTab('schedule') && !isActiveTab('estimation')"
+              <label class="label" v-if="isActiveTab('tasks')">
+                {{ $t('schedule.title') }}
+              </label>
+              <combobox-options
+                class="display-options"
+                :options="dataDisplayOptions"
+                :title="$t('tasks.data_display')"
+                v-model="dataDisplay"
+                @change="onDataDisplayChange"
               />
             </div>
-          </div>
-
-          <div class="tabs mt1">
-            <ul>
-              <li :class="{ 'is-active': isActiveTab('tasks') }">
-                <router-link :to="tasksPath">
-                  {{ $t('tasks.tasks') }}
-                </router-link>
-              </li>
-              <li :class="{ 'is-active': isActiveTab('schedule') }">
-                <router-link :to="schedulePath">
-                  {{ $t('schedule.title') }}
-                </router-link>
-              </li>
-              <li :class="{ 'is-active': isActiveTab('estimation') }">
-                <router-link :to="estimationPath">
-                  {{ $t('estimation.title') }}
-                </router-link>
-              </li>
-            </ul>
-          </div>
-
-          <div class="flexcolumn-item flexrow align-end mb1">
-            <div class="flexrow-item search-options">
-              <search-field
-                ref="task-search-field"
-                :can-save="!loading.entities"
-                :focus-options="{ preventScroll: true }"
-                @change="onSearchChange"
-                @save="saveSearchQuery"
-                placeholder="ex: retake chara"
-              />
-            </div>
-            <div
-              class="flexrow-item flexrow align-end"
-              v-if="isActiveTab('tasks')"
-            >
-              <combobox-multiple
-                class="flexrow-item selector"
-                :label="$t('entities.build_filter.asset_type')"
-                :options="assetTypeOptions"
-                v-model="assetTypeIdsFilter"
-                v-if="entityType === 'Asset'"
-              />
-              <combobox-status-multiple
-                class="flexrow-item selector"
-                :label="$t('news.task_status')"
-                :task-status-list="taskStatusList"
-                v-model="taskStatusIdsFilter"
-              />
-              <combobox-styled
+            <template v-if="dataDisplay.beforeAfterTasks">
+              <combobox-task-type
                 class="flexrow-item"
-                :label="$t('tasks.fields.difficulty')"
-                :options="difficultyOptions"
-                locale-key-prefix="tasks."
-                v-model="difficultyFilter"
+                :disabled="taskTypeListBeforeFilter.length < 2"
+                :label="$t('tasks.fields.tasks_before')"
+                :task-type-list="taskTypeListBeforeFilter"
+                :with-margin="false"
+                v-model="schedule.taskTypeBefore"
+                @change="resetScheduleItems()"
               />
-              <combobox-styled
+              <combobox-task-type
                 class="flexrow-item"
-                :label="$t('tasks.due_date')"
-                :options="dueDateOptions"
-                locale-key-prefix="tasks."
-                v-model="dueDateFilter"
+                :disabled="taskTypeListAfterFilter.length < 2"
+                :label="$t('tasks.fields.tasks_after')"
+                :task-type-list="taskTypeListAfterFilter"
+                :with-margin="false"
+                v-model="schedule.taskTypeAfter"
+                @change="resetScheduleItems()"
               />
-              <combobox-styled
-                class="flexrow-item"
-                :label="$t('tasks.late')"
-                :options="estimationOptions"
-                locale-key-prefix="tasks."
-                v-model="estimationFilter"
-              />
-              <combobox-styled
-                class="flexrow-item"
-                :label="$t('task_types.fields.priority')"
-                :options="priorityOptions"
-                locale-key-prefix="tasks."
-                v-model="priorityFilter"
-              />
-              <combobox-styled
-                class="flexrow-item"
-                :label="$t('tasks.fields.retake_count')"
-                :options="retakeCountOptions"
-                locale-key-prefix="tasks."
-                v-model="retakeCountFilter"
-              />
-            </div>
-
-            <div
-              class="flexrow-item flexrow align-end"
-              v-if="
-                isActiveTab('schedule') ||
-                (isActiveTab('tasks') && isScheduleVisible)
-              "
-            >
-              <div flexrow-item>
-                <label class="label" v-if="isActiveTab('tasks')">
-                  {{ $t('schedule.title') }}
-                </label>
-                <combobox-options
-                  class="display-options"
-                  :options="dataDisplayOptions"
-                  :title="$t('tasks.data_display')"
-                  v-model="dataDisplay"
-                  @change="onDataDisplayChange"
-                />
-              </div>
-              <div
-                class="flexrow-item flexrow ml1"
-                v-if="dataDisplay.beforeAfterTasks"
-              >
-                <combobox-task-type
-                  class="flexrow-item"
-                  :disabled="taskTypeListBeforeFilter.length < 2"
-                  :label="$t('tasks.fields.tasks_before')"
-                  :task-type-list="taskTypeListBeforeFilter"
-                  :with-margin="false"
-                  v-model="schedule.taskTypeBefore"
-                  @change="resetScheduleItems()"
-                />
-                <combobox-task-type
-                  class="flexrow-item"
-                  :disabled="taskTypeListAfterFilter.length < 2"
-                  :label="$t('tasks.fields.tasks_after')"
-                  :task-type-list="taskTypeListAfterFilter"
-                  :with-margin="false"
-                  v-model="schedule.taskTypeAfter"
-                  @change="resetScheduleItems()"
-                />
-              </div>
-            </div>
-
-            <div class="filler"></div>
-            <button-simple
-              :active="isScheduleVisible"
+            </template>
+          </template>
+          <template v-if="isActiveTab('schedule')">
+            <combobox-styled
               class="flexrow-item"
-              icon="calendar"
-              is-medium
-              :text="$t('schedule.title')"
-              @click="toggleSchedule()"
-              v-if="isActiveTab('tasks') && !displaySettings.contactSheetMode"
+              :label="$t('tasks.colors.title')"
+              :options="schedule.colorOptions"
+              locale-key-prefix="tasks.colors."
+              v-model="schedule.currentColor"
             />
-            <div class="flexrow-item" v-if="isActiveTab('tasks')">
-              <combobox-styled
-                :label="$t('main.sorted_by')"
-                open-left
-                :options="sortOptions"
-                locale-key-prefix="tasks.fields."
-                v-model="currentSort"
-              />
-            </div>
-
-            <div
+            <combobox-styled
               class="flexrow-item"
-              v-if="isActiveTab('schedule') && isCurrentUserProductionManager"
-            >
-              <date-field
-                class="flexrow-item"
-                :can-delete="false"
-                :min-date="disabledDates.to"
-                :max-date="disabledDates.from"
-                :label="$t('main.start_date')"
-                utc
-                week-days-disabled
-                :with-margin="false"
-                v-model="schedule.taskTypeStartDate"
-              />
-            </div>
-            <div
-              class="flexrow-item"
-              v-if="isActiveTab('schedule') && isCurrentUserProductionManager"
-            >
-              <date-field
-                class="flexrow-item"
-                :can-delete="false"
-                :min-date="disabledDates.to"
-                :max-date="disabledDates.from"
-                :label="$t('main.end_date')"
-                utc
-                week-days-disabled
-                :with-margin="false"
-                v-model="schedule.taskTypeEndDate"
-              />
-            </div>
-
-            <div
-              class="flexrow-item color-option"
-              v-if="isActiveTab('schedule')"
-            >
-              <combobox-styled
-                class="flexrow-item"
-                :label="$t('tasks.colors.title')"
-                :options="schedule.colorOptions"
-                locale-key-prefix="tasks.colors."
-                v-model="schedule.currentColor"
-              />
-            </div>
-            <div class="flexrow-item zoom-level" v-if="isActiveTab('schedule')">
-              <combobox-number
-                class="mt0 nowrap"
-                :label="$t('schedule.zoom_level')"
-                :options="zoomOptions"
-                v-model="schedule.zoomLevel"
-                v-if="isActiveTab('schedule')"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          class="query-list"
-          :class="{ empty: !searchQueries.length }"
-          v-if="!loading.entities"
-        >
-          <search-query-list
-            ref="task-search-query-list"
-            :entity-type="entityType"
-            :queries="searchQueries"
-            type="taskType"
-            :production-id="currentProduction?.id"
+              :label="$t('schedule.zoom_level')"
+              open-left
+              :options="zoomOptions"
+              v-model="schedule.zoomLevel"
+            />
+          </template>
+          <button-simple
+            :active="isScheduleVisible"
+            class="flexrow-item"
+            icon="calendar"
+            :title="$t('schedule.title')"
+            @click="toggleSchedule()"
+            v-if="isActiveTab('tasks') && !displaySettings.contactSheetMode"
+          />
+          <button-simple
+            class="edit-action flexrow-item"
+            icon="plus"
+            :title="$t('productions.metadata.title')"
+            @click="onAddMetadataClicked"
+            v-if="isActiveTab('tasks') && isSupervisorInDepartment"
+          />
+          <button-simple
+            class="edit-action flexrow-item"
+            icon="import"
+            :title="$t('main.csv.import_file')"
+            @click="showImportModal"
+            v-if="
+              isActiveTab('tasks') &&
+              isSupervisorInDepartment &&
+              !isEstimationsImportHidden
+            "
+          />
+          <button-simple
+            class="edit-action flexrow-item"
+            icon="export"
+            :title="$t('main.csv.export_file')"
+            @click="onExportClick"
+            v-if="isActiveTab('tasks')"
           />
         </div>
-
-        <error-text
-          :text="taskListSaveErrorText"
-          v-if="taskListSaveErrorText"
+      </div>
+      <div class="filters flexrow collapsible">
+        <template
+          v-if="isActiveTab('schedule') && isCurrentUserProductionManager"
+        >
+          <date-field
+            class="edit-action flexrow-item"
+            :can-delete="false"
+            :min-date="disabledDates.to"
+            :max-date="disabledDates.from"
+            :label="$t('main.start_date')"
+            utc
+            week-days-disabled
+            :with-margin="false"
+            v-model="schedule.taskTypeStartDate"
+          />
+          <date-field
+            class="edit-action flexrow-item"
+            :can-delete="false"
+            :min-date="disabledDates.to"
+            :max-date="disabledDates.from"
+            :label="$t('main.end_date')"
+            utc
+            week-days-disabled
+            :with-margin="false"
+            v-model="schedule.taskTypeEndDate"
+          />
+        </template>
+        <combobox-status-multiple
+          class="flexrow-item"
+          :label="$t('news.task_status')"
+          :task-status-list="taskStatusList"
+          v-model="taskStatusIdsFilter"
         />
-        <error-text
-          class="has-text-centered"
-          :text="scheduleSaveErrorText"
-          v-if="
-            scheduleSaveErrorText &&
-            (isActiveTab('schedule') ||
-              (isActiveTab('tasks') && isScheduleVisible))
-          "
+        <combobox-multiple
+          class="flexrow-item"
+          :label="$t('entities.build_filter.asset_type')"
+          :options="assetTypeOptions"
+          v-model="assetTypeIdsFilter"
+          v-if="entityType === 'Asset'"
         />
-        <task-list
-          ref="task-list"
-          :disabled-dates="disabledDates"
-          :entity-type="entityType"
-          :is-contact-sheet="displaySettings.contactSheetMode"
-          :is-error="errors.entities"
-          :is-grouped="currentSort === 'entity_name'"
-          :is-loading="loading.entities"
-          :metadata-descriptors="taskMetadataDescriptors"
-          :tasks="tasks"
-          :with-schedule="isScheduleVisible"
-          @delete-metadata="onDeleteMetadataClicked"
-          @edit-metadata="onEditMetadataClicked"
-          @sort-metadata="onSortByMetadata"
-          @task-selected="updateTaskInQuery"
-          @scroll="onTaskListScroll"
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('tasks.fields.difficulty')"
+          :options="difficultyOptions"
+          locale-key-prefix="tasks."
+          v-model="difficultyFilter"
+        />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('tasks.due_date')"
+          :options="dueDateOptions"
+          locale-key-prefix="tasks."
+          v-model="dueDateFilter"
+        />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('tasks.late')"
+          :options="estimationOptions"
+          locale-key-prefix="tasks."
+          v-model="estimationFilter"
+        />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('task_types.fields.priority')"
+          :options="priorityOptions"
+          locale-key-prefix="tasks."
+          v-model="priorityFilter"
+        />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('tasks.fields.retake_count')"
+          :options="retakeCountOptions"
+          locale-key-prefix="tasks."
+          v-model="retakeCountFilter"
+        />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('main.sorted_by')"
+          :options="sortOptions"
+          locale-key-prefix="tasks.fields."
+          v-model="currentSort"
           v-if="isActiveTab('tasks')"
-        >
-          <schedule
-            ref="schedule-widget"
-            class="task-schedule"
-            :start-date="productionStartDate"
-            :end-date="productionEndDate"
-            :sub-start-date="taskTypeStartDate"
-            :sub-end-date="taskTypeEndDate"
-            hide-entities
-            hide-root
-            :hierarchy="schedule.scheduleItems"
-            :zoom-level="schedule.zoomLevel"
-            :is-loading="loading.entities"
-            invert-lines-color
-            is-estimation-linked
-            :with-estimations="dataDisplay.estimations"
-            :with-ghosts="dataDisplay.beforeAfterTasks"
-            :with-statuses="dataDisplay.statuses"
-            :with-timesheets="dataDisplay.timesheets"
-            @item-changed="saveTaskScheduleItem"
-            @root-element-expanded="expandPersonElement"
-            @estimation-changed="updateEstimation"
-            @scroll="onScheduleScroll"
-            v-if="isScheduleVisible && !displaySettings.contactSheetMode"
-          />
-        </task-list>
-
-        <div
-          class="task-type-schedule flexrow-item"
-          v-if="isActiveTab('schedule')"
-        >
-          <schedule
-            ref="schedule-widget"
-            :start-date="productionStartDate"
-            :end-date="productionEndDate"
-            :sub-start-date="taskTypeStartDate"
-            :sub-end-date="taskTypeEndDate"
-            :hierarchy="schedule.scheduleItems"
-            :zoom-level="schedule.zoomLevel"
-            :is-loading="loading.entities"
-            :is-estimation-linked="true"
-            :with-estimations="dataDisplay.estimations"
-            :with-ghosts="dataDisplay.beforeAfterTasks"
-            :with-statuses="dataDisplay.statuses"
-            :with-timesheets="dataDisplay.timesheets"
-            @item-changed="saveTaskScheduleItem"
-            @root-element-expanded="expandPersonElement"
-            @estimation-changed="updateEstimation"
-          />
-
-          <task-list-numbers
-            :is-shots="entityType === 'Shot'"
-            :tasks="tasks"
-            v-if="!loading.entities"
-          />
-        </div>
-
-        <error-text
-          :text="cellSaveErrorText"
-          v-if="isActiveTab('estimation') && cellSaveErrorText"
-        />
-        <div
-          class="task-type-estimation flexrow-item"
-          v-if="isActiveTab('estimation')"
-        >
-          <estimation-helper
-            :entity-type="entityType"
-            :tasks="tasks"
-            @estimation-changed="onEstimationCellChanged"
-          />
-        </div>
-
-        <import-render-modal
-          :active="modals.isImportRenderDisplayed"
-          :is-loading="loading.importing"
-          :is-error="errors.importing"
-          :import-error="errors.importingError"
-          :imported-rows="importedRows"
-          :parsed-csv="parsedCSV"
-          :file-headers="importFileHeaders"
-          :columns="[...dataMatchers, ...optionalColumns]"
-          :data-matchers="dataMatchers"
-          :required-values="dataMatchers"
-          :block-missing-columns="true"
-          :database="{}"
-          :disable-update="true"
-          @reupload="resetImport"
-          @cancel="hideImportRenderModal"
-          @confirm="uploadImportFile"
-        />
-
-        <import-modal
-          ref="import-modal"
-          :active="modals.importing"
-          :is-loading="loading.importing"
-          :is-error="errors.importing"
-          :columns="dataMatchers"
-          :optional-columns="optionalColumns"
-          :generic-columns="genericColumns"
-          @cancel="hideImportModal"
-          @confirm="renderImport"
-        />
-
-        <add-metadata-modal
-          :active="modals.isAddMetadataDisplayed"
-          :is-loading="loading.addMetadata"
-          :is-error="errors.addMetadata"
-          :taken-name="errors.takenMetadataName"
-          :descriptor-to-edit="descriptorToEdit"
-          :descriptors="taskMetadataDescriptors"
-          entity-type="Task"
-          @confirm="confirmAddMetadata"
-          @cancel="modals.isAddMetadataDisplayed = false"
-        />
-
-        <delete-modal
-          :active="modals.isDeleteMetadataDisplayed"
-          :is-loading="loading.deleteMetadata"
-          :is-error="errors.deleteMetadata"
-          :text="$t('productions.metadata.delete_task_text')"
-          :error-text="$t('productions.metadata.delete_error')"
-          @confirm="confirmDeleteMetadata"
-          @cancel="modals.isDeleteMetadataDisplayed = false"
         />
       </div>
-    </div>
+    </template>
 
-    <div class="column side-column" v-if="nbSelectedTasks >= 1">
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :entity-type="currentTaskType.id"
+        :kept-query-keys="KEPT_QUERY_KEYS"
+        :production-id="currentProduction?.id"
+        :queries="searchQueries"
+        type="taskType"
+        with-route-query
+        v-if="!loading.entities"
+      />
+
+      <error-text :text="taskListSaveErrorText" v-if="taskListSaveErrorText" />
+      <error-text
+        class="has-text-centered"
+        :text="scheduleSaveErrorText"
+        v-if="
+          scheduleSaveErrorText &&
+          (isActiveTab('schedule') ||
+            (isActiveTab('tasks') && isScheduleVisible))
+        "
+      />
+      <task-list
+        ref="task-list"
+        :disabled-dates="disabledDates"
+        :entity-type="entityType"
+        :is-contact-sheet="displaySettings.contactSheetMode"
+        :is-error="errors.entities"
+        :is-grouped="currentSort === 'entity_name'"
+        :is-loading="loading.entities"
+        :metadata-descriptors="taskMetadataDescriptors"
+        :tasks="tasks"
+        :with-schedule="isScheduleVisible"
+        @delete-metadata="onDeleteMetadataClicked"
+        @edit-metadata="onEditMetadataClicked"
+        @sort-metadata="onSortByMetadata"
+        @task-selected="updateTaskInQuery"
+        @scroll="onTaskListScroll"
+        v-if="isActiveTab('tasks')"
+      >
+        <schedule
+          ref="schedule-widget"
+          class="task-schedule"
+          :start-date="productionStartDate"
+          :end-date="productionEndDate"
+          :sub-start-date="taskTypeStartDate"
+          :sub-end-date="taskTypeEndDate"
+          hide-entities
+          hide-root
+          :hierarchy="schedule.scheduleItems"
+          :zoom-level="schedule.zoomLevel"
+          :is-loading="loading.entities"
+          invert-lines-color
+          is-estimation-linked
+          :with-estimations="dataDisplay.estimations"
+          :with-ghosts="dataDisplay.beforeAfterTasks"
+          :with-statuses="dataDisplay.statuses"
+          :with-timesheets="dataDisplay.timesheets"
+          @item-changed="saveTaskScheduleItem"
+          @root-element-expanded="expandPersonElement"
+          @estimation-changed="updateEstimation"
+          @scroll="onScheduleScroll"
+          v-if="isScheduleVisible && !displaySettings.contactSheetMode"
+        />
+      </task-list>
+
+      <div class="task-type-schedule" v-if="isActiveTab('schedule')">
+        <schedule
+          ref="schedule-widget"
+          :start-date="productionStartDate"
+          :end-date="productionEndDate"
+          :sub-start-date="taskTypeStartDate"
+          :sub-end-date="taskTypeEndDate"
+          :hierarchy="schedule.scheduleItems"
+          :zoom-level="schedule.zoomLevel"
+          :is-loading="loading.entities"
+          is-estimation-linked
+          :with-estimations="dataDisplay.estimations"
+          :with-ghosts="dataDisplay.beforeAfterTasks"
+          :with-statuses="dataDisplay.statuses"
+          :with-timesheets="dataDisplay.timesheets"
+          @item-changed="saveTaskScheduleItem"
+          @root-element-expanded="expandPersonElement"
+          @estimation-changed="updateEstimation"
+        />
+
+        <task-list-numbers
+          :is-shots="entityType === 'Shot'"
+          :tasks="tasks"
+          v-if="!loading.entities"
+        />
+      </div>
+
+      <error-text
+        :text="cellSaveErrorText"
+        v-if="isActiveTab('estimation') && cellSaveErrorText"
+      />
+      <div class="task-type-estimation" v-if="isActiveTab('estimation')">
+        <estimation-helper
+          :entity-type="entityType"
+          :tasks="tasks"
+          @estimation-changed="onEstimationCellChanged"
+        />
+      </div>
+    </template>
+
+    <template #side>
+      <button-simple
+        class="back-to-list"
+        icon="left"
+        :text="$t('main.back')"
+        @click="store.dispatch('clearSelectedTasks')"
+      />
       <task-info :task="selectedTasks.values().next().value" with-actions />
-    </div>
-  </div>
+    </template>
+
+    <import-render-modal
+      :active="modals.isImportRenderDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :import-error="errors.importingError"
+      :imported-rows="importedRows"
+      :parsed-csv="parsedCSV"
+      :file-headers="importFileHeaders"
+      :columns="[...dataMatchers, ...optionalColumns]"
+      :data-matchers="dataMatchers"
+      :required-values="dataMatchers"
+      block-missing-columns
+      :database="{}"
+      disable-update
+      @reupload="resetImport"
+      @cancel="hideImportRenderModal"
+      @confirm="uploadImportFile"
+    />
+
+    <import-modal
+      ref="import-modal"
+      :active="modals.importing"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :columns="dataMatchers"
+      :optional-columns="optionalColumns"
+      :generic-columns="genericColumns"
+      @cancel="hideImportModal"
+      @confirm="renderImport"
+    />
+
+    <add-metadata-modal
+      :active="modals.isAddMetadataDisplayed"
+      :is-loading="loading.addMetadata"
+      :is-error="errors.addMetadata"
+      :taken-name="errors.takenMetadataName"
+      :descriptor-to-edit="descriptorToEdit"
+      :descriptors="taskMetadataDescriptors"
+      entity-type="Task"
+      @confirm="confirmAddMetadata"
+      @cancel="modals.isAddMetadataDisplayed = false"
+    />
+
+    <delete-modal
+      :active="modals.isDeleteMetadataDisplayed"
+      :is-loading="loading.deleteMetadata"
+      :is-error="errors.deleteMetadata"
+      :text="$t('productions.metadata.delete_task_text')"
+      :error-text="$t('productions.metadata.delete_error')"
+      @confirm="confirmDeleteMetadata"
+      @cancel="modals.isDeleteMetadataDisplayed = false"
+    />
+  </panel-layout>
 </template>
 
 <script setup>
 // Imports
+// --------------------------------------------------------------------------
 import { useHead } from '@unhead/vue'
 import { CornerLeftUpIcon } from 'lucide-vue-next'
 import moment from 'moment'
@@ -503,25 +473,27 @@ import {
 import taskStatusStore from '@/store/modules/taskstatus.js'
 import taskTypeStore from '@/store/modules/tasktypes.js'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import TaskList from '@/components/lists/TaskList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
+// ESLint reads the lowercase <schedule> tag as a native element.
+// eslint-disable-next-line no-unused-vars
+import Schedule from '@/components/schedule/Schedule.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
-import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
-import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
+import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
-// eslint-disable-next-line no-unused-vars
-import Schedule from '@/components/schedule/Schedule.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TaskListNumbers from '@/components/widgets/TaskListNumbers.vue'
@@ -576,6 +548,7 @@ const filters = {
 }
 
 // Composables
+// --------------------------------------------------------------------------
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -593,6 +566,7 @@ const instance = getCurrentInstance()
 const socket = instance.appContext.config.globalProperties.$socket
 
 // State
+// --------------------------------------------------------------------------
 const activeTab = ref('tasks')
 const currentScheduleItem = ref(null)
 const currentSort = ref('entity_name')
@@ -636,14 +610,40 @@ const importFileHeaders = ref([])
 const importedRows = ref(null)
 const priorityFilter = ref('-1')
 const retakeCountFilter = ref('all')
+const showFilters = ref(false)
 const tasks = ref([])
 const assetTypeIdsFilter = ref([])
 const taskStatusIdsFilter = ref([])
+// the fields of the filters, under their name in the view of a query
+const filterFields = {
+  dueDate: dueDateFilter,
+  late: estimationFilter,
+  priority: priorityFilter,
+  difficulty: difficultyFilter,
+  retakeCount: retakeCountFilter,
+  assetTypeIds: assetTypeIdsFilter,
+  taskStatusIds: taskStatusIdsFilter
+}
+// The task type the page loaded: the route of another page has none, or
+// another one.
+let loadedTaskTypeId = null
 
 // Search index for the supervisor filters, non-reactive by design
 let taskIndex = null
 
 const genericColumns = ['Metadata column name (text value)']
+// the task picked is no filter: a saved search leaves it alone
+const KEPT_QUERY_KEYS = ['task_id']
+const FILTER_QUERY_KEYS = [
+  'search',
+  'duedate',
+  'late',
+  'priority',
+  'difficulty',
+  'retake_count',
+  'task_status_id',
+  'asset_type_id'
+]
 const pageEntityTypes = ['Asset', 'Shot', 'Sequence', 'Edit', 'Episode']
 const realDateColumns = Object.keys(ESTIMATIONS_REAL_DATES)
 const allEpisodesLabelKeys = {
@@ -747,10 +747,10 @@ const schedule = reactive({
 const importModalRef = useTemplateRef('import-modal')
 const scheduleWidgetRef = useTemplateRef('schedule-widget')
 const searchFieldRef = useTemplateRef('task-search-field')
-const searchQueryListRef = useTemplateRef('task-search-query-list')
 const taskListRef = useTemplateRef('task-list')
 
 // Computed
+// --------------------------------------------------------------------------
 const currentEpisode = computed(() => store.getters.currentEpisode)
 // Shown above the list, whose row holds the schedule beside the rows.
 const taskListSaveErrorText = computed(
@@ -987,10 +987,38 @@ const tasksPath = computed(() => getRoute('task-type'))
 const schedulePath = computed(() => getRoute('task-type-schedule'))
 const estimationPath = computed(() => getRoute('task-type-estimation'))
 
+// A search is filed under its task type, in the field Zou names entity type:
+// those saved before hold the entity type itself, and stay on every task type
+// of that entity.
+// Before the filters went to the URL, a saved search held the text of the
+// search field, where modeling=wip names a status.
 const searchQueries = computed(() =>
-  taskSearchQueries.value.filter(
-    query => query.entity_type === entityType.value
+  taskSearchQueries.value
+    .filter(query =>
+      [currentTaskType.value.id, entityType.value].includes(query.entity_type)
+    )
+    .map(query => {
+      const isRouteQuery = [...new URLSearchParams(query.search_query)].every(
+        ([key]) => FILTER_QUERY_KEYS.includes(key)
+      )
+      return isRouteQuery
+        ? query
+        : {
+            ...query,
+            search_query: `${new URLSearchParams({ search: query.search_query })}`
+          }
+    })
+)
+
+const setFilterNames = computed(() => {
+  const defaults = readQueryView({})
+  return Object.keys(filterFields).filter(
+    name => `${filterFields[name].value}` !== `${defaults[name]}`
   )
+})
+
+const hasFilters = computed(
+  () => setFilterNames.value.length > 0 || Boolean(route.query.search)
 )
 
 const team = computed(() =>
@@ -1023,6 +1051,7 @@ const dataDisplayOptions = computed(() => [
 const zoomOptions = computed(() => getZoomOptions(t, [0, 1, 2, 3]))
 
 // Functions
+// --------------------------------------------------------------------------
 const initData = force => {
   resetTasks()
   focusSearchField({ preventScroll: true })
@@ -1042,6 +1071,7 @@ const initData = force => {
           setSearchFromUrl()
           resetTaskTypeDates()
         }, 200)
+
         applyQueryView()
       })
       .catch(err => {
@@ -1064,14 +1094,7 @@ const initData = force => {
 // A return to the page finds its entities still loaded and skips their
 // load: both paths read the URL.
 const applyQueryView = () => {
-  const view = readQueryView(route.query)
-  dueDateFilter.value = view.dueDate
-  estimationFilter.value = view.late
-  priorityFilter.value = view.priority
-  difficultyFilter.value = view.difficulty
-  retakeCountFilter.value = view.retakeCount
-  assetTypeIdsFilter.value = view.assetTypeIds
-  taskStatusIdsFilter.value = view.taskStatusIds
+  if (!setFilters(readQueryView(route.query))) applyTaskFilters()
 
   const taskId = route.query.task_id
   const task = taskMap.value.get(taskId)
@@ -1118,8 +1141,8 @@ const setCurrentScheduleItem = () => {
     })
 }
 
-// Tabs
-
+// Functions (tabs)
+// --------------------------------------------------------------------------
 const isActiveTab = tab => activeTab.value === tab
 
 const updateActiveTab = () => {
@@ -1142,7 +1165,9 @@ const getRoute = section => {
     params: {
       production_id: currentProduction.value.id,
       task_type_id: taskTypeId
-    }
+    },
+    // the filters apply to every section
+    query: route.query
   }
   // The episodes route has no type to inherit, and old links of the episode
   // stats open shot task types there. The route's own type comes first: it
@@ -1196,8 +1221,8 @@ const pushQuery = query => {
   })
 }
 
-// Search
-
+// Functions (search)
+// --------------------------------------------------------------------------
 const focusSearchField = options => {
   searchFieldRef.value?.focus(options)
 }
@@ -1294,26 +1319,42 @@ const onSearchChange = query => {
   }
 }
 
-const saveSearchQuery = searchQuery => {
-  searchQueryListRef.value?.addSearch(searchQuery)
-}
-
+// The URL holds the filters that are set, and no other: a saved search
+// compares its query to that one.
 const updateUrlParams = () => {
-  const retakeCount = retakeCountFilter.value
+  const unlessDefault = (value, defaultValue) =>
+    value === defaultValue ? undefined : value
   pushQuery({
-    search: searchFieldRef.value.getValue(),
-    duedate: dueDateFilter.value,
-    late: estimationFilter.value,
-    priority: priorityFilter.value,
-    difficulty: difficultyFilter.value,
-    retake_count: retakeCount === 'all' ? undefined : retakeCount,
-    task_status_id: taskStatusIdsFilter.value.join(',') || null,
-    asset_type_id: assetTypeIdsFilter.value.join(',') || null
+    search: searchFieldRef.value.getValue() || undefined,
+    duedate: unlessDefault(dueDateFilter.value, 'all'),
+    late: unlessDefault(estimationFilter.value, 'all'),
+    priority: unlessDefault(priorityFilter.value, '-1'),
+    difficulty: unlessDefault(difficultyFilter.value, '-1'),
+    retake_count: unlessDefault(retakeCountFilter.value, 'all'),
+    task_status_id: taskStatusIdsFilter.value.join(',') || undefined,
+    asset_type_id: assetTypeIdsFilter.value.join(',') || undefined
   })
 }
 
-// Tasks
+// The fields take the filters of a view, and their watcher applies them:
+// true when one of them changed.
+const setFilters = view => {
+  const changed = Object.entries(filterFields).filter(
+    ([name, field]) => `${field.value}` !== `${view[name]}`
+  )
+  changed.forEach(([name, field]) => {
+    field.value = view[name]
+  })
+  return changed.length > 0
+}
 
+const resetFilters = () => {
+  searchFieldRef.value.setValue('')
+  if (!setFilters(readQueryView({}))) applyTaskFilters()
+}
+
+// Functions (tasks)
+// --------------------------------------------------------------------------
 // onSearchChange leaves tasks sorted on every path, no extra sort needed.
 const applyTaskFilters = () => {
   onSearchChange(searchFieldRef.value.getValue())
@@ -1503,8 +1544,8 @@ const onEstimationCellChanged = ({ taskId, ...change }) => {
   if (task) saveCell(task, () => saveEstimation(task, change))
 }
 
-// Schedule
-
+// Functions (schedule)
+// --------------------------------------------------------------------------
 const onDataDisplayChange = item => {
   if (item.key === 'timesheets' && item.value) {
     resetScheduleItems()
@@ -1991,8 +2032,8 @@ const expandPersonElement = personElement => {
   personElement.expanded = !personElement.expanded
 }
 
-// Import
-
+// Functions (import)
+// --------------------------------------------------------------------------
 // Close leaves the error of the last save: opening drops it.
 const onAddMetadataClicked = () => {
   errors.addMetadata = false
@@ -2256,6 +2297,7 @@ if (!currentProduction.value) {
 }
 
 // Watchers
+// --------------------------------------------------------------------------
 watch(
   () => route.fullPath,
   () => {
@@ -2293,15 +2335,18 @@ watch(
   { deep: true }
 )
 
+// A saved search, or Back, changes the query from outside the fields, which
+// follow it. The load reads it by itself.
 watch(
-  () => route.query.search,
-  () => {
-    const currentSearch = searchFieldRef.value.getValue()
-    const routeSearch = route.query.search
-    if (routeSearch && routeSearch !== currentSearch) {
-      searchFieldRef.value.setValue(routeSearch)
-      onSearchChange(routeSearch)
+  () => route.query,
+  query => {
+    if (loading.entities || route.params.task_type_id !== loadedTaskTypeId) {
+      return
     }
+    const view = readQueryView(query)
+    const isSearchChanged = searchFieldRef.value.getValue() !== view.search
+    if (isSearchChanged) searchFieldRef.value.setValue(view.search)
+    if (!setFilters(view) && isSearchChanged) onSearchChange(view.search)
   }
 )
 
@@ -2407,6 +2452,7 @@ watch(
 )
 
 // Lifecycle
+// --------------------------------------------------------------------------
 onMounted(() => {
   if (!currentTaskType.value?.id) {
     router.push({ name: 'not-found' })
@@ -2422,6 +2468,7 @@ onMounted(() => {
     ...preferences.getObjectPreference('tasktype:data_display')
   }
   searchFieldRef.value?.setValue(route.query.search || '')
+  loadedTaskTypeId = route.params.task_type_id
   store.dispatch('clearSelectedTasks')
   const isAssets = route.path.includes('assets')
   const isShots = route.path.includes('shots')
@@ -2455,88 +2502,213 @@ onBeforeUnmount(() => {
 })
 
 // Head
+// --------------------------------------------------------------------------
 useHead({ title: computed(() => `${title.value} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.page-header {
-  margin-top: 1em;
-  margin-right: 0;
-}
-
-.align-end {
-  align-items: flex-end;
-}
-
-.search-options {
-  width: 325px;
-}
-
 .tabs ul {
   margin-left: 0;
 }
 
-.page {
-  flex: 1;
-  height: 100%;
+// One label height and one control height for the whole row, as on the other
+// pages: the back link and the name of the task type sit level with the
+// controls.
+.filters {
+  align-items: flex-end;
+  flex-wrap: wrap;
+  row-gap: 1em;
+
+  > .flexrow-item,
+  .actions > .flexrow-item {
+    margin-bottom: 0;
+  }
+
+  .field {
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  // The combos render from 34px to 39px tall against 42px for the buttons.
+  // Inline, they keep their width under a label wider than them.
+  :deep(.combo) {
+    display: inline-flex;
+    flex-direction: column;
+    height: 42px;
+    justify-content: center;
+    margin: 0;
+    vertical-align: top;
+  }
+
+  .button {
+    // Bulma's near-black button text outweighs the grey of the filter labels
+    color: var(--text);
+    height: 42px;
+    padding: 0 14px;
+  }
 }
 
-.back-link {
-  padding-top: 5px;
-  margin-right: 5px;
+// #app .dp--input sets the height globally; the id outranks the scope
+#app .filters :deep(.dp--input) {
+  height: 42px;
 }
 
-.task-type {
+.back-link,
+.task-type-name {
+  align-items: center;
   display: flex;
-  flex-direction: column;
-  height: 100%;
+  height: 42px;
 }
 
-.columns {
-  display: flex;
-  flex-direction: row;
+.task-type-name {
+  font-size: 1.2em;
+  margin-right: 1em;
 }
 
-.column {
-  overflow-y: auto;
-  padding: 0;
+// The search field gives its width up before the row wraps.
+.search-field {
+  flex: 1 1 200px;
+  max-width: 325px;
 }
 
-.main-column {
-  overflow: hidden;
+// Beside the search, the reset shows after the funnel: before it, it pushed
+// the funnel away.
+.filters :deep(.reset-filters) {
+  margin-left: 1rem;
+  order: 1;
 }
 
-.field {
-  margin-bottom: 0;
+.filters :deep(.reset-filters + .filters-toggle) {
+  margin-left: 0;
 }
 
-.query-list {
-  margin-bottom: 0;
+// the view and the actions keep to the right, on a line of their own once
+// the row wraps
+.actions {
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-left: auto;
+  row-gap: 1em;
+
+  > :last-child {
+    margin-right: 0;
+  }
+}
+
+// the folded filters stand a little apart, from each other and from the row
+// above
+.filters.collapsible {
   margin-top: 0.5em;
 
-  &.empty {
-    margin-top: 0;
+  > .flexrow-item:not(:last-child) {
+    margin-right: 1.5em;
   }
+}
+
+.collapsed .filters.collapsible {
+  display: none;
+}
+
+// The sections fill the panel of the list, and scroll what they hold.
+.task-type-page :deep(.data-list),
+.task-type-schedule,
+.task-type-estimation {
+  flex: 1;
+  min-height: 0;
+}
+
+.task-type-page :deep(.data-list) {
+  max-height: none;
+}
+
+// Beside the schedule, the rows of the list face its lines: the head of the
+// list ends where the 85px header of the schedule does, frame included, and
+// the list stops at the bottom of the schedule.
+.task-type-page :deep(.datatable-wrapper.with-schedule) {
+  margin-top: calc(54px - 1px);
+  min-height: 0;
+
+  .datatable-head th {
+    height: 31px;
+    padding-bottom: 3px;
+    padding-top: 3px;
+    vertical-align: middle;
+  }
+}
+
+.task-type-page :deep(.nb-tasks) {
+  padding-bottom: 0;
 }
 
 .task-type-schedule {
   display: flex;
   flex-direction: column;
-  flex: 1;
-}
-
-.zoom-level {
-  margin-bottom: 6px;
 }
 
 .task-type-estimation {
   display: flex;
-  max-height: calc(100% - 200px);
+
+  // its two tables scroll in the panel, where they ran past the page
+  .estimation-wrapper {
+    min-width: 0;
+  }
+
+  // two sheets set apart, as tall as the panel
+  :deep(.estimation-helper) {
+    column-gap: 14px;
+    margin-top: 0;
+
+    .column {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .task-schedule {
   flex-grow: 1;
   min-width: 200px;
   height: auto;
+}
+
+// The schedule paints its month names with the page background and leaves
+// the rest of its header transparent: on the panel tone they came out as
+// patches.
+.task-type-page .schedule-wrapper {
+  background: var(--background);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+// small screens only: the back button brings the list back in place of the
+// task panel
+.back-to-list {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  // read-only
+  .edit-action {
+    display: none;
+  }
+
+  // the view and the actions wrap with the filters, one by one: as a block
+  // they left half a line empty before them
+  .actions {
+    display: contents;
+  }
+
+  .search-field {
+    max-width: none;
+  }
+
+  .back-to-list {
+    display: flex;
+    margin-bottom: 0.5em;
+  }
 }
 </style>

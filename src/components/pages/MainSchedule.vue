@@ -1,6 +1,6 @@
 <template>
-  <div class="columns fixed-page">
-    <div class="column main-column">
+  <panel-layout class="main-schedule">
+    <template #filters>
       <div class="schedule-toolbar">
         <div class="toolbar-row">
           <div class="flexrow-item">
@@ -55,16 +55,12 @@
               @click="scrollScheduleByPeriod(1)"
             />
           </div>
-          <button-simple
-            class="flexrow-item toggle-filters"
-            :active="showMoreFilters"
-            icon="funnel"
-            :title="
-              showMoreFilters
-                ? $t('main.less_filters')
-                : $t('main.more_filters')
-            "
-            @click="showMoreFilters = !showMoreFilters"
+          <filters-toggle
+            class="flexrow-item"
+            :count="activeFilterCount"
+            :resettable="Boolean(activeFilterCount)"
+            v-model="showMoreFilters"
+            @reset="resetFilters"
           />
         </div>
         <div class="toolbar-row" v-show="showMoreFilters">
@@ -90,7 +86,16 @@
           </div>
         </div>
       </div>
-
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="mainScheduleSearchFilterGroups"
+        :is-group-enabled="true"
+        :queries="mainScheduleSearchQueries"
+        type="mainSchedule"
+        with-route-query
+      />
       <schedule
         ref="schedule"
         :end-date="endDate"
@@ -103,8 +108,8 @@
         readonly
         @root-element-expanded="expandProductionElement"
       />
-    </div>
-  </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -135,12 +140,15 @@ import {
   parseSimpleDate
 } from '@/lib/time'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import Schedule from '@/components/schedule/Schedule.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import FiltersToggle from '@/components/widgets/FiltersToggle.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 // Constants
 // --------------------------------------------------------------------------
@@ -183,8 +191,18 @@ const zoomLevel = ref(0)
 
 const scheduleRef = useTemplateRef('schedule')
 
+// The route watcher sees the query of the next page too, before this one
+// unmounts.
+const pagePath = route.path
+
 // Computed
 // --------------------------------------------------------------------------
+const mainScheduleSearchFilterGroups = computed(
+  () => store.getters.mainScheduleSearchFilterGroups
+)
+const mainScheduleSearchQueries = computed(
+  () => store.getters.mainScheduleSearchQueries
+)
 const openProductions = computed(() => store.getters.openProductions)
 const archivedTaskTypes = computed(() => store.getters.archivedTaskTypes)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -252,6 +270,13 @@ const taskTypeFilterTitle = computed(() => {
     t('main.all')
   )
 })
+
+const activeFilterCount = computed(
+  () =>
+    [hiddenProductionIds.value, hiddenTaskTypeIds.value].filter(
+      ids => ids.length
+    ).length
+)
 
 const filteredScheduleItems = computed(() =>
   scheduleItems.value.filter(
@@ -351,14 +376,44 @@ const onProductionVisibilityChanged = ({ key, value }) => {
 
 // The rows of a production are loaded when it unfolds: the filter applies
 // to the ones already loaded and to the next ones.
-const onTaskTypeVisibilityChanged = ({ key, value }) => {
-  hiddenTaskTypeIds.value = setVisibility(hiddenTaskTypeIds.value, key, value)
+const filterLoadedTaskTypeRows = () => {
   scheduleItems.value.forEach(item => {
     if (item.allChildren) {
       item.children = getVisibleTaskTypeItems(item.allChildren)
     }
   })
+}
+
+const onTaskTypeVisibilityChanged = ({ key, value }) => {
+  hiddenTaskTypeIds.value = setVisibility(hiddenTaskTypeIds.value, key, value)
+  filterLoadedTaskTypeRows()
   updateFilterQuery()
+}
+
+// The route watcher shows again what the query no longer hides.
+const resetFilters = () => {
+  router.push({
+    query: {
+      ...route.query,
+      hiddenProductions: undefined,
+      hiddenTypes: undefined
+    }
+  })
+}
+
+const applyRouteQuery = () => {
+  const zoom = parseInt(route.query.zoom)
+  zoomLevel.value = Math.min(Math.max(isNaN(zoom) ? 1 : zoom, 0), 3)
+  const knownIds = options => new Set(options.map(option => option.value))
+  hiddenProductionIds.value = parseHiddenIds(
+    route.query.hiddenProductions,
+    knownIds(productionFilterOptions.value)
+  )
+  hiddenTaskTypeIds.value = parseHiddenIds(
+    route.query.hiddenTypes,
+    knownIds(taskTypeFilterOptions.value)
+  )
+  filterLoadedTaskTypeRows()
 }
 
 const expandProductionElement = async productionElement => {
@@ -411,27 +466,25 @@ watch(zoomLevel, zoom => {
   if (zoom === 0 && periodUnit.value === 'days') periodUnit.value = 'weeks'
   const query = { ...route.query, zoom: String(zoom) }
   if (JSON.stringify(query) !== JSON.stringify(route.query)) {
-    router.push({ query })
+    // A query without zoom is completed in place: going back to it would
+    // otherwise push a new entry over the next ones.
+    const navigate = route.query.zoom ? router.push : router.replace
+    navigate({ query })
   }
 })
+
+// A saved search, or the back button, sets a query the page did not write.
+watch(
+  () => route.query,
+  () => {
+    if (route.path === pagePath) applyRouteQuery()
+  }
+)
 
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
-  const zoom = parseInt(route.query.zoom)
-  zoomLevel.value = Math.min(Math.max(isNaN(zoom) ? 1 : zoom, 0), 3)
-  const knownIds = options => new Set(options.map(option => option.value))
-  hiddenProductionIds.value = parseHiddenIds(
-    route.query.hiddenProductions,
-    knownIds(productionFilterOptions.value)
-  )
-  hiddenTaskTypeIds.value = parseHiddenIds(
-    route.query.hiddenTypes,
-    knownIds(taskTypeFilterOptions.value)
-  )
-  // a link or a reload brings the filters back: keep them in sight
-  showMoreFilters.value =
-    hiddenProductionIds.value.length > 0 || hiddenTaskTypeIds.value.length > 0
+  applyRouteQuery()
   if (openProductions.value.length) {
     scheduleItems.value = convertScheduleItems(openProductions.value)
     startDate.value = getFirstStartDate(scheduleItems.value)
@@ -456,11 +509,6 @@ useHead({
 }
 
 .schedule-toolbar {
-  background: var(--background-panel);
-  border-radius: 12px;
-  margin-bottom: 1em;
-  padding: 0.75em 1em 1em;
-
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
@@ -553,16 +601,19 @@ useHead({
   }
 }
 
-.fixed-page {
-  padding: 1em;
-  // the 60px topbar, then the same 1em as the sides
-  padding-top: calc(60px + 1em);
+// The schedule paints its corner and its month names with the page
+// background and leaves the rest of its headers transparent: on the panel
+// tone they came out as patches.
+.main-schedule .schedule-wrapper {
+  background: var(--background);
+  border-radius: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.main-column {
-  display: flex;
-  border: 0;
-  overflow: hidden;
-  flex-direction: column;
+// its names sit 5px from its left edge, made for a page margin beside them
+.main-schedule .schedule-wrapper :deep(.schedule) {
+  padding-left: 10px;
 }
 </style>

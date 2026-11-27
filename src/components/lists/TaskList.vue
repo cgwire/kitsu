@@ -504,10 +504,9 @@ import { getTaskHref } from '@/lib/path'
 import {
   durationToMinutes,
   formatSimpleDate,
-  getDatesFromStartDate,
-  getDatesFromEndDate,
-  parseSimpleDate,
-  minutesToDays
+  getTaskDueDateEdit,
+  getTaskEstimationEdit,
+  getTaskStartDateEdit
 } from '@/lib/time'
 
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
@@ -836,66 +835,21 @@ const onUnassign = (task, person) => {
 
 const updateStartDate = date => {
   applyToSelection(task => {
-    if (!date) {
-      const data = { start_date: null, due_date: task.due_date }
-      if (task.difficulty) data.difficulty = task.difficulty
-      return data
-    }
-    const startDate = moment(date)
-    if (
-      task.start_date &&
-      task.start_date.substring(0, 10) === formatSimpleDate(startDate)
-    ) {
-      return null
-    }
-    const dueDate = task.due_date ? parseSimpleDate(task.due_date) : null
-    const data = getDatesFromStartDate(
-      organisation.value,
-      startDate,
-      dueDate,
-      minutesToDays(organisation.value, task.estimation)
-    )
-    if (task.difficulty) data.difficulty = task.difficulty
-    return data
+    const data = getTaskStartDateEdit(organisation.value, task, date)
+    return data && task.difficulty
+      ? { ...data, difficulty: task.difficulty }
+      : data
   })
 }
 
 const updateDueDate = date => {
-  applyToSelection(task => {
-    if (!date) {
-      return { start_date: task.start_date, due_date: null }
-    }
-    const dueDate = moment(date)
-    if (
-      task.due_date &&
-      task.due_date.substring(0, 10) === formatSimpleDate(dueDate)
-    ) {
-      return null
-    }
-    const startDate = task.start_date ? parseSimpleDate(task.start_date) : null
-    return getDatesFromEndDate(
-      organisation.value,
-      startDate,
-      dueDate,
-      minutesToDays(organisation.value, task.estimation)
-    )
-  })
+  applyToSelection(task => getTaskDueDateEdit(organisation.value, task, date))
 }
 
 const updateTasksEstimation = ({ estimation }) => {
-  applyToSelection(task => {
-    if (!task.start_date) return { estimation }
-    const startDate = moment(task.start_date)
-    const dueDate = task.due_date ? moment(task.due_date) : null
-    const data = getDatesFromStartDate(
-      organisation.value,
-      startDate,
-      dueDate,
-      minutesToDays(organisation.value, estimation)
-    )
-    data.estimation = estimation
-    return data
-  })
+  applyToSelection(task =>
+    getTaskEstimationEdit(organisation.value, task, estimation)
+  )
 }
 
 // The rules of the import of Zou, which the task PUT does not check: a

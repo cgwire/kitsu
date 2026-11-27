@@ -1,7 +1,12 @@
 <template>
-  <div class="fixed-page columns xyz-in" xyz="fade">
-    <div class="page column main-column">
-      <div class="page-header pa1 mb0" xyz="fade">
+  <panel-layout
+    ref="page"
+    class="task-page xyz-in"
+    xyz="fade"
+    :side="!loadError"
+  >
+    <template #tabs>
+      <div class="page-header">
         <div class="flexrow header-title" v-if="loadError">
           <h1 class="title flexrow-item">{{ loadTitle }}</h1>
         </div>
@@ -14,7 +19,7 @@
             <corner-left-up-icon />
           </router-link>
 
-          <div class="flexrow-item block flexrow task-type">
+          <div class="flexrow-item flexrow task-type">
             <router-link
               class="flexrow-item mt05"
               :title="$t('tasks.previous')"
@@ -47,7 +52,7 @@
               :empty-width="100"
               :empty-height="60"
               :width="100"
-              :with-link="true"
+              with-link
             />
           </span>
 
@@ -63,15 +68,14 @@
             </template>
           </h1>
 
-          <div class="flexrow-item flexrow block">
+          <div class="flexrow-item flexrow task-status">
             <span class="flexrow-item">
               {{ $t('tasks.current_status') }}
             </span>
             <validation-tag
               class="is-medium flexrow-item"
               :task="task"
-              :is-static="true"
-              v-if="task"
+              is-static
             />
             <span
               class="flexrow-item"
@@ -95,7 +99,7 @@
             </template>
             <subscribe-button
               class="flexrow-item action-button"
-              :subscribed="isAssigned || task.is_subscribed"
+              :subscribed="task.is_subscribed"
               @click="toggleSubscribe"
               v-if="!isAssigned"
             />
@@ -120,377 +124,384 @@
           </div>
         </div>
       </div>
+    </template>
 
-      <div class="task-columns" ref="task-columns" v-if="!loadError">
-        <div class="task-column preview-column">
-          <div class="preview-column-content block">
-            <div class="flexrow preview-header">
-              <div class="flexrow-item" v-if="isPreviews">
-                <combobox-styled
-                  class="preview-combo flexrow-item"
-                  :aria-label="$t('entities.preview_files.revision')"
-                  :options="previewOptions"
-                  is-preview
-                  :model-value="currentPreviewId"
-                  @update:model-value="onRevisionPicked"
-                />
-              </div>
-              <div v-else>
-                <em>
-                  {{ $t('tasks.no_preview') }}
-                </em>
-              </div>
+    <template #list>
+      <route-section-tabs
+        class="section-tabs"
+        :active-tab="currentSection"
+        :route="route"
+        :tabs="taskTabs"
+        v-if="!loadError && !isCurrentUserClient"
+      />
+      <div
+        class="preview-column"
+        v-show="currentSection === 'preview'"
+        v-if="!loadError"
+      >
+        <div class="preview-column-content">
+          <div class="flexrow preview-header">
+            <div class="flexrow-item" v-if="isPreviews">
+              <combobox-styled
+                class="preview-combo flexrow-item"
+                :aria-label="$t('entities.preview_files.revision')"
+                :options="previewOptions"
+                is-preview
+                :model-value="currentPreviewId"
+                @update:model-value="onRevisionPicked"
+              />
+            </div>
+            <div v-else>
+              <em>
+                {{ $t('tasks.no_preview') }}
+              </em>
+            </div>
 
-              <div
-                class="set-main-preview flexrow-item flexrow pull-right"
-                v-if="currentPreview"
+            <div
+              class="set-main-preview flexrow-item flexrow pull-right"
+              v-if="currentPreview"
+            >
+              <button
+                class="button flexrow-item playlist-button"
+                @click="showHookupPlaylistModal"
+                v-if="isHookupButtonVisible"
               >
-                <button
-                  class="button flexrow-item playlist-button"
-                  @click="showHookupPlaylistModal"
-                  v-if="isHookupButtonVisible"
-                >
-                  <kitsu-icon
-                    name="playlists"
-                    :title="$t('tasks.hookup_playlist')"
-                  />
-                </button>
-                <button
-                  class="button flexrow-item mr0"
-                  :class="{
-                    'is-loading': loading.setPreview
-                  }"
-                  @click="setPreview"
-                  v-if="isCurrentUserManager"
-                >
-                  <image-icon class="icon" />
-                  <span class="text">
-                    {{ $t('tasks.set_preview') }}
-                  </span>
-                </button>
-                <label
-                  class="flexrow-item pointer"
-                  v-if="isMovie && isCurrentUserManager"
-                >
-                  <input
-                    class="mr02"
-                    type="checkbox"
-                    v-model="isUseCurrentFrame"
-                  />
-                  {{ $t('tasks.use_current_frame') }}
-                </label>
-                <span class="error flexrow-item" v-if="errors.setPreview">
-                  {{ $t('tasks.set_preview_error') }}
+                <kitsu-icon
+                  name="playlists"
+                  :title="$t('tasks.hookup_playlist')"
+                />
+              </button>
+              <button
+                class="button flexrow-item set-preview-button"
+                :class="{
+                  'is-loading': loading.setPreview
+                }"
+                @click="setPreview"
+                v-if="isCurrentUserManager"
+              >
+                <image-icon class="icon" />
+                <span class="text">
+                  {{ $t('tasks.set_preview') }}
                 </span>
-              </div>
-              <view-playlist-modal
-                active
-                sort
-                :task-ids="hookupPlaylistTaskIds"
-                @cancel="hideHookupPlaylistModal"
-                v-if="modals.hookupPlaylist"
-              />
-            </div>
-
-            <div class="preview-area mt1">
-              <div v-if="isPreviews">
-                <preview-player
-                  ref="preview-player"
-                  :can-comment="isCommentingAllowed"
-                  :entity-preview-files="taskEntityPreviews"
-                  :extra-wide="true"
-                  :fps="currentFps"
-                  :last-preview-files="taskPreviews || []"
-                  :link="currentPreviewComment?.links?.[0]"
-                  :previews="currentPreview.previews"
-                  :read-only="isPreviewPlayerReadOnly"
-                  :task="task"
-                  :task-type-map="taskTypeMap"
-                  @add-extra-preview="onAddExtraPreviewClicked"
-                  @annotation-changed="onAnnotationChanged"
-                  @change-current-preview="changeCurrentPreview"
-                  @remove-extra-preview="onRemoveExtraPreviewClicked"
-                  @previews-order-changed="onPreviewsOrderChanged"
-                  @frame-updated="onFrameUpdated"
-                  v-if="currentPreview"
-                />
-              </div>
-            </div>
-          </div>
-          <div
-            class="flexrow-item block mt1 mr0 info-block"
-            v-if="!isCurrentUserClient"
-          >
-            <page-subtitle :text="$t('main.info')" />
-            <div class="table-body mt1">
-              <table class="datatable no-header" v-if="task">
-                <tbody class="table-body">
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('tasks.fields.estimation') }}
-                    </td>
-                    <td>{{ formatDuration(task.estimation) }}</td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('tasks.fields.duration') }}
-                    </td>
-                    <td>{{ formatDuration(task.duration) }}</td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('tasks.fields.retake_count') }}
-                    </td>
-                    <td>{{ task.retake_count }}</td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('tasks.fields.start_date') }}
-                    </td>
-                    <td>{{ formatDisplayDate(task.start_date) }}</td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('tasks.fields.due_date') }}
-                    </td>
-                    <td>{{ formatDisplayDate(task.due_date) }}</td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('tasks.fields.end_date') }}
-                    </td>
-                    <td>{{ formatDisplayDate(task.end_date) }}</td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('tasks.fields.done_date') }}
-                    </td>
-                    <td>{{ formatDisplayDate(task.done_date) }}</td>
-                  </tr>
-                  <tr
-                    class="datatable-row"
-                    :key="descriptor.id"
-                    v-for="descriptor in taskMetadata"
-                  >
-                    <td class="field-label">{{ descriptor.name }}</td>
-                    <td
-                      :class="{
-                        'pre-wrap': descriptor.data_type === 'textarea'
-                      }"
-                    >
-                      <a
-                        :href="linkForDescriptor(descriptor)"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        v-if="
-                          descriptor.data_type === 'url' &&
-                          linkForDescriptor(descriptor)
-                        "
-                      >
-                        {{ getOwnValue(task.data, descriptor.field_name) }}
-                      </a>
-                      <span
-                        class="flexrow"
-                        v-else-if="
-                          descriptor.data_type === 'person' &&
-                          personForDescriptor(descriptor)
-                        "
-                      >
-                        <people-avatar
-                          class="flexrow-item"
-                          :person="personForDescriptor(descriptor)"
-                          :size="22"
-                          :font-size="11"
-                          :is-link="false"
-                        />
-                        <span class="flexrow-item">
-                          {{ personForDescriptor(descriptor).name }}
-                        </span>
-                      </span>
-                      <template v-else>
-                        {{ getTaskMetadataValue(descriptor) }}
-                      </template>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="pa2"></div>
-        </div>
-
-        <div class="task-column comments-column">
-          <div v-if="task">
-            <div>
-              <add-comment
-                ref="add-comment"
-                :frame="currentFrame"
-                :is-error="errors.addComment"
-                :is-max-retakes-error="errors.addCommentMaxRetakes"
-                :is-loading="loading.addComment"
-                :is-movie="isMovie"
-                :is-picture="isPicture"
-                :is-status-locked="isMentionedOnly"
-                :team="currentTeam"
-                :task-types="currentTaskTypes"
-                :task="task"
-                :task-status="taskStatusForCurrentUser"
-                :preview-forms="previewForms"
-                :fps="currentFps"
-                :revision="currentRevision"
-                @add-comment="postComment"
-                @add-preview="onAddPreviewClicked"
-                @file-drop="selectFile"
-                @clear-files="clearPreviewFiles"
-                @annotation-snapshots-requested="extractAnnotationSnapshots"
-                @annotation-snapshots-with-label-requested="
-                  extractAnnotationSnapshots(true)
-                "
-                @remove-preview="onPreviewFormRemoved"
-                v-if="isCommentingAllowed"
-              />
-              <div
-                class="comments"
-                v-if="taskComments && taskComments.length > 0"
+              </button>
+              <label
+                class="flexrow-item pointer use-current-frame"
+                v-if="isMovie && isCurrentUserManager"
               >
-                <XyzTransitionGroup
-                  appear
-                  v-xyz="{ fade: false, up: false, 'flip-up': false }"
-                >
-                  <comment
-                    :key="comment.id"
-                    :comment="comment"
-                    :fps="currentFps"
-                    :frame="currentFrame"
-                    :is-action-error="comment.id === failedActionCommentId"
-                    :is-change="isStatusChange(index)"
-                    :is-checkable="
-                      (user && user.id === comment.person?.id) ||
-                      (isCurrentUserArtist && isAssigned) ||
-                      isDepartmentSupervisor ||
-                      isCurrentUserManager
-                    "
-                    :is-duplicable="isCommentingAllowed"
-                    :is-editable="
-                      (user && user.id === comment.person?.id) ||
-                      isCurrentUserManager
-                    "
-                    :is-movie="isMovie"
-                    :is-pinnable="
-                      isDepartmentSupervisor || isCurrentUserManager
-                    "
-                    :is-replyable="canReplyTo(comment)"
-                    :revision="currentRevision"
-                    :task="task"
-                    :team="currentTeam"
-                    :task-types="currentTaskTypes"
-                    @ack-comment="onAckComment"
-                    @duplicate-comment="onDuplicateComment"
-                    @pin-comment="onPinComment"
-                    @edit-comment="onEditComment"
-                    @delete-comment="onDeleteComment"
-                    @toggle-for-client="onToggleForClient"
-                    @checklist-updated="saveComment"
-                    @time-code-clicked="timeCodeClicked"
-                    v-for="(comment, index) in taskComments"
-                  />
-                </XyzTransitionGroup>
-              </div>
-              <div class="no-comment" v-else>
-                <em>
-                  {{ $t('tasks.no_comment') }}
-                </em>
-              </div>
+                <input type="checkbox" v-model="isUseCurrentFrame" />
+                {{ $t('tasks.use_current_frame') }}
+              </label>
+              <span class="error flexrow-item" v-if="errors.setPreview">
+                {{ $t('tasks.set_preview_error') }}
+              </span>
             </div>
+            <view-playlist-modal
+              active
+              sort
+              :task-ids="hookupPlaylistTaskIds"
+              @cancel="hideHookupPlaylistModal"
+              v-if="modals.hookupPlaylist"
+            />
           </div>
 
-          <div class="has-text-centered" v-if="isTaskLoading">
-            <spinner />
+          <div class="preview-area">
+            <div v-if="isPreviews">
+              <preview-player
+                ref="preview-player"
+                :can-comment="isCommentingAllowed"
+                :entity-preview-files="taskEntityPreviews"
+                extra-wide
+                :fps="currentFps"
+                :last-preview-files="taskPreviews || []"
+                :link="currentPreviewComment?.links?.[0]"
+                :previews="currentPreview.previews"
+                :read-only="isPreviewPlayerReadOnly"
+                :task="task"
+                :task-type-map="taskTypeMap"
+                @add-extra-preview="onAddExtraPreviewClicked"
+                @annotation-changed="onAnnotationChanged"
+                @change-current-preview="changeCurrentPreview"
+                @remove-extra-preview="onRemoveExtraPreviewClicked"
+                @previews-order-changed="onPreviewsOrderChanged"
+                @frame-updated="onFrameUpdated"
+                v-if="currentPreview"
+              />
+            </div>
           </div>
+        </div>
+      </div>
+      <div
+        class="info-block"
+        v-show="currentSection === 'metadata'"
+        v-if="!loadError && !isCurrentUserClient"
+      >
+        <div class="table-body">
+          <table class="datatable no-header" v-if="task">
+            <tbody class="table-body">
+              <tr class="datatable-row">
+                <td class="field-label">
+                  {{ $t('tasks.fields.estimation') }}
+                </td>
+                <td>{{ formatDuration(task.estimation) }}</td>
+              </tr>
+              <tr class="datatable-row">
+                <td class="field-label">
+                  {{ $t('tasks.fields.duration') }}
+                </td>
+                <td>{{ formatDuration(task.duration) }}</td>
+              </tr>
+              <tr class="datatable-row">
+                <td class="field-label">
+                  {{ $t('tasks.fields.retake_count') }}
+                </td>
+                <td>{{ task.retake_count }}</td>
+              </tr>
+              <tr class="datatable-row">
+                <td class="field-label">
+                  {{ $t('tasks.fields.start_date') }}
+                </td>
+                <td>{{ formatDisplayDate(task.start_date) }}</td>
+              </tr>
+              <tr class="datatable-row">
+                <td class="field-label">
+                  {{ $t('tasks.fields.due_date') }}
+                </td>
+                <td>{{ formatDisplayDate(task.due_date) }}</td>
+              </tr>
+              <tr class="datatable-row">
+                <td class="field-label">
+                  {{ $t('tasks.fields.end_date') }}
+                </td>
+                <td>{{ formatDisplayDate(task.end_date) }}</td>
+              </tr>
+              <tr class="datatable-row">
+                <td class="field-label">
+                  {{ $t('tasks.fields.done_date') }}
+                </td>
+                <td>{{ formatDisplayDate(task.done_date) }}</td>
+              </tr>
+              <tr
+                class="datatable-row"
+                :key="descriptor.id"
+                v-for="descriptor in taskMetadata"
+              >
+                <td class="field-label">{{ descriptor.name }}</td>
+                <td
+                  :class="{
+                    'pre-wrap': descriptor.data_type === 'textarea'
+                  }"
+                >
+                  <a
+                    :href="linkForDescriptor(descriptor)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    v-if="
+                      descriptor.data_type === 'url' &&
+                      linkForDescriptor(descriptor)
+                    "
+                  >
+                    {{ getOwnValue(task.data, descriptor.field_name) }}
+                  </a>
+                  <span
+                    class="flexrow"
+                    v-else-if="
+                      descriptor.data_type === 'person' &&
+                      personForDescriptor(descriptor)
+                    "
+                  >
+                    <people-avatar
+                      class="flexrow-item"
+                      :person="personForDescriptor(descriptor)"
+                      :size="22"
+                      :font-size="11"
+                      :is-link="false"
+                    />
+                    <span class="flexrow-item">
+                      {{ personForDescriptor(descriptor).name }}
+                    </span>
+                  </span>
+                  <template v-else>
+                    {{ getTaskMetadataValue(descriptor) }}
+                  </template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
       <entity-load-error
         class="block load-error"
         :error="loadError"
         @reload="loadPage()"
-        v-else
+        v-if="loadError"
       />
+    </template>
 
+    <template #side>
+      <div class="comments-column">
+        <div v-if="task">
+          <div>
+            <add-comment
+              ref="add-comment"
+              :frame="currentFrame"
+              :is-error="errors.addComment"
+              :is-max-retakes-error="errors.addCommentMaxRetakes"
+              :is-loading="loading.addComment"
+              :is-movie="isMovie"
+              :is-picture="isPicture"
+              :is-status-locked="isMentionedOnly"
+              :team="currentTeam"
+              :task-types="currentTaskTypes"
+              :task="task"
+              :task-status="taskStatusForCurrentUser"
+              :preview-forms="previewForms"
+              :fps="currentFps"
+              :revision="currentRevision"
+              @add-comment="postComment"
+              @add-preview="onAddPreviewClicked"
+              @file-drop="selectFile"
+              @clear-files="clearPreviewFiles"
+              @annotation-snapshots-requested="extractAnnotationSnapshots"
+              @annotation-snapshots-with-label-requested="
+                extractAnnotationSnapshots(true)
+              "
+              @remove-preview="onPreviewFormRemoved"
+              v-if="isCommentingAllowed"
+            />
+            <div
+              class="comments"
+              v-if="taskComments && taskComments.length > 0"
+            >
+              <XyzTransitionGroup
+                appear
+                v-xyz="{ fade: false, up: false, 'flip-up': false }"
+              >
+                <comment
+                  :key="comment.id"
+                  :comment="comment"
+                  :fps="currentFps"
+                  :frame="currentFrame"
+                  :is-action-error="comment.id === failedActionCommentId"
+                  :is-change="isStatusChange(index)"
+                  :is-checkable="
+                    (user && user.id === comment.person?.id) ||
+                    (isCurrentUserArtist && isAssigned) ||
+                    isDepartmentSupervisor ||
+                    isCurrentUserManager
+                  "
+                  :is-duplicable="isCommentingAllowed"
+                  :is-editable="
+                    (user && user.id === comment.person?.id) ||
+                    isCurrentUserManager
+                  "
+                  :is-movie="isMovie"
+                  :is-pinnable="isDepartmentSupervisor || isCurrentUserManager"
+                  :is-replyable="canReplyTo(comment)"
+                  :revision="currentRevision"
+                  :task="task"
+                  :team="currentTeam"
+                  :task-types="currentTaskTypes"
+                  @ack-comment="onAckComment"
+                  @duplicate-comment="onDuplicateComment"
+                  @pin-comment="onPinComment"
+                  @edit-comment="onEditComment"
+                  @delete-comment="onDeleteComment"
+                  @toggle-for-client="onToggleForClient"
+                  @checklist-updated="saveComment"
+                  @time-code-clicked="timeCodeClicked"
+                  v-for="(comment, index) in taskComments"
+                />
+              </XyzTransitionGroup>
+            </div>
+            <div class="no-comment" v-else>
+              <em>
+                {{ $t('tasks.no_comment') }}
+              </em>
+            </div>
+          </div>
+        </div>
+
+        <div class="has-text-centered" v-if="isTaskLoading">
+          <spinner />
+        </div>
+      </div>
+    </template>
+
+    <add-preview-modal
+      ref="add-preview-modal"
+      :active="modals.addPreview"
+      :is-loading="loading.addPreview"
+      :is-error="errors.addPreview"
+      :fps="currentFps"
+      :expected-frames="entityFrames"
+      :title="previewModalTitle"
+      @cancel="closeAddPreviewModal"
+      @confirm="confirmAddPreviewModal"
+    />
+
+    <!-- The browser shows a player in full screen alone: the modals of its
+         "+" and trash buttons go into it. -->
+    <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
       <add-preview-modal
-        ref="add-preview-modal"
-        :active="modals.addPreview"
-        :is-loading="loading.addPreview"
-        :is-error="errors.addPreview"
-        :fps="currentFps"
-        :expected-frames="entityFrames"
-        :title="
-          task
-            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
-            : ''
-        "
-        @cancel="closeAddPreviewModal"
-        @confirm="confirmAddPreviewModal"
-      />
-
-      <!-- The browser shows a player in full screen alone: the modals of its
-           "+" and trash buttons go into it. -->
-      <teleport :to="fullScreenPlayer" :disabled="!fullScreenPlayer">
-        <add-preview-modal
-          ref="add-extra-preview-modal"
-          :active="modals.addExtraPreview"
-          :is-loading="loading.addExtraPreview"
-          :is-error="errors.addExtraPreview"
-          message=""
-          :upload-progress="uploadProgress"
-          :title="
-            task
-              ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
-              : ''
-          "
-          @cancel="hideExtraPreviewModal"
-          @confirm="createExtraPreview"
-        />
-
-        <delete-modal
-          :active="modals.deleteExtraPreview"
-          :is-loading="loading.deleteExtraPreview"
-          :is-error="errors.deleteExtraPreview"
-          :text="$t('tasks.delete_preview')"
-          :error-text="$t('tasks.delete_preview_error')"
-          @cancel="hideRemoveExtraPreviewModal"
-          @confirm="confirmDeleteTaskPreview"
-        />
-      </teleport>
-
-      <edit-comment-modal
-        :active="modals.editComment"
-        :frame="currentFrame"
-        :is-loading="loading.editComment"
-        :is-error="errors.editComment"
-        :is-movie="isMovie"
-        :comment-to-edit="commentToEdit"
-        :team="currentTeam"
-        :task-types="currentTaskTypes"
-        :fps="currentFps"
-        :revision="currentRevision"
-        @confirm="confirmEditTaskComment"
-        @cancel="onCancelEditComment"
+        ref="add-extra-preview-modal"
+        :active="modals.addExtraPreview"
+        :is-loading="loading.addExtraPreview"
+        :is-error="errors.addExtraPreview"
+        message=""
+        :upload-progress="uploadProgress"
+        :title="previewModalTitle"
+        @cancel="hideExtraPreviewModal"
+        @confirm="createExtraPreview"
       />
 
       <delete-modal
-        :active="modals.deleteComment"
-        :is-loading="loading.deleteComment"
-        :is-error="errors.deleteComment"
-        :text="$t('tasks.delete_comment')"
-        :error-text="$t('tasks.delete_comment_error')"
-        @confirm="confirmDeleteTaskComment"
-        @cancel="onCancelDeleteComment"
+        :active="modals.deleteExtraPreview"
+        :is-loading="loading.deleteExtraPreview"
+        :is-error="errors.deleteExtraPreview"
+        :text="$t('tasks.delete_preview')"
+        :error-text="$t('tasks.delete_preview_error')"
+        @cancel="hideRemoveExtraPreviewModal"
+        @confirm="confirmDeleteTaskPreview"
       />
-    </div>
-  </div>
+    </teleport>
+
+    <edit-comment-modal
+      :active="modals.editComment"
+      :frame="currentFrame"
+      :is-loading="loading.editComment"
+      :is-error="errors.editComment"
+      :is-movie="isMovie"
+      :comment-to-edit="commentToEdit"
+      :team="currentTeam"
+      :task-types="currentTaskTypes"
+      :fps="currentFps"
+      :revision="currentRevision"
+      @confirm="confirmEditTaskComment"
+      @cancel="onCancelEditComment"
+    />
+
+    <delete-modal
+      :active="modals.deleteComment"
+      :is-loading="loading.deleteComment"
+      :is-error="errors.deleteComment"
+      :text="$t('tasks.delete_comment')"
+      :error-text="$t('tasks.delete_comment_error')"
+      @confirm="confirmDeleteTaskComment"
+      @cancel="onCancelDeleteComment"
+    />
+  </panel-layout>
 </template>
 
 <script setup>
+import { useHead } from '@unhead/vue'
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+  CornerLeftUpIcon,
+  ImageIcon
+} from 'lucide-vue-next'
 import {
   computed,
   defineAsyncComponent,
@@ -504,18 +515,9 @@ import {
   useTemplateRef,
   watch
 } from 'vue'
-import { useHead } from '@unhead/vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-  CornerLeftUpIcon,
-  ImageIcon
-} from 'lucide-vue-next'
 
 import { isListOfPageLoaded } from '@/composables/entity'
 import { useFullScreenTarget } from '@/composables/fullScreen'
@@ -548,24 +550,23 @@ import episodesStore from '@/store/modules/episodes'
 import sequencesStore from '@/store/modules/sequences'
 import shotsStore from '@/store/modules/shots'
 
-/* eslint-disable no-unused-vars */
-import AddComment from '@/components/widgets/AddComment.vue'
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
-import Comment from '@/components/widgets/Comment.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import EntityLoadError from '@/components/pages/entities/EntityLoadError.vue'
+import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+import AddComment from '@/components/widgets/AddComment.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import Comment from '@/components/widgets/Comment.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
-import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
-/* eslint-enable no-unused-vars */
 
 const ViewPlaylistModal = defineAsyncComponent(
   () => import('@/components/modals/ViewPlaylistModal.vue')
@@ -656,7 +657,7 @@ const errors = ref({
 const draftComment = reactive({})
 provide('draftComment', draftComment)
 
-const taskColumns = useTemplateRef('task-columns')
+const pageRef = useTemplateRef('page')
 const previewPlayerRef = useTemplateRef('preview-player')
 const fullScreenPlayer = useFullScreenTarget(() => previewPlayerRef.value?.$el)
 const addCommentRef = useTemplateRef('add-comment')
@@ -714,19 +715,24 @@ const entityListsByType = {
   Shot: () => shotsStore.cache.shots
 }
 
+// The plain load of the sequences and of the episodes brings no task: the
+// chevrons walk the tasks.
+const LIST_LOADS = {
+  Episode: 'loadEpisodesWithTasks',
+  Sequence: 'loadSequencesWithTasks'
+}
+
 // The page loads the list of its episode once the task shows, and a list load
 // replaces the cached array out of sight of Vue: the chevrons walk the list
-// once that load is over. The sequences and the episodes reload without the
-// tasks the chevrons read: their lists stay as they were.
+// once that load is over. Other pages load the sequences and the episodes
+// without the tasks the chevrons read: such a list has nothing to walk.
 const entityList = computed(() => {
   const type = currentType.value
-  if (
-    ['Asset', 'Edit', 'Shot'].includes(type) &&
-    !isListOfPageLoaded(store.getters, type)
-  ) {
-    return []
-  }
-  return entityListsByType[type]()
+  const isLoaded =
+    type === 'Episode'
+      ? store.getters.isEpisodeListLoadedWithTasks
+      : isListOfPageLoaded(store.getters, type)
+  return isLoaded ? entityListsByType[type]() : []
 })
 
 // Computed (task)
@@ -747,7 +753,23 @@ const taskMetadata = computed(() => {
 
 const currentEntity = computed(() => task.value && task.value.entity)
 
+// A client reads no metadata.
+const currentSection = computed(() =>
+  route.query.section === 'metadata' && !isCurrentUserClient.value
+    ? 'metadata'
+    : 'preview'
+)
+
+const taskTabs = computed(() => [
+  { label: t('main.label.preview'), name: 'preview' },
+  { label: t('main.label.metadata'), name: 'metadata' }
+])
+
 const taskType = computed(() => taskTypeMap.value.get(task.value?.task_type_id))
+
+const previewModalTitle = computed(() =>
+  task.value ? `${task.value.entity_name} / ${taskType.value?.name || ''}` : ''
+)
 
 // Ported from taskMixin: an entity can override the production fps via
 // data.fps; use it so the player builds its frame model on the rate the video
@@ -1072,44 +1094,26 @@ const currentTeam = computed(() =>
   )
 )
 
-// get current task types for this project filtered by current task entity type (Shot or Asset)
+// The task types of the production the entity of the task has a task for,
+// each with the path to that task.
 const currentTaskTypes = computed(() => {
-  if (!task.value || !currentProduction.value) return []
-
-  // task types for this project
-  const task_types = currentProduction.value.task_types
-
-  // get the current task entity type eg. 'Shot' or 'Asset'
-  const current_task_type = taskTypeMap.value.get(task.value.task_type_id)
-  if (!current_task_type) return []
-  const task_type_entity = current_task_type.for_entity
-  const task_type_entity_slug = task_type_entity.toLowerCase() + 's'
-
-  // lets get a map of all tasks that are the same entity
-  // where the key is the task type id
-  const entity_tasks = {}
-  for (const keyValue of taskMap.value) {
-    const entityTask = keyValue[1]
-    if (entityTask.entity_id === task.value.entity_id)
-      entity_tasks[entityTask.task_type_id] = entityTask
-  }
-
-  return (
-    task_types
-      // get all task type objects
-      .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
-
-      // filter down to just those that match this task entity type Shot, Asset etc.
-      .filter(item => item?.for_entity === task_type_entity)
-
-      // filter to tasks that exist
-      .filter(item => entity_tasks[item.id])
-
-      // add a url that points to the task
-      .map(item =>
-        getTaskTypeWithUrl(item, entity_tasks[item.id], task_type_entity_slug)
-      )
+  if (!task.value || !currentProduction.value || !taskType.value) return []
+  const forEntity = taskType.value.for_entity
+  const entityTasks = Object.fromEntries(
+    [...taskMap.value.values()]
+      .filter(entityTask => entityTask.entity_id === task.value.entity_id)
+      .map(entityTask => [entityTask.task_type_id, entityTask])
   )
+  return currentProduction.value.task_types
+    .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+    .filter(item => item?.for_entity === forEntity && entityTasks[item.id])
+    .map(item =>
+      getTaskTypeWithUrl(
+        item,
+        entityTasks[item.id],
+        `${forEntity.toLowerCase()}s`
+      )
+    )
 })
 
 // Functions (formatting)
@@ -1145,13 +1149,16 @@ const linkForDescriptor = descriptor =>
 
 // Functions (routing)
 // --------------------------------------------------------------------------
-function taskPath(targetTask, section = 'task') {
-  if (!targetTask) {
-    targetTask = task.value
-  } else {
-    targetTask.project_id = task.value.project_id
-    targetTask.episode_id = task.value.episode_id
-  }
+const taskPath = (targetTask, section = 'task') => {
+  // A task of the lists comes as its id alone, in the production and the
+  // episode of the task shown.
+  targetTask = targetTask
+    ? {
+        ...targetTask,
+        project_id: task.value.project_id,
+        episode_id: task.value.episode_id
+      }
+    : task.value
 
   let target = { name: 'open-productions' }
   if (targetTask) {
@@ -1352,7 +1359,7 @@ const loadPage = async () => {
   const type = currentType.value
   if (listReadWithTask !== type || !isListOfPageLoaded(store.getters, type)) {
     const isFailed = await store
-      .dispatch(`load${type}s`)
+      .dispatch(LIST_LOADS[type] ?? `load${type}s`)
       // The shots, the assets, and the edits answer a failure with an empty
       // list and their error flag; the sequences and the episodes pass it on.
       .then(() => Boolean(store.getters[`is${type}sLoadingError`]))
@@ -1370,10 +1377,10 @@ const loadPage = async () => {
   // A newer load, a move for instance, keeps its scroll.
   if (call !== loadCount) return
   await nextTick()
-  if (taskColumns.value) {
-    taskColumns.value.scrollTop = 100
-    window.scrollTo(0, 0)
-  }
+  window.scrollTo(0, 0)
+  // The comment box takes the focus when it shows: a narrow page, which
+  // scrolls as a whole, goes down to it.
+  if (pageRef.value) pageRef.value.$el.scrollTop = 0
 }
 
 // Functions (comments)
@@ -1724,7 +1731,7 @@ const showRemoveExtraPreviewModal = preview => {
 const onRemoveExtraPreviewClicked = preview =>
   showRemoveExtraPreviewModal(preview)
 
-function hideRemoveExtraPreviewModal() {
+const hideRemoveExtraPreviewModal = () => {
   modals.value.deleteExtraPreview = false
 }
 
@@ -2154,18 +2161,41 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.dark .task-information,
-.dark .add-comment,
-.dark .comment,
-.dark .no-comment,
-.dark .column {
-  background: #46494f;
-  border-color: $dark-grey;
-  box-shadow: 0 0 6px #333;
+// The controls of the bar are as tall as the combobox of the revisions,
+// which carries a top margin the buttons lack. Its chevron keeps a margin on
+// its right: the revision gets as much room on its left.
+.preview-header :deep(.combo) {
+  margin-top: 0;
+  padding-left: 14px;
+}
+
+.preview-header .button {
+  // Bulma's near-black button text outweighs the text of the combobox
+  color: var(--text);
+  height: 40px;
+  padding: 0 14px;
 }
 
 .set-main-preview {
   margin-right: 0;
+
+  > :last-child {
+    margin-right: 0;
+  }
+}
+
+.use-current-frame {
+  align-items: center;
+  display: flex;
+
+  input {
+    margin-right: 0.5em;
+  }
+}
+
+// as far from the bar as the bar is from the tabs
+.preview-area {
+  margin-top: 0.75em;
 }
 
 .playlist-button {
@@ -2174,103 +2204,61 @@ useHead({
   }
 }
 
-h2.subtitle {
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.page {
-  background: #f9f9f9;
-  margin-top: 60px;
-  padding: 0;
-}
-
-.page.column {
-  background: var(--background-page);
-  padding-bottom: 1em;
-}
-
+// The header runs over the two columns, in the place of the tabs of a page:
+// it holds too much for the width of the preview alone.
 .page-header {
-  margin: 1em 1em 0 1em;
-  padding-right: 0;
+  background: var(--background-panel);
+  border-radius: 12px;
+  margin: 0;
+  padding: 14px;
 }
 
-.navigation-buttons {
-  font-size: 1em;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-}
-
-.navigation-buttons .arrow {
-  font-size: 1.2em;
-  font-weight: bold;
-}
-
-.navigation-buttons a {
-  color: $grey;
-}
-
-.selected {
-  border: 0;
-}
-
-.source {
-  color: #aaa;
-  font-size: 0.8em;
-}
-
-video {
-  width: 100%;
-}
-
-.validation-buttons button {
-  width: 100%;
-  margin-bottom: 0.3em;
-  border-width: 2px;
-  font-weight: bold;
+// .comments-column outweighs the colors the comment box gives itself
+.comments-column .add-comment,
+.no-comment {
+  background: var(--background-block);
+  border-color: var(--border);
+  box-shadow: 0 0 6px var(--box-shadow);
 }
 
 .add-comment {
   margin-bottom: 1em;
   padding: 1em;
-  box-shadow: 0 0 6px #e0e0e0;
 }
 
 .no-comment {
-  background: white;
-  box-shadow: 0 0 6px #e0e0e0;
   padding: 1em;
   border-radius: 5px;
 }
 
-.comment {
-  box-shadow: 0 0 6px #e0e0e0;
-  margin-top: 0.3em;
+// the comments take a third of the page, and no less than a task panel
+.task-page.panel-layout.with-side {
+  grid-template-columns: minmax(0, 2fr) minmax(400px, 1fr);
 }
 
-.task-columns {
-  display: flex;
+.task-page :deep(.side-column) {
+  max-width: none;
+  width: auto;
+}
+
+.section-tabs {
+  margin-bottom: 0;
+  min-height: 36px;
+}
+
+.preview-column,
+.info-block {
   flex: 1;
-  flex-direction: row;
-}
-
-.task-column {
-  padding: 1em;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .comments-column {
-  flex: 1;
-}
-
-.preview-column {
-  overflow: auto;
-  flex: 2;
-}
-
-.preview-list {
-  display: flex;
-  flex-wrap: wrap;
+  background: var(--background-panel);
+  border-radius: 12px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 14px;
 }
 
 .page-header .tag {
@@ -2279,25 +2267,13 @@ video {
   margin-right: 0.5em;
 }
 
-.assignees {
-  display: flex;
-}
-
-.assignees span {
-  margin-right: 0.2em;
-}
-
 .avatar-wrapper {
   margin-right: 0.5em;
 }
 
 .entity-thumbnail {
   margin-right: 0.3em;
-}
-
-.title {
-  margin: 0;
-  flex: 1;
+  margin-top: 5px;
 }
 
 .pull-right {
@@ -2308,44 +2284,8 @@ video {
   color: inherit;
 }
 
-.set-main-preview {
-  height: 30px;
-}
-
 .back-link {
   padding-top: 6px;
-}
-
-.main-column {
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100% - 60px);
-}
-
-.task-columns {
-  display: flex;
-  max-height: 100%;
-  overflow: hidden;
-}
-
-.task-column {
-  overflow-y: auto;
-}
-
-.info-block {
-  margin-right: 0;
-}
-
-.load-error {
-  margin: 1em;
-}
-
-.task-type.block {
-  margin-bottom: 0;
-}
-
-.entity-thumbnail {
-  margin-top: 5px;
 }
 
 .field-label {
@@ -2357,12 +2297,55 @@ video {
   white-space: pre-wrap;
 }
 
+// the status goes under a title too long for the row, which stays whole
+.header-title {
+  flex-wrap: wrap;
+}
+
+.task-status {
+  color: var(--text);
+  margin-left: auto;
+}
+
 .title {
   margin: 0;
-  flex: 1;
+  flex: 1 0 auto;
   line-height: 1.5em;
   font-weight: 500;
   color: $grey;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 1000px) {
+  // Two columns leave the preview no room: the page scrolls as a whole, its
+  // header, its preview, then the comments, which the layout hides with the
+  // side on a phone.
+  .task-page.panel-layout {
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .task-page.panel-layout.with-side :deep(.main-column) {
+    overflow: visible;
+    padding-right: 1em;
+  }
+
+  .task-page.panel-layout :deep(.side-column) {
+    display: block;
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .preview-column,
+  .info-block,
+  .comments-column {
+    height: auto;
+    overflow: visible;
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -2372,7 +2355,6 @@ video {
 
   .title {
     font-size: 1.3em;
-    line-height: 1.5em;
   }
 
   .header-title {
@@ -2384,9 +2366,14 @@ video {
     margin-bottom: 0.5em;
   }
 
-  .task-column {
-    width: 100%;
-    overflow-y: initial;
+  .task-status {
+    margin-left: 0;
+  }
+
+  // read-only
+  .set-preview-button,
+  .use-current-frame {
+    display: none;
   }
 }
 </style>

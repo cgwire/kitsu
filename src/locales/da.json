@@ -74,7 +74,7 @@
       "workflow_studio": "Studiets workflow"
     },
     "breakdown": {
-      "all_assets": "Alle tilgængelige assets",
+      "link_assets": "Tilknyt assets",
       "copy_casting": "Kopiér denne casting (ctrl + V indsætter den på de valgte linjer)",
       "edit_label": "Rediger assettens label",
       "empty": "Tom casting",
@@ -276,6 +276,9 @@
         "uploader": "Uploadet af",
         "uploaded_at": "Uploadet den"
       },
+      "working_files": {
+        "no_working_files": "Der er ingen arbejdsfiler for denne enhed."
+      },
       "output_files": {
         "extension": "Filtypenavn",
         "name": "Navn",
@@ -474,7 +477,6 @@
       "for": "For",
       "go_productions": "Vend tilbage til produktion",
       "history": "historik",
-      "info": "Information",
       "or": "eller",
       "next": "Næste",
       "no": "Nej",
@@ -562,6 +564,7 @@
       "less_filters": "Færre filtre",
       "more_filters": "Flere filtre",
       "reload": "Genindlæs",
+      "search_example": "f.eks. {example}",
       "search_query": "Søgeforespørgsel",
       "search_query_add": "Tilføj søgefilter",
       "search_query_add_error": "Der opstod en fejl under gemning af søgefilteret.",
@@ -617,7 +620,6 @@
         "explanation": "Det er muligt at importere almindelige OpenTimelineIO-understøttede filer (otio, fcp_xml, fcpx_xml, edl). Shots vil blive oprettet eller opdateret med det angivne frame-interval, frame ind og frame ud. Frame ind starter ved 0."
       },
       "active": "Aktiv",
-      "activity": "Aktivitet",
       "archived": "Arkiveret",
       "avatar": {
         "open_page": "Åbn {personName}s side",
@@ -655,8 +657,10 @@
         "casting": "Casting",
         "chat": "Chat",
         "concepts": "Koncepter",
-        "info": "Info",
+        "metadata": "Metadata",
+        "working_files": "Arbejdsfiler",
         "output_files": "Output-filer",
+        "preview": "Preview",
         "preview_files": "Preview-filer",
         "schedule": "Tidsplan",
         "timelog": "Tidslog"
@@ -1119,6 +1123,7 @@
         "title": "Klienter",
         "unavailable": "Forhåndsvisningskonti kræver lokal godkendelse med adgangskoder. Ellers kan du oprette en almindelig klientkonto."
       },
+      "closed_name": "{name} (lukket)",
       "current": "Valgt produktion",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database? Bekræft venligst ved at skrive navnet på den produktion, du ønsker at slette, i tekstfeltet.",
       "delete_error": "Der opstod en fejl under sletning af denne produktion. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne produktion ikke har nogen opgave, shot eller asset knyttet til sig? Kitsu tillader ikke sletning af produktioner. Hvis du ikke længere ønsker at se produktionen, kan du i stedet lukke den.",

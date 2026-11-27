@@ -128,11 +128,11 @@ export default {
   },
 
   breakdown: {
-    all_assets: 'All available assets',
     copy_casting: 'Copy this casting (ctrl + V pastes it on the selected lines)',
     edit_label: 'Change the asset\'s label',
     empty: 'Empty casting',
     label: 'Label',
+    link_assets: 'Link assets',
     nb_assets: '{count} asset | {count} assets',
     nb_occurrences: '{count} occurrence | {count} occurrences',
     nb_ready: '{ready} / {total} ready',
@@ -642,6 +642,10 @@ export default {
       undefined: 'Undefined',
       undefined_pattern: 'Undefined',
       upload: 'Add Thumbnails'
+    },
+
+    working_files: {
+      no_working_files: 'There are no working files for this entity.'
     }
   },
 
@@ -871,7 +875,6 @@ export default {
   main: {
     about: 'About',
     active: 'Active',
-    activity: 'Activity',
     add: 'Add',
     after: 'After',
     admin: 'Admin',
@@ -965,18 +968,19 @@ export default {
     hide_support_chat: 'Hide support chat',
     history: 'history',
     home: 'Return to the home page',
-    info: 'Information',
     import: 'Import',
     is_shared: 'Shared with the whole team',
     label:{
       casting: 'Casting',
       chat: 'Chat',
       concepts: 'Concepts',
-      info: 'Info',
+      metadata: 'Metadata',
       output_files: 'Output Files',
+      preview: 'Preview',
       preview_files: 'Preview Files',
       schedule: 'Schedule',
       timelog: 'Timelog',
+      working_files: 'Working Files'
     },
     less_filters: 'Fewer filters',
     link: 'Link',
@@ -1040,6 +1044,7 @@ export default {
     select_section: 'Select a section',
     shared_by: 'Shared by {name}',
     save: 'Save',
+    search_example: 'ex: {example}',
     search_query: 'Search query',
     search_query_add: 'Add search filter',
     search_query_add_error: 'An error occurred while saving the search filter.',
@@ -1530,6 +1535,7 @@ export default {
   },
 
   productions: {
+    closed_name: '{name} (closed)',
     current: 'Selected production',
     delete_text: 'Are you sure you want to remove {name} from your database? Please confirm by typing the name of the production you want to delete in the text field.',
     delete_error: 'An error occurred while deleting this production. There may be existing data currently linked to it. Are you sure this production has no task, shot, or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',

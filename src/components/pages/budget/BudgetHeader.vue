@@ -26,7 +26,7 @@
       </p>
     </div>
 
-    <div class="flexrow mt1" v-else>
+    <div class="flexrow budget-actions" v-else>
       <h3 class="selected-budget flexrow-item">
         <combobox-styled
           :aria-label="$t('budget.title')"
@@ -146,5 +146,10 @@ defineEmits([
 
 .selected-budget {
   font-size: 1.3rem;
+}
+
+.budget-actions .button {
+  color: var(--text);
+  height: 42px;
 }
 </style>

@@ -42,6 +42,15 @@ const actions = {
     }
   },
 
+  async loadEntityWorkingFiles(_, entityId) {
+    try {
+      return await filesApi.getEntityWorkingFiles(entityId)
+    } catch (error) {
+      console.error('Error loading entity working files', error)
+      return []
+    }
+  },
+
   loadPreviewFileText(_, { previewId, extension, urlPrefix }) {
     return filesApi.getPreviewFileText(previewId, extension, urlPrefix)
   }

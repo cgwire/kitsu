@@ -1,66 +1,74 @@
 <template>
-  <div class="columns fixed-page">
-    <div class="column main-column">
+  <panel-layout
+    class="news-feed"
+    :class="{ 'drawer-open': isDrawerOpen }"
+    :max-width="FEED_WIDTH"
+    side
+  >
+    <template #filters>
+      <news-filters
+        :is-studio="isStudio"
+        v-model:episode-id="episodeId"
+        v-model:task-status-id="taskStatusId"
+        v-model:task-type-id="taskTypeId"
+        v-model:person="person"
+        v-model:before="before"
+        v-model:after="after"
+        v-model:preview-mode="previewMode"
+      />
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="searchFilterGroups"
+        :is-group-enabled="true"
+        :queries="searchQueries"
+        :type="searchListType"
+        with-route-query
+      />
       <div class="news page" ref="body" @scroll.passive="onBodyScroll">
-        <div class="timeline-wrapper">
-          <news-filters
-            :is-studio="isStudio"
-            v-model:episode-id="episodeId"
-            v-model:task-status-id="taskStatusId"
-            v-model:task-type-id="taskTypeId"
-            v-model:person="person"
-            v-model:before="before"
-            v-model:after="after"
-            v-model:preview-mode="previewMode"
-          />
-
-          <div :class="{ timeline: true, 'timeline-blank': isTimelineBlank }">
-            <div class="empty-state" v-if="errors.news">
-              <alert-triangle-icon class="empty-icon" :size="48" />
-              <p class="empty-title">{{ $t('main.loading_error') }}</p>
-              <button class="empty-action" type="button" @click="init">
-                {{ $t('main.reload') }}
-              </button>
-            </div>
-
-            <news-skeleton v-else-if="loading.news" />
-
-            <div class="empty-state" v-else-if="newsList.length === 0">
-              <newspaper-icon class="empty-icon" :size="48" />
-              <p class="empty-title">{{ $t('news.no_news') }}</p>
-              <p class="empty-hint">{{ $t('news.no_news_hint') }}</p>
-            </div>
-
-            <template v-else>
-              <div :key="key" v-for="{ dayList, key } in newsDays">
-                <div
-                  class="has-text-centered subtitle timeline-entry day-sticky"
-                >
-                  <span class="big-dot"></span>
-                  {{
-                    dayList.length > 0 ? formatDay(dayList[0].created_at) : ''
-                  }}
-                </div>
-                <news-row
-                  :key="`news-${news.id}`"
-                  :ref="el => setNewsRef(news.id, el?.root)"
-                  :canvas-id="`annotation-canvas-${news.id}`"
-                  :is-new="recentNewsIds.has(news.id)"
-                  :is-selected="news.id === currentNewsId"
-                  :is-studio="isStudio"
-                  :news="news"
-                  :preview-mode="previewMode"
-                  @select="onNewsSelected"
-                  v-for="news in dayList"
-                />
-              </div>
-            </template>
-
-            <spinner class="load-more" v-if="loading.more" />
+        <div :class="{ timeline: true, 'timeline-blank': isTimelineBlank }">
+          <div class="empty-state" v-if="errors.news">
+            <alert-triangle-icon class="empty-icon" :size="48" />
+            <p class="empty-title">{{ $t('main.loading_error') }}</p>
+            <button class="empty-action" type="button" @click="init">
+              {{ $t('main.reload') }}
+            </button>
           </div>
+
+          <news-skeleton v-else-if="loading.news" />
+
+          <div class="empty-state" v-else-if="newsList.length === 0">
+            <newspaper-icon class="empty-icon" :size="48" />
+            <p class="empty-title">{{ $t('news.no_news') }}</p>
+            <p class="empty-hint">{{ $t('news.no_news_hint') }}</p>
+          </div>
+
+          <template v-else>
+            <div :key="key" v-for="{ dayList, key } in newsDays">
+              <div class="has-text-centered subtitle timeline-entry day-sticky">
+                <span class="big-dot"></span>
+                {{ dayList.length > 0 ? formatDay(dayList[0].created_at) : '' }}
+              </div>
+              <news-row
+                :key="`news-${news.id}`"
+                :ref="el => setNewsRef(news.id, el?.root)"
+                :canvas-id="`annotation-canvas-${news.id}`"
+                :is-new="recentNewsIds.has(news.id)"
+                :is-selected="news.id === currentNewsId"
+                :is-studio="isStudio"
+                :news="news"
+                :preview-mode="previewMode"
+                @select="onNewsSelected"
+                v-for="news in dayList"
+              />
+            </div>
+          </template>
+
+          <spinner class="load-more" v-if="loading.more" />
         </div>
       </div>
-    </div>
+    </template>
 
     <div
       class="drawer-backdrop"
@@ -68,10 +76,7 @@
       @click="closeTask"
     ></div>
 
-    <div
-      id="side-column"
-      :class="{ column: true, 'side-column': true, 'is-open': isDrawerOpen }"
-    >
+    <template #side>
       <button
         class="drawer-close"
         type="button"
@@ -85,8 +90,8 @@
         :task="currentTask"
         with-actions
       />
-    </div>
-  </div>
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -114,17 +119,24 @@ import { isBehindModal } from '@/composables/modal'
 import { useTime } from '@/composables/time'
 import { logRequestFailure } from '@/lib/errors'
 import { isCaretMoveOnMac, isFreeEscape } from '@/lib/keyboard'
+import { toSortedQueryString } from '@/lib/query'
 import {
   formatFullDateWithRevertedTimezone,
   formatFullDateWithTimezone,
   formatSimpleDate
 } from '@/lib/time'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import NewsFilters from '@/components/pages/news/NewsFilters.vue'
 import NewsRow from '@/components/pages/news/NewsRow.vue'
 import NewsSkeleton from '@/components/pages/news/NewsSkeleton.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+
+// 870px of timeline plus the panel padding, the room for its dots and its
+// scrollbar: the dots of the preview rows count on that width.
+const FEED_WIDTH = 940
 
 const { t } = useI18n()
 const route = useRoute()
@@ -187,6 +199,17 @@ const newsDays = computed(() =>
 
 const isStudio = computed(() => !route.path.includes('productions'))
 
+// The studio feed and the feed of each production keep their own searches.
+const searchListType = computed(() =>
+  isStudio.value ? 'newsFeed' : 'productionNewsFeed'
+)
+const searchQueries = computed(
+  () => store.getters[`${searchListType.value}SearchQueries`]
+)
+const searchFilterGroups = computed(
+  () => store.getters[`${searchListType.value}SearchFilterGroups`]
+)
+
 const currentEntityType = computed(
   () => currentTask.value?.task_type?.for_entity
 )
@@ -228,6 +251,31 @@ const filterQuery = computed(() => ({
 }))
 
 // Functions
+
+// Without its unset filters, as the router keeps it.
+const isPageQuery = query =>
+  toSortedQueryString(query) ===
+  toSortedQueryString(
+    Object.fromEntries(
+      Object.entries(filterQuery.value).filter(([, value]) => value)
+    )
+  )
+
+// A filter missing from the query is unset: a saved search replaces the
+// whole query.
+const applyRouteQuery = query => {
+  silent = true
+  previewMode.value = query.preview_mode || 'comments'
+  taskTypeId.value = query.task_type_id || ''
+  taskStatusId.value = query.task_status_id || ''
+  episodeId.value = query.episode_id || ''
+  person.value = query.person_id
+    ? (personMap.value.get(query.person_id) ?? null)
+    : null
+  before.value = parseQueryDate(query.before)
+  after.value = parseQueryDate(query.after)
+  silent = false
+}
 
 // Query dates carry the day only. Rebuild them at local midnight: the round
 // trip goes back out through formatSimpleDate, which formats in local time.
@@ -537,26 +585,28 @@ watch(taskStatusId, value => {
   init()
 })
 
+// A saved search, or the back button, sets a query the page did not write.
+// The feed of another production keeps the filters instead: its path differs.
+watch(
+  () => ({ path: route.path, query: route.query }),
+  (to, from) => {
+    // the watchers of the filters it changes load the feed
+    if (to.path === from.path && !isPageQuery(to.query)) {
+      applyRouteQuery(to.query)
+    }
+  }
+)
+
 // Lifecycle
 
 onMounted(() => {
-  const query = route.query
-  silent = true
-  previewMode.value =
-    query.preview_mode ||
-    localStorage.getItem('news:preview-mode') ||
-    'comments'
-  taskTypeId.value =
-    query.task_type_id || localStorage.getItem('news:task-type-id') || ''
-  taskStatusId.value =
-    query.task_status_id || localStorage.getItem('news:task-status-id') || ''
-  episodeId.value = query.episode_id || ''
-  person.value = query.person_id
-    ? (personMap.value.get(query.person_id) ?? null)
-    : null
-  before.value = parseQueryDate(query.before)
-  after.value = parseQueryDate(query.after)
-  silent = false
+  // the filters the browser kept only stand in for a query without them
+  applyRouteQuery({
+    preview_mode: localStorage.getItem('news:preview-mode'),
+    task_type_id: localStorage.getItem('news:task-type-id'),
+    task_status_id: localStorage.getItem('news:task-status-id'),
+    ...route.query
+  })
 
   window.addEventListener('keydown', onKeyDown, false)
   socket.on('preview-file:add-file', onPreviewFileAddFile)
@@ -593,10 +643,6 @@ useHead({
 
 <style lang="scss" scoped>
 .dark {
-  .page {
-    background: $dark-grey-light;
-  }
-
   .icon,
   .comment-text {
     color: $light-grey-light;
@@ -604,10 +650,6 @@ useHead({
 
   a {
     color: $light-grey-light;
-  }
-
-  .timeline-wrapper {
-    background: $dark-grey;
   }
 
   .timeline {
@@ -619,40 +661,21 @@ useHead({
   }
 }
 
-.columns {
-  display: flex;
-  flex-direction: row;
+// the global .page rule paints a white sheet as tall as the window
+.news.page {
+  background: transparent;
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  // always its lane: the timeline keeps its width on a short feed
+  overflow-y: scroll;
+  // room for the dots of the rail
+  padding: 0 11px;
 }
 
-.column {
-  overflow-y: auto;
-  padding: 0;
-}
-
-.main-column {
-  flex: 1 1 auto;
-  padding-top: 60px;
-  background: $white-grey-light;
-  height: 100%;
-  overflow: hidden;
-}
-
-.news {
-  background: $white-grey-light;
-  width: 100%;
-  padding: 0;
-  overflow-y: auto;
-  height: 100%;
-}
-
-.timeline-wrapper {
-  margin: auto;
-  max-width: 920px;
-  padding-top: 25px;
-  padding-left: 25px;
-  padding-right: 25px;
-  background: $white;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+// the first day needs no room over it: the panel gap already sets it apart
+.timeline > div:first-child > .day-sticky {
+  margin-top: 0;
 }
 
 .timeline {
@@ -689,16 +712,12 @@ useHead({
 // `position: sticky` still establishes a positioning context for the
 // absolutely-placed `.big-dot`, so the dot keeps sitting on the rail.
 .timeline-entry.day-sticky {
-  background: $white;
+  background: var(--background-panel);
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   position: sticky;
   top: 0;
   z-index: 2;
-
-  .dark & {
-    background: $dark-grey;
-  }
 }
 
 .empty-state {
@@ -745,12 +764,6 @@ useHead({
   padding: 1em 0;
 }
 
-.side-column {
-  width: 450px;
-  min-width: 450px;
-  max-width: 450px;
-}
-
 .drawer-close {
   display: none;
 }
@@ -776,28 +789,33 @@ useHead({
     display: none;
   }
 
-  .timeline-wrapper {
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+  .news.page {
+    padding: 0;
   }
 }
 
 // Mobile / tablet drawer: under 1024px the side panel slides in from
 // the right when a news is selected. Backdrop catches outside taps to
 // close.
+// out of the flow, the drawer leaves the page its right margin
+@media (min-width: 769px) and (max-width: 1024px) {
+  .news-feed.with-side :deep(.main-column) {
+    padding-right: 20px;
+  }
+}
+
 @media (max-width: 1024px) {
   // Override App.vue's global `.side-column { max-width: 400px; width: 400px;
   // margin-top: 60px }` — the drawer needs to span the full viewport and
   // sit ABOVE the topbar (z-index 204), so no top offset and no width cap.
-  .side-column {
+  .news-feed.panel-layout :deep(.side-column) {
     background: $white;
     bottom: 0;
-    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
     margin-top: 0 !important;
     max-width: min(100vw, 420px) !important;
     min-width: 0 !important;
     overflow-y: auto;
-    padding-top: 56px;
+    padding: 56px 0 0;
     position: fixed;
     right: 0;
     top: 0;
@@ -805,14 +823,27 @@ useHead({
     transition: transform 0.25s ease;
     width: min(100vw, 420px) !important;
     z-index: 250;
-
-    &.is-open {
-      transform: translateX(0);
-    }
   }
 
-  .dark .side-column {
+  // shut, the drawer would cast its shadow over the edge of the page
+  .news-feed.panel-layout.drawer-open :deep(.side-column) {
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
+    transform: translateX(0);
+  }
+
+  // a drawer is not resized, and its handle would hang over the backdrop
+  .news-feed.panel-layout :deep(.extend-bar) {
+    display: none;
+  }
+
+  .dark .news-feed.panel-layout :deep(.side-column) {
     background: $dark-grey-light;
+  }
+
+  // in the drawer the task panel is the sheet itself, not a panel on it
+  .news-feed.panel-layout :deep(.side.task-info) {
+    background: var(--background-page);
+    border-radius: 0;
   }
 
   .drawer-close {
@@ -840,7 +871,7 @@ useHead({
 
   // The drawer needs to be a flex column so the sticky close button can
   // align itself to the right edge.
-  .side-column {
+  .news-feed.panel-layout :deep(.side-column) {
     display: flex;
     flex-direction: column;
   }

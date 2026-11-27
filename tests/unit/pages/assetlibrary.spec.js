@@ -28,16 +28,16 @@ const SearchFieldStub = {
   }
 }
 
-const PageLayoutStub = {
-  template: '<div><slot name="main" /><slot name="side" /></div>'
-}
+const savedSearches = [{ id: 'search-1', name: 'Chairs' }]
 
-const mountPage = async query => {
+const mountPage = async (query, { isManager = true } = {}) => {
+  const setSharedAssetSearch = vi.fn()
   const store = createStore({
     getters: {
+      assetLibrarySearchQueries: () => savedSearches,
       displayedSharedAssets: () => [],
       displayedSharedAssetsByType: () => [],
-      isCurrentUserManager: () => true,
+      isCurrentUserManager: () => isManager,
       openProductions: () => [production],
       productionMap: () => new Map([[production.id, production]]),
       selectedAssets: () => new Map()
@@ -45,7 +45,7 @@ const mountPage = async query => {
     actions: {
       loadSharedAssets: vi.fn(),
       setAssetSelection: vi.fn(),
-      setSharedAssetSearch: vi.fn()
+      setSharedAssetSearch
     }
   })
   const router = createRouter({
@@ -56,12 +56,18 @@ const mountPage = async query => {
   const wrapper = shallowMount(AssetLibrary, {
     global: {
       plugins: [store, router],
-      stubs: { PageLayout: PageLayoutStub, SearchField: SearchFieldStub }
+      stubs: { PanelLayout: false, SearchField: SearchFieldStub }
     }
   })
   await flushPromises()
+  wrapper.setSharedAssetSearch = setSharedAssetSearch
   return wrapper
 }
+
+const resetButton = wrapper =>
+  wrapper
+    .findAllComponents({ name: 'ButtonSimple' })
+    .find(button => button.props('icon') === 'remove')
 
 describe('AssetLibrary page', () => {
   // unmounted after each test, a failed one included
@@ -82,6 +88,98 @@ describe('AssetLibrary page', () => {
     wrapper?.unmount()
     wrapper = null
     vi.unstubAllGlobals()
+  })
+
+  describe('panel layout', () => {
+    it('lays its filters and its list out in the two panels', async () => {
+      wrapper = await mountPage()
+
+      expect(
+        wrapper.find('.filters-panel').findComponent(ComboboxProduction).exists()
+      ).toBe(true)
+      expect(wrapper.find('.list-panel .entities').exists()).toBe(true)
+    })
+
+    it('keeps the library panel for the managers', async () => {
+      wrapper = await mountPage()
+      expect(
+        wrapper
+          .find('.side-column')
+          .findComponent({ name: 'ManageLibrary' })
+          .exists()
+      ).toBe(true)
+      wrapper.unmount()
+
+      wrapper = await mountPage({}, { isManager: false })
+      expect(wrapper.find('.side-column').exists()).toBe(false)
+    })
+  })
+
+  describe('saved searches', () => {
+    it('saves the filters of the URL', async () => {
+      wrapper = await mountPage()
+
+      expect(
+        wrapper
+          .find('.list-panel')
+          .findComponent({ name: 'SearchQueryList' })
+          .props()
+      ).toMatchObject({
+        queries: savedSearches,
+        type: 'assetLibrary',
+        withRouteQuery: true
+      })
+    })
+
+    it('follows the filters of the URL', async () => {
+      wrapper = await mountPage()
+
+      await wrapper.vm.$router.push({
+        query: { production: production.id, search: 'chair' }
+      })
+      await flushPromises()
+
+      expect(
+        wrapper.findComponent(ComboboxProduction).props('modelValue')
+      ).toBe(production.id)
+      expect(wrapper.findComponent(SearchFieldStub).vm.getValue()).toBe('chair')
+      expect(wrapper.setSharedAssetSearch).toHaveBeenLastCalledWith(
+        expect.anything(),
+        'chair'
+      )
+      expect(wrapper.vm.$route.query).toEqual({
+        production: production.id,
+        search: 'chair'
+      })
+    })
+  })
+
+  describe('filters reset', () => {
+    it('shows only when a filter is set', async () => {
+      wrapper = await mountPage()
+      expect(resetButton(wrapper)).toBeUndefined()
+      wrapper.unmount()
+
+      wrapper = await mountPage({ search: 'chair' })
+      expect(resetButton(wrapper).exists()).toBe(true)
+    })
+
+    it('clears the filters', async () => {
+      wrapper = await mountPage({ production: production.id, search: 'chair' })
+
+      await resetButton(wrapper).vm.$emit('click')
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query).toEqual({})
+      expect(
+        wrapper.findComponent(ComboboxProduction).props('modelValue')
+      ).toBeFalsy()
+      expect(wrapper.findComponent(SearchFieldStub).vm.getValue()).toBe('')
+      expect(wrapper.setSharedAssetSearch).toHaveBeenLastCalledWith(
+        expect.anything(),
+        ''
+      )
+    })
   })
 
   describe('URL', () => {

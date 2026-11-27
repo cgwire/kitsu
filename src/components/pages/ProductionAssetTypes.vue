@@ -1,51 +1,71 @@
 <template>
-  <div class="asset-types page fixed-page">
-    <div class="asset-type-list-header page-header flexrow">
-      <combobox-visible-options
-        class="flexrow-item options-filter"
-        :label="$t('asset_types.title')"
-        :options="assetTypeOptions"
-        v-model:hidden="hiddenAssetTypeIds"
+  <panel-layout class="asset-type-stats">
+    <template #filters>
+      <div class="asset-type-list-header flexrow">
+        <combobox-visible-options
+          class="flexrow-item options-filter"
+          :label="$t('asset_types.title')"
+          :options="assetTypeOptions"
+          v-model:hidden="hiddenAssetTypeIds"
+        />
+        <combobox-task-type-options
+          class="flexrow-item options-filter"
+          :label="$t('task_types.title')"
+          :task-types="columnTaskTypes"
+          v-model:hidden="hiddenTaskTypeIds"
+        />
+        <combobox
+          class="mb0 flexrow-item"
+          :label="$t('statistics.display_mode')"
+          locale-key-prefix="statistics."
+          :options="STATS_DISPLAY_MODE_OPTIONS"
+          v-model="displayMode"
+        />
+        <span class="filler"></span>
+        <button-simple
+          class="flexrow-item"
+          icon="refresh"
+          :title="$t('main.reload')"
+          @click="reset"
+        />
+        <button-simple
+          class="flexrow-item export-button"
+          icon="download"
+          :title="$t('main.csv.export_file')"
+          @click="exportStatisticsToCsv"
+        />
+        <button-simple
+          class="flexrow-item reset-filters"
+          icon="remove"
+          :title="$t('main.clear_filters')"
+          @click="resetFilters"
+          v-if="hasFilters"
+        />
+      </div>
+    </template>
+    <template #list>
+      <search-query-list
+        class="query-list"
+        :groups="assetTypeStatsSearchFilterGroups"
+        :is-group-enabled="true"
+        :production-id="currentProduction?.id"
+        :queries="assetTypeStatsSearchQueries"
+        type="assetTypeStats"
+        with-route-query
       />
-      <combobox-task-type-options
-        class="flexrow-item options-filter"
-        :label="$t('task_types.title')"
-        :task-types="columnTaskTypes"
-        v-model:hidden="hiddenTaskTypeIds"
-      />
-      <combobox
-        class="mb0 flexrow-item"
-        :label="$t('statistics.display_mode')"
-        locale-key-prefix="statistics."
-        :options="STATS_DISPLAY_MODE_OPTIONS"
-        v-model="displayMode"
-      />
-      <span class="filler"></span>
-      <button-simple
-        class="flexrow-item"
-        icon="refresh"
-        :title="$t('main.reload')"
-        @click="reset"
-      />
-      <button-simple
-        class="flexrow-item export-button"
-        icon="download"
-        :title="$t('main.csv.export_file')"
-        @click="exportStatisticsToCsv"
-      />
-    </div>
 
-    <production-asset-type-list
-      :entries="displayedAssetTypes"
-      :is-loading="isAssetsLoading || initialLoading"
-      :is-error="isAssetsLoadingError"
-      :is-filtered="isFiltered"
-      :validation-columns="displayedColumns"
-      :asset-type-stats="displayedStats"
-      :asset-counts="assetTypeAssetCounts"
-      :display-mode="displayMode"
-    />
-  </div>
+      <production-asset-type-list
+        :entries="displayedAssetTypes"
+        :is-loading="isAssetsLoading || initialLoading"
+        :is-error="isAssetsLoadingError"
+        :is-filtered="isFiltered"
+        :validation-columns="displayedColumns"
+        :asset-type-stats="displayedStats"
+        :asset-counts="assetTypeAssetCounts"
+        :display-mode="displayMode"
+      />
+    </template>
+  </panel-layout>
 </template>
 
 <script setup>
@@ -64,11 +84,13 @@ import {
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
+import PanelLayout from '@/components/layouts/PanelLayout.vue'
 import ProductionAssetTypeList from '@/components/lists/ProductionAssetTypeList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOptions.vue'
 import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 const { t } = useI18n()
 const store = useStore()
@@ -82,6 +104,12 @@ const initialLoading = ref(true)
 const assetTypeAssetCounts = computed(() => store.getters.assetTypeAssetCounts)
 const assetTypeMap = computed(() => store.getters.assetTypeMap)
 const assetTypeStats = computed(() => store.getters.assetTypeStats)
+const assetTypeStatsSearchFilterGroups = computed(
+  () => store.getters.assetTypeStatsSearchFilterGroups
+)
+const assetTypeStatsSearchQueries = computed(
+  () => store.getters.assetTypeStatsSearchQueries
+)
 const assetValidationColumns = computed(
   () => store.getters.assetValidationColumns
 )
@@ -100,9 +128,11 @@ const {
   displayedColumns,
   displayedRows: displayedAssetTypes,
   getDisplayedStats,
+  hasFilters,
   hiddenColumnIds: hiddenTaskTypeIds,
   hiddenRowIds: hiddenAssetTypeIds,
   isFiltered,
+  resetFilters,
   rowOptions: assetTypeOptions
 } = useStatsPage({
   preferenceKey: 'stats:asset-type-display-mode',

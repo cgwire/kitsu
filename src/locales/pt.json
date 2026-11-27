@@ -74,7 +74,7 @@
       "workflow_studio": "Fluxo de trabalho do estúdio"
     },
     "breakdown": {
-      "all_assets": "Todos os assets disponíveis",
+      "link_assets": "Vincular assets",
       "copy_casting": "Copiar este casting (ctrl + V cola-o nas linhas selecionadas)",
       "edit_label": "Alterar o rótulo do asset",
       "empty": "Casting vazio",
@@ -276,6 +276,9 @@
         "uploader": "Carregado por",
         "uploaded_at": "Carregado em"
       },
+      "working_files": {
+        "no_working_files": "Não há arquivos de trabalho para essa entidade."
+      },
       "output_files": {
         "extension": "Extensão",
         "name": "Nome",
@@ -474,7 +477,6 @@
       "for": "Para",
       "go_productions": "Voltar para a produção",
       "history": "histórico",
-      "info": "Informação",
       "or": "ou",
       "next": "Próximo",
       "no": "Não",
@@ -562,6 +564,7 @@
       "less_filters": "Menos filtros",
       "more_filters": "Mais filtros",
       "reload": "Recarregar",
+      "search_example": "ex.: {example}",
       "search_query": "Pesquisar",
       "search_query_add": "Adicionar filtro de pesquisa",
       "search_query_add_error": "Ocorreu um erro ao salvar o filtro de pesquisa.",
@@ -617,7 +620,6 @@
         "explanation": "É possível importar arquivos comuns compatíveis com o OpenTimelineIO (otio, fcp_xml, fcpx_xml, edl). Os shots serão criados ou atualizados com o intervalo de quadros, a entrada e a saída de quadros fornecidos. O quadro de entrada começa em 0."
       },
       "active": "Ativo",
-      "activity": "Atividade",
       "archived": "Arquivado",
       "avatar": {
         "open_page": "Abrir a página de {personName}",
@@ -655,8 +657,10 @@
         "casting": "Casting",
         "chat": "Bate-papo",
         "concepts": "Conceitos",
-        "info": "Informações",
+        "metadata": "Metadados",
+        "working_files": "Arquivos de trabalho",
         "output_files": "Arquivos de saída",
+        "preview": "Visualização",
         "preview_files": "Arquivos de visualização",
         "schedule": "Cronograma",
         "timelog": "Registro de tempo"
@@ -1119,6 +1123,7 @@
         "title": "Clientes",
         "unavailable": "As contas de pré-visualização exigem autenticação local com senhas. Caso contrário, crie uma conta de cliente normal."
       },
+      "closed_name": "{name} (fechada)",
       "current": "Produção selecionada",
       "delete_text": "Tem certeza de que deseja remover {name} do seu banco de dados? Por favor, confirme digitando o nome da produção que você quer excluir no campo de texto.",
       "delete_error": "Ocorreu um erro ao excluir esta produção. Provavelmente há dados vinculados a ela. Tem certeza de que esta produção não tem nenhuma tarefa, shot ou asset vinculado a ela? Kitsu não permite a exclusão de produções. Se você não quiser mais ver a produção, pode fechá-la.",

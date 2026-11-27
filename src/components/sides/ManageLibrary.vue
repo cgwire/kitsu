@@ -311,6 +311,18 @@ onMounted(async () => {
 
 .manage-library {
   padding: 1em;
+
+  // every control takes the width of the panel
+  .flexrow-item {
+    margin-right: 0;
+  }
+
+  .button,
+  :deep(.production-combo),
+  :deep(.select),
+  :deep(.select-input) {
+    width: 100%;
+  }
 }
 
 .mt0 {
