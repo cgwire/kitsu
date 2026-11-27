@@ -166,7 +166,10 @@
                   :colspan="7 + visibleProjectMetadataDescriptors.length"
                   class="datatable-row-stats"
                 >
-                  <production-stats :stats="productionStats[entry.id] || {}" />
+                  <production-stats
+                    :production="entry"
+                    :stats="productionStats[entry.id] || {}"
+                  />
                 </td>
                 <td class="actions"></td>
               </tr>

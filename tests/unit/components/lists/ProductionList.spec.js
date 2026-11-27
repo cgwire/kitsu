@@ -9,6 +9,7 @@ import resizableColumn from '@/directives/resizable-column'
 import peopleStore from '@/store/modules/people'
 
 import ProductionList from '@/components/lists/ProductionList.vue'
+import ProductionStats from '@/components/pages/production/ProductionStats.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
 
@@ -45,7 +46,8 @@ const mountList = ({
   descriptors = [],
   getters = {},
   people = [],
-  guests = []
+  guests = [],
+  productionStats = {}
 }) => {
   peopleStore.cache.people = []
   peopleStore.cache.personMap.clear()
@@ -74,7 +76,7 @@ const mountList = ({
       plugins: [store, resizableColumn],
       stubs: { RouterLink: true }
     },
-    props: { entries: productions, groupBy }
+    props: { entries: productions, groupBy, productionStats }
   })
   return { store, wrapper }
 }
@@ -85,6 +87,30 @@ const getSectionTitles = wrapper =>
     .map(header => header.text().replace(/\s+/g, ' '))
 
 describe('lists/ProductionList', () => {
+  // The stats follow the menus of their own production.
+  test('hands each production to its stats', () => {
+    const { wrapper } = mountList({
+      productions: [production(1, 'Alpha'), production(2, 'Bravo')],
+      productionStats: {
+        'production-1': { amount: 3 },
+        'production-2': { amount: 5 }
+      }
+    })
+
+    expect(
+      wrapper
+        .findAllComponents(ProductionStats)
+        .map(stats => [
+          stats.props('production').id,
+          stats.props('stats').amount
+        ])
+    ).toEqual([
+      ['production-1', 3],
+      ['production-2', 5]
+    ])
+    wrapper.unmount()
+  })
+
   // A column named "Constructor" has the field name of a property every
   // object inherits.
   test('groups the productions without a Constructor value under None', () => {
