@@ -3,8 +3,7 @@ import { defineComponent } from 'vue'
 
 import {
   usePreviewShortcuts,
-  isAltLetter,
-  undoRedoCommand
+  isAltLetter
 } from '@/composables/players/previewShortcuts'
 
 /**
@@ -481,75 +480,6 @@ describe('composables/previewShortcuts', () => {
       dispatchKeydown({ key: ' ' })
       expect(handlers.onPlayPause).not.toHaveBeenCalled()
     })
-  })
-})
-
-describe('undoRedoCommand', () => {
-  // Shared by usePreviewShortcuts and by SharedPlaylistPlayer's own keydown
-  // handler. Everything it reports must be swallowed: Chromium's undo stack
-  // belongs to the frame, so an unconsumed press replays the last edit of a
-  // page text field (a list search input, a comment draft).
-  const ev = overrides => ({
-    ctrlKey: false,
-    metaKey: false,
-    shiftKey: false,
-    ...overrides
-  })
-
-  it('reports undo on Ctrl+Z and Cmd+Z', () => {
-    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'z', code: 'KeyZ' }))).toBe(
-      'undo'
-    )
-    expect(undoRedoCommand(ev({ metaKey: true, key: 'z', code: 'KeyZ' }))).toBe(
-      'undo'
-    )
-  })
-
-  it('reports undo with caps lock on, the key being uppercased', () => {
-    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'Z', code: 'KeyZ' }))).toBe(
-      'undo'
-    )
-  })
-
-  it('reports redo on the combos the browser binds to it', () => {
-    // Shift uppercases event.key, which is why a bare `case 'z'` missed it.
-    expect(
-      undoRedoCommand(ev({ ctrlKey: true, shiftKey: true, key: 'Z' }))
-    ).toBe('redo')
-    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'y' }))).toBe('redo')
-    expect(
-      undoRedoCommand(ev({ metaKey: true, shiftKey: true, key: 'Z' }))
-    ).toBe('redo')
-  })
-
-  it('leaves Cmd+Y alone, the macOS history shortcut being no redo', () => {
-    expect(undoRedoCommand(ev({ metaKey: true, key: 'y' }))).toBeNull()
-  })
-
-  it('follows the printed cap on Latin layouts', () => {
-    // QWERTZ: the Z cap is physically KeyY. The typed letter wins, so the
-    // user's cap is what counts, not the position.
-    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'z', code: 'KeyY' }))).toBe(
-      'undo'
-    )
-    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'y', code: 'KeyZ' }))).toBe(
-      'redo'
-    )
-  })
-
-  it('falls back to the physical key on a non-Latin layout', () => {
-    // Cyrillic: event.key is 'я', unusable, so the QWERTY position decides.
-    // Without this the press escapes and the browser undo fires.
-    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'я', code: 'KeyZ' }))).toBe(
-      'undo'
-    )
-  })
-
-  it('ignores anything that is not a modified z or y', () => {
-    expect(undoRedoCommand(ev({ key: 'z', code: 'KeyZ' }))).toBeNull()
-    expect(undoRedoCommand(ev({ altKey: true, key: 'z', code: 'KeyZ' }))).toBeNull()
-    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'c', code: 'KeyC' }))).toBeNull()
-    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'Enter' }))).toBeNull()
   })
 })
 

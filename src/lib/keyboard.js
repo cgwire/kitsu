@@ -76,3 +76,29 @@ export const isSendingEnter = event =>
   !event.repeat &&
   !event.isComposing &&
   event.keyCode !== 229
+
+// Ctrl/Cmd + Z or Y read as the browser's undo or redo command: 'undo',
+// 'redo', or null. Both must be swallowed wherever a player, or a menu over
+// the page, owns the keyboard: left alone, Chromium replays the last edit made
+// in a text field of the page (its undo stack belongs to the frame, not to the
+// focused element), which rewrites a list search field or a comment draft
+// behind the user's back. Shift uppercases event.key, and Windows binds redo
+// to Ctrl+Y as well; both are reported as redo so callers can swallow them
+// without acting, redo living on Alt+R in the preview and playlist players.
+// Letter matching follows isAltLetter of the player shortcuts: event.key
+// first, so that the shortcut stays on the printed cap across Latin layouts
+// (AZERTY, QWERTZ, BÉPO), event.code only when event.key is not a plain a-z
+// letter, the non-Latin case where the physical position is the sole usable
+// signal.
+export const undoRedoCommand = event => {
+  if (!event.ctrlKey && !event.metaKey) return null
+  const typed = event.key?.length === 1 ? event.key.toLowerCase() : null
+  const letter =
+    typed && typed >= 'a' && typed <= 'z'
+      ? typed
+      : { KeyZ: 'z', KeyY: 'y' }[event.code]
+  if (letter === 'z') return event.shiftKey ? 'redo' : 'undo'
+  // Ctrl+Y is the Windows redo. Cmd+Y is not its macOS counterpart, it opens
+  // the browser history, so it is left alone.
+  return letter === 'y' && event.ctrlKey ? 'redo' : null
+}

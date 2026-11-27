@@ -123,7 +123,7 @@ import { useStore } from 'vuex'
 import draggable from 'vuedraggable'
 
 import { useDraggableRebuild } from '@/composables/draggableRebuild'
-import { undoRedoCommand } from '@/composables/players/previewShortcuts'
+import { undoRedoCommand } from '@/lib/keyboard'
 import { getOwnValue } from '@/lib/models'
 
 const MODIFIER_KEYS = ['Alt', 'Control', 'Meta', 'Shift']

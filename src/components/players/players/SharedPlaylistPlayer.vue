@@ -272,11 +272,9 @@ import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { usePhoneLayout } from '@/composables/phoneLayout'
 import { useMediaKind } from '@/composables/players/mediaKind'
-import {
-  isAltLetter,
-  undoRedoCommand
-} from '@/composables/players/previewShortcuts'
+import { isAltLetter } from '@/composables/players/previewShortcuts'
 import { usePlayerTransport } from '@/composables/players/transport'
+import { undoRedoCommand } from '@/lib/keyboard'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
 import {
   DEFAULT_FPS,
