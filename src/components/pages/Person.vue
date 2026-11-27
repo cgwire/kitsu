@@ -195,8 +195,8 @@
             :person-id="person?.id"
             :tasks="loggablePersonTasks"
             :done-tasks="loggableDoneTasks"
-            :is-loading="isTasksLoading"
-            :is-error="isTasksLoadingError"
+            :is-loading="isTasksLoading || isTimeSpentsLoading"
+            :is-error="isTasksLoadingError || isTimeSpentsLoadingError"
             :days-off="daysOff"
             v-model:day-off-error="dayOffError"
             :time-spent-map="personTimeSpentMap"
@@ -306,6 +306,7 @@ import { useProductivity } from '@/composables/productivity'
 import { getBarOrigin, useScheduleSave } from '@/composables/scheduleSave'
 import { useTaskFilters } from '@/composables/taskFilters'
 import colors from '@/lib/colors'
+import { logRequestFailure } from '@/lib/errors'
 import preferences from '@/lib/preferences'
 import { getZoomOptions } from '@/lib/productionSchedule'
 import {
@@ -351,6 +352,7 @@ const activeTab = ref('todos')
 const calendarTimeSpents = ref([])
 const daysOff = ref([])
 const dayOffError = ref(false)
+const failedTimeSpentKey = ref(null)
 const init = ref(false)
 const isDoneTasksLoading = ref(false)
 const isDoneTasksLoadingError = ref(false)
@@ -391,6 +393,7 @@ const personMap = computed(() => store.getters.personMap)
 const personTaskSearchQueries = computed(
   () => store.getters.personTaskSearchQueries
 )
+const personTimeSpentKey = computed(() => store.getters.personTimeSpentKey)
 const personTimeSpentMap = computed(() => store.getters.personTimeSpentMap)
 const personTimeSpentTotal = computed(() => store.getters.personTimeSpentTotal)
 const productionMap = computed(() => store.getters.productionMap)
@@ -445,6 +448,22 @@ const canReadDaysOff = computed(() =>
 
 const isTimelogShown = computed(
   () => isActiveTab('timesheets') && canSeeTimelog.value
+)
+
+// The store holds the time spents of the person and day read last, which can
+// be a day or a person left since
+const shownTimeSpentKey = computed(
+  () => `${person.value?.id}/${selectedDate.value}`
+)
+
+const isTimeSpentsLoading = computed(
+  () => personTimeSpentKey.value !== shownTimeSpentKey.value
+)
+
+const isTimeSpentsLoadingError = computed(
+  () =>
+    isTimeSpentsLoading.value &&
+    failedTimeSpentKey.value === shownTimeSpentKey.value
 )
 
 const sortedTasks = computed(() =>
@@ -838,12 +857,22 @@ const loadDaysOff = async () => {
 }
 
 const loadTimeSpents = async () => {
-  isTasksLoading.value = true
-  await store.dispatch('loadPersonTimeSpents', {
-    personId: person.value.id,
-    date: selectedDate.value
-  })
-  isTasksLoading.value = false
+  const personId = person.value.id
+  const date = selectedDate.value
+  const key = `${personId}/${date}`
+  if (failedTimeSpentKey.value === key) {
+    failedTimeSpentKey.value = null
+  }
+  try {
+    await store.dispatch('loadPersonTimeSpents', { personId, date })
+  } catch (err) {
+    // a failed read for a day or person left since says nothing of the one
+    // shown
+    if (shownTimeSpentKey.value === key) {
+      failedTimeSpentKey.value = key
+    }
+    logRequestFailure(err)
+  }
 }
 
 const resizeHeaders = () => {

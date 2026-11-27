@@ -1,14 +1,31 @@
 <template>
   <div class="user-timesheet data-list">
     <div class="timesheet-header">
-      <date-field
-        :can-delete="false"
-        :min-date="disabledDates.to"
-        :max-date="disabledDates.from"
-        :with-margin="false"
-        v-model="selectedDate"
-      />
-      <div class="time-spent-total">
+      <div class="day-stepper">
+        <button-simple
+          class="previous-day"
+          icon="left"
+          :disabled="isFirstDay"
+          :title="$t('schedule.previous_day')"
+          @click="shiftSelectedDate(-1)"
+        />
+        <date-field
+          class="day-field"
+          :can-delete="false"
+          :min-date="minDate"
+          :max-date="maxDate"
+          :with-margin="false"
+          v-model="selectedDate"
+        />
+        <button-simple
+          class="next-day"
+          icon="right"
+          :disabled="isLastDay"
+          :title="$t('schedule.next_day')"
+          @click="shiftSelectedDate(1)"
+        />
+      </div>
+      <div class="time-spent-total" v-if="isDayRead">
         <strong>{{ timeSpentTotal }}</strong>
         {{ $t('timesheets.hours') }}
       </div>
@@ -17,6 +34,8 @@
         {{ $t('timesheets.week_total', { hours: weekTimeSpentTotal }) }}
       </div>
       <button-simple
+        class="day-off-button"
+        icon="briefcase"
         :text="$t('timesheets.day_off')"
         :active="personIsDayOff"
         @click="toggleDayOff"
@@ -226,7 +245,15 @@
 
 <script setup>
 import moment from 'moment-timezone'
-import { computed, onMounted, reactive, ref, useTemplateRef, watch } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
@@ -315,7 +342,6 @@ const emit = defineEmits([
 const colNamePosX = ref('')
 const colTypePosX = ref('')
 const dayOffToEdit = ref(null)
-const disabledDates = ref({})
 const filledTaskIds = ref(new Set())
 const otherDaysDuration = ref(null)
 const page = ref(1)
@@ -328,6 +354,9 @@ const modals = reactive({
   setDayOff: false,
   unsetDayOff: false
 })
+// Moved on each new day, so a page left open overnight reaches today
+const now = ref(new Date())
+let clock = null
 
 const bodyRef = useTemplateRef('body')
 const thProdRef = useTemplateRef('th-prod')
@@ -339,6 +368,23 @@ const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const organisation = computed(() => store.getters.organisation)
 const productionMap = computed(() => store.getters.productionMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+// A studio can lock the timesheets of the artists older than one week
+const minDate = computed(() =>
+  isCurrentUserArtist.value && organisation.value.timesheets_locked
+    ? moment(now.value).subtract(1, 'weeks').toDate()
+    : undefined
+)
+const maxDate = computed(() => now.value)
+
+const isFirstDay = computed(
+  () =>
+    Boolean(minDate.value) &&
+    moment(selectedDate.value).isSameOrBefore(minDate.value, 'day')
+)
+const isLastDay = computed(() =>
+  moment(selectedDate.value).isSameOrAfter(maxDate.value, 'day')
+)
 
 const personDayOff = computed(() => {
   const date = moment(selectedDate.value).format('YYYY-MM-DD')
@@ -359,9 +405,13 @@ const displayedTasks = computed(() =>
   sortedTasks.value.slice(0, page.value * (PAGE_SIZE / 2))
 )
 
+// Until the day shown is read, the day total of the page is the one of the
+// day left.
+const isDayRead = computed(() => !props.isLoading && !props.isError)
+
 // The selected day comes from the live total, so the edits show at once.
 const weekTimeSpentTotal = computed(() =>
-  otherDaysDuration.value === null
+  otherDaysDuration.value === null || !isDayRead.value
     ? null
     : otherDaysDuration.value / 60 + props.timeSpentTotal
 )
@@ -388,6 +438,10 @@ const onBodyScroll = event => {
 
 const onSliderChange = valueInfo => {
   emit('time-spent-change', valueInfo)
+}
+
+const shiftSelectedDate = days => {
+  selectedDate.value = moment(selectedDate.value).add(days, 'days').toDate()
 }
 
 const loadWeekTimeSpents = async () => {
@@ -464,14 +518,14 @@ onMounted(() => {
   colNamePosX.value = `${
     thProdRef.value.offsetWidth + thTypeRef.value.offsetWidth
   }px`
-  disabledDates.value = {
-    to:
-      isCurrentUserArtist.value && organisation.value.timesheets_locked
-        ? moment().subtract(1, 'weeks').toDate() // Disable dates older than one week
-        : undefined,
-    from: moment().toDate() // Disable dates after today
-  }
+  clock = setInterval(() => {
+    if (!moment().isSame(now.value, 'day')) {
+      now.value = new Date()
+    }
+  }, 60 * 1000)
 })
+
+onBeforeUnmount(() => clearInterval(clock))
 </script>
 
 <style lang="scss" scoped>
@@ -571,6 +625,55 @@ onMounted(() => {
   background: $dark-grey-light;
 }
 
+.day-stepper {
+  display: flex;
+
+  .button,
+  :deep(.dp--input) {
+    position: relative;
+
+    // the borders overlap: the focused one goes over its neighbors, the
+    // hovered one over the focused one
+    &:focus {
+      z-index: 1;
+    }
+
+    &:hover {
+      z-index: 2;
+    }
+  }
+
+  .button {
+    height: 40px;
+  }
+
+  .previous-day {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  .day-field {
+    margin: 0 -1px;
+
+    :deep(.dp--input) {
+      // the border of the buttons: in dark mode, the lighter one of the
+      // picker made the field look taller than them
+      --dp-border-color: var(--border);
+      text-align: center;
+    }
+  }
+
+  .next-day {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+  }
+}
+
+// #app .dp--input rounds the field; the id outranks the scope
+#app .day-stepper :deep(.dp--input) {
+  border-radius: 0;
+}
+
 .time-spent-total {
   color: var(--text);
   white-space: nowrap;
@@ -597,6 +700,11 @@ onMounted(() => {
   // the Day off button takes the place of the week total
   .day-off-info,
   .week-time-spent-total {
+    display: none;
+  }
+
+  // ButtonSimple sets an icon against its text on a phone: the text goes alone
+  .day-off-button :deep(.icon) {
     display: none;
   }
 

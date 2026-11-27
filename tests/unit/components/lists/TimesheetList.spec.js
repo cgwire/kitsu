@@ -1,6 +1,7 @@
 import { flushPromises, mount, shallowMount } from '@vue/test-utils'
 import moment from 'moment-timezone'
 import { vi } from 'vitest'
+import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
 import TimesheetList from '@/components/lists/TimesheetList.vue'
@@ -11,21 +12,22 @@ import DateField from '@/components/widgets/DateField.vue'
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
-const createListStore = (actions = {}) =>
+const createListStore = (actions = {}, getters = {}) =>
   createStore({
     actions,
     getters: {
       isCurrentUserArtist: () => false,
       organisation: () => ({ hours_by_day: 8 }),
       productionMap: () => new Map(),
-      taskTypeMap: () => new Map()
+      taskTypeMap: () => new Map(),
+      ...getters
     }
   })
 
-const mountList = props =>
+const mountList = (props, getters) =>
   shallowMount(TimesheetList, {
     global: {
-      plugins: [createListStore()],
+      plugins: [createListStore({}, getters)],
       stubs: { RouterLink: true }
     },
     props: { hideDayOff: false, ...props }
@@ -81,6 +83,106 @@ describe('lists/TimesheetList', () => {
 
     expect(wrapper.findComponent(DayOffModal).props('dayOffToEdit')).toEqual({
       date: new Date('2026-08-06T00:00:00.000Z')
+    })
+  })
+
+  it('marks the day off button with the briefcase of the schedules', () => {
+    const wrapper = mountList({ initialDate: '2026-08-04' })
+
+    const dayOffButton = wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('text') === 'timesheets.day_off')
+    expect(dayOffButton.props('icon')).toBe('briefcase')
+  })
+
+  describe('day steps', () => {
+    // Midday in Tokyo, the profile zone of these tests
+    const now = new Date('2026-08-05T12:00:00+09:00')
+    const lockedArtist = {
+      isCurrentUserArtist: () => true,
+      organisation: () => ({ hours_by_day: 8, timesheets_locked: true })
+    }
+
+    const stepButton = (wrapper, name) =>
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.classes(name))
+    const isStepDisabled = (wrapper, name) =>
+      stepButton(wrapper, name).props('disabled')
+    const step = async (wrapper, name) => {
+      stepButton(wrapper, name).vm.$emit('click')
+      await nextTick()
+    }
+    const day = date => moment(date).format('YYYY-MM-DD')
+
+    beforeEach(() => {
+      vi.useFakeTimers({
+        now,
+        toFake: ['Date', 'setInterval', 'clearInterval']
+      })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('steps to the day before and the day after', async () => {
+      const wrapper = mountList({ initialDate: '2026-08-04' })
+
+      await step(wrapper, 'previous-day')
+      await step(wrapper, 'next-day')
+      await step(wrapper, 'next-day')
+
+      expect(wrapper.emitted('date-changed').map(([date]) => day(date))).toEqual(
+        ['2026-08-03', '2026-08-04', '2026-08-05']
+      )
+      expect(day(wrapper.findComponent(DateField).props('modelValue'))).toBe(
+        '2026-08-05'
+      )
+    })
+
+    it('stops at today', () => {
+      const wrapper = mountList({ initialDate: '2026-08-05' })
+
+      expect(isStepDisabled(wrapper, 'next-day')).toBe(true)
+      expect(isStepDisabled(wrapper, 'previous-day')).toBe(false)
+    })
+
+    // Zou does not check the lock: the timesheet is its only guard
+    it('stops one week back for an artist when the studio locks the timesheets', () => {
+      const lockedDay = mountList({ initialDate: '2026-07-29' }, lockedArtist)
+      const nextDay = mountList({ initialDate: '2026-07-30' }, lockedArtist)
+      const unlockedArtist = mountList(
+        { initialDate: '2026-07-29' },
+        { isCurrentUserArtist: () => true }
+      )
+      const manager = mountList(
+        { initialDate: '2026-07-29' },
+        { organisation: lockedArtist.organisation }
+      )
+
+      expect(isStepDisabled(lockedDay, 'previous-day')).toBe(true)
+      expect(isStepDisabled(lockedDay, 'next-day')).toBe(false)
+      expect(isStepDisabled(nextDay, 'previous-day')).toBe(false)
+      expect(isStepDisabled(unlockedArtist, 'previous-day')).toBe(false)
+      expect(isStepDisabled(manager, 'previous-day')).toBe(false)
+    })
+
+    it('moves the bounds to the new day while the page stays open', async () => {
+      vi.setSystemTime(new Date('2026-08-05T23:59:30+09:00'))
+      const wrapper = mountList({ initialDate: '2026-08-05' }, lockedArtist)
+      const field = wrapper.findComponent(DateField)
+      expect(isStepDisabled(wrapper, 'next-day')).toBe(true)
+
+      vi.advanceTimersByTime(60 * 1000)
+      await nextTick()
+
+      expect(isStepDisabled(wrapper, 'next-day')).toBe(false)
+      expect(day(field.props('maxDate'))).toBe('2026-08-06')
+      expect(day(field.props('minDate'))).toBe('2026-07-30')
+
+      wrapper.unmount()
+      expect(vi.getTimerCount()).toBe(0)
     })
   })
 
@@ -207,7 +309,7 @@ describe('lists/TimesheetList', () => {
       { date: '2026-08-05', duration: 60 }
     ]
 
-    const mountWeekList = () => {
+    const mountWeekList = (props = {}) => {
       const loadPersonTimeSpentsByPeriod = vi.fn(() => timeSpents)
       const store = createListStore({ loadPersonTimeSpentsByPeriod })
       const wrapper = shallowMount(TimesheetList, {
@@ -221,13 +323,35 @@ describe('lists/TimesheetList', () => {
         props: {
           initialDate: '2026-08-05',
           personId: 'person-1',
-          timeSpentTotal: 2
+          timeSpentTotal: 2,
+          ...props
         }
       })
       return { loadPersonTimeSpentsByPeriod, wrapper }
     }
 
     const weekTotal = wrapper => wrapper.find('.week-time-spent-total').text()
+    const dayTotal = wrapper => wrapper.find('.time-spent-total')
+
+    // The day total of the page is the one of the day left until the day
+    // shown is read, and the week total would count that day twice.
+    it('shows no total while the day shown is not read', async () => {
+      const { wrapper } = mountWeekList({ isLoading: true })
+      await flushPromises()
+
+      expect(dayTotal(wrapper).exists()).toBe(false)
+      expect(wrapper.find('.week-time-spent-total').exists()).toBe(false)
+
+      await wrapper.setProps({ isLoading: false })
+
+      expect(dayTotal(wrapper).find('strong').text()).toBe('2')
+      expect(weekTotal(wrapper)).toBe('timesheets.week_total:7')
+
+      await wrapper.setProps({ isError: true })
+
+      expect(dayTotal(wrapper).exists()).toBe(false)
+      expect(wrapper.find('.week-time-spent-total').exists()).toBe(false)
+    })
 
     it('adds the live day total to the other days of the week', async () => {
       const { loadPersonTimeSpentsByPeriod, wrapper } = mountWeekList()

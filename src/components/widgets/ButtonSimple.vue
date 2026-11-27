@@ -16,6 +16,7 @@
     @click="$emit('click', $event)"
   >
     <bell-icon class="icon" v-if="icon === 'bell'" />
+    <briefcase-icon class="icon" v-else-if="icon === 'briefcase'" />
     <chart-line-icon class="icon" v-else-if="icon === 'chart'" />
     <chart-column-icon class="icon" v-else-if="icon === 'chart-column'" />
     <grid-icon class="icon" v-else-if="icon === 'grid'" />
@@ -100,6 +101,7 @@
 <script setup>
 import {
   BellIcon,
+  BriefcaseIcon,
   CalendarIcon,
   CalendarPlusIcon,
   ChartColumnIcon,

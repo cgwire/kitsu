@@ -23,4 +23,12 @@ describe('ButtonSimple', () => {
 
     expect(wrapper.find('span').classes()).toEqual([])
   })
+
+  it('draws the Lucide briefcase for the briefcase icon', () => {
+    const wrapper = mount(ButtonSimple, {
+      props: { icon: 'briefcase', text: 'Day off' }
+    })
+
+    expect(wrapper.find('svg.lucide-briefcase').exists()).toBe(true)
+  })
 })

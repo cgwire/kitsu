@@ -119,6 +119,11 @@ const cache = {
   todosIndex: {}
 }
 
+// The day of the last time spents read: the timesheet steps from a day to the
+// next faster than Zou answers, and the answer for a day left since must not
+// replace the time spents shown.
+let timeSpentsRead = null
+
 // Zou's order (TWO_FACTOR_FALLBACKS), so the page agrees with it until a
 // reload.
 const TWO_FACTOR_FALLBACKS = {
@@ -208,6 +213,8 @@ const initialState = {
   userFilterGroups: {},
   todoListScrollPosition: 0,
 
+  // the day of the time spents of the map
+  timeSpentDate: null,
   timeSpentMap: {},
   timeSpentTotal: 0,
 
@@ -337,6 +344,7 @@ const getters = {
   isTodosLoadingError: state => state.isTodosLoadingError,
   todoListScrollPosition: state => state.todoListScrollPosition,
 
+  timeSpentDate: state => state.timeSpentDate,
   timeSpentMap: state => state.timeSpentMap,
   timeSpentTotal: state => state.timeSpentTotal,
 
@@ -492,12 +500,15 @@ const actions = {
 
     if (state.todos.length === 0 || forced) {
       commit(USER_LOAD_TODOS_START)
+      timeSpentsRead = date
       try {
         const tasks = await peopleApi.loadTodos()
         const timeSpents = await peopleApi.loadTimeSpents(date)
         commit(USER_LOAD_TODOS_END, { tasks, userFilters, taskTypeMap })
         commit(REGISTER_USER_TASKS, { tasks })
-        commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
+        if (timeSpentsRead === date) {
+          commit(USER_LOAD_TIME_SPENTS_END, { date, timeSpents })
+        }
         return tasks
       } catch (err) {
         console.error(err)
@@ -516,8 +527,11 @@ const actions = {
   },
 
   async loadUserTimeSpents({ commit }, { date }) {
+    timeSpentsRead = date
     const timeSpents = (await peopleApi.loadTimeSpents(date)) || []
-    commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
+    if (timeSpentsRead === date) {
+      commit(USER_LOAD_TIME_SPENTS_END, { date, timeSpents })
+    }
   },
 
   async loadTasksToCheck({ commit }, params = {}) {
@@ -804,11 +818,11 @@ const mutations = {
     }
   },
 
+  // The time spents of the day held stay, with their total, until a read
+  // replaces them.
   [USER_LOAD_TODOS_START](state) {
     state.isTodosLoadingError = false
     state.isTodosLoading = true
-    state.timeSpents = {}
-    state.timeSpentTotal = 0
   },
 
   [USER_LOAD_TODOS_END](state, { tasks, userFilters, taskTypeMap }) {
@@ -1025,8 +1039,13 @@ const mutations = {
     })
   },
 
+  // A save answered once the timesheet shows another day belongs to the day
+  // left.
   [SET_TIME_SPENT](state, timeSpent) {
-    if (state.user.id === timeSpent.person_id) {
+    if (
+      state.user.id === timeSpent.person_id &&
+      timeSpent.date === state.timeSpentDate
+    ) {
       state.timeSpentMap[timeSpent.task_id] = timeSpent
     }
     state.timeSpentTotal =
@@ -1036,11 +1055,13 @@ const mutations = {
       ) / 60
   },
 
-  [USER_LOAD_TIME_SPENTS_END](state, timeSpents) {
+  [USER_LOAD_TIME_SPENTS_END](state, { date, timeSpents }) {
     const timeSpentMap = {}
     timeSpents.forEach(timeSpent => {
       timeSpentMap[timeSpent.task_id] = timeSpent
     })
+    // set once the list is read: the day names the time spents held
+    state.timeSpentDate = date
     state.timeSpentMap = timeSpentMap
 
     state.timeSpentTotal =

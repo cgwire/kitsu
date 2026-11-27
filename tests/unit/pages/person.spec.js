@@ -16,6 +16,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
+import { markRequestFailure } from '@/lib/errors'
 
 import KanbanBoard from '@/components/lists/KanbanBoard.vue'
 import TimesheetList from '@/components/lists/TimesheetList.vue'
@@ -68,6 +69,7 @@ const mountPage = async ({
   tasks = []
 } = {}) => {
   const store = createStore({
+    state: () => ({ personTimeSpentKey: null }),
     getters: {
       canReadDaysOff: () => () => true,
       displayedPersonDoneTasks: () => [],
@@ -85,6 +87,7 @@ const mountPage = async ({
       personTaskSearchQueries: () => [],
       personTaskSelectionGrid: () => ({}),
       personTasksScrollPosition: () => 0,
+      personTimeSpentKey: state => state.personTimeSpentKey,
       personTimeSpentMap: () => ({}),
       personTimeSpentTotal: () => 0,
       productionMap: () => new Map(),
@@ -98,12 +101,17 @@ const mountPage = async ({
       clearSelectedTasks: vi.fn(),
       loadAggregatedPersonDaysOff: vi.fn(() => []),
       loadPersonDoneTasks: vi.fn(),
-      loadPersonTasks: vi.fn(),
+      loadPersonTasks: vi.fn(({ commit }, { personId, date }) =>
+        commit('PERSON_LOAD_TIME_SPENTS_END', { personId, date, timeSpents: [] })
+      ),
       setPersonTasksSearch: vi.fn(),
       ...actions
     },
     mutations: {
-      LOAD_PERSON_TASKS_END: () => {}
+      LOAD_PERSON_TASKS_END: () => {},
+      PERSON_LOAD_TIME_SPENTS_END: (state, { personId, date }) => {
+        state.personTimeSpentKey = `${personId}/${date}`
+      }
     }
   })
   const router = createRouter({
@@ -1061,6 +1069,274 @@ describe('Person page', () => {
       await flushPromises()
 
       expect(consoleError).toHaveBeenCalledWith(error)
+      wrapper.unmount()
+    })
+
+    // Each read answers on demand, and commits its person and day as the
+    // store does
+    const deferReads = () => {
+      const reads = []
+      const loadPersonTimeSpents = vi.fn(
+        ({ commit }, { personId, date }) =>
+          new Promise((resolve, reject) => {
+            reads.push({
+              answer: () => {
+                commit('PERSON_LOAD_TIME_SPENTS_END', {
+                  personId,
+                  date,
+                  timeSpents: []
+                })
+                resolve()
+              },
+              fail: reject
+            })
+          })
+      )
+      return { loadPersonTimeSpents, reads }
+    }
+
+    const manager = {
+      isCurrentUserManager: () => true,
+      personMap: () =>
+        new Map([person, otherUser].map(people => [people.id, people]))
+    }
+
+    it('keeps the timesheet loading until the day picked last is read', async () => {
+      const { loadPersonTimeSpents, reads } = deferReads()
+      const wrapper = await mountPage({
+        actions: { loadPersonTimeSpents },
+        query: { section: 'timesheets' }
+      })
+      const list = wrapper.findComponent(TimesheetList)
+
+      list.vm.$emit('date-changed', new Date(2026, 9, 29))
+      list.vm.$emit('date-changed', new Date(2026, 9, 28))
+      await flushPromises()
+      reads[0].answer()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(true)
+
+      reads[1].answer()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(false)
+      wrapper.unmount()
+    })
+
+    // The timesheet stays on screen while the tasks of a colleague opened
+    // from another page load.
+    it('keeps the timesheet loading for a day picked during the task load', async () => {
+      let answerTasks = null
+      const loadPersonTasks = vi.fn(({ commit }, { personId, date }) => {
+        const commitDay = () =>
+          commit('PERSON_LOAD_TIME_SPENTS_END', {
+            personId,
+            date,
+            timeSpents: []
+          })
+        if (personId === person.id) return commitDay()
+        return new Promise(resolve => {
+          answerTasks = () => {
+            commitDay()
+            resolve()
+          }
+        })
+      })
+      const { loadPersonTimeSpents, reads } = deferReads()
+      const wrapper = await mountPage({
+        actions: { loadPersonTasks, loadPersonTimeSpents },
+        getters: manager,
+        query: { section: 'timesheets' }
+      })
+      await wrapper.vm.$router.push({
+        path: `/people/${otherUser.id}`,
+        query: { section: 'timesheets' }
+      })
+      await flushPromises()
+      const list = wrapper.findComponent(TimesheetList)
+
+      list.vm.$emit('date-changed', new Date(2026, 9, 29))
+      await flushPromises()
+      answerTasks()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(true)
+
+      reads[0].answer()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(false)
+      wrapper.unmount()
+    })
+
+    // A colleague's page opened on another day while a read for the person
+    // left is still on its way
+    it('keeps the timesheet loading when a read for the person left lands', async () => {
+      const { loadPersonTimeSpents, reads } = deferReads()
+      const wrapper = await mountPage({
+        actions: { loadPersonTimeSpents },
+        getters: manager,
+        query: { section: 'timesheets' }
+      })
+      wrapper
+        .findComponent(TimesheetList)
+        .vm.$emit('date-changed', new Date(2026, 9, 29))
+      await flushPromises()
+      await wrapper.vm.$router.push({
+        path: `/people/${otherUser.id}`,
+        query: { section: 'timesheets', day: '2026-10-28' }
+      })
+      await flushPromises()
+      const list = wrapper.findComponent(TimesheetList)
+
+      expect(list.props('isLoading')).toBe(false)
+
+      list.vm.$emit('date-changed', new Date(2026, 9, 29))
+      await flushPromises()
+      reads[0].answer()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(true)
+
+      reads[1].answer()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(false)
+      wrapper.unmount()
+    })
+
+    // Back on a day before its first read came back: the second one shows it
+    it('shows the day when another read of it fails', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = new Error('timeout')
+      markRequestFailure(failure)
+      const { loadPersonTimeSpents, reads } = deferReads()
+      const wrapper = await mountPage({
+        actions: { loadPersonTimeSpents },
+        query: { section: 'timesheets' }
+      })
+      const list = wrapper.findComponent(TimesheetList)
+
+      list.vm.$emit('date-changed', new Date(2026, 9, 29))
+      list.vm.$emit('date-changed', new Date(2026, 9, 28))
+      list.vm.$emit('date-changed', new Date(2026, 9, 29))
+      await flushPromises()
+      reads[2].answer()
+      reads[0].fail(failure)
+      await flushPromises()
+
+      expect(consoleError).toHaveBeenCalledWith(failure)
+      expect(list.props('isLoading')).toBe(false)
+      expect(list.props('isError')).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('says that the time spents of the day could not be read', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = new Error('timeout')
+      markRequestFailure(failure)
+      const { loadPersonTimeSpents, reads } = deferReads()
+      const wrapper = await mountPage({
+        actions: { loadPersonTimeSpents },
+        query: { section: 'timesheets' }
+      })
+      const list = wrapper.findComponent(TimesheetList)
+
+      list.vm.$emit('date-changed', new Date(2026, 9, 29))
+      await flushPromises()
+      reads[0].fail(failure)
+      await flushPromises()
+
+      expect(consoleError).toHaveBeenCalledWith(failure)
+      expect(list.props('isLoading')).toBe(true)
+      expect(list.props('isError')).toBe(true)
+
+      list.vm.$emit('date-changed', new Date(2026, 9, 28))
+      await flushPromises()
+
+      expect(list.props('isError')).toBe(false)
+
+      reads[1].answer()
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(false)
+
+      // a new read of the day that failed
+      list.vm.$emit('date-changed', new Date(2026, 9, 29))
+      await flushPromises()
+
+      expect(list.props('isLoading')).toBe(true)
+      expect(list.props('isError')).toBe(false)
+      wrapper.unmount()
+    })
+
+    // Two steps whose reads both fail, the one of the day shown first
+    it('keeps saying that the day shown could not be read', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = new Error('timeout')
+      markRequestFailure(failure)
+      const { loadPersonTimeSpents, reads } = deferReads()
+      const wrapper = await mountPage({
+        actions: { loadPersonTimeSpents },
+        query: { section: 'timesheets' }
+      })
+      const list = wrapper.findComponent(TimesheetList)
+
+      list.vm.$emit('date-changed', new Date(2026, 9, 29))
+      list.vm.$emit('date-changed', new Date(2026, 9, 28))
+      await flushPromises()
+      reads[1].fail(failure)
+      await flushPromises()
+      reads[0].fail(failure)
+      await flushPromises()
+
+      expect(consoleError).toHaveBeenCalledTimes(2)
+      expect(list.props('isLoading')).toBe(true)
+      expect(list.props('isError')).toBe(true)
+      wrapper.unmount()
+    })
+
+    // The same day on a colleague's page, the read for the person left failing
+    // last
+    it('keeps saying that the day of the person shown could not be read', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const failure = new Error('timeout')
+      markRequestFailure(failure)
+      const { loadPersonTimeSpents, reads } = deferReads()
+      const wrapper = await mountPage({
+        actions: { loadPersonTimeSpents },
+        getters: manager,
+        query: { section: 'timesheets' }
+      })
+      wrapper
+        .findComponent(TimesheetList)
+        .vm.$emit('date-changed', new Date(2026, 9, 29))
+      await flushPromises()
+      await wrapper.vm.$router.push({
+        path: `/people/${otherUser.id}`,
+        query: { section: 'timesheets', day: '2026-10-28' }
+      })
+      await flushPromises()
+      const list = wrapper.findComponent(TimesheetList)
+      list.vm.$emit('date-changed', new Date(2026, 9, 29))
+      await flushPromises()
+      reads[1].fail(failure)
+      await flushPromises()
+      reads[0].fail(failure)
+      await flushPromises()
+
+      expect(consoleError).toHaveBeenCalledTimes(2)
+      expect(list.props('isLoading')).toBe(true)
+      expect(list.props('isError')).toBe(true)
       wrapper.unmount()
     })
   })

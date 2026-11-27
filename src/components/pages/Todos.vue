@@ -187,8 +187,8 @@
           :person-id="user.id"
           :tasks="loggableTodos"
           :done-tasks="loggableDoneTasks"
-          :is-loading="loading.timesheets || isTodosLoading"
-          :is-error="isTodosLoadingError"
+          :is-loading="isTimeSpentsLoading || isTodosLoading"
+          :is-error="isTodosLoadingError || isTimeSpentsLoadingError"
           :days-off="daysOff"
           v-model:day-off-error="dayOffError"
           :time-spent-map="timeSpentMap"
@@ -273,6 +273,7 @@ import { useStore } from 'vuex'
 import { useBoardStatuses } from '@/composables/board'
 import { useProductivity } from '@/composables/productivity'
 import { useTaskFilters } from '@/composables/taskFilters'
+import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import preferences from '@/lib/preferences'
 
@@ -341,10 +342,10 @@ const {
   )
 })
 const calendarTimeSpents = ref([])
+const failedTimeSpentDate = ref(null)
 const selectedDate = ref(moment().format('YYYY-MM-DD'))
 const loading = reactive({
-  doneTasks: false,
-  timesheets: false
+  doneTasks: false
 })
 
 const searchFieldRef = useTemplateRef('todos-search-field')
@@ -366,6 +367,7 @@ const productionMap = computed(() => store.getters.productionMap)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const timeSpentDate = computed(() => store.getters.timeSpentDate)
 const timeSpentMap = computed(() => store.getters.timeSpentMap)
 const timeSpentTotal = computed(() => store.getters.timeSpentTotal)
 const todoSearchQueries = computed(() => store.getters.todoSearchQueries)
@@ -494,6 +496,18 @@ const loggableDoneTasks = computed(() =>
   sortedDoneTasks.value.filter(isLoggable)
 )
 
+// The store holds the time spents of the day read last, which can be a day
+// left since or the day of an earlier visit
+const isTimeSpentsLoading = computed(
+  () => timeSpentDate.value !== selectedDate.value
+)
+
+const isTimeSpentsLoadingError = computed(
+  () =>
+    isTimeSpentsLoading.value &&
+    failedTimeSpentDate.value === selectedDate.value
+)
+
 // Functions
 // --------------------------------------------------------------------------
 const isActiveTab = tab => currentSection.value === tab
@@ -512,6 +526,10 @@ const isLoggable = task =>
 const loadData = async (forced = false) => {
   loading.doneTasks = true
   await store.dispatch('loadTodos', { date: selectedDate.value, forced })
+  // tasks kept from an earlier visit come without a read of the day
+  if (isTimeSpentsLoading.value) {
+    loadTimeSpents()
+  }
   store
     .dispatch('loadDoneTasks')
     .catch(console.error)
@@ -534,8 +552,21 @@ const loadData = async (forced = false) => {
     })
 }
 
-const loadTimeSpents = () =>
-  store.dispatch('loadUserTimeSpents', { date: selectedDate.value })
+const loadTimeSpents = async () => {
+  const date = selectedDate.value
+  if (failedTimeSpentDate.value === date) {
+    failedTimeSpentDate.value = null
+  }
+  try {
+    await store.dispatch('loadUserTimeSpents', { date })
+  } catch (err) {
+    // a failed read for a day left since says nothing of the day shown
+    if (selectedDate.value === date) {
+      failedTimeSpentDate.value = date
+    }
+    logRequestFailure(err)
+  }
+}
 
 const resizeHeaders = () => {
   nextTick(() => {
@@ -633,7 +664,6 @@ const setTodoListScrollPosition = position =>
   store.dispatch('setTodoListScrollPosition', position)
 
 const onDateChanged = async date => {
-  loading.timesheets = true
   selectedDate.value = moment(date).format('YYYY-MM-DD')
   // keep the day shareable in the URL, without stacking history entries
   if (route.query.day !== selectedDate.value) {
@@ -642,7 +672,6 @@ const onDateChanged = async date => {
     })
   }
   await loadTimeSpents()
-  loading.timesheets = false
 }
 
 const onCalendarTimeClicked = date => {

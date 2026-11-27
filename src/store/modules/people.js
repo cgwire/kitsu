@@ -140,6 +140,11 @@ const cache = {
 // answers 404 to a write whose row a concurrent delete removed.
 const timeSpentWrites = new Map()
 
+// The person and day of the last time spents read: the timesheet steps from a
+// day to the next faster than Zou answers, and the answer for a day left since
+// must not replace the time spents shown.
+let timeSpentsRead = null
+
 const initialState = {
   organisation: {
     name: 'Kitsu',
@@ -190,6 +195,8 @@ const initialState = {
   personTasksScrollPosition: 0,
 
   timesheet: {},
+  // the person and day of the time spents of the map, as "<person id>/<day>"
+  personTimeSpentKey: null,
   personTimeSpentMap: {},
   personTimeSpentTotal: 0,
   personDayOff: {},
@@ -289,6 +296,7 @@ const getters = {
     cache.personDoneTasks.find(task => task.id === id),
 
   timesheet: state => state.timesheet,
+  personTimeSpentKey: state => state.personTimeSpentKey,
   personTimeSpentMap: state => state.personTimeSpentMap,
   personTimeSpentTotal: state => state.personTimeSpentTotal,
   dayOffMap: state => state.dayOffMap,
@@ -495,13 +503,17 @@ const actions = {
     })
     commit(LOAD_PERSON_DONE_TASKS_END, [])
 
+    const read = `${personId}/${date}`
+    timeSpentsRead = read
     const [tasks, timeSpents] = await Promise.all([
       peopleApi.getPersonTasks(personId).catch(() => []),
       withTimeSpents
         ? peopleApi.getTimeSpents(personId, date).catch(() => [])
         : []
     ])
-    commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
+    if (timeSpentsRead === read) {
+      commit(PERSON_LOAD_TIME_SPENTS_END, { personId, date, timeSpents })
+    }
     commit(LOAD_PERSON_TASKS_END, {
       personId,
       tasks,
@@ -522,8 +534,12 @@ const actions = {
   },
 
   async loadPersonTimeSpents({ commit }, { personId, date }) {
-    const timeSpents = await peopleApi.getTimeSpents(personId, date)
-    commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
+    const read = `${personId}/${date}`
+    timeSpentsRead = read
+    const timeSpents = (await peopleApi.getTimeSpents(personId, date)) || []
+    if (timeSpentsRead === read) {
+      commit(PERSON_LOAD_TIME_SPENTS_END, { personId, date, timeSpents })
+    }
   },
 
   loadPersonTimeSpentsByPeriod({}, { personId, startDate, endDate }) {
@@ -1053,8 +1069,12 @@ const mutations = {
     state.timesheet = timesheet
   },
 
+  // A save answered once the timesheet shows another day or person belongs
+  // to the one left.
   [SET_TIME_SPENT](state, timeSpent) {
-    if (state.person?.id === timeSpent.person_id) {
+    if (
+      state.personTimeSpentKey === `${timeSpent.person_id}/${timeSpent.date}`
+    ) {
       state.personTimeSpentMap[timeSpent.task_id] = timeSpent
     }
     state.personTimeSpentTotal =
@@ -1064,11 +1084,13 @@ const mutations = {
       ) / 60
   },
 
-  [PERSON_LOAD_TIME_SPENTS_END](state, timeSpents) {
+  [PERSON_LOAD_TIME_SPENTS_END](state, { personId, date, timeSpents }) {
     const timeSpentMap = {}
     timeSpents.forEach(timeSpent => {
       timeSpentMap[timeSpent.task_id] = timeSpent
     })
+    // set once the list is read: the key names the time spents held
+    state.personTimeSpentKey = `${personId}/${date}`
     state.personTimeSpentMap = timeSpentMap
 
     state.personTimeSpentTotal =
