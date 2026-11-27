@@ -127,7 +127,7 @@
       "pin": "釘選",
       "pinned": "已釘選",
       "post_status": "發表評論",
-      "retake": "重拍",
+      "retake": "退修",
       "revision": "修訂",
       "task_placeholder": "新事項...",
       "text": "文字",
@@ -146,7 +146,7 @@
       "checklist": "清單",
       "attachments": "附件",
       "attachments_to_add": "新增附件",
-      "max_retakes_error": "您不能再在此任務上新增重拍。",
+      "max_retakes_error": "您不能再在此任務上新增退修。",
       "revision_taken_error": "修訂 {revision} 已存在。請選擇其他編號。",
       "unknown_status_error": "所選的任務狀態已無法使用。請重新載入頁面並再試一次。",
       "previews": "要發佈為新修訂版的預覽檔案",
@@ -1173,7 +1173,7 @@
         "nb_episodes": "集數",
         "episode_span": "集數間距",
         "is_clients_isolated": "隔離客戶評論 (彼此不可見)",
-        "max_retakes": "最多重拍次數",
+        "max_retakes": "最多退修次數",
         "style": "風格",
         "is_preview_download_allowed": "允許藝術家下載預覽",
         "is_set_preview_automated": "自動設定新預覽為實體縮圖",
@@ -1236,12 +1236,12 @@
       "parameters": {
         "publish_default_description": "藝術家開啟任務時看到的是發佈表單，而不是評論表單。",
         "title": "參數",
-        "comments_and_retakes": "評論與重拍",
+        "comments_and_retakes": "評論與退修",
         "save": {
           "button": "確定"
         },
         "general_title": "一般",
-        "max_retakes_description": "任務的重拍次數達到此數值後，藝術家將無法再設定重拍狀態。0 表示不限制。"
+        "max_retakes_description": "任務的退修次數達到此數值後，藝術家將無法再設定退修狀態。0 表示不限制。"
       },
       "creation": {
         "add_assets": "新增資產（選填）",
@@ -1476,7 +1476,7 @@
         "is_artist_allowed": "允許藝術家使用",
         "is_client_allowed": "允許客戶使用",
         "is_done": "已完成",
-        "is_retake": "具有重拍值",
+        "is_retake": "具有退修值",
         "name": "名稱",
         "short_name": "簡稱",
         "is_feedback_request": "是否需要回饋",
@@ -1734,7 +1734,7 @@
         "step": "步進",
         "time_spent": "時間",
         "person": "修改者",
-        "max_retakes": "最多重拍次數",
+        "max_retakes": "退修上限",
         "resolution": "解析度",
         "placeholder": "SH01",
         "nb_drawings": "張數"
@@ -1766,7 +1766,7 @@
       "heatmap": "熱力圖",
       "shots": "鏡頭",
       "data_mode": "資料",
-      "retakes": "重拍",
+      "retakes": "退修",
       "status": "狀態",
       "all": "全部",
       "only_running": "僅進行中",
@@ -1846,7 +1846,7 @@
         "production": "製作",
         "real_end_date": "回饋日期",
         "real_start_date": "WIP 日期",
-        "retake_count": "重拍",
+        "retake_count": "退修",
         "seconds": "秒",
         "sequence": "序列",
         "start_date": "開始日期",
@@ -1958,8 +1958,8 @@
       "delete_for_selection_hard_lock_text": "刪除",
       "hookup_playlist": "產生銜接播放清單",
       "assignation_error": "指派此人執行所選任務時出現問題。並未指派所有任務。",
-      "retake_filter_none": "無重拍",
-      "retake_filter_with_retakes": "有重拍"
+      "retake_filter_none": "無退修",
+      "retake_filter_with_retakes": "有退修"
     },
     "timesheets": {
       "chart": "時間圖表",
