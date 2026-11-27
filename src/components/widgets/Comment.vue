@@ -39,7 +39,8 @@
             ref="menuWrapper"
             class="flexrow-item menu-wrapper"
             v-if="
-              isPinnable || isEditable || canToggleForClient || canMoveComment
+              !isPending &&
+              (isPinnable || isEditable || canToggleForClient || canMoveComment)
             "
           >
             <button
@@ -135,12 +136,23 @@
               class="checklist"
               :checklist="checklistItems"
               :disabled="true"
-              :is-editable="isCheckable"
+              :is-editable="isCheckable && !isPending"
               @remove-task="removeTask"
               @emit-change="onChecklistChanged"
               @time-code-clicked="onChecklistTimecodeClicked"
               v-if="checklistItems.length > 0"
             />
+            <p v-if="pendingAttachmentNames.length > 0">
+              <span
+                :key="`pending-attachment-${index}`"
+                :title="name"
+                class="attachment-file-link pending-attachment"
+                v-for="(name, index) in pendingAttachmentNames"
+              >
+                <paperclip-icon class="attachment-icon" :size="16" />
+                <span class="attachment-file-name">{{ name }}</span>
+              </span>
+            </p>
             <p v-if="comment.attachment_files.length > 0">
               <attachment-image
                 v-for="attachment in pictureAttachments"
@@ -399,7 +411,7 @@
                 }"
                 type="button"
                 @click="acknowledgeComment(comment)"
-                v-if="isAcknowledgeable"
+                v-if="isAcknowledgeable && !isPending"
               >
                 <thumbs-up-icon class="icon-1x" />
                 <span>{{ comment.acknowledgements.length }}</span>
@@ -412,7 +424,7 @@
                 @click="showReplyWidget"
                 @keydown.enter.prevent="showReplyWidget"
                 @keydown.space.prevent="showReplyWidget"
-                v-if="!showReply && isReplyable"
+                v-if="!showReply && isReplyable && !isPending"
               >
                 {{ $t('main.reply') }}
               </span>
@@ -512,7 +524,7 @@
         <div
           ref="menuWrapper"
           class="flexrow-item menu-wrapper"
-          v-if="isPinnable || isEditable"
+          v-if="!isPending && (isPinnable || isEditable)"
         >
           <button
             type="button"
@@ -810,11 +822,21 @@ const isPreviewBound = computed(() => {
 
 const canMoveComment = computed(() => props.canMove && !isPreviewBound.value)
 
+// Shown before Zou saved it, under an id Zou does not know: its actions wait
+// for the comment Zou sends back.
+const isPending = computed(() => Boolean(props.comment.isPending))
+
+// The files sent with it: until Zou saved them, nothing to open.
+const pendingAttachmentNames = computed(
+  () => props.comment.pendingAttachmentNames || []
+)
+
 const isEmpty = computed(() => {
   return (
     props.comment.text.length === 0 &&
     (!props.comment.checklist || props.comment.checklist.length === 0) &&
     props.comment.attachment_files.length === 0 &&
+    pendingAttachmentNames.value.length === 0 &&
     props.comment.previews.length === 0
   )
 })
@@ -1447,6 +1469,14 @@ p {
   &:hover .attachment-download-icon,
   &:focus-visible .attachment-download-icon {
     opacity: 1;
+  }
+
+  &.pending-attachment {
+    cursor: default;
+
+    &:hover {
+      background: var(--background-page);
+    }
   }
 }
 

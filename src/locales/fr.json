@@ -1841,6 +1841,7 @@
       "feedback": "retours",
       "hide_infos": "Cacher les informations supplémentaires",
       "my_tasks": "Mes tâches",
+      "nb_by_status": "{name} - {count} tâche | {name} - {count} tâches",
       "next": "Tâche suivante",
       "no_comment": "Il n'y a actuellement aucun commentaire pour cette tâche.",
       "no_preview": "Il n'y a actuellement aucune preview pour cette tâche.",

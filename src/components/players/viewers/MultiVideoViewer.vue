@@ -566,7 +566,7 @@ const setMovieSource = (player, moviePath, preview) => {
 }
 
 const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
-  if (index < props.entities.length) {
+  if (index >= 0 && index < props.entities.length) {
     const nextIndex = getNextIndex(index)
     const entity = props.entities[index]
     const nextEntity = props.entities[nextIndex]

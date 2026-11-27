@@ -1841,6 +1841,7 @@
       "feedback": "feedback",
       "hide_infos": "Ocultar informações adicionais",
       "my_tasks": "Minhas Tarefas",
+      "nb_by_status": "{name} - {count} tarefa | {name} - {count} tarefas",
       "next": "Próxima tarefa",
       "no_comment": "Ainda não há comentários para esta tarefa.",
       "no_preview": "Ainda não há visualizações para esta tarefa.",
@@ -2513,7 +2514,7 @@
       "archive": "Arquivar"
     },
     "project_templates": {
-      "add_metadata": "Adicionar uma coluna de metadados",
+      "add_metadata": "Adicionar coluna de metadados",
       "apply": "Aplicar template",
       "click_name_to_edit": "Clique no nome de um template para editar sua configuração.",
       "create_error": "Ocorreu um erro ao salvar este template. Tem certeza de que não há nenhum template com um nome semelhante?",

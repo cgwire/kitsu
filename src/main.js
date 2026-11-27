@@ -12,7 +12,7 @@ import i18n from '@/lib/i18n'
 import resizableColumn from '@/directives/resizable-column'
 import router from '@/router'
 import store from '@/store'
-import { setupChunkErrorHandler } from '@/lib/chunk-error'
+import { setupChunkErrorHandler, setupStylesheetRetry } from '@/lib/chunk-error'
 import { followLostRedirects } from '@/lib/navigation-failure'
 import { createSocket } from '@/lib/socket'
 import { startApp } from '@/lib/startup'
@@ -76,6 +76,7 @@ window.addEventListener('unhandledrejection', event => {
 })
 
 setupChunkErrorHandler(router)
+setupStylesheetRetry()
 followLostRedirects(router)
 
 startApp(app, router)

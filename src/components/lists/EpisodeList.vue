@@ -60,10 +60,7 @@
                     icon="plus"
                     :text="''"
                     @click="onAddMetadataClicked"
-                    v-if="
-                      (isCurrentUserManager || isCurrentUserSupervisor) &&
-                      !isLoading
-                    "
+                    v-if="isMetadataAddAllowed"
                   />
                 </template>
               </sortable-field-header>
@@ -211,18 +208,23 @@
                 }"
                 namespace="episodes"
                 :production-id="currentProduction?.id"
+                :is-add-allowed="isMetadataAddAllowed"
                 v-model="metadataDisplayHeaders"
                 v-model:is-open="columnSelectorDisplayed"
+                @add-metadata="onAddMetadataClicked"
                 v-if="displaySettings.showInfos"
               />
 
               <button-simple
                 class="is-small is-pulled-right mr05"
                 :title="$t('main.column_visibility')"
+                :aria-expanded="columnSelectorDisplayed"
+                aria-haspopup="dialog"
                 icon="down"
                 @click="toggleColumnSelector"
                 v-if="
-                  episodeMetadataDescriptors.length > 0 &&
+                  (episodeMetadataDescriptors.length > 0 ||
+                    isMetadataAddAllowed) &&
                   displaySettings.showInfos
                 "
               />
@@ -613,9 +615,6 @@ const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
-const isCurrentUserSupervisor = computed(
-  () => store.getters.isCurrentUserProductionSupervisor
-)
 const isEpisodeDescription = computed(() => store.getters.isEpisodeDescription)
 const isEpisodeEstimation = computed(() => store.getters.isEpisodeEstimation)
 const isEpisodeResolution = computed(() => store.getters.isEpisodeResolution)
@@ -640,6 +639,7 @@ const {
   columnSelectorDisplayed,
   hiddenColumns,
   isEmptyTask,
+  isMetadataAddAllowed,
   lastHeaderMenuDisplayed,
   lastMetadataHeaderMenuDisplayed,
   metadataDisplayHeaders,

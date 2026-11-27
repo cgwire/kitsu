@@ -1841,6 +1841,7 @@
       "feedback": "反馈",
       "hide_infos": "隐藏其他信息",
       "my_tasks": "我的任务",
+      "nb_by_status": "{name} - {count} 个任务 | {name} - {count} 个任务",
       "next": "下一个任务",
       "no_comment": "此任务当前没有评论。",
       "no_preview": "此任务当前没有预览。",

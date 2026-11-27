@@ -343,7 +343,12 @@ const compareFirstAssignees = (a, b) => {
     const personB = personMap.value.get(b.assignees[0])
     return (personA?.name || '').localeCompare(personB?.name || '')
   }
-  return a.assignees.length > 0 || b.assignees.length === 0 ? -1 : 1
+  // Equal, so the sort keeps their list order: putting each before the other
+  // let the browser reverse them.
+  if (a.assignees.length === 0 && b.assignees.length === 0) {
+    return 0
+  }
+  return a.assignees.length > 0 ? -1 : 1
 }
 
 const getSeconds = task => {

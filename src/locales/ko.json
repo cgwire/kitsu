@@ -1841,6 +1841,7 @@
       "feedback": "피드백",
       "hide_infos": "추가 정보 숨기기",
       "my_tasks": "내 작업",
+      "nb_by_status": "{name} - 작업 {count}개 | {name} - 작업 {count}개",
       "next": "다음 작업",
       "no_comment": "현재 이 작업에는 댓글이 없습니다.",
       "no_preview": "이 작업에는 현재 미리 보기가 없습니다.",

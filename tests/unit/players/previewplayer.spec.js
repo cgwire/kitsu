@@ -160,7 +160,10 @@ const mountPlayer = ({
   store.dispatch = vi.fn(() => Promise.resolve())
   store.commit = vi.fn()
 
+  // Attached: isVisible() reads the computed style, which a detached tree
+  // lacks.
   return shallowMount(PreviewPlayer, {
+    attachTo: document.body,
     props: { previews: [preview], task, readOnly: true, ...props },
     global: {
       config,

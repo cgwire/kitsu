@@ -120,8 +120,8 @@ describe('PreviewViewer', () => {
   // A sound has no height of its own: in full screen the viewer takes the
   // screen height, so the waveform can sit in its middle as in a playlist.
   it.each([
-    ['mp3', true, 'calc(100vh - 32px)'],
-    ['wav', true, 'calc(100vh - 32px)'],
+    ['mp3', true, 'calc(-32px + 100vh)'],
+    ['wav', true, 'calc(-32px + 100vh)'],
     ['mp3', false, ''],
     ['png', true, ''],
     ['mp4', true, '']

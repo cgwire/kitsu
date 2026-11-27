@@ -315,6 +315,13 @@ export const useEntityList = ({
       props.validationColumns.length === 0
   )
 
+  // Shared by the "+" of the name header and the visible columns menu.
+  const isMetadataAddAllowed = computed(
+    () =>
+      (isCurrentUserManager.value || isCurrentUserSupervisor.value) &&
+      !props.isLoading
+  )
+
   // Columns
   // --------------------------------------------------------------------------
 
@@ -1008,6 +1015,7 @@ export const useEntityList = ({
     stickedColumns,
 
     isEmptyTask,
+    isMetadataAddAllowed,
     nonStickedDisplayedValidationColumns,
     nonStickedVisibleMetadataDescriptors,
     stickedDisplayedValidationColumns,

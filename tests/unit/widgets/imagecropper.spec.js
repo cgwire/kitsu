@@ -5,9 +5,9 @@ import { nextTick } from 'vue'
 
 import ImageCropper from '@/components/widgets/ImageCropper.vue'
 
-// jsdom 30 pulls the optional `canvas` package, so getContext('2d') and
-// toBlob() are the real node-canvas ones. drawImage still rejects a jsdom
-// <img> (nothing ever loads its src), so each test replaces just that call.
+// jsdom 31 pulls the optional `@napi-rs/canvas` package, so getContext('2d')
+// and toBlob() are real ones. A jsdom <img> never loads its src, so each test
+// replaces just drawImage.
 
 const selectFile = async (wrapper, file, size = {}) => {
   const input = wrapper.find('input[type="file"]')
@@ -204,7 +204,7 @@ describe('ImageCropper zoom slider', () => {
     expect(sliderPosition(wrapper)).toBe(0)
     // Centered in the frame: 240px wide behind a 180px window.
     expect(wrapper.find('img.cropper-image').element.style.transform).toBe(
-      'translate(-30px, 0px)'
+      'translate(-30px)'
     )
   })
 

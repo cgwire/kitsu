@@ -9,6 +9,9 @@ import resizableColumn from '@/directives/resizable-column'
 import peopleStore from '@/store/modules/people'
 
 import ProductionList from '@/components/lists/ProductionList.vue'
+import ProductionStats from '@/components/pages/production/ProductionStats.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
 
 import { shallowMountWithI18n } from '../../fixtures/i18n'
 
@@ -43,7 +46,8 @@ const mountList = ({
   descriptors = [],
   getters = {},
   people = [],
-  guests = []
+  guests = [],
+  productionStats = {}
 }) => {
   peopleStore.cache.people = []
   peopleStore.cache.personMap.clear()
@@ -72,7 +76,7 @@ const mountList = ({
       plugins: [store, resizableColumn],
       stubs: { RouterLink: true }
     },
-    props: { entries: productions, groupBy }
+    props: { entries: productions, groupBy, productionStats }
   })
   return { store, wrapper }
 }
@@ -83,6 +87,30 @@ const getSectionTitles = wrapper =>
     .map(header => header.text().replace(/\s+/g, ' '))
 
 describe('lists/ProductionList', () => {
+  // The stats follow the menus of their own production.
+  test('hands each production to its stats', () => {
+    const { wrapper } = mountList({
+      productions: [production(1, 'Alpha'), production(2, 'Bravo')],
+      productionStats: {
+        'production-1': { amount: 3 },
+        'production-2': { amount: 5 }
+      }
+    })
+
+    expect(
+      wrapper
+        .findAllComponents(ProductionStats)
+        .map(stats => [
+          stats.props('production').id,
+          stats.props('stats').amount
+        ])
+    ).toEqual([
+      ['production-1', 3],
+      ['production-2', 5]
+    ])
+    wrapper.unmount()
+  })
+
   // A column named "Constructor" has the field name of a property every
   // object inherits.
   test('groups the productions without a Constructor value under None', () => {
@@ -461,5 +489,65 @@ describe('lists/ProductionList', () => {
       'Urgent (1)'
     ])
     wrapper.unmount()
+  })
+
+  // App.vue gives the label of a field header the room left, as on the
+  // sortable headers of the entity lists: the "+" ends the cell.
+  test('pushes the "+" of the name header to the right', () => {
+    const { wrapper } = mountList({
+      productions: [production(1, 'Alpha')],
+      getters: { isCurrentUserManager: () => true }
+    })
+    const header = wrapper.find('th.name .field-header')
+
+    expect(header.exists()).toBe(true)
+    expect(header.element.firstElementChild.textContent.trim()).toBe('Name')
+    expect(header.element.firstElementChild.className).toBe('flexrow-item')
+    expect(header.find('button-simple-stub').attributes('icon')).toBe('plus')
+    wrapper.unmount()
+  })
+
+  describe('visible columns menu', () => {
+    const findMenu = getters => {
+      const { wrapper } = mountList({
+        productions: [production(1, 'Alpha')],
+        getters
+      })
+      onTestFinished(() => wrapper.unmount())
+      return { menu: wrapper.findComponent(TableMetadataSelectorMenu), wrapper }
+    }
+
+    test.each([
+      ['a manager', { isCurrentUserManager: () => true }, true],
+      ['a supervisor', { isCurrentUserSupervisor: () => true }, true],
+      ['an artist', {}, false]
+    ])('lets %s add a metadata column', (_, getters, isAllowed) => {
+      const { menu } = findMenu(getters)
+
+      expect(menu.props('isAddAllowed')).toBe(isAllowed)
+    })
+
+    test('tells whether the menu of its toggle is open', async () => {
+      const { menu, wrapper } = findMenu({})
+      const toggle = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('title') === 'Visible columns')
+
+      expect(toggle.attributes('aria-haspopup')).toBe('dialog')
+      expect(toggle.attributes('aria-expanded')).toBe('false')
+
+      await toggle.vm.$emit('click')
+
+      expect(menu.props('isOpen')).toBe(true)
+      expect(toggle.attributes('aria-expanded')).toBe('true')
+    })
+
+    test('passes the menu request on to the page', async () => {
+      const { menu, wrapper } = findMenu({ isCurrentUserManager: () => true })
+
+      await menu.vm.$emit('add-metadata')
+
+      expect(wrapper.emitted('add-metadata')).toHaveLength(1)
+    })
   })
 })

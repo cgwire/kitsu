@@ -1841,6 +1841,7 @@
       "feedback": "visszajelzés",
       "hide_infos": "Egyéb információk elrejtése",
       "my_tasks": "Feladataim",
+      "nb_by_status": "{name} - {count} feladat | {name} - {count} feladat",
       "next": "Következő feladat",
       "no_comment": "Jelenleg nincs hozzászólás ehhez a feladathoz.",
       "no_preview": "Jelenleg nincs előnézet ehhez a feladathoz.",

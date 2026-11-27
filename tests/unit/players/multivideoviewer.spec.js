@@ -31,7 +31,10 @@ const mountViewer = (props = {}) => {
   const store = createStore({
     getters: { currentProduction: () => ({ fps: '25' }) }
   })
+  // Attached: isVisible() reads the computed style, which a detached tree
+  // lacks.
   return mount(MultiVideoViewer, {
+    attachTo: document.body,
     props: {
       entities: [
         { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },
@@ -241,6 +244,19 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     expect(wrapper.vm.currentPlayer.src).toContain(
       '/movies/low/preview-files/p1b.mp4'
     )
+
+    wrapper.unmount()
+  })
+
+  // The Previous button of an empty playlist asked for index -1.
+  it.each([
+    ['an empty playlist', { entities: [] }],
+    ['a playlist of two movies', {}]
+  ])('loads nothing for an index before the first entity of %s', (_, props) => {
+    const wrapper = mountViewer(props)
+
+    expect(() => wrapper.vm.loadEntity(-1)).not.toThrow()
+    expect(wrapper.emitted('entity-change')).toBeUndefined()
 
     wrapper.unmount()
   })
@@ -820,6 +836,7 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
         }
       })
       const wrapper = mount(MultiVideoViewer, {
+        attachTo: document.body,
         props: {
           entities: [
             { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },

@@ -64,10 +64,7 @@
                     icon="plus"
                     :text="''"
                     @click="onAddMetadataClicked"
-                    v-if="
-                      (isCurrentUserManager || isCurrentUserSupervisor) &&
-                      !isLoading
-                    "
+                    v-if="isMetadataAddAllowed"
                   />
                 </template>
               </sortable-field-header>
@@ -256,14 +253,18 @@
                 }"
                 namespace="assets"
                 :production-id="currentProduction?.id"
+                :is-add-allowed="isMetadataAddAllowed"
                 v-model="metadataDisplayHeaders"
                 v-model:is-open="columnSelectorDisplayed"
+                @add-metadata="onAddMetadataClicked"
                 v-if="displaySettings.showInfos"
               />
 
               <button-simple
                 class="is-small is-pulled-right mr05"
                 :title="$t('main.column_visibility')"
+                :aria-expanded="columnSelectorDisplayed"
+                aria-haspopup="dialog"
                 icon="down"
                 @click="toggleColumnSelector"
                 v-if="displaySettings.showInfos"
@@ -705,9 +706,6 @@ const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
-const isCurrentUserSupervisor = computed(
-  () => store.getters.isCurrentUserProductionSupervisor
-)
 const isTVShow = computed(() => store.getters.isTVShow)
 const productionAssetTaskTypes = computed(
   () => store.getters.productionAssetTaskTypes
@@ -812,6 +810,7 @@ const {
   getValidationStyle,
   hiddenColumns,
   isEmptyTask,
+  isMetadataAddAllowed,
   isMetadataColumnEditAllowed,
   isValidResolution,
   lastHeaderMenuDisplayed,

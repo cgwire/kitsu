@@ -4055,7 +4055,9 @@ const updateProgressBar = f => {
 
 // Player previews navigation
 
+// An empty playlist has no entry to go to: going back wraps around to -1.
 const onPlayPreviousEntityClicked = () => {
+  if (entityList.value.length === 0) return
   if (currentPreviewIndex.value > 0) onPreviousPreviewClicked()
   else onPlayPreviousEntity()
 }
@@ -4073,6 +4075,7 @@ const onPlayNextEntity = () => {
 }
 
 const onPlayNextEntityClicked = () => {
+  if (entityList.value.length === 0) return
   if (currentPreviewIndex.value < currentEntityPreviewLength.value - 1) {
     onNextPreviewClicked()
   } else {

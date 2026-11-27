@@ -1841,6 +1841,7 @@
       "feedback": "feedback",
       "hide_infos": "Aanvullende informatie verbergen",
       "my_tasks": "Mijn taken",
+      "nb_by_status": "{name} - {count} taak | {name} - {count} taken",
       "next": "Volgende taak",
       "no_comment": "Er zijn momenteel geen opmerkingen bij deze taak.",
       "no_preview": "Er is momenteel geen preview voor deze taak.",
@@ -2513,7 +2514,7 @@
       "archive": "Archiveren"
     },
     "project_templates": {
-      "add_metadata": "Een metadatakolom toevoegen",
+      "add_metadata": "Metadatakolom toevoegen",
       "apply": "Sjabloon toepassen",
       "click_name_to_edit": "Klik op een sjabloonnaam om de configuratie ervan te bewerken.",
       "create_error": "Er is een fout opgetreden tijdens het opslaan van deze sjabloon. Weet je zeker dat er geen sjabloon met een vergelijkbare naam is?",

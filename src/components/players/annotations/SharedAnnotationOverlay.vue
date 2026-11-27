@@ -88,7 +88,8 @@ import { useStore } from 'vuex'
 import { useSharedAnnotationCanvas } from '@/composables/players/sharedAnnotation'
 import {
   buildReadOnlyShape,
-  findAnnotationAtTime
+  findAnnotationAtTime,
+  removeAddition
 } from '@/lib/players/annotation'
 
 const store = useStore()
@@ -133,6 +134,11 @@ const wrapper = ref(null)
 
 let renderToken = 0
 let resizeObserver = null
+
+// The file of the unsaved strokes held by the canvas. Those of the files the
+// guest left wait here, by file id.
+let pendingFileId = props.previewFileId
+const pendingByFile = new Map()
 
 // Computed
 // --------------------------------------------------------------------------
@@ -220,10 +226,24 @@ const currentTime = computed(() => {
 // Functions
 // --------------------------------------------------------------------------
 
+// Each file keeps its own unsaved strokes: they wait while the guest views
+// another file, so a save never sends them with that file.
+const takePendingStrokesOf = previewFileId => {
+  if (annotation.hasChanges()) {
+    pendingByFile.set(pendingFileId, annotation.getDiff().additions)
+  }
+  annotation.restoreUnsaved(pendingByFile.get(previewFileId) || [], [])
+  pendingByFile.delete(previewFileId)
+  pendingFileId = previewFileId
+}
+
 const render = async () => {
   const fabricCanvas = annotation.getCanvas()
   if (!fabricCanvas) return
   const token = ++renderToken
+  if (props.previewFileId !== pendingFileId) {
+    takePendingStrokesOf(props.previewFileId)
+  }
   // Unsaved guest strokes must survive re-renders (resize, comments-panel
   // toggle, frame stepping): capture the pending diff before the reset
   // wipes it. This is an explicit-save UX, a silent wipe loses work.
@@ -232,14 +252,13 @@ const render = async () => {
     : []
   fabricCanvas.clear()
   annotation.reset()
-  if (props.isPlaying) {
-    // Keep the pending data armed (save button, reappearance on pause)
-    // even though nothing is painted during playback.
-    if (pendingAdditions.length) {
-      annotation.restoreUnsaved(pendingAdditions, [])
-    }
-    return
+  // Keep the pending data armed through the awaits below: a newer render
+  // started meanwhile reads it back, and during playback nothing is painted
+  // but the save button and the reappearance on pause still need it.
+  if (pendingAdditions.length) {
+    annotation.restoreUnsaved(pendingAdditions, [])
   }
+  if (props.isPlaying) return
   const current = findAnnotationAtTime(
     props.annotations,
     currentTime.value,
@@ -317,6 +336,25 @@ const refreshCanvasOffset = () => {
   nextTick(() => annotation.getCanvas()?.calcOffset())
 }
 
+// Drop the local copies of the strokes sent, now persisted: render() keeps
+// unsaved work across resets, so a stale diff would repaint them as pending
+// duplicates. The guest may have left their file while the request ran.
+const clearSavedStrokes = (previewFileId, ids) => {
+  if (previewFileId === pendingFileId) {
+    annotation.clearSaved(ids)
+    return
+  }
+  const entries = ids.reduce(
+    removeAddition,
+    pendingByFile.get(previewFileId) || []
+  )
+  if (entries.length) {
+    pendingByFile.set(previewFileId, entries)
+  } else {
+    pendingByFile.delete(previewFileId)
+  }
+}
+
 const save = async () => {
   if (
     isSaving.value ||
@@ -328,23 +366,26 @@ const save = async () => {
     return
   }
   isSaving.value = true
+  const previewFileId = props.previewFileId
   try {
     const diff = annotation.getDiff()
+    // Read the ids now: getDiff() copies the entries only, so a stroke drawn
+    // on the same frame during the request lands in these objects arrays.
+    const sentIds = diff.additions.flatMap(entry =>
+      entry.drawing.objects.map(object => object.id)
+    )
     const updated = await store.dispatch('saveSharedPlaylistAnnotations', {
       shareToken: props.token,
       data: {
         guest_id: props.guestId,
-        preview_file_id: props.previewFileId,
+        preview_file_id: previewFileId,
         additions: diff.additions,
         updates: diff.updates,
         deletions: diff.deletions
       }
     })
-    // Drop the local copies now that they are persisted: render() keeps
-    // unsaved work across resets, so a stale diff would repaint the just
-    // saved strokes as pending duplicates.
-    annotation.clearLocal()
-    emit('saved', updated.annotations || [])
+    clearSavedStrokes(previewFileId, sentIds)
+    emit('saved', updated.annotations || [], previewFileId)
   } catch (error) {
     // Keep the toolbar so the user can retry; surface the failure for logs.
     console.error('Failed to save shared playlist annotations', error)
@@ -375,7 +416,8 @@ watch(
     () => props.currentFrame,
     () => props.frameDuration,
     () => props.isPicture,
-    () => props.isPlaying
+    () => props.isPlaying,
+    () => props.previewFileId
   ],
   render
 )

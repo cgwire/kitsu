@@ -169,6 +169,19 @@ export const useSharedAnnotationCanvas = () => {
     fabricCanvas.requestRenderAll()
   }
 
+  // After a save: a stroke drawn while the request ran stays pending. Match
+  // the additions by id, since render() rebuilds the pending objects as new
+  // instances. The canvas objects it rebuilds without an id are left to the
+  // render that follows the save.
+  const clearSaved = ids => {
+    if (!fabricCanvas) return
+    const isSaved = o => ids.includes(o.id)
+    localStack.value.filter(isSaved).forEach(o => fabricCanvas.remove(o))
+    localStack.value = localStack.value.filter(o => !isSaved(o))
+    additionsRef.value = ids.reduce(removeAddition, additionsRef.value)
+    fabricCanvas.requestRenderAll()
+  }
+
   const hasChanges = () => additionsRef.value.length > 0
 
   const getDiff = () => ({
@@ -211,6 +224,7 @@ export const useSharedAnnotationCanvas = () => {
     PENCIL_WIDTHS,
     additions: additionsRef,
     clearLocal,
+    clearSaved,
     currentTool,
     dispose,
     getDiff,

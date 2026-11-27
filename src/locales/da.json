@@ -1841,6 +1841,7 @@
       "feedback": "feedback",
       "hide_infos": "Skjul yderligere information",
       "my_tasks": "Mine opgaver",
+      "nb_by_status": "{name} - {count} opgave | {name} - {count} opgaver",
       "next": "Næste opgave",
       "no_comment": "Der er i øjeblikket ingen kommentarer til denne opgave.",
       "no_preview": "Der er i øjeblikket ingen previews for denne opgave.",
@@ -2513,7 +2514,7 @@
       "archive": "Arkivér"
     },
     "project_templates": {
-      "add_metadata": "Tilføj en metadata-kolonne",
+      "add_metadata": "Tilføj metadata-kolonne",
       "apply": "Anvend skabelon",
       "click_name_to_edit": "Klik på et skabelonnavn for at redigere dets konfiguration.",
       "create_error": "Der opstod en fejl under gemning af denne skabelon. Er du sikker på, at der ikke findes en skabelon med et lignende navn?",

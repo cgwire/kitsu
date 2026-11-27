@@ -379,6 +379,10 @@ describe('TaskType page', () => {
           wrapper
             .findComponent(TaskList)
             .vm.$emit('edit-metadata', descriptor.id)
+      ],
+      [
+        'a new column from the visible columns menu',
+        () => wrapper.findComponent(TaskList).vm.$emit('add-metadata')
       ]
     ])('opens %s without the error of a refused column', async (_, open) => {
       vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -516,6 +520,51 @@ describe('TaskType page', () => {
       expect(modal().props('active')).toBe(true)
       expect(modal().props('takenName')).toBe('')
     })
+
+    // The visible columns menu of the list offers the column of the "+"
+    // button of the page, to the same people.
+    it.each([
+      ['a manager', {}, true],
+      [
+        'a supervisor of another department',
+        {
+          isCurrentUserProductionManager: () => false,
+          isCurrentUserProductionSupervisor: () => true,
+          user: () => ({
+            id: 'supervisor-1',
+            departments: ['department-2'],
+            role: 'supervisor'
+          })
+        },
+        false
+      ]
+    ])(
+      'lets %s add a column from the list menu as from the page',
+      async (_, getters, isAllowed) => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        const page = await mountPage({
+          section: 'tasks',
+          getters: {
+            currentTaskType: () => ({
+              id: 'task-type-1',
+              name: 'Modeling',
+              for_entity: 'Asset',
+              department_id: 'department-1'
+            }),
+            ...getters
+          }
+        })
+        wrapper = page.wrapper
+        const pageButton = wrapper
+          .findAllComponents(ButtonSimple)
+          .find(button => button.props('icon') === 'plus')
+
+        expect(
+          wrapper.findComponent(TaskList).props('isMetadataAddAllowed')
+        ).toBe(isAllowed)
+        expect(Boolean(pageButton)).toBe(isAllowed)
+      }
+    )
 
     // Zou keeps the names of the task columns unique per task type.
     it('checks a new name against the columns of its task type', async () => {
@@ -2714,6 +2763,20 @@ describe('TaskType page', () => {
         const paths = await mountTabs({ currentTaskType: () => ({}) })
         const base = '/productions/production-1/episodes/task-types/task-type-1'
         expect(paths).toEqual([base, `${base}/schedule`, `${base}/estimation`])
+      })
+
+      // An undefined id reaches the same path only because the router keeps
+      // the current one, which newer vue-router releases warn about.
+      it('links them with the id of the route', async () => {
+        await mountTabs({ currentTaskType: () => ({}) })
+        const ids = wrapper
+          .findAll('.tabs li')
+          .map(
+            tab =>
+              tab.findComponent({ name: 'RouterLink' }).props('to').params
+                .task_type_id
+          )
+        expect(ids).toEqual(['task-type-1', 'task-type-1', 'task-type-1'])
       })
     })
   })

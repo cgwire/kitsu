@@ -407,15 +407,19 @@ describe('Assets page, client access', () => {
     const open = { nbSelectedTasks: 1 }
     const shown = await mountEntityPage(Assets, {
       listName: 'AssetList',
-      getters: open
+      getters: open,
+      attachTo: document.body
     })
     expect(shown.wrapper.find('#side-column').isVisible()).toBe(true)
+    shown.wrapper.unmount()
 
     const hidden = await mountEntityPage(Assets, {
       listName: 'AssetList',
-      getters: { ...open, ...hideTaskTypeAndPanel }
+      getters: { ...open, ...hideTaskTypeAndPanel },
+      attachTo: document.body
     })
     expect(hidden.wrapper.find('#side-column').isVisible()).toBe(false)
+    hidden.wrapper.unmount()
   })
 })
 

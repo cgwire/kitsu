@@ -272,11 +272,9 @@ import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { usePhoneLayout } from '@/composables/phoneLayout'
 import { useMediaKind } from '@/composables/players/mediaKind'
-import {
-  isAltLetter,
-  undoRedoCommand
-} from '@/composables/players/previewShortcuts'
+import { isAltLetter } from '@/composables/players/previewShortcuts'
 import { usePlayerTransport } from '@/composables/players/transport'
+import { undoRedoCommand } from '@/lib/keyboard'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
 import {
   DEFAULT_FPS,
@@ -1032,9 +1030,18 @@ const onTimeCodeClicked = ({ versionRevision, frame }) => {
   onFrameUpdate(frameNumber)
 }
 
-const onAnnotationsSaved = annotations => {
-  const entity = currentEntity.value
-  if (entity) entity.preview_file_annotations = annotations
+// The answer goes to the file saved: the guest may have moved to another file
+// or shot while the request ran.
+const onAnnotationsSaved = (annotations, previewFileId) => {
+  entityList.value.forEach(entity => {
+    if (entity.preview_file_id === previewFileId) {
+      entity.preview_file_annotations = annotations
+    }
+    const preview = entity.preview_file_previews?.find(
+      ({ id }) => id === previewFileId
+    )
+    if (preview) preview.annotations = annotations
+  })
 }
 
 const onStatusChanged = ({ taskStatusId, color }) => {

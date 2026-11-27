@@ -94,7 +94,9 @@ export const mountEntityPage = async (
     stubs = {},
     // The script reads these, the template keeps the key mock.
     locale = 'en',
-    messages = {}
+    messages = {},
+    // isVisible() reads the computed style, which a detached tree lacks.
+    attachTo
   }
 ) => {
   const store = buildStore(getters, actions)
@@ -123,6 +125,7 @@ export const mountEntityPage = async (
     methods: { setScrollPosition: vi.fn(), selectTaskFromQuery: vi.fn() }
   }
   const wrapper = shallowMount(page, {
+    attachTo,
     props,
     global: {
       config,

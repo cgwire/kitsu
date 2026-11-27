@@ -22,7 +22,7 @@
               data-column-key="name"
               scope="col"
             >
-              <div class="flexrow">
+              <div class="flexrow field-header">
                 <span class="flexrow-item">
                   {{ $t('productions.fields.name') }}
                 </span>
@@ -32,10 +32,7 @@
                   :text="''"
                   @click="onAddMetadataClick"
                   icon="plus"
-                  v-if="
-                    (isCurrentUserManager || isCurrentUserSupervisor) &&
-                    !isLoading
-                  "
+                  v-if="isMetadataAddAllowed"
                 />
               </div>
             </th>
@@ -68,9 +65,11 @@
                 :descriptors="mergedProjectMetadataDescriptors"
                 :exclude="{}"
                 :external-reorder="onAllProjectsMetadataReorder"
+                :is-add-allowed="isMetadataAddAllowed"
                 :model-value="metadataDisplayHeaders"
                 namespace="all-productions"
                 v-model:is-open="columnSelectorDisplayed"
+                @add-metadata="onAddMetadataClick"
                 @update:model-value="
                   $emit('update:metadata-display-headers', $event)
                 "
@@ -78,6 +77,8 @@
               <button-simple
                 class="is-small is-pulled-right mr05"
                 :title="$t('main.column_visibility')"
+                :aria-expanded="columnSelectorDisplayed"
+                aria-haspopup="dialog"
                 icon="down"
                 @click="toggleColumnSelector"
               />
@@ -165,7 +166,10 @@
                   :colspan="7 + visibleProjectMetadataDescriptors.length"
                   class="datatable-row-stats"
                 >
-                  <production-stats :stats="productionStats[entry.id] || {}" />
+                  <production-stats
+                    :production="entry"
+                    :stats="productionStats[entry.id] || {}"
+                  />
                 </td>
                 <td class="actions"></td>
               </tr>
@@ -326,6 +330,12 @@ const lastMetadataHeaderMenuColumn = ref(null)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
+)
+// Shared by the "+" of the name header and the visible columns menu.
+const isMetadataAddAllowed = computed(
+  () =>
+    (isCurrentUserManager.value || isCurrentUserSupervisor.value) &&
+    !props.isLoading
 )
 const lastProductionScreen = computed(() => store.getters.lastProductionScreen)
 const mergedProjectMetadataDescriptors = computed(

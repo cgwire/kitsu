@@ -1841,6 +1841,7 @@
       "feedback": "feedback",
       "hide_infos": "Nascondi informazioni aggiuntive",
       "my_tasks": "I miei task",
+      "nb_by_status": "{name} - {count} task | {name} - {count} task",
       "next": "Task successivo",
       "no_comment": "Al momento non ci sono commenti per questo task.",
       "no_preview": "Al momento non ci sono anteprime per questo task.",

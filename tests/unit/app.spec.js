@@ -256,6 +256,7 @@ describe('App', () => {
         const { socket } = await mountApp({
           actions: { [action]: load },
           getters: {
+            assetsLoadingKey: () => 'prod-1/',
             currentProduction: () => ({ id: 'prod-1' }),
             shotsLoadingKey: () => 'prod-1/'
           }
@@ -294,6 +295,43 @@ describe('App', () => {
 
         expect(rejections).toEqual([bug])
         expect(consoleError).not.toHaveBeenCalledWith(bug)
+      })
+    })
+
+    // Without a loaded asset list the store drops a new asset: the read was
+    // wasted, and it failed when the asset was deleted within the second.
+    describe('asset:new and the asset list', () => {
+      const emitAssetNew = async assetsLoadingKey => {
+        const loadAsset = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { loadAsset },
+          getters: {
+            assetsLoadingKey: () => assetsLoadingKey,
+            currentProduction: () => ({ id: 'prod-1' })
+          }
+        })
+        vi.useFakeTimers({ toFake: ['setTimeout'] })
+        emitSocketEvent(socket, 'asset:new', {
+          asset_id: 'asset-new',
+          project_id: 'prod-1'
+        })
+        vi.advanceTimersByTime(1000)
+        return loadAsset
+      }
+
+      it('loads the asset when an asset list is loaded', async () => {
+        const loadAsset = await emitAssetNew('prod-1/episode-1')
+
+        expect(loadAsset).toHaveBeenCalledWith(expect.anything(), {
+          assetId: 'asset-new',
+          onlyInScope: true
+        })
+      })
+
+      it('loads nothing while no asset list is loaded', async () => {
+        const loadAsset = await emitAssetNew(null)
+
+        expect(loadAsset).not.toHaveBeenCalled()
       })
     })
 

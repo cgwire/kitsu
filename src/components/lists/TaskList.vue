@@ -125,6 +125,8 @@
               <button-simple
                 class="is-small"
                 :title="$t('main.column_visibility')"
+                :aria-expanded="columnSelectorDisplayed"
+                aria-haspopup="dialog"
                 icon="down"
                 @click="toggleColumnSelector"
               />
@@ -133,8 +135,10 @@
                 :exclude="{ frames: !isShots }"
                 namespace="task-type"
                 :production-id="currentProduction?.id"
+                :is-add-allowed="isMetadataAddAllowed"
                 v-model="metadataDisplayHeaders"
                 v-model:is-open="columnSelectorDisplayed"
+                @add-metadata="$emit('add-metadata')"
               />
             </th>
           </tr>
@@ -559,6 +563,11 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  // The page decides who may add a metadata column.
+  isMetadataAddAllowed: {
+    type: Boolean,
+    default: false
+  },
   metadataDescriptors: {
     type: Array,
     default: () => []
@@ -574,6 +583,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
+  'add-metadata',
   'delete-metadata',
   'edit-metadata',
   'scroll',

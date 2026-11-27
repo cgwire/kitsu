@@ -1841,6 +1841,7 @@
       "feedback": "comentarios",
       "hide_infos": "Ocultar información adicional",
       "my_tasks": "Mis tareas",
+      "nb_by_status": "{name} - {count} tarea | {name} - {count} tareas",
       "next": "Tarea siguiente",
       "no_comment": "Actualmente no hay ningún comentario para esta tarea.",
       "no_preview": "Actualmente no hay ninguna vista previa para esta tarea.",
@@ -2513,7 +2514,7 @@
       "archive": "Archivar"
     },
     "project_templates": {
-      "add_metadata": "Añadir una columna de metadatos",
+      "add_metadata": "Añadir columna de metadatos",
       "apply": "Aplicar plantilla",
       "click_name_to_edit": "Haga clic en el nombre de una plantilla para editar su configuración.",
       "create_error": "Se ha producido un error al guardar esta plantilla. ¿Está seguro de que no hay ninguna plantilla con un nombre similar?",
