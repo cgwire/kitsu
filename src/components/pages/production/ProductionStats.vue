@@ -146,7 +146,8 @@ const ENTITY_PRIORITY = {
   Sequence: 3,
   Episode: 4,
   Edit: 5,
-  Concept: 6
+  Concept: 6,
+  Untracked: 7
 }
 
 const props = defineProps({
