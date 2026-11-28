@@ -1014,6 +1014,92 @@ describe('entity list task unselection', () => {
   })
 })
 
+// The x of the task panel removes a task from the store selection, and the
+// list finds its cell in its own rows and columns.
+describe('entity list task removed from the task panel', () => {
+  const otherTaskTypeId = 'task-type-2'
+  const shot = (id, fields = {}) => ({ id, ...fields })
+  const taskOf = (entity, columnId) => ({
+    id: `task-${entity.id}-${columnId}`,
+    entity_id: entity.id,
+    task_type_id: columnId
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    shotStore.cache.result = []
+  })
+
+  const mountRemovalHost = (rows, options = {}) =>
+    mountHost(
+      {},
+      {
+        options: {
+          entities: computed(() => rows),
+          filledColumns: computed(() => ({
+            [taskTypeId]: true,
+            [otherTaskTypeId]: true
+          })),
+          ...options
+        },
+        props: { validationColumns: [taskTypeId, otherTaskTypeId] }
+      }
+    )
+
+  // The stuck columns come first in the grid, whatever the order of the
+  // task types.
+  test('unselects the cell of the task, after a stuck column', async () => {
+    localStorage.setItem(
+      `stick-shots-${production.id}`,
+      JSON.stringify({ [otherTaskTypeId]: true })
+    )
+    const rows = [[shot('shot-1')], [shot('shot-2')]]
+    const wrapper = await mountRemovalHost(rows)
+    const task = taskOf(rows[1][0], taskTypeId)
+
+    wrapper.vm.list.unselectTask(task)
+
+    expect(committed(wrapper, 'REMOVE_SELECTED_TASK')).toEqual([
+      { task, x: 1, y: 1 }
+    ])
+  })
+
+  // Select column selects the cells of the rows not loaded yet too.
+  test('unselects the cell of a row not loaded yet where Select column put it', async () => {
+    const loaded = shot('shot-1')
+    const later = shot('shot-3')
+    shotStore.cache.result = [loaded, shot('shot-2', { hidden: true }), later]
+    const wrapper = await mountRemovalHost([[loaded]], {
+      isEntityShown: entity => !entity.hidden
+    })
+    wrapper.vm.list.showHeaderMenu(otherTaskTypeId, headerClick())
+    wrapper.vm.list.onSelectColumn()
+    await nextTick()
+    const cell = committed(wrapper, 'ADD_SELECTED_TASKS')[0].find(
+      ({ entity }) => entity === later
+    )
+    const task = taskOf(later, otherTaskTypeId)
+
+    wrapper.vm.list.unselectTask(task)
+
+    expect(committed(wrapper, 'REMOVE_SELECTED_TASK')).toEqual([
+      { task, x: cell.x, y: cell.y }
+    ])
+    expect(cell).toMatchObject({ x: 1, y: 1 })
+  })
+
+  test('leaves the grid as it is for a column the list does not show', async () => {
+    const rows = [[shot('shot-1')]]
+    const wrapper = await mountRemovalHost(rows, {
+      filledColumns: computed(() => ({ [taskTypeId]: true }))
+    })
+
+    wrapper.vm.list.unselectTask(taskOf(rows[0][0], otherTaskTypeId))
+
+    expect(committed(wrapper, 'REMOVE_SELECTED_TASK')).toEqual([])
+  })
+})
+
 describe('entity list scroll to the selected cell', () => {
   const rect = box => () => ({
     ...box,
@@ -1248,10 +1334,12 @@ describe('entity list column selection', () => {
     return committed(wrapper, 'ADD_SELECTED_TASKS')[0]
   }
 
-  test('selects the cells of the column for the shots left uncanceled', async () => {
+  // The list shows the canceled rows, which the sequences and the episodes do
+  // not sort last.
+  test('selects the cells of the uncanceled shots at their rows', async () => {
     expect(await selectColumn()).toEqual([
       { entity: shots[0], column, task: { id: 'task-a' }, x: 0, y: 0 },
-      { entity: shots[2], column, task: { id: 'task-c' }, x: 1, y: 0 }
+      { entity: shots[2], column, task: { id: 'task-c' }, x: 2, y: 0 }
     ])
   })
 
@@ -1259,7 +1347,7 @@ describe('entity list column selection', () => {
     const selection = await selectColumn({
       isCellSelectable: entity => entity.id !== 'a'
     })
-    expect(selection.map(({ entity, x }) => [entity.id, x])).toEqual([['c', 1]])
+    expect(selection.map(({ entity, x }) => [entity.id, x])).toEqual([['c', 2]])
   })
 
   // An episode or a sequence received live comes without its tasks: the list

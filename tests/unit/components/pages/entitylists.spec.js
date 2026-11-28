@@ -19,6 +19,7 @@ import Edits from '@/components/pages/Edits.vue'
 import Episodes from '@/components/pages/Episodes.vue'
 import Sequences from '@/components/pages/Sequences.vue'
 import Shots from '@/components/pages/Shots.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
 
 // A page left mounted renders again with the stubs of the next mount: once
@@ -347,6 +348,18 @@ describe.each(pages)(
     })
   }
 )
+
+describe.each(pages)('$name page, task panel', ({ listName, page }) => {
+  // The x of the panel removes the task from the store selection only.
+  test('hands a task removed from the panel to its list', async () => {
+    const { wrapper, list } = await mountEntityPage(page, { listName })
+    const task = { id: 'task-1', entity_id: 'entity-1', task_type_id: 'tt-1' }
+
+    wrapper.findComponent(TaskInfo).vm.$emit('task-removed', task)
+
+    expect(list.unselectTask).toHaveBeenCalledWith(task)
+  })
+})
 
 // The ready for column of the assets list saves a partial asset.
 describe('Assets page, ready for cell', () => {

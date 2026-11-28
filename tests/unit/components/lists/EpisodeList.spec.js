@@ -9,6 +9,7 @@ import {
   descriptor,
   filledColumns,
   mountEntityList,
+  mountEntityListInPage,
   production,
   stickColumns,
   stickyLeft,
@@ -162,6 +163,35 @@ describe('lists/EpisodeList sticky columns', () => {
     await flushPromises()
 
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('320px')
+
+    wrapper.unmount()
+  })
+})
+
+describe('lists/EpisodeList task panel', () => {
+  test('unselects the cell of a task the task panel removes', async () => {
+    const wrapper = await mountEntityListInPage(EpisodeList, {
+      getters: {
+        currentProduction: production,
+        displayedEpisodesLength: 2,
+        episodeFilledColumns: filledColumns
+      },
+      props: {
+        displayedEpisodes: ['episode-1', 'episode-2'].map(id => ({ id, name: id, data: {} }))
+      }
+    })
+    const task = {
+      id: 'task-episode-2',
+      entity_id: 'episode-2',
+      task_type_id: taskTypeId
+    }
+
+    wrapper.vm.$refs.list.unselectTask(task)
+
+    expect(wrapper.vm.$store.commit).toHaveBeenCalledWith(
+      'REMOVE_SELECTED_TASK',
+      { task, x: 1, y: 0 }
+    )
 
     wrapper.unmount()
   })

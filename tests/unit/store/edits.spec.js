@@ -1992,9 +1992,7 @@ describe('Edits store, through a store', () => {
       ])
       expect(store.getters.selectedEdits.size).toBe(0)
 
-      store.commit(REMOVE_SELECTED_TASK, {
-        task: { entity: { id: 'e1' }, column: { id: 'tt-anim' } }
-      })
+      store.commit(REMOVE_SELECTED_TASK, { x: 0, y: 0 })
       expect([...store.getters.editSelectionGrid]).toEqual(['0-1', '1-0'])
     })
 

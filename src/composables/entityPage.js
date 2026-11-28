@@ -449,6 +449,11 @@ export const useEntityPage = ({
     keepTaskPanelOpen.value = keepOpen
   }
 
+  // Only the list knows the cell of a task removed from the task panel.
+  const onTaskRemoved = task => {
+    listRef.value?.unselectTask(task)
+  }
+
   const onChangeSortClicked = sortInfo => {
     store.dispatch(`change${entityTypeName}Sort`, sortInfo)
   }
@@ -1055,6 +1060,7 @@ export const useEntityPage = ({
     onRestoreClicked,
     openEditModal,
     onSearchChange,
+    onTaskRemoved,
     renderImport,
     resetImport,
     saveCell,

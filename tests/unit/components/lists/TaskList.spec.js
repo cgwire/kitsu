@@ -564,6 +564,41 @@ describe('lists/TaskList', () => {
 
       wrapper.unmount()
     })
+
+    // The x of the task panel only left the store selection: the row stayed
+    // highlighted, and the value typed in another row was saved on it too.
+    test('leaves a row the task panel removes out of the edit', async () => {
+      const other = { ...task, id: 'task-2' }
+      const updateTask = vi.fn()
+      const selection = trackTaskSelection()
+      const wrapper = mountList(undefined, {
+        selection,
+        getters: {
+          isCurrentUserProductionManager: () => true,
+          taskMap: () =>
+            new Map([
+              [task.id, task],
+              [other.id, other]
+            ])
+        },
+        actions: { updateTask },
+        props: { disabledDates: {}, tasks: [task, other] }
+      })
+      const names = wrapper.findAll('tbody td.name')
+      await names[0].trigger('click')
+      await names[1].trigger('click', { ctrlKey: true })
+
+      await wrapper.vm.$store.dispatch('removeSelectedTask', { task: other })
+      await nextTick()
+      await wrapper.find('tbody td.estimation input').setValue('1')
+
+      expect(wrapper.findAll('tbody tr.selected')).toHaveLength(1)
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1'
+      ])
+
+      wrapper.unmount()
+    })
   })
 
   // Status changes set the real dates: the expert mode of the instance lets

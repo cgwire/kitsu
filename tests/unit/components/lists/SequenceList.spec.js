@@ -1,18 +1,26 @@
 vi.mock('@/store', () => ({ default: {} }))
 
 import { flushPromises } from '@vue/test-utils'
+import { nextTick } from 'vue'
 
+import sequenceStore from '@/store/modules/sequences'
+
+import ValidationCell from '@/components/cells/ValidationCell.vue'
+import ValidationHeader from '@/components/cells/ValidationHeader.vue'
 import SequenceList from '@/components/lists/SequenceList.vue'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
 
 import {
   columnCounts,
   descriptor,
   filledColumns,
   mountEntityList,
+  mountEntityListInPage,
   production,
   stickColumns,
   stickyLeft,
-  stubHeaderWidths
+  stubHeaderWidths,
+  taskTypeId
 } from '../../fixtures/entity-list'
 
 const mountList = props =>
@@ -116,6 +124,80 @@ describe('lists/SequenceList sticky columns', () => {
 
     expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('200px')
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('320px')
+
+    wrapper.unmount()
+  })
+})
+
+describe('lists/SequenceList task panel', () => {
+  test('unselects the cell of a task the task panel removes', async () => {
+    const wrapper = await mountEntityListInPage(SequenceList, {
+      getters: {
+        currentProduction: production,
+        displayedSequencesLength: 2,
+        sequenceFilledColumns: filledColumns
+      },
+      props: {
+        displayedSequences: ['sequence-1', 'sequence-2'].map(id => ({ id, name: id, data: {} }))
+      }
+    })
+    const task = {
+      id: 'task-sequence-2',
+      entity_id: 'sequence-2',
+      task_type_id: taskTypeId
+    }
+
+    wrapper.vm.$refs.list.unselectTask(task)
+
+    expect(wrapper.vm.$store.commit).toHaveBeenCalledWith(
+      'REMOVE_SELECTED_TASK',
+      { task, x: 1, y: 0 }
+    )
+
+    wrapper.unmount()
+  })
+})
+
+describe('lists/SequenceList column selection', () => {
+  afterEach(() => {
+    sequenceStore.cache.result = []
+  })
+
+  // The sequences keep their name order, a canceled one included.
+  test('selects the cells below a canceled sequence at their rows', async () => {
+    const sequences = ['SQ01', 'SQ02', 'SQ03'].map((name, i) => ({
+      id: `sequence-${i + 1}`,
+      name,
+      canceled: i === 0,
+      data: {},
+      validations: new Map([[taskTypeId, `task-${i + 1}`]])
+    }))
+    sequenceStore.cache.result = sequences
+    const wrapper = await mountEntityList(SequenceList, {
+      getters: {
+        currentProduction: production,
+        displayedSequencesLength: sequences.length,
+        sequenceFilledColumns: filledColumns
+      },
+      props: { displayedSequences: sequences }
+    })
+
+    wrapper.findComponent(ValidationHeader).vm.$emit('show-header-menu')
+    wrapper.findComponent(TableHeaderMenu).vm.$emit('select-column')
+    await nextTick()
+
+    const [selection] = wrapper.vm.$store.commit.mock.calls
+      .filter(([name]) => name === 'ADD_SELECTED_TASKS')
+      .map(([, payload]) => payload)
+    const rowX = entity =>
+      wrapper
+        .findAllComponents(ValidationCell)
+        .find(cell => cell.props('entity').id === entity.id)
+        .props('rowX')
+    expect(selection.map(({ entity, x }) => [entity.name, x])).toEqual([
+      ['SQ02', rowX(sequences[1])],
+      ['SQ03', rowX(sequences[2])]
+    ])
 
     wrapper.unmount()
   })

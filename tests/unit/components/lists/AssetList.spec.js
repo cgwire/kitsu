@@ -16,6 +16,7 @@ import {
   columnCounts,
   descriptor,
   mountEntityList,
+  mountEntityListInPage,
   production,
   setHeaderWidth,
   stickColumns,
@@ -204,7 +205,12 @@ describe('lists/AssetList task selection', () => {
   let listedAssets = []
 
   // The store result holds every listed asset, the hidden ones included.
-  const mountList = async (displayedAssets, query = {}, displaySettings = {}) => {
+  const mountList = async (
+    displayedAssets,
+    query = {},
+    displaySettings = {},
+    mount = mountEntityList
+  ) => {
     listedAssets = displayedAssets.flat()
     listedAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
     assetStore.cache.result = listedAssets
@@ -212,7 +218,7 @@ describe('lists/AssetList task selection', () => {
       assetSelectionGrid: reactive(new Set()),
       selectedAssets: new Map()
     }
-    const wrapper = await mountEntityList(AssetList, {
+    const wrapper = await mount(AssetList, {
       getters: {
         assetSelectionGrid: selectionState.assetSelectionGrid,
         currentEpisode: { id: 'episode-2' },
@@ -418,6 +424,30 @@ describe('lists/AssetList task selection', () => {
     const colorCells = ownBackgrounds.map(({ name }) => `${name} Color`)
     expect(selectedCells(wrapper)).toEqual(colorCells)
     expect(committedSelection(wrapper)).toEqual(colorCells)
+
+    wrapper.unmount()
+  })
+
+  // The store counted the hidden cast assets in the rows: the x of the task
+  // panel left the cell highlighted and unselected the one of a row below.
+  test('unselects the cell of a task the task panel removes below hidden cast assets', async () => {
+    const wrapper = await mountList(
+      [[...castBackgrounds, ...ownBackgrounds]],
+      {},
+      {},
+      mountEntityListInPage
+    )
+    await selectColumn(wrapper, layout)
+    const task = wrapper.vm.$store.getters.taskMap.get('task-E02_BG_21-layout')
+
+    wrapper.vm.$refs.list.unselectTask(task)
+    await flushPromises()
+
+    expect(selectedCells(wrapper)).toEqual(
+      ['E02_BG_20', 'E02_BG_22', 'E02_BG_23', 'E02_BG_24'].map(
+        name => `${name} Layout`
+      )
+    )
 
     wrapper.unmount()
   })

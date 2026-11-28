@@ -1420,11 +1420,6 @@ describe('Sequences store, through a store', () => {
 
   test('tracks the selected task cells', async () => {
     const { store } = await buildStore()
-    loadSequences(store, [
-      buildSequence('sq1', 'SQ01'),
-      buildSequence('sq2', 'SQ02')
-    ])
-    store.state.sequences.sequenceValidationColumns = ['tt-1', 'tt-2']
     const grid = () => [...store.getters.sequenceSelectionGrid].sort()
 
     store.commit('ADD_SELECTED_TASK', { x: 0, y: 1 })
@@ -1435,9 +1430,7 @@ describe('Sequences store, through a store', () => {
     expect(grid()).toEqual(['0-1', '1-0', '1-1'])
 
     store.commit('REMOVE_SELECTED_TASK', { x: 0, y: 1 })
-    store.commit('REMOVE_SELECTED_TASK', {
-      task: { column: { id: 'tt-2' }, entity: { id: 'sq2' } }
-    })
+    store.commit('REMOVE_SELECTED_TASK', { x: 1, y: 1 })
     expect(grid()).toEqual(['1-0'])
 
     store.commit('CLEAR_SELECTED_TASKS')

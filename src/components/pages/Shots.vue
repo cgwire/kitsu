@@ -139,6 +139,7 @@
         :task="selectedTasks.values().next().value"
         entity-type="Shot"
         with-actions
+        @task-removed="onTaskRemoved"
       />
     </div>
 
@@ -497,6 +498,7 @@ const {
   onKeepTaskPanelOpenChanged,
   onRestoreClicked,
   onSearchChange,
+  onTaskRemoved,
   openEditModal: onEditClicked,
   parsedCSV,
   renderColumns,

@@ -981,6 +981,7 @@ const {
   stickedDisplayedValidationColumns,
   stickedVisibleMetadataDescriptors,
   toggleColumnSelector,
+  unselectTask,
   updateOffsets
 } = useEntityList({
   type: 'shot',
@@ -1104,7 +1105,7 @@ const onNbFramesChanged = (entry, input) => {
 watch(isBigThumbnails, updateOffsets)
 
 // The pages drive the list through a ref.
-defineExpose({ selectTaskFromQuery, setScrollPosition })
+defineExpose({ selectTaskFromQuery, setScrollPosition, unselectTask })
 </script>
 
 <style lang="scss" scoped>

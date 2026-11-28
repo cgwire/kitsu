@@ -163,7 +163,7 @@ export const getNextEditableCell = (cell, key) => {
  * - emit: the list emit
  * - entities: ref of the displayed entities, grouped for assets and shots
  * - isEntityShown: whether the display settings show an entity of the store
- *   result, which Select column goes through
+ *   result, which Select column and unselectTask go through
  * - isCellSelectable: whether the cell of an entity in a task type column
  *   can be selected, which Select column goes through too
  * - filledColumns: ref of the columns holding at least one task
@@ -622,6 +622,19 @@ export const useEntityList = ({
     return nonStickedIndex + stickedDisplayedValidationColumns.value.length
   }
 
+  // Rows of the list, the rows not loaded yet included, which Select column
+  // numbers in the grid.
+  const getColumnRows = () =>
+    ENTITY_STORES[type].cache.result.filter(entity => isEntityShown(entity))
+
+  // Row of an entity in the selection grid, -1 when it is not displayed: a
+  // row not loaded yet keeps the number Select column gave it.
+  const getRowIndexInGrid = entityId => {
+    const x = entities.value.flat().findIndex(({ id }) => id === entityId)
+    if (x > -1) return x
+    return getColumnRows().findIndex(({ id }) => id === entityId)
+  }
+
   /*
    * Writes the selected task id in the url query string, or removes it
    * when 0 or more than 1 task is selected.
@@ -743,15 +756,24 @@ export const useEntityList = ({
     updateTaskInQuery()
   }
 
+  const unselectTask = task => {
+    const x = getRowIndexInGrid(task.entity_id)
+    const y = getColumnIndexInGrid(task.task_type_id)
+    if (x > -1 && y > -1) {
+      store.commit('REMOVE_SELECTED_TASK', { task, x, y })
+    }
+  }
+
   const onSelectColumn = () => {
     const taskTypeId = lastHeaderMenuDisplayed.value
     const y = getColumnIndexInGrid(taskTypeId)
-    // The rows are numbered before the grayed cells leave: the next rows
-    // keep their place in the grid.
-    const selection = ENTITY_STORES[type].cache.result
-      .filter(entity => !entity.canceled && isEntityShown(entity))
+    // The rows are numbered before the canceled rows and the grayed cells
+    // leave: the next rows keep their place in the grid.
+    const selection = getColumnRows()
       .map((entity, x) => ({ entity, x }))
-      .filter(({ entity }) => isCellSelectable(entity, taskTypeId))
+      .filter(
+        ({ entity }) => !entity.canceled && isCellSelectable(entity, taskTypeId)
+      )
       .map(({ entity, x }) => ({
         entity,
         column: taskTypeMap.value.get(taskTypeId),
@@ -1044,6 +1066,7 @@ export const useEntityList = ({
     startBrowsing,
     stickColumnClicked,
     toggleColumnSelector,
+    unselectTask,
     updateOffsets
   }
 }

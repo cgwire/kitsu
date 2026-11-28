@@ -120,7 +120,11 @@ export const mountEntityPage = async (
       validationColumns: { type: Array, default: () => [] }
     },
     template: '<div />',
-    methods: { setScrollPosition: vi.fn(), selectTaskFromQuery: vi.fn() }
+    methods: {
+      setScrollPosition: vi.fn(),
+      selectTaskFromQuery: vi.fn(),
+      unselectTask: vi.fn()
+    }
   }
   const wrapper = shallowMount(page, {
     props,

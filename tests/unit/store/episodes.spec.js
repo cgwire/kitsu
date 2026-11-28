@@ -1638,11 +1638,6 @@ describe('Episodes store, through a store', () => {
 
   test('tracks the selected task cells', async () => {
     const { store } = await buildStore()
-    loadEpisodes(store, [
-      { id: 'ep1', name: 'E01' },
-      { id: 'ep2', name: 'E02' }
-    ])
-    store.state.episodes.episodeValidationColumns = ['tt-1', 'tt-2']
     const grid = () => [...store.getters.episodeSelectionGrid].sort()
 
     store.commit('ADD_SELECTED_TASK', { x: 0, y: 1 })
@@ -1653,9 +1648,7 @@ describe('Episodes store, through a store', () => {
     expect(grid()).toEqual(['0-1', '1-0', '1-1'])
 
     store.commit('REMOVE_SELECTED_TASK', { x: 0, y: 1 })
-    store.commit('REMOVE_SELECTED_TASK', {
-      task: { column: { id: 'tt-2' }, entity: { id: 'ep2' } }
-    })
+    store.commit('REMOVE_SELECTED_TASK', { x: 1, y: 1 })
     expect(grid()).toEqual(['1-0'])
 
     store.commit('CLEAR_SELECTED_TASKS')

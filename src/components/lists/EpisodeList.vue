@@ -674,7 +674,8 @@ const {
   stickedColumns,
   stickedDisplayedValidationColumns,
   stickedVisibleMetadataDescriptors,
-  toggleColumnSelector
+  toggleColumnSelector,
+  unselectTask
 } = useEntityList({
   type: 'episode',
   props,
@@ -709,7 +710,7 @@ const onEpisodeStatusChanged = (episode, status) => {
 }
 
 // The pages drive the list through a ref.
-defineExpose({ selectTaskFromQuery, setScrollPosition })
+defineExpose({ selectTaskFromQuery, setScrollPosition, unselectTask })
 </script>
 
 <style lang="scss" scoped>
