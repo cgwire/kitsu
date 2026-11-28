@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
@@ -10,6 +10,7 @@ vi.mock('vue-router', () => ({
 import i18n from '@/lib/i18n'
 
 import Login from '@/components/pages/Login.vue'
+import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 
 import { pressEnter, pressSpace } from '../fixtures/keyboard'
 
@@ -176,5 +177,126 @@ describe('pages/Login', () => {
     await press(button, { repeat: true })
 
     expect(logIn).toHaveBeenCalledTimes(1)
+  })
+
+  // Each check of a code mounted the step again: a method chosen went back to
+  // the preferred one, and an email account was sent a new code.
+  describe('two-factor step', () => {
+    const missingOTP = {
+      missing_OTP: true,
+      preferred_two_factor_authentication: 'totp',
+      two_factor_authentication_enabled: ['totp', 'recovery_code']
+    }
+
+    const openStep = async logIn => {
+      wrapper = mountPage('jane@example.com', logIn, 'secret')
+      await wrapper.find('.main-button').trigger('click')
+      await flushPromises()
+      return wrapper.findComponent(TwoFactorAuthentication)
+    }
+
+    const sendCode = async (step, payload) => {
+      step.vm.$emit('validate', payload)
+      await flushPromises()
+    }
+
+    const findStep = () => wrapper.findComponent(TwoFactorAuthentication)
+
+    test('stays while its code is checked', async () => {
+      const logIn = vi
+        .fn()
+        .mockRejectedValueOnce(missingOTP)
+        .mockReturnValueOnce(new Promise(() => {}))
+      const step = await openStep(logIn)
+
+      await sendCode(step, { totp: '123456' })
+
+      expect(findStep().exists()).toBe(true)
+      expect(findStep().element).toBe(step.element)
+      expect(wrapper.find('form').exists()).toBe(false)
+    })
+
+    test('stays after a refused code', async () => {
+      const logIn = vi
+        .fn()
+        .mockRejectedValueOnce(missingOTP)
+        .mockRejectedValueOnce({ wrong_OTP: true })
+      const step = await openStep(logIn)
+
+      await sendCode(step, { recovery_code: 'K7PZ2QW9AB' })
+
+      expect(findStep().element).toBe(step.element)
+      expect(findStep().props('isWrongOtp')).toBe(true)
+    })
+
+    test('stays when another method is chosen after a refused code', async () => {
+      const logIn = vi
+        .fn()
+        .mockRejectedValueOnce(missingOTP)
+        .mockRejectedValueOnce({ wrong_OTP: true })
+      const step = await openStep(logIn)
+      await sendCode(step, { totp: '000000' })
+
+      step.vm.$emit('changed-two-fa', 'recovery_code')
+      await flushPromises()
+
+      expect(findStep().element).toBe(step.element)
+      expect(findStep().props('isWrongOtp')).toBe(false)
+      expect(wrapper.find('form').exists()).toBe(false)
+    })
+
+    // Zou checks the password before the code: a password changed meanwhile
+    // is refused without a word about the code.
+    test('goes back to the password when Zou refuses it', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const logIn = vi
+        .fn()
+        .mockRejectedValueOnce(missingOTP)
+        .mockRejectedValueOnce({ message: 'Bad credentials' })
+      const step = await openStep(logIn)
+
+      await sendCode(step, { totp: '123456' })
+
+      expect(findStep().exists()).toBe(false)
+      expect(wrapper.find('form').exists()).toBe(true)
+      expect(error).toHaveBeenCalledWith({ message: 'Bad credentials' })
+      error.mockRestore()
+    })
+
+    test.each([
+      ['too_many_failed_login_attemps', 'login.too_many_failed_login_attemps'],
+      ['unactive', 'login.login_inactive'],
+      ['server_error', 'login.login_server_failed']
+    ])('stays with the error of the page after %s', async (flag, key) => {
+      const logIn = vi
+        .fn()
+        .mockRejectedValueOnce(missingOTP)
+        .mockRejectedValueOnce({ [flag]: true })
+      const step = await openStep(logIn)
+
+      await sendCode(step, { totp: '123456' })
+
+      expect(findStep().element).toBe(step.element)
+      expect(wrapper.text()).toContain(key)
+    })
+
+    // Disabled meanwhile, the method of the code sent says nothing more: the
+    // step starts again on the method that Zou now names.
+    test('starts again when Zou asks for another method', async () => {
+      const logIn = vi
+        .fn()
+        .mockRejectedValueOnce(missingOTP)
+        .mockRejectedValueOnce({
+          ...missingOTP,
+          preferred_two_factor_authentication: 'email_otp',
+          two_factor_authentication_enabled: ['email_otp', 'recovery_code']
+        })
+      const step = await openStep(logIn)
+
+      await sendCode(step, { totp: '123456' })
+
+      expect(findStep().element).not.toBe(step.element)
+      expect(findStep().props('preferredTwoFa')).toBe('email_otp')
+    })
   })
 })

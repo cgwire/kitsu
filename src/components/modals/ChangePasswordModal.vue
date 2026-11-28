@@ -166,6 +166,7 @@ const disableTwoFactorAuthenticationClicked = async () => {
   isLoading.value = true
   try {
     await store.dispatch('disableTwoFactorAuthenticationPerson', props.person)
+    emit('confirm')
   } catch (err) {
     if (isTwoFactorAuthenticationRefusal(err)) {
       isDisableTwoFactorAuthenticationRefused.value = true

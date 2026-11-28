@@ -12,6 +12,7 @@ vi.mock('@/store/api/people', () => ({
   default: {
     deleteOrganisationLogo: vi.fn(),
     deletePerson: vi.fn(),
+    disableTwoFactorAuthenticationPerson: vi.fn(),
     getDaysOff: vi.fn(),
     getDayTable: vi.fn(),
     getMonthTable: vi.fn(),
@@ -423,6 +424,128 @@ describe('People store', () => {
       expect(people.value).toEqual(['alice', 'robot'])
       expect(displayedPeople.value).toEqual(['alice', 'robot'])
       expect(bob.value).toBeUndefined()
+    })
+
+    // The People page lists copies of the displayed people: the row has to
+    // drop its 2FA tag once the password modal closes. The person lookups
+    // follow too.
+    test('disableTwoFactorAuthenticationPerson turns the 2FA off in the displayed people', async () => {
+      peopleApi.disableTwoFactorAuthenticationPerson.mockResolvedValue({})
+      vuexStore.commit('LOAD_PEOPLE_END', {
+        people: [
+          person('alice'),
+          person('bob', {
+            totp_enabled: true,
+            preferred_two_factor_authentication: 'totp'
+          })
+        ],
+        userFilters: {}
+      })
+      const { row, lookup } = scope.run(() => ({
+        row: computed(() => ({
+          ...vuexStore.getters.displayedPeople.find(({ id }) => id === 'bob')
+        })),
+        lookup: computed(() => vuexStore.getters.getPerson('bob').totp_enabled)
+      }))
+      expect(row.value.totp_enabled).toBe(true)
+      expect(lookup.value).toBe(true)
+
+      await store.actions.disableTwoFactorAuthenticationPerson(
+        { commit: vuexStore.commit },
+        row.value
+      )
+
+      expect(
+        peopleApi.disableTwoFactorAuthenticationPerson
+      ).toHaveBeenCalledWith(expect.objectContaining({ id: 'bob' }))
+      expect(row.value).toMatchObject({
+        totp_enabled: false,
+        preferred_two_factor_authentication: null
+      })
+      expect(lookup.value).toBe(false)
+    })
+
+    // Unlike an edit, the page does not search again once the modal closes.
+    test('disableTwoFactorAuthenticationPerson keeps the people of a filtered search', async () => {
+      peopleApi.disableTwoFactorAuthenticationPerson.mockResolvedValue({})
+      vuexStore.commit('LOAD_PEOPLE_END', {
+        people: [
+          person('alice', { departments: ['d-model'] }),
+          person('bob', { departments: ['d-anim'], totp_enabled: true }),
+          person('carl', { departments: ['d-anim'] })
+        ],
+        userFilters: {}
+      })
+      vuexStore.commit('PEOPLE_SEARCH_CHANGE', {
+        peopleSearch: 'department=Animation',
+        persons: vuexStore.getters.people,
+        departments: [
+          { id: 'd-anim', name: 'Animation' },
+          { id: 'd-model', name: 'Modeling' }
+        ]
+      })
+      const { displayed, row } = scope.run(() => ({
+        displayed: computed(() =>
+          vuexStore.getters.displayedPeople.map(({ id }) => id)
+        ),
+        row: computed(() => ({
+          ...vuexStore.getters.displayedPeople.find(({ id }) => id === 'bob')
+        }))
+      }))
+      expect(displayed.value).toEqual(['bob', 'carl'])
+      expect(row.value.totp_enabled).toBe(true)
+
+      await store.actions.disableTwoFactorAuthenticationPerson(
+        { commit: vuexStore.commit },
+        person('bob')
+      )
+
+      expect(displayed.value).toEqual(['bob', 'carl'])
+      expect(row.value.totp_enabled).toBe(false)
+    })
+
+    // The browser's Back button can bring a search that hides the person
+    // while the modal is open: the row shows the change once listed again.
+    test('disableTwoFactorAuthenticationPerson turns the 2FA off for a person the search hides', async () => {
+      peopleApi.disableTwoFactorAuthenticationPerson.mockResolvedValue({})
+      vuexStore.commit('LOAD_PEOPLE_END', {
+        people: [person('alice'), person('bob', { totp_enabled: true })],
+        userFilters: {}
+      })
+      const search = peopleSearch =>
+        vuexStore.commit('PEOPLE_SEARCH_CHANGE', {
+          peopleSearch,
+          persons: vuexStore.getters.people,
+          departments: []
+        })
+      const row = scope.run(() =>
+        computed(() => ({
+          ...vuexStore.getters.displayedPeople.find(({ id }) => id === 'bob')
+        }))
+      )
+      search('alice')
+      expect(row.value.id).toBeUndefined()
+
+      await store.actions.disableTwoFactorAuthenticationPerson(
+        { commit: vuexStore.commit },
+        person('bob')
+      )
+      search('')
+
+      expect(row.value).toMatchObject({ id: 'bob', totp_enabled: false })
+    })
+
+    // Zou disabled the 2FA: a person missing from the loaded people is no
+    // reason to show an error.
+    test('disableTwoFactorAuthenticationPerson resolves for a person out of the loaded people', async () => {
+      peopleApi.disableTwoFactorAuthenticationPerson.mockResolvedValue({})
+
+      await expect(
+        store.actions.disableTwoFactorAuthenticationPerson(
+          { commit: vuexStore.commit },
+          person('gone')
+        )
+      ).resolves.toBeUndefined()
     })
 
     // The People page lists the guests in their own tabs, where an archived

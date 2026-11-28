@@ -96,20 +96,92 @@ describe('widgets/TwoFactorAuthentication', () => {
   })
 
   // Safari then offers the code that Mail received, or the one its Passwords
-  // app generates.
-  it.each(['totp', 'email_otp'])(
-    'marks the %s field as a one-time code',
-    method => {
-      const wrapper = mountWidget(
-        { preferredTwoFa: method, twoFasEnabled: [method] },
-        { sendEmailOTP: () => {} }
+  // app generates, and phones open their numeric keypad. The field takes the
+  // focus as the step mounts, and a browser reads its hints then: the step
+  // must know its method at its first render.
+  describe('when the field takes the focus', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    // A FIDO device needs no code: its field took the focus, then went away
+    // once the step picked FIDO.
+    it('focuses no code field for a FIDO device', () => {
+      const focused = []
+      vi.spyOn(HTMLElement.prototype, 'focus').mockImplementation(
+        function () {
+          focused.push(this.tagName)
+        }
       )
 
-      expect(wrapper.find('input').attributes('autocomplete')).toBe(
-        'one-time-code'
+      mountWidget(
+        { preferredTwoFa: 'fido', twoFasEnabled: ['fido'] },
+        { getFIDOChallenge: () => new Promise(() => {}) }
       )
-    }
-  )
+
+      expect(focused).toEqual([])
+    })
+
+    it.each(['totp', 'email_otp'])(
+      'marks the %s field as a numeric one-time code',
+      method => {
+        const hints = []
+        vi.spyOn(HTMLElement.prototype, 'focus').mockImplementation(
+          function () {
+            hints.push({
+              autocomplete: this.getAttribute('autocomplete'),
+              inputmode: this.getAttribute('inputmode')
+            })
+          }
+        )
+
+        mountWidget(
+          { preferredTwoFa: method, twoFasEnabled: [method] },
+          { sendEmailOTP: () => {} }
+        )
+
+        expect(hints).toEqual([
+          { autocomplete: 'one-time-code', inputmode: 'numeric' }
+        ])
+      }
+    )
+  })
+
+  // Recovery codes hold letters. A browser offered the code of an email or of
+  // an authenticator app there: a tap filled it in, and Verify sent it as a
+  // recovery code, which Zou refused, and counted as a failed login on the
+  // login page.
+  it('takes a recovery code as plain text', async () => {
+    const wrapper = mountWidget()
+    await flushPromises()
+    const input = wrapper.find('input')
+    expect(input.attributes('inputmode')).toBe('numeric')
+    expect(input.attributes('autocomplete')).toBe('one-time-code')
+
+    await wrapper
+      .findAll('a')
+      .find(link => link.text() === 'login.choose_recovery_code')
+      .trigger('click')
+
+    expect(input.attributes('inputmode')).toBeUndefined()
+    expect(input.attributes('autocomplete')).toBe('off')
+  })
+
+  // Recovery codes are capital letters and digits, and a phone keyboard
+  // capitalized only the first letter typed.
+  it('types a recovery code in capital letters', async () => {
+    const wrapper = mountWidget()
+    await flushPromises()
+
+    await wrapper
+      .findAll('a')
+      .find(link => link.text() === 'login.choose_recovery_code')
+      .trigger('click')
+
+    expect(wrapper.find('input').attributes('autocapitalize')).toBe(
+      'characters'
+    )
+  })
 
   // Each email makes Zou refuse the codes of the earlier ones: after a click
   // on "Resend OTP by email", the code of the first email was refused with
@@ -149,6 +221,23 @@ describe('widgets/TwoFactorAuthentication', () => {
 
       expect(peopleApi.sendEmailOTP).toHaveBeenCalledTimes(2)
       expect(helpLine(wrapper).text()).toBe(notice)
+    })
+
+    // Zou keeps only the code of the latest email.
+    it('sends no new email while a code is checked', async () => {
+      const wrapper = mountWidget({ ...emailProps, isLoading: true })
+      await flushPromises()
+      const link = wrapper
+        .findAll('a')
+        .find(item => item.text() === 'login.send_email_otp')
+
+      await link.trigger('click')
+      await link.trigger('keydown', { key: 'Enter' })
+      await link.trigger('keydown', { key: ' ' })
+      await flushPromises()
+
+      expect(link.attributes('aria-disabled')).toBe('true')
+      expect(peopleApi.sendEmailOTP).toHaveBeenCalledTimes(1)
     })
 
     // Cancel and Escape close the step of the 2FA settings, and the login
@@ -342,6 +431,47 @@ describe('widgets/TwoFactorAuthentication', () => {
     })
   })
 
+  // After "Use a recovery code", the refused TOTP code went again under its
+  // own name, and the profile then blamed a recovery code.
+  it('empties the code typed for the method left', async () => {
+    const wrapper = mountWidget()
+    await wrapper.find('input').setValue('123456')
+
+    await wrapper
+      .findAll('a')
+      .find(link => link.text() === 'login.choose_recovery_code')
+      .trigger('click')
+    await wrapper.find('button').trigger('click')
+
+    expect(wrapper.find('input').element.value).toBe('')
+    expect(wrapper.emitted('validate')).toBeUndefined()
+
+    await wrapper.find('input').setValue('K7PZ2QW9AB')
+    await wrapper.find('button').trigger('click')
+
+    expect(wrapper.emitted('validate')).toEqual([
+      [{ recovery_code: 'K7PZ2QW9AB' }]
+    ])
+  })
+
+  // A refusal arriving after a switch read as one for the method chosen.
+  it('keeps its method while the code is checked', async () => {
+    const wrapper = mountWidget({ isLoading: true })
+    const link = wrapper
+      .findAll('a')
+      .find(item => item.text() === 'login.choose_recovery_code')
+
+    await link.trigger('click')
+    await link.trigger('keydown', { key: 'Enter' })
+    await link.trigger('keydown', { key: ' ' })
+
+    expect(link.attributes('aria-disabled')).toBe('true')
+    expect(wrapper.find('input').attributes('placeholder')).toBe(
+      'login.fields.totp'
+    )
+    expect(wrapper.emitted('changed-two-fa')).toBeUndefined()
+  })
+
   // The code step of the login page sits under the language list.
   describe('validation label', () => {
     let wrapper = null
@@ -402,6 +532,45 @@ describe('widgets/TwoFactorAuthentication', () => {
         { getFIDOChallenge: () => ({ challenge: 'abc' }) }
       )
       await flushPromises()
+
+      expect(wrapper.emitted('validate')).toEqual([
+        [{ fido_authentication_response: response }]
+      ])
+    })
+
+    it('asks the device nothing more while its response is checked', async () => {
+      const getFIDOChallenge = vi.fn(() => ({ challenge: 'abc' }))
+      const wrapper = mountWidget(
+        { preferredTwoFa: 'fido', twoFasEnabled: ['fido'], isLoading: true },
+        { getFIDOChallenge }
+      )
+      await flushPromises()
+      const link = wrapper
+        .findAll('a')
+        .find(item => item.text() === 'login.retry_fido_challenge')
+
+      await link.trigger('click')
+      await link.trigger('keydown', { key: 'Enter' })
+      await link.trigger('keydown', { key: ' ' })
+      await flushPromises()
+
+      expect(link.attributes('aria-disabled')).toBe('true')
+      expect(getFIDOChallenge).toHaveBeenCalledTimes(1)
+    })
+
+    // A code method chosen next sent that response again on Verify.
+    it('drops the device response when a code method is chosen', async () => {
+      const wrapper = mountWidget(
+        { preferredTwoFa: 'fido', twoFasEnabled: ['fido', 'totp'] },
+        { getFIDOChallenge: () => ({ challenge: 'abc' }) }
+      )
+      await flushPromises()
+
+      await wrapper
+        .findAll('a')
+        .find(link => link.text() === 'login.choose_totp')
+        .trigger('click')
+      await wrapper.find('button').trigger('click')
 
       expect(wrapper.emitted('validate')).toEqual([
         [{ fido_authentication_response: response }]

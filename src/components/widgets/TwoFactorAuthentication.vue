@@ -10,7 +10,9 @@
         <input
           class="input is-medium password"
           type="text"
-          autocomplete="one-time-code"
+          :autocomplete="isDigitCode ? 'one-time-code' : 'off'"
+          :inputmode="isDigitCode ? 'numeric' : null"
+          autocapitalize="characters"
           :aria-describedby="informationId"
           :placeholder="placeholderInputText"
           @input="updatePayload"
@@ -50,9 +52,10 @@
         <a
           role="button"
           tabindex="0"
-          @click="requestSendEmailOTP()"
-          @keydown.enter.prevent="requestSendEmailOTP()"
-          @keydown.space.prevent="requestSendEmailOTP()"
+          :aria-disabled="isLoading"
+          @click="resendEmailOTP"
+          @keydown.enter.prevent="resendEmailOTP"
+          @keydown.space.prevent="resendEmailOTP"
         >
           {{ $t('login.send_email_otp') }}
         </a>
@@ -62,9 +65,10 @@
         <a
           role="button"
           tabindex="0"
-          @click="requestGetFIDOChallenge"
-          @keydown.enter.prevent="requestGetFIDOChallenge"
-          @keydown.space.prevent="requestGetFIDOChallenge"
+          :aria-disabled="isLoading"
+          @click="retryFIDOChallenge"
+          @keydown.enter.prevent="retryFIDOChallenge"
+          @keydown.space.prevent="retryFIDOChallenge"
         >
           {{ $t('login.retry_fido_challenge') }}
         </a>
@@ -83,9 +87,10 @@
             <a
               role="button"
               tabindex="0"
-              @click="changeTwoFA(twoFA)"
-              @keydown.enter.prevent="changeTwoFA(twoFA)"
-              @keydown.space.prevent="changeTwoFA(twoFA)"
+              :aria-disabled="isLoading"
+              @click="chooseTwoFA(twoFA)"
+              @keydown.enter.prevent="chooseTwoFA(twoFA)"
+              @keydown.space.prevent="chooseTwoFA(twoFA)"
             >
               {{ changeTwoFAText(twoFA) }}
             </a>
@@ -145,7 +150,7 @@ const props = defineProps({
 
 const emit = defineEmits(['changed-two-fa', 'validate'])
 
-const chosenTwoFA = ref('')
+const chosenTwoFA = ref(props.preferredTwoFa)
 const OTPValue = ref('')
 const twoFactorPayload = ref({})
 const errorSendingEmail = ref(false)
@@ -175,6 +180,11 @@ const placeholderInputText = computed(() => {
   }
   return ''
 })
+
+// Recovery codes hold letters, and match none of the codes a browser offers.
+const isDigitCode = computed(() =>
+  ['totp', 'email_otp'].includes(chosenTwoFA.value)
+)
 
 const wrongOTPError = computed(() => {
   switch (chosenTwoFA.value) {
@@ -259,12 +269,20 @@ const changeTwoFA = (twoFA, isOpening = false) => {
   removeErrors()
   emailSendingStatus.value = ''
   chosenTwoFA.value = twoFA
+  // Validate would send the code typed for the method left, under its name.
+  OTPValue.value = ''
+  twoFactorPayload.value = {}
   if (chosenTwoFA.value === 'email_otp') {
     requestSendEmailOTP({ isOpening })
   } else if (chosenTwoFA.value === 'fido') {
     requestGetFIDOChallenge()
   }
   if (!isOpening) emit('changed-two-fa', chosenTwoFA.value)
+}
+
+// The answer to the code being checked would read as one for the new method.
+const chooseTwoFA = twoFA => {
+  if (!props.isLoading) changeTwoFA(twoFA)
 }
 
 // A status region speaks only when its text changes: emptied first, it reads
@@ -313,6 +331,16 @@ const requestGetFIDOChallenge = () => {
     })
 }
 
+// A new email can void the code being checked, and a new challenge opens a
+// second prompt of the security key while its first response is checked.
+const resendEmailOTP = () => {
+  if (!props.isLoading) requestSendEmailOTP()
+}
+
+const retryFIDOChallenge = () => {
+  if (!props.isLoading) requestGetFIDOChallenge()
+}
+
 onMounted(() => {
   changeTwoFA(props.preferredTwoFa, true)
 })
@@ -346,5 +374,10 @@ onMounted(() => {
   .icon {
     padding: 0.25em;
   }
+}
+
+a[aria-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
 }
 </style>

@@ -54,19 +54,29 @@
       </p>
     </div>
 
-    <two-factor-authentication
-      v-if="twoFA.newRecoveryCodesNeedTwoFA"
-      :preferred-two-fa="user.preferred_two_factor_authentication"
-      :two-fas-enabled="twoFAsEnabled"
-      :is-loading="twoFA.loadingAction === 'newRecoveryCodes'"
-      :email="user.email"
-      :text-validate-button="textValidateTwoFA"
-      :is-disable-button="validateTwoFAIsDisable"
-      :is-wrong-otp="twoFA.error.isWrongOTP"
-      :is-profile="true"
-      @validate="nextWithPayload"
-      @changed-two-fa="changedTwoFA"
-    />
+    <template v-if="twoFA.newRecoveryCodesNeedTwoFA">
+      <two-factor-authentication
+        :preferred-two-fa="user.preferred_two_factor_authentication"
+        :two-fas-enabled="twoFAsEnabled"
+        :is-loading="twoFA.loadingAction === 'newRecoveryCodes'"
+        :email="user.email"
+        :text-validate-button="textValidateTwoFA"
+        :is-disable-button="validateTwoFAIsDisable"
+        :is-wrong-otp="twoFA.error.isWrongOTP"
+        :is-profile="true"
+        @validate="nextWithPayload"
+        @changed-two-fa="changedTwoFA"
+      />
+      <div class="two-fa-flow-actions new-recovery-codes-actions">
+        <button
+          class="button cancel-flow-button"
+          :disabled="isRequestRunning"
+          @click="cancelCurrentTwoFactorAuthAction"
+        >
+          {{ $t('main.cancel') }}
+        </button>
+      </div>
+    </template>
 
     <div class="two-fa-methods">
       <div class="two-fa-card">
@@ -117,6 +127,7 @@
                 class="input is-medium otp-input"
                 type="text"
                 autocomplete="one-time-code"
+                inputmode="numeric"
                 v-model.trim="twoFA.validationOTP"
                 @keyup.enter="nextEnable"
                 :placeholder="placeholderInputEnableOTP"
@@ -145,6 +156,7 @@
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
+              :disabled="isRequestRunning"
               @click="cancelCurrentTwoFactorAuthAction"
             >
               {{ $t('main.cancel') }}
@@ -161,26 +173,36 @@
           </div>
         </div>
 
-        <two-factor-authentication
-          v-else-if="twoFA.TOTPNeedTwoFA"
-          :preferred-two-fa="user.preferred_two_factor_authentication"
-          :two-fas-enabled="twoFAsEnabled"
-          :is-loading="twoFA.loadingAction === 'disableTOTP'"
-          :email="user.email"
-          :text-validate-button="textValidateTwoFA"
-          :is-disable-button="validateTwoFAIsDisable"
-          :is-wrong-otp="twoFA.error.isWrongOTP"
-          :is-profile="true"
-          @validate="nextWithPayload"
-          @changed-two-fa="changedTwoFA"
-        />
+        <template v-else-if="twoFA.TOTPNeedTwoFA">
+          <two-factor-authentication
+            :preferred-two-fa="user.preferred_two_factor_authentication"
+            :two-fas-enabled="twoFAsEnabled"
+            :is-loading="twoFA.loadingAction === 'disableTOTP'"
+            :email="user.email"
+            :text-validate-button="textValidateTwoFA"
+            :is-disable-button="validateTwoFAIsDisable"
+            :is-wrong-otp="twoFA.error.isWrongOTP"
+            :is-profile="true"
+            @validate="nextWithPayload"
+            @changed-two-fa="changedTwoFA"
+          />
+          <div class="two-fa-flow-actions">
+            <button
+              class="button cancel-flow-button"
+              :disabled="isRequestRunning"
+              @click="cancelCurrentTwoFactorAuthAction"
+            >
+              {{ $t('main.cancel') }}
+            </button>
+          </div>
+        </template>
 
         <div v-else class="two-fa-card-actions">
           <button
             v-if="!user.totp_enabled"
             class="button two-fa-action enable-action"
             :class="{ 'is-loading': twoFA.loadingAction === 'preEnableTOTP' }"
-            :disabled="twoFAButtonsDisabled"
+            :disabled="isActionDisabled('preEnableTOTP')"
             @click="preEnableTOTPRequested()"
           >
             {{ $t('profile.two_factor_authentication.totp.button_enable') }}
@@ -240,6 +262,7 @@
                 class="input is-medium otp-input"
                 type="text"
                 autocomplete="one-time-code"
+                inputmode="numeric"
                 :aria-describedby="
                   isNewEmailCodeSent ? newCodeSentId : undefined
                 "
@@ -271,6 +294,7 @@
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
+              :disabled="isRequestRunning"
               @click="cancelCurrentTwoFactorAuthAction"
             >
               {{ $t('main.cancel') }}
@@ -289,19 +313,29 @@
           </div>
         </div>
 
-        <two-factor-authentication
-          v-else-if="twoFA.emailOTPNeedTwoFA"
-          :preferred-two-fa="user.preferred_two_factor_authentication"
-          :two-fas-enabled="twoFAsEnabled"
-          :is-loading="twoFA.loadingAction === 'disableEmailOTP'"
-          :email="user.email"
-          :text-validate-button="textValidateTwoFA"
-          :is-disable-button="validateTwoFAIsDisable"
-          :is-wrong-otp="twoFA.error.isWrongOTP"
-          :is-profile="true"
-          @validate="nextWithPayload"
-          @changed-two-fa="changedTwoFA"
-        />
+        <template v-else-if="twoFA.emailOTPNeedTwoFA">
+          <two-factor-authentication
+            :preferred-two-fa="user.preferred_two_factor_authentication"
+            :two-fas-enabled="twoFAsEnabled"
+            :is-loading="twoFA.loadingAction === 'disableEmailOTP'"
+            :email="user.email"
+            :text-validate-button="textValidateTwoFA"
+            :is-disable-button="validateTwoFAIsDisable"
+            :is-wrong-otp="twoFA.error.isWrongOTP"
+            :is-profile="true"
+            @validate="nextWithPayload"
+            @changed-two-fa="changedTwoFA"
+          />
+          <div class="two-fa-flow-actions">
+            <button
+              class="button cancel-flow-button"
+              :disabled="isRequestRunning"
+              @click="cancelCurrentTwoFactorAuthAction"
+            >
+              {{ $t('main.cancel') }}
+            </button>
+          </div>
+        </template>
 
         <div v-else class="two-fa-card-actions">
           <button
@@ -310,7 +344,7 @@
             :class="{
               'is-loading': twoFA.loadingAction === 'preEnableEmailOTP'
             }"
-            :disabled="twoFAButtonsDisabled"
+            :disabled="isActionDisabled('preEnableEmailOTP')"
             @click="preEnableEmailOTPRequested()"
           >
             {{
@@ -395,6 +429,7 @@
           <div class="two-fa-flow-actions">
             <button
               class="button cancel-flow-button"
+              :disabled="isRequestRunning"
               @click="cancelCurrentTwoFactorAuthAction"
             >
               {{ $t('main.cancel') }}
@@ -466,19 +501,29 @@
       </li>
     </ul>
 
-    <two-factor-authentication
-      v-if="twoFA.FIDOUnregisterDeviceName"
-      :preferred-two-fa="user.preferred_two_factor_authentication"
-      :two-fas-enabled="twoFAsEnabled"
-      :is-loading="twoFA.loadingAction === 'unregisterFIDO'"
-      :email="user.email"
-      :text-validate-button="textValidateTwoFA"
-      :is-disable-button="validateTwoFAIsDisable"
-      :is-wrong-otp="twoFA.error.isWrongOTP"
-      :is-profile="true"
-      @validate="nextWithPayload"
-      @changed-two-fa="changedTwoFA"
-    />
+    <template v-if="twoFA.FIDOUnregisterDeviceName">
+      <two-factor-authentication
+        :preferred-two-fa="user.preferred_two_factor_authentication"
+        :two-fas-enabled="twoFAsEnabled"
+        :is-loading="twoFA.loadingAction === 'unregisterFIDO'"
+        :email="user.email"
+        :text-validate-button="textValidateTwoFA"
+        :is-disable-button="validateTwoFAIsDisable"
+        :is-wrong-otp="twoFA.error.isWrongOTP"
+        :is-profile="true"
+        @validate="nextWithPayload"
+        @changed-two-fa="changedTwoFA"
+      />
+      <div class="two-fa-flow-actions">
+        <button
+          class="button cancel-flow-button"
+          :disabled="isRequestRunning"
+          @click="cancelCurrentTwoFactorAuthAction"
+        >
+          {{ $t('main.cancel') }}
+        </button>
+      </div>
+    </template>
 
     <p
       class="show-message-2fa error"
@@ -570,8 +615,12 @@ const twoFAEnabled = computed(
     user.value.fido_enabled
 )
 
+// The answer of a request canceled midway landed on the next action.
+const isRequestRunning = computed(() => twoFA.loadingAction !== null)
+
 const twoFAButtonsDisabled = computed(
   () =>
+    isRequestRunning.value ||
     twoFA.TOTPPreEnabled ||
     twoFA.TOTPNeedTwoFA ||
     twoFA.emailOTPPreEnabled ||
@@ -634,6 +683,11 @@ const isNewEmailCodeSent = computed(
 )
 
 // Methods
+
+// Disabled, the button that started a request lost the keyboard focus, and a
+// failed request never gave it back. Its handler ignores a second press.
+const isActionDisabled = action =>
+  twoFAButtonsDisabled.value && twoFA.loadingAction !== action
 
 const removeTwoFactorErrors = () => {
   twoFA.error.isWrongOTP = false
@@ -915,8 +969,6 @@ const nextEnable = () => {
 }
 
 const nextWithPayload = payload => {
-  // A setup can open next to a removal, when its request was still running:
-  // only the factor asked by a setup sends the code to that setup.
   if (twoFA.enableNeedTwoFA) {
     if (twoFA.TOTPPreEnabled) enableTOTPRequested(payload)
     else if (twoFA.emailOTPPreEnabled) enableEmailOTPRequested(payload)
@@ -948,6 +1000,7 @@ const changedTwoFA = () => {
 }
 
 const cancelCurrentTwoFactorAuthAction = () => {
+  if (isRequestRunning.value) return
   twoFA.TOTPPreEnabled = false
   twoFA.TOTPNeedTwoFA = false
   twoFA.emailOTPPreEnabled = false
@@ -957,7 +1010,6 @@ const cancelCurrentTwoFactorAuthAction = () => {
   twoFA.FIDOPreRegistered = false
   twoFA.FIDONewDeviceName = ''
   twoFA.FIDOUnregisterDeviceName = ''
-  twoFA.loadingAction = null
   twoFA.validationOTP = ''
   twoFA.error.isWrongOTP = false
   twoFA.error.isWrongEnabledFactor = false
@@ -1062,7 +1114,8 @@ onUnmounted(() => {
   float: left;
 }
 
-.recovery-codes-panel {
+.recovery-codes-panel,
+.new-recovery-codes-actions {
   margin-bottom: 1.5em;
 }
 

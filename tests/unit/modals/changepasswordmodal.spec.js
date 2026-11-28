@@ -85,6 +85,17 @@ describe('ChangePasswordModal', () => {
   describe('two-factor authentication', () => {
     const disable2FA = 'button.is-warning'
 
+    // The modal used to stay open with its button active and no message, so
+    // a second click got Zou's refusal as an error.
+    it('closes once Zou has disabled it', async () => {
+      const { wrapper, actions, click } = mountModal()
+
+      await click(disable2FA)
+
+      expect(actions.disableTwoFactorAuthenticationPerson).toHaveBeenCalled()
+      expect(wrapper.emitted('confirm')).toHaveLength(1)
+    })
+
     it('says why Zou refuses to disable it for another admin', async () => {
       const { wrapper, actions, click } = mountModal()
       actions.disableTwoFactorAuthenticationPerson.mockRejectedValueOnce(
@@ -95,6 +106,7 @@ describe('ChangePasswordModal', () => {
 
       expect(wrapper.text()).toContain('people.disable_2FA_refused')
       expect(wrapper.text()).not.toContain('people.disable_2FA_error')
+      expect(wrapper.emitted('confirm')).toBeUndefined()
     })
 
     it('keeps the generic error for any other failure', async () => {
@@ -107,6 +119,7 @@ describe('ChangePasswordModal', () => {
 
       expect(wrapper.text()).toContain('people.disable_2FA_error')
       expect(wrapper.text()).not.toContain('people.disable_2FA_refused')
+      expect(wrapper.emitted('confirm')).toBeUndefined()
     })
 
     it('clears a password refusal of the previous click', async () => {
