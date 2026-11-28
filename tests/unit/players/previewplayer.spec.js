@@ -188,6 +188,7 @@ const mountPlayer = ({
   })
 }
 
+// Finger 1 lands first, so it is the primary one.
 const pointer = (target, type, { id, x, y }) => {
   const event = new MouseEvent(type, {
     bubbles: true,
@@ -197,7 +198,8 @@ const pointer = (target, type, { id, x, y }) => {
   })
   Object.defineProperties(event, {
     pointerId: { value: id },
-    pointerType: { value: 'touch' }
+    pointerType: { value: 'touch' },
+    isPrimary: { value: id === 1 }
   })
   target.dispatchEvent(event)
 }
@@ -243,6 +245,220 @@ describe('PreviewPlayer.vue', () => {
   })
 
   describe('finger navigation', () => {
+    // panzoom moves the media; the bands around a picture belong to the
+    // viewer.
+    const viewerWith = media => ({
+      name: 'PreviewViewer',
+      template: `
+        <div>
+          <div class="picture-subwrapper">
+            <div>${media}</div>
+          </div>
+        </div>
+      `,
+      computed: {
+        container() {
+          return this.$el
+        },
+        currentMediaElement() {
+          return this.$el.querySelector('img, canvas')
+        }
+      },
+      methods: viewer
+    })
+
+    it('pans a movie with one finger', async () => {
+      wrapper = mountPlayer({
+        props: { previews: [moviePreview] },
+        stubs: { PreviewViewer: viewerWith('<canvas />') }
+      })
+      await nextTick()
+      const movie = wrapper
+        .findComponent({ ref: 'preview-viewer' })
+        .find('canvas').element
+
+      pointer(movie, 'pointerdown', { id: 1, x: 100, y: 100 })
+      pointer(movie, 'pointermove', { id: 1, x: 110, y: 95 })
+
+      expect(viewer.panBy.mock.calls).toEqual([[10, -5]])
+      expect(viewer.panBy.mock.contexts.map(vm => vm.$attrs.name)).toEqual([
+        'main'
+      ])
+    })
+
+    // A finger in the black band above or below a picture was left out of
+    // the pinch, which panned instead.
+    it('pinches a picture from a finger in the band around it', async () => {
+      wrapper = mountPlayer({
+        stubs: { PreviewViewer: viewerWith('<img />') }
+      })
+      await nextTick()
+      const main = wrapper.findComponent({ ref: 'preview-viewer' })
+      const band = main.find('.picture-subwrapper').element
+
+      pointer(main.find('img').element, 'pointerdown', {
+        id: 1,
+        x: 100,
+        y: 100
+      })
+      pointer(band, 'pointerdown', { id: 2, x: 200, y: 100 })
+      pointer(band, 'pointermove', { id: 2, x: 300, y: 100 })
+
+      expect(viewer.zoomAt.mock.calls).toEqual([[200, 100, 2]])
+      expect(viewer.zoomAt.mock.contexts.map(vm => vm.$attrs.name)).toEqual([
+        'main'
+      ])
+    })
+
+    describe('in a comparison', () => {
+      const comparedPreview = { ...preview, id: 'preview-3', revision: 2 }
+      const placeAt = (element, left) => {
+        element.getBoundingClientRect = () => ({
+          left,
+          top: 0,
+          right: left + 400,
+          bottom: 300,
+          width: 400,
+          height: 300
+        })
+      }
+      const openComparison = async () => {
+        wrapper = mountPlayer({
+          props: {
+            entityPreviewFiles: {
+              [task.task_type_id]: [comparedPreview, preview]
+            },
+            taskTypeMap: new Map([
+              [task.task_type_id, { id: task.task_type_id, name: 'Animation' }]
+            ])
+          },
+          stubs: { PreviewViewer: viewerWith('<img />') }
+        })
+        await nextTick()
+        wrapper
+          .findComponent({ name: 'PlayerComparisonBar' })
+          .vm.$emit('compare-clicked')
+        await flushPromises()
+        return wrapper.findAllComponents({ name: 'PreviewViewer' })[1]
+      }
+
+      // A compared model turns its camera with the fingers.
+      it('leaves the fingers on a compared model to its viewer', async () => {
+        const model = { ...preview, id: 'preview-glb', extension: 'glb' }
+        wrapper = mountPlayer({
+          props: {
+            entityPreviewFiles: { [task.task_type_id]: [model, preview] },
+            taskTypeMap: new Map([
+              [task.task_type_id, { id: task.task_type_id, name: 'Animation' }]
+            ])
+          },
+          stubs: {
+            PreviewViewer: {
+              name: 'PreviewViewer',
+              template: `
+                <div>
+                  <img v-if="$attrs.preview?.extension === 'png'" />
+                  <div class="model" v-else />
+                </div>
+              `,
+              computed: {
+                container() {
+                  return this.$el
+                },
+                currentMediaElement() {
+                  return this.$el.querySelector('img')
+                }
+              },
+              methods: viewer
+            }
+          }
+        })
+        await nextTick()
+        wrapper
+          .findComponent({ name: 'PlayerComparisonBar' })
+          .vm.$emit('compare-clicked')
+        await flushPromises()
+        const target = wrapper
+          .findAllComponents({ name: 'PreviewViewer' })[1]
+          .find('.model').element
+        const heard = vi.fn()
+        target.addEventListener('pointerdown', heard)
+
+        pointer(target, 'pointerdown', { id: 1, x: 100, y: 100 })
+        pointer(target, 'pointermove', { id: 1, x: 110, y: 100 })
+
+        expect(heard).toHaveBeenCalled()
+        expect(viewer.panBy).not.toHaveBeenCalled()
+      })
+
+      // A first finger on the compared picture and a second one on the main
+      // picture made panzoom divide by a length it never measured ("zoom
+      // requires valid numbers").
+      it('keeps the fingers on the compared picture from panzoom', async () => {
+        const compared = await openComparison()
+        const image = compared.find('img').element
+        const heard = vi.fn()
+        image.parentElement.addEventListener('touchstart', heard)
+
+        image.dispatchEvent(new Event('touchstart', { bubbles: true }))
+
+        expect(heard).not.toHaveBeenCalled()
+      })
+
+      // The compared picture mirrors the main one, which sits 20 px into its
+      // viewer. Side by side, the compared viewer stands 500 px to the right,
+      // its picture 30 px into it; laid over, it shares the box of the main
+      // viewer, its picture elsewhere in it.
+      const pinchCompared = async ({ viewerAt, imageAt }) => {
+        const compared = await openComparison()
+        const main = wrapper.findComponent({ ref: 'preview-viewer' })
+        const image = compared.find('img').element
+        placeAt(main.element, 0)
+        placeAt(main.find('img').element, 20)
+        placeAt(compared.element, viewerAt)
+        placeAt(image, imageAt)
+
+        pointer(image, 'pointerdown', { id: 1, x: imageAt + 100, y: 100 })
+        pointer(image, 'pointerdown', { id: 2, x: imageAt + 200, y: 100 })
+        pointer(image, 'pointermove', { id: 2, x: imageAt + 300, y: 100 })
+      }
+      const mainZooms = () =>
+        viewer.zoomAt.mock.calls.filter(
+          (_, i) => viewer.zoomAt.mock.contexts[i].$attrs.name === 'main'
+        )
+
+      it('zooms the main picture at the spot pinched beside it', async () => {
+        await pinchCompared({ viewerAt: 500, imageAt: 530 })
+        expect(viewer.zoomAt).toHaveBeenCalledTimes(1)
+        expect(mainZooms()).toEqual([[220, 100, 2]])
+      })
+
+      it('zooms the main picture at the spot pinched over it', async () => {
+        await pinchCompared({ viewerAt: 0, imageAt: 50 })
+        expect(viewer.zoomAt).toHaveBeenCalledTimes(1)
+        expect(mainZooms()).toEqual([[250, 100, 2]])
+      })
+
+      // The band around the compared picture belongs to its viewer.
+      it('zooms the main picture from the band of the compared one', async () => {
+        const compared = await openComparison()
+        const main = wrapper.findComponent({ ref: 'preview-viewer' })
+        const image = compared.find('img').element
+        const band = compared.find('.picture-subwrapper').element
+        placeAt(main.element, 0)
+        placeAt(main.find('img').element, 20)
+        placeAt(compared.element, 500)
+        placeAt(image, 530)
+
+        pointer(band, 'pointerdown', { id: 1, x: 600, y: 100 })
+        pointer(image, 'pointerdown', { id: 2, x: 700, y: 100 })
+        pointer(image, 'pointermove', { id: 2, x: 800, y: 100 })
+
+        expect(viewer.zoomAt).toHaveBeenCalledTimes(1)
+        expect(mainZooms()).toEqual([[190, 100, 2]])
+      })
+    })
+
     // Fingers on the annotations move the media of the main viewer: the
     // comparison viewer only mirrors it.
     it('zooms the main viewer with a pinch on the annotations', async () => {

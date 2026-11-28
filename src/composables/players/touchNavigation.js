@@ -41,6 +41,9 @@ const middle = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
 
 const pointOf = event => ({ x: event.clientX, y: event.clientY })
 
+// A navigating finger: where it is, and the element it landed on.
+const fingerOf = event => ({ point: pointOf(event), target: event.target })
+
 const pointerInit = event =>
   Object.fromEntries(POINTER_FIELDS.map(field => [field, event[field]]))
 
@@ -48,7 +51,9 @@ const pointerInit = event =>
  * @param {Object} options
  * @param {Ref<HTMLElement>} options.container element holding the surfaces
  * @param {Function} options.surfaces elements where a finger navigates:
- *   the annotation overlay and the media's parent
+ *   the annotation overlay, the viewer of the media (not only the media's
+ *   parent, which the bands around a picture lie outside of), and the
+ *   viewer of the media it is compared with
  * @param {Function} options.overlay the annotation overlay, where one
  *   finger uses the tool turned on
  * @param {Ref<Boolean>} options.isAnnotating an annotation tool is on
@@ -131,26 +136,45 @@ export const useTouchNavigation = ({
     }
   }
 
+  // A finger on an element that left the page can lose its release with
+  // it, out of the window's reach.
+  const forgetLostFingers = () => {
+    fingers.forEach(({ target }, pointerId) => {
+      if (!target.isConnected) fingers.delete(pointerId)
+    })
+    if (heldFinger && !heldFinger.target.isConnected) dropHeldFinger()
+    if (toolFinger && !toolFinger.target.isConnected) toolFinger = null
+  }
+
   const onPointerDown = event => {
     if (replays.has(event)) return
     if (event.pointerType === 'pen') {
       isStylusUsed = true
+      // A primary pen lands while no other is down: one still noted lost
+      // its release on the way.
+      if (event.isPrimary) pens.clear()
       pens.add(event.pointerId)
       fingers.clear()
       dropHeldFinger()
       releaseToolFinger()
     } else if (isPlayerFinger(event)) {
       event.stopPropagation()
+      // A primary finger lands while no other is down. Only the fingers on
+      // an element that left the page go: Firefox can also call a finger
+      // landing beside another primary (before 126, and on Android per bug
+      // 1909197).
+      if (event.isPrimary) forgetLostFingers()
       if (pens.size > 0 || toolFinger) return
       if (heldFinger) {
         // A second finger: a pinch.
-        fingers.set(heldFinger.pointerId, heldFinger.point)
+        const { pointerId, point, target } = heldFinger
+        fingers.set(pointerId, { point, target })
         dropHeldFinger()
-        fingers.set(event.pointerId, pointOf(event))
+        fingers.set(event.pointerId, fingerOf(event))
       } else if (fingers.size === 0 && isForTool(event)) {
         holdFinger(event)
       } else {
-        fingers.set(event.pointerId, pointOf(event))
+        fingers.set(event.pointerId, fingerOf(event))
       }
     }
   }
@@ -178,13 +202,13 @@ export const useTouchNavigation = ({
       // A finger past the first two drives from where it is once one of
       // them lifts.
       if (fingers.has(event.pointerId)) {
-        fingers.set(event.pointerId, pointOf(event))
+        fingers.get(event.pointerId).point = pointOf(event)
       }
       return
     }
-    const before = drivers.map(([, point]) => point)
+    const before = drivers.map(([, finger]) => finger.point)
     const point = pointOf(event)
-    fingers.set(event.pointerId, point)
+    fingers.get(event.pointerId).point = point
     if (before.length === 1) {
       panBy(point.x - before[0].x, point.y - before[0].y)
     } else {

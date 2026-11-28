@@ -48,11 +48,27 @@ const mountNavigation = ({
   return { wrapper, element, panBy, zoomAt }
 }
 
+// The pointers down, as the browser counts them: a pointer landing while
+// none of its kind is down is the primary one, until it lifts. A test can
+// force the flag, as Firefox can set it (before 126, and on Android per bug
+// 1909197).
+const pointersDown = new Map()
+
 const pointer = (
   target,
   type,
-  { id = 1, kind = 'touch', x = 0, y = 0, ...init }
-) =>
+  { id = 1, kind = 'touch', x = 0, y = 0, isPrimary, ...init }
+) => {
+  if (type === 'pointerdown') {
+    const isAlone = [...pointersDown.values()].every(
+      down => down.kind !== kind
+    )
+    pointersDown.set(id, { kind, isPrimary: isPrimary ?? isAlone })
+  }
+  const flag = isPrimary ?? pointersDown.get(id)?.isPrimary ?? true
+  if (type === 'pointerup' || type === 'pointercancel') {
+    pointersDown.delete(id)
+  }
   target.dispatchEvent(
     new PointerEvent(type, {
       bubbles: true,
@@ -61,10 +77,20 @@ const pointer = (
       clientY: y,
       pointerId: id,
       pointerType: kind,
-      isPrimary: true,
+      isPrimary: flag,
       ...init
     })
   )
+}
+
+// A viewer the test can take out of the page, as a player does with its
+// spinner, its overlay, or a picture it unmounts: the finger lands on its
+// content. A release sent there never reaches the window.
+const addViewer = parent => {
+  const viewer = parent.appendChild(document.createElement('div'))
+  const content = viewer.appendChild(document.createElement('canvas'))
+  return { viewer, content }
+}
 
 const touchStart = target =>
   target.dispatchEvent(new Event('touchstart', { bubbles: true }))
@@ -102,6 +128,7 @@ describe('composables/touchNavigation', () => {
     wrapper = null
     unlistens.forEach(unlisten => unlisten())
     unlistens = []
+    pointersDown.clear()
     vi.useRealTimers()
   })
 
@@ -548,6 +575,176 @@ describe('composables/touchNavigation', () => {
     vi.advanceTimersByTime(300)
 
     expect(heard).toEqual([])
+  })
+
+  // A finger whose element leaves the page can lose its release with it:
+  // the next finger to land alone forgets such fingers, and only those.
+  it('forgets a finger whose element left the page once a finger lands alone', () => {
+    const navigation = mountNavigation()
+    wrapper = navigation.wrapper
+    const media = navigation.element('.media')
+    const { viewer, content: picture } = addViewer(media.parentElement)
+
+    pointer(picture, 'pointerdown', { id: 1, x: 100 })
+    viewer.remove()
+    pointer(picture, 'pointerup', { id: 1, x: 100 })
+    pointer(media, 'pointerdown', { id: 2, x: 300 })
+    pointer(media, 'pointermove', { id: 2, x: 320 })
+
+    expect(navigation.zoomAt).not.toHaveBeenCalled()
+    expect(navigation.panBy.mock.calls).toEqual([[20, 0]])
+  })
+
+  it('drops a finger waiting for the tool once its element left the page and a finger lands alone', () => {
+    vi.useFakeTimers()
+    const navigation = mountNavigation({ isAnnotating: ref(true) })
+    wrapper = navigation.wrapper
+    const upper = navigation.element('.upper')
+    const { viewer, content: drawing } = addViewer(upper.parentElement)
+    const heard = listenLikeFabric(upper)
+
+    pointer(drawing, 'pointerdown', { id: 1, x: 100 })
+    viewer.remove()
+    pointer(drawing, 'pointerup', { id: 1, x: 100 })
+    pointer(upper, 'pointerdown', { id: 2, x: 200 })
+    vi.advanceTimersByTime(300)
+
+    expect(heard).toEqual([['pointerdown', 2, 200]])
+  })
+
+  it('drops the finger the tool got once its element left the page and a finger lands alone', () => {
+    vi.useFakeTimers()
+    const navigation = mountNavigation({ isAnnotating: ref(true) })
+    wrapper = navigation.wrapper
+    const media = navigation.element('.media')
+    const { viewer, content: drawing } = addViewer(
+      navigation.element('.upper').parentElement
+    )
+    const heard = listenLikeFabric(drawing)
+
+    pointer(drawing, 'pointerdown', { id: 1, x: 100 })
+    vi.advanceTimersByTime(300)
+    viewer.remove()
+    pointer(drawing, 'pointerup', { id: 1, x: 100 })
+    pointer(media, 'pointerdown', { id: 2, x: 300 })
+    pointer(media, 'pointermove', { id: 2, x: 320 })
+
+    expect(heard).toEqual([['pointerdown', 1, 100]])
+    expect(navigation.panBy.mock.calls).toEqual([[20, 0]])
+  })
+
+  it('forgets a finger that waited for the tool once its element left the page', () => {
+    const navigation = mountNavigation({ isAnnotating: ref(true) })
+    wrapper = navigation.wrapper
+    const upper = navigation.element('.upper')
+    const media = navigation.element('.media')
+    const { viewer, content: drawing } = addViewer(upper.parentElement)
+
+    pointer(drawing, 'pointerdown', { id: 1, x: 100 })
+    pointer(upper, 'pointerdown', { id: 2, x: 200 })
+    pointer(upper, 'pointerup', { id: 2, x: 200 })
+    viewer.remove()
+    pointer(drawing, 'pointerup', { id: 1, x: 100 })
+    pointer(media, 'pointerdown', { id: 3, x: 300 })
+    pointer(media, 'pointermove', { id: 3, x: 320 })
+
+    expect(navigation.zoomAt).not.toHaveBeenCalled()
+    expect(navigation.panBy.mock.calls).toEqual([[20, 0]])
+  })
+
+  it('pinches on with a finger whose element left the page while it is down', () => {
+    const navigation = mountNavigation()
+    wrapper = navigation.wrapper
+    const media = navigation.element('.media')
+    const { viewer, content: picture } = addViewer(media.parentElement)
+
+    pointer(picture, 'pointerdown', { id: 1, x: 100 })
+    viewer.remove()
+    pointer(media, 'pointerdown', { id: 2, x: 200 })
+    pointer(media, 'pointermove', { id: 2, x: 300 })
+
+    expect(navigation.zoomAt.mock.calls).toEqual([[200, 0, 2]])
+  })
+
+  // Firefox can flag a finger landing beside another primary: before 126
+  // by its place in the list of touches, and on Android per bug 1909197.
+  it('pinches on when a finger put back comes flagged primary', () => {
+    const navigation = mountNavigation()
+    wrapper = navigation.wrapper
+    const upper = navigation.element('.upper')
+
+    pointer(upper, 'pointerdown', { id: 1, x: 100 })
+    pointer(upper, 'pointerdown', { id: 2, x: 200 })
+    pointer(upper, 'pointerup', { id: 1, x: 100 })
+    pointer(upper, 'pointerdown', { id: 3, x: 100, isPrimary: true })
+    pointer(upper, 'pointermove', { id: 3, x: 0 })
+
+    expect(navigation.zoomAt.mock.calls).toEqual([[100, 0, 2]])
+  })
+
+  it('pinches when a finger beside one waiting for the tool comes flagged primary', () => {
+    vi.useFakeTimers()
+    const navigation = mountNavigation({ isAnnotating: ref(true) })
+    wrapper = navigation.wrapper
+    const upper = navigation.element('.upper')
+    const heard = listenLikeFabric(upper)
+
+    pointer(upper, 'pointerdown', { id: 1, x: 100 })
+    pointer(upper, 'pointerdown', { id: 2, x: 200, isPrimary: true })
+    pointer(upper, 'pointermove', { id: 2, x: 300 })
+    vi.advanceTimersByTime(300)
+
+    expect(navigation.zoomAt.mock.calls).toEqual([[200, 0, 2]])
+    expect(heard).toEqual([])
+  })
+
+  it('keeps the stroke of the tool finger when a finger beside it comes flagged primary', () => {
+    vi.useFakeTimers()
+    const navigation = mountNavigation({ isAnnotating: ref(true) })
+    wrapper = navigation.wrapper
+    const upper = navigation.element('.upper')
+    const heard = listenLikeFabric(upper)
+
+    pointer(upper, 'pointerdown', { id: 1, x: 100 })
+    vi.advanceTimersByTime(300)
+    pointer(upper, 'pointerdown', { id: 2, x: 200, isPrimary: true })
+    pointer(upper, 'pointermove', { id: 1, x: 130 })
+
+    expect(heard).toEqual([
+      ['pointerdown', 1, 100],
+      ['pointermove', 1, 130]
+    ])
+  })
+
+  it('navigates again once a pen lands alone and lifts after a lost release', () => {
+    const navigation = mountNavigation()
+    wrapper = navigation.wrapper
+    const upper = navigation.element('.upper')
+    const { viewer, content: drawing } = addViewer(upper.parentElement)
+
+    pointer(drawing, 'pointerdown', { id: 1, kind: 'pen' })
+    viewer.remove()
+    pointer(drawing, 'pointerup', { id: 1, kind: 'pen' })
+    pointer(upper, 'pointerdown', { id: 2, kind: 'pen' })
+    pointer(upper, 'pointerup', { id: 2, kind: 'pen' })
+    pointer(upper, 'pointerdown', { id: 3, x: 300 })
+    pointer(upper, 'pointermove', { id: 3, x: 320 })
+
+    expect(navigation.panBy.mock.calls).toEqual([[20, 0]])
+  })
+
+  it('ignores the fingers while another pen is down', () => {
+    const navigation = mountNavigation()
+    wrapper = navigation.wrapper
+    const upper = navigation.element('.upper')
+
+    pointer(upper, 'pointerdown', { id: 1, kind: 'pen' })
+    pointer(upper, 'pointerdown', { id: 2, kind: 'pen' })
+    pointer(upper, 'pointerup', { id: 2, kind: 'pen' })
+    pointer(upper, 'pointerdown', { id: 3, x: 300 })
+    pointer(upper, 'pointermove', { id: 3, x: 320 })
+
+    expect(navigation.panBy).not.toHaveBeenCalled()
   })
 
   it('hands nothing to the tool once unmounted', () => {

@@ -491,6 +491,7 @@ import { useTrimmedEntity } from '@/composables/players/trimmedEntity'
 import func from '@/lib/func'
 import { getEntityPath } from '@/lib/path'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
+import { pointOnMainMedia } from '@/lib/players/panzoom'
 import localPreferences from '@/lib/preferences'
 import { safeUrl } from '@/lib/render'
 import {
@@ -799,15 +800,30 @@ const isAnnotationToolOn = computed(
     isTyping.value
 )
 
+// A compared movie or picture follows the main media: the fingers on either
+// side move the main one. A compared model keeps them for its camera, and a
+// movie compared with a picture plays in a plain video, with its controls.
 useTouchNavigation({
   container: previewContainer,
-  surfaces: () => [canvasWrapper.value, mainMediaElement.value?.parentElement],
+  surfaces: () => [
+    canvasWrapper.value,
+    previewViewer.value?.container,
+    comparisonMediaElement.value ? comparisonViewer.value?.container : null
+  ],
   overlay: canvasWrapper,
   isAnnotating: isAnnotationToolOn,
   isEnabled: isTouchNavigationEnabled,
   panBy: (dx, dy) => previewViewer.value?.panBy(dx, dy),
-  zoomAt: (clientX, clientY, ratio) =>
-    previewViewer.value?.zoomAt(clientX, clientY, ratio)
+  zoomAt: (clientX, clientY, ratio) => {
+    const { x, y } = pointOnMainMedia(clientX, clientY, {
+      mainArea: previewViewer.value?.container?.getBoundingClientRect(),
+      comparisonArea:
+        comparisonViewer.value?.container?.getBoundingClientRect(),
+      main: mainMediaElement.value?.getBoundingClientRect(),
+      compared: comparisonMediaElement.value?.getBoundingClientRect()
+    })
+    previewViewer.value?.zoomAt(x, y, ratio)
+  }
 })
 
 // Onion skin: ghost the annotations of nearby frames. Persisted like the
@@ -3186,10 +3202,17 @@ defineExpose({
   // and drop any unsaved comment — issue #1700.
   overscroll-behavior-x: contain;
 
-  // The fingers navigate the media there: the page must not scroll or
-  // zoom under them.
+  // The fingers navigate the media there: the page must not scroll or zoom
+  // under them, and iOS must not select, open its menu, or start a drag
+  // under a held finger.
   &.touch-navigation {
     touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+
+    :deep(img) {
+      -webkit-user-drag: none;
+    }
   }
 }
 

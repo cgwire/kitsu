@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils'
-import { nextTick } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 import { createStore } from 'vuex'
 
 import SharedPlaylistButtonBar from '@/components/players/bars/SharedPlaylistButtonBar.vue'
@@ -44,6 +44,7 @@ const picture = {
 }
 
 const mountPlayer = ({
+  attached = false,
   entities = [entity],
   getCurrentFrame = () => 0,
   isMovieBroken = false,
@@ -51,19 +52,26 @@ const mountPlayer = ({
   goNextFrame = () => {},
   goPreviousFrame = () => {},
   loadEntity = () => {},
+  panMovieBy = () => {},
+  props = {},
   setCurrentFrame = () => {},
   playSound = () => {},
   setSoundTime = () => {},
-  updateProgressBar = () => {}
+  stubs = {},
+  updateProgressBar = () => {},
+  zoomMovieAt = () => {}
 } = {}) => {
   const store = createStore({
     getters: { user: () => ({ id: 'guest-1', is_guest: true }) }
   })
   return shallowMount(SharedPlaylistPlayer, {
+    // The window hears the events of an attached player only.
+    ...(attached ? { attachTo: document.body } : {}),
     props: {
       entities,
       playlist: { name: 'Dailies', project_fps: 25 },
-      token: 'token'
+      token: 'token',
+      ...props
     },
     global: {
       plugins: [store],
@@ -72,7 +80,7 @@ const mountPlayer = ({
         // of their methods.
         MultiVideoViewer: {
           name: 'MultiVideoViewer',
-          template: '<div />',
+          template: '<div><canvas class="playlist-movie" /></div>',
           data: () => ({ isBroken: isMovieBroken }),
           methods: {
             getCurrentFrame,
@@ -86,12 +94,14 @@ const mountPlayer = ({
                 this.$emit('frame-update', movieFrameOnPause)
               }
             },
+            panBy: panMovieBy,
             play: () => {},
             resetHeight: () => {},
             resetPanZoom: () => {},
             resumePanZoom: () => {},
             setCurrentFrame,
-            setVolume: () => {}
+            setVolume: () => {},
+            zoomAt: zoomMovieAt
           }
         },
         SoundViewer: {
@@ -108,11 +118,30 @@ const mountPlayer = ({
           name: 'VideoProgress',
           template: '<div />',
           methods: { updateProgressBar }
-        }
+        },
+        ...stubs
       }
     }
   })
 }
+
+// A finger on a tablet: a touch pointer, bubbling like the real one.
+const finger = (
+  target,
+  type,
+  { id = 1, x = 0, y = 100, isPrimary = id === 1 } = {}
+) =>
+  target.dispatchEvent(
+    new PointerEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      clientX: x,
+      clientY: y,
+      isPrimary,
+      pointerId: id,
+      pointerType: 'touch'
+    })
+  )
 
 describe('players/SharedPlaylistPlayer', () => {
   it('hands the zip url to the header on a link allowing downloads', async () => {
@@ -851,6 +880,192 @@ describe('players/SharedPlaylistPlayer', () => {
     })
   })
 
+  // On a tablet, two fingers pan and zoom the media, over the drawing too,
+  // as in the studio players.
+  describe('fingers', () => {
+    // panzoom moves the image; the bands around it belong to its wrapper.
+    const pictureViewer = ({ zoomAt = () => {} } = {}) => ({
+      name: 'PictureViewer',
+      template: `
+        <div class="picture-player">
+          <div class="picture-subwrapper">
+            <div><img class="picture" /></div>
+          </div>
+        </div>
+      `,
+      methods: { panBy: () => {}, resetPanZoom: () => {}, zoomAt }
+    })
+
+    // The surface fabric draws on, with the toolbar beside it.
+    const AnnotationOverlay = defineComponent({
+      name: 'SharedAnnotationOverlay',
+      setup(props, { expose }) {
+        const overlay = ref(null)
+        expose({ overlay, undo: () => {} })
+        return () =>
+          h('div', { class: 'annotation-overlay' }, [
+            h('div', { class: 'annotation-surface', ref: overlay }, [
+              h('canvas', { class: 'upper-canvas' })
+            ]),
+            h('div', { class: 'annotation-toolbar' })
+          ])
+      }
+    })
+
+    const mountDrawing = async options => {
+      const wrapper = mountPlayer({
+        props: { canComment: true, guestId: 'guest-1' },
+        stubs: { SharedAnnotationOverlay: AnnotationOverlay },
+        ...options
+      })
+      wrapper
+        .findComponent(SharedPlaylistButtonBar)
+        .vm.$emit('update:isAnnotating', true)
+      await nextTick()
+      return wrapper
+    }
+
+    // fabric listens on its canvas.
+    const listenLikeFabric = wrapper => {
+      const heard = []
+      wrapper
+        .find('.upper-canvas')
+        .element.addEventListener('pointerdown', event =>
+          heard.push(event.pointerId)
+        )
+      return heard
+    }
+
+    // A second finger lands beside the first one, then moves away: the
+    // length between them doubles.
+    const pinch = (first, second) => {
+      finger(first, 'pointerdown', { id: 1, x: 100 })
+      finger(second, 'pointerdown', { id: 2, x: 200 })
+      finger(second, 'pointermove', { id: 2, x: 300 })
+    }
+
+    const nextEntity = async wrapper => {
+      wrapper.findComponent(SharedPlaylistHeader).vm.$emit('next-entity')
+      await nextTick()
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    // panzoom measures a pinch on a two-finger touchstart on the parent of
+    // what it moves: a second finger landing beside the image never got
+    // there ("zoom requires valid numbers").
+    it.each([
+      ['picture', [picture], 'img.picture'],
+      ['movie', [entity], 'canvas.playlist-movie']
+    ])('keeps the fingers on the %s from panzoom', (kind, entities, media) => {
+      const wrapper = mountPlayer({
+        entities,
+        stubs: { PictureViewer: pictureViewer() }
+      })
+      const element = wrapper.find(media).element
+      const heard = vi.fn()
+      element.parentElement.addEventListener('touchstart', heard)
+      element.dispatchEvent(new Event('touchstart', { bubbles: true }))
+      expect(heard).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('pinches a picture from a finger beside it', () => {
+      const zoomAt = vi.fn()
+      const wrapper = mountPlayer({
+        entities: [picture],
+        stubs: { PictureViewer: pictureViewer({ zoomAt }) }
+      })
+      pinch(
+        wrapper.find('img.picture').element,
+        wrapper.find('.picture-subwrapper').element
+      )
+      expect(zoomAt).toHaveBeenCalledWith(200, 100, 2)
+      wrapper.unmount()
+    })
+
+    it('pans the media with one finger', () => {
+      const panMovieBy = vi.fn()
+      const wrapper = mountPlayer({ panMovieBy })
+      const movie = wrapper.find('canvas.playlist-movie').element
+      finger(movie, 'pointerdown', { x: 100, y: 100 })
+      finger(movie, 'pointermove', { x: 110, y: 95 })
+      expect(panMovieBy).toHaveBeenCalledWith(10, -5)
+      wrapper.unmount()
+    })
+
+    // The class carries touch-action: none, a style jsdom does not apply.
+    it.each([
+      ['sound', 'mp3'],
+      ['3D model', 'glb'],
+      ['PDF', 'pdf'],
+      ['markdown file', 'md'],
+      ['diff', 'diff'],
+      ['file to download', 'zip']
+    ])(
+      'sets the touch-navigation class on a movie or a picture, not on a %s',
+      async (kind, extension) => {
+        const other = {
+          id: 'other-1',
+          name: 'other-1',
+          preview_file_id: 'preview-other-1',
+          preview_file_extension: extension
+        }
+        const wrapper = mountPlayer({ entities: [entity, other, picture] })
+        const isMarked = () =>
+          wrapper.find('.video-container').classes('touch-navigation')
+        expect(isMarked()).toBe(true)
+        await nextEntity(wrapper)
+        expect(isMarked()).toBe(false)
+        await nextEntity(wrapper)
+        expect(isMarked()).toBe(true)
+        wrapper.unmount()
+      }
+    )
+
+    describe('in draw mode', () => {
+      it('pinches a movie from beside it onto the drawing', async () => {
+        const zoomMovieAt = vi.fn()
+        const wrapper = await mountDrawing({ zoomMovieAt })
+        pinch(
+          wrapper.find('canvas.playlist-movie').element.parentElement,
+          wrapper.find('.upper-canvas').element
+        )
+        expect(zoomMovieAt).toHaveBeenCalledWith(200, 100, 2)
+        wrapper.unmount()
+      })
+
+      it('pinches over the drawing, out of reach of the tool', async () => {
+        vi.useFakeTimers()
+        const zoomMovieAt = vi.fn()
+        const wrapper = await mountDrawing({ zoomMovieAt })
+        const heard = listenLikeFabric(wrapper)
+        const drawing = wrapper.find('.upper-canvas').element
+        pinch(drawing, drawing)
+        vi.advanceTimersByTime(300)
+        expect(zoomMovieAt).toHaveBeenCalledWith(200, 100, 2)
+        expect(heard).toEqual([])
+        wrapper.unmount()
+      })
+
+      it('hands one finger on the drawing to the tool', async () => {
+        vi.useFakeTimers()
+        const wrapper = await mountDrawing()
+        const heard = listenLikeFabric(wrapper)
+        finger(wrapper.find('.upper-canvas').element, 'pointerdown', {
+          x: 100
+        })
+        // It waits a moment for a second finger.
+        expect(heard).toEqual([])
+        vi.advanceTimersByTime(300)
+        expect(heard).toEqual([1])
+        wrapper.unmount()
+      })
+    })
+  })
+
   describe('on a phone', () => {
     const PORTRAIT = '(max-width: 768px)'
     const LANDSCAPE = '(max-height: 500px) and (orientation: landscape)'
@@ -965,7 +1180,7 @@ describe('players/SharedPlaylistPlayer', () => {
       }
       const mountFullScreen = async () => {
         stubScreen([LANDSCAPE])
-        const wrapper = mountPlayer()
+        const wrapper = mountPlayer({ attached: true })
         await toggleFullScreen(wrapper)
         return wrapper
       }
@@ -989,6 +1204,143 @@ describe('players/SharedPlaylistPlayer', () => {
         await tap(wrapper)
         expect(wrapper.classes()).not.toContain('bars-hidden')
         await tap(wrapper)
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('brings the bars back on a finger tap on the media', async () => {
+        const wrapper = await mountFullScreen()
+        const movie = wrapper.find('canvas.playlist-movie').element
+        finger(movie, 'pointerdown', { x: 100 })
+        finger(movie, 'pointerup', { x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      // The second finger of the pinch stays still: its release looked like
+      // a tap.
+      it('leaves the bars alone after a pinch', async () => {
+        const wrapper = await mountFullScreen()
+        const movie = wrapper.find('canvas.playlist-movie').element
+        finger(movie, 'pointerdown', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 2, x: 200 })
+        finger(movie, 'pointermove', { id: 1, x: 50 })
+        finger(movie, 'pointerup', { id: 1, x: 50 })
+        finger(movie, 'pointerup', { id: 2, x: 200 })
+        await nextTick()
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('brings the bars back on a tap after a cancelled finger', async () => {
+        const wrapper = await mountFullScreen()
+        const movie = wrapper.find('canvas.playlist-movie').element
+        finger(movie, 'pointerdown', { id: 1, x: 100 })
+        finger(movie, 'pointercancel', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 2, x: 100, isPrimary: true })
+        finger(movie, 'pointerup', { id: 2, x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      // A release can get lost on the way when the element under the finger
+      // leaves the page: sent to that element, it never reaches the window.
+      // The next finger to land alone forgets the fingers on such an
+      // element, and only those.
+      it('brings the bars back on a tap after a lost release', async () => {
+        const wrapper = await mountFullScreen()
+        const media = wrapper.find('.video-container').element
+        const movie = wrapper.find('canvas.playlist-movie').element
+        const viewer = media.appendChild(document.createElement('div'))
+        const picture = viewer.appendChild(document.createElement('img'))
+        finger(picture, 'pointerdown', { id: 1, x: 100 })
+        viewer.remove()
+        finger(picture, 'pointerup', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 2, x: 100, isPrimary: true })
+        finger(movie, 'pointerup', { id: 2, x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('brings the bars back on a tap after a pinch whose last release got lost', async () => {
+        const wrapper = await mountFullScreen()
+        const media = wrapper.find('.video-container').element
+        const movie = wrapper.find('canvas.playlist-movie').element
+        const viewer = media.appendChild(document.createElement('div'))
+        const picture = viewer.appendChild(document.createElement('img'))
+        finger(movie, 'pointerdown', { id: 1, x: 100 })
+        finger(picture, 'pointerdown', { id: 2, x: 200 })
+        finger(movie, 'pointerup', { id: 1, x: 100 })
+        viewer.remove()
+        finger(picture, 'pointerup', { id: 2, x: 200 })
+        finger(movie, 'pointerdown', { id: 3, x: 100, isPrimary: true })
+        finger(movie, 'pointerup', { id: 3, x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      // In Chrome, a finger whose element left the page lives on: its next
+      // events go to what lies under it.
+      it('leaves the bars alone after a pinch with a finger whose element left the page while it was down', async () => {
+        const wrapper = await mountFullScreen()
+        const media = wrapper.find('.video-container').element
+        const movie = wrapper.find('canvas.playlist-movie').element
+        const viewer = media.appendChild(document.createElement('div'))
+        const picture = viewer.appendChild(document.createElement('img'))
+        finger(picture, 'pointerdown', { id: 1, x: 100 })
+        viewer.remove()
+        finger(movie, 'pointerdown', { id: 2, x: 200 })
+        finger(movie, 'pointerup', { id: 2, x: 200 })
+        finger(movie, 'pointerup', { id: 1, x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      // Firefox can flag a finger landing beside another primary: before 126
+      // by its place in the list of touches, and on Android per bug 1909197.
+      it('leaves the bars alone after a pinch whose finger put back comes flagged primary', async () => {
+        const wrapper = await mountFullScreen()
+        const movie = wrapper.find('canvas.playlist-movie').element
+        finger(movie, 'pointerdown', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 2, x: 200 })
+        finger(movie, 'pointerup', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 3, x: 100, isPrimary: true })
+        finger(movie, 'pointerup', { id: 3, x: 100 })
+        finger(movie, 'pointerup', { id: 2, x: 200 })
+        await nextTick()
+        expect(wrapper.classes()).toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('brings the bars back on a tap after a pinch', async () => {
+        const wrapper = await mountFullScreen()
+        const movie = wrapper.find('canvas.playlist-movie').element
+        finger(movie, 'pointerdown', { id: 1, x: 100 })
+        finger(movie, 'pointerdown', { id: 2, x: 200 })
+        finger(movie, 'pointerup', { id: 1, x: 100 })
+        finger(movie, 'pointerup', { id: 2, x: 200 })
+        finger(movie, 'pointerdown', { id: 3, x: 100, isPrimary: true })
+        finger(movie, 'pointerup', { id: 3, x: 100 })
+        await nextTick()
+        expect(wrapper.classes()).not.toContain('bars-hidden')
+        wrapper.unmount()
+      })
+
+      it('leaves the bars alone on a release away from the media', async () => {
+        const wrapper = await mountFullScreen()
+        const media = wrapper.find('.video-container').element
+        const send = (target, type) =>
+          target.dispatchEvent(
+            new PointerEvent(type, { bubbles: true, clientX: 100 })
+          )
+        send(media, 'pointerdown')
+        send(wrapper.find('.player-row').element, 'pointerup')
+        await nextTick()
         expect(wrapper.classes()).toContain('bars-hidden')
         wrapper.unmount()
       })
