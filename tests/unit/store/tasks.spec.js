@@ -1477,6 +1477,26 @@ describe('Tasks store, rolled back preview publications', () => {
     ])
   })
 
+  // Zou names no file in its refusal, and the comment box may hold several.
+  test('commentTaskWithPreview names the file Zou refused', async () => {
+    const err = refusal(400)
+    tasksApi.uploadPreview.mockImplementationOnce(failedUpload(err))
+
+    await expect(publish([form('a.png'), form('b.png')])).rejects.toBe(err)
+    expect(err.uploadFileName).toBe('a.png')
+  })
+
+  test('commentTaskWithPreview names the extra file Zou refused', async () => {
+    const err = refusal(400)
+    tasksApi.addExtraPreview.mockResolvedValueOnce({ id: 'preview-2' })
+    tasksApi.uploadPreview
+      .mockImplementationOnce(upload({ id: 'preview-1', revision: 3 }))
+      .mockImplementationOnce(failedUpload(err))
+
+    await expect(publish([form('a.png'), form('b.png')])).rejects.toBe(err)
+    expect(err.uploadFileName).toBe('b.png')
+  })
+
   test('commentTaskWithPreview drops the comment and the revision Zou removed', async () => {
     const earlierComment = { id: 'comment-0', previews: [{ id: 'preview-0' }] }
     const earlierRevision = { id: 'preview-0', revision: 2, previews: [] }
@@ -1549,7 +1569,7 @@ describe('Tasks store, rolled back preview publications', () => {
         { taskId: 'task-1', commentId: 'comment-1', previewId: 'preview-1', forms }
       )
 
-    test('removes the preview whose file Zou refused, not the comment', async () => {
+    test('removes the preview whose file the proxy refused, not the comment', async () => {
       const err = refusal(413)
       tasksApi.addExtraPreview
         .mockResolvedValueOnce({ id: 'preview-2' })
@@ -1572,6 +1592,29 @@ describe('Tasks store, rolled back preview publications', () => {
 
       await expect(addExtras([form('b.png')])).rejects.toBe(err)
       expect(tasksApi.deletePreview).not.toHaveBeenCalled()
+    })
+
+    // A second deletion would answer 404.
+    test('leaves to Zou the preview of a file it refuses', async () => {
+      const err = refusal(400)
+      tasksApi.addExtraPreview.mockResolvedValueOnce({ id: 'preview-2' })
+      tasksApi.uploadPreview.mockImplementationOnce(failedUpload(err))
+
+      await expect(addExtras([form('b.png')])).rejects.toBe(err)
+      expect(tasksApi.deletePreview).not.toHaveBeenCalled()
+    })
+
+    test('names the file Zou refused', async () => {
+      const err = refusal(400)
+      tasksApi.addExtraPreview
+        .mockResolvedValueOnce({ id: 'preview-2' })
+        .mockResolvedValueOnce({ id: 'preview-3' })
+      tasksApi.uploadPreview
+        .mockImplementationOnce(upload({ id: 'preview-2', revision: 1 }))
+        .mockImplementationOnce(failedUpload(err))
+
+      await expect(addExtras([form('b.png'), form('c.png')])).rejects.toBe(err)
+      expect(err.uploadFileName).toBe('c.png')
     })
   })
 })

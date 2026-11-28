@@ -152,6 +152,7 @@
       "max_retakes_error": "Je kunt geen retakes meer toevoegen aan deze taak.",
       "revision_taken_error": "Revisie {revision} bestaat al. Kies een ander nummer.",
       "unknown_status_error": "De geselecteerde taakstatus is niet meer beschikbaar. Herlaad de pagina en probeer het opnieuw.",
+      "unreadable_picture_error": "\"{name}\" kon niet als afbeelding worden gelezen.",
       "previews": "Previewbestanden om te publiceren als een nieuwe revisie",
       "selected_files": "Geselecteerde bestanden",
       "no_attachments": "Er zijn geen bijlagen voor deze opmerking.",

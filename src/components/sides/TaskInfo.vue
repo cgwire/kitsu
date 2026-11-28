@@ -197,6 +197,7 @@
                   :preview-forms="previewForms"
                   :is-error="errors.addComment"
                   :is-max-retakes-error="errors.addCommentMaxRetakes"
+                  :unreadable-picture-name="errors.addCommentUnreadablePicture"
                   :fps="currentFps"
                   :frame="displayedFrame"
                   :revision="currentRevision"
@@ -307,6 +308,7 @@
             :is-loading="loading.addExtraPreview"
             :is-error="errors.addExtraPreview"
             message=""
+            :unreadable-picture-name="errors.addExtraPreviewUnreadablePicture"
             :upload-progress="uploadProgress"
             @cancel="onCloseExtraPreview"
             @confirm="createExtraPreview"
@@ -426,7 +428,7 @@ import { isCommentReplyable } from '@/lib/comments'
 import csv from '@/lib/csv'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
 import drafts from '@/lib/drafts'
-import { logRequestFailure } from '@/lib/errors'
+import { isUnreadablePicture, logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import { getEntityTasks } from '@/lib/models'
 import {
@@ -553,11 +555,14 @@ let extraFileRevision = null
 let lastWidth = 0
 let lastWidthX = 0
 
+// The unreadable picture errors hold the name of the file Zou could not read.
 const errors = reactive({
   addComment: false,
   addCommentMaxRetakes: false,
+  addCommentUnreadablePicture: '',
   addPreview: false,
   addExtraPreview: false,
+  addExtraPreviewUnreadablePicture: '',
   editComment: false,
   deleteComment: false,
   moveComment: false,
@@ -1013,6 +1018,7 @@ const postComment = (
     loading.addComment = true
     errors.addComment = false
     errors.addCommentMaxRetakes = false
+    errors.addCommentUnreadablePicture = ''
     store
       .dispatch(action, params)
       .then(() => {
@@ -1029,7 +1035,11 @@ const postComment = (
       .catch(err => {
         console.error(err)
         const isRetakeError = err.body?.message?.includes('retake') ?? false
-        errors.addComment = !isRetakeError
+        errors.addCommentUnreadablePicture = isUnreadablePicture(err)
+          ? err.uploadFileName
+          : ''
+        errors.addComment =
+          !isRetakeError && !errors.addCommentUnreadablePicture
         errors.addCommentMaxRetakes = isRetakeError
         loading.addComment = false
       })
@@ -1091,6 +1101,7 @@ const clearPreviewFiles = () => {
 
 const createExtraPreview = forms => {
   errors.addExtraPreview = false
+  errors.addExtraPreviewUnreadablePicture = ''
   loading.addExtraPreview = true
   const { previewId, task } = extraFileRevision ?? getShownRevision()
   const taskId = task.id
@@ -1119,7 +1130,10 @@ const createExtraPreview = forms => {
     .catch(err => {
       console.error(err)
       loading.addExtraPreview = false
-      errors.addExtraPreview = true
+      errors.addExtraPreviewUnreadablePicture = isUnreadablePicture(err)
+        ? err.uploadFileName
+        : ''
+      errors.addExtraPreview = !errors.addExtraPreviewUnreadablePicture
     })
 }
 
@@ -1191,8 +1205,11 @@ const onAddPreviewClicked = () => {
 }
 
 // The revisions may change behind the modal: the file must join this one.
+// An upload can fail after its window closed: each opening starts clean.
 const onAddExtraPreview = () => {
   extraFileRevision = getShownRevision()
+  errors.addExtraPreview = false
+  errors.addExtraPreviewUnreadablePicture = ''
   modals.addExtraPreview = true
 }
 
@@ -1821,6 +1838,9 @@ watch(
     clearPreviewFiles()
     pickedPreviewId.value = null
     failedActionCommentId.value = null
+    errors.addComment = false
+    errors.addCommentMaxRetakes = false
+    errors.addCommentUnreadablePicture = ''
     if (!props.silent) {
       loadTaskData()
     }

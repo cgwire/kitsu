@@ -177,6 +177,15 @@ describe('AddComment', () => {
     expect(draftComment.mode).toBe('status')
   })
 
+  // Zou names no file in its refusal: the page hands the name over.
+  it('names the file Zou cannot read as a picture', async () => {
+    await wrapper.setProps({ unreadablePictureName: 'sh010.png' })
+
+    expect(wrapper.find('.error em').text()).toBe(
+      '"sh010.png" could not be read as a picture.'
+    )
+  })
+
   // A client turns the frame on once for every comment, and the toggle hides
   // beside a picture.
   describe('frame toggle of a client', () => {

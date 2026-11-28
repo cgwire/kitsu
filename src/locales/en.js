@@ -295,6 +295,7 @@ export default {
       'Revision {revision} already exists. Choose another number.',
     unknown_status_error:
       'The selected task status is not available anymore. Please reload the page and try again.',
+    unreadable_picture_error: '"{name}" could not be read as a picture.',
     no_attachments: 'There are no attachments for this comment.',
     pin: 'Pin',
     pinned: 'Pinned',

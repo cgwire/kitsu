@@ -152,6 +152,7 @@
       "max_retakes_error": "Vous ne pouvez plus faire de retakes sur cette tâche.",
       "revision_taken_error": "La révision {revision} existe déjà. Choisissez un autre numéro.",
       "unknown_status_error": "Le statut de tâche sélectionné n'est plus disponible. Veuillez recharger la page et réessayer.",
+      "unreadable_picture_error": "\"{name}\" n'a pas pu être lu comme une image.",
       "previews": "Fichiers de preview à publier comme nouvelle révision",
       "selected_files": "Fichiers sélectionnés",
       "no_attachments": "Il n'y a pas de pièces jointes pour ce commentaire.",

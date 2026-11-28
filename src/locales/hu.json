@@ -163,6 +163,7 @@
       "max_retakes_error": "Nem adhatsz több javítást ehhez a feladathoz.",
       "revision_taken_error": "A(z) {revision}. revízió már létezik. Válassz másik számot.",
       "unknown_status_error": "A kiválasztott feladat állapot már nem érhető el. Kérlek töltsd újra az oldalt és próbáld újra.",
+      "unreadable_picture_error": "A(z) \"{name}\" beolvasása képként nem sikerült.",
       "move_modal": {
         "error": "Nem sikerült áthelyezni a hozzászólást. Kérlek keresd fel a támogató csapatunkat.",
         "intro": "Válassz egy ugyanahhoz az elemhez tartozó feladatot, ahova áthelyezed ezt a hozzászólást. A célfeladaton ugyanúgy elküldésre kerülnek az értesítések, mint egy új hozzászólásnál.",
